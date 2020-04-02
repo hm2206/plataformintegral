@@ -1,0 +1,52 @@
+{
+  "name": "unujobs_client",
+  "repository": {
+    "url": "https://github.com/jocker2206/unujobs_client"
+  },
+  "version": "1.0.0",
+  "description": "Sistema Finanaciero para Entidades Publicas",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Hans Medina",
+  "license": "ISC",
+  "dependencies": {
+    "alertifyjs": "^1.13.1",
+    "atob": "^2.1.2",
+    "axios": "^0.19.0",
+    "base64-url": "^2.3.3",
+    "bootstrap": "^4.4.1",
+    "btoa": "^1.2.1",
+    "dotenv": "^8.2.0",
+    "fs": "0.0.1-security",
+    "html-to-json": "^0.6.0",
+    "jquery": "^1.9.1",
+    "js-cookie": "^2.2.1",
+    "moment": "^2.24.0",
+    "native-url": "^0.2.3",
+    "next": "^9.1.6",
+    "next-cookies": "^2.0.3",
+    "next-redux-wrapper": "^4.0.1",
+    "node-fetch": "^2.6.0",
+    "nookies": "^2.0.8",
+    "pdf-viewer-reactjs": "^2.0.2",
+    "react": "^16.12.0",
+    "react-bootstrap": "^1.0.0-beta.16",
+    "react-csv": "^1.1.2",
+    "react-csv-reader": "^2.0.2",
+    "react-dom": "^16.12.0",
+    "react-iframe": "^1.8.0",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.5",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-thunk": "^2.3.0",
+    "semantic-ui-react": "^0.88.2",
+    "sweetalert2": "^9.5.4",
+    "table-to-json": "^1.0.0"
+  }
+}

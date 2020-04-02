@@ -1,0 +1,83 @@
+{
+    "tipo_documento": [
+        {
+            "key": "01",
+            "text": "DNI",
+            "value": "01"
+        },
+        {
+            "key": "04",
+            "text": "Carné de extrangería",
+            "value": "04"
+        },
+        {
+            "key": "07",
+            "text": "Passaporte",
+            "value": "07"
+        },
+        {
+            "key": "09",
+            "text": "Carné de Solict. de Refugio",
+            "value": "09"
+        }
+    ],
+    "pap": [
+        {
+            "key": "CONT",
+            "text": "Contratado",
+            "value": "CONTRATADO"
+        },
+        {
+            "key": "NOMB",
+            "text": "Nombrado",
+            "value": "NOMBRADO"
+        },
+        {
+            "key": "CAS",
+            "text": "Cas",
+            "value": "CAS"
+        },
+        {
+            "key": "PENS",
+            "text": "Pensionista",
+            "value": "PENSIONISTA"
+        },
+        {
+            "key": "SUPL",
+            "text": "Suplente",
+            "value": "SUPLENTE"
+        },
+        {
+            "key": "OTRO",
+            "text": "Otro",
+            "value": "OTRO"
+        }
+    ],
+    "tipo_ingreso": [
+        {
+            "key": "CONT",
+            "text": "Contratado",
+            "value": "CONTRATADO"
+        },
+        {
+            "key": "NOMB",
+            "text": "Nombrado",
+            "value": "NOMBRADO"
+        },
+        {
+            "key": "INVT",
+            "text": "Invitado",
+            "value": "INVITADO"
+        },
+        {
+            "key": "CONC",
+            "text": "Concurso",
+            "value": "CONCURSO"
+        },
+        {
+            "key": "OTRO",
+            "text": "Otro",
+            "value": "OTRO"
+        }
+    ]
+}
