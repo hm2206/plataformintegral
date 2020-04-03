@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { unujobs } from '../../services/apis';
 import { Button, Form, Select, Icon } from 'semantic-ui-react';
 import { parseOptions } from '../../services/utils';
+import Swal from 'sweetalert2';
 
 
-export default class Remuneracion extends Component
+export default class Aportacion extends Component
 {
 
 
@@ -26,6 +27,43 @@ export default class Remuneracion extends Component
         if (nextProps.historial && nextProps.historial.id != this.props.historial.id) {
             await this.getAportaciones(nextProps);
         }
+    }
+
+    create = async () => {
+        this.setState({ loader: true });
+        await unujobs.post('aportacion', {
+            historial_id: this.props.historial.id,
+            type_aportacion_id: this.state.type_aportacion_id
+        })
+        .then(async res => {
+            let { success, message } = res.data;
+            let icon = success ? 'success' : 'error';
+            Swal.fire({ icon, text: message });
+            if (success) {
+                this.setState({ loader: false });
+                await this.props.updatingHistorial();
+                this.getAportaciones(this.props);
+            }
+        })
+        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        await this.setState({ loader: false });
+    }
+
+    _delete = async (id) => {
+        this.setState({ loader: true });
+        await unujobs.post(`aportacion/${id}`, { _method: "DELETE" })
+        .then(async res => {
+            let { success, message } = res.data;
+            let icon = success ? 'success' : 'error';
+            Swal.fire({ icon, text: message });
+            if (success) {
+                await this.props.updatingHistorial();
+                this.setState({ loader: false });
+                this.getAportaciones(this.props);
+            }
+        })
+        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        this.setState({ loader: false });
     }
 
     handleInput = ({ name, value }) => {
@@ -71,7 +109,8 @@ export default class Remuneracion extends Component
                         </div>
                         <div className="col-xs">
                             <Button color="green"
-                                disabled={!type_aportacion_id}    
+                                disabled={!this.props.edit || !type_aportacion_id}
+                                onClick={this.create}    
                             >
                                 <Icon name="plus"/> Agregar
                             </Button>
@@ -85,24 +124,28 @@ export default class Remuneracion extends Component
 
                 {aportaciones.map((obj, index) => 
                     <div  key={`remuneracion-${obj.id}`}
-                         className="col-md-3 mb-1"
+                         className="col-md-4 mb-1"
                     >
-                        <span className="text-danger">
-                            {obj.key}
-                        </span>
-                            .-
-                        <span className="text-primary">
-                            {obj.descripcion}
-                        </span>
-                        <Form.Field>
-                            <input type="number"
-                                step="any" 
-                                defaultValue={obj.monto}
-                                disabled={!this.props.edit}
-                                onChange={({target}) => this.handleMonto(obj.id, target.value, index)}
-                                min="0"
-                            />
-                        </Form.Field>
+                        <div className="row">
+                            <div className="col-md-9">
+                                <Button 
+                                    fluid
+                                >
+                                    { obj.key }.-{ obj.descripcion } 
+                                    <i className="fas fa-arrow-right ml-1 mr-1"></i> 
+                                    <small className="badge badge-dark">S./ { obj.monto }</small>
+                                </Button>
+                            </div>
+
+                            <div className="col-md-3">
+                                <Button color="red"
+                                    onClick={(e) => this._delete(obj.id)}
+                                    disabled={!this.props.edit}
+                                >
+                                    <i className="fas fa-trash"></i>
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </Form>

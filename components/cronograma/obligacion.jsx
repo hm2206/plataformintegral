@@ -40,6 +40,10 @@ export default class Obligacion extends Component
         if (nextProps.historial && nextProps.historial.id != this.props.historial.id) {
             await this.getObligaciones(nextProps);
         }
+        // send
+        if (nextProps.send && nextProps.send != this.props.send) {
+            await this.update();
+        }
     }
 
     create = async () => {
@@ -117,6 +121,26 @@ export default class Obligacion extends Component
     permisionAdd = () => {
         let { tipo_documento, numero_de_documento, beneficiario, monto, porcentaje } = this.state.form;
         return tipo_documento && numero_de_documento &&  beneficiario && (monto || porcentaje);
+    }
+
+    update = async () => {
+        let form = new FormData;
+        form.append('obligaciones', JSON.stringify(this.state.obligaciones));
+        await unujobs.post(`obligacion/${this.props.historial.id}/all`, form)
+        .then(async res => {
+            let { success, message } = res.data;
+            let icon = success ? 'success' : 'error';
+            Swal.fire({ icon, text: message });
+            if (success) {
+                await this.props.updatingHistorial();
+            } 
+            // recargar
+            this.getObligaciones(this.props);
+        })
+        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        this.props.setEdit(false);
+        this.props.setSend(false);
+        this.props.setLoading(false);
     }
 
     render() {
@@ -376,7 +400,6 @@ export default class Obligacion extends Component
                                 <hr/>
                             </div>
                         </div>
-
 
                     </div>    
                 )}

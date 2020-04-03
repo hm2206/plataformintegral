@@ -27,8 +27,11 @@ export default class Remuneracion extends Component
 
     componentWillReceiveProps = async (nextProps) => {
         if (nextProps.historial && nextProps.historial.id != this.props.historial.id) {
-            // await this.getDetalles(nextProps);
-            await this.setState({ loader: false });
+            await this.getDetalles(nextProps);
+        }
+        // update
+        if (nextProps.send && nextProps.send != this.props.send) {
+            await this.update();
         }
     }
 
@@ -63,11 +66,13 @@ export default class Remuneracion extends Component
     }
 
     getDetalles = async (props) => {
+        this.setState({ loader: true });
         let { historial } = props;
         await unujobs.get(`historial/${historial.id}/detalle`)
         .then(async res => {
             await this.setState({ detalles: res.data ? res.data : [] });
         }).catch(err => console.log(err.message));
+        this.setState({ loader: false });
     }
 
     getTypeDetalles = async () => {
@@ -82,6 +87,23 @@ export default class Remuneracion extends Component
         this.setState({ payload: newPayload });
     }
 
+    update = async () => {
+        let form = new FormData;
+        form.append('detalles', JSON.stringify(this.state.payload));
+        await unujobs.post(`detalle/${this.props.historial.id}/all`, form)
+        .then(async res => {
+            let { success, message } = res.data;
+            let icon = success ? 'success' : 'error';
+            await Swal.fire({ icon, text: message });
+            if (success) {
+                await this.props.updatingHistorial();
+            }
+        })
+        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        this.props.setLoading(false);
+        this.props.setSend(false);
+    }
+    
     render() {
 
         let { detalles, type_detalle_id, monto, type_detalles, loader } = this.state;
