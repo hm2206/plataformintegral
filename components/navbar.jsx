@@ -196,7 +196,7 @@ class Navbar extends Component {
                           >
                             <span className="user-avatar user-avatar-md">
                               <img
-                                src="/img/perfil.jpg"
+                                src={auth.person && auth.person.image ? `${authentication.path}/${auth.person.image}` : '/img/perfil.jpg'}
                                 alt=""
                               />
                             </span>{" "}

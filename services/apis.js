@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_AUTHENTICATION, API_UNUJOBS } from '../env.json';
+import { url } from '../env.json';
 import Cookies from 'js-cookie';
 
 
@@ -14,12 +14,12 @@ let headers = {
  */
 export const authentication = {
     get: (path, config = { headers }) => {
-        return axios.get(`${API_AUTHENTICATION}/${path}`, config);
+        return axios.get(`${url.API_AUTHENTICATION}/${path}`, config);
     },
     post: (path, body = {}, config = { headers }) => {
-        return axios.post(`${API_AUTHENTICATION}/${path}`, body, config);
+        return axios.post(`${url.API_AUTHENTICATION}/${path}`, body, config);
     },
-    path: API_AUTHENTICATION
+    path: url.API_AUTHENTICATION
 };
 
 
@@ -28,15 +28,15 @@ export const authentication = {
  */
 export const unujobs = {
     get: (path, config = { headers }) => {
-        return axios.get(`${API_UNUJOBS}/${path}`, config);
+        return axios.get(`${url.API_UNUJOBS}/${path}`, config);
     },
     post: (path, body = {}, config = { headers }) => {
-        return axios.post(`${API_UNUJOBS}/${path}`, body, config);
+        return axios.post(`${url.API_UNUJOBS}/${path}`, body, config);
     },
     fetch: (path, config = { headers }) => {
-        return fetch(`${API_UNUJOBS}/${path}`, config);
+        return fetch(`${url.API_UNUJOBS}/${path}`, config);
     },
-    path: API_UNUJOBS
+    path: url.API_UNUJOBS
 };
 
 

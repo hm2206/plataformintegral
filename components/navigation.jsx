@@ -72,11 +72,11 @@ class Navigation extends Component {
         });
     }
 
-    activeToggle = async (nextProps) => {
+    activeToggle = async () => {
         let tmpParent = Router.pathname.split('/');
         let parent = `/${tmpParent[1]}`;
         let child = tmpParent[2];
-        await this.setState(async state => {
+         await this.setState(async state => {
             let options = await state.newOptions.map(async opt => {
                 if(opt.path == parent) {
                     opt.toggle = true;

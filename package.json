@@ -16,6 +16,7 @@
   "author": "Hans Medina",
   "license": "ISC",
   "dependencies": {
+    "@adonisjs/websocket-client": "^1.0.9",
     "alertifyjs": "^1.13.1",
     "atob": "^2.1.2",
     "axios": "^0.19.0",
@@ -46,6 +47,7 @@
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
     "semantic-ui-react": "^0.88.2",
+    "socket.io-client": "^2.3.0",
     "sweetalert2": "^9.5.4",
     "table-to-json": "^1.0.0"
   }

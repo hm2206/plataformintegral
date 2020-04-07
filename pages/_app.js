@@ -8,7 +8,6 @@ import { AUTH } from '../services/auth';
 import { getAuth, authsActionsTypes } from '../storage/actions/authsActions';
 import { app } from '../env.json';
 
-
 // config redux
 import { Provider } from 'react-redux';
 import withRedux from 'next-redux-wrapper';
@@ -41,6 +40,7 @@ class MyApp extends App {
     return null;
   }
 
+  
   render() {
     const { Component, pageProps, store, auth_token } = this.props
 
@@ -94,7 +94,7 @@ class MyApp extends App {
                       <Sidebar/>
                         <Content>
                           <Body>
-                            <Component {...pageProps}/>
+                            <Component {...pageProps} {...this.state}/>
                           </Body>
                         </Content>
                       </div>

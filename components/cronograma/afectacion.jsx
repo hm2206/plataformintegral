@@ -103,6 +103,7 @@ export default class Afectacion extends Component {
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.props.setEdit(false);
         this.props.setSend(false);
+        this.props.setLoading(false);
     }
 
     render() {
