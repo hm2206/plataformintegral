@@ -6,7 +6,7 @@ const Content = props => (
     <div className="app-main">
       <div className="wrapper">
         <div className="page">
-          <div className="page-inner container">{props.children}</div>
+          <div className="page-inner">{props.children}</div>
         </div>
       </div>
     </div>
@@ -15,7 +15,7 @@ const Content = props => (
 
 const Body = props => (
   <Fragment>
-    <div className="page-header page-header-light"></div>
+    {/* <div className="page-header page-header-light"></div> */}
     <div className="content">{props.children}</div>
     <div className="navbar navbar-expand-lg navbar-light"></div>
   </Fragment>
@@ -97,11 +97,12 @@ const BtnToolBasic = props => (
   </div>
 );
 
-const BtnFloat = ({ theme, children, onClick }) => (
+const BtnFloat = ({ theme, children, onClick, disabled = false }) => (
   <button
     type="button"
     onClick={onClick}
     className={`btn ${theme ? theme : "btn-success"} btn-lg btn-floated`}
+    disabled={disabled}
   >
     <Show condicion={children}>
       {children}

@@ -17,18 +17,19 @@ class MyApp extends App {
 
   static getInitialProps = async ({ Component, ctx, store }) => {
     let pageProps = {};
-    // ejecutar initial de los children
-    if (Component.getInitialProps) {
-      pageProps = await Component.getInitialProps(ctx)
-    }
     // obtener auth
-    if (await AUTH(ctx)) {
+    let auth = await AUTH(ctx)
+    if (auth) {
       await ctx.store.dispatch(getAuth(ctx));
     } else {
       await ctx.store.dispatch({ type: authsActionsTypes.LOGOUT });
     }
+    // ejecutar initial de los children
+    if (Component.getInitialProps) {
+      pageProps = await Component.getInitialProps(ctx)
+    }
     // page
-    return { pageProps, store, auth_token: await AUTH(ctx) };
+    return { pageProps, store, auth_token: auth };
   }
 
   constructor(props) {
@@ -93,9 +94,7 @@ class MyApp extends App {
                       <div className="gx-main-content-wrapper">
                       <Sidebar/>
                         <Content>
-                          <Body>
                             <Component {...pageProps} {...this.state}/>
-                          </Body>
                         </Content>
                       </div>
                     </div>

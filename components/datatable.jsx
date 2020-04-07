@@ -98,6 +98,7 @@ export default class DataTable extends Component {
     if (typeof this.props.getOption == "function") {
       this.props.getOption(obj, key, index);
     }
+    return false;
   }
 
   getCurrent(e) {

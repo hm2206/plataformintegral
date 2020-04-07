@@ -2,6 +2,11 @@ import React, { Component, Fragment } from 'react'
 import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
+import { Button, Form } from 'semantic-ui-react'
+import { unujobs } from '../../../services/apis';
+import DataTable from '../../../components/datatable';
+import btoa from 'btoa';
+import Swal from 'sweetalert2';
 
 export default class Index extends Component
 {
@@ -11,18 +16,129 @@ export default class Index extends Component
         return { pathname: ctx.pathname, query: ctx.query }
     }
 
+    state = {
+        loading: false,
+        query_search: "",
+        works: [],
+        total: 0,
+        page: 1
+    }
+
+    componentDidMount = async () => {
+        await this.setState((state, props) => ({
+            query_search: props.query.query_search ? props.query.query_search : ""
+        }));
+        // gets
+        this.getWorks();
+    }
+
+    componentWillReceiveProps = async (nextProps) => {
+        let { props } = this;
+        if (nextProps.query.query_search != props.query.query_search) {
+            await this.setState({ page: 1, works: [] });
+            await this.getWorks();
+        }
+    }
+
+    handleInput = ({ name, value }, url = false) => {
+        this.setState({ [name]: value });
+        // link
+        if (url) {
+            Router.push({ pathname: Router.pathname, query: { [name]: value } });
+        }
+    }
+
+    handleOption = async (obj, key, index) => {
+        let id = await btoa(obj.id);
+        if (key == 'info') Router.push({ pathname: `${Router.pathname}/profile`, query: { id } });
+    }
+
+    handleScroll = async () => {
+        await window.addEventListener('scroll', async evt => {
+            let posicion = Math.round(window.scrollY + window.innerHeight);
+            let limite = document.body.scrollHeight;
+            // validar limite
+            if (!this.state.loading && posicion >= limite) {
+                await this.getWorks();
+            }
+        });
+    }
+
+    leaveScroll = async () => {
+        await Swal.fire({ icon: "warning", text: "No hay más registros!" });
+    }
+
+    getWorks = async () => {
+        this.setState({ loading: true });
+        await this.handleScroll();
+        await unujobs.get(`work?page=${this.state.page}&query_search=${this.state.query_search}`)
+        .then(async res => {
+            let  { data, total, next_page_url } = res.data;
+            await this.setState(state => ({ works: data.length ? [...state.works, ...data] : state.works, total, page: state.page + 1 }));
+            // activar o desactivar el scroll
+            if (this.state.page != 2 && !next_page_url) {
+                this.leaveScroll();
+            } 
+        })
+        .catch(err => console.log());
+        this.setState({ loading: false });
+    }
+
     render() {
         return (
-            <Fragment>
+            <Form loading={this.state.loading}>
+                <div className="col-md-12">
+                    <DataTable titulo={<span><i className="fas fa-list"></i> Lista de Trabajadores</span>}
+                        headers={["#ID", "Apellidos y Nombres", "N° Documento", "N° Cussp"]}
+                        data={this.state.works}
+                        index={[
+                            { key: "person.id", type: "text" },
+                            { key: "person.fullname", type: "text" },
+                            { key: "person.document_number", type: "text" },
+                            { key: "numero_de_cussp", type: "text" }
+                        ]}
+                        options={[
+                            { key: "info", icon: "fas fa-info" }
+                        ]}
+                        getOption={this.handleOption}
+                    >
+                        <div className="col-md-12 mt-2">
+                            <div className="row">
+                                <div className="col-md-7">
+                                    <Form.Field>
+                                        <input type="text" 
+                                            placeholder="Buscar trabajador por: Apellidos y Nombres"
+                                            name="query_search"
+                                            value={this.state.query_search}
+                                            onChange={(e) => this.handleInput(e.target)}
+                                        />
+                                    </Form.Field>
+                                </div>
 
-                <h4>Lista de Trabajadores</h4>
+                                <div className="col-xs">
+                                    <Button color="blue"
+                                        onClick={ async (e) => Router.push({ pathname: Router.pathname, query: { query_search: this.state.query_search } })}
+                                    >
+                                        <i className="fas fa-search"></i> Buscar
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="card-body mt-4">
+                            <h4>Resultados: {this.state.works.length} de {this.state.total}</h4>
+                        </div>
+
+                    </DataTable>
+                </div>
 
                 <BtnFloat
+                    disabled={this.state.loading}
                     onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })}
                 >
                     <i className="fas fa-plus"></i>
                 </BtnFloat>
-            </Fragment>
+            </Form>
         )
     }
 

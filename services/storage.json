@@ -52,32 +52,5 @@
             "text": "Otro",
             "value": "OTRO"
         }
-    ],
-    "tipo_ingreso": [
-        {
-            "key": "CONT",
-            "text": "Contratado",
-            "value": "CONTRATADO"
-        },
-        {
-            "key": "NOMB",
-            "text": "Nombrado",
-            "value": "NOMBRADO"
-        },
-        {
-            "key": "INVT",
-            "text": "Invitado",
-            "value": "INVITADO"
-        },
-        {
-            "key": "CONC",
-            "text": "Concurso",
-            "value": "CONCURSO"
-        },
-        {
-            "key": "OTRO",
-            "text": "Otro",
-            "value": "OTRO"
-        }
     ]
 }

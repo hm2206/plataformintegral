@@ -4,9 +4,13 @@ import { Button, Form } from 'semantic-ui-react';
 export default class CreateInfo extends Component
 {
 
+    state = {
+        loading: false
+    }
+
     render() {
         return (
-            <Form>
+            <Form loading={this.state.loading}>
                 <div className="col-md-12">
                     <Button>
                         <i className="fas fa-arrow-left"></i> Atrás

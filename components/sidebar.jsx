@@ -55,16 +55,6 @@ class Sidebar extends Component {
                     <span className="dropdown-icon oi oi-account-logout"></span>{" "}
                     Logout
                   </a>
-                  <div className="dropdown-divider"></div>
-                  <a className="dropdown-item" href="#">
-                    Help Center
-                  </a>{" "}
-                  <a className="dropdown-item" href="#">
-                    Ask Forum
-                  </a>{" "}
-                  <a className="dropdown-item" href="#">
-                    Keyboard Shortcuts
-                  </a>
                 </div>
               </div>
             </header>
@@ -78,6 +68,12 @@ class Sidebar extends Component {
                     </a>
                   </li>
                   <Navigation options={this.state.options}/>
+                  <li className={`menu-item ${this.state.pathname == '/help' ? 'has-active' : ''}`}>
+                    <a href="/help" className="menu-link">
+                      <b className="menu-icon fas fa-comment"></b>{" "}
+                      <b className="menu-text">Help</b>
+                    </a>
+                  </li>
                 </ul>
               </nav>
             </div>
