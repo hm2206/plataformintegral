@@ -4,7 +4,6 @@ import Datatable from '../../components/datatable';
 import {authentication} from '../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
-import Info from '../../components/cronograma/info';
 
 export default class Categoria extends Component {
 
@@ -146,18 +145,6 @@ export default class Categoria extends Component {
                     </div>
                 </div>
             </Datatable>
-            {/* componentes de la ventana  */}
-            <Info show={
-                    query.info
-                }
-                query={query}
-                pathname={pathname}
-                close={
-                    (e) => {
-                        query.info = "";
-                        Router.push({pathname, query});
-                    }
-                }/>
         </div>)
     }
 
