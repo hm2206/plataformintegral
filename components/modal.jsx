@@ -43,7 +43,7 @@ export default class Modal extends Component {
             top: "0px",
             left: "0px",
             zIndex: "1050",
-            display: display ? display : 'block',
+            display: isShow  ? 'block' : 'none',
             padding: "0.5em 0.5em"
           }}
         >

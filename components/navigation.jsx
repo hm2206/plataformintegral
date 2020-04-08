@@ -4,13 +4,14 @@ import Router from 'next/router';
 import Link from 'next/link';
 
 
-const NavLink = ({ children, active = false, url = '/' }) => {
+const NavLink = ({ children, active = false, url = '/', onClick }) => {
     return (
-        <Link href={url}>
-            <a className={`menu-link ${active ? 'text-dark' : ''}`}>
-                { children }
-            </a>
-        </Link>
+        <a href={url} 
+            className={`menu-link ${active ? 'text-dark' : ''}`}
+            onClick={onClick}
+        >
+            { children }
+        </a>
     )
 }
 
@@ -98,6 +99,12 @@ class Navigation extends Component {
         return modules;
     }
 
+    handleNav = (e, obj) => {
+        e.preventDefault();
+        let { href } = e.target;
+        Router.push({ pathname: obj.slug, query: { clickb: obj.name } })
+    }
+
     render() {
 
         let { newOptions } = this.state;
@@ -117,7 +124,10 @@ class Navigation extends Component {
                             <li className="menu-subhead">{obj.name}</li>
                             {obj.modules.map( mod => 
                                 <li className="menu-item" key={`childre-${mod.id}`}>
-                                    <NavLink url={`${mod.slug}`} active={mod.active}>
+                                    <NavLink url={`${mod.slug}`} 
+                                        active={mod.active}
+                                        onClick={(e) => this.handleNav(e, mod)}
+                                    >
                                         { mod.name }
                                     </NavLink>
                                 </li>

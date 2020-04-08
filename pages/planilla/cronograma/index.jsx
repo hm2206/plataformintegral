@@ -2,7 +2,6 @@ import React, {Component, Fragment} from 'react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
-import Info from '../../../components/cronograma/info';
 import Reports from '../../../components/cronograma/reports';
 import Create from '../../../components/cronograma/create';
 import { unujobs } from '../../../services/apis';
@@ -78,7 +77,14 @@ export default class Cronograma extends Component {
 
     getOption(obj, key, index) {
         let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
+        let id = btoa(obj.id);
+        query[key] = id;
+        // verificar
+        if (key == 'info') {
+            query = { id, clickb: "Cronograma" };
+            pathname = pathname + "/informacion";
+        }
+        // execute
         Router.push({pathname, query});
     }
 
@@ -242,17 +248,6 @@ export default class Cronograma extends Component {
                         <hr/>
                     </Form>
                 </Datatable>
-                {/* componentes de la ventana  */}
-                <Show condicion={query.info}>
-                    <Info show={true}
-                        query={query}
-                        pathname={pathname}
-                        isClose={(e) => {
-                            query.info = "";
-                            Router.push({pathname, query});
-                        }}
-                    />
-                </Show>
                 {/* create cronograma */}
                 <Show condicion={query.create}>
                     <Create show={true}

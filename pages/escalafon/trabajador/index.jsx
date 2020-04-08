@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react'
+import ReactDOM from 'react-dom';
 import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -40,6 +41,10 @@ export default class Index extends Component
         }
     }
 
+    componentWillUnmount = () => {
+        this.leaveScroll();
+    }
+
     handleInput = ({ name, value }, url = false) => {
         this.setState({ [name]: value });
         // link
@@ -53,19 +58,21 @@ export default class Index extends Component
         if (key == 'info') Router.push({ pathname: `${Router.pathname}/profile`, query: { id } });
     }
 
+    handleActionScroll = async () => {
+        let posicion = Math.round(window.scrollY + window.innerHeight);
+        let limite = document.body.scrollHeight;
+        // validar limite
+        if (!this.state.loading && posicion >= limite) {
+            await this.getWorks();
+        }
+    }
+
     handleScroll = async () => {
-        await window.addEventListener('scroll', async evt => {
-            let posicion = Math.round(window.scrollY + window.innerHeight);
-            let limite = document.body.scrollHeight;
-            // validar limite
-            if (!this.state.loading && posicion >= limite) {
-                await this.getWorks();
-            }
-        });
+        window.addEventListener('scroll', this.handleActionScroll);
     }
 
     leaveScroll = async () => {
-        await Swal.fire({ icon: "warning", text: "No hay más registros!" });
+        window.removeEventListener('scroll', this.handleActionScroll);
     }
 
     getWorks = async () => {
@@ -77,6 +84,7 @@ export default class Index extends Component
             await this.setState(state => ({ works: data.length ? [...state.works, ...data] : state.works, total, page: state.page + 1 }));
             // activar o desactivar el scroll
             if (this.state.page != 2 && !next_page_url) {
+                await Swal.fire({ icon: "warning", text: "No hay más registros!" });
                 this.leaveScroll();
             } 
         })

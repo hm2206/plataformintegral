@@ -10,7 +10,7 @@ export default class SSP extends Component
         return <Modal 
             {...this.props}  
         >
-            <div className="card-body h-100 text-right">
+            <div className="card-body h-100">
                 <Iframe 
                     src={this.props.url}
                     SameSite="none"

@@ -63,7 +63,7 @@ class TrabajadorID extends Component
                 {/* Contenidos */}
                 <div className="col-md-12 mt-5">
                     <Show condicion={query.method == 'general'}>
-                        <General work={work}/>
+                        <General work={work} person={work.person}/>
                     </Show>
                 </div>
             </div>

@@ -1,62 +1,66 @@
-import React, { Component, Fragment } from 'react';
-import Modal from '../modal';
-import { Card, Row } from 'react-bootstrap';
-import { unujobs, authentication } from '../../services/apis';
+import React, { Component } from 'react';
 import base64url from 'base64-url';
-import Swal from 'sweetalert2';
-import { CSVLink } from "react-csv";
-import { parseOptions } from '../../services/utils';
-import Show from '../../components/show';
-import TabCronograma from './TabCronograma';
+import { unujobs, authentication } from '../../../services/apis';
 import { Form, Button, Input, Select, Icon } from 'semantic-ui-react';
-import Head from 'next/head';
+import { Card, Row } from 'react-bootstrap';
+import { AUTHENTICATE } from '../../../services/auth';
+import { findCronograma } from '../../../storage/actions/cronogramaActions';
+import { parseOptions } from '../../../services/utils';
+import Show from '../../../components/show';
+import TabCronograma from '../../../components/cronograma/TabCronograma';
+import Modal from '../../../components/modal';
+import Swal from 'sweetalert2';
+import Router from 'next/router';
 
+export default class CronogramaInformacion extends Component
+{
 
-export default class Info extends Component {
+    state = {
+        loading: false,
+        total: 0,
+        like: "",
+        page: 1,
+        cronograma_id: '',
+        ubigeos: [],
+        last_page: 1,
+        edit: false,
+        loading: true,
+        cronograma: {
+            year: 2019,
+            mes: 9,
+            adicional: 0,
+            planilla_id: "",
+        },
+        historial: {},
+        cargo_id: "",
+        type_categoria_id: "",
+        planillas: [],
+        cargos: [],
+        type_categorias: [],
+        bancos: [],
+        send: false,
+        block: false,
+        cancel: false,
+        type_documents: []
+    }
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            total: 0,
-            like: "",
-            page: 1,
-            cronograma_id: '',
-            ubigeos: [],
-            last_page: 1,
-            edit: false,
-            loading: true,
-            cronograma: {
-                year: 2019,
-                mes: 9,
-                adicional: 0,
-                planilla_id: "",
-            },
-            historial: {},
-            cargo_id: "",
-            type_categoria_id: "",
-            planillas: [],
-            cargos: [],
-            type_categorias: [],
-            bancos: [],
-            send: false,
-            block: false,
-            cancel: false,
-            type_documents: []
-        };
+    static getInitialProps = async (ctx) => {
+        await AUTHENTICATE(ctx);
+        await ctx.store.dispatch(findCronograma(ctx));
+        let { cronograma } = ctx.store.getState().cronograma;
+        return { pathname: ctx.pathname, query: ctx.query, cronograma }
     }
 
     async componentDidMount() {
-        let { query } = this.props;
-        let id = query.info ?  base64url.decode(query.info) : "";
-        await this.setState({ cronograma_id: id });
-        if (this.props.show && !Object.keys(this.state.historial).length) {
-            this.getCronograma(this.props, this.state);
-        }
+        await this.setting(this.props);
         // obtener configuración basica
         this.getDocumentType();
         this.getBancos();
         this.getPlanillas();
-        this.getUbigeo();
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+        if (nextProps != this.props) this.setting(nextProps);
     }
 
     componentWillUpdate = (nextProps, nextState) => {
@@ -64,6 +68,23 @@ export default class Info extends Component {
         if (nextState.cargo_id != "" && nextState.cargo_id != this.state.cargo_id) this.gettype_categorias(nextState);
         if (nextState.cargo_id == "" && nextState.cargo_id != this.state.cargo_id) this.setState({ type_categoria_id: "", type_categorias: [] });
         if (nextProps.show != this.props.show && nextProps.show && !Object.keys(nextState.historial).length) this.getCronograma(nextProps, nextState);
+    }
+
+    setting = (props) => {
+        let { cronograma, historial, aportaciones, descuentos, remuneraciones } = props.cronograma;
+        let { query } = this.props;
+        this.setState({
+            cronograma: cronograma, 
+            historial: historial.data, 
+            total: historial.total, 
+            last_page: historial.last_page,
+            remuneraciones,
+            descuentos,
+            aportaciones,
+            loading: false,
+            page: query.page ? query.page : 1,
+            like: query.like ? query.like : ""
+        });
     }
 
     getDocumentType = async () => {
@@ -82,16 +103,9 @@ export default class Info extends Component {
         this.setState({ loading: false });
     }
 
-
     getBancos = () => {
         unujobs.get(`banco`)
         .then(res => this.setState({ bancos: res.data }))
-        .catch(err => console.log(err.message));
-    }
-
-    getUbigeo = async () => {
-        await unujobs.get('ubigeo')
-        .then(res => this.setState({ ubigeos: res.data }))
         .catch(err => console.log(err.message));
     }
 
@@ -106,14 +120,17 @@ export default class Info extends Component {
 
     readCronograma = async (e) => {
         if (!this.state.edit) {
-            await this.setState({ page: 1 });
-            this.getCronograma(this.props, this.state);
+            await this.setState({ loading: true });
+            let { pathname, query } = Router;
+            query.like = this.state.like;
+            query.page = 1;
+            query.cargo_id = this.state.cargo_id;
+            query.type_categoria_id = this.state.type_categoria_id;
+            Router.push({ pathname, query });
         } else {
             this.getAlert();
         }
     }
-
-
 
     clearSearch = async () => {
         await this.setState({ 
@@ -128,34 +145,6 @@ export default class Info extends Component {
 
     getAlert = () => {
         Swal.fire({ icon: "warning", text: "La edición está activa!. Actualize o Cancele la edición" });
-    }
-
-    getCronograma = async (props, state) => {
-        this.setState({ loading: true });
-        try {
-            let { query } = props;
-            let { page, cargo_id, type_categoria_id, afp_id, like } = state;
-            let id = query.info ? atob(query.info) : "";
-            let params = `page=${page}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&afp_id=${afp_id}&like=${like}`;
-            await unujobs.get(`cronograma/${id}?${params}`)
-            .then(async res => {
-                let { cronograma, historial, remuneraciones, descuentos, aportaciones } = res.data;
-                // setting
-                this.setState({ 
-                    cronograma: cronograma, 
-                    historial: historial.data, 
-                    total: historial.total, 
-                    last_page: historial.last_page,
-                    remuneraciones,
-                    descuentos,
-                    aportaciones 
-                });
-            }).catch(err => console.log(err));
-        } catch(ex) {
-            console.log(ex);
-        }
-
-        this.setState({ loading: false });
     }
 
     sendEmail = async () => {
@@ -193,8 +182,10 @@ export default class Info extends Component {
         let { page, last_page, edit } = this.state;
         if (!edit) {
             if (page < last_page) {
-                await this.setState(state => ({ page: state.page + 1 }));
-                await this.getCronograma(this.props, this.state);
+                await this.setState(state => ({ page: parseInt(state.page) + 1, loading: true }));
+                let { push, pathname, query } = Router;
+                query.page = this.state.page;
+                push({ pathname, query });
             }else {
                 Swal.fire({ icon: "warning", text: "No hay más registros" });
             }
@@ -207,8 +198,10 @@ export default class Info extends Component {
         let { page, edit } = this.state;
         if (!edit) {
             if (page > 1) {
-                await this.setState(state => ({ page: state.page - 1 }));
-                this.getCronograma(this.props, this.state);
+                await this.setState(state => ({ page: state.page - 1, loading: true }));
+                let { push, pathname, query } = Router;
+                query.page = this.state.page;
+                push({ pathname, query });
             }else {
                 Swal.fire({ icon: "warning", text: "No hay más registros" });
             }
@@ -234,8 +227,9 @@ export default class Info extends Component {
     }
 
     updatingHistorial = async () => {
-        await this.getCronograma(this.props, this.state);
-        this.setState({ edit: false, block: false, send: false });
+        let { push, query, pathname } = Router;
+        push({ pathname, query });
+        this.setState({ send: false, edit: false });
     }
 
     handleConfirm = async (e) => {
@@ -248,24 +242,20 @@ export default class Info extends Component {
         if (value) await this.setState({ loading: true, send: true });
     }
 
+    handleClose = async () => {
+        let { push, pathname, query } = Router;
+        let newPath = pathname.split('/');
+        newPath.splice(-1, 1);
+        push({  pathname: newPath.join('/') });
+    }
+
     render() {
 
-        let { show } = this.props;
-        let { 
-            cronograma, 
-            historial, planillas, 
-            cargos, 
-            type_categorias, loading, 
-            cargo_id, type_categoria_id,
-        } = this.state;
-
-        
+        let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id } = this.state;
 
         return (
-            <React.Fragment>
-
-                <Modal show={show}
-                    isClose={this.props.isClose}
+            <Modal show={true}
+                    isClose={this.handleClose}
                     disabled={this.state.edit || this.state.block}
                     md="12"
                     titulo={`INFORMACIÓN DE "${historial && historial.person ? historial.person.fullname : 'NO HAY TRABAJADOR DISPONIBLE'}"`}
@@ -481,9 +471,7 @@ export default class Info extends Component {
                         </Card.Body>
                     </Card.Footer>
                 </Modal>    
-            </React.Fragment>
         )
-        
     }
 
 }

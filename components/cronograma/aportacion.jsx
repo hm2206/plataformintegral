@@ -27,6 +27,10 @@ export default class Aportacion extends Component
         if (nextProps.historial && nextProps.historial.id != this.props.historial.id) {
             await this.getAportaciones(nextProps);
         }
+        // update aportaciones
+        if (nextProps.aportaciones != this.props.aportaciones) {
+            await this.getAportaciones(nextProps);
+        }
     }
 
     create = async () => {

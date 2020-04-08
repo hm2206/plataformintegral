@@ -22,8 +22,8 @@ export default class Afectacion extends Component {
         dependencias: [],
         errors: {},
         error_message: "",
-        ssp: 'none',
-        essalud: 'none'
+        ssp: false,
+        essalud: false
     };
 
 
@@ -133,13 +133,13 @@ export default class Afectacion extends Component {
                 <Show condicion={this.props.edit}>
                     <div className="col-md-12">
                         <Button color="teal" basic
-                            onClick={(e) => this.setState({ ssp: 'flex' })}
+                            onClick={(e) => this.setState({ ssp: true })}
                         >
                             Consulta SSP
                         </Button>
 
                         <Button color="teal" basic
-                            onClick={(e) => this.setState({ essalud: 'flex' })}
+                            onClick={(e) => this.setState({ essalud: true })}
                         >
                             Consulta Essalud
                         </Button>
@@ -412,15 +412,15 @@ export default class Afectacion extends Component {
 
                 {/* Render tools */}
                 <ConsultaIframe 
-                    isClose={(e) => this.setState({ ssp: 'none' })}
-                    display={this.state.ssp}
+                    isClose={(e) => this.setState({ ssp: false })}
+                    show={this.state.ssp}
                     titulo="Consulta al Sistema Privado de Pensiones"
                     url="https://www2.sbs.gob.pe/afiliados/paginas/Consulta.aspx"
                 />
                 <ConsultaIframe 
-                    isClose={(e) => this.setState({ essalud: 'none' })}
+                    isClose={(e) => this.setState({ essalud: false })}
                     md="8"
-                    display={this.state.essalud}
+                    show={this.state.essalud}
                     titulo="Consulta al Sistema de  Essalud"
                     url="http://ww4.essalud.gob.pe:7777/acredita/"
                 />
