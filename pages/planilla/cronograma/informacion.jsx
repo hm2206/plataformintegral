@@ -260,10 +260,10 @@ export default class CronogramaInformacion extends Component
                     md="12"
                     titulo={`INFORMACIÓN DE "${historial && historial.person ? historial.person.fullname : 'NO HAY TRABAJADOR DISPONIBLE'}"`}
                 >
-                    <Card.Body style={{ height: "85%", overflowY: "auto" }}>
+                    <Card.Body style={{ height: "86%", overflowY: "auto" }}>
                         <Form loading={loading}>
                             <Row>
-                                <div className="col-md-4">
+                                <div className="col-md-4 col-12 col-sm-6 mb-1">
                                     <Form.Field> 
                                         <input type="search" 
                                             className={`${this.state.like ? 'border-dark text-dark' : ''}`}
@@ -276,7 +276,7 @@ export default class CronogramaInformacion extends Component
                                     </Form.Field>
                                 </div>
 
-                                <div className="col-md-3 mb-1">
+                                <div className="col-md-3 mb-1 col-4">
                                     <Select placeholder='Select. Cargo' 
                                         options={parseOptions(cargos, ['sel-car', '', 'Select. Cargo'], ['id', 'id', 'descripcion'])} 
                                         disabled={loading || this.state.edit || this.state.block}
@@ -288,7 +288,7 @@ export default class CronogramaInformacion extends Component
                                     />
                                 </div>
                                 
-                                <div className="col-md-2 mb-1">
+                                <div className="col-md-2 mb-1 col-6">
                                     <Select placeholder='Select. Categoría' 
                                         fluid
                                         options={parseOptions(type_categorias, ['sel-cat', '', 'Select. Categoría'], ['id', 'id', 'descripcion'])}
@@ -327,7 +327,7 @@ export default class CronogramaInformacion extends Component
                                         setEdit={this.setEdit}
                                         setLoading={this.setLoading}
                                         updatingHistorial={this.updatingHistorial}
-                                        menu={{ secondary: true, pointing: true }}
+                                        menu={{ secondary: true, pointing: true, attached: true, tabular: true }}
                                     />  
                                 </Show>          
                                 
@@ -343,69 +343,71 @@ export default class CronogramaInformacion extends Component
                         <Card.Body>
                             <Form>
                                 <Row className="justify-content-between"> 
-                                    <div className="col md-8">
-                                        <div className="row">
-                                            <div className="col-md-2 mb-1">
-                                                <Form.Field>
-                                                    <input type="number"  
-                                                        placeholder="Año"
-                                                        value={cronograma.year}
-                                                        disabled={true}
-                                                    />
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-2 mb-1">
-                                                <Form.Field>
-                                                    <input type="number" 
-                                                        placeholder="Mes"
-                                                        value={cronograma.mes}
-                                                        disabled={true}
-                                                    />
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-3 mb-1">
-                                                <Select placeholder='Select. Planilla' 
-                                                    options={parseOptions(planillas, ['sel-afp', '', 'Select. Planilla'], ['id', 'id', 'nombre'])} 
-                                                    value={cronograma.planilla_id}
-                                                    disabled={true}
-                                                />
-                                            </div>
-
-                                            <Show condicion={cronograma.adicional}>
-                                                <div className="col-md-2 mb-1">
+                                    <Show condicion={true}>
+                                        <div className="col-md-8 col-12">
+                                            <div className="row">
+                                                <div className="col-md-2 col-4 mb-1">
                                                     <Form.Field>
-                                                        <input type="text" 
-                                                            value={`Adicional ${cronograma.adicional}`}
-                                                            readOnly
+                                                        <input type="number"  
+                                                            placeholder="Año"
+                                                            value={cronograma.year}
+                                                            disabled={true}
                                                         />
                                                     </Form.Field>
                                                 </div>
-                                            </Show>
 
-                                            <div className="col-md-2 mb-1">
-                                                <Show condicion={this.state.total}>
-                                                    <Button color="black"
-                                                        fluid
-                                                    >
-                                                        {this.state.page} de {this.state.total}
-                                                    </Button>
+                                                <div className="col-md-2 col-4 mb-1">
+                                                    <Form.Field>
+                                                        <input type="number" 
+                                                            placeholder="Mes"
+                                                            value={cronograma.mes}
+                                                            disabled={true}
+                                                        />
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-3 col-3 mb-1 col-sm-3">
+                                                    <Select placeholder='Select. Planilla' 
+                                                        options={parseOptions(planillas, ['sel-afp', '', 'Select. Planilla'], ['id', 'id', 'nombre'])} 
+                                                        value={cronograma.planilla_id}
+                                                        disabled={true}
+                                                    />
+                                                </div>
+
+                                                <Show condicion={cronograma.adicional}>
+                                                    <div className="col-md-2 col-4 mb-1">
+                                                        <Form.Field>
+                                                            <input type="text" 
+                                                                value={`Adicional ${cronograma.adicional}`}
+                                                                disabled
+                                                            />
+                                                        </Form.Field>
+                                                    </div>
                                                 </Show>
-                                                <Show condicion={!this.state.total}>
-                                                    <Button color="red"
-                                                        disabled={loading}
-                                                        onClick={this.clearSearch}
-                                                        fluid
-                                                    >
-                                                        <i className="fas fa-trash"></i> Limpiar
-                                                    </Button>
-                                                </Show>
+
+                                                <div className="col-md-2 col-4 mb-1">
+                                                    <Show condicion={this.state.total}>
+                                                        <Button color="black"
+                                                            fluid
+                                                        >
+                                                            {this.state.page} de {this.state.total}
+                                                        </Button>
+                                                    </Show>
+                                                    <Show condicion={!this.state.total}>
+                                                        <Button color="red"
+                                                            disabled={loading}
+                                                            onClick={this.clearSearch}
+                                                            fluid
+                                                        >
+                                                            <i className="fas fa-trash"></i> Limpiar
+                                                        </Button>
+                                                    </Show>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Show>
                                     
-                                    <div className="col-md-4 text-right">
+                                    <div className="col-md-4 col-12 text-right">
                                         <Show condicion={this.state.total && cronograma.estado}>
                                             <Button color={this.state.edit ? 'red' : 'teal'}
                                                 disabled={loading || this.state.block || this.state.send}

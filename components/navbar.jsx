@@ -17,7 +17,7 @@ class Navbar extends Component {
       show: true,
       config: false,
       loading: true,
-      auth: { }
+      auth: { },
     };
 
     this.responsive = this.responsive.bind(this);
@@ -34,11 +34,16 @@ class Navbar extends Component {
 
 
   async responsive(e) {
-    let body = document.getElementsByTagName("body")[0];
-    await this.setState(state => ({ show: !state.show }));
-    body.className = this.state.show ? "" : "sidebar-xs";
+    // let body = document.getElementsByTagName("body")[0];
+    // await this.setState(state => ({ show: !state.show }));
+    // body.className = this.state.show ? "" : "sidebar-xs";
   }
 
+  handleNavBar = () => {
+    if (typeof this.props.onToggle == 'function') {
+      this.props.onToggle();
+    }
+  }
 
   handleConfig(e) {
     this.setState(state => ({ config: !state.config }));
@@ -76,10 +81,11 @@ class Navbar extends Component {
             <div className="top-bar-list">
               <div className="top-bar-item px-2 d-md-none d-lg-none d-xl-none">
                 <button
-                  className="hamburger hamburger-squeeze"
+                  className={`hamburger hamburger-squeeze ${this.props.toggle ? 'active' : ''}`}
                   type="button"
                   data-toggle="aside"
                   aria-label="toggle menu"
+                  onClick={this.handleNavBar}
                 >
                   <span className="hamburger-box">
                     <span className="hamburger-inner"></span>

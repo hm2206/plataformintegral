@@ -101,7 +101,7 @@ export default class Cronograma extends Component {
         let {query, pathname, cronogramas} = this.props;
 
         return (
-            <div>
+            <div className="col-md-12">
                 <Datatable titulo="Lista de Planillas x Mes"
                     isFilter={false}
                     loading={loading}
@@ -216,7 +216,7 @@ export default class Cronograma extends Component {
                     data={cronogramas.data}>
                     <Form className="mb-3">
                         <div className="row">
-                            <div className="col-md-2 mb-1">
+                            <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
                                 <Form.Field>
                                     <input type="number" 
                                         min="2019" 
@@ -228,7 +228,7 @@ export default class Cronograma extends Component {
                                     />
                                 </Form.Field>
                             </div>
-                            <div className="col-md-2 mb-1">
+                            <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
                                 <Form.Field>
                                     <input type="number" 
                                         min="1" 
@@ -241,8 +241,9 @@ export default class Cronograma extends Component {
                                     />
                                 </Form.Field>
                             </div>
-                            <div className="col-md-2">
+                            <div className="col-md-3 col-12 col-sm-12 col-xl-2">
                                 <Button 
+                                    fluid
                                     onClick={this.handleCronograma}
                                     disabled={this.state.loading}
                                     color="blue"

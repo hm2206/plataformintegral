@@ -34,6 +34,13 @@ class MyApp extends App {
 
   constructor(props) {
     super(props);
+    this.state = {
+      toogle: false
+    }
+  }
+
+  handleToggle = async () => {
+    await this.setState(state => ({ toggle: !state.toggle }));
   }
 
   capitalize(word) {
@@ -75,29 +82,30 @@ class MyApp extends App {
           <link href='/favicon-16x16.png' rel='icon' type='image/png' sizes='16x16' />
           <link href='/favicon-32x32.png' rel='icon' type='image/png' sizes='32x32' />
           <link rel="apple-touch-icon" href="/apple-icon.png"></link>
-          <meta name="theme-color" content="#317EFB"/>
+          <meta name="theme-color" content="#346cb0"/>
 
           {auth_token ? <script src="/js/pace.min.js"></script> : ''}
 
-          <script src="/js/stacked-menu.min.js"></script>
+          {/* <script src="/js/stacked-menu.min.js"></script> */}
           {/* <script src="/js/perfect-scrollbar.min.js"></script> */}
           {/* <script src="/js/flatpickr.min.js"></script> */}
           {/* <script src="/js/jquery.easypiechart.min.js"></script> */}
           {/* <script src="/js/Chart.min.js"></script> */}
-          <script src="/js/theme.min.js"></script>
+          {/* <script src="/js/theme.min.js"></script> */}
 
         </Head>
 
 
         {
           auth_token ?
+            <Fragment>
               <div className="full-layout">
                 <div className="gx-app-layout ant-layout ant-layout-has-sider">
                   <div className="ant-layout">
-                    <Navbar/>
+                    <Navbar onToggle={this.handleToggle} toggle={this.state.toggle}/>
                     <div className="gx-layout-content ant-layout-content">
                       <div className="gx-main-content-wrapper">
-                      <Sidebar/>
+                      <Sidebar onToggle={this.handleToggle} toggle={this.state.toggle}/>
                         <Content>
                             <Component {...pageProps} {...this.state}/>
                         </Content>
@@ -106,6 +114,12 @@ class MyApp extends App {
                   </div>
                 </div>
               </div>
+
+              <div 
+                class={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
+                onClick={this.handleToggle}
+              />
+            </Fragment>
           : <Component {...pageProps}/>
         }
       

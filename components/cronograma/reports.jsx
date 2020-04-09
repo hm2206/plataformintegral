@@ -322,8 +322,9 @@ export default class Reports extends Component {
                 md="11"
                 titulo={<span><i className="fas fa-file-alt"></i> REPORTES POR CRONOGRAMA: {this.state.cronograma_id}</span>}
             >
-                    <Card.Body style={{ height: "85%", overflowY: "auto" }}>
-                        <Form loading={loading}>
+                <Form loading={this.state.loading} className="h-100">
+                    <Card.Body style={{ height: "100%", overflowY: "auto" }}>
+                        <div>
                             <Row>
                                 <div className="col-md-5 mb-1">
                                     <Select placeholder='Seleccionar Tipo de Reporte' 
@@ -344,7 +345,7 @@ export default class Reports extends Component {
                             
                                 <Show condicion={!this.state.loading_filters}>
                                     {this.state.filters.map(filter => 
-                                        <div className="col-md-3" key={`sel-${filter.key}`}>
+                                        <div className="col-md-3 mb-1" key={`sel-${filter.key}`}>
                                             <Select placeholder={filter.placeholder} 
                                                 options={parseOptions(this.state[filter.resource], ["", "", filter.placeholder], filter.index)} 
                                                 disabled={this.state.loading_filters}
@@ -364,9 +365,13 @@ export default class Reports extends Component {
                                 </Show>
                                 
                                 {/*  body reports */}
-                                <div className="col-md-12 text-center mt-2">
-                                    <img src={this.state.imagen} width="450px"/>
-                                </div>
+                                {/* <div className="col-md-12 text-center mt-2">
+                                    <div className="row justify-content-center">
+                                        <div className="col-md-5 col-7">
+                                            <img src={this.state.imagen} width="100%"/>
+                                        </div>
+                                    </div>
+                                </div> */}
                                 
                                 <Show condicion={!this.state.loading && !this.state.cronograma}>
                                     <div className="w-100 text-center">
@@ -374,15 +379,19 @@ export default class Reports extends Component {
                                     </div>
                                 </Show>                    
                             </Row>
-                        </Form>
+                        </div>
                     </Card.Body>
-                    <Card.Footer style={{ position: "absolute", background: "#fff", bottom: "0px", width: "100%", left: "0px" }}>
+                    <Card.Footer style={{ 
+                            position: "absolute", background: "#fff", 
+                            bottom: "0px", width: "100%", left: "0px"
+                        }}
+                    >
                         <Card.Body>
-                            <Form>
+                            <div loading={loading}>
                                 <Row className="justify-content-between"> 
                                     <div className="col md-8">
                                         <div className="row">
-                                            <div className="col-md-2 mb-1">
+                                            <div className="col-md-2 mb-1 col-6">
                                                 <Form.Field>
                                                     <input type="number"  
                                                         placeholder="Año"
@@ -392,7 +401,7 @@ export default class Reports extends Component {
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-2 mb-1">
+                                            <div className="col-md-2 mb-1 col-6">
                                                 <Form.Field>
                                                     <input type="number" 
                                                         placeholder="Mes"
@@ -402,7 +411,7 @@ export default class Reports extends Component {
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-3 mb-1">
+                                            <div className="col-md-3 mb-1 col-12">
                                                 <Form.Field>
                                                     <input type="text" disabled={true} 
                                                         value={cronograma.planilla ? cronograma.planilla.nombre : ''}
@@ -423,22 +432,30 @@ export default class Reports extends Component {
                                         </div>
                                     </div>
 
-                                    <div className="col-md-4 text-right">
-                                        {this.state.buttons.map(btn => 
-                                            <Button color={btn.color}
-                                                key={btn.key}
-                                                className="mb-1"
-                                                onClick={this.handleAction.bind(this, btn)}
-                                                disabled={this.state.block}
-                                            >
-                                                <i className={btn.icon}></i> {btn.text}
-                                            </Button>  
-                                        )}
+                                    <div className="col-md-6 col-12 text-right">
+                                        <div className="row justify-content-end">
+                                            {this.state.buttons.map(btn => 
+                                                <div className="col-md-3 col-6"
+                                                    key={`btn-${btn.key}`}
+                                                >
+                                                    <Button color={btn.color}
+                                                        fluid
+                                                        key={btn.key}
+                                                        className="mb-1"
+                                                        onClick={this.handleAction.bind(this, btn)}
+                                                        disabled={this.state.block}
+                                                    >
+                                                        <i className={btn.icon}></i> {btn.text}
+                                                    </Button> 
+                                                </div> 
+                                            )}
+                                        </div>
                                     </div>
                                 </Row>
-                            </Form>
+                            </div>
                         </Card.Body>
                     </Card.Footer>
+                </Form>
             </Modal>    
         )
         

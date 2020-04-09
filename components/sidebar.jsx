@@ -1,7 +1,11 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import Navigation from "./navigation";
 import { authentication } from '../services/apis';
 import Router from 'next/router';
+import { connect } from 'react-redux';
+import initStore from '../storage/store';
+import { app } from '../env.json';
+
 
 class Sidebar extends Component {
   constructor(props) {
@@ -14,7 +18,15 @@ class Sidebar extends Component {
 
   async componentDidMount() {
     this.getProfile();
+    this.setting();
     if (typeof Router == 'object') await this.setState({ pathname: Router.pathname });
+  }
+
+  setting = () => {
+    this.setState((state, props) => {
+      let { user } = props.getState().auth ? props.getState().auth : {};
+      return { auth: user };
+    });
   }
 
   getProfile =  async () => {
@@ -25,8 +37,12 @@ class Sidebar extends Component {
 }
 
   render() {
+
+    let { auth } = this.state;
+
     return (
-          <aside className="app-aside app-aside-expand-md app-aside-light">
+        <Fragment>   
+          <aside className={`app-aside app-aside-expand-md app-aside-light ${this.props.toggle ? 'show' : ''}`}>
           <div className="aside-content">
             <header className="aside-header d-block d-md-none">
               <button
@@ -36,14 +52,14 @@ class Sidebar extends Component {
                 data-target="#dropdown-aside"
               >
                 <span className="user-avatar user-avatar-lg">
-                  <img src="/static/img/avatars/profile.jpg" alt="" />
+                  <img src={auth && auth.person && auth.person.image ? `${authentication.path}/${auth.person.image}` : '/img/perfil.jpg'} alt={auth && auth.person && auth.person.fullname} />
                 </span>{" "}
                 <span className="account-icon">
                   <span className="fa fa-caret-down fa-lg"></span>
                 </span>{" "}
                 <span className="account-summary">
-                  <span className="account-name">Beni Arisandi</span>{" "}
-                  <span className="account-description">Marketing Manager</span>
+                  <span className="account-name">{auth && auth.username ? auth.username : 'fetching...'}</span>{" "}
+                  <span className="account-description">{auth && auth.person ? auth.person.fullname : 'fetching...'}</span>
                 </span>
               </button>
               <div id="dropdown-aside" className="dropdown-aside collapse">
@@ -78,12 +94,13 @@ class Sidebar extends Component {
               </nav>
             </div>
             <footer className="aside-footer border-top p-3">
-
+                Versión <b className="badge badge-dark">{app.version}</b>
             </footer>
           </div>
         </aside>
+      </Fragment>
     );
   }
 }
 
-export default Sidebar;
+export default connect(initStore)(Sidebar);

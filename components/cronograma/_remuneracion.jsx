@@ -97,22 +97,22 @@ export default class Remuneracion extends Component
             <Form className="row">
                 <div className="col-md-12">
                     <div className="row justify-content-center">
-                        <b className="col-md-3">
+                        <b className="col-md-3 col-6 mb-1">
                             <Button basic loading={loader} fluid color="black">
                                 {loader ? 'Cargando...' : `Total Bruto: S/ ${total_bruto}`}
                             </Button>
                         </b>
-                        <b className="col-md-3">
+                        <b className="col-md-3 col-6 mb-1">
                             <Button basic loading={loader} fluid color="black">
                                 {loader ? 'Cargando...' : `Total Descuentos: S/ ${total_desct}`}
                             </Button>
                         </b>
-                        <b className="col-md-3">
+                        <b className="col-md-3 col-6 mb-1">
                             <Button basic loading={loader} fluid color="black">
                                 {loader ? 'Cargando...' : `Base Imponible: S/ ${base}`}
                             </Button>
                         </b>
-                        <b className="col-md-3">
+                        <b className="col-md-3 col-6 mb-1">
                             <Button basic loading={loader} fluid color="black">
                                 {loader ? 'Cargando...' : `Total Neto: S/ ${total_neto}`}
                             </Button>

@@ -17,10 +17,10 @@ export default class DataTable extends Component {
     this.send = this.send.bind(this);
     this.optionAction = this.optionAction.bind(this);
     this.selectRow = this.selectRow.bind(this);
-    this.morePage = this.morePage.bind(this);
   }
 
   async componentDidMount() {
+    await this.listenerScroll();
     await this.checkDefault();
     await this.setDataTable(this.props);
   }
@@ -29,6 +29,10 @@ export default class DataTable extends Component {
     if (newProps != this.props) {
       this.setDataTable(newProps);
     }
+  }
+
+  componentWillUnmount = () => {
+    this.removeScroll();
   }
 
   checkDefault = async () => {
@@ -121,12 +125,28 @@ export default class DataTable extends Component {
     }
   }
 
-
-  morePage() {
-    console.log('cargar mas');
+  handleScroll = async (evt) => {
+    let body = document.getElementsByTagName('body')[0];
+    let posicion = Math.round(window.scrollY + window.innerHeight);
+    let limite = document.body.scrollHeight;
+    if (!this.state.loading && posicion >= limite) {
+      body.style.overflow = 'hidden';
+      window.scrollTo(window.scrollX, posicion);
+      await this.props.onScroll(evt, body);
+    }
   }
 
+  listenerScroll = async () => {
+    if (typeof this.props.onScroll == 'function') {
+      window.addEventListener('scroll', this.handleScroll);
+    }
+  }
 
+  removeScroll = async () => {
+    if (typeof this.props.onScroll == 'function') {
+      window.removeEventListener('scroll', this.handleScroll);
+    }
+  }
 
   render() {
     let {

@@ -23,8 +23,8 @@ export default class RegisterCronograma extends Component
         mes: 6,
         dias: 30,
         observacion: "",
-        adicional: false,
-        remanente: false,
+        adicional: 0,
+        remanente: 0,
         loading: true,
         errors: {},
         type_id: 0,
@@ -86,75 +86,69 @@ export default class RegisterCronograma extends Component
             <Modal 
                 show={true}
                 titulo={<span><Icon name="universal access" size="large"/>Asistente de creación de cronograma</span>}
-                md="11"
+                md="10"
                 isClose={this.handleClose}
             >
                 <div className="card-body">
-                    <Form loading={this.state.loading} action="#" onSubmit={(e) => e.preventDefault()}>
-                        <Grid centered columns={3}>
-                            <Grid.Column>
-                                <Form.Field>
-                                    <label htmlFor="" className="text-left">Planilla</label>
-                                    <Select placeholder="Select. Planilla"
-                                        options={parseOptions(this.state.planillas, ["", "", "Select. Planilla"], ["id", "id", "nombre"])}
-                                        name="planilla_id"
-                                        value={this.state.planilla_id}
-                                        onChange={(e, obj) => this.handleInput(obj)}
-                                    />
-                                </Form.Field>
+                    <div className="row justify-content-center">
+                        <Form loading={this.state.loading} action="#" className="col-md-10" onSubmit={(e) => e.preventDefault()}>
+                            <div className="row justify-content-center">
+                                    <Form.Field className="col-md-6">
+                                        <label htmlFor="" className="text-left">Planilla</label>
+                                        <Select placeholder="Select. Planilla"
+                                            options={parseOptions(this.state.planillas, ["", "", "Select. Planilla"], ["id", "id", "nombre"])}
+                                            name="planilla_id"
+                                            value={this.state.planilla_id}
+                                            onChange={(e, obj) => this.handleInput(obj)}
+                                        />
+                                    </Form.Field>
 
-                                <Form.Field>
-                                    <Form.Input
-                                        className="text-left"
-                                        error={null}
-                                        type="number"
-                                        fluid
-                                        label="Mes"
-                                        name="mes"
-                                        value={this.state.mes}  
-                                        onChange={(e, obj) => this.handleInput(obj)}
-                                        placeholder='Ingrese el mes'
-                                    />
-                                </Form.Field>
-                            </Grid.Column>
+                                    <Form.Field className="col-md-6">
+                                        <Form.Input
+                                            className="text-left"
+                                            error={null}
+                                            fluid
+                                            label="Año"
+                                            name="year"
+                                            type="number"
+                                            value={this.state.year}  
+                                            onChange={(e, obj) => this.handleInput(obj)}
+                                            placeholder='Ingrese el año'
+                                            disabled
+                                        />
+                                    </Form.Field>
 
-                            <Grid.Column>
-                                <Form.Field>
-                                    <Form.Input
-                                        className="text-left"
-                                        error={null}
-                                        fluid
-                                        label="Año"
-                                        name="year"
-                                        type="number"
-                                        value={this.state.year}  
-                                        onChange={(e, obj) => this.handleInput(obj)}
-                                        placeholder='Ingrese el año'
-                                        disabled
-                                    />
-                                </Form.Field>
+                                    <Form.Field className="col-md-6">
+                                        <Form.Input
+                                            className="text-left"
+                                            error={null}
+                                            type="number"
+                                            fluid
+                                            label="Mes"
+                                            name="mes"
+                                            value={this.state.mes}  
+                                            onChange={(e, obj) => this.handleInput(obj)}
+                                            placeholder='Ingrese el mes'
+                                        />
+                                    </Form.Field>
 
-                                <Form.Field>
-                                    <Form.Input
-                                        className="text-left"
-                                        error={null}
-                                        type="number"
-                                        fluid
-                                        label="Dias"
-                                        name="dias"
-                                        value={this.state.dias}  
-                                        onChange={(e, obj) => this.handleInput(obj)}
-                                        placeholder='Ingrese los dias'
-                                        disabled={!this.state.adicional}
-                                    />
-                                </Form.Field>
-                            </Grid.Column>
-                        </Grid>
+                                    <Form.Field className="col-md-6">
+                                        <Form.Input
+                                            className="text-left"
+                                            error={null}
+                                            type="number"
+                                            fluid
+                                            label="Dias"
+                                            name="dias"
+                                            value={this.state.dias}  
+                                            onChange={(e, obj) => this.handleInput(obj)}
+                                            placeholder='Ingrese los dias'
+                                            disabled={!this.state.adicional}
+                                        />
+                                    </Form.Field>
 
-                        <Grid columns={3} centered>
-                            <Show condicion={this.state.adicional == 0}>
-                                <Grid.Column>
-                                    <Form.Field className="text-left">
+                                <Show condicion={this.state.adicional == 0}>
+                                    <Form.Field className="text-left col-md-6">
                                         <label htmlFor="">Modo de creación</label>
                                         <Select
                                             options={this.state.types}
@@ -164,39 +158,42 @@ export default class RegisterCronograma extends Component
                                             onChange={(e, obj) => this.handleInput(obj)}
                                         />
                                     </Form.Field>
-                                </Grid.Column>
-                            </Show>
+                                </Show>
 
-                            <Show condicion={this.state.mes != 12}>
-                                <Grid.Column>
-                                    <Form.Field>
+                                <Show condicion={this.state.mes != 12}>
+                                    <Form.Field className="col-md-6">
                                         <label htmlFor="">¿Es una planilla adicional?</label>
-                                        <Checkbox label='Si' 
-                                            checked={this.state.adicional} 
+                                        <Select
                                             name="adicional"
+                                            value={this.state.adicional}
+                                            placeholder="Select. Planilla Adicional"
+                                            options={[
+                                                {key: "si", value: 1, text: "Si"},
+                                                {key: "no", value: 0, text: "No"}
+                                            ]}
                                             onChange={(e, obj) => this.handleInput(obj)}
                                         />
                                     </Form.Field>
-                                </Grid.Column>
-                            </Show>
+                                </Show>
 
-                            <Show condicion={this.state.mes == 12}>
-                                <Grid.Column>
-                                    <Form.Field>
+                                <Show condicion={this.state.mes == 12}>
+                                    <Form.Field className="col-md-6">
                                         <label htmlFor="">¿Es una planilla remanente?</label>
-                                        <Checkbox label='Si'
-                                            checked={this.state.remanente} 
+                                        <Select
                                             name="remanente"
+                                            value={this.state.remanente}
+                                            placeholder="Select. Planilla Remanente"
                                             onChange={(e, obj) => this.handleInput(obj)}
+                                            options={[
+                                                {key: "si", value: 1, text: "Si"},
+                                                {key: "no", value: 0, text: "No"}
+                                            ]}
                                         />
                                     </Form.Field>
-                                </Grid.Column>
-                            </Show>
-                        </Grid>
+                                </Show>
 
-                        <Grid centered columns={2}>
-                            <Grid.Column>
-                                <Form.Field>
+                            
+                                <Form.Field className="col-md-12">
                                     <label htmlFor="" className="text-left">Observación</label>
                                     <textarea name="observacion"
                                         rows="6"
@@ -205,23 +202,22 @@ export default class RegisterCronograma extends Component
                                         onChange={({ target }) => this.handleInput(target)}
                                     />
                                 </Form.Field>
-                            </Grid.Column>
-                        </Grid>
 
-                        <Divider/>
+                                <Divider/>
 
-                        <Grid columns={1} textAlign="right">
-                            <Grid.Column>
-                                <Button color="teal"
-                                    disabled={!this.readySend()}
-                                    onClick={this.saveAndContinue}
-                                    loading={this.state.loading}
-                                >
-                                    <Icon name="save"/> Guardar y Continuar
-                                </Button>
-                            </Grid.Column>
-                        </Grid>
-                    </Form>
+                        
+                                <div className="col-md-12 text-right">
+                                    <Button color="teal"
+                                        disabled={!this.readySend()}
+                                        onClick={this.saveAndContinue}
+                                        loading={this.state.loading}
+                                    >
+                                        <Icon name="save"/> Guardar y Continuar
+                                    </Button>
+                                </div>
+                            </div>
+                        </Form>
+                    </div>
                 </div>
             </Modal>
         )

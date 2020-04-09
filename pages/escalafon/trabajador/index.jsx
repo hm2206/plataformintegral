@@ -41,10 +41,6 @@ export default class Index extends Component
         }
     }
 
-    componentWillUnmount = () => {
-        this.leaveScroll();
-    }
-
     handleInput = ({ name, value }, url = false) => {
         this.setState({ [name]: value });
         // link
@@ -59,25 +55,11 @@ export default class Index extends Component
     }
 
     handleActionScroll = async () => {
-        let posicion = Math.round(window.scrollY + window.innerHeight);
-        let limite = document.body.scrollHeight;
-        // validar limite
-        if (!this.state.loading && posicion >= limite) {
-            await this.getWorks();
-        }
-    }
-
-    handleScroll = async () => {
-        window.addEventListener('scroll', this.handleActionScroll);
-    }
-
-    leaveScroll = async () => {
-        window.removeEventListener('scroll', this.handleActionScroll);
+        await this.getWorks();
     }
 
     getWorks = async () => {
         this.setState({ loading: true });
-        await this.handleScroll();
         await unujobs.get(`work?page=${this.state.page}&query_search=${this.state.query_search}`)
         .then(async res => {
             let  { data, total, next_page_url } = res.data;
@@ -102,13 +84,14 @@ export default class Index extends Component
                         index={[
                             { key: "person.id", type: "text" },
                             { key: "person.fullname", type: "text" },
-                            { key: "person.document_number", type: "text" },
-                            { key: "numero_de_cussp", type: "text" }
+                            { key: "person.document_number", type: "icon" },
+                            { key: "numero_de_cussp", type: "icon", bg: 'dark' }
                         ]}
                         options={[
                             { key: "info", icon: "fas fa-info" }
                         ]}
                         getOption={this.handleOption}
+                        onScroll={this.handleActionScroll}
                     >
                         <div className="col-md-12 mt-2">
                             <div className="row">

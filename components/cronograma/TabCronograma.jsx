@@ -188,7 +188,7 @@ export default class TabCronograma extends Component
             }
         ];
 
-        return <Tab panes={panes} menu={this.props.menu} className="w-100"/>
+        return <Tab panes={panes} menu={this.props.menu} style={{ overflow: 'auto' }} className="w-100"/>
 
     }
 

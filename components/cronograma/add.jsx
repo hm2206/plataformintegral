@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Modal from '../modal';
 import atob from 'atob';
 import { unujobs } from '../../services/apis';
-import { Form, Button, Input, Select, List, Icon, Image, Label } from 'semantic-ui-react';
+import { Form, Button, Select, List, Icon, Image, Label } from 'semantic-ui-react';
 import Show from '../show';
 import Swal from 'sweetalert2';
 
@@ -110,7 +110,7 @@ export default class Add extends Component
         return (
             <Modal
                 { ...this.props }
-                md="9"
+                md="11"
                 titulo={<span><i className="fas fa-user-plus"></i> Agregar trabajadores al cronograma: {this.state.id}</span>}
                 show={true}
                 disabled={this.state.loading}
@@ -119,7 +119,7 @@ export default class Add extends Component
                     <Form loading={this.state.loading}>
                         <div className="row">
                             <Show condicion={!this.state.preparate}>
-                                <div className="col-md-4">
+                                <div className="col-md-4 mb-1">
                                     <Form.Field>
                                         <input type="text" 
                                             placeholder="Buscar trabajador por apellidos y nombres"
@@ -130,7 +130,7 @@ export default class Add extends Component
                                     </Form.Field>
                                 </div>
 
-                                <div className="col-md-3">
+                                <div className="col-md-3 mb-1">
                                     <Select
                                         fluid
                                         value={this.state.select_id}
@@ -141,7 +141,7 @@ export default class Add extends Component
                                     />
                                 </div>
                                 
-                                <div className="col-md-2">
+                                <div className="col-md-2 mb-1 col-6">
                                     <Button color="teal" fluid
                                         onClick={(e) => this.getInfos()}
                                     >
@@ -149,7 +149,7 @@ export default class Add extends Component
                                     </Button>
                                 </div>
 
-                                <div className="col-md-2">
+                                <div className="col-md-2 col-6 mb-1">
                                     <Button color="black" fluid
                                         onClick={(e) => this.setState({ preparate: true })}
                                         floated="right"
@@ -161,7 +161,7 @@ export default class Add extends Component
                             </Show>
 
                             <Show condicion={this.state.preparate}>
-                                <div className="col-md-2">
+                                <div className="col-md-2 col-6 mb-1">
                                     <Button color="blue" fluid
                                         onClick={this.send}
                                     >
@@ -169,7 +169,7 @@ export default class Add extends Component
                                     </Button>
                                 </div>
 
-                                <div className="col-md-2">
+                                <div className="col-md-2 col-6 mb-1">
                                     <Button color="red" fluid
                                         onClick={(e) => {
                                             this.setState({ preparate: false, index: [], payload: [] });
@@ -218,10 +218,10 @@ export default class Add extends Component
                                                         </Button>
                                                     </Show>
                                                 </List.Content>
-                                                <Image avatar src='https://react.semantic-ui.com/images/avatar/small/lena.png'/>
+                                                {/* <Image avatar src='https://react.semantic-ui.com/images/avatar/small/lena.png'/> */}
                                                 <List.Content>
                                                     {obj.person.fullname}
-                                                    <Label className="ml-2" color="grey">{obj.cargo}</Label>
+                                                    {/* <Label className="ml-2 visible-lg" color="grey">{obj.cargo}</Label> */}
                                                     <Label className="ml-1" color="red">{obj.categoria}</Label>
                                                 </List.Content>
                                             </List.Item>    
