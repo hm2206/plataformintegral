@@ -116,7 +116,7 @@ class MyApp extends App {
               </div>
 
               <div 
-                class={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
+                className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
                 onClick={this.handleToggle}
               />
             </Fragment>
