@@ -96,7 +96,7 @@ class Navbar extends Component {
                       aria-haspopup="true"
                       aria-expanded="false"
                     >
-                      <span className="oi oi-envelope-open"></span>
+                      <span className="fas fa-bell"></span>
                     </a>
                     <div className="dropdown-menu dropdown-menu-rich dropdown-menu-right">
                       <div className="dropdown-arrow"></div>
@@ -219,7 +219,7 @@ class Navbar extends Component {
                             {" "}
                             Beni Arisandi{" "}
                           </h6>
-                          <a className="dropdown-item" href="user-profile.html">
+                          <a className="dropdown-item" href="/">
                             <span className="dropdown-icon oi oi-person"></span>{" "}
                             Perfil
                           </a>{" "}

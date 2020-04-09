@@ -19,13 +19,13 @@ class MyApp extends App {
     let pageProps = {};
     // obtener auth
     let auth = await AUTH(ctx)
-    if (auth) {
-      await ctx.store.dispatch(getAuth(ctx));
-    } else {
-      await ctx.store.dispatch({ type: authsActionsTypes.LOGOUT });
-    }
     // ejecutar initial de los children
     if (Component.getInitialProps) {
+      if (auth) {
+        await ctx.store.dispatch(getAuth(ctx));
+      } else {
+        await ctx.store.dispatch({ type: authsActionsTypes.LOGOUT });
+      }
       pageProps = await Component.getInitialProps(ctx)
     }
     // page
@@ -57,7 +57,7 @@ class MyApp extends App {
           <link rel="shortcut icon" href="/img/logo-unu.png"></link>
           <meta name="theme-color" content="#3063A0"></meta>
           <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,600,700,900" rel="stylesheet" type="text/css" />
-          <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css" />
+          {/* <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css" /> */}
           <link rel="stylesheet" href="/css/all.css" />
           <link rel="stylesheet" href="/css/buttons.bootstrap4.min.css"></link>
           <link rel="stylesheet" href="/css/flatpickr.min.css" />
@@ -71,14 +71,20 @@ class MyApp extends App {
           <script src="/js/bootstrap.min.js"></script>
           <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" />
 
+          {/* WPA */}
+          <link rel="manifest" href="/manifest.json" />
+          <link href='/favicon-16x16.png' rel='icon' type='image/png' sizes='16x16' />
+          <link href='/favicon-32x32.png' rel='icon' type='image/png' sizes='32x32' />
+          <link rel="apple-touch-icon" href="/apple-icon.png"></link>
+          <meta name="theme-color" content="#317EFB"/>
 
           {auth_token ? <script src="/js/pace.min.js"></script> : ''}
 
           <script src="/js/stacked-menu.min.js"></script>
-          <script src="/js/perfect-scrollbar.min.js"></script>
-          <script src="/js/flatpickr.min.js"></script>
-          <script src="/js/jquery.easypiechart.min.js"></script>
-          <script src="/js/Chart.min.js"></script>
+          {/* <script src="/js/perfect-scrollbar.min.js"></script> */}
+          {/* <script src="/js/flatpickr.min.js"></script> */}
+          {/* <script src="/js/jquery.easypiechart.min.js"></script> */}
+          {/* <script src="/js/Chart.min.js"></script> */}
           <script src="/js/theme.min.js"></script>
 
         </Head>
