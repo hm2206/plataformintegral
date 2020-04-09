@@ -20,11 +20,10 @@ export default class Modal extends Component {
     if (Newprops.show != this.props.show) this.setState({ isShow: Newprops.show });
   }
 
-  close(e) {
+  async close(e) {
     let { isClose } = this.props;
-    this.setState({ isShow: false });
     if (typeof isClose == "function") {
-      this.props.isClose(false);
+      await isClose(false);
     }
   }
 

@@ -1,12 +1,10 @@
-import React, {Component, Fragment} from 'react';
+import React, { Component } from 'react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
 import Reports from '../../../components/cronograma/reports';
-import Create from '../../../components/cronograma/create';
-import { unujobs } from '../../../services/apis';
-import { AUTH, AUTHENTICATE } from '../../../services/auth';
-import { Form, Button, Icon } from 'semantic-ui-react';
+import { AUTHENTICATE } from '../../../services/auth';
+import { Form, Button } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import SendEmail from '../../../components/cronograma/sendEmail';
@@ -14,6 +12,7 @@ import Add from '../../../components/cronograma/add';
 import Close from '../../../components/cronograma/close';
 import Open from '../../../components/cronograma/open';
 import Edit from '../../../components/cronograma/edit';
+import { allCronograma } from '../../../storage/actions/cronogramaActions';
 
 
 export default class Cronograma extends Component {
@@ -21,11 +20,8 @@ export default class Cronograma extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            mes: 6,
-            year: 2019,
             page: false,
-            loading: false,
-            cronogramas: []
+            loading: true
         }
 
         this.handleInput = this.handleInput.bind(this);
@@ -34,30 +30,42 @@ export default class Cronograma extends Component {
 
     static getInitialProps  = async (ctx) => {
         await AUTHENTICATE(ctx);
+        let date = new Date;
         let {query, pathname} = ctx;
-        return {query, pathname }
+        query.year = query.year ? query.year : date.getFullYear();
+        query.mes = query.mes ? query.mes : date.getMonth() + 1;
+        await ctx.store.dispatch(allCronograma(ctx));
+        let { cronogramas } = ctx.store.getState().cronograma;
+        return {query, pathname, cronogramas }
     }
 
-    async componentDidMount() {
-        let date = new Date();
-        await this.setState({
-            year: date.getFullYear(),
-            mes: date.getMonth() + 1
-        });
-        // obtener cronogramas
-        this.getCronogramas();
+    componentDidMount = () => {
+        this.setting(this.props);
     }
 
     componentWillReceiveProps(nextProps) {
-        if (!nextProps.query.create && nextProps.query.create != this.props.query.create) {
-            this.getCronogramas();
-        } else if (!nextProps.query.open && nextProps.query.open != this.props.query.open) {
-            this.getCronogramas();
-        } else if (!nextProps.query.close && nextProps.query.close != this.props.query.close) {
-            this.getCronogramas();
-        } else if (!nextProps.query.edit && nextProps.query.edit != this.props.query.edit) {
-            this.getCronogramas();
-        } 
+        let { query } = this.props;
+        if (!nextProps.query.create && nextProps.query.create != query.create) {
+            this.handleCronograma();
+        } else if (!nextProps.query.open && nextProps.query.open != query.open) {
+            this.handleCronograma();
+        } else if (!nextProps.query.close && nextProps.query.close != query.close) {
+            this.handleCronograma();
+        } else if (!nextProps.query.edit && nextProps.query.edit != query.edit) {
+            this.handleCronograma();
+        } else if (query.mes != nextProps.query.mes || query.year != nextProps.query.year) {
+            this.setting(nextProps);
+        } else {
+            this.setState({ loading: false });
+        }
+    }
+
+    setting = (props) => {
+        this.setState({ 
+            year: props.query.year,
+            mes: props.query.mes,
+            loading: false
+        })
     }
 
     handleInput(e) {
@@ -65,14 +73,12 @@ export default class Cronograma extends Component {
         this.setState({[name]: value});
     }
 
-    getCronogramas = async () => {
-        this.setState({loading: true});
-        let {mes, year} = this.state;
-        await unujobs.get(`cronograma?mes=${mes}&year=${year}`).then(res => {
-            let {data} = res.data;
-            this.setState({cronogramas: data});
-        }).catch(err => console.log(err.message));
-        this.setState({loading: false});
+    handleCronograma = async () => {
+        this.setState({ loading: true });
+        let { push, query, pathname } = Router;
+        query.year = this.state.year;
+        query.mes = this.state.mes;
+        push({ pathname, query });
     }
 
     getOption(obj, key, index) {
@@ -81,6 +87,7 @@ export default class Cronograma extends Component {
         query[key] = id;
         // verificar
         if (key == 'info') {
+            this.setState({ loading: true });
             query = { id, clickb: "Cronograma" };
             pathname = pathname + "/informacion";
         }
@@ -90,8 +97,8 @@ export default class Cronograma extends Component {
 
     render() {
 
-        let {loading, cronogramas} = this.state;
-        let {query, pathname} = this.props;
+        let {loading } = this.state;
+        let {query, pathname, cronogramas} = this.props;
 
         return (
             <div>
@@ -206,7 +213,7 @@ export default class Cronograma extends Component {
                         ]
                     }
                     getOption={this.getOption}
-                    data={cronogramas}>
+                    data={cronogramas.data}>
                     <Form className="mb-3">
                         <div className="row">
                             <div className="col-md-2 mb-1">
@@ -236,7 +243,7 @@ export default class Cronograma extends Component {
                             </div>
                             <div className="col-md-2">
                                 <Button 
-                                    onClick={this.getCronogramas}
+                                    onClick={this.handleCronograma}
                                     disabled={this.state.loading}
                                     color="blue"
                                 >
@@ -248,12 +255,6 @@ export default class Cronograma extends Component {
                         <hr/>
                     </Form>
                 </Datatable>
-                {/* create cronograma */}
-                <Show condicion={query.create}>
-                    <Create show={true}
-                        isClose={(e) => Router.push({ pathname, query: { create: "" }})}
-                    />
-                </Show>
                 {/* reportes */}
                 <Show condicion={query.report}>
                     <Reports show={true}
@@ -294,7 +295,7 @@ export default class Cronograma extends Component {
                 </Show>
                 {/* event create cronograma */}
                 <BtnFloat
-                    onClick={(e) => Router.push({ pathname, query:  { create: "true" }})}
+                    onClick={(e) => Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }})}
                 >
                     <i className="fas fa-plus"></i>
                 </BtnFloat>

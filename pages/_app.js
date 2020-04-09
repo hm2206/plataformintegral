@@ -20,7 +20,7 @@ class MyApp extends App {
     // obtener auth
     let auth = await AUTH(ctx)
     // ejecutar initial de los children
-    if (Component.getInitialProps) {
+    if (await Component.getInitialProps) {
       if (auth) {
         await ctx.store.dispatch(getAuth(ctx));
       } else {
@@ -40,7 +40,6 @@ class MyApp extends App {
     if (word)  return "- " + word[0].toUpperCase() + word.slice(1);
     return null;
   }
-
   
   render() {
     const { Component, pageProps, store, auth_token } = this.props

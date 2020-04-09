@@ -1,14 +1,20 @@
-import React, { Component } from 'react'
-import { Form, Grid, Checkbox, Select, Button, Icon, Divider, Message, Input } from 'semantic-ui-react';
-import Show from '../show';
-import { unujobs } from '../../services/apis';
-import { parseOptions } from '../../services/utils';
+import React, { Component } from 'react';
+import { Form, Grid, Checkbox, Select, Button, Icon, Divider } from 'semantic-ui-react';
+import Show from '../../../components/show';
+import { unujobs } from '../../../services/apis';
+import { parseOptions } from '../../../services/utils';
 import Swal from 'sweetalert2';
-import Modal from '../modal';
+import Modal from '../../../components/modal';
+import Router from 'next/router';
+import { AUTHENTICATE } from '../../../services/auth';
 
-
-export default class Create extends Component
+export default class RegisterCronograma extends Component
 {
+
+    static getInititalProps = async (ctx) => {
+        await AUTHENTICATE(ctx);
+        return { pathname: ctx.pathname, query: ctx.query };
+    };
 
     state = {
         planillas: [],
@@ -55,29 +61,33 @@ export default class Create extends Component
 
     saveAndContinue = async () => {
         await this.setState({ loading: true });
-        let { fireCookie } = this.props;
         // send
         await unujobs.post('cronograma', this.state)
         .then(async res => {
-            let { success, message, payload } = res.data;
+            let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
-            if (success) {
-                if (typeof fireCookie == 'function') await fireCookie(payload, "config_boleta");
-            } 
         })
         .catch(err => this.setState({ errors: err.response.data }));
         this.setState({ loading: false });
     }
 
+    handleClose = () => {
+        this.setState({ loading: true });
+        let { push, pathname } = Router;
+        let newPath = pathname.split('/');
+        newPath.splice(-1, 1);
+        push({  pathname: newPath.join('/') });
+    }
+
     render() {
 
-        let { errors } = this.state;
-
         return (
-            <Modal {...this.props}
+            <Modal 
+                show={true}
                 titulo={<span><Icon name="universal access" size="large"/>Asistente de creación de cronograma</span>}
                 md="11"
+                isClose={this.handleClose}
             >
                 <div className="card-body">
                     <Form loading={this.state.loading} action="#" onSubmit={(e) => e.preventDefault()}>
@@ -164,7 +174,6 @@ export default class Create extends Component
                                         <Checkbox label='Si' 
                                             checked={this.state.adicional} 
                                             name="adicional"
-                                            value={!this.state.adicional}
                                             onChange={(e, obj) => this.handleInput(obj)}
                                         />
                                     </Form.Field>
@@ -178,7 +187,6 @@ export default class Create extends Component
                                         <Checkbox label='Si'
                                             checked={this.state.remanente} 
                                             name="remanente"
-                                            value={!this.state.remanente}
                                             onChange={(e, obj) => this.handleInput(obj)}
                                         />
                                     </Form.Field>

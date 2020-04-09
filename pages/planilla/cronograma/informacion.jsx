@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import base64url from 'base64-url';
 import { unujobs, authentication } from '../../../services/apis';
-import { Form, Button, Input, Select, Icon } from 'semantic-ui-react';
+import { Form, Button, Select, Icon } from 'semantic-ui-react';
 import { Card, Row } from 'react-bootstrap';
 import { AUTHENTICATE } from '../../../services/auth';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
@@ -243,10 +242,11 @@ export default class CronogramaInformacion extends Component
     }
 
     handleClose = async () => {
-        let { push, pathname, query } = Router;
+        let { push, pathname } = Router;
+        let options = { year: this.state.cronograma.year, mes: this.state.cronograma.mes };
         let newPath = pathname.split('/');
         newPath.splice(-1, 1);
-        push({  pathname: newPath.join('/') });
+        push({  pathname: newPath.join('/'), query: options });
     }
 
     render() {

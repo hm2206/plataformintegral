@@ -4,7 +4,8 @@ import atob from 'atob';
 
 
 export const cronogramaActionsTypes = {
-    FIND_CRONOGRAMA: 'FIND_CRONOGRAMA'
+    FIND_CRONOGRAMA: 'FIND_CRONOGRAMA',
+    ALL_CRONOGRAMA: 'ALL_CRONOGRAMA'
 };
 
 export const findCronograma = (ctx) => {
@@ -16,6 +17,18 @@ export const findCronograma = (ctx) => {
         let path = `cronograma/${id}?${params}`;
         await unujobs.get(path, { headers: { Authorization } })
         .then(res => dispatch({ type: cronogramaActionsTypes.FIND_CRONOGRAMA, payload: res.data }))
+        .catch(err => console.log(err.message));
+    }
+}
+
+export const allCronograma = (ctx) => {
+    return async (dispatch) => {
+        let Authorization = `Bearer ${NextCookies(ctx)['auth_token']}`;
+        let { year, mes } = ctx.query;
+        let params = `year=${year}&mes=${mes}`;
+        let path = `cronograma?${params}`;
+        await unujobs.get(path, { headers: { Authorization } })
+        .then(res =>  dispatch({ type: cronogramaActionsTypes.ALL_CRONOGRAMA, payload: res.data }))
         .catch(err => console.log(err.message));
     }
 }
