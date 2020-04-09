@@ -86,10 +86,10 @@ class MyApp extends App {
 
           {auth_token ? <script src="/js/pace.min.js"></script> : ''}
 
-          {/* <script src="/js/stacked-menu.min.js"></script> */}
+          <script src="/js/stacked-menu.min.js"></script>
           {/* <script src="/js/perfect-scrollbar.min.js"></script> */}
           {/* <script src="/js/flatpickr.min.js"></script> */}
-          {/* <script src="/js/jquery.easypiechart.min.js"></script> */}
+          <script src="/js/jquery.easypiechart.min.js"></script>
           {/* <script src="/js/Chart.min.js"></script> */}
           {/* <script src="/js/theme.min.js"></script> */}
 
