@@ -24,7 +24,7 @@ export default class Descuento extends Component
     }
 
     componentWillReceiveProps = async (nextProps) => {
-        if (nextProps.historial && nextProps.historial.id != this.props.historial.id) {
+        if (nextProps.historial != this.props.historial) {
             await this.getDescuentos(nextProps);
         }
         // update 

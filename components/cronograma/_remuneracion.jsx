@@ -25,7 +25,7 @@ export default class Remuneracion extends Component
     }
 
     componentWillReceiveProps = async (nextProps) => {
-        if (nextProps.historial && nextProps.historial.id != this.props.historial.id) {
+        if (nextProps.historial && nextProps.historial != this.props.historial) {
             await this.getRemuneraciones(nextProps);
         }
         // update 
