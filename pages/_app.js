@@ -35,8 +35,23 @@ class MyApp extends App {
   constructor(props) {
     super(props);
     this.state = {
-      toogle: false
+      toogle: false,
+      screenY: 0,
+      screenX: 0
     }
+  }
+
+  componentDidMount = () => {
+    this.handleScreen();
+    window.addEventListener('resize', this.handleScreen);
+  }
+
+  componentWillUnmount = () => {
+    window.removeEventListener('resize', this.handleScreen);
+  }
+
+  handleScreen = () => {
+    this.setState({ screenX: window.innerWidth, screenY: window.innerHeight });
   }
 
   handleToggle = async () => {
@@ -100,7 +115,7 @@ class MyApp extends App {
         {
           auth_token ?
             <Fragment>
-              <div className="full-layout">
+              <div className="full-layout" id="main">
                 <div className="gx-app-layout ant-layout ant-layout-has-sider">
                   <div className="ant-layout">
                     <Navbar onToggle={this.handleToggle} toggle={this.state.toggle}/>

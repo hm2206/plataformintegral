@@ -6,6 +6,8 @@ import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { app } from '../env.json';
 import { version } from '../package.json';
+import Swal from 'sweetalert2'
+import Cookies from 'js-cookie';
 
 
 class Sidebar extends Component {
@@ -35,7 +37,22 @@ class Sidebar extends Component {
     .then(res => {
         this.setState({ options: res.data });
     }).catch(err => console.log(err));
-}
+  }
+
+  async logout(e) {
+    e.preventDefault();
+    await authentication.post('logout')
+    .then(async res => {
+      let { success, message } = res.data;
+      if (success) {
+        Cookies.remove('auth_token');
+        await Swal.fire({ icon: 'success', text: message });
+        history.go('/login');
+      } else {
+        Swal.fire({ icon: 'error', text: message });
+      }
+    }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+  }
 
   render() {
 
@@ -65,12 +82,12 @@ class Sidebar extends Component {
               </button>
               <div id="dropdown-aside" className="dropdown-aside collapse">
                 <div className="pb-3">
-                  <a className="dropdown-item" href="user-profile.html">
+                  <a className="dropdown-item" href="/">
                     <span className="dropdown-icon oi oi-person"></span> Perfil
                   </a>{" "}
-                  <a className="dropdown-item" href="auth-signin-v1.html">
+                  <a className="dropdown-item" href="#" onClick={this.logout}>
                     <span className="dropdown-icon oi oi-account-logout"></span>{" "}
-                    Logout
+                    Cerrar Sesión
                   </a>
                 </div>
               </div>

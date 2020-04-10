@@ -84,7 +84,7 @@ export default class Cronograma extends Component {
         push({ pathname, query });
     }
 
-    getOption(obj, key, index) {
+    async getOption(obj, key, index) {
         let {pathname, query} = Router;
         let id = btoa(obj.id);
         query[key] = id;
@@ -95,7 +95,7 @@ export default class Cronograma extends Component {
             pathname = pathname + "/informacion";
         }
         // execute
-        Router.push({pathname, query});
+        await Router.push({pathname, query});
     }
 
     handleExport = async () => {
@@ -260,7 +260,7 @@ export default class Cronograma extends Component {
                                     />
                                 </Form.Field>
                             </div>
-                            <div className="col-md-3 col-12 col-sm-12 col-xl-2 mb-1">
+                            <div className="col-md-3 col-6 col-sm-12 col-xl-2 mb-1">
                                 <Button 
                                     fluid
                                     onClick={this.handleCronograma}
@@ -273,7 +273,7 @@ export default class Cronograma extends Component {
                             </div>
 
                             <Show condicion={!this.state.block}>
-                                <div className="col-md-3 col-12 col-sm-12 col-xl-2">
+                                <div className="col-md-3 col-6 col-sm-12 col-xl-2">
                                     <Button 
                                         fluid
                                         onClick={this.handleCronograma}
@@ -331,7 +331,10 @@ export default class Cronograma extends Component {
                 {/* event create cronograma */}
                 <BtnFloat
                     disabled={this.state.loading}
-                    onClick={(e) => Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }})}
+                    onClick={(e) => {
+                        this.setState({ loading: true });
+                        Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }});
+                    }}
                 >
                     <i className="fas fa-plus"></i>
                 </BtnFloat>

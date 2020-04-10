@@ -54,8 +54,9 @@ export default class Index extends Component
         if (key == 'info') Router.push({ pathname: `${Router.pathname}/profile`, query: { id } });
     }
 
-    handleActionScroll = async () => {
+    handleActionScroll = async (e, body) => {
         await this.getWorks();
+        body.style.overflow = 'auto';
     }
 
     getWorks = async () => {

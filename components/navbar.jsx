@@ -34,9 +34,7 @@ class Navbar extends Component {
 
 
   async responsive(e) {
-    // let body = document.getElementsByTagName("body")[0];
-    // await this.setState(state => ({ show: !state.show }));
-    // body.className = this.state.show ? "" : "sidebar-xs";
+    
   }
 
   handleNavBar = () => {

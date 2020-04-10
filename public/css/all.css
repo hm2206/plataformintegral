@@ -4426,3 +4426,19 @@ readers do not read off random characters that represent icons */
 /* ::-webkit-scrollbar-thumb:hover {
   background: #555;
 } */
+
+
+/* Nav bottom */
+.nav-bottom {
+  width: 100%;
+  height: auto;
+  min-height: 5vh;
+  background: white;
+  border-top: 1px solid #cfd8dc;
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+  padding: 0.5em;
+  padding-left: 1em;
+  padding-right: 1em;
+}

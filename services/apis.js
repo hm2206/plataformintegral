@@ -1,13 +1,16 @@
 import axios from 'axios';
 import { url } from '../env.json';
 import Cookies from 'js-cookie';
+import NextCookies from 'next-cookies';
 
 
 let headers = {
     Authorization: `Bearer ${Cookies.get('auth_token')}`
 };
 
-
+export const configAuthorization = (ctx) => {
+    return `Bearer ${NextCookies(ctx)['auth_token']}`;
+}
 
 /**
  *  api para consumir el authenticador

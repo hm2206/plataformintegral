@@ -2,7 +2,7 @@ import NextCookie from 'next-cookies';
 import { setCookie } from 'nookies';
 
 export const AUTH =  (ctx) => {
-    return NextCookie(ctx).auth_token || false;
+    return NextCookie(ctx)['auth_token'] || false;
 };
 
 
