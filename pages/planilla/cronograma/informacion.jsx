@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { unujobs, authentication } from '../../../services/apis';
 import { Form, Button, Select, Icon } from 'semantic-ui-react';
 import { Card, Row } from 'react-bootstrap';
@@ -254,146 +254,160 @@ export default class CronogramaInformacion extends Component
         let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id } = this.state;
 
         return (
-            <Modal show={true}
-                    isClose={this.handleClose}
-                    disabled={this.state.edit || this.state.block}
-                    md="12"
-                    titulo={`INFORMACIÓN DE "${historial && historial.person ? historial.person.fullname : 'NO HAY TRABAJADOR DISPONIBLE'}"`}
-                >
-                    <Card.Body style={{ height: "86%", overflowY: "auto" }}>
-                        <Form loading={loading}>
-                            <Row>
-                                <div className="col-md-4 col-12 col-sm-6 mb-1">
-                                    <Form.Field> 
-                                        <input type="search" 
-                                            className={`${this.state.like ? 'border-dark text-dark' : ''}`}
-                                            disabled={loading || this.state.edit || this.state.block}
-                                            value={this.state.like}
-                                            onChange={this.handleInput}
-                                            name="like"
-                                            placeholder="Buscar por Apellidos y Nombres"
-                                        />  
-                                    </Form.Field>
-                                </div>
+            <Form className="col-md-12" disabled={loading}>
+                <div className="row pl-2 pr-2">
+                    <div className="col-md-2 col-4">
+                        <Button fluid>
+                            <i className="fas fa-arrow-left"></i> Atrás
+                        </Button>
+                    </div>
 
-                                <div className="col-md-3 mb-1 col-4">
-                                    <Select placeholder='Select. Cargo' 
-                                        options={parseOptions(cargos, ['sel-car', '', 'Select. Cargo'], ['id', 'id', 'descripcion'])} 
-                                        disabled={loading || this.state.edit || this.state.block}
-                                        value={cargo_id}
-                                        name="cargo_id"
-                                        onChange={this.handleSelect}
-                                        wrapSelection={false}
-                                        fluid
-                                    />
-                                </div>
-                                
-                                <div className="col-md-2 mb-1 col-6">
-                                    <Select placeholder='Select. Categoría' 
-                                        fluid
-                                        options={parseOptions(type_categorias, ['sel-cat', '', 'Select. Categoría'], ['id', 'id', 'descripcion'])}
-                                        disabled={loading || this.state.edit || this.state.block}
-                                        value={type_categoria_id}
-                                        name="type_categoria_id"
-                                        onChange={this.handleSelect}
-                                    />
-                                </div>
-                                
-                                <div className="col-md-2 mb-1">
-                                    <Button color="black"
-                                        fluid
-                                        onClick={this.readCronograma}
-                                        title="Realizar Búsqueda"
-                                        disabled={loading || this.state.edit || this.state.block}
-                                    >
-                                        <Icon name="filter"/> Filtrar
-                                    </Button>
-                                </div>
-                                
-                                <Show condicion={this.state.total}>
-                                    <TabCronograma
-                                        type_documents={this.state.type_documents}
-                                        historial={historial}
-                                        remuneraciones={this.state.remuneraciones}
-                                        descuentos={this.state.descuentos}
-                                        aportaciones={this.state.aportaciones}
-                                        bancos={this.state.bancos}
-                                        ubigeos={this.state.ubigeos}
-                                        edit={this.state.edit}
-                                        loading={this.state.loading}
-                                        send={this.state.send}
-                                        total={this.state.total}
-                                        setSend={this.setSend}
-                                        setEdit={this.setEdit}
-                                        setLoading={this.setLoading}
-                                        updatingHistorial={this.updatingHistorial}
-                                        menu={{ secondary: true, pointing: true, attached: true, tabular: true }}
-                                    />  
-                                </Show>          
-                                
-                                <Show condicion={!this.state.loading && !this.state.total}>
-                                    <div className="w-100 text-center">
-                                        <h4 className="mt-5">No se encontró trabajadores</h4>
-                                    </div>
-                                </Show>                    
-                            </Row>
-                        </Form>
-                    </Card.Body>
-                    <Card.Footer style={{ position: "absolute", background: "#fff", bottom: "0px", width: "100%", left: "0px" }}>
-                        <Card.Body>
-                            <Form>
-                                <Row className="justify-content-between"> 
-                                    <Show condicion={true}>
-                                        <div className="col-md-8 col-12">
+                    <div className="col-md-2 col-4 mb-1">
+                        <Form.Field>
+                            <input type="number"  
+                                placeholder="Año"
+                                value={cronograma.year}
+                                disabled={true}
+                            />
+                        </Form.Field>
+                    </div>
+
+                    <div className="col-md-2 col-4 mb-1">
+                        <Form.Field>
+                            <input type="number" 
+                                placeholder="Mes"
+                                value={cronograma.mes}
+                                disabled={true}
+                            />
+                        </Form.Field>
+                    </div>
+
+                    <div className="col-md-3 col-12 mb-1 col-sm-3">
+                        <Select placeholder='Select. Planilla' 
+                            fluid
+                            options={parseOptions(planillas, ['sel-afp', '', 'Select. Planilla'], ['id', 'id', 'nombre'])} 
+                            value={cronograma.planilla_id}
+                            disabled={true}
+                        />
+                    </div>
+
+                    <Show condicion={cronograma.adicional}>
+                        <div className="col-md-3 col-12 mb-1">
+                            <Form.Field>
+                                <input type="text" 
+                                    value={`Adicional ${cronograma.adicional}`}
+                                     disabled
+                                />
+                            </Form.Field>
+                        </div>
+                    </Show>
+                </div>
+
+                <div className="col-md-12 mt-3">
+                    <div className="card" style={{ minHeight: "80vh" }}>
+                        <div className="card-header">
+                            <i className="fas fa-info-circle"></i> Información de "{historial.person && historial.person.fullname}"
+                        </div>
+
+                        <div className="card-body">
+                                <Form loading={loading}>
+                                    <Row>
+                                        <div className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1">
+                                            <Form.Field> 
+                                                <input type="search" 
+                                                    className={`${this.state.like ? 'border-dark text-dark' : ''}`}
+                                                    disabled={loading || this.state.edit || this.state.block}
+                                                    value={this.state.like}
+                                                    onChange={this.handleInput}
+                                                    name="like"
+                                                    placeholder="Buscar por Apellidos y Nombres"
+                                                />  
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-6 col-12 mb-1 col-sm-6 col-lg-3">
+                                            <Form.Field>
+                                                <Select placeholder='Select. Cargo'
+                                                    fluid 
+                                                    options={parseOptions(cargos, ['sel-car', '', 'Select. Cargo'], ['id', 'id', 'descripcion'])} 
+                                                    disabled={loading || this.state.edit || this.state.block}
+                                                    value={cargo_id}
+                                                    name="cargo_id"
+                                                    onChange={this.handleSelect}
+                                                />
+                                            </Form.Field>
+                                        </div>
+                                        
+                                        <div className="col-md-6 col-sm-6 col-lg-2 mb-1 col-12">
+                                            <Select placeholder='Select. Categoría' 
+                                                fluid
+                                                options={parseOptions(type_categorias, ['sel-cat', '', 'Select. Categoría'], ['id', 'id', 'descripcion'])}
+                                                disabled={loading || this.state.edit || this.state.block}
+                                                value={type_categoria_id}
+                                                name="type_categoria_id"
+                                                onChange={this.handleSelect}
+                                            />
+                                        </div>
+                                        
+                                        <div className="col-md-3 col-lg-2 col-6 mb-1">
+                                            <Button color="black"
+                                                fluid
+                                                onClick={this.readCronograma}
+                                                title="Realizar Búsqueda"
+                                                disabled={loading || this.state.edit || this.state.block}
+                                            >
+                                                <Icon name="filter"/> Filtrar
+                                            </Button>
+                                        </div>
+
+                                        <div className="col-md-3 col-lg-2 col-6 mb-1">
+                                            <Button color="olive"
+                                                fluid
+                                                onClick={this.readCronograma}
+                                                title="Realizar Búsqueda"
+                                                disabled={loading || this.state.edit || this.state.block}
+                                            >
+                                                <Icon name="share"/> Export
+                                            </Button>
+                                        </div>
+                                        
+                                        <Show condicion={this.state.total}>
+                                            <TabCronograma
+                                                type_documents={this.state.type_documents}
+                                                historial={historial}
+                                                remuneraciones={this.state.remuneraciones}
+                                                descuentos={this.state.descuentos}
+                                                aportaciones={this.state.aportaciones}
+                                                bancos={this.state.bancos}
+                                                ubigeos={this.state.ubigeos}
+                                                edit={this.state.edit}
+                                                loading={this.state.loading}
+                                                send={this.state.send}
+                                                total={this.state.total}
+                                                setSend={this.setSend}
+                                                setEdit={this.setEdit}
+                                                setLoading={this.setLoading}
+                                                updatingHistorial={this.updatingHistorial}
+                                                menu={{ attached: true, tabular: true }}
+                                            />  
+                                        </Show>          
+                                        
+                                        <Show condicion={!this.state.loading && !this.state.total}>
+                                            <div className="w-100 text-center">
+                                                <h4 className="mt-5">No se encontró trabajadores</h4>
+                                            </div>
+                                        </Show>                    
+                                    </Row>
+                                </Form>
+                            </div>
+
+                            <div  className="card-footer">
+                                <div className="card-body">
+                                    <div className="row justify-content-start">
+                                        <div className="col-md-8">
                                             <div className="row">
-                                                <div className="col-md-2 col-4 mb-1">
-                                                    <Form.Field>
-                                                        <input type="number"  
-                                                            placeholder="Año"
-                                                            value={cronograma.year}
-                                                            disabled={true}
-                                                        />
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-2 col-4 mb-1">
-                                                    <Form.Field>
-                                                        <input type="number" 
-                                                            placeholder="Mes"
-                                                            value={cronograma.mes}
-                                                            disabled={true}
-                                                        />
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-3 col-3 mb-1 col-sm-3">
-                                                    <Select placeholder='Select. Planilla' 
-                                                        options={parseOptions(planillas, ['sel-afp', '', 'Select. Planilla'], ['id', 'id', 'nombre'])} 
-                                                        value={cronograma.planilla_id}
-                                                        disabled={true}
-                                                    />
-                                                </div>
-
-                                                <Show condicion={cronograma.adicional}>
-                                                    <div className="col-md-2 col-4 mb-1">
-                                                        <Form.Field>
-                                                            <input type="text" 
-                                                                value={`Adicional ${cronograma.adicional}`}
-                                                                disabled
-                                                            />
-                                                        </Form.Field>
-                                                    </div>
-                                                </Show>
-
-                                                <div className="col-md-2 col-4 mb-1">
-                                                    <Show condicion={this.state.total}>
-                                                        <Button color="black"
-                                                            fluid
-                                                        >
-                                                            {this.state.page} de {this.state.total}
-                                                        </Button>
-                                                    </Show>
-                                                    <Show condicion={!this.state.total}>
+                                                <Show condicion={!this.state.total}>
+                                                    <div className="col-md-3 mb-1">   
                                                         <Button color="red"
                                                             disabled={loading}
                                                             onClick={this.clearSearch}
@@ -401,78 +415,110 @@ export default class CronogramaInformacion extends Component
                                                         >
                                                             <i className="fas fa-trash"></i> Limpiar
                                                         </Button>
-                                                    </Show>
-                                                </div>
+                                                    </div>
+                                                </Show>
+
+                                                <Show condicion={this.state.total && !cronograma.estado}>
+                                                    <div className="col-md-3 mb-1">
+                                                        <Button
+                                                            fluid
+                                                            color="orange"
+                                                            disabled={loading || this.state.block}
+                                                            onClick={this.sendEmail}
+                                                        >
+                                                            <Icon name="send"/> { this.state.send ? 'Enviando...' : 'Enviar Email' }
+                                                        </Button>
+                                                    </div>
+                                                </Show>
+
+                                                <Show condicion={!this.state.edit && this.state.total}>
+                                                    <div className="col-md-3 mb-1">
+                                                        <Button
+                                                            fluid
+                                                            color="black"
+                                                            disabled={loading || this.state.edit || this.state.block}
+                                                            onClick={this.readCronograma}
+                                                        >
+                                                            Pág N° 1
+                                                        </Button>    
+                                                    </div>   
+                                                </Show>
+
+                                                <Show condicion={!this.state.edit && this.state.total}>
+                                                    <div className="col-md-7 mb-1 col-12">
+                                                        <div className="row">
+                                                            <div className="col-md-4 col-4">
+                                                                <Button  
+                                                                    color="black"
+                                                                    disabled={loading || this.state.edit || this.state.block}
+                                                                    onClick={this.previus}
+                                                                    fluid
+                                                                >
+                                                                    <Icon name="triangle left"/>
+                                                                </Button>
+                                                            </div>
+
+                                                            <Show condicion={this.state.total}>
+                                                                <div className="col-md-4 col-4 mb-1">
+                                                                    <Button color="black"
+                                                                        fluid
+                                                                    >
+                                                                            {this.state.page} de {this.state.total}
+                                                                    </Button>
+                                                                </div>
+                                                            </Show>
+
+                                                            <div className="col-md-4 col-4">
+                                                                <Button 
+                                                                    fluid
+                                                                    color="black"
+                                                                    disabled={loading || this.state.edit || this.state.block}
+                                                                    onClick={this.next}
+                                                                >
+                                                                    <Icon name="triangle right"/>
+                                                                </Button>    
+                                                            </div>      
+                                                        </div>    
+                                                    </div>
+                                                </Show>
                                             </div>
                                         </div>
-                                    </Show>
-                                    
-                                    <div className="col-md-4 col-12 text-right">
-                                        <Show condicion={this.state.total && cronograma.estado}>
-                                            <Button color={this.state.edit ? 'red' : 'teal'}
-                                                disabled={loading || this.state.block || this.state.send}
-                                                onClick={(e) => this.setState(state => ({ edit: !state.edit }))}
-                                            >
-                                                <Icon name={this.state.edit ? 'cancel' : 'pencil'}/> { this.state.edit ? 'Cancelar' : 'Editar' }
-                                            </Button>
-                                        </Show>
 
-                                        <Show condicion={this.state.total && !cronograma.estado}>
-                                            <Button
-                                                color="orange"
-                                                disabled={loading || this.state.block}
-                                                onClick={this.sendEmail}
-                                            >
-                                                <Icon name="send"/> { this.state.send ? 'Enviando...' : 'Enviar Email' }
-                                            </Button>
-                                        </Show>
+                                        <div className="col-md-4">
+                                            <div className="row justify-content-end">
+                                                <Show condicion={this.state.edit}>
+                                                    <div className="col-md-6 mb-1">
+                                                        <Button
+                                                            fluid
+                                                            color="blue"
+                                                            loading={this.state.send}
+                                                            disabled={loading || !this.state.edit || this.state.block}
+                                                            onClick={this.handleConfirm}
+                                                        >
+                                                            <Icon name="save"/> Guardar
+                                                        </Button>    
+                                                    </div>                
+                                                </Show>
 
-                                        <Show condicion={!this.state.edit && this.state.total}>
-                                            <Button
-                                                color="black"
-                                                disabled={loading || this.state.edit || this.state.block}
-                                                onClick={this.readCronograma}
-                                            >
-                                                Pág N° 1
-                                            </Button>   
-                                        </Show>
-
-                                        <Show condicion={!this.state.edit && this.state.total}>
-                                            <Button  
-                                                color="black"
-                                                disabled={loading || this.state.edit || this.state.block}
-                                                onClick={this.previus}
-                                            >
-                                                <Icon name="triangle left"/>
-                                            </Button>
-                                        </Show>
-
-                                        <Show condicion={!this.state.edit && this.state.total}>
-                                            <Button 
-                                                color="black"
-                                                disabled={loading || this.state.edit || this.state.block}
-                                                onClick={this.next}
-                                            >
-                                                <Icon name="triangle right"/>
-                                            </Button>
-                                        </Show>
-
-                                        <Show condicion={this.state.edit}>
-                                            <Button
-                                                color="blue"
-                                                loading={this.state.send}
-                                                disabled={loading || !this.state.edit || this.state.block}
-                                                onClick={this.handleConfirm}
-                                            >
-                                                <Icon name="save"/> Guardar
-                                            </Button>
-                                        </Show>
+                                                <Show condicion={this.state.total && cronograma.estado}>
+                                                    <div className="col-md-6">
+                                                        <Button color={this.state.edit ? 'red' : 'teal'}
+                                                            disabled={loading || this.state.block || this.state.send}
+                                                            onClick={(e) => this.setState(state => ({ edit: !state.edit }))}
+                                                            fluid
+                                                        >
+                                                            <Icon name={this.state.edit ? 'cancel' : 'pencil'}/> { this.state.edit ? 'Cancelar' : 'Editar' }
+                                                        </Button>
+                                                    </div>
+                                                </Show>
+                                            </div>
+                                        </div>
                                     </div>
-                                </Row>
-                            </Form>
-                        </Card.Body>
-                    </Card.Footer>
-                </Modal>    
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </Form>
         )
     }
 

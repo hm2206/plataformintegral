@@ -26,7 +26,7 @@ export default class TabCronograma extends Component
 
         const panes = [
             { 
-                menuItem: {key: 'info', icon: 'info circle', content: 'Datos Generales', disabled: edit }, 
+                menuItem: {key: 'info', icon: 'info circle', content: 'Datos Per.', disabled: edit }, 
                 render: () => 
                     <Tab.Pane style={styles}>
                         <Work 
@@ -43,7 +43,7 @@ export default class TabCronograma extends Component
                     </Tab.Pane> 
             },
             {
-                menuItem: {key: 'afectacion', icon: 'cogs', content: 'Afectacion Presupuestal', disabled: edit },
+                menuItem: {key: 'afectacion', icon: 'cogs', content: 'Afectació Pres.', disabled: edit },
                 render: () => (
                     <Tab.Pane style={styles}>
                         <Afectacion
@@ -64,7 +64,7 @@ export default class TabCronograma extends Component
                 )
             },
             {
-                menuItem: {key: 'remuneracion', icon: 'dollar', content: 'Remuneraciones', disabled: edit },
+                menuItem: {key: 'remuneracion', icon: 'dollar', content: 'Remuneración', disabled: edit },
                 render: () => (
                     <Tab.Pane style={styles}>
                         <Remuneracion
@@ -107,7 +107,7 @@ export default class TabCronograma extends Component
                 )
             },
             {
-                menuItem: {key: 'detallado', icon: 'briefcase', content: 'Descuentos Detallados', disabled: edit },
+                menuItem: {key: 'detallado', icon: 'briefcase', content: 'Más descuentos', disabled: edit },
                 render: () => (
                     <Tab.Pane style={styles}>
                         <Detallado
@@ -126,7 +126,7 @@ export default class TabCronograma extends Component
                 )
             },
             {
-                menuItem: {key: 'obligacion', icon: 'balance scale', content: 'Obligaciones Judicial', disabled: edit },
+                menuItem: {key: 'obligacion', icon: 'balance scale', content: 'Obligaciones', disabled: edit },
                 render: () => (
                     <Tab.Pane style={styles}>
                         <Obligacion
@@ -146,7 +146,7 @@ export default class TabCronograma extends Component
                 )
             },
             {
-                menuItem: {key: 'sindicato', icon: 'users', content: 'Sindicatos/Afiliación', disabled: edit },
+                menuItem: {key: 'sindicato', icon: 'users', content: 'Afiliación', disabled: edit },
                 render: () => (
                     <Tab.Pane style={styles}>
                         <Sindicato
@@ -166,7 +166,7 @@ export default class TabCronograma extends Component
                 )
             },
             {
-                menuItem: {key: 'aportacion', icon: 'certificate', content: 'Aportes Empleador', disabled: edit },
+                menuItem: {key: 'aportacion', icon: 'certificate', content: 'Aporte Empleador', disabled: edit },
                 render: () => (
                     <Tab.Pane style={styles}>
                         <Aportacion
@@ -188,7 +188,7 @@ export default class TabCronograma extends Component
             }
         ];
 
-        return <Tab panes={panes} menu={this.props.menu} style={{ overflow: 'auto' }} className="w-100"/>
+        return <Tab panes={panes} menu={this.props.menu} className="w-100 mt-3"/>
 
     }
 

@@ -13,6 +13,8 @@ import Close from '../../../components/cronograma/close';
 import Open from '../../../components/cronograma/open';
 import Edit from '../../../components/cronograma/edit';
 import { allCronograma } from '../../../storage/actions/cronogramaActions';
+import { unujobs } from '../../../services/apis';
+import Swal from 'sweetalert2';
 
 
 export default class Cronograma extends Component {
@@ -21,7 +23,8 @@ export default class Cronograma extends Component {
         super(props);
         this.state = {
             page: false,
-            loading: true
+            loading: true,
+            block: false
         }
 
         this.handleInput = this.handleInput.bind(this);
@@ -93,6 +96,22 @@ export default class Cronograma extends Component {
         }
         // execute
         Router.push({pathname, query});
+    }
+
+    handleExport = async () => {
+        this.setState({ loading: true });
+        let { year, mes } = this.props.query;
+        await unujobs.fetch(`exports/personal/${year}/${mes}`)
+        .then(resdata => resdata.blob())
+        .then(blob => {
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `report_${year}_${mes}.xlsx`;
+            a.target = "_blank";
+            a.click();
+        })
+        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        this.setState({ loading: false });
     }
 
     render() {
@@ -241,7 +260,7 @@ export default class Cronograma extends Component {
                                     />
                                 </Form.Field>
                             </div>
-                            <div className="col-md-3 col-12 col-sm-12 col-xl-2">
+                            <div className="col-md-3 col-12 col-sm-12 col-xl-2 mb-1">
                                 <Button 
                                     fluid
                                     onClick={this.handleCronograma}
@@ -252,6 +271,21 @@ export default class Cronograma extends Component {
                                     <span>Buscar</span>
                                 </Button>
                             </div>
+
+                            <Show condicion={!this.state.block}>
+                                <div className="col-md-3 col-12 col-sm-12 col-xl-2">
+                                    <Button 
+                                        fluid
+                                        onClick={this.handleCronograma}
+                                        disabled={this.state.loading}
+                                        color="olive"
+                                        onClick={this.handleExport}
+                                    >
+                                        <i className="fas fa-share mr-1"></i>
+                                        <span>Exportar</span>
+                                    </Button>
+                                </div>
+                            </Show>
                         </div>
                         <hr/>
                     </Form>
@@ -296,6 +330,7 @@ export default class Cronograma extends Component {
                 </Show>
                 {/* event create cronograma */}
                 <BtnFloat
+                    disabled={this.state.loading}
                     onClick={(e) => Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }})}
                 >
                     <i className="fas fa-plus"></i>

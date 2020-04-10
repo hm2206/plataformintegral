@@ -5,8 +5,8 @@ const Content = props => (
   <Fragment>
     <div className="app-main">
       <div className="wrapper">
-        <div className="page">
-          <div className="page-inner">{props.children}</div>
+        <div className="page mb-5">
+          <div className="page-inner- mt-4">{props.children}</div>
         </div>
       </div>
     </div>

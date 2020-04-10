@@ -4394,3 +4394,35 @@ readers do not read off random characters that represent icons */
 .fas {
   font-family: 'Font Awesome 5 Free';
   font-weight: 900; }
+
+
+
+.tabular {
+  overflow-y: auto;
+  border-right: 0px!important;
+}
+
+.tabular.menu.active.item  {
+  /* border-bottom: 1px solid red!important; */
+  background: red!important;
+}
+
+.tabular::-webkit-scrollbar {
+  width: 1px;
+}
+
+.tabular::-webkit-scrollbar-track {
+  background: #fff;
+} 
+
+
+/* Handle */
+.tabular::-webkit-scrollbar-thumb {
+  background: #cfd8dc;
+  border-radius: 0.3em;
+}
+
+/* Handle on hover */
+/* ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} */
