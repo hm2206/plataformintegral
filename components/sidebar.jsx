@@ -5,6 +5,7 @@ import Router from 'next/router';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { app } from '../env.json';
+import { version } from '../package.json';
 
 
 class Sidebar extends Component {
@@ -94,7 +95,7 @@ class Sidebar extends Component {
               </nav>
             </div>
             <footer className="aside-footer border-top p-3">
-                Versión <b className="badge badge-dark">{app.version}</b>
+                Versión <b className="badge badge-dark">{version}</b>
             </footer>
           </div>
         </aside>
