@@ -59,7 +59,7 @@ class MyApp extends App {
         <Head>
           <meta charSet="utf-8"></meta>
           <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></meta>
-          <meta http-equiv="Content-Security-Policy" content="default-src 'self' http*;"></meta>
+          <meta http-equiv="Content-Security-Policy" content="default-src 'self' *:*; style-src https://*;"></meta>
           <title>{app.name} {this.capitalize(titulo)}</title>
           <link rel="shortcut icon" href="/img/logo-unu.png"></link>
           <meta name="theme-color" content="#3063A0"></meta>
