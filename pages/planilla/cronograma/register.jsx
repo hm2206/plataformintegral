@@ -98,7 +98,7 @@ export default class RegisterCronograma extends Component
                     <i className="fas fa-arrow-left"></i> Atrás
                 </Button>
                 
-                <div className="card mt-3">
+                <div className="card- mt-3">
                     <div className="card-header">
                         <i className="fas fa-plus ml-2"></i> Registrar Nuevo Cronograma
                     </div>

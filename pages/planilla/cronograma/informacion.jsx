@@ -7,7 +7,6 @@ import { findCronograma } from '../../../storage/actions/cronogramaActions';
 import { parseOptions } from '../../../services/utils';
 import Show from '../../../components/show';
 import TabCronograma from '../../../components/cronograma/TabCronograma';
-import Modal from '../../../components/modal';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 
@@ -41,7 +40,8 @@ export default class CronogramaInformacion extends Component
         block: false,
         cancel: false,
         type_documents: [],
-        screen: {}
+        screen: {},
+        export: true
     }
 
     static getInitialProps = async (ctx) => {
@@ -87,7 +87,10 @@ export default class CronogramaInformacion extends Component
             aportaciones,
             loading: false,
             page: query.page ? query.page : 1,
-            like: query.like ? query.like : ""
+            like: query.like ? query.like : "",
+            cargo_id: query.cargo_id ? parseInt(query.cargo_id) : "",
+            type_categoria_id: query.type_categoria_id ? parseInt(query.type_categoria_id) : "",
+            export: true
         });
     }
 
@@ -115,11 +118,11 @@ export default class CronogramaInformacion extends Component
 
     handleInput = e => {
         let { name, value } = e.target;
-        this.setState({ [name]: value });
+        this.setState({ [name]: value, export: false });
     }
 
     handleSelect = (e, { name, value }) => {
-        this.setState({ [name]: value });
+        this.setState({ [name]: value, export: false });
     }
 
     readCronograma = async (e) => {
@@ -263,13 +266,31 @@ export default class CronogramaInformacion extends Component
         push({ pathname: newPath.join('/'), query: { year: cronograma.year, mes: cronograma.mes  }});
     }
 
+    handleExport = async () => {
+        this.setState({ loading: true });
+        let { cronograma, cargo_id, type_categoria_id, like } = this.state;
+        let query = `cronograma_id=${cronograma.id}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&query_search=${like}`;
+        await unujobs.fetch(`exports/personal/${cronograma.year}/${cronograma.mes}?${query}`)
+        .then(resData => {
+            resData.blob();
+            resData.json().then(res => { throw new Error(res.message)})
+        })
+        .then(blob => {
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.target = "_blank";
+            a.click();
+        }).catch(err => Swal.fire({ icon: 'error', text: err.message }))
+        this.setState({ loading: false });
+    }
+
     render() {
 
         let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id } = this.state;
 
         return (
             <Fragment>
-                <Form className="col-md-12" disabled={loading}>
+                <Form className="col-md-12" disabled={loading} onSubmit={(e) => e.preventDefault()}>
                     <div className="row pl-2 pr-2">
                         <div className="col-md-2 col-4">
                             <Button fluid
@@ -324,7 +345,7 @@ export default class CronogramaInformacion extends Component
                     <div className="col-md-12 mt-3">
                         <div className="card-" style={{ minHeight: "80vh" }}>
                             <div className="card-header">
-                                <i className="fas fa-info-circle"></i> Información de "{historial.person && historial.person.fullname}"
+                                <i className="fas fa-info-circle"></i> Información de "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
                             </div>
 
                             <div className="card-body" style={{ marginBottom: "10em" }}>
@@ -372,7 +393,7 @@ export default class CronogramaInformacion extends Component
                                                     fluid
                                                     onClick={this.readCronograma}
                                                     title="Realizar Búsqueda"
-                                                    disabled={loading || this.state.edit || this.state.block}
+                                                    disabled={loading || this.state.edit || this.state.block || this.state.export}
                                                 >
                                                     <Icon name="filter"/> Filtrar
                                                 </Button>
@@ -381,9 +402,9 @@ export default class CronogramaInformacion extends Component
                                             <div className="col-md-3 col-lg-2 col-6 mb-1">
                                                 <Button color="olive"
                                                     fluid
-                                                    onClick={this.readCronograma}
+                                                    onClick={this.handleExport}
                                                     title="Realizar Búsqueda"
-                                                    disabled={loading || this.state.edit || this.state.block}
+                                                    disabled={loading || this.state.edit || this.state.block || !this.state.export}
                                                 >
                                                     <Icon name="share"/> Export
                                                 </Button>

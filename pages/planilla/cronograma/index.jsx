@@ -124,13 +124,14 @@ export default class Cronograma extends Component {
                 <Datatable titulo="Lista de Planillas x Mes"
                     isFilter={false}
                     loading={loading}
-                    headers={ ["#ID", "Planilla", "Sede", "Estado"]}
+                    headers={ ["#ID", "Planilla", "Sede", "F. Creado", "N° Trabajadores", "Estado"]}
                     index={
                         [
                             {
                                 key: "id",
                                 type: "text"
-                            }, {
+                            }, 
+                            {
                                 key: "planilla.nombre",
                                 type: "text",
                                 children: [
@@ -140,10 +141,21 @@ export default class Cronograma extends Component {
                                         prefix: "Adicional"
                                     }
                                 ]
-                            }, {
+                            }, 
+                            {
                                 key: "sede.descripcion",
                                 type: "text"
-                            }, {
+                            }, 
+                            {
+                                key: "created_at",
+                                type: "timestamp"
+                            },
+                            {
+                                key: "historial_count",
+                                type: "icon",
+                                bg: 'dark'
+                            },
+                            {
                                 key: "estado",
                                 type: "switch",
                                 is_true: "En curso",
