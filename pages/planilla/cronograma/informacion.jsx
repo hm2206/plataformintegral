@@ -9,6 +9,8 @@ import Show from '../../../components/show';
 import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
+import { responsive } from '../../../services/storage.json';
+import { Body } from '../../../components/Utils';
 
 export default class CronogramaInformacion extends Component
 {
@@ -40,15 +42,17 @@ export default class CronogramaInformacion extends Component
         block: false,
         cancel: false,
         type_documents: [],
-        screen: {},
-        export: true
+        export: true,
+        active: 0
     }
 
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
+        let { store, query, pathname } = ctx;
         await ctx.store.dispatch(findCronograma(ctx));
-        let { cronograma } = ctx.store.getState().cronograma;
-        return { pathname: ctx.pathname, query: ctx.query, cronograma }
+        let { cronograma } = store.getState().cronograma;
+        query.active = query.active ? query.active : 0;
+        return { pathname, query, cronograma }
     }
 
     async componentDidMount() {
@@ -90,7 +94,8 @@ export default class CronogramaInformacion extends Component
             like: query.like ? query.like : "",
             cargo_id: query.cargo_id ? parseInt(query.cargo_id) : "",
             type_categoria_id: query.type_categoria_id ? parseInt(query.type_categoria_id) : "",
-            export: true
+            export: true,
+            active: props.query.active
         });
     }
 
@@ -192,6 +197,7 @@ export default class CronogramaInformacion extends Component
                 await this.setState(state => ({ page: parseInt(state.page) + 1, loading: true }));
                 let { push, pathname, query } = Router;
                 query.page = this.state.page;
+                query.active = this.state.active;
                 push({ pathname, query });
             }else {
                 Swal.fire({ icon: "warning", text: "No hay más registros" });
@@ -208,6 +214,7 @@ export default class CronogramaInformacion extends Component
                 await this.setState(state => ({ page: state.page - 1, loading: true }));
                 let { push, pathname, query } = Router;
                 query.page = this.state.page;
+                query.active = this.state.active;
                 push({ pathname, query });
             }else {
                 Swal.fire({ icon: "warning", text: "No hay más registros" });
@@ -235,6 +242,7 @@ export default class CronogramaInformacion extends Component
 
     updatingHistorial = async () => {
         let { push, query, pathname } = Router;
+        query.active = this.state.active;
         push({ pathname, query });
         this.setState({ send: false, edit: false });
     }
@@ -284,6 +292,10 @@ export default class CronogramaInformacion extends Component
         this.setState({ loading: false });
     }
 
+    handleActive = (e, data) => {
+        this.setState({ active: data.activeIndex });
+    }
+
     render() {
 
         let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id } = this.state;
@@ -291,156 +303,161 @@ export default class CronogramaInformacion extends Component
         return (
             <Fragment>
                 <Form className="col-md-12" disabled={loading} onSubmit={(e) => e.preventDefault()}>
-                    <div className="row pl-2 pr-2">
-                        <div className="col-md-2 col-4">
-                            <Button fluid
-                                disabled={this.state.loading}
-                                onClick={this.handleBack}
-                            >
-                                <i className="fas fa-arrow-left"></i> Atrás
-                            </Button>
-                        </div>
+                    <Body>
+                        <div className="row pl-2 pr-2">
+                            <div className="col-md-2 col-4">
+                                <Button fluid
+                                    disabled={this.state.loading}
+                                    onClick={this.handleBack}
+                                >
+                                    <i className="fas fa-arrow-left"></i> Atrás
+                                </Button>
+                            </div>
 
-                        <div className="col-md-2 col-4 mb-1">
-                            <Form.Field>
-                                <input type="number"  
-                                    placeholder="Año"
-                                    value={cronograma.year}
-                                    disabled={true}
-                                />
-                            </Form.Field>
-                        </div>
-
-                        <div className="col-md-2 col-4 mb-1">
-                            <Form.Field>
-                                <input type="number" 
-                                    placeholder="Mes"
-                                    value={cronograma.mes}
-                                    disabled={true}
-                                />
-                            </Form.Field>
-                        </div>
-
-                        <div className="col-md-3 col-12 mb-1 col-sm-3">
-                            <Select placeholder='Select. Planilla' 
-                                fluid
-                                options={parseOptions(planillas, ['sel-afp', '', 'Select. Planilla'], ['id', 'id', 'nombre'])} 
-                                value={cronograma.planilla_id}
-                                disabled={true}
-                            />
-                        </div>
-
-                        <Show condicion={cronograma.adicional}>
-                            <div className="col-md-3 col-12 mb-1">
+                            <div className="col-md-2 col-4 mb-1">
                                 <Form.Field>
-                                    <input type="text" 
-                                        value={`Adicional ${cronograma.adicional}`}
-                                        disabled
+                                    <input type="number"  
+                                        placeholder="Año"
+                                        value={cronograma.year}
+                                        disabled={true}
                                     />
                                 </Form.Field>
                             </div>
-                        </Show>
-                    </div>
 
-                    <div className="col-md-12 mt-3">
-                        <div className="card-" style={{ minHeight: "80vh" }}>
-                            <div className="card-header">
-                                <i className="fas fa-info-circle"></i> Información de "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
+                            <div className="col-md-2 col-4 mb-1">
+                                <Form.Field>
+                                    <input type="number" 
+                                        placeholder="Mes"
+                                        value={cronograma.mes}
+                                        disabled={true}
+                                    />
+                                </Form.Field>
                             </div>
 
-                            <div className="card-body" style={{ marginBottom: "10em" }}>
-                                    <Form loading={loading}>
-                                        <Row>
-                                            <div className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1">
-                                                <Form.Field> 
-                                                    <input type="search" 
-                                                        className={`${this.state.like ? 'border-dark text-dark' : ''}`}
-                                                        disabled={loading || this.state.edit || this.state.block}
-                                                        value={this.state.like}
-                                                        onChange={this.handleInput}
-                                                        name="like"
-                                                        placeholder="Buscar por Apellidos y Nombres"
-                                                    />  
-                                                </Form.Field>
-                                            </div>
+                            <div className="col-md-3 col-12 mb-1 col-sm-3">
+                                <Select placeholder='Select. Planilla' 
+                                    fluid
+                                    options={parseOptions(planillas, ['sel-afp', '', 'Select. Planilla'], ['id', 'id', 'nombre'])} 
+                                    value={cronograma.planilla_id}
+                                    disabled={true}
+                                />
+                            </div>
 
-                                            <div className="col-md-6 col-12 mb-1 col-sm-6 col-lg-3">
-                                                <Form.Field>
-                                                    <Select placeholder='Select. Cargo'
-                                                        fluid 
-                                                        options={parseOptions(cargos, ['sel-car', '', 'Select. Cargo'], ['id', 'id', 'descripcion'])} 
+                            <Show condicion={cronograma.adicional}>
+                                <div className="col-md-3 col-12 mb-1">
+                                    <Form.Field>
+                                        <input type="text" 
+                                            value={`Adicional ${cronograma.adicional}`}
+                                            disabled
+                                        />
+                                    </Form.Field>
+                                </div>
+                            </Show>
+                        </div>
+
+                        <div className="col-md-12 mt-3">
+                            <div className="card-" style={{ minHeight: "80vh" }}>
+                                <div className="card-header">
+                                    <i className="fas fa-info-circle"></i> Información de "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
+                                </div>
+
+                                <div className="card-body" style={{ marginBottom: "10em" }}>
+                                        <Form loading={loading}>
+                                            <Row>
+                                                <div className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1">
+                                                    <Form.Field> 
+                                                        <input type="search" 
+                                                            className={`${this.state.like ? 'border-dark text-dark' : ''}`}
+                                                            disabled={loading || this.state.edit || this.state.block}
+                                                            value={this.state.like}
+                                                            onChange={this.handleInput}
+                                                            name="like"
+                                                            placeholder="Buscar por Apellidos y Nombres"
+                                                        />  
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-6 col-12 mb-1 col-sm-6 col-lg-3">
+                                                    <Form.Field>
+                                                        <Select placeholder='Select. Cargo'
+                                                            fluid 
+                                                            options={parseOptions(cargos, ['sel-car', '', 'Select. Cargo'], ['id', 'id', 'descripcion'])} 
+                                                            disabled={loading || this.state.edit || this.state.block}
+                                                            value={cargo_id}
+                                                            name="cargo_id"
+                                                            onChange={this.handleSelect}
+                                                        />
+                                                    </Form.Field>
+                                                </div>
+                                                
+                                                <div className="col-md-6 col-sm-6 col-lg-2 mb-1 col-12">
+                                                    <Select placeholder='Select. Categoría' 
+                                                        fluid
+                                                        options={parseOptions(type_categorias, ['sel-cat', '', 'Select. Categoría'], ['id', 'id', 'descripcion'])}
                                                         disabled={loading || this.state.edit || this.state.block}
-                                                        value={cargo_id}
-                                                        name="cargo_id"
+                                                        value={type_categoria_id}
+                                                        name="type_categoria_id"
                                                         onChange={this.handleSelect}
                                                     />
-                                                </Form.Field>
-                                            </div>
-                                            
-                                            <div className="col-md-6 col-sm-6 col-lg-2 mb-1 col-12">
-                                                <Select placeholder='Select. Categoría' 
-                                                    fluid
-                                                    options={parseOptions(type_categorias, ['sel-cat', '', 'Select. Categoría'], ['id', 'id', 'descripcion'])}
-                                                    disabled={loading || this.state.edit || this.state.block}
-                                                    value={type_categoria_id}
-                                                    name="type_categoria_id"
-                                                    onChange={this.handleSelect}
-                                                />
-                                            </div>
-                                            
-                                            <div className="col-md-3 col-lg-2 col-6 mb-1">
-                                                <Button color="black"
-                                                    fluid
-                                                    onClick={this.readCronograma}
-                                                    title="Realizar Búsqueda"
-                                                    disabled={loading || this.state.edit || this.state.block || this.state.export}
-                                                >
-                                                    <Icon name="filter"/> Filtrar
-                                                </Button>
-                                            </div>
-
-                                            <div className="col-md-3 col-lg-2 col-6 mb-1">
-                                                <Button color="olive"
-                                                    fluid
-                                                    onClick={this.handleExport}
-                                                    title="Realizar Búsqueda"
-                                                    disabled={loading || this.state.edit || this.state.block || !this.state.export}
-                                                >
-                                                    <Icon name="share"/> Export
-                                                </Button>
-                                            </div>
-                                            
-                                            <Show condicion={this.state.total}>
-                                                <TabCronograma
-                                                    type_documents={this.state.type_documents}
-                                                    historial={historial}
-                                                    remuneraciones={this.state.remuneraciones}
-                                                    descuentos={this.state.descuentos}
-                                                    aportaciones={this.state.aportaciones}
-                                                    bancos={this.state.bancos}
-                                                    ubigeos={this.state.ubigeos}
-                                                    edit={this.state.edit}
-                                                    loading={this.state.loading}
-                                                    send={this.state.send}
-                                                    total={this.state.total}
-                                                    setSend={this.setSend}
-                                                    setEdit={this.setEdit}
-                                                    setLoading={this.setLoading}
-                                                    updatingHistorial={this.updatingHistorial}
-                                                    menu={{ attached: true, tabular: true }}
-                                                />  
-                                            </Show>          
-                                            
-                                            <Show condicion={!this.state.loading && !this.state.total}>
-                                                <div className="w-100 text-center">
-                                                    <h4 className="mt-5">No se encontró trabajadores</h4>
                                                 </div>
-                                            </Show>                    
-                                        </Row>
-                                    </Form>
+                                                
+                                                <div className="col-md-3 col-lg-2 col-6 mb-1">
+                                                    <Button color="black"
+                                                        fluid
+                                                        onClick={this.readCronograma}
+                                                        title="Realizar Búsqueda"
+                                                        disabled={loading || this.state.edit || this.state.block || this.state.export}
+                                                    >
+                                                        <Icon name="filter"/> Filtrar
+                                                    </Button>
+                                                </div>
+
+                                                <div className="col-md-3 col-lg-2 col-6 mb-1">
+                                                    <Button color="olive"
+                                                        fluid
+                                                        onClick={this.handleExport}
+                                                        title="Realizar Búsqueda"
+                                                        disabled={loading || this.state.edit || this.state.block || !this.state.export}
+                                                    >
+                                                        <Icon name="share"/> Export
+                                                    </Button>
+                                                </div>
+                                                
+                                                <Show condicion={this.state.total}>
+                                                    <TabCronograma
+                                                        type_documents={this.state.type_documents}
+                                                        historial={historial}
+                                                        remuneraciones={this.state.remuneraciones}
+                                                        descuentos={this.state.descuentos}
+                                                        aportaciones={this.state.aportaciones}
+                                                        bancos={this.state.bancos}
+                                                        ubigeos={this.state.ubigeos}
+                                                        edit={this.state.edit}
+                                                        loading={this.state.loading}
+                                                        send={this.state.send}
+                                                        total={this.state.total}
+                                                        setSend={this.setSend}
+                                                        setEdit={this.setEdit}
+                                                        setLoading={this.setLoading}
+                                                        updatingHistorial={this.updatingHistorial}
+                                                        menu={{ attached: true, tabular: true }}
+                                                        screenX={this.props.screenX}
+                                                        activeIndex={this.state.active}
+                                                        onTabChange={this.handleActive}
+                                                    />  
+                                                </Show>          
+                                                
+                                                <Show condicion={!this.state.loading && !this.state.total}>
+                                                    <div className="w-100 text-center">
+                                                        <h4 className="mt-5">No se encontró trabajadores</h4>
+                                                    </div>
+                                                </Show>                    
+                                            </Row>
+                                        </Form>
+                                    </div>
                                 </div>
-                        </div>
-                    </div>
+                            </div>
+                    </Body>
                 </Form>
 
                 <div className="nav-bottom">
@@ -527,7 +544,7 @@ export default class CronogramaInformacion extends Component
                                             onClick={this.handleConfirm}
                                         >
                                             <i className="fas fa-save mr-1"></i>
-                                            <Show condicion={this.props.screenX > 605}>
+                                            <Show condicion={this.props.screenX > responsive.md}>
                                                 Guardar
                                             </Show>
                                         </Button>    
@@ -542,7 +559,7 @@ export default class CronogramaInformacion extends Component
                                             fluid
                                         >
                                             <i className={this.state.edit ? 'fas fa-times mr-1' : 'fas fa-pencil-alt mr-1'}></i> 
-                                            <Show condicion={this.props.screenX > 605}>
+                                            <Show condicion={this.props.screenX > responsive.md}>
                                                 {this.state.edit ? 'Cancelar' : 'Editar'}
                                             </Show>
                                         </Button>

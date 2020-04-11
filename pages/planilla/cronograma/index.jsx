@@ -15,6 +15,7 @@ import Edit from '../../../components/cronograma/edit';
 import { allCronograma } from '../../../storage/actions/cronogramaActions';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import { Body } from '../../../components/Utils';
 
 
 export default class Cronograma extends Component {
@@ -121,235 +122,237 @@ export default class Cronograma extends Component {
 
         return (
             <div className="col-md-12">
-                <Datatable titulo="Lista de Planillas x Mes"
-                    isFilter={false}
-                    loading={loading}
-                    headers={ ["#ID", "Planilla", "Sede", "F. Creado", "N° Trabajadores", "Estado"]}
-                    index={
-                        [
-                            {
-                                key: "id",
-                                type: "text"
-                            }, 
-                            {
-                                key: "planilla.nombre",
-                                type: "text",
-                                children: [
-                                    {
-                                        key: "adicional",
-                                        type: "icon",
-                                        prefix: "Adicional"
+                <Body>
+                    <Datatable titulo="Lista de Planillas x Mes"
+                        isFilter={false}
+                        loading={loading}
+                        headers={ ["#ID", "Planilla", "Sede", "F. Creado", "N° Trabajadores", "Estado"]}
+                        index={
+                            [
+                                {
+                                    key: "id",
+                                    type: "text"
+                                }, 
+                                {
+                                    key: "planilla.nombre",
+                                    type: "text",
+                                    children: [
+                                        {
+                                            key: "adicional",
+                                            type: "icon",
+                                            prefix: "Adicional"
+                                        }
+                                    ]
+                                }, 
+                                {
+                                    key: "sede.descripcion",
+                                    type: "text"
+                                }, 
+                                {
+                                    key: "created_at",
+                                    type: "date"
+                                },
+                                {
+                                    key: "historial_count",
+                                    type: "icon",
+                                    bg: 'dark'
+                                },
+                                {
+                                    key: "estado",
+                                    type: "switch",
+                                    is_true: "En curso",
+                                    is_false: "Cerrada"
+                                }
+                            ]
+                        }
+                        options={
+                            [
+                                {
+                                    id: 1,
+                                    key: "edit",
+                                    icon: "fas fa-pencil-alt",
+                                    title: "Editar cronograma",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
                                     }
-                                ]
-                            }, 
-                            {
-                                key: "sede.descripcion",
-                                type: "text"
-                            }, 
-                            {
-                                key: "created_at",
-                                type: "timestamp"
-                            },
-                            {
-                                key: "historial_count",
-                                type: "icon",
-                                bg: 'dark'
-                            },
-                            {
-                                key: "estado",
-                                type: "switch",
-                                is_true: "En curso",
-                                is_false: "Cerrada"
-                            }
-                        ]
-                    }
-                    options={
-                        [
-                            {
-                                id: 1,
-                                key: "edit",
-                                icon: "fas fa-pencil-alt",
-                                title: "Editar cronograma",
-                                rules: {
-                                    key: "estado",
-                                    value: 1
+                                }, 
+                                {
+                                    id: 1,
+                                    key: "info",
+                                    icon: "fas fa-info",
+                                    title: "Visualizar cronograma detalladamente",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
+                                    }
+                                }, 
+                                {
+                                    id: 1,
+                                    key: "info",
+                                    icon: "fas fa-info",
+                                    title: "Visualizar cronograma detalladamente",
+                                    rules: {
+                                        key: "estado",
+                                        value: 0
+                                    }
+                                },
+                                {
+                                    id: 1,
+                                    key: "add",
+                                    icon: "fas fa-user-plus",
+                                    title: "Agregar trabajadores al cronograma",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
+                                    }
+                                }, 
+                                {
+                                    id: 1,
+                                    key: "open",
+                                    icon: "fas fa-lock-open",
+                                    title: "Abrir cronograma",
+                                    rules: {
+                                        key: "estado",
+                                        value: 0
+                                    }
+                                }, 
+                                {
+                                    id: 1,
+                                    key: "close",
+                                    icon: "fas fa-lock",
+                                    title: "Cerrar cronograma",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
+                                    }
+                                }, 
+                                {
+                                    id: 1,
+                                    key: "send_email",
+                                    icon: "fas fa-paper-plane",
+                                    title: "Enviar correo",
+                                    rules: {
+                                        key: "estado",
+                                        value: 0
+                                    }
+                                }, 
+                                {
+                                    id: 1,
+                                    key: "report",
+                                    icon: "fas fa-file-alt",
+                                    title: "Reportes"
                                 }
-                            }, 
-                            {
-                                id: 1,
-                                key: "info",
-                                icon: "fas fa-info",
-                                title: "Visualizar cronograma detalladamente",
-                                rules: {
-                                    key: "estado",
-                                    value: 1
-                                }
-                            }, 
-                            {
-                                id: 1,
-                                key: "info",
-                                icon: "fas fa-info",
-                                title: "Visualizar cronograma detalladamente",
-                                rules: {
-                                    key: "estado",
-                                    value: 0
-                                }
-                            },
-                            {
-                                id: 1,
-                                key: "add",
-                                icon: "fas fa-user-plus",
-                                title: "Agregar trabajadores al cronograma",
-                                rules: {
-                                    key: "estado",
-                                    value: 1
-                                }
-                            }, 
-                            {
-                                id: 1,
-                                key: "open",
-                                icon: "fas fa-lock-open",
-                                title: "Abrir cronograma",
-                                rules: {
-                                    key: "estado",
-                                    value: 0
-                                }
-                            }, 
-                            {
-                                id: 1,
-                                key: "close",
-                                icon: "fas fa-lock",
-                                title: "Cerrar cronograma",
-                                rules: {
-                                    key: "estado",
-                                    value: 1
-                                }
-                            }, 
-                            {
-                                id: 1,
-                                key: "send_email",
-                                icon: "fas fa-paper-plane",
-                                title: "Enviar correo",
-                                rules: {
-                                    key: "estado",
-                                    value: 0
-                                }
-                            }, 
-                            {
-                                id: 1,
-                                key: "report",
-                                icon: "fas fa-file-alt",
-                                title: "Reportes"
-                            }
-                        ]
-                    }
-                    getOption={this.getOption}
-                    data={cronogramas.data}>
-                    <Form className="mb-3">
-                        <div className="row">
-                            <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
-                                <Form.Field>
-                                    <input type="number" 
-                                        min="2019" 
-                                        placeholder="Año" 
-                                        name="year"
-                                        value={this.state.year}
-                                        disabled={this.state.loading}
-                                        onChange={this.handleInput}
-                                    />
-                                </Form.Field>
-                            </div>
-                            <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
-                                <Form.Field>
-                                    <input type="number" 
-                                        min="1" 
-                                        max="12" 
-                                        placeholder="Mes" 
-                                        name="mes"
-                                        value={this.state.mes}
-                                        onChange={this.handleInput}
-                                        disabled={this.state.loading}
-                                    />
-                                </Form.Field>
-                            </div>
-                            <div className="col-md-3 col-6 col-sm-12 col-xl-2 mb-1">
-                                <Button 
-                                    fluid
-                                    onClick={this.handleCronograma}
-                                    disabled={this.state.loading}
-                                    color="blue"
-                                >
-                                    <i className="fas fa-search mr-1"></i>
-                                    <span>Buscar</span>
-                                </Button>
-                            </div>
-
-                            <Show condicion={!this.state.block}>
-                                <div className="col-md-3 col-6 col-sm-12 col-xl-2">
+                            ]
+                        }
+                        getOption={this.getOption}
+                        data={cronogramas.data}>
+                        <Form className="mb-3">
+                            <div className="row">
+                                <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
+                                    <Form.Field>
+                                        <input type="number" 
+                                            min="2019" 
+                                            placeholder="Año" 
+                                            name="year"
+                                            value={this.state.year}
+                                            disabled={this.state.loading}
+                                            onChange={this.handleInput}
+                                        />
+                                    </Form.Field>
+                                </div>
+                                <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
+                                    <Form.Field>
+                                        <input type="number" 
+                                            min="1" 
+                                            max="12" 
+                                            placeholder="Mes" 
+                                            name="mes"
+                                            value={this.state.mes}
+                                            onChange={this.handleInput}
+                                            disabled={this.state.loading}
+                                        />
+                                    </Form.Field>
+                                </div>
+                                <div className="col-md-3 col-6 col-sm-12 col-xl-2 mb-1">
                                     <Button 
                                         fluid
                                         onClick={this.handleCronograma}
                                         disabled={this.state.loading}
-                                        color="olive"
-                                        onClick={this.handleExport}
+                                        color="blue"
                                     >
-                                        <i className="fas fa-share mr-1"></i>
-                                        <span>Exportar</span>
+                                        <i className="fas fa-search mr-1"></i>
+                                        <span>Buscar</span>
                                     </Button>
                                 </div>
-                            </Show>
-                        </div>
-                        <hr/>
-                    </Form>
-                </Datatable>
-                {/* reportes */}
-                <Show condicion={query.report}>
-                    <Reports show={true}
-                        query={query}
-                        pathname={pathname}
-                        isClose={(e) => Router.push({ pathname, query: { report: "" }})}
-                    />
-                </Show>
-                {/* enviar email */}
-                <Show condicion={query.send_email}>
-                    <SendEmail query={query}
-                        isClose={(e) => Router.push({ pathname, query: { send_email: "" } })}
-                    />
-                </Show>
-                {/* add infos */}
-                <Show condicion={query.add}>
-                    <Add query={query}
-                        isClose={(e) => Router.push({ pathname, query: { add: "" } })}
-                    />
-                </Show>
-                {/* editar cronograma */}
-                <Show condicion={query.edit}>
-                    <Edit query={query}
-                        isClose={(e) => Router.push({ pathname, query: { edit: "" } })}
-                    />
-                </Show>
-                {/* cerrar planilla */}
-                <Show condicion={query.close}>
-                    <Close query={query}
-                        isClose={(e) => Router.push({ pathname, query: { close: "" } })}
-                    />
-                </Show>
-                {/* abrir planilla */}
-                <Show condicion={query.open}>
-                    <Open query={query}
-                        isClose={(e) => Router.push({ pathname, query: { open: "" } })}
-                    />
-                </Show>
-                {/* event create cronograma */}
-                <BtnFloat
-                    disabled={this.state.loading}
-                    onClick={(e) => {
-                        this.setState({ loading: true });
-                        Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }});
-                    }}
-                >
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
+
+                                <Show condicion={!this.state.block}>
+                                    <div className="col-md-3 col-6 col-sm-12 col-xl-2">
+                                        <Button 
+                                            fluid
+                                            onClick={this.handleCronograma}
+                                            disabled={this.state.loading}
+                                            color="olive"
+                                            onClick={this.handleExport}
+                                        >
+                                            <i className="fas fa-share mr-1"></i>
+                                            <span>Exportar</span>
+                                        </Button>
+                                    </div>
+                                </Show>
+                            </div>
+                            <hr/>
+                        </Form>
+                    </Datatable>
+                    {/* reportes */}
+                    <Show condicion={query.report}>
+                        <Reports show={true}
+                            query={query}
+                            pathname={pathname}
+                            isClose={(e) => Router.push({ pathname, query: { report: "" }})}
+                        />
+                    </Show>
+                    {/* enviar email */}
+                    <Show condicion={query.send_email}>
+                        <SendEmail query={query}
+                            isClose={(e) => Router.push({ pathname, query: { send_email: "" } })}
+                        />
+                    </Show>
+                    {/* add infos */}
+                    <Show condicion={query.add}>
+                        <Add query={query}
+                            isClose={(e) => Router.push({ pathname, query: { add: "" } })}
+                        />
+                    </Show>
+                    {/* editar cronograma */}
+                    <Show condicion={query.edit}>
+                        <Edit query={query}
+                            isClose={(e) => Router.push({ pathname, query: { edit: "" } })}
+                        />
+                    </Show>
+                    {/* cerrar planilla */}
+                    <Show condicion={query.close}>
+                        <Close query={query}
+                            isClose={(e) => Router.push({ pathname, query: { close: "" } })}
+                        />
+                    </Show>
+                    {/* abrir planilla */}
+                    <Show condicion={query.open}>
+                        <Open query={query}
+                            isClose={(e) => Router.push({ pathname, query: { open: "" } })}
+                        />
+                    </Show>
+                    {/* event create cronograma */}
+                    <BtnFloat
+                        disabled={this.state.loading}
+                        onClick={(e) => {
+                            this.setState({ loading: true });
+                            Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }});
+                        }}
+                    >
+                        <i className="fas fa-plus"></i>
+                    </BtnFloat>
+                </Body>
             </div>
         )
     }

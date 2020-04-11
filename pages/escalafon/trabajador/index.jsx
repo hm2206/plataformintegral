@@ -7,7 +7,8 @@ import { Button, Form } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
-import Swal from 'sweetalert2';
+import { responsive } from '../../../services/storage.json';
+import { Body } from '../../../components/Utils';
 
 export default class Index extends Component
 {
@@ -50,6 +51,7 @@ export default class Index extends Component
     }
 
     handleOption = async (obj, key, index) => {
+        this.setState({ loading: true });
         let id = await btoa(obj.id);
         if (key == 'info') Router.push({ pathname: `${Router.pathname}/profile`, query: { id } });
     }
@@ -67,7 +69,6 @@ export default class Index extends Component
             await this.setState(state => ({ works: data.length ? [...state.works, ...data] : state.works, total, page: state.page + 1 }));
             // activar o desactivar el scroll
             if (this.state.page != 2 && !next_page_url) {
-                await Swal.fire({ icon: "warning", text: "No hay más registros!" });
                 this.leaveScroll();
             } 
         })
@@ -77,60 +78,65 @@ export default class Index extends Component
 
     render() {
         return (
-            <Form loading={this.state.loading}>
-                <div className="col-md-12">
-                    <DataTable titulo={<span><i className="fas fa-list"></i> Lista de Trabajadores</span>}
-                        headers={["#ID", "Apellidos y Nombres", "N° Documento", "N° Cussp"]}
-                        data={this.state.works}
-                        index={[
-                            { key: "person.id", type: "text" },
-                            { key: "person.fullname", type: "text" },
-                            { key: "person.document_number", type: "icon" },
-                            { key: "numero_de_cussp", type: "icon", bg: 'dark' }
-                        ]}
-                        options={[
-                            { key: "info", icon: "fas fa-info" }
-                        ]}
-                        getOption={this.handleOption}
-                        onScroll={this.handleActionScroll}
-                    >
-                        <div className="col-md-12 mt-2">
-                            <div className="row">
-                                <div className="col-md-7">
-                                    <Form.Field>
-                                        <input type="text" 
-                                            placeholder="Buscar trabajador por: Apellidos y Nombres"
-                                            name="query_search"
-                                            value={this.state.query_search}
-                                            onChange={(e) => this.handleInput(e.target)}
-                                        />
-                                    </Form.Field>
-                                </div>
+            <div className="col-md-12">
+                <Body>
+                    <Form loading={this.state.loading}>
+                    <div className="col-md-12">
+                        <DataTable titulo={<span><i className="fas fa-list"></i> Lista de Trabajadores</span>}
+                            headers={["#ID", "Apellidos y Nombres", "N° Documento", "N° Cussp"]}
+                            data={this.state.works}
+                            index={[
+                                { key: "person.id", type: "text" },
+                                { key: "person.fullname", type: "text" },
+                                { key: "person.document_number", type: "icon" },
+                                { key: "numero_de_cussp", type: "icon", bg: 'dark' }
+                            ]}
+                            options={[
+                                { key: "info", icon: "fas fa-info" }
+                            ]}
+                            getOption={this.handleOption}
+                            onScroll={this.handleActionScroll}
+                        >
+                            <div className="col-md-12 mt-2">
+                                <div className="row">
+                                    <div className="col-md-7 mb-1 col-10">
+                                        <Form.Field>
+                                            <input type="text" 
+                                                placeholder="Buscar trabajador por: Apellidos y Nombres"
+                                                name="query_search"
+                                                value={this.state.query_search}
+                                                onChange={(e) => this.handleInput(e.target)}
+                                            />
+                                        </Form.Field>
+                                    </div>
 
-                                <div className="col-xs">
-                                    <Button color="blue"
-                                        onClick={ async (e) => Router.push({ pathname: Router.pathname, query: { query_search: this.state.query_search } })}
-                                    >
-                                        <i className="fas fa-search"></i> Buscar
-                                    </Button>
+                                    <div className="col-xs col-2">
+                                        <Button color="blue"
+                                            fluid
+                                            onClick={ async (e) => Router.push({ pathname: Router.pathname, query: { query_search: this.state.query_search } })}
+                                        >
+                                            <i className="fas fa-search"></i> {responsive.md < this.props.screenX ? 'Buscar' : ''}
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="card-body mt-4">
-                            <h4>Resultados: {this.state.works.length} de {this.state.total}</h4>
-                        </div>
+                            <div className="card-body mt-4">
+                                <h4>Resultados: {this.state.works.length} de {this.state.total}</h4>
+                            </div>
 
-                    </DataTable>
-                </div>
+                        </DataTable>
+                    </div>
 
-                <BtnFloat
-                    disabled={this.state.loading}
-                    onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })}
-                >
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
-            </Form>
+                    <BtnFloat
+                        disabled={this.state.loading}
+                        onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })}
+                    >
+                        <i className="fas fa-plus"></i>
+                    </BtnFloat>
+                </Form>
+                </Body>
+            </div>
         )
     }
 

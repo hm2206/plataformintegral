@@ -3,6 +3,7 @@ import { unujobs } from '../../services/apis';
 import { Button, Form, Select, Icon, Grid } from 'semantic-ui-react';
 import { parseOptions } from '../../services/utils';
 import Swal from 'sweetalert2';
+import { responsive } from '../../services/storage.json';
 
 
 export default class Remuneracion extends Component
@@ -113,7 +114,7 @@ export default class Remuneracion extends Component
 
                 <div className="col-md-12">
                     <div className="row">
-                        <div className="col-md-4">
+                        <div className="col-md-4 mb-1 col-12 col-sm-12 col-lg-4">
                             <Select
                                 fluid
                                 placeholder="Select. Tipo Detalle"
@@ -125,7 +126,7 @@ export default class Remuneracion extends Component
                             />
                         </div>
 
-                        <div className="col-md-3">
+                        <div className="col-md-4 mb-1 col-10 col-lg-3 col-sm-9">
                             <Form.Field>
                                 <input type="number"
                                     name="monto"
@@ -138,12 +139,13 @@ export default class Remuneracion extends Component
                             </Form.Field>
                         </div>
 
-                        <div className="col-xs">
+                        <div className="col-xs col-md-4 col-2 col-sm-3 col-lg-3">
                             <Button color="green"
                                 disabled={!type_detalle_id}
                                 onClick={this.create}    
+                                fluid
                             >
-                                <Icon name="plus"/> Agregar
+                                <i className="fas fa-plus"></i> {this.props.screenX > responsive.md ? 'Agregar' : ''}
                             </Button>
                         </div>
                     </div>

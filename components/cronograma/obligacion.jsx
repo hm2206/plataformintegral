@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { unujobs } from '../../services/apis';
 import { Button, Form, Select, Icon, Checkbox } from 'semantic-ui-react';
-import { parseOptions } from '../../services/utils';
 import Show from '../show';
 import storage from '../../services/storage.json';
 import Swal from 'sweetalert2';
+import { responsive } from '../../services/storage.json';
 
 
 export default class Obligacion extends Component
@@ -152,7 +152,7 @@ export default class Obligacion extends Component
 
                 <div className="col-md-12">
                     <div className="row">
-                        <div className="col-md-3 mb-2">
+                        <div className="col-md-4 col-lg-3 mb-2">
                             <Select
                                 fluid
                                 placeholder="Select. Tip. Documento"
@@ -164,7 +164,7 @@ export default class Obligacion extends Component
                             />
                         </div>
 
-                        <div className="col-md-3 mb-2">
+                        <div className="col-md-4 col-lg-3 mb-2">
                             <Form.Field>
                                 <input type="text" 
                                     name="numero_de_documento"
@@ -176,7 +176,7 @@ export default class Obligacion extends Component
                             </Form.Field>
                         </div>
 
-                        <div className="col-md-4 mb-2">
+                        <div className="col-md-4 col-lg-3 mb-2">
                             <Form.Field>
                                 <input type="text" 
                                     placeholder="Beneficiario"
@@ -188,17 +188,7 @@ export default class Obligacion extends Component
                             </Form.Field>
                         </div>
 
-                        <div className="col-md-2 mb-2">
-                            <Button color="green"
-                                fluid
-                                disabled={!this.permisionAdd()}  
-                                onClick={this.create}  
-                            >
-                                <Icon name="plus"/> Agregar
-                            </Button>
-                        </div>
-
-                        <div className="col-md-3 mb-2">
+                        <div className="col-md-4 col-lg-3 mb-2">
                             <Form.Field>
                                 <input type="text" 
                                     placeholder="Numero de Cuenta"
@@ -210,7 +200,7 @@ export default class Obligacion extends Component
                             </Form.Field>
                         </div>
 
-                        <div className="col-md-2 mb-2">
+                        <div className="col-md-4 col-lg-3 mb-2">
                             <Form.Field>
                                 <Select
                                     fluid
@@ -228,7 +218,7 @@ export default class Obligacion extends Component
                         </div>
 
                         <Show condicion={form.is_porcentaje}>
-                            <div className="col-md-3 mb-2">
+                            <div className="col-md-4 col-lg-3 mb-2">
                                 <Form.Field>
                                     <input type="number" 
                                         placeholder="Porcentaje"
@@ -244,7 +234,7 @@ export default class Obligacion extends Component
                         </Show>
 
                         <Show condicion={!form.is_porcentaje}>
-                            <div className="col-md-3 mb-2">
+                            <div className="col-md-4 col-lg-3 mb-2">
                                 <Form.Field>
                                     <input type="number" 
                                         placeholder="Monto"
@@ -258,8 +248,11 @@ export default class Obligacion extends Component
                             </div>
                         </Show>
 
-                        <div className="col-md-2 mb-2">
+                        <div className="col-md-4 col-lg-2 mb-2">
                             <Form.Field>
+                                <Show condicion={responsive.sm >= this.props.screenX}>
+                                    Fecha de incio
+                                </Show>
                                 <input type="date" 
                                     title="Fecha de inicio"
                                     placeholder="Fecha de inicio"
@@ -271,8 +264,11 @@ export default class Obligacion extends Component
                             </Form.Field>
                         </div>
 
-                        <div className="col-md-2 mb-2">
+                        <div className="col-md-4 col-lg-2 mb-2">
                             <Form.Field>
+                                <Show condicion={responsive.sm >= this.props.screenX}>
+                                    Fecha de término
+                                </Show>
                                 <input type="date" 
                                     title="Fecha de término"
                                     placeholder="Fecha de término"
@@ -282,6 +278,16 @@ export default class Obligacion extends Component
                                     onChange={({ target }) => this.handleInput(target)}
                                 />
                             </Form.Field>
+                        </div>
+
+                        <div className="col-md-4 col-lg-2 mb-2">
+                            <Button color="green"
+                                fluid
+                                disabled={!this.permisionAdd()}  
+                                onClick={this.create}  
+                            >
+                                <Icon name="plus"/> Agregar
+                            </Button>
                         </div>
                     </div>
                 </div>

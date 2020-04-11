@@ -18,7 +18,7 @@ export default class TabCronograma extends Component
 
     render() {
 
-        let { loading, cancel, edit, send, total, ubigeos, bancos } = this.props;
+        let { loading, cancel, edit, send, total, ubigeos, bancos, screenX } = this.props;
 
         let styles = {
             border: '0px'
@@ -39,6 +39,7 @@ export default class TabCronograma extends Component
                             cancel={cancel}
                             total={total}
                             updatingHistorial={this.props.updatingHistorial}
+                            screenX={screenX}
                         />
                     </Tab.Pane> 
             },
@@ -59,6 +60,7 @@ export default class TabCronograma extends Component
                             setSend={this.props.setSend}
                             setCancel={this.props.setCancel}
                             updatingHistorial={this.props.updatingHistorial}
+                            screenX={screenX}
                         /> 
                     </Tab.Pane>
                 )
@@ -81,6 +83,7 @@ export default class TabCronograma extends Component
                             setSend={this.props.setSend}
                             setCancel={this.props.setCancel}
                             updatingHistorial={this.props.updatingHistorial}
+                            screenX={screenX}
                         /> 
                     </Tab.Pane>
                 )
@@ -102,6 +105,7 @@ export default class TabCronograma extends Component
                             setLoading={this.props.setLoading}
                             setSend={this.props.setSend}
                             updatingHistorial={this.props.updatingHistorial}
+                            screenX={screenX}
                         /> 
                     </Tab.Pane>
                 )
@@ -121,6 +125,7 @@ export default class TabCronograma extends Component
                             setLoading={this.props.setLoading}
                             setSend={this.props.setSend}
                             updatingHistorial={this.props.updatingHistorial}
+                            screenX={screenX}
                         /> 
                     </Tab.Pane>
                 )
@@ -141,6 +146,7 @@ export default class TabCronograma extends Component
                             setLoading={this.props.setLoading}
                             setSend={this.props.setSend}
                             updatingHistorial={this.props.updatingHistorial}
+                            screenX={screenX}
                         /> 
                     </Tab.Pane>
                 )
@@ -161,6 +167,7 @@ export default class TabCronograma extends Component
                             setLoading={this.props.setLoading}
                             setSend={this.props.setSend}
                             updatingHistorial={this.props.updatingHistorial}
+                            screenX={screenX}
                         /> 
                     </Tab.Pane>
                 )
@@ -182,13 +189,14 @@ export default class TabCronograma extends Component
                             setLoading={this.props.setLoading}
                             setSend={this.props.setSend}
                             updatingHistorial={this.props.updatingHistorial}
+                            screenX={screenX}
                         /> 
                     </Tab.Pane>
                 )
             }
         ];
 
-        return <Tab panes={panes} menu={this.props.menu} className="w-100 mt-3"/>
+        return <Tab panes={panes} menu={this.props.menu} activeIndex={this.props.activeIndex} onTabChange={this.props.onTabChange} className="w-100 mt-3"/>
 
     }
 

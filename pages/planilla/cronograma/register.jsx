@@ -6,6 +6,7 @@ import { parseOptions } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
+import { Body } from '../../../components/Utils';
 
 export default class RegisterCronograma extends Component
 {
@@ -91,148 +92,149 @@ export default class RegisterCronograma extends Component
 
         return (
             <div className="col-md-12">
+                <Body>
+                    <Button onClick={this.handleBack}
+                        disabled={this.state.loading}
+                    >
+                        <i className="fas fa-arrow-left"></i> Atrás
+                    </Button>
+                    
+                    <div className="card- mt-3">
+                        <div className="card-header">
+                            <i className="fas fa-plus ml-2"></i> Registrar Nuevo Cronograma
+                        </div>
+                        <div className="card-body">
+                            <div className="row justify-content-center">
+                                <Form loading={this.state.loading} action="#" className="col-md-10" onSubmit={(e) => e.preventDefault()}>
+                                    <div className="row justify-content-center">
+                                            <Form.Field className="col-md-6">
+                                                <label htmlFor="" className="text-left">Planilla</label>
+                                                <Select placeholder="Select. Planilla"
+                                                    options={parseOptions(this.state.planillas, ["", "", "Select. Planilla"], ["id", "id", "nombre"])}
+                                                    name="planilla_id"
+                                                    value={this.state.planilla_id}
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                />
+                                            </Form.Field>
 
-                <Button onClick={this.handleBack}
-                    disabled={this.state.loading}
-                >
-                    <i className="fas fa-arrow-left"></i> Atrás
-                </Button>
-                
-                <div className="card- mt-3">
-                    <div className="card-header">
-                        <i className="fas fa-plus ml-2"></i> Registrar Nuevo Cronograma
-                    </div>
-                    <div className="card-body">
-                        <div className="row justify-content-center">
-                            <Form loading={this.state.loading} action="#" className="col-md-10" onSubmit={(e) => e.preventDefault()}>
-                                <div className="row justify-content-center">
-                                        <Form.Field className="col-md-6">
-                                            <label htmlFor="" className="text-left">Planilla</label>
-                                            <Select placeholder="Select. Planilla"
-                                                options={parseOptions(this.state.planillas, ["", "", "Select. Planilla"], ["id", "id", "nombre"])}
-                                                name="planilla_id"
-                                                value={this.state.planilla_id}
-                                                onChange={(e, obj) => this.handleInput(obj)}
+                                            <Form.Field className="col-md-6">
+                                                <Form.Input
+                                                    className="text-left"
+                                                    error={null}
+                                                    fluid
+                                                    label="Año"
+                                                    name="year"
+                                                    type="number"
+                                                    value={this.state.year}  
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                    placeholder='Ingrese el año'
+                                                    disabled
+                                                />
+                                            </Form.Field>
+
+                                            <Form.Field className="col-md-6">
+                                                <Form.Input
+                                                    className="text-left"
+                                                    error={null}
+                                                    type="number"
+                                                    fluid
+                                                    label="Mes"
+                                                    name="mes"
+                                                    value={this.state.mes}  
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                    placeholder='Ingrese el mes'
+                                                />
+                                            </Form.Field>
+
+                                            <Form.Field className="col-md-6">
+                                                <Form.Input
+                                                    className="text-left"
+                                                    error={null}
+                                                    type="number"
+                                                    fluid
+                                                    label="Dias"
+                                                    name="dias"
+                                                    value={this.state.dias}  
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                    placeholder='Ingrese los dias'
+                                                    disabled={!this.state.adicional}
+                                                />
+                                            </Form.Field>
+
+                                        <Show condicion={this.state.adicional == 0}>
+                                            <Form.Field className="text-left col-md-6">
+                                                <label htmlFor="">Modo de creación</label>
+                                                <Select
+                                                    options={this.state.types}
+                                                    value={this.state.type_id}
+                                                    name="type_id"
+                                                    fluid
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                />
+                                            </Form.Field>
+                                        </Show>
+
+                                        <Show condicion={this.state.mes != 12}>
+                                            <Form.Field className="col-md-6">
+                                                <label htmlFor="">¿Es una planilla adicional?</label>
+                                                <Select
+                                                    name="adicional"
+                                                    value={this.state.adicional}
+                                                    placeholder="Select. Planilla Adicional"
+                                                    options={[
+                                                        {key: "si", value: 1, text: "Si"},
+                                                        {key: "no", value: 0, text: "No"}
+                                                    ]}
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                />
+                                            </Form.Field>
+                                        </Show>
+
+                                        <Show condicion={this.state.mes == 12}>
+                                            <Form.Field className="col-md-6">
+                                                <label htmlFor="">¿Es una planilla remanente?</label>
+                                                <Select
+                                                    name="remanente"
+                                                    value={this.state.remanente}
+                                                    placeholder="Select. Planilla Remanente"
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                    options={[
+                                                        {key: "si", value: 1, text: "Si"},
+                                                        {key: "no", value: 0, text: "No"}
+                                                    ]}
+                                                />
+                                            </Form.Field>
+                                        </Show>
+
+                                    
+                                        <Form.Field className="col-md-12">
+                                            <label htmlFor="" className="text-left">Observación</label>
+                                            <textarea name="observacion"
+                                                rows="6"
+                                                value={this.state.observacion}
+                                                placeholder="Ingrese una observación para el cronograma"
+                                                onChange={({ target }) => this.handleInput(target)}
                                             />
                                         </Form.Field>
 
-                                        <Form.Field className="col-md-6">
-                                            <Form.Input
-                                                className="text-left"
-                                                error={null}
-                                                fluid
-                                                label="Año"
-                                                name="year"
-                                                type="number"
-                                                value={this.state.year}  
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                                placeholder='Ingrese el año'
-                                                disabled
-                                            />
-                                        </Form.Field>
-
-                                        <Form.Field className="col-md-6">
-                                            <Form.Input
-                                                className="text-left"
-                                                error={null}
-                                                type="number"
-                                                fluid
-                                                label="Mes"
-                                                name="mes"
-                                                value={this.state.mes}  
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                                placeholder='Ingrese el mes'
-                                            />
-                                        </Form.Field>
-
-                                        <Form.Field className="col-md-6">
-                                            <Form.Input
-                                                className="text-left"
-                                                error={null}
-                                                type="number"
-                                                fluid
-                                                label="Dias"
-                                                name="dias"
-                                                value={this.state.dias}  
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                                placeholder='Ingrese los dias'
-                                                disabled={!this.state.adicional}
-                                            />
-                                        </Form.Field>
-
-                                    <Show condicion={this.state.adicional == 0}>
-                                        <Form.Field className="text-left col-md-6">
-                                            <label htmlFor="">Modo de creación</label>
-                                            <Select
-                                                options={this.state.types}
-                                                value={this.state.type_id}
-                                                name="type_id"
-                                                fluid
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                            />
-                                        </Form.Field>
-                                    </Show>
-
-                                    <Show condicion={this.state.mes != 12}>
-                                        <Form.Field className="col-md-6">
-                                            <label htmlFor="">¿Es una planilla adicional?</label>
-                                            <Select
-                                                name="adicional"
-                                                value={this.state.adicional}
-                                                placeholder="Select. Planilla Adicional"
-                                                options={[
-                                                    {key: "si", value: 1, text: "Si"},
-                                                    {key: "no", value: 0, text: "No"}
-                                                ]}
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                            />
-                                        </Form.Field>
-                                    </Show>
-
-                                    <Show condicion={this.state.mes == 12}>
-                                        <Form.Field className="col-md-6">
-                                            <label htmlFor="">¿Es una planilla remanente?</label>
-                                            <Select
-                                                name="remanente"
-                                                value={this.state.remanente}
-                                                placeholder="Select. Planilla Remanente"
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                                options={[
-                                                    {key: "si", value: 1, text: "Si"},
-                                                    {key: "no", value: 0, text: "No"}
-                                                ]}
-                                            />
-                                        </Form.Field>
-                                    </Show>
+                                        <Divider/>
 
                                 
-                                    <Form.Field className="col-md-12">
-                                        <label htmlFor="" className="text-left">Observación</label>
-                                        <textarea name="observacion"
-                                            rows="6"
-                                            value={this.state.observacion}
-                                            placeholder="Ingrese una observación para el cronograma"
-                                            onChange={({ target }) => this.handleInput(target)}
-                                        />
-                                    </Form.Field>
-
-                                    <Divider/>
-
-                            
-                                    <div className="col-md-12 text-right">
-                                        <Button color="teal"
-                                            disabled={!this.readySend()}
-                                            onClick={this.saveAndContinue}
-                                            loading={this.state.loading}
-                                        >
-                                            <Icon name="save"/> Guardar y Continuar
-                                        </Button>
+                                        <div className="col-md-12 text-right">
+                                            <Button color="teal"
+                                                disabled={!this.readySend()}
+                                                onClick={this.saveAndContinue}
+                                                loading={this.state.loading}
+                                            >
+                                                <Icon name="save"/> Guardar y Continuar
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
-                            </Form>
+                                </Form>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </Body>
             </div>
         )
     }

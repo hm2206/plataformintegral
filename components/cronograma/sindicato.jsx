@@ -4,6 +4,7 @@ import { Button, Form, Select, Icon } from 'semantic-ui-react';
 import { parseOptions } from '../../services/utils';
 import Swal from 'sweetalert2';
 import Show from '../show';
+import { responsive } from '../../services/storage.json';
 
 
 export default class Sindicato extends Component
@@ -96,7 +97,7 @@ export default class Sindicato extends Component
 
                 <div className="col-md-12">
                     <div className="row">
-                        <div className="col-md-4">
+                        <div className="col-md-8 col-lg-5 col-10 mb-1">
                             <Select
                                 fluid
                                 placeholder="Select. Sindicato"
@@ -107,12 +108,13 @@ export default class Sindicato extends Component
                                 disabled={!this.props.edit}
                             />
                         </div>
-                        <div className="col-xs">
+                        <div className="col-xs col-md-4 col-lg-2 col-2">
                             <Button color="green"
                                 disabled={!sindicato_id}   
                                 onClick={this.create} 
+                                fluid
                             >
-                                <Icon name="plus"/> Agregar
+                                <i className="fas fa-plus"></i> {responsive.md < this.props.screenX ? ' Agregar' : ''}
                             </Button>
                         </div>
                     </div>
@@ -123,9 +125,9 @@ export default class Sindicato extends Component
                 </div>
 
                 {sindicatos.map((obj, index) => 
-                <div className="col-md-4 mb-2" key={`sindicato-${obj.id}`}>
+                <div className="col-md-12 col-lg-4 mb-2 col-12" key={`sindicato-${obj.id}`}>
                     <div className="row">
-                            <div className="col-md-10">
+                            <div className="col-md-9 col-lg-10 col-10">
                                 <Button fluid>
                                     {obj.type_sindicato.nombre} 
                                     <Show condicion={obj.porcentaje > 0}>
@@ -136,7 +138,7 @@ export default class Sindicato extends Component
                                     </Show>
                                 </Button>
                             </div>    
-                            <div className="col-md-2">
+                            <div className="col-md-3 col-lg-2 col-2">
                                 <Button color="red" fluid
                                     disabled={!this.props.edit}
                                     onClick={(e) => this.delete(obj.id)}

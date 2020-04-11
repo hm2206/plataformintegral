@@ -6,7 +6,7 @@ const Content = props => (
     <div className="app-main">
       <div className="wrapper">
         <div className="page mb-5">
-          <div className="page-inner- mt-4">{props.children}</div>
+          <div className={`page-inner- row`}>{props.children}</div>
         </div>
       </div>
     </div>
@@ -16,8 +16,7 @@ const Content = props => (
 const Body = props => (
   <Fragment>
     {/* <div className="page-header page-header-light"></div> */}
-    <div className="content">{props.children}</div>
-    <div className="navbar navbar-expand-lg navbar-light"></div>
+    <div className="content mt-4 ml-3 mr-3">{props.children}</div>
   </Fragment>
 );
 

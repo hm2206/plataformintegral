@@ -284,6 +284,7 @@ export default class DataTable extends Component {
                                     {attr.type == "text" ? this.verifyObjects(obj, attr) : null}
                                     {attr.type == "switch" ? <span className={`badge badge-${this.verifyObjects(obj, attr) ? `${attr.bg_true ? attr.bg_true : 'success'}` : `${attr.bg_false ? attr.bg_false : 'danger'}`}`}>{this.verifyObjects(obj, attr) ? attr.is_true : attr.is_false}</span> : null}
                                     {attr.type == "timestamp" ? new Date(this.verifyObjects(obj, attr)).toDateString() : null}
+                                    {attr.type == "date" ? new Date(this.verifyObjects(obj, attr)).toLocaleDateString() : null}
                                     {attr.children && attr.children.length > 0 && attr.children.map(chi => 
                                         <span className="row align-items-center" key={`children-${chi}`}>
                                           {this.verifyObjects(obj, chi) ? 
