@@ -99,6 +99,7 @@ const BtnToolBasic = props => (
 const BtnFloat = ({ theme, children, onClick, disabled = false }) => (
   <button
     type="button"
+    style={{ overflow: 'hidden' }}
     onClick={onClick}
     className={`btn ${theme ? theme : "btn-success"} btn-lg btn-floated`}
     disabled={disabled}

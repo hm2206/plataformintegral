@@ -1,5 +1,4 @@
 import React,  { Component, Fragment } from 'react';
-import { Button } from 'semantic-ui-react';
 import Router from 'next/router';
 import Cover from '../../../components/trabajador/cover';
 import NavCover from '../../../components/trabajador/navCover';
@@ -9,6 +8,7 @@ import { authentication } from '../../../services/apis';
 import Show from '../../../components/show';
 import General from '../../../components/trabajador/general';
 import Swal from 'sweetalert2';
+import { backUrl } from '../../../services/utils'
 
 
 class TrabajadorID extends Component
@@ -36,15 +36,8 @@ class TrabajadorID extends Component
 
         return <Fragment>
             <div className="col-md-12">
-                <Button
-                    onClick={(e) => Router.push({ pathname: "/escalafon/trabajador" })}
-                >
-                    <i className="fas fa-arrow-left"></i> Atras
-                </Button>
-            </div>
-
-            <div className="col-md-12 mt-3">
                 <Cover
+                    back={backUrl(this.props.pathname)}
                     titulo={work && work.person && work.person.fullname}
                     email={work && work.person && work.person.email_contact}
                     image={work && work.person && work.person.image ? `${authentication.path}/${work.person.image}` : '/img/perfil.jpg'}
@@ -61,11 +54,13 @@ class TrabajadorID extends Component
                     getOption={this.handleOption}
                 />
                 {/* Contenidos */}
-                <div className="col-md-12 mt-5">
-                    <Show condicion={query.method == 'general'}>
-                        <General work={work} person={work.person}/>
-                    </Show>
-                </div>
+                <Show condicion={typeof work == 'object' && Object.values(work).length}>
+                    <div className="col-md-12 mt-5">
+                        <Show condicion={query.method == 'general'}>
+                            <General work={work} person={work.person}/>
+                        </Show>
+                    </div>
+                </Show>
             </div>
         </Fragment>
     }

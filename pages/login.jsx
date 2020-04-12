@@ -3,6 +3,8 @@ import Swal from 'sweetalert2';
 import { GUEST } from '../services/auth';
 import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
+import { BtnFloat } from '../components/Utils';
+import Show from '../components/show';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { app } from '../env.json';
@@ -12,7 +14,7 @@ class Login extends Component
 {
 
     static getInitialProps = async (ctx) => {
-        let { query, pathname } = ctx.req;
+        let { query, pathname } = ctx;
         // verificar guest
         await GUEST(ctx)
         // response
@@ -24,9 +26,22 @@ class Login extends Component
         password: "",
         loading: false,
         errors: {},
-        progress: 0
+        progress: 0,
+        remember: null
     };
 
+    componentDidMount = () => {
+        this.setting();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.setting();
+    }
+
+    setting = () => {
+        let cache = Cookies.getJSON('old_user');
+        this.setState({ remember: cache });
+    }
 
     handleInput = (e) => {
         let { name, value } = e.target;
@@ -60,10 +75,10 @@ class Login extends Component
 
     render() {
 
-        let { errors, email, password, loading } = this.state;
+        let { errors, email, password, loading, remember } = this.state;
 
         return (
-            <div className="auth">
+            <div className="auth" style={{ minHeight: "100vh" }}>
                 <header
                     id="auth-header"
                     className={`auth-header bg-${app.theme}`}
@@ -154,6 +169,15 @@ class Login extends Component
                     © 2019 Todos Los Derechos Reservados <a href="#">Privacidad</a> y
                     <a href="#">Terminos</a>
                 </footer>
+
+                <Show condicion={this.state.remember}>
+                    <BtnFloat theme="btn-secundary" disabled={loading}>
+                        <img src={remember && remember.person && remember.person.image ? `${authentication.path}/${remember.person.image}` : '/img/perfil.jpg'} 
+                            alt={remember && remember.username}
+                            style={{ "position": "absolute", top: "0px", left: "0px", width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                    </BtnFloat>
+                </Show>
             </div>
         )
     }

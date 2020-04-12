@@ -12,11 +12,6 @@ export const findWork = (ctx) => {
         let Authorization = `Bearer ${NextCookies(ctx)['auth_token']}`;
         let id = ctx.query.id ? await atob(ctx.query.id) : "error";
         await unujobs.get(`work/${id}`, { headers: { Authorization } })
-        .then(res => dispatch({ type: workActionsTypes.FIND_WORK, payload: res.data }))
-        .catch(err => {
-            ctx.res.writeHead(301, { Location: "/error" });
-            ctx.res.end();
-            ctx.res.finished = true;
-        });
+        .then(res => dispatch({ type: workActionsTypes.FIND_WORK, payload: res.data }));
     }
 }

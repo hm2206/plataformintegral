@@ -2,6 +2,7 @@ import React, { Fragment } from 'react'
 import Head from 'next/head'
 import App from 'next/app';
 import Sidebar from '../components/sidebar';
+import Router from 'next/router';
 import Navbar from '../components/navbar';
 import { Content, Body } from '../components/Utils';
 import { AUTH } from '../services/auth';
@@ -26,7 +27,16 @@ class MyApp extends App {
       } else {
         await ctx.store.dispatch({ type: authsActionsTypes.LOGOUT });
       }
-      pageProps = await Component.getInitialProps(ctx)
+      // props
+     try {
+        pageProps = await Component.getInitialProps(ctx)
+     } catch (error) {
+        if (ctx && ctx.res) {
+          ctx.res.writeHead(301, { location: '/404' });
+          ctx.res.end();
+          ctx.finished = true;
+        }
+     }
     }
     // page
     return { pageProps, store, auth_token: auth };
@@ -48,6 +58,10 @@ class MyApp extends App {
 
   componentWillUnmount = () => {
     window.removeEventListener('resize', this.handleScreen);
+  }
+
+  componentDidCatch = (error, info) => {
+    Router.push({ pathname: "/error", query: { error: info }});
   }
 
   handleScreen = () => {

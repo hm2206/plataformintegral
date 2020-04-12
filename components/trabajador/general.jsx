@@ -112,7 +112,7 @@ export default class General extends Component
                             <b><i className="fas fa-place"></i> Ubicación</b>
                             <hr/>
                         </div>
-                        <iframe src={`https://www.google.com/maps/embed?pb=!1m12!1m8!1m3!1d63151.44781604753!2d-74.58435273334369!3d-8.405050255752414!3m2!1i1024!2i768!4f13.1!2m1!1s${person.address}!5e0!3m2!1ses!2spe!4v1586299621785!5m2!1ses!2spe`} 
+                        <iframe src={`https://www.google.com/maps/embed?pb=!1m12!1m8!1m3!1d63151.44781604753!2d-74.58435273334369!3d-8.405050255752414!3m2!1i1024!2i768!4f13.1!2m1!1s${person && person.address}!5e0!3m2!1ses!2spe!4v1586299621785!5m2!1ses!2spe`} 
                             frameborder="0" 
                             style={{ border: "0px", width: "100%", height: "200px" }}
                             aria-hidden="false" 

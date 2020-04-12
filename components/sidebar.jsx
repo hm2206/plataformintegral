@@ -4,10 +4,8 @@ import { authentication } from '../services/apis';
 import Router from 'next/router';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
-import { app } from '../env.json';
 import { version } from '../package.json';
-import Swal from 'sweetalert2'
-import Cookies from 'js-cookie';
+import Link from 'next/link';
 
 
 class Sidebar extends Component {
@@ -39,21 +37,6 @@ class Sidebar extends Component {
     }).catch(err => console.log(err));
   }
 
-  async logout(e) {
-    e.preventDefault();
-    await authentication.post('logout')
-    .then(async res => {
-      let { success, message } = res.data;
-      if (success) {
-        Cookies.remove('auth_token');
-        await Swal.fire({ icon: 'success', text: message });
-        history.go('/login');
-      } else {
-        Swal.fire({ icon: 'error', text: message });
-      }
-    }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
-  }
-
   render() {
 
     let { auth } = this.state;
@@ -82,11 +65,24 @@ class Sidebar extends Component {
               </button>
               <div id="dropdown-aside" className="dropdown-aside collapse">
                 <div className="pb-3">
-                  <a className="dropdown-item" href="/">
-                    <span className="dropdown-icon oi oi-person"></span> Perfil
+                  <a className="dropdown-item" href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      Router.push({ pathname: '/notify', query: { tab: 'all_notify' } });
+                    }}
+                  >
+                    <span className="fas fa-bell"></span> Notificaciones
                   </a>{" "}
-                  <a className="dropdown-item" href="#" onClick={this.logout}>
-                    <span className="dropdown-icon oi oi-account-logout"></span>{" "}
+                  <a className="dropdown-item" href="/">
+                    <span className="fas fa-user"></span> Perfil
+                  </a>{" "}
+                  <a className="dropdown-item" href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      Router.push('/logout');
+                    }}
+                  >
+                    <span className="fas fa-sign"></span>{" "}
                     Cerrar Sesión
                   </a>
                 </div>
@@ -96,17 +92,24 @@ class Sidebar extends Component {
               <nav id="stacked-menu" className="stacked-menu">
                 <ul className="menu">
                   <li className={`menu-item ${this.state.pathname == '/' ? 'has-active' : ''}`}>
-                    <a href="/" className="menu-link">
+                    <a className="menu-link"
+                      href="/"
+                    >
                       <span className="menu-icon fas fa-user"></span>{" "}
                       <span className="menu-text">Perfil</span>
                     </a>
                   </li>
                   <Navigation options={this.state.options}/>
                   <li className={`menu-item ${this.state.pathname == '/help' ? 'has-active' : ''}`}>
-                    <a href="/help" className="menu-link">
-                      <b className="menu-icon fas fa-comment"></b>{" "}
-                      <b className="menu-text">Help</b>
-                    </a>
+                    {/* <Link> */}
+                      <a href="/help#menu" style={{ cursor: 'pointer' }}
+                        className="menu-link"
+                        onClick={(e) => Router.push('/help')}
+                      >
+                        <b className="menu-icon fas fa-info-circle"></b>{" "}
+                        <b className="menu-text">Help</b>
+                      </a>
+                    {/* </Link> */}
                   </li>
                 </ul>
               </nav>

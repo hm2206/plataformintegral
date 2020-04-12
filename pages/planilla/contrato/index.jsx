@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { Button, Form, Select } from 'semantic-ui-react';
 import { allInfo } from '../../../storage/actions/infoActions';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -168,7 +168,7 @@ export default class CreateInfo extends Component
 
                         <BtnFloat
                             disabled={this.state.loading}
-                            onClick={(e) => Router.push({ pathname: `${Router.pathname}/register` })}
+                            onClick={(e) => Router.push({ pathname: `${Router.pathname}/preparate` })}
                         >
                             <i className="fas fa-plus"></i>
                         </BtnFloat>

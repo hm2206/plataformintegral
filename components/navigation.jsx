@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import SkullNavigation from './loaders/skullNavigation';
 import Router from 'next/router';
-import Link from 'next/link';
 
 
 const NavLink = ({ children, active = false, url = '/', onClick }) => {

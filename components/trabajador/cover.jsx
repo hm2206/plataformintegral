@@ -1,11 +1,19 @@
 import React, { Component } from 'react';
 import Show from '../../components/show';
+import Router from 'next/router';
 
 export default class Cover extends Component {
 
     render() {
         return (
             <div class="page-cover">
+                <Show condicion={this.props.back}>
+                    <a href="#"
+                        onClick={(e) => Router.push({ pathname: this.props.back })}
+                    >
+                        <i className="fas fa-arrow-left"></i>
+                    </a>
+                </Show>
                 <div class="text-center">
                     <a href={this.props.image} target="_blank" class="user-avatar user-avatar-xl"
                         style={{ width: "150px", height: "150px", borderRadius: "50%" }}

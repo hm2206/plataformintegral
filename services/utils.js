@@ -32,3 +32,17 @@ export const parseOptions = (
         return [];
     }
 }
+
+
+export const parseUrl = (path = "", replace) => {
+    let newPath = path.split('/');
+    newPath.splice(-1, 1);
+    newPath.push(replace);
+    return newPath.join("/");
+}
+
+export const backUrl = (path = "") => {
+    let newPath = path.split('/');
+    newPath.splice(-1, 1);
+    return newPath.join("/");
+}
