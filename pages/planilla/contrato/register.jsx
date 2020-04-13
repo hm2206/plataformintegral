@@ -11,6 +11,8 @@ import { parseUrl } from '../../../services/utils';
 import { findWork } from '../../../storage/actions/workActions';
 import { parseOptions } from '../../../services/utils';
 import { pap } from '../../../services/storage.json';
+import Swal from 'sweetalert2';
+import btoa from 'btoa';
 
 
 export default class Register extends Component
@@ -32,13 +34,15 @@ export default class Register extends Component
         cargos: [],
         type_categorias: [],
         form: {
+            is_aportacion: "1",
             planilla_id: "",
             meta_id: "",
             dependencia_id: "",
             pap: "",
             cargo_id: "",
             type_categoria_id: ""
-        }
+        },
+        errors: {}
     }
 
     componentDidMount = async () => {
@@ -57,8 +61,16 @@ export default class Register extends Component
 
     handleInput = async ({ name, value }) => {
         let newForm = Object.assign({}, this.state.form);
+        let newErrors = Object.assign({}, this.state.errors);
+        newErrors[name] = [];
         newForm[name] = value;
-        this.setState({ form: newForm });
+        this.setState({ form: newForm, errors: newErrors });
+    }
+
+    handleFile = async ({ name, files }) => {
+        if (files[0]) {
+            this.handleInput({ name, value: files[0] });
+        }
     }
 
     getPlanilla = async () => {
@@ -102,9 +114,37 @@ export default class Register extends Component
         this.setState({ loading: false });
     }
 
+    create = async () => {
+        this.setState({ loading: true });
+        let newForm = new FormData;
+        newForm.append('work_id', this.props.work.id);
+        for(let key in this.state.form) {
+            newForm.append(key, this.state.form[key]);
+        }
+        await unujobs.post('info', newForm)
+        .then(async res => {
+            let { success, message, body } = res.data;
+            let icon = success ? 'success' : 'error';
+            await Swal.fire({ icon, text: message });
+            if (success) {
+                let { push, pathname, query } = Router;
+                let id = btoa(body.id);
+                await push({ pathname: parseUrl(pathname, 'pay'), query: { id } });
+            }
+        }).catch(err => {
+            let { status, data } = err.response;
+            if (status == '422') {
+                this.setState({ errors: data.errors });
+            }
+        });
+        // leave loading
+        this.setState({ loading: false });
+    }
+
     render() {
 
         let { query, work } = this.props;
+        let { errors } = this.state;
 
         return (
             <Fragment>
@@ -152,7 +192,9 @@ export default class Register extends Component
                                                     name="planilla_id"
                                                     value={this.state.form.planilla_id}
                                                     onChange={(e, obj) => this.handleInput(obj)}
+                                                    error={errors && errors.planilla_id && errors.planilla_id[0]}
                                                 />
+                                                <b className="text-red">{errors && errors.planilla_id && errors.planilla_id[0]}</b>
                                             </Form.Field>
                                         </div>
 
@@ -165,7 +207,9 @@ export default class Register extends Component
                                                      name="dependencia_id"
                                                      value={this.state.form.dependencia_id}
                                                      onChange={(e, obj) => this.handleInput(obj)}
+                                                     error={errors && errors.dependencia_id && errors.dependencia_id[0]}
                                                 />
+                                                <b className="text-red">{errors && errors.dependencia_id && errors.dependencia_id[0]}</b>
                                             </Form.Field>
                                         </div>
 
@@ -178,7 +222,9 @@ export default class Register extends Component
                                                     name="meta_id"
                                                     value={this.state.form.meta_id}
                                                     onChange={(e, obj) => this.handleInput(obj)}
+                                                    error={errors && errors.meta_id && errors.meta_id[0]}
                                                 />
+                                                <b className="text-red">{errors && errors.meta_id && errors.meta_id[0]}</b>
                                             </Form.Field>
                                         </div>
 
@@ -217,7 +263,9 @@ export default class Register extends Component
                                                     name="cargo_id"
                                                     value={this.state.form.cargo_id}
                                                     onChange={(e, obj) => this.handleInput(obj)}
+                                                    error={errors && errors.cargo_id && errors.cargo_id[0]}
                                                 />
+                                                <b className="text-red">{errors && errors.cargo_id && errors.cargo_id[0]}</b>
                                             </Form.Field>
                                         </div>
 
@@ -244,7 +292,9 @@ export default class Register extends Component
                                                     value={this.state.form.type_categoria_id}
                                                     onChange={(e, obj) => this.handleInput(obj)}
                                                     disabled={!this.state.form.cargo_id}
+                                                    error={errors && errors.type_categoria_id && errors.type_categoria_id[0]}
                                                 />
+                                                <b className="text-red">{errors && errors.type_categoria_id && errors.type_categoria_id[0]}</b>
                                             </Form.Field>
                                         </div>
 
@@ -257,13 +307,15 @@ export default class Register extends Component
                                                     name="pap"
                                                     value={this.state.form.pap}
                                                     onChange={(e, obj) => this.handleInput(obj)}
+                                                    error={errors && errors.pap && errors.pap[0]}
                                                 />
+                                                <b className="text-red">{errors && errors.pap && errors.pap[0]}</b>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mb-2">
                                             <Form.Field>
-                                                <label htmlFor="">Plaza <b className="text-red">*</b></label>
+                                                <label htmlFor="">Plaza</label>
                                                 <input type="text" 
                                                     name="plaza"
                                                     value={this.state.form.plaza}
@@ -282,6 +334,7 @@ export default class Register extends Component
                                                     value={this.state.form.perfil_laboral}
                                                     onChange={(e) => this.handleInput(e.target)}
                                                 />
+                                                <b className="text-red">{errors && errors.perfil_laboral && errors.perfil_laboral[0]}</b>
                                             </Form.Field>
                                         </div>
 
@@ -294,12 +347,13 @@ export default class Register extends Component
                                                     value={this.state.form.fecha_de_ingreso}
                                                     onChange={(e) => this.handleInput(e.target)}
                                                 />
+                                                <b className="text-red">{errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0]}</b>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mb-2">
                                             <Form.Field>
-                                                <label htmlFor="">Fecha de Cese <b className="text-red">*</b></label>
+                                                <label htmlFor="">Fecha de Cese </label>
                                                 <input type="date" 
                                                     placeholder="Fecha de cese"
                                                     name="fecha_de_cese"
@@ -316,12 +370,25 @@ export default class Register extends Component
                                                     <i className="fas fa-file-alt"></i>
                                                     <input type="file" 
                                                         id="file"
+                                                        onChange={(e) => this.handleFile(e.target)}
                                                         name="file"
                                                         hidden 
                                                         placeholder="Archivo de Regístro"
                                                         accept="application/pdf"
                                                     />
                                                 </label>
+                                                <b className="text-red">{errors && errors.file && errors.file[0]}</b>
+                                            </Form.Field>
+                                        </div>
+                                        
+                                        <div className="col-md-8 mb-2">
+                                            <Form.Field>
+                                                <label htmlFor="">Observación <b className="text-red">*</b></label>
+                                                <textarea name="observacion" 
+                                                    value={this.state.form.observacion}
+                                                    onChange={(e) => this.handleInput(e.target)}
+                                                />
+                                                <b className="text-red">{errors && errors.observacion && errors.observacion[0]}</b>
                                             </Form.Field>
                                         </div>
 
@@ -335,6 +402,20 @@ export default class Register extends Component
                                                     onChange={(e) => this.handleInput(e.target)}
                                                 />
                                             </Form.Field>
+
+                                            <Form.Field>
+                                                <label htmlFor="">¿ Agregar aportación empleador: ESSALUD ?</label>
+                                                <Select
+                                                    placeholder="Select. Aportación"
+                                                    name="is_aportacion"
+                                                    options={[
+                                                        { key: "0", value: "0", text: "No" },
+                                                        { key: "1", value: "1", text: "Si" }
+                                                    ]}
+                                                    value={this.state.form.is_aportacion}
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                />
+                                            </Form.Field>
                                         </div>
                                     </div>
                                 </div>
@@ -345,13 +426,16 @@ export default class Register extends Component
 
                 <ContentControl>
                     <div className="col-lg-2 col-6">
-                        <Button fluid color="red">
+                        <Button fluid color="red" disabled={this.state.loading}>
                             <i className="fas fa-times"></i> Cancelar
                         </Button>
                     </div>
 
                     <div className="col-lg-2 col-6">
-                        <Button fluid color="blue">
+                        <Button fluid color="blue" 
+                            disabled={this.state.loading}
+                            onClick={this.create}
+                        >
                             <i className="fas fa-save"></i> Guardar
                         </Button>
                     </div>
