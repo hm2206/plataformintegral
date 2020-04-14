@@ -6,7 +6,7 @@ import { parseOptions } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
-import { Body } from '../../../components/Utils';
+import { Body, BtnBack } from '../../../components/Utils';
 
 export default class RegisterCronograma extends Component
 {
@@ -93,11 +93,9 @@ export default class RegisterCronograma extends Component
         return (
             <div className="col-md-12">
                 <Body>
-                    <Button onClick={this.handleBack}
-                        disabled={this.state.loading}
-                    >
-                        <i className="fas fa-arrow-left"></i> Atrás
-                    </Button>
+                    <BtnBack
+                        onClick={this.handleBack}
+                    />
                     
                     <div className="card- mt-3">
                         <div className="card-header">

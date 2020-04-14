@@ -10,7 +10,7 @@ import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { responsive } from '../../../services/storage.json';
-import { Body } from '../../../components/Utils';
+import { Body, BtnBack } from '../../../components/Utils';
 
 export default class CronogramaInformacion extends Component
 {
@@ -306,12 +306,9 @@ export default class CronogramaInformacion extends Component
                     <Body>
                         <div className="row pl-2 pr-2">
                             <div className="col-md-2 col-4">
-                                <Button fluid
+                                <BtnBack onClick={this.handleBack}
                                     disabled={this.state.loading}
-                                    onClick={this.handleBack}
-                                >
-                                    <i className="fas fa-arrow-left"></i> Atrás
-                                </Button>
+                                />
                             </div>
 
                             <div className="col-md-2 col-4 mb-1">

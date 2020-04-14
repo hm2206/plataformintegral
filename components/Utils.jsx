@@ -110,6 +110,23 @@ const BtnFloat = ({ theme, children, onClick, disabled = false }) => (
   </button>
 );
 
+const BtnBack = ({ title = 'Ir atrás', theme, children, onClick, disabled }) =>  (
+  <button style={{ 
+      borderRadius: '50%', 
+      border: '2px solid #346cb0', 
+      width: '2.4em', 
+      height: '2.4em',
+      color: '#346cb0',
+      background: '#fff'
+    }}
+    title={title}
+    onClick={(e) => onClick(e)}
+    disabled={disabled}
+  >
+    <i className="fas fa-arrow-left"></i>
+  </button>
+);
+
 const CheckList = ({ id }) => (
   <div className="thead-dd dropdown">
     <span className="custom-control custom-control-nolabel custom-checkbox">
@@ -259,4 +276,5 @@ export {
   Skull,
   Tab,
   BtnEditar,
+  BtnBack
 };

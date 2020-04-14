@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
-import { Body, BtnFloat } from '../../../components/Utils';
+import { Body, BtnFloat, BtnBack } from '../../../components/Utils';
 import { findInfo } from '../../../storage/actions/infoActions';
 import { unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
@@ -81,19 +81,12 @@ export default class Pay extends Component
             <Fragment>
                 <div className="col-md-12">
                     <Body>
-                        <Button 
-                            onClick={this.handleBack}
-                        >
-                            <i className="fas fa-arrow-left"></i> Atrás
-                        </Button>
-                    </Body>
-                </div>
-
-                <div className="col-md-12">
-                    <Body>
-                        <div className="card" loading={this.state.loading}>
+                        <div className="card-" loading={this.state.loading}>
                             <div className="card-header">
-                                <i className="fas fa-coins"></i> Configuración de Boleta de Pago
+                                <BtnBack 
+                                    onClick={this.handleBack} 
+                                    disabled={this.state.loading}
+                                /> <span className="ml-4">Configuración de Boleta de Pago</span>
                             </div>
 
                             <div className="card-body">
@@ -272,7 +265,7 @@ export default class Pay extends Component
                                 <div className="card-footer">
                                     <div className="card-body">
                                         <div className="row">
-                                            <div className="col-md-3">
+                                            <div className="col-md-3 col-6">
                                                 <Button color="red" fluid
                                                     onClick={this.getConfig}
                                                 >
@@ -280,7 +273,7 @@ export default class Pay extends Component
                                                 </Button>
                                             </div>
 
-                                            <div className="col-md-3">
+                                            <div className="col-md-3 col-6">
                                                 <Button color="blue" fluid>
                                                     <i className="fas fa-save"></i> Guardar
                                                 </Button>

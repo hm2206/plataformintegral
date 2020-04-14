@@ -77,7 +77,7 @@ export default class CreateInfo extends Component
         let id = btoa(obj.id);
         if (key == 'pay') {
             push({ pathname: `${pathname}/pay`, query: { id, clickb: "Info" } });
-        }
+        } 
     }
 
     handleInput = ({ name, value }) => {
@@ -113,8 +113,7 @@ export default class CreateInfo extends Component
                                     { key: "estado", type: "switch", is_true: "Activo", is_false: "Terminado"}
                                 ]}
                                 options={[
-                                    { key: "pay", icon: "fas fa-coins" },
-                                    { key: "report", icon: "fas fa-file-alt" }
+                                    { key: "pay", icon: "fas fa-coins" }
                                 ]}
                                 getOption={this.handleOption}
                                 onScroll={this.handleScroll}

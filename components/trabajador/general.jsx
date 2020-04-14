@@ -52,7 +52,7 @@ export default class General extends Component
         this.setState({[obj]: newObject, edit: newEdit});
     }
 
-    leaveForm = async (e) => {
+    leaveForm = async (e, name) => {
         e.preventDefault();
         let answer = await Swal.fire({
             icon: 'warning',
@@ -63,6 +63,9 @@ export default class General extends Component
         // verify
         if (answer) {
             Router.push({ pathname: Router.pathname, query: Router.query })
+            let newObj = Object.assign({}, this.state.loading);
+            newObj[name] = false;
+            this.setState({edit: newObj});
         }
     }
 
@@ -219,17 +222,24 @@ export default class General extends Component
                                 </Form.Field>
                             </div>
 
-                            <div className="col-md-12 mb-4 mt-4 text-right">
+                            <div className="col-md-12 mb-4 mt-4 text-right col-6">
                                 <Show condicion={edit.person}>
-                                    <Button color="red"
-                                        onClick={this.leaveForm}
-                                    >
-                                        <i className="fas fa-trash-alt"></i> Cancelar Cambios
-                                    </Button>
+                                    <div className="row">
+                                        <div className="col-6">
+                                            <Button color="red"
+                                                onClick={this.leaveForm}
+                                                fluid
+                                            >
+                                                <i className="fas fa-trash-alt"></i> Cancelar Cambios
+                                            </Button>
+                                        </div>
 
-                                    <Button color="teal">
-                                        <i className="fas fa-save"></i> Actualizar Información
-                                    </Button>
+                                        <div className="col-6">
+                                            <Button color="teal" fluid>
+                                                <i className="fas fa-save"></i> Actualizar Información
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </Show>
 
                                 <hr/>
@@ -326,19 +336,26 @@ export default class General extends Component
                                 </Form.Field>
                             </div>
 
-                            <div className="col-md-12 mt-4 text-right">
+                            <div className="col-md-12 mt-4 text-right col-12">
                                 <Show condicion={edit.work}>
-                                    <Button color="red"
-                                        onClick={this.leaveForm}
-                                    >
-                                        <i className="fas fa-trash-alt"></i> Cancelar Cambios
-                                    </Button>
-
-                                    <Button color="teal"
-                                        onClick={this.updateWork}
-                                    >
-                                        <i className="fas fa-save"></i> Actualizar Información
-                                    </Button>
+                                    <div className="row">
+                                        <div className="col-6">
+                                            <Button color="red"
+                                                fluid
+                                                onClick={(e) => this.leaveForm(e, work)}
+                                            >
+                                                <i className="fas fa-trash-alt"></i> Cancelar Cambios
+                                            </Button>
+                                        </div>
+                                        <div className="col-6">
+                                            <Button color="teal"
+                                                fluid
+                                                onClick={this.updateWork}
+                                            >
+                                                <i className="fas fa-save"></i> Actualizar Información
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </Show>
                                 
                                 <hr/>

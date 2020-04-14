@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Show from '../../components/show';
 import Router from 'next/router';
+import { BtnBack } from '../Utils';
 
 export default class Cover extends Component {
 
@@ -8,11 +9,7 @@ export default class Cover extends Component {
         return (
             <div class="page-cover">
                 <Show condicion={this.props.back}>
-                    <a href="#"
-                        onClick={(e) => Router.push({ pathname: this.props.back })}
-                    >
-                        <i className="fas fa-arrow-left"></i>
-                    </a>
+                    <BtnBack onClick={(e) => Router.push({ pathname: this.props.back })}/>
                 </Show>
                 <div class="text-center">
                     <a href={this.props.image} target="_blank" class="user-avatar user-avatar-xl"

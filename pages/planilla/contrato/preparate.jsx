@@ -2,8 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Form, Button, Select, Card, Image } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
-import { Body } from '../../../components/Utils';
-import Show from '../../../components/show';
+import { Body, BtnBack } from '../../../components/Utils';
 import { unujobs, authentication } from '../../../services/apis';
 import { responsive } from '../../../services/storage.json'
 import btoa from 'btoa'
@@ -64,19 +63,9 @@ export default class Preparate extends Component
             <Fragment>
                 <div className="col-md-12">
                     <Body>
-                        <Button 
-                            onClick={this.handleBack}
-                        >
-                            <i className="fas fa-arrow-left"></i> Atrás
-                        </Button>
-                    </Body>
-                </div>
-
-                <div className="col-md-12 mt-3">
-                    <Body>
                         <Form loading={this.state.loading}>
                             <div className="card-header">
-                                <i className="fas fa-search"></i> Buscar trabajador para agregar contrato
+                                <BtnBack onClick={this.handleBack}/> <span className="ml-3">Buscar trabajador para agregar contrato</span>
                             </div>
 
                             <div className="card-header">
@@ -92,50 +81,52 @@ export default class Preparate extends Component
                             </div>
 
                                 <div className="card-body">
-                                    <Card.Group doubling itemsPerRow={4}>
+                                    <div className="row">
                                         {this.state.results.map(obj => 
-                                            <Card key={`result-item-${obj.id}`}>
-                                                <Image 
-                                                    style={{ height: "200px", objectFit: "cover" }}
-                                                     src={obj.person && obj.person.image ? `${authentication.path}/${obj.person.image}` : '/img/perfil.jpg'}
-                                                />
-                                                <Card.Content>
-                                                    <Card.Header>{obj.person && obj.person.fullname}</Card.Header>
-                                                    <Card.Meta>N° Documento: <b>{obj.person && obj.person.document_number}</b></Card.Meta>
-                                                    <Card.Description>Teléfono: <b>{obj.person && obj.person.phone ? obj.person.phone : ""}</b></Card.Description>
-                                                </Card.Content>
-                                                <Card.Content extra>
-                                                    <div className="row">
-                                                        <div className="col-md-6 col-6 mb-1">
-                                                            <Button fluid
-                                                                onClick={(e) => {
-                                                                    this.setState({ loading: true });
-                                                                    let { query } = Router;
-                                                                    query.id = btoa(obj.id);
-                                                                    Router.push({ pathname: `/escalafon/trabajador/profile`, query });
-                                                                }}
-                                                            >
-                                                                {this.props.screenX > responsive.md ? 'Ver Perfil' : <i className="fas fa-user"></i>}  
-                                                            </Button>
+                                            <div className="col-md-3 mb-2 mt-2 col-12">
+                                                <Card key={`result-item-${obj.id}`} fluid>
+                                                    <Image 
+                                                        style={{minHeight: "150px", maxHeight: "300px", width: "100%", objectFit: "cover" }}
+                                                        src={obj.person && obj.person.image ? `${authentication.path}/${obj.person.image}` : '/img/perfil.jpg'}
+                                                    />
+                                                    <Card.Content>
+                                                        <Card.Header>{obj.person && obj.person.fullname}</Card.Header>
+                                                        <Card.Meta>N° Documento: <b>{obj.person && obj.person.document_number}</b></Card.Meta>
+                                                        <Card.Description>Teléfono: <b>{obj.person && obj.person.phone ? obj.person.phone : ""}</b></Card.Description>
+                                                    </Card.Content>
+                                                    <Card.Content extra>
+                                                        <div className="row">
+                                                            <div className="col-md-6 col-6 mb-1">
+                                                                <Button fluid
+                                                                    onClick={(e) => {
+                                                                        this.setState({ loading: true });
+                                                                        let { query } = Router;
+                                                                        query.id = btoa(obj.id);
+                                                                        Router.push({ pathname: `/escalafon/trabajador/profile`, query });
+                                                                    }}
+                                                                >
+                                                                    {this.props.screenX > responsive.md ? 'Ver Perfil' : <i className="fas fa-user"></i>}  
+                                                                </Button>
+                                                            </div>
+                                                            <div className="col-md-6 col-6 mb-1">
+                                                                <Button fluid 
+                                                                    primary
+                                                                    onClick={(e) => {
+                                                                        this.setState({ loading: true });
+                                                                        let { pathname, query } = Router;
+                                                                        query.id = btoa(obj.id);
+                                                                        Router.push({ pathname: parseUrl(pathname, "register"), query });
+                                                                    }}
+                                                                >
+                                                                    {this.props.screenX > responsive.md ? 'Agregar' : <i className="fas fa-plus"></i>}  
+                                                                </Button>
+                                                            </div>
                                                         </div>
-                                                        <div className="col-md-6 col-6 mb-1">
-                                                            <Button fluid 
-                                                                primary
-                                                                onClick={(e) => {
-                                                                    this.setState({ loading: true });
-                                                                    let { pathname, query } = Router;
-                                                                    query.id = btoa(obj.id);
-                                                                    Router.push({ pathname: parseUrl(pathname, "register"), query });
-                                                                }}
-                                                            >
-                                                                {this.props.screenX > responsive.md ? 'Agregar' : <i className="fas fa-plus"></i>}  
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                </Card.Content>
-                                            </Card>  
+                                                    </Card.Content>
+                                                </Card>  
+                                            </div>
                                         )}
-                                    </Card.Group>
+                                    </div>
                                 </div>
                         </Form>
                     </Body>
