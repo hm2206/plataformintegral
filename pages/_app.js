@@ -61,7 +61,7 @@ class MyApp extends App {
   }
 
   componentDidCatch = (error, info) => {
-    Router.push({ pathname: "/error", query: { error: info }});
+    // Router.push({ pathname: "/error", query: { error: error }});
   }
 
   handleScreen = () => {

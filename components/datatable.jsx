@@ -28,7 +28,18 @@ export default class DataTable extends Component {
   componentWillReceiveProps(newProps) {
     if (newProps != this.props) {
       this.setDataTable(newProps);
+    } 
+    
+    if(newProps.onStop == true && newProps.onStop != this.props.onStop) {
+      console.log('stop');
+      this.removeScroll();
     }
+    
+    if (newProps.onStop == false && newProps.onStop != this.props.onStop) {
+      console.log('ok');
+      this.listenerScroll();
+    }
+
   }
 
   componentWillUnmount = () => {
@@ -145,6 +156,9 @@ export default class DataTable extends Component {
   removeScroll = async () => {
     if (typeof this.props.onScroll == 'function') {
       window.removeEventListener('scroll', this.handleScroll);
+      if (typeof this.props.onRemoveScroll == 'function') {
+        this.props.onRemoveScroll();
+      }
     }
   }
 
