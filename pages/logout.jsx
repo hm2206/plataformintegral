@@ -22,6 +22,10 @@ export default class Logout extends Component
         Router.push('/login')
     }
 
+    handleGo = () => {
+        location.href = '/login';
+    }
+
     render() {
         return (
            <div className="col-md-12 mt-5">
@@ -33,9 +37,9 @@ export default class Logout extends Component
                         <div className="mt-5 row justify-content-center">
                             <Button basic 
                                 color="blue"
-                                onClick={(e) => Router.push('/login')}
+                                onClick={this.handleGo}
                             >
-                                Iniciar Sesión
+                                Ir al Inicio
                             </Button>
 
                             <Button

@@ -31,12 +31,10 @@ export default class DataTable extends Component {
     } 
     
     if(newProps.onStop == true && newProps.onStop != this.props.onStop) {
-      console.log('stop');
       this.removeScroll();
     }
     
     if (newProps.onStop == false && newProps.onStop != this.props.onStop) {
-      console.log('ok');
       this.listenerScroll();
     }
 

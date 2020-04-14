@@ -107,7 +107,7 @@ export default class CreateInfo extends Component
                                 index={[
                                     { key: "person.id", type: "text" },
                                     { key: "person.fullname", type: "text" },
-                                    { key: "fecha_de_ingreso", type: "icon", bg: "warning" },
+                                    { key: "fecha_de_ingreso", type: "date", bg: "warning" },
                                     { key: "plaza", type: "icon" },
                                     { key: "perfil_laboral", type: "icon", bg: "dark" },
                                     { key: "estado", type: "switch", is_true: "Activo", is_false: "Terminado"}

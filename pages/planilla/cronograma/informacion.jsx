@@ -279,10 +279,7 @@ export default class CronogramaInformacion extends Component
         let { cronograma, cargo_id, type_categoria_id, like } = this.state;
         let query = `cronograma_id=${cronograma.id}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&query_search=${like}`;
         await unujobs.fetch(`exports/personal/${cronograma.year}/${cronograma.mes}?${query}`)
-        .then(resData => {
-            resData.blob();
-            resData.json().then(res => { throw new Error(res.message)})
-        })
+        .then(resData => resData.blob())
         .then(blob => {
             let a = document.createElement('a');
             a.href = URL.createObjectURL(blob);

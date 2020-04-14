@@ -118,7 +118,7 @@ export default class Boleta extends Component {
     }
 
     handleRemoveScroll = () => {
-        Swal.fire({ icon: 'info', text: 'No se encontró más registros!' })
+        // manejar el evento al remover el scroll
     }
 
     render() {

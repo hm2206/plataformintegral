@@ -143,6 +143,24 @@ export default class Obligacion extends Component
         this.props.setLoading(false);
     }
 
+    delete = async (id) => {
+        this.setState({ loader: true });
+        await unujobs.post(`obligacion/${id}`, { _method: 'DELETE' })
+        .then(async res => {
+            let { success, message } = res.data;
+            let icon = success ? 'success' : 'error';
+            await Swal.fire({ icon, text: message });
+            if (success) {
+                await this.props.updatingHistorial();
+                this.getObligaciones(this.props);
+            }
+        }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        this.setState({ loader: false });
+        this.props.setEdit(false);
+        this.props.setSend(false);
+        this.props.setLoading(false);
+    }
+
     render() {
 
         let { obligaciones, form, loader } = this.state;
@@ -399,6 +417,18 @@ export default class Obligacion extends Component
                                             onChange={({ target }) => this.handleInputUpdate(target, index)}
                                         />
                                     </Form.Field>
+                                </div>
+                            </Show>
+                            
+                            <div className="col-md-9"></div>
+
+                            <Show condicion={this.props.edit}>
+                                <div className="col-md-3 col-12 text-right">
+                                    <Button color="red fluid"
+                                        onClick={(e) => this.delete(obl.id)}
+                                    >
+                                        <i className="fas fa-trash-alt"></i> Eliminar
+                                    </Button>
                                 </div>
                             </Show>
 
