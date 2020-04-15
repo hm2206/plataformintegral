@@ -1,18 +1,15 @@
 import React, { Component } from 'react';
 import Datatable from '../../components/datatable';
 import Router from 'next/router';
-import btoa from 'btoa';
 import { AUTHENTICATE } from '../../services/auth';
 import { Form, Button } from 'semantic-ui-react';
-import { BtnFloat } from '../../components/Utils';
-import Show from '../../components/show';
 import { allHistorial } from '../../storage/actions/historialActions';
 import { unujobs } from '../../services/apis';
 import Swal from 'sweetalert2';
 import { Body } from '../../components/Utils';
 
 
-export default class Boleta extends Component {
+export default class DuplicadoBoleta extends Component {
 
     constructor(props) {
         super(props);

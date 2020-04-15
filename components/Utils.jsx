@@ -1,5 +1,6 @@
 import React, { Fragment, useState } from "react";
 import Show from "./show";
+import { Dropdown } from 'semantic-ui-react';
 
 const Content = props => (
   <Fragment>
@@ -20,7 +21,7 @@ const Body = props => (
   </Fragment>
 );
 
-const Dropdown = props => (
+const DropdownSimple = props => (
   <div className="breadcrumb-elements-item dropdown p-0">
     <a
       href="http://demo.interface.club/limitless/demo/bs4/Template/layout_1/LTR/default/full/index.html#"
@@ -137,7 +138,15 @@ const CheckList = ({ id, onAllSelect, onAllUnSelect }) => {
     <CheckBox
       id={`checklist-id-${id}`}
       checked={check}
-      onClick={(e) => false}
+      onClick={(e) => {
+        if (check) {
+          setCheck(false);
+          onAllUnSelect(e);
+        } else {
+          setCheck(true);
+          onAllSelect(e);
+        }
+      }}
     />
     <div
       className="thead-btn"
@@ -277,10 +286,30 @@ const BtnEditar = ({ onClick, edit = false }) => (
 );
 
 
+const DrownSelect = ({ text, direction, options = [], onSelect }) =>  {
+
+  return (
+    <Dropdown text={text ? text : 'Opciones'} direction={direction ? direction : 'left'}>
+      <Dropdown.Menu>
+        {options && options.map(obj => 
+            <Fragment key={`drownselect-${obj.key}`}>
+              <Dropdown.Item text={obj.text} description={obj.description} icon={obj.icon}
+                onClick={(e, data) => typeof onSelect == 'function' ? onSelect(e, data) : null}
+                name={obj.key}
+              />
+              {obj.divider ? <Dropdown.Divider/> : null}
+            </Fragment>
+        )}
+      </Dropdown.Menu>
+    </Dropdown>
+  )
+}
+
+
 export {
   Content,
   Body,
-  Dropdown,
+  DropdownSimple,
   BreadCrumb,
   BtnToolBasic,
   BtnFloat,
@@ -290,5 +319,6 @@ export {
   Skull,
   Tab,
   BtnEditar,
-  BtnBack
+  BtnBack,
+  DrownSelect
 };

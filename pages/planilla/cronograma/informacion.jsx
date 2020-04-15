@@ -10,7 +10,9 @@ import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { responsive } from '../../../services/storage.json';
-import { Body, BtnBack } from '../../../components/Utils';
+import { Body, BtnBack, DrownSelect } from '../../../components/Utils';
+import UpdateDesctMassive from '../../../components/cronograma/updateDesctMassive';
+
 
 export default class CronogramaInformacion extends Component
 {
@@ -293,9 +295,18 @@ export default class CronogramaInformacion extends Component
         this.setState({ active: data.activeIndex });
     }
 
+    handleOnSelect = (e, { name }) => {
+        let { push, pathname, query } = Router;
+        if (name == 'desc-massive') {
+            query.desc_massive = 1;
+            push({ pathname, query });
+        }
+    }
+
     render() {
 
         let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id } = this.state;
+        let { pathname, query } = this.props;
 
         return (
             <Fragment>
@@ -352,7 +363,20 @@ export default class CronogramaInformacion extends Component
                         <div className="col-md-12 mt-3">
                             <div className="card-" style={{ minHeight: "80vh" }}>
                                 <div className="card-header">
-                                    <i className="fas fa-info-circle"></i> Información de "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
+                                    <div className="row align-items-center">
+                                        <div className="col-md-9 mb-2">
+                                            <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
+                                        </div>
+
+                                        <div className="col-md-3 text-center">
+                                            <DrownSelect text="Opciones"
+                                                options={[
+                                                    { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" }
+                                                ]}
+                                                onSelect={this.handleOnSelect}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="card-body" style={{ marginBottom: "10em" }}>
@@ -563,6 +587,14 @@ export default class CronogramaInformacion extends Component
                         </div>
                     </div>              
                 </div>
+
+                <Show condicion={query.desc_massive}>
+                    <UpdateDesctMassive isClose={(e) => {
+                        let { push, pathname, query } = Router;
+                        query.desc_massive = null;
+                        push({ pathname, query });
+                    }}/>
+                </Show>
             </Fragment>
         )
     }

@@ -60,7 +60,7 @@ export default class DataTable extends Component {
   }
 
   async setDataTable(newProps) {
-    let { isCheck, data, newRows } = newProps;
+    let { isCheck, data } = newProps;
     let newData =  data;
     if (isCheck && typeof newData != "undefined") {
       // actualizamos los checked
@@ -202,6 +202,7 @@ export default class DataTable extends Component {
       isCheck,
       titulo,
       children,
+      base
     } = this.props;
 
     let { datatable } = this.state;

@@ -85,6 +85,10 @@ export default class RemoveCronograma extends Component
         this.setState({ stop: true, rows: [], send: true });
     }
 
+    handleAllUnSelect = (row) => {
+        this.setState({ stop: false, rows: [], send: false });
+    }
+
     setting = (props) => {
         let { cronograma, historial } = props.remove;
         let { cargo_id, type_categoria_id, query_search  } = props.query;
@@ -108,26 +112,28 @@ export default class RemoveCronograma extends Component
     }
 
     getHistorial = async () => {
-        this.setState({ loading: true });
-        let { cronograma, cargo_id, type_categoria_id, query_search, page } = this.state;
-        let params = `page=${page}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&query_search=${query_search}`;
-        await unujobs.get(`cronograma/${cronograma.id}/remove?${params}`)
-        .then(res => {
-            let { cronograma, historial } = res.data;
-            let { data, total, next_page_url } = historial;
-            if (next_page_url) {
-                this.setState(state => ({ 
-                    historial: [...state.historial, ...data], 
-                    page: state.page + 1, 
-                    total, 
-                    stop: false 
-                }));
-            } else {
-                this.setState({ stop: true });
-            }
-        })
-        .catch(err => console.log(err.message));
-        await this.setState({ loading: false });
+        if (!this.state.stop) {
+            this.setState({ loading: true });
+            let { cronograma, cargo_id, type_categoria_id, query_search, page } = this.state;
+            let params = `page=${page}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&query_search=${query_search}`;
+            await unujobs.get(`cronograma/${cronograma.id}/remove?${params}`)
+            .then(res => {
+                let { historial } = res.data;
+                let { data, total, next_page_url } = historial;
+                if (next_page_url) {
+                    this.setState(state => ({ 
+                        historial: [...state.historial, ...data], 
+                        page: state.page + 1, 
+                        total, 
+                        stop: false 
+                    }));
+                } else {
+                    this.setState({ stop: true });
+                }
+            })
+            .catch(err => console.log(err.message));
+            await this.setState({ loading: false });
+        }
     }
 
     getCargo = async () => {
@@ -260,6 +266,7 @@ export default class RemoveCronograma extends Component
                                         onStop={this.state.stop}
                                         newRows={this.state.rows}
                                         onAllSelect={this.handleAllSelect}
+                                        onAllUnSelect={this.handleAllUnSelect}
                                     />
                                 </div>
                             </div>
