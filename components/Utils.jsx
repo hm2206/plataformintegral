@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import Show from "./show";
 
 const Content = props => (
@@ -127,12 +127,18 @@ const BtnBack = ({ title = 'Ir atrás', theme, children, onClick, disabled }) =>
   </button>
 );
 
-const CheckList = ({ id }) => (
+
+const CheckList = ({ id, onAllSelect, onAllUnSelect }) => {
+  
+  let [check, setCheck] = useState(false);
+
+  return (
   <div className="thead-dd dropdown">
-    <span className="custom-control custom-control-nolabel custom-checkbox">
-      <input type="checkbox" className="custom-control-input" id={id} />
-      <label className="custom-control-label" htmlFor={id}></label>
-    </span>
+    <CheckBox
+      id={`checklist-id-${id}`}
+      checked={check}
+      onClick={(e) => false}
+    />
     <div
       className="thead-btn"
       role="button"
@@ -144,28 +150,36 @@ const CheckList = ({ id }) => (
     </div>
     <div className="dropdown-menu">
       <div className="dropdown-arrow"></div>
-      <a className="dropdown-item" href="#">
+      <a className="dropdown-item" href="#" onClick={(e) => {
+        e.preventDefault(); 
+        setCheck(true);
+        onAllSelect(e)
+      }}>
         Seleccionar Todo
       </a>{" "}
-      <a className="dropdown-item" href="#">
+      <a className="dropdown-item" href="#" onClick={(e) =>{
+        e.preventDefault();
+        setCheck(false);
+         onAllUnSelect(e)
+      }}>
         Deseleccionar Todo
       </a>
-      <div className="dropdown-divider"></div>
+      {/* <div className="dropdown-divider"></div>
       <a className="dropdown-item" href="#">
         Bulk remove
       </a>{" "}
       <a className="dropdown-item" href="#">
         Bulk edit
-      </a>{" "}
-      <a className="dropdown-item" href="#">
+      </a>{" "} */}
+      {/* <a className="dropdown-item" href="#">
         Separate actions
-      </a>
+      </a> */}
     </div>
   </div>
-);
+)};
 
 const CheckBox = ({ id, checked = false, onClick, disabled = false }) => (
-  <div className="custom-control custom-control-nolabel custom-checkbox">
+  <div className="custom-control custom-control-nolabel custom-checkbox" id={`checkbox-${id}`}>
     <label
       style={{
         width: "17px",

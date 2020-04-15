@@ -94,6 +94,10 @@ export default class Cronograma extends Component {
             this.setState({ loading: true });
             query = { id, clickb: "Cronograma" };
             pathname = pathname + "/informacion";
+        } else if (key == 'remove') {
+            this.setState({ loading: true });
+            query = { id };
+            pathname = `${pathname}/remove`;
         }
         // execute
         await Router.push({pathname, query});
@@ -168,7 +172,6 @@ export default class Cronograma extends Component {
                         options={
                             [
                                 {
-                                    id: 1,
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
                                     title: "Editar cronograma",
@@ -178,7 +181,6 @@ export default class Cronograma extends Component {
                                     }
                                 }, 
                                 {
-                                    id: 1,
                                     key: "info",
                                     icon: "fas fa-info",
                                     title: "Visualizar cronograma detalladamente",
@@ -188,7 +190,6 @@ export default class Cronograma extends Component {
                                     }
                                 }, 
                                 {
-                                    id: 1,
                                     key: "info",
                                     icon: "fas fa-info",
                                     title: "Visualizar cronograma detalladamente",
@@ -198,7 +199,6 @@ export default class Cronograma extends Component {
                                     }
                                 },
                                 {
-                                    id: 1,
                                     key: "add",
                                     icon: "fas fa-user-plus",
                                     title: "Agregar trabajadores al cronograma",
@@ -208,27 +208,15 @@ export default class Cronograma extends Component {
                                     }
                                 }, 
                                 {
-                                    id: 1,
-                                    key: "open",
-                                    icon: "fas fa-lock-open",
-                                    title: "Abrir cronograma",
-                                    rules: {
-                                        key: "estado",
-                                        value: 0
-                                    }
-                                }, 
-                                {
-                                    id: 1,
-                                    key: "close",
-                                    icon: "fas fa-lock",
-                                    title: "Cerrar cronograma",
+                                    key: "remove",
+                                    icon: "fas fa-user-minus",
+                                    title: "Eliminar trabajadores al cronograma",
                                     rules: {
                                         key: "estado",
                                         value: 1
                                     }
                                 }, 
                                 {
-                                    id: 1,
                                     key: "send_email",
                                     icon: "fas fa-paper-plane",
                                     title: "Enviar correo",
@@ -238,7 +226,6 @@ export default class Cronograma extends Component {
                                     }
                                 }, 
                                 {
-                                    id: 1,
                                     key: "report",
                                     icon: "fas fa-file-alt",
                                     title: "Reportes"

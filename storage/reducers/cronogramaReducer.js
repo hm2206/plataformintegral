@@ -2,7 +2,8 @@ import { cronogramaActionsTypes } from '../actions/cronogramaActions';
 
 const initialState = {
     cronograma: {},
-    cronogramas: {}
+    cronogramas: {},
+    remove: {},
 };
 
 const cronograma = (state = initialState, action) => {
@@ -12,6 +13,9 @@ const cronograma = (state = initialState, action) => {
             return state;
         case cronogramaActionsTypes.ALL_CRONOGRAMA :
             state.cronogramas = action.payload;
+            return state;
+        case cronogramaActionsTypes.REMOVE :
+            state.remove = action.payload;
             return state;
         default:
             return state;

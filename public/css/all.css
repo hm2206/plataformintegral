@@ -4442,3 +4442,9 @@ readers do not read off random characters that represent icons */
   padding-left: 1em;
   padding-right: 1em;
 }
+
+
+.btn-red {
+  background: #d32f2f!important;
+  color: #fff!important;
+}

@@ -46,3 +46,19 @@ export const backUrl = (path = "") => {
     newPath.splice(-1, 1);
     return newPath.join("/");
 }
+
+
+export const Confirm = async (icon = null, text = null, btn = null) => {
+    const Swal = require('sweetalert2');
+    icon = icon ? icon : 'warning';
+    text = text ? text : "¿Deseas guardar los cambios?";
+    btn = btn ? btn : "Continuar";
+    let { value } = await Swal.fire({ 
+        icon: icon,
+        text: text,
+        confirmButtonText: btn,
+        showCancelButton: true
+    });
+    // response
+    return value;
+}

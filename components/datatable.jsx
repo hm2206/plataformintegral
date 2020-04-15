@@ -25,11 +25,16 @@ export default class DataTable extends Component {
     await this.setDataTable(this.props);
   }
 
-  componentWillReceiveProps(newProps) {
+  async componentWillReceiveProps(newProps) {
+  
+    if (newProps.newRows != this.props.newRows) {
+      this.setState({ rows: newProps.newRows });
+    }
+
     if (newProps != this.props) {
-      this.setDataTable(newProps);
-    } 
-    
+      await this.setDataTable(newProps);
+    }
+
     if(newProps.onStop == true && newProps.onStop != this.props.onStop) {
       this.removeScroll();
     }
@@ -160,6 +165,32 @@ export default class DataTable extends Component {
     }
   }
 
+  handleAllSelect = async () => {
+    await this.setState(async state => {
+      await this.state.datatable.map(obj => obj.check = true);
+      return { datatable: state.datatable }
+    })
+    // rows
+    this.setState({ rows: this.state.datatable });
+    // emitir evento
+    if (typeof this.props.onAllSelect == 'function') {
+      this.props.onAllSelect(this.state.rows);
+    }
+  }
+
+  handleAllUnSelect = async () => {
+    await this.setState(async state => {
+      await this.state.datatable.map(obj => obj.check = false);
+      return { datatable: state.datatable }
+    })
+    // rows
+    this.setState({ rows: [] });
+    // emitir evento
+    if (typeof this.props.onAllUnSelect == 'function') {
+      this.props.onAllUnSelect(this.state.rows);
+    }
+  }
+
   render() {
     let {
       loading,
@@ -234,7 +265,7 @@ export default class DataTable extends Component {
                   <tr role="row">
                     {isCheck ? (
                       <th>
-                        <CheckList />
+                        <CheckList onAllSelect={this.handleAllSelect} onAllUnSelect={this.handleAllUnSelect}/>
                       </th>
                     ) : null}
                     {headers && headers.length > 0
