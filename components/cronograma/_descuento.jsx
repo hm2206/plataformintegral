@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { unujobs } from '../../services/apis';
 import { Button, Form, Input } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
+import Show from '../show';
 
 
 export default class Descuento extends Component
@@ -135,13 +136,18 @@ export default class Descuento extends Component
                             {obj.descripcion}
                         </span>
                         <Form.Field>
-                            <input type="number"
-                                step="any" 
-                                value={obj.monto}
-                                disabled={!obj.edit ? true : !this.props.edit}
-                                onChange={({target}) => this.handleMonto(index, target.value, obj)}
-                                min="0"
-                            />
+                            <Show condicion={obj.edit}>
+                                <input type="number"
+                                    step="any" 
+                                    value={obj.monto}
+                                    disabled={!this.props.edit}
+                                    onChange={({target}) => this.handleMonto(index, target.value, obj)}
+                                    min="0"
+                                />
+                            </Show>
+                            <Show condicion={!obj.edit}>
+                                <Input icon='wait' iconPosition='left' defaultValue={obj.monto} disabled/>
+                            </Show>
                         </Form.Field>
                     </div>
                 )}

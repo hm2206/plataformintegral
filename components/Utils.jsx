@@ -344,11 +344,19 @@ const BtnEditar = ({ onClick, edit = false }) => (
 );
 
 
-const DrownSelect = ({ text, direction, disabled, options = [], onSelect }) =>  {
+const DrownSelect = ({ button, icon, text, direction, disabled, options = [], onSelect }) =>  {
 
   return (
-    <Dropdown disabled={disabled} text={text ? text : 'Opciones'} direction={direction ? direction : 'left'}>
-      <Dropdown.Menu>
+    <Dropdown disabled={disabled} 
+      text={text ? text : 'Opciones'} 
+      direction={direction ? direction : 'left'}
+      icon={icon ? icon : ''}
+      button={button ? button : false}
+      floating
+      labeled
+      className={icon ? 'icon': ''}
+    >
+      <Dropdown.Menu direction={direction ? direction : 'left'}>
         {options && options.map(obj => 
             <Fragment key={`drownselect-${obj.key}`}>
               <Dropdown.Item text={obj.text} description={obj.description} icon={obj.icon}

@@ -304,8 +304,21 @@ export default class CronogramaInformacion extends Component
         } else if (name == 'report') {
             query.href = pathname;
             await push({ pathname: parseUrl(pathname, 'report'), query });
+        } else if (name == 'sync-remuneracion') {
+            await this.syncConfig();
         }
         // end loading
+        this.setState({ loading: false });
+    }
+
+    syncConfig = async () => {
+        this.setState({ loading: true });
+        await unujobs.post(`info/ejemlo/sync_config`)
+        .then(async res => {
+            let { success, message } = res.data;
+            let icon = success ? 'success' : 'error';
+            await Swal.fire({ icon, text: message });
+        }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
         this.setState({ loading: false });
     }
 
@@ -376,10 +389,13 @@ export default class CronogramaInformacion extends Component
 
                                         <div className="col-md-3 text-center">
                                             <DrownSelect text="Opciones"
-                                                disabled={this.state.loading}
+                                                button
+                                                icon="options"
+                                                disabled={this.state.loading || this.state.edit}
                                                 options={[
                                                     { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
-                                                    { key: "report", text: "Reportes", icon: "file text outline" }
+                                                    { key: "report", text: "Reportes", icon: "file text outline" },
+                                                    { key: "sync-remuneracion", text: "Sync Remuneración", icon: "arrow circle down" }
                                                 ]}
                                                 onSelect={this.handleOnSelect}
                                             />
