@@ -86,21 +86,25 @@ export default class Cronograma extends Component {
     }
 
     async getOption(obj, key, index) {
+        this.setState({ loading: true });
         let {pathname, query} = Router;
         let id = btoa(obj.id);
         query[key] = id;
         // verificar
         if (key == 'info') {
-            this.setState({ loading: true });
             query = { id, clickb: "Cronograma" };
             pathname = pathname + "/informacion";
         } else if (key == 'remove') {
-            this.setState({ loading: true });
             query = { id };
             pathname = `${pathname}/remove`;
+        } else if (key == 'report') {
+            
+            query = { id };
+            pathname = `${pathname}/report`;
         }
         // execute
         await Router.push({pathname, query});
+        this.setState({ loading: false });
     }
 
     handleExport = async () => {

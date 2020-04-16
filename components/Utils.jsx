@@ -1,6 +1,7 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, Component } from "react";
 import Show from "./show";
-import { Dropdown } from 'semantic-ui-react';
+import { Dropdown, Button, Icon } from 'semantic-ui-react';
+import Swal from "sweetalert2";
 
 const Content = props => (
   <Fragment>
@@ -20,6 +21,63 @@ const Body = props => (
     <div className="content mt-4 ml-3 mr-3">{props.children}</div>
   </Fragment>
 );
+
+class BtnSelect extends Component {
+
+  state = {
+    color: "black",
+    text: "Seleccionar",
+    object: {},
+    isPermission: false
+  }
+
+  componentWillReceiveProps = (nextProps) => {
+    if (nextProps.options != this.props.options) {
+      this.setState({ 
+        object: {}
+      });
+    }
+  }
+
+  handleClick = (e) => {
+    if (typeof this.props.onClick == 'function') {
+      if (Object.keys(this.state.object).length > 0) {
+        this.props.onClick(e, this.state.object);
+      } else {
+        Swal.fire({ icon: "info", text: "Porfavor seleccioné una opción" });
+      }
+    }
+  }
+
+  handleChange = async (e, obj) => {
+    let newObj = {};
+    await obj.options.filter(opt => opt.value == obj.value ? newObj = opt : null);
+    this.setState({ object: newObj });
+  }
+
+  render () {
+
+    let { color, text, object } = this.state;
+
+    return (
+      <Button.Group fluid  color={object.color ? object.color : color}>
+        <Button disabled={this.props.disabled}
+          onClick={this.handleClick}
+        >
+        <Icon name={object.icon ? object.icon : ""}/>  {object.text ? object.text : text}
+        </Button>
+        <Dropdown
+          disabled={this.props.disabled}
+          onChange={this.handleChange}
+          className="button icon"
+          floating
+          options={this.props.options}
+          trigger={<Fragment/>}
+        />
+      </Button.Group>
+    )
+  }
+}
 
 const DropdownSimple = props => (
   <div className="breadcrumb-elements-item dropdown p-0">
@@ -286,10 +344,10 @@ const BtnEditar = ({ onClick, edit = false }) => (
 );
 
 
-const DrownSelect = ({ text, direction, options = [], onSelect }) =>  {
+const DrownSelect = ({ text, direction, disabled, options = [], onSelect }) =>  {
 
   return (
-    <Dropdown text={text ? text : 'Opciones'} direction={direction ? direction : 'left'}>
+    <Dropdown disabled={disabled} text={text ? text : 'Opciones'} direction={direction ? direction : 'left'}>
       <Dropdown.Menu>
         {options && options.map(obj => 
             <Fragment key={`drownselect-${obj.key}`}>
@@ -320,5 +378,6 @@ export {
   Tab,
   BtnEditar,
   BtnBack,
-  DrownSelect
+  DrownSelect,
+  BtnSelect
 };

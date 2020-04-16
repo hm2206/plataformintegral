@@ -1,10 +1,10 @@
 import React, { Component, Fragment } from 'react';
 import { unujobs, authentication } from '../../../services/apis';
 import { Form, Button, Select, Icon } from 'semantic-ui-react';
-import { Card, Row } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
 import { AUTHENTICATE } from '../../../services/auth';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
-import { parseOptions } from '../../../services/utils';
+import { parseOptions, parseUrl } from '../../../services/utils';
 import Show from '../../../components/show';
 import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
@@ -295,12 +295,18 @@ export default class CronogramaInformacion extends Component
         this.setState({ active: data.activeIndex });
     }
 
-    handleOnSelect = (e, { name }) => {
+    handleOnSelect = async (e, { name }) => {
+        this.setState({ loading: true });
         let { push, pathname, query } = Router;
         if (name == 'desc-massive') {
             query.desc_massive = 1;
-            push({ pathname, query });
+            await push({ pathname, query });
+        } else if (name == 'report') {
+            query.href = pathname;
+            await push({ pathname: parseUrl(pathname, 'report'), query });
         }
+        // end loading
+        this.setState({ loading: false });
     }
 
     render() {
@@ -370,8 +376,10 @@ export default class CronogramaInformacion extends Component
 
                                         <div className="col-md-3 text-center">
                                             <DrownSelect text="Opciones"
+                                                disabled={this.state.loading}
                                                 options={[
-                                                    { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" }
+                                                    { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
+                                                    { key: "report", text: "Reportes", icon: "file text outline" }
                                                 ]}
                                                 onSelect={this.handleOnSelect}
                                             />
