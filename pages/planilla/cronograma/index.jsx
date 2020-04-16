@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
-import Reports from '../../../components/cronograma/reports';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Form, Button } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
@@ -295,14 +294,6 @@ export default class Cronograma extends Component {
                             <hr/>
                         </Form>
                     </Datatable>
-                    {/* reportes */}
-                    <Show condicion={query.report}>
-                        <Reports show={true}
-                            query={query}
-                            pathname={pathname}
-                            isClose={(e) => Router.push({ pathname, query: { report: "" }})}
-                        />
-                    </Show>
                     {/* enviar email */}
                     <Show condicion={query.send_email}>
                         <SendEmail query={query}

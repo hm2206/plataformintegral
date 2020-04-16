@@ -6,6 +6,9 @@ import { Body, BtnFloat, BtnBack } from '../../../components/Utils';
 import { findInfo } from '../../../storage/actions/infoActions';
 import { unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
+import CreateConfigRemuneracion from '../../../components/contrato/createConfigRemuneracion';
+import Swal from 'sweetalert2';
+import { Confirm } from '../../../services/utils'
 
 export default class Pay extends Component
 {
@@ -28,6 +31,13 @@ export default class Pay extends Component
     componentDidMount = async () => {
         await this.getWork();
         await this.getConfig();
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+        let { query } = this.props;
+        if (!nextProps.query.create && query.create != nextProps.query.create) {
+            this.getConfig();
+        }
     }
 
     handleBack = () => {
@@ -72,10 +82,27 @@ export default class Pay extends Component
         });
     }
 
+    delete = async (id) => {
+        let value = await Confirm("warning", "¿Desea elimnar la remuneración?", "Confirmar")
+        if (value) {
+            let { info } = this.props;
+            this.setState({ loading: true, edit: false });
+            await unujobs.post(`info/${info.id}/delete_config`, { _method: 'DELETE', config_id: id })
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                if (success) this.getConfig();
+            })
+            .catch(err => Swal.fire({ icon: 'error', text: "Algo salió mal" }));
+            this.setState({ loading: false });
+        }
+    }
+
     render() {
 
         let { work } = this.state;
-        let { info } = this.props;
+        let { info, query, pathname } = this.props;
 
         return (
             <Fragment>
@@ -229,7 +256,7 @@ export default class Pay extends Component
                                                 key={`config-item-${obj.id}`}
                                             >
                                                 <div className="row">
-                                                    <div className="col-md-9">
+                                                    <div className="col-md-6">
                                                         <Form.Field>
                                                             <b><span className="text-red">{obj.key}</span>.-<span className="text-primary">{obj.descripcion}</span></b>
                                                             <input type="number"
@@ -240,7 +267,8 @@ export default class Pay extends Component
                                                             />
                                                         </Form.Field>
                                                     </div>
-                                                    <div className="col-md-3">
+
+                                                    <div className="col-md-4 col-6">
                                                         <b>Base imponible</b>
                                                         <Select
                                                             key={`opt-${obj.id}`}
@@ -254,6 +282,16 @@ export default class Pay extends Component
                                                             value={obj.base}
                                                             onChange={(e, o) => this.handleInput(o, index)}
                                                         />
+                                                    </div>
+                                                        
+                                                    <div className="col-md-2 col-6">
+                                                        <b>Opción</b>
+                                                        <Button fluid
+                                                            color="red"
+                                                            onClick={(e) => this.delete(obj.id)}
+                                                        >
+                                                            <i className="fas fa-trash"></i>
+                                                        </Button>
                                                     </div>
                                                 </div>
                                             </div>    
@@ -287,9 +325,25 @@ export default class Pay extends Component
                 </div>
 
                 <Show condicion={!this.state.edit}>
-                    <BtnFloat>
+                    <BtnFloat 
+                        onClick={(e) => {
+                            let { query, pathname, push } = Router;
+                            query.create = true;
+                            push({ pathname, query });
+                        }}
+                    >
                         <i className="fas fa-plus"></i>
                     </BtnFloat>
+                </Show>
+                {/* Ventanas flotantes */}
+                <Show condicion={query.create}>
+                    <CreateConfigRemuneracion
+                        info={this.props.info}
+                        isClose={(e) => {
+                            query.create = null;
+                            Router.push({ pathname, query })
+                        }}
+                    />
                 </Show>
             </Fragment>
         )
