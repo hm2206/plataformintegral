@@ -391,6 +391,7 @@ export default class CronogramaInformacion extends Component
                                             <DrownSelect text="Opciones"
                                                 button
                                                 icon="options"
+                                                labeled
                                                 disabled={this.state.loading || this.state.edit}
                                                 options={[
                                                     { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },

@@ -5,6 +5,7 @@ import cronograma from './cronogramaReducer';
 import info from './infoReducer';
 import cargo from './cargoReducer';
 import historial from './historialReducer';
+import person from './personReducer';
 
 const rootReducer = combineReducers({
     auth,
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
     info,
     cargo,
     historial,
+    person
 });
 
 export default rootReducer;

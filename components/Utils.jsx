@@ -344,16 +344,16 @@ const BtnEditar = ({ onClick, edit = false }) => (
 );
 
 
-const DrownSelect = ({ button, icon, text, direction, disabled, options = [], onSelect }) =>  {
+const DrownSelect = ({ button, icon, text, direction, disabled, options = [], onSelect, labeled = false }) =>  {
 
   return (
     <Dropdown disabled={disabled} 
-      text={text ? text : 'Opciones'} 
+      text={text} 
       direction={direction ? direction : 'left'}
       icon={icon ? icon : ''}
       button={button ? button : false}
       floating
-      labeled
+      labeled={labeled}
       className={icon ? 'icon': ''}
     >
       <Dropdown.Menu direction={direction ? direction : 'left'}>
