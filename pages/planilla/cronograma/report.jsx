@@ -42,7 +42,7 @@ export default class Report extends Component
             {key: "detallado", value: "detallado", text: "Reporte de Descuentos Detallados", icon: "file text outline", filtros: ['type_detalle'], buttons: ['detalle']},
             {key: "aportacion", value: "aportacion", text: "Reporte de Aportacion al Empleador", icon: "file text outline", filtros: ['type_aportacion'], buttons: ['aportacion']},
             {key: "personal", value: "personal", text: "Reporte de Personal", icon: "file text outline", filtros: ['negativo', 'cargo', 'type_categoria'], buttons: ['personal']},
-            {key: "ejecucion", value: "ejecucion", text: "Reporte de Ejecucion de Planilla", icon: "file text outline", filtros: ['neto'], buttons: ['ejecucion', 'ejecucion-pay']}
+            {key: "ejecucion", value: "ejecucion", text: "Reporte de Ejecucion de Planilla", icon: "file text outline", filtros: ['neto'], buttons: ['ejecucion', 'ejecucion-pay', 'ejecucion-total']}
         ],
         filtros: [
             {key: "meta", name: "meta_id", placeholder: "Select. Meta", options: "metas", index: ["id", "id", "metaID"]},
