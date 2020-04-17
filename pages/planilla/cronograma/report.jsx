@@ -241,6 +241,8 @@ export default class Report extends Component
         // except
         query += index == 0 ? `neto=${this.state.neto}` : `&neto=${this.state.neto}`;
         query += index == 0 ? `negativo=${this.state.negativo}` : `&negativo=${this.state.negativo}`;
+        payload.neto = this.state.neto;
+        payload.negativo = this.state.negativo;
         // response
         return _string ? query : payload;
     }
