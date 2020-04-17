@@ -76,6 +76,7 @@ export default class Report extends Component
             {value: "personal", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/personal/{id}", params: ["id"], action: "blob", type: "text/html"},
             {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}", params: ["id"], action: "link"},
             {value: "ejecucion-pay", text: "Generar pago PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/pago", params: ["id"], action: "link"},
+            {value: "ejecucion-total", text: "Generar eje. Total PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/total", params: ["id"], action: "link"},
         ],
         type_report_id: "",
         metas: [],
