@@ -2,13 +2,11 @@ import React, { Component, Fragment } from 'react'
 import { Form, Image, Select, Button } from 'semantic-ui-react';
 import Router from 'next/router';
 import { authentication, unujobs } from '../../../services/apis';
-import { parseOptions } from '../../../services/utils';
-import Show from '../../../components/show';
+import { parseOptions, backUrl, parseUrl } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
-import { findPerson } from '../../../storage/actions/personActions';
-import CreateWork from '../../../components/trabajador/createWork';
+import btoa from 'btoa'
 
 export default class CreateTrabajador extends Component
 {
@@ -16,18 +14,12 @@ export default class CreateTrabajador extends Component
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let { query, pathname, store } = ctx;
-        if ( query.id ) {
-            await store.dispatch(findPerson(ctx));
-        }
-        // response
-        let { person } = await store.getState().person;
-        return { query, pathname, person }
+        return { query, pathname }
     }
 
     state = {
         loader: false,
         block: false,
-        path: "",
         form: {
             name: "",
             ape_pat: "",
@@ -51,9 +43,6 @@ export default class CreateTrabajador extends Component
     }
 
     componentDidMount = () => {
-        let tmp = this.props.pathname.split('/');
-        tmp.pop();
-        this.setState({ path: tmp.join('/') });
         // apis
         this.getDocumentType();
         this.getDepartamento();
@@ -69,6 +58,16 @@ export default class CreateTrabajador extends Component
 
         if (nextState.form.document_number != form.document_number) {
             await this.getReniec(nextState.form.document_number);
+        }
+    }
+
+    handleBack = () => {
+        let { pathname, query, push } = Router;
+        this.setState({ loader: true });
+        if (query.href) {
+            push(query.href);
+        } else {
+            push({ pathname: backUrl(pathname) });
         }
     }
 
@@ -154,16 +153,29 @@ export default class CreateTrabajador extends Component
         // request
         await authentication.post(`create_person`, form)
         .then(async res => {
-            let { success, message } = res.data;
+            let { success, message, person } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
+            if (success) {
+                let id = btoa(person.id)
+                await Router.push({ pathname: parseUrl(Router.pathname, "add"), query: { id } });
+            }
         }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.setState({ loader: false });
     }
 
+    onExist = async () => {
+        let id = await prompt(`Porfavor ingrese su N° de Documento`);
+        if (id) {
+            this.setState({ loader: true });
+            let { pathname, push } = Router;
+            push({ pathname: parseUrl(pathname, 'add'), query: { id: btoa(id), type: 'document' } });
+        }
+    }
+
     render() {    
 
-        let { image_render, form, path, work, document_types } = this.state;
+        let { image_render, form } = this.state;
         let { query } = this.props;
 
             return (
@@ -171,7 +183,7 @@ export default class CreateTrabajador extends Component
                     <div className="col-md-12">
                         <Body>
                             <div className="card-header">
-                                <BtnBack/> <span className="ml-3"><i className="fas fa-plus"></i> Agregar Nueva Persona</span>
+                                <BtnBack onClick={this.handleBack}/> <span className="ml-3"><i className="fas fa-plus"></i> Agregar Nueva Persona</span>
                             </div>
 
                             <div className="card-body">
@@ -266,12 +278,14 @@ export default class CreateTrabajador extends Component
                                                         <label htmlFor="">Genero <b className="text-red">*</b></label>
                                                         <Select
                                                             placeholder="Select. Genero"
+                                                            name="gender"
                                                             value={this.state.form.gender}
                                                             options={[
                                                                 { key: "M", value: "M", text: "Masculino" },
                                                                 { key: "F", value: "F", text: "Femenino" },
                                                                 { key: "I", value: "I", text: "No Binario" }
                                                             ]}
+                                                            onChange={(e, obj) => this.handleInput(obj)}
                                                         />
                                                     </Form.Field>
                                                 </div>
@@ -303,6 +317,18 @@ export default class CreateTrabajador extends Component
                                                         </select>
                                                     </Form.Field>
                                                 </div>       
+
+                                                <div className="col-md-4 mb-2">
+                                                    <Form.Field>
+                                                        <label htmlFor="">Fecha de nacimiento <b className="text-red">*</b></label>
+                                                        <input type="date"
+                                                            disabled={this.state.block}
+                                                            name="date_of_birth"
+                                                            value={form.date_of_birth ? form.date_of_birth : ''}
+                                                            onChange={(e) => this.handleInput(e.target)}
+                                                        />
+                                                    </Form.Field>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -388,7 +414,7 @@ export default class CreateTrabajador extends Component
                                             <Form.Field>
                                                 <label htmlFor="">Teléfono</label>
                                                 <input type="text"
-                                                    name="name"
+                                                    name="phone"
                                                     value={form.phone ? form.phone : ''}
                                                     onChange={(e) => this.handleInput(e.target)}
                                                     placeholder="Ingrese un número telefónico"
@@ -396,18 +422,24 @@ export default class CreateTrabajador extends Component
                                             </Form.Field>
                                         </div>
 
-                                        <div className="col-md-12 text-right">
+                                        <div className="col-md-12">
                                             <hr/>
+                                        </div>
+
+                                        <div className="col-md-12 text-right">
+                                            <Button color="orange"
+                                                basic
+                                                onClick={this.onExist}
+                                            >
+                                                <i className="fas fa-user"></i> Ya existe!!!
+                                            </Button>
+
                                             <Button color="teal"
                                                 onClick={this.create}
                                             >
                                                 <i className="fas fa-save"></i> Guardar y Continuar
                                             </Button>
                                         </div>
-
-                                        <Show>
-                                            <CreateTrabajador/>
-                                        </Show>
                                     </div>
                                 </Form>
                             </div>
