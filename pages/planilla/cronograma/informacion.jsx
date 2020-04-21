@@ -12,7 +12,8 @@ import Router from 'next/router';
 import { responsive } from '../../../services/storage.json';
 import { Body, BtnBack, DrownSelect } from '../../../components/Utils';
 import UpdateDesctMassive from '../../../components/cronograma/updateDesctMassive';
-
+import Open from '../../../components/cronograma/open';
+import Cerrar from '../../../components/cronograma/close';
 
 export default class CronogramaInformacion extends Component
 {
@@ -521,19 +522,6 @@ export default class CronogramaInformacion extends Component
                                     </div>
                                 </Show>
 
-                                <Show condicion={this.state.total && !cronograma.estado}>
-                                    <div className="col-md-4 mb-1">
-                                        <Button
-                                            fluid
-                                            color="orange"
-                                            disabled={loading || this.state.block}
-                                            onClick={this.sendEmail}
-                                        >
-                                            <Icon name="send"/> { this.state.send ? 'Enviando...' : 'Enviar Email' }
-                                        </Button>
-                                    </div>
-                                </Show>
-
                                 <Show condicion={!this.state.edit && this.state.total}>
                                     <div className="col-md-12 mb-1 col-sm-12 col-12">
                                         <div className="row">
@@ -575,41 +563,95 @@ export default class CronogramaInformacion extends Component
                             </div>
                         </div>
 
-                        <div className="col-md-3 col-lg-4 col-sm-5 col-12">
-                            <div className="row justify-content-end">
-                                <Show condicion={this.state.edit}>
-                                    <div className="col-md-6 mb-1 col-6">
-                                        <Button
-                                            fluid
-                                            color="blue"
-                                            loading={this.state.send}
-                                            disabled={loading || !this.state.edit || this.state.block}
-                                            onClick={this.handleConfirm}
-                                        >
-                                            <i className="fas fa-save mr-1"></i>
-                                            <Show condicion={this.props.screenX > responsive.md}>
-                                                Guardar
-                                            </Show>
-                                        </Button>    
-                                    </div>                
-                                </Show>
+                        <Show condicion={cronograma.estado}>                     
+                            <div className="col-md-3 col-lg-4 col-sm-5 col-12">
+                                <div className="row justify-content-end">
+                                    <Show condicion={this.state.edit}>
+                                        <div className="col-md-6 mb-1 col-6">
+                                            <Button
+                                                fluid
+                                                color="blue"
+                                                loading={this.state.send}
+                                                disabled={loading || !this.state.edit || this.state.block}
+                                                onClick={this.handleConfirm}
+                                            >
+                                                <i className="fas fa-save mr-1"></i>
+                                                <Show condicion={this.props.screenX > responsive.md}>
+                                                    Guardar
+                                                </Show>
+                                            </Button>    
+                                        </div>                
+                                    </Show>
 
-                                <Show condicion={this.state.total && cronograma.estado}>
-                                    <div className={`col-md-6 ${this.state.edit ? 'col-6' : 'col-12 col-sm-12'}`}>
-                                        <Button color={this.state.edit ? 'red' : 'teal'}
-                                            disabled={loading || this.state.block || this.state.send}
-                                            onClick={(e) => this.setState(state => ({ edit: !state.edit }))}
-                                            fluid
-                                        >
-                                            <i className={this.state.edit ? 'fas fa-times mr-1' : 'fas fa-pencil-alt mr-1'}></i> 
-                                            <Show condicion={this.props.screenX > responsive.md}>
-                                                {this.state.edit ? 'Cancelar' : 'Editar'}
-                                            </Show>
-                                        </Button>
-                                    </div>
-                                </Show>
+                                    <Show condicion={!this.state.edit}>
+                                        <div className="col-md-6 mb-1 col-6">
+                                            <Button
+                                                color="red"
+                                                basic
+                                                fluid
+                                                disabled={loading}
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    let { push, pathname, query } = Router;
+                                                    query.cerrar = true;
+                                                    push({ pathname, query });
+                                                }}
+                                            >
+                                                <i className="fas fa-lock mr-1"></i>
+                                                <Show condicion={this.props.screenX > responsive.md}>
+                                                    Cerrar
+                                                </Show>
+                                            </Button>    
+                                        </div>                
+                                    </Show>
+
+                                    <Show condicion={this.state.total && cronograma.estado}>
+                                        <div className={`col-md-6 ${this.state.edit ? 'col-6' : 'col-12 col-sm-12'}`}>
+                                            <Button color={this.state.edit ? 'red' : 'teal'}
+                                                disabled={loading || this.state.block || this.state.send}
+                                                onClick={(e) => this.setState(state => ({ edit: !state.edit }))}
+                                                fluid
+                                            >
+                                                <i className={this.state.edit ? 'fas fa-times mr-1' : 'fas fa-pencil-alt mr-1'}></i> 
+                                                <Show condicion={this.props.screenX > responsive.md}>
+                                                    {this.state.edit ? 'Cancelar' : 'Editar'}
+                                                </Show>
+                                            </Button>
+                                        </div>
+                                    </Show>
+                                </div>
                             </div>
-                        </div>
+                        </Show>
+
+                        <Show condicion={this.state.total && !cronograma.estado}>
+                            <div className="col-md-2 mb-1 col-6">
+                                <Button
+                                    fluid
+                                    disabled={loading || this.state.block}
+                                    onClick={e => {
+                                        e.preventDefault();
+                                        let { push, pathname, query } = Router;
+                                        query.open = true;
+                                        push({ pathname, query });
+                                    }}
+                                >
+                                    <Icon name="unlock"/> Abrir
+                                </Button>
+                            </div>
+                        </Show>
+                    
+                        <Show condicion={this.state.total && !cronograma.estado}>
+                            <div className="col-md-2 mb-1 col-6">
+                                <Button
+                                    fluid
+                                    color="orange"
+                                    disabled={loading || this.state.block}
+                                    onClick={this.sendEmail}
+                                >
+                                    <Icon name="send"/> { this.state.send ? 'Enviando...' : 'Enviar Email' }
+                                </Button>
+                            </div>
+                        </Show>
                     </div>              
                 </div>
 
@@ -619,6 +661,26 @@ export default class CronogramaInformacion extends Component
                         query.desc_massive = null;
                         push({ pathname, query });
                     }}/>
+                </Show>
+
+                <Show condicion={query.open}>
+                    <Open cronograma={this.state.cronograma}
+                        isClose={e => {
+                            let { push, pathname, query } = Router;
+                            query.open = null;
+                            push({ pathname, query });
+                        }}
+                    />
+                </Show>
+
+                <Show condicion={query.cerrar}>
+                    <Cerrar cronograma={this.state.cronograma}
+                        isClose={e => {
+                            let { push, pathname, query } = Router;
+                            query.cerrar = null;
+                            push({ pathname, query });
+                        }}
+                    />
                 </Show>
             </Fragment>
         )

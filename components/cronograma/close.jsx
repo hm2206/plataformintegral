@@ -10,23 +10,20 @@ export default class Close extends Component
 {
 
     state = {
-        id: "",
         loader: false,
-        token_verify: ""
-    }
-
-    componentDidMount = () => {
-        this.setState((state, props) => ({ id: props.query.close ? atob(props.query.close) : "" }));
     }
 
     close = async () => {
         this.setState({ loader: true });
-        await unujobs.post(`cronograma/${this.state.id}/close`, { token_verify: this.state.token_verify })
+        let { cronograma } = this.props;
+        await unujobs.post(`cronograma/${cronograma.id}/close`)
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
-            if (success) Router.push({ pathname: Router.pathname, query: { close: "" } });
+            let { pathname, query, push } = Router;
+            query.cerrar = null;
+            if (success) push({ pathname, query });
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.setState({ loader: false });
@@ -37,7 +34,7 @@ export default class Close extends Component
             <Modal
                 show={true}
                 {...this.props}
-                titulo={<span><i className="fas fa-lock"></i> Cerrar cronograma: {this.state.id}</span>}
+                titulo={<span><i className="fas fa-lock"></i> Cerrar cronograma: #{this.props.cronograma && this.props.cronograma.id}</span>}
             >
                 <Form className="card-body" loading={this.state.loader}>
                     <h1 className="text-center mt-5">
@@ -47,25 +44,18 @@ export default class Close extends Component
                     </h1>
 
                     <div className="row justify-content-center mt-5">
-                        <div className="col-md-8">
-                            <Form.Field>
-                                <label htmlFor="">Contraseña de cierre de cronograma</label>
-                                <input type="password"
-                                    max="8"
-                                    placeholder="Ingrese la contraseña de cierre"
-                                    value={this.state.token_verify}
-                                    onChange={({ target }) => this.setState({ token_verify: target.value })}
-                                />
-                            </Form.Field>
+                        <div className="col-md-8 text-left">
+                            1.- El cronograma será cerrardo solo por las personas autorizadas. <br/>
+                            2.- Todas las acciones son monitoreadas! <br/>
                         </div>
                     </div>
 
                     <div className="row justify-content-center mt-3">
-                        <div className="col-md-8 text-right mr-4">
+                        <div className="col-md-8 text-center mr-4">
                             <Button color="red"
                                 onClick={this.close}
                             >
-                                <i className="fas fa-times"></i> Cerrar
+                                <i className="fas fa-check"></i> Cerrar
                             </Button>
                         </div>
                     </div>
