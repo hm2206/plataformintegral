@@ -34,7 +34,7 @@ export default class Report extends Component
             {key: "general", value: "general", text: "Reporte General", icon: "file text outline", filtros: ['meta'], buttons: ['general']},
             {key: "planilla", value: "planilla", text: "Reporte de Planilla", icon: "file text outline", filtros: ['meta', 'cargo'], buttons: ['planilla']},
             {key: "boleta", value: "boleta", text: "Reporte de Boleta", icon: "file text outline", filtros: ['meta', 'cargo'], buttons: ['boleta']},
-            {key: "pago", value: "pago", text: "Reporte Medio de Pago", icon: "file text outline", filtros: ['pay', 'type_categoria'], buttons: ['pay', 'pay-txt', 'pay-csv']},
+            {key: "pago", value: "pago", text: "Reporte Medio de Pago", icon: "file text outline", filtros: ['pay','cargo', 'type_categoria'], buttons: ['pay', 'pay-txt', 'pay-csv']},
             {key: "afp", value: "afp", text: "Reporte de AFP y ONP", icon: "file text outline", filtros: ['afp'], buttons: ['afp', 'afp-net']},
             {key: "remuneracion", value: "remuneracion", text: "Reporte de Remuneraciones", icon: "file text outline", filtros: ['type_remuneracion'], buttons: ['remuneracion']},
             {key: "descuento", value: "descuento", text: "Reporte de Descuentos", icon: "file text outline", filtros: ['type_descuento'], buttons: ['descuento']},
