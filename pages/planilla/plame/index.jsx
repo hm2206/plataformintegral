@@ -111,17 +111,17 @@ export default class Plame extends Component
                                             Reporte PLAME
                                         </a>
 
-                                        <a href="" className="ml-2 mr-2 text-success" target="_blank">
+                                        <a href={`${unujobs.path}/plame/jor/${this.state.year}/${this.state.mes}?download=1`} className="ml-2 mr-2 text-success" target="_blank">
                                             <i className="fas fa-file-alt mr-1"></i>
                                             Generar JOR
                                         </a>
 
-                                        <a href="" className="ml-2 mr-2 text-dark" target="_blank">
+                                        <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1`} className="ml-2 mr-2 text-dark" target="_blank">
                                             <i className="fas fa-file-alt mr-1"></i>
                                             Generar REM
                                         </a>
 
-                                        <a href="" className="ml-2 mr-2 text-red" target="_blank">
+                                        <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen`} className="ml-2 mr-2 text-red" target="_blank">
                                             <i className="fas fa-file-alt mr-1"></i>
                                             Generar PEN
                                         </a>
