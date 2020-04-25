@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Body, BtnBack, BtnSelect } from '../../../components/Utils';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
-import { AUTHENTICATE } from '../../../services/auth';
+import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { backUrl, parseOptions } from '../../../services/utils';
 import Router from 'next/dist/client/router';
 import { Form, Button, Select } from 'semantic-ui-react';
@@ -18,7 +18,8 @@ export default class Report extends Component
         let { pathname, query, store } = ctx;
         await store.dispatch(findCronograma(ctx));
         let { cronograma } = await store.getState().cronograma;
-        return { pathname, query, cronograma };
+        let auth_token = await AUTH(ctx);
+        return { pathname, query, cronograma, auth_token };
     }
 
     state = {
@@ -192,10 +193,16 @@ export default class Report extends Component
         if (obj.action == 'link') {
             let query = await this.genetateQuery();
             let link = await this.handleUrl(obj.url, obj.params);
-            let a = document.createElement('a');
-            a.href = `${unujobs.path}/${link}?${query}`;
-            a.target = '_blank';
-            a.click();
+            let form = document.createElement('form');
+            let input = document.createElement('input');
+            form.appendChild(input);
+            input.name = 'auth_token';
+            input.value = this.props.auth_token;
+            document.body.appendChild(form);
+            form.action = `${unujobs.path}/${link}?${query}`;
+            form.method = 'POST';
+            form.target = '_blank';
+            form.submit();
         } else if (obj.action == 'blob') {
             let params = await this.genetateQuery(false);
             let link = await this.handleUrl(obj.url, obj.params);
