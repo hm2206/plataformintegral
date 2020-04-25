@@ -152,13 +152,13 @@ export default class Report extends Component
 
     handleBack = (e) => {
         this.setState({ loading: true })
-        let { cronograma } = this.props;
+        let { cronograma } = this.props.cronograma;
         let { pathname, push, query } = Router; 
         if (query.href) {
             push({ pathname: query.href, query });
         } else {
             let newQuery = { year: cronograma && cronograma.year, mes: cronograma && cronograma.mes };
-            push({ pathname: backUrl(pathname), newQuery });
+            push({ pathname: backUrl(pathname), query: newQuery });
         }
     }
 
