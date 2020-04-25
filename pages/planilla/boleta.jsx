@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Datatable from '../../components/datatable';
 import Router from 'next/router';
-import { AUTHENTICATE } from '../../services/auth';
+import { AUTHENTICATE, AUTH } from '../../services/auth';
 import { Form, Button } from 'semantic-ui-react';
 import { allHistorial } from '../../storage/actions/historialActions';
 import { unujobs } from '../../services/apis';
@@ -33,7 +33,8 @@ export default class DuplicadoBoleta extends Component {
         query.query_search = await query.query_search ? query.query_search : "";
         await store.dispatch(allHistorial(ctx));
         let { page_historial } = store.getState().historial;
-        return {query, pathname, page_historial }
+        let auth_token = await AUTH(ctx);
+        return {query, pathname, page_historial, auth_token }
     }
 
     componentDidMount = () => {
@@ -73,7 +74,7 @@ export default class DuplicadoBoleta extends Component {
     handleBoleta = async (obj) => {
         this.setState({ loading: true });
         let path = `pdf/boleta/${obj.cronograma_id}?meta_id=${obj.meta_id}&historial_id=${obj.id}`;
-        await unujobs.fetch(path, { method: 'POST' })
+        await unujobs.fetch(path, { method: 'POST', headers: { Authorization: `Bearer ${this.props.auth_token}`  } })
         .then(resData => resData.blob())
         .then(blob => {
             let a = document.createElement('a');
