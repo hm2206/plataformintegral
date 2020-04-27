@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import Loader from "../components/loader";
 import { CheckList, CheckBox } from "../components/Utils";
+import { Pagination } from 'semantic-ui-react';
 
 
 export default class DataTable extends Component {

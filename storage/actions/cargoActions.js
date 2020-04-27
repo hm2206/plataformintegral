@@ -10,8 +10,9 @@ export const cargoActionsTypes = {
 export const pageCargo = (ctx) => {
     return async (dispatch) => {
         let { query } = ctx;
-        await unujobs.get(`cargo?estado=${query.estado}`)
-        .then(res => dispatch({ type: cargoActionsTypes.PAGE_CARGO, payload: res.data }))
+        let Authorization = await configAuthorization(ctx);
+        await unujobs.get(`cargo?estado=${query.estado}`, { headers: { Authorization } })
+        .then(res =>  dispatch({ type: cargoActionsTypes.PAGE_CARGO, payload: res.data }))
         .catch(err => console.log(err.message));
     }
 }

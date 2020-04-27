@@ -1,14 +1,15 @@
 import React, {Component, Fragment} from 'react';
 import {Button, Form} from 'semantic-ui-react';
-import Datatable from '../../components/datatable';
-import {authentication} from '../../services/apis';
+import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
-import {BtnFloat, Body} from '../../components/Utils';
-import { AUTHENTICATE, AUTH } from '../../services/auth';
-import { pageCargo } from '../../storage/actions/cargoActions';
+import {BtnFloat, Body} from '../../../components/Utils';
+import { AUTHENTICATE, AUTH } from '../../../services/auth';
+import { allTypeSindicato } from '../../../storage/actions/typeSindicatoActions';
+import { Pagination } from 'semantic-ui-react';
+import Show from '../../../components/show';
 
-export default class Cargo extends Component {
+export default class TypeRemuneracion extends Component {
 
     constructor(props) {
         super(props);
@@ -24,10 +25,10 @@ export default class Cargo extends Component {
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let {query, pathname, store} = ctx;
-        query.estado = query.estado ? query.estado : 1;
-        await store.dispatch(pageCargo(ctx));
-        let { page_cargos } = store.getState().cargo;
-        return {query, pathname, page_cargos}
+        query.page = query.page ? query.page : 1;
+        await store.dispatch(allTypeSindicato(ctx));
+        let { type_sindicatos } = store.getState().type_sindicato;
+        return {query, pathname, type_sindicatos}
     }
 
     componentWillReceiveProps = (nextProps) => {
@@ -36,7 +37,6 @@ export default class Cargo extends Component {
 
     handleInput = ({ name, value }) => {
         this.setState({ [name]: value })
-        console.log(name, value);
     }
 
     getOption(obj, key, index) {
@@ -52,37 +52,53 @@ export default class Cargo extends Component {
         push({ pathname, query });
     }
 
+    handlePage = async (e, { activePage }) => {
+        this.setState({ loading: true });
+        let { pathname, query, push } = Router;
+        query.page = activePage;
+        await push({ pathname, query });
+        this.setState({ loading: false });
+    }
+
     render() {
 
         let {loading} = this.state;
-        let { page_cargos } = this.props;
+        let { type_sindicatos, query } = this.props;
 
         return (
                 <Form className="col-md-12">
                     <Body>
-                        <Datatable titulo="Lista de Los Cargos o Particiones Presupuestales"
+                        <Datatable titulo="Lista de Tip. Remuneraciones"
                         isFilter={false}
                         loading={loading}
                         headers={
-                            ["#ID", "Descripcion", "Planilla", "Ext Presupuestal", "Estado"]
+                            ["#ID", "Descripción", "Tip. Descuento", "Monto", "Porcentaje", "Estado"]
                         }
                         index={
                             [
                                 {
                                     key: "id",
                                     type: "text"
-                                }, {
-                                    key: "descripcion",
+                                }, 
+                                {
+                                    key: "nombre",
                                     type: "text"
-                                }, {
-                                    key: "planilla.nombre",
-                                    type: "icon"
-                                }, {
-                                    key: "ext_pptto",
+                                },
+                                {
+                                    key: "type_descuento.descripcion",
                                     type: "icon",
                                     bg: "dark",
                                     justify: "center"
-                                }, {
+                                },
+                                {
+                                    key: "monto",
+                                    type: "text"
+                                },
+                                {
+                                    key: "porcentaje",
+                                    type: "text"
+                                },
+                                {
                                     key: "estado",
                                     type: "switch",
                                     justify: "center",
@@ -125,35 +141,17 @@ export default class Cargo extends Component {
                         }
                         optionAlign="text-center"
                         getOption={this.getOption}
-                        data={page_cargos.data}>
-                        <div className="form-group">
-                            <div className="row">
-
-                                <div className="col-md-4 mb-1">
-                                    <select  name="estado"
-                                        value={this.state.estado}
-                                        onChange={(e) => this.handleInput(e.target)}
-                                    >
-                                        <option value="1">Cargos Activos</option>
-                                        <option value="0">Cargos Deshabilitado</option>
-                                    </select>
-                                </div>
-
-                                <div className="col-md-2">
-                                    <Button onClick={this.handleSearch}
-                                        disabled={this.state.loading}
-                                        color="blue"
-                                    >
-                                        <i className="fas fa-search mr-1"></i>
-                                        <span>Buscar</span>
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </Datatable>
+                        data={type_sindicatos}
+                    />
                 </Body>
 
-                <BtnFloat>
+                <BtnFloat
+                    onClick={async (e) => {
+                        await this.setState({ loading: true });
+                        let { pathname, push } = Router;
+                        push({ pathname: `${pathname}/create` });
+                    }}
+                >
                     <i className="fas fa-plus"></i>
                 </BtnFloat>
             </Form>

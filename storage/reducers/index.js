@@ -6,6 +6,12 @@ import info from './infoReducer';
 import cargo from './cargoReducer';
 import historial from './historialReducer';
 import person from './personReducer';
+import type_remuneracion from './typeRemuneracionReducer';
+import type_descuento from './typeDescuentoReducer';
+import type_aportacion from './typeAportacionReducer';
+import type_categoria from './typeCategoriaReducer';
+import type_detalle from './typeDetalleReducer';
+import type_sindicato from './typeSindicatoReducer'
 
 const rootReducer = combineReducers({
     auth,
@@ -14,7 +20,13 @@ const rootReducer = combineReducers({
     info,
     cargo,
     historial,
-    person
+    person,
+    type_remuneracion,
+    type_descuento,
+    type_aportacion,
+    type_categoria,
+    type_detalle,
+    type_sindicato,
 });
 
 export default rootReducer;
