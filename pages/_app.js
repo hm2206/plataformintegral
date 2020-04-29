@@ -123,6 +123,7 @@ class MyApp extends App {
           {/* <script src="/js/Chart.min.js"></script> */}
           <script src="/js/theme.min.js"></script>
 
+          <script data-ad-client="ca-pub-6166160936934803" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         </Head>
 
 
