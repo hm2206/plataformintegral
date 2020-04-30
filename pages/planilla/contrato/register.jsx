@@ -127,9 +127,8 @@ export default class Register extends Component
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
             if (success) {
-                let { push, pathname, query } = Router;
                 let id = btoa(body.id);
-                await push({ pathname: parseUrl(pathname, 'pay'), query: { id } });
+                location.href = `${parseUrl(location.pathname, 'pay')}?id=${id}`;
             }
         }).catch(err => {
             let { status, data } = err.response;

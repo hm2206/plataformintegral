@@ -105,7 +105,7 @@ export default class CreateInfo extends Component
                                 headers={["#ID", "Apellidos y Nombres", "F. Ingreso", "Plaza", "Perfil Laboral", "Estado"]}
                                 data={this.state.infos}
                                 index={[
-                                    { key: "person.id", type: "text" },
+                                    { key: "id", type: "text" },
                                     { key: "person.fullname", type: "text" },
                                     { key: "fecha_de_ingreso", type: "date", bg: "warning" },
                                     { key: "plaza", type: "icon" },
