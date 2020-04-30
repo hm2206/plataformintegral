@@ -9,7 +9,7 @@ import Show from '../../../components/show';
 export default class Plame extends Component 
 {
 
-    static getInititalProps = async (ctx) => {
+    static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let auth_token = await AUTH(ctx);
         let { pathname, query } = ctx;
