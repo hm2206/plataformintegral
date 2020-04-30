@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Body } from '../../../components/Utils';
-import { AUTHENTICATE } from '../../../services/auth';
+import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { unujobs } from '../../../services/apis';
 import { Form, Button } from 'semantic-ui-react';
 import Show from '../../../components/show';
@@ -11,8 +11,9 @@ export default class Plame extends Component
 
     static getInititalProps = async (ctx) => {
         await AUTHENTICATE(ctx);
-        let { pathname, query, store } = ctx;
-        return { pathname, query }
+        let auth_token = await AUTH(ctx);
+        let { pathname, query } = ctx;
+        return { pathname, query, auth_token }
     }
 
     state = {
@@ -48,6 +49,9 @@ export default class Plame extends Component
     }
 
     render() {
+
+        let { auth_token } = this.props;
+
         return (
             <div className="col-md-12">
                 <Body>
@@ -106,22 +110,22 @@ export default class Plame extends Component
 
                                 <Show condicion={this.state.success}>
                                     <div className="col-md-12 mb-1">
-                                        <a href={`${unujobs.path}/pdf/plame/${this.state.year}/${this.state.mes}`} className="ml-2 mr-2" target="_blank">
+                                        <a href={`${unujobs.path}/pdf/plame/${this.state.year}/${this.state.mes}?auth_token=${auth_token}`} className="ml-2 mr-2" target="_blank">
                                             <i className="fas fa-users mr-1"></i>
                                             Reporte PLAME
                                         </a>
 
-                                        <a href={`${unujobs.path}/plame/jor/${this.state.year}/${this.state.mes}?download=1`} className="ml-2 mr-2 text-success" target="_blank">
+                                        <a href={`${unujobs.path}/plame/jor/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} className="ml-2 mr-2 text-success" target="_blank">
                                             <i className="fas fa-file-alt mr-1"></i>
                                             Generar JOR
                                         </a>
 
-                                        <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1`} className="ml-2 mr-2 text-dark" target="_blank">
+                                        <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} className="ml-2 mr-2 text-dark" target="_blank">
                                             <i className="fas fa-file-alt mr-1"></i>
                                             Generar REM
                                         </a>
 
-                                        <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen`} className="ml-2 mr-2 text-red" target="_blank">
+                                        <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen&auth_token=${auth_token}`} className="ml-2 mr-2 text-red" target="_blank">
                                             <i className="fas fa-file-alt mr-1"></i>
                                             Generar PEN
                                         </a>
