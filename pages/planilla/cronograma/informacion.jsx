@@ -4,7 +4,7 @@ import { Form, Button, Select, Icon } from 'semantic-ui-react';
 import { Row } from 'react-bootstrap';
 import { AUTHENTICATE } from '../../../services/auth';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
-import { parseOptions, parseUrl } from '../../../services/utils';
+import { parseOptions, parseUrl, Confirm } from '../../../services/utils';
 import Show from '../../../components/show';
 import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
@@ -306,21 +306,56 @@ export default class CronogramaInformacion extends Component
             query.href = pathname;
             await push({ pathname: parseUrl(pathname, 'report'), query });
         } else if (name == 'sync-remuneracion') {
-            await this.syncConfig();
+            await this.syncRemuneracion();
+        } else if(name == 'sync-aportacion') {
+            await this.syncAportacion();
+        }else if (name == 'processing') {
+            await this.processing();
         }
         // end loading
         this.setState({ loading: false });
     }
 
-    syncConfig = async () => {
-        this.setState({ loading: true });
-        await unujobs.post(`info/ejemlo/sync_config`)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-        }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
-        this.setState({ loading: false });
+    syncRemuneracion = async () => {
+        let response = await Confirm("warning", "¿Desea agregar las remuneraciones a los trabajadores?", "Confirmar");
+        if (response) {
+            this.setState({ loading: true });
+            await unujobs.post(`cronograma/${this.state.cronograma.id}/add_remuneracion`)
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+            }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
+            this.setState({ loading: false });
+        }
+    }
+
+    syncAportacion = async () => {
+        let response = await Confirm("warning", "¿Desea agregar las aportaciones a los trabajadores?", "Confirmar");
+        if (response) {
+            this.setState({ loading: true });
+            await unujobs.post(`cronograma/${this.state.cronograma.id}/add_aportacion`)
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+            }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
+            this.setState({ loading: false });
+        }
+    }
+
+    processing = async () => {
+        let response = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
+        if (response) {
+            this.setState({ loading: true });
+            await unujobs.post(`cronograma/${this.state.cronograma.id}/processing`)
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+            }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
+            this.setState({ loading: false });
+        }
     }
 
     render() {
@@ -396,8 +431,10 @@ export default class CronogramaInformacion extends Component
                                                 disabled={this.state.loading || this.state.edit}
                                                 options={[
                                                     { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
+                                                    { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
+                                                    { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
+                                                    { key: "processing", text: "Procesar Cronograma", icon: "database" },
                                                     { key: "report", text: "Reportes", icon: "file text outline" },
-                                                    { key: "sync-remuneracion", text: "Sync Remuneración", icon: "arrow circle down" }
                                                 ]}
                                                 onSelect={this.handleOnSelect}
                                             />
@@ -606,7 +643,7 @@ export default class CronogramaInformacion extends Component
                                     </Show>
 
                                     <Show condicion={this.state.total && cronograma.estado}>
-                                        <div className={`col-md-6 ${this.state.edit ? 'col-6' : 'col-12 col-sm-12'}`}>
+                                        <div className={`col-md-6 ${this.state.edit ? 'col-6' : 'col-6 col-sm-12'}`}>
                                             <Button color={this.state.edit ? 'red' : 'teal'}
                                                 disabled={loading || this.state.block || this.state.send}
                                                 onClick={(e) => this.setState(state => ({ edit: !state.edit }))}

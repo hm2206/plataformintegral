@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { unujobs } from '../../services/apis';
-import { Button, Form, Input } from 'semantic-ui-react';
+import { Button, Form, Input, Icon } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
 import Show from '../show';
+import { Confirm } from '../../services/utils';
 
 
 export default class Descuento extends Component
@@ -89,6 +90,26 @@ export default class Descuento extends Component
         });
     }
 
+    handleEdit = async (obj, edit = 0) => {
+        let res = await Confirm("warning", `Deseas ${edit ? 'Desactivar' : 'Activar'} el calculo automático para "${obj.descripcion}"`, "Confirmar");
+        if (res) {
+            this.props.setLoading(true);
+            this.setState({ loader: true });
+            await unujobs.post(`descuento/${obj.id}/edit`, { _method: 'PUT', edit })
+            .then(async res => { 
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                if (success) {
+                    await this.props.updatingHistorial();
+                }
+            }).catch(err => Swal.fire({ icon: 'error', text: "Algo salió mal :(" }))
+            this.setState({ loader: false });
+            this.props.setLoading(false);
+            this.props.setEdit(false);
+        }
+    }
+
     render() {
 
         let { descuentos, total_bruto, total_desct, total_neto, base, loader } = this.state;
@@ -137,16 +158,35 @@ export default class Descuento extends Component
                         </span>
                         <Form.Field>
                             <Show condicion={obj.edit}>
-                                <input type="number"
-                                    step="any" 
-                                    value={obj.monto}
-                                    disabled={!this.props.edit}
-                                    onChange={({target}) => this.handleMonto(index, target.value, obj)}
-                                    min="0"
-                                />
+                                <div className="row justify-aligns-center">
+                                    <div className={this.props.edit ? 'col-md-9 col-9' : 'col-md-12 col-12'}>
+                                        <input type="number"
+                                            step="any" 
+                                            value={obj.monto}
+                                            disabled={!this.props.edit}
+                                            onChange={({target}) => this.handleMonto(index, target.value, obj)}
+                                            min="0"
+                                        />
+                                    </div>
+
+                                    <Show condicion={this.props.edit}>
+                                        <div className="col-md-3 col-3">
+                                            <Button 
+                                                onClick={(e) => this.handleEdit(obj, 0)}
+                                                style={{ width: "100%", height: "100%" }}
+                                                size="small"
+                                                disabled={this.state.loading || !this.props.edit}>
+                                                <Icon name="asl"/>
+                                            </Button>
+                                        </div>
+                                    </Show>
+                                </div>
                             </Show>
                             <Show condicion={!obj.edit}>
-                                <Input icon='wait' iconPosition='left' defaultValue={obj.monto} disabled/>
+                                <Input icon='wait' iconPosition='left' 
+                                    defaultValue={obj.monto} 
+                                    disabled
+                                />
                             </Show>
                         </Form.Field>
                     </div>
