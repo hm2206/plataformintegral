@@ -35,6 +35,7 @@ export default class RemoveCronograma extends Component
         type_categoria_id: "",
         page: 2,
         total: 0,
+        condicion: 0,
         stop: false,
         block: false,
         send: false
@@ -163,6 +164,7 @@ export default class RemoveCronograma extends Component
             await unujobs.post(`cronograma/${this.state.cronograma.id}/remove`, { 
                 _method: 'DELETE' ,
                 cargo_id: this.state.cargo_id,
+                condicion: this.state.condicion,
                 type_categoria_id: this.state.type_categoria_id,
                 historial: JSON.stringify(payload)
             })
@@ -198,7 +200,7 @@ export default class RemoveCronograma extends Component
                     <Body>
                         <Form loading={this.state.loading}>
                             <div className="row">
-                                <div className="col-md-4 mb-1">
+                                <div className="col-md-3 mb-1">
                                     <Form.Field>
                                         <input type="text" 
                                             placeholder="Buscar por: Apellidos y Nombres"
@@ -223,7 +225,7 @@ export default class RemoveCronograma extends Component
                                     </Form.Field>
                                 </div>
 
-                                <div className="col-md-3 mb-1">
+                                <div className="col-md-2 mb-1">
                                     <Form.Field>
                                         <Select
                                             options={parseOptions(this.state.type_categorias, ["selec-cat", "", "Select. Tip. Categoría"], ["id", "id", "descripcion"])}
@@ -231,6 +233,22 @@ export default class RemoveCronograma extends Component
                                             name="type_categoria_id"
                                             onChange={(e, obj) => this.handleInput(obj)}
                                             value={this.state.type_categoria_id}
+                                            disabled={this.state.block}
+                                        />
+                                    </Form.Field>
+                                </div>
+
+                                <div className="col-md-2 mb-1">
+                                    <Form.Field>
+                                        <Select
+                                            options={[
+                                                { key: "remove", value: 0, text: "Solo Quitar" },
+                                                { key: "end", value: 1, text: "Quitar y Terminar Contrato" }
+                                            ]}
+                                            placeholder="Select. Condición"
+                                            name="condicion"
+                                            onChange={(e, obj) => this.handleInput(obj)}
+                                            value={this.state.condicion}
                                             disabled={this.state.block}
                                         />
                                     </Form.Field>
