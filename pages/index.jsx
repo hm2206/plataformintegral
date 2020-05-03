@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { AUTH, AUTHENTICATE } from '../services/auth';
 import CoverSimple from '../components/coverSimple';
 import { authentication } from '../services/apis';
+import NavCover from '../components/navCover';
 
 
 export default class Index extends Component
@@ -25,6 +26,15 @@ export default class Index extends Component
                     titulo={user.person.fullname}
                     username={user.username}
                     email={user.email}
+                />
+                <NavCover
+                    align="left"
+                    active="activity"
+                    options={[
+                        { key: "activity", text: "Actividad", active: true },
+                        { key: "data", text: "Datos Personales" },
+                        { key: "account", text: "Cuenta" },
+                    ]}
                 />
             </div>
         )
