@@ -155,6 +155,7 @@ export default class Meta extends Component {
                                 <div className="col-md-3">
                                     <Form.Field>
                                         <input type="number" 
+                                            name="year"
                                             value={this.state.year}
                                             onChange={(e) => this.handleInput(e.target)}
                                         />
@@ -174,12 +175,20 @@ export default class Meta extends Component {
                                         />
                                     </Form.Field>
                                 </div>
+                                <div className="col-md-2">
+                                    <Button fluid
+                                        color="blue"
+                                        onClick={this.handleSearch}
+                                    >
+                                        <i className="fas fa-search"></i>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </Datatable>
                         
                     <div className="text-center">
-                        <Show condicion={page_meta && page_meta.data.length > 0}>
+                        <Show condicion={page_meta && page_meta.data && page_meta.data.length > 0}>
                             <hr/>
                             <Pagination defaultActivePage={query.page} 
                                 totalPages={page_meta.last_page}
