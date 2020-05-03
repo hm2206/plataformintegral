@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import Loader from "../components/loader";
 import { CheckList, CheckBox } from "../components/Utils";
-import { Pagination } from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
 
 
 export default class DataTable extends Component {
@@ -209,7 +209,7 @@ export default class DataTable extends Component {
     let { datatable } = this.state;
 
     return (
-      <div className="car card-fluid" style={{ position: "relative" }}>
+      <Form className="car card-fluid" style={{ position: "relative" }} loading={loading}>
         <div className="card-header">
           {titulo}
         </div>
@@ -411,22 +411,8 @@ export default class DataTable extends Component {
               </table>
             </div>
           </div>
-          {loading ? (
-            <div
-              style={{
-                position: "absolute",
-                top: "0px",
-                left: "0px",
-                background: "rgba(255, 255, 255, 0.6)",
-                width: "100%",
-                height: "100%"
-              }}
-            >
-              <Loader />
-            </div>
-          ) : null}
         </div>
-      </div>
+      </Form>
     );
   }
 }

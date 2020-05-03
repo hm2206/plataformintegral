@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from 'react';
-import {Button, Form} from 'semantic-ui-react';
+import {Button, Form, Select} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
@@ -16,7 +16,8 @@ export default class Meta extends Component {
         this.state = {
             page: false,
             loading: false,
-            estado: "1"
+            estado: "1",
+            year: 2019
         }
 
         this.getOption = this.getOption.bind(this);
@@ -31,6 +32,13 @@ export default class Meta extends Component {
 
         let { page_meta } = store.getState().meta;
         return {query, pathname, page_meta}
+    }
+
+    componentDidMount = () => {
+        this.setState((state, props) => ({ 
+            year: props.query.year,
+            estado: props.query.estado
+        }))
     }
 
     componentWillReceiveProps = (nextProps) => {
@@ -51,6 +59,7 @@ export default class Meta extends Component {
         this.setState({ loading: true });
         let { pathname, query, push } = Router;
         query.estado = this.state.estado;
+        query.year = this.state.year;
         push({ pathname, query });
     }
 
@@ -58,6 +67,8 @@ export default class Meta extends Component {
         this.setState({ loading: true });
         let { pathname, query, push } = Router;
         query.page = activePage;
+        query.year = this.state.year;
+        query.estado = this.state.estado;
         await push({ pathname, query });
         this.setState({ loading: false });
     }
@@ -74,7 +85,7 @@ export default class Meta extends Component {
                         isFilter={false}
                         loading={loading}
                         headers={
-                            ["#METAID", "Descripción", "#ACTIVIDADID", "Actividad", "Estado"]
+                            ["#metaID", "Descripción", "#actividadID", "Actividad", "Estado"]
                         }
                         index={
                             [
@@ -138,10 +149,37 @@ export default class Meta extends Component {
                         optionAlign="text-center"
                         getOption={this.getOption}
                         data={page_meta && page_meta.data}
-                    />
+                    >
+                        <div className="card-body">
+                            <div className="row">
+                                <div className="col-md-3">
+                                    <Form.Field>
+                                        <input type="number" 
+                                            value={this.state.year}
+                                            onChange={(e) => this.handleInput(e.target)}
+                                        />
+                                    </Form.Field>
+                                </div>
+                                <div className="col-md-4">
+                                    <Form.Field>
+                                        <Select
+                                            fluid
+                                            options={[
+                                                {key: "active", value: "1", text: "Activo"},
+                                                {key: "des-active", value: "0", text: "Desactivado"}
+                                            ]}
+                                            name="estado"
+                                            value={this.state.estado}
+                                            onChange={(e, obj) => this.handleInput(obj)}
+                                        />
+                                    </Form.Field>
+                                </div>
+                            </div>
+                        </div>
+                    </Datatable>
                         
                     <div className="text-center">
-                        <Show condicion={page_meta && page_meta.data}>
+                        <Show condicion={page_meta && page_meta.data.length > 0}>
                             <hr/>
                             <Pagination defaultActivePage={query.page} 
                                 totalPages={page_meta.last_page}

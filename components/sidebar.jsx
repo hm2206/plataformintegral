@@ -88,7 +88,7 @@ class Sidebar extends Component {
                 </div>
               </div>
             </header>
-            <div className="aside-menu overflow-hidden">
+            <div className="aside-menu --overflow-hidden">
               <nav id="stacked-menu" className="stacked-menu">
                 <ul className="menu">
                   <li className={`menu-item ${this.state.pathname == '/' ? 'has-active' : ''}`}>
