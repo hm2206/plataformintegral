@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
+import { Loader } from 'semantic-ui-react';
 
-class Loader extends Component {
+class Loading extends Component {
   render() {
     return (
       <Fragment>
@@ -12,11 +13,11 @@ class Loader extends Component {
             alignItems: 'center'
           }}
         >
-            <span className="spinner-border"></span>
+             <Loader active />
         </div>
       </Fragment>
     );
   }
 }
 
-export default Loader;
+export default Loading;

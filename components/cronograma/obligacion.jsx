@@ -94,10 +94,6 @@ export default class Obligacion extends Component
         let newObject = Object.assign({}, this.state.form);
         newObject[name] = value;
         this.setState({ form: newObject});
-        if (this.state.form.tipo_documento == '01' &&  name == 'numero_de_documento' && value.length == 8) {
-            this.getDatosReniec(value);
-        }
-        // setting
     }
 
     handleInputUpdate = ({ name, value }, index = 0) => {
@@ -197,9 +193,9 @@ export default class Obligacion extends Component
                         <div className="col-md-4 col-lg-3 mb-2">
                             <Form.Field>
                                 <input type="text" 
-                                    placeholder="Beneficiario"
-                                    name="beneficiario"
-                                    value={form.beneficiario}
+                                    placeholder="Numero de Cuenta"
+                                    name="numero_de_cuenta"
+                                    value={form.numero_de_cuenta}
                                     disabled={!this.props.edit}
                                     onChange={({ target }) => this.handleInput(target)}
                                 />
@@ -209,9 +205,9 @@ export default class Obligacion extends Component
                         <div className="col-md-4 col-lg-3 mb-2">
                             <Form.Field>
                                 <input type="text" 
-                                    placeholder="Numero de Cuenta"
-                                    name="numero_de_cuenta"
-                                    value={form.numero_de_cuenta}
+                                    placeholder="Beneficiario"
+                                    name="beneficiario"
+                                    value={form.beneficiario}
                                     disabled={!this.props.edit}
                                     onChange={({ target }) => this.handleInput(target)}
                                 />
@@ -420,11 +416,12 @@ export default class Obligacion extends Component
                                 </div>
                             </Show>
                             
-                            <div className="col-md-9"></div>
+                            <div className="col-md-10"></div>
 
                             <Show condicion={this.props.edit}>
-                                <div className="col-md-3 col-12 text-right">
-                                    <Button color="red fluid"
+                                <div className="col-md-2 col-12 text-right">
+                                    <Button color="red"
+                                        fluid
                                         onClick={(e) => this.delete(obl.id)}
                                     >
                                         <i className="fas fa-trash-alt"></i> Eliminar

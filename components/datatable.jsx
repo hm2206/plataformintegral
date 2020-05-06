@@ -209,7 +209,7 @@ export default class DataTable extends Component {
     let { datatable } = this.state;
 
     return (
-      <Form className="car card-fluid" style={{ position: "relative" }} loading={loading}>
+      <div className="car card-fluid" style={{ position: "relative" }} loading={loading}>
         <div className="card-header">
           {titulo}
         </div>
@@ -412,7 +412,21 @@ export default class DataTable extends Component {
             </div>
           </div>
         </div>
-      </Form>
+          {loading ? (
+            <div
+              style={{
+                position: "absolute",
+                top: "15%",
+                left: "0px",
+                background: "rgba(255, 255, 255, 0.6)",
+                width: "100%",
+                height: "100%"
+              }}
+            >
+              <Loader />
+            </div>
+          ) : null}
+      </div>
     );
   }
 }
