@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Form, Select } from 'semantic-ui-react';
+import { Button, Form, Select, Pagination } from 'semantic-ui-react';
 import { allInfo } from '../../../storage/actions/infoActions';
 import { AUTHENTICATE } from '../../../services/auth';
 import DataTable from '../../../components/datatable';
@@ -9,14 +9,15 @@ import { unujobs } from '../../../services/apis';
 import btoa from 'btoa';
 import { responsive } from '../../../services/storage.json';
 import { Body } from '../../../components/Utils';
+import Show from '../../../components/show';
 
-export default class CreateInfo extends Component
+export default class Contrato extends Component
 {
 
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let { query, pathname, store } = ctx;
-        query.page = 1;
+        query.page = query.page ? query.page : 1;
         query.query_search = query.query_search ? query.query_search : "";
         query.estado = query.estado ? query.estado : `1`;
         await store.dispatch(allInfo(ctx));
@@ -51,25 +52,11 @@ export default class CreateInfo extends Component
             infos: infos.data,
             total: infos.total,
             loading: false,
-            page: 1,
             query_search: query.query_search,
             estado: query.estado
         });
         // setting scrolling
         window.scrollTo(0, 0);
-    }
-
-    handleScroll = async (evt, body) => {
-        await this.getInfos();
-        body.style.overflow = 'auto';
-    }
-
-    getInfos = async () => {
-        await this.setState(state => ({ page: parseInt(state.page) + 1, loading: true }));
-        await unujobs.get(`info?page=${this.state.page}&query_search=${this.state.query_search}&estado=${this.state.estado}`)
-        .then(res => this.setState(state => ({ infos: state.infos.concat(res.data.data) })))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
     }
 
     handleOption = (obj, key, index) => {
@@ -95,7 +82,19 @@ export default class CreateInfo extends Component
         })
     }
 
+    handlePage = async (e, { activePage }) => {
+        this.setState({ loading: true });
+        let { pathname, query, push } = Router;
+        query.page = activePage;
+        query.estado = this.state.estado;
+        await push({ pathname, query });
+        this.setState({ loading: false });
+    }
+
     render() {
+
+        let { query, infos } = this.props;
+
         return (
             <div className="col-md-12">
                 <Body>
@@ -116,7 +115,6 @@ export default class CreateInfo extends Component
                                     { key: "pay", icon: "fas fa-coins" }
                                 ]}
                                 getOption={this.handleOption}
-                                onScroll={this.handleScroll}
                             >
                                 <div className="col-md-12 mt-2">
                                     <div className="row">
@@ -163,6 +161,16 @@ export default class CreateInfo extends Component
                                 </div>
 
                             </DataTable>
+                            <div className="text-center">
+                                <Show condicion={infos && infos.data && infos.data.length > 0}>
+                                    <hr/>
+                                    <Pagination defaultActivePage={query.page} 
+                                        totalPages={infos.last_page}
+                                        enabled={this.state.loading}
+                                        onPageChange={this.handlePage}
+                                    />
+                                </Show>
+                            </div>
                         </div>
 
                         <BtnFloat

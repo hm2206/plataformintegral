@@ -99,6 +99,23 @@ export default class Pay extends Component
         }
     }
 
+    update = async () => {
+        let form = new FormData;
+        form.append('configs', JSON.stringify(this.state.configs));
+        form.append('_method', 'PUT');
+        this.setState({ loading: true });
+        await unujobs.post(`info/${this.props.info.id}/config`, form)
+        .then(async res => {
+            let { success, message } = res.data;
+            let icon = success ? 'success' : 'error';
+            await Swal.fire({ icon, text: message });
+            if (success) {
+                this.setState({ edit: false });
+            }
+        }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal :(' }))
+        this.setState({ loading: false });
+    }
+
     render() {
 
         let { work } = this.state;
@@ -312,7 +329,10 @@ export default class Pay extends Component
                                             </div>
 
                                             <div className="col-md-3 col-6">
-                                                <Button color="blue" fluid>
+                                                <Button color="blue" 
+                                                    fluid
+                                                    onClick={this.update}
+                                                >
                                                     <i className="fas fa-save"></i> Guardar
                                                 </Button>
                                             </div>

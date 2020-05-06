@@ -2,11 +2,12 @@ import React, { Component } from 'react';
 import Datatable from '../../components/datatable';
 import Router from 'next/router';
 import { AUTHENTICATE, AUTH } from '../../services/auth';
-import { Form, Button } from 'semantic-ui-react';
+import { Form, Button, Pagination} from 'semantic-ui-react';
 import { allHistorial } from '../../storage/actions/historialActions';
 import { unujobs } from '../../services/apis';
 import Swal from 'sweetalert2';
 import { Body } from '../../components/Utils';
+import Show from '../../components/show'
 
 
 export default class DuplicadoBoleta extends Component {
@@ -29,7 +30,7 @@ export default class DuplicadoBoleta extends Component {
     static getInitialProps  = async (ctx) => {
         await AUTHENTICATE(ctx);
         let {query, pathname, store} = ctx;
-        query.page = 1;
+        query.page = query.page ? query.page : 1;
         query.query_search = await query.query_search ? query.query_search : "";
         await store.dispatch(allHistorial(ctx));
         let { page_historial } = store.getState().historial;
@@ -44,7 +45,6 @@ export default class DuplicadoBoleta extends Component {
     componentWillReceiveProps = async (nextProps) => {
         let { query, page_historial } = this.props;
         if (nextProps.query.query_search != query.query_search || nextProps.page_historial != page_historial) {
-            console.log('changed');
             await this.setting(nextProps);
         }
     }
@@ -54,7 +54,6 @@ export default class DuplicadoBoleta extends Component {
             query_search: props.query.query_search ? props.query.query_search : "",
             loading: false,
             historial: props.page_historial.data,
-            page: 2
         }))
     }
 
@@ -67,8 +66,17 @@ export default class DuplicadoBoleta extends Component {
         this.setState({ loading: true });
         let { push, pathname, query } = Router;
         query.query_search = this.state.query_search;
+        query.page = 1;
         await push({ pathname, query })
         this.setState({ loading: false, stop: false });
+    }
+
+    handlePage = async (e, { activePage }) => {
+        this.setState({ loading: true });
+        let { pathname, query, push } = Router;
+        query.page = activePage;
+        await push({ pathname, query });
+        this.setState({ loading: false });
     }
 
     handleBoleta = async (obj) => {
@@ -92,37 +100,11 @@ export default class DuplicadoBoleta extends Component {
         }
     }
 
-    handleScroll = async (e, body) => {
-        await this.getHistorial();
-        body.style.overflow = "auto";
-    }
-
-    getHistorial = async () => {
-        this.setState({ loading: true }); 
-        await unujobs.get(`historial?page=${this.state.page}&query_search=${this.state.query_search}`)
-        .then(res => {
-            let { data } = res.data;
-            if (data && data.length > 0) {
-                this.setState(state => ({ 
-                    historial: [...this.state.historial, ...res.data.data],
-                    page: state.page + 1 })
-                );
-            } else {
-                this.setState({ stop: true });
-            }
-        })
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
-
-    handleRemoveScroll = () => {
-        // manejar el evento al remover el scroll
-    }
 
     render() {
 
         let { loading, historial } = this.state;
-        let {query, pathname} = this.props;
+        let {query, pathname, page_historial} = this.props;
 
         return (
             <div className="col-md-12">
@@ -150,9 +132,6 @@ export default class DuplicadoBoleta extends Component {
                         }
                         getOption={this.getOption}
                         data={historial}
-                        onScroll={this.handleScroll}
-                        onStop={this.state.stop}
-                        onRemoveScroll={this.handleRemoveScroll}
                     >
                         <Form className="mb-3">
                             <div className="row">
@@ -182,6 +161,16 @@ export default class DuplicadoBoleta extends Component {
                             <hr/>
                         </Form>
                     </Datatable>
+                    <div className="text-center">
+                        <Show condicion={page_historial && page_historial.data && page_historial.data.length > 0}>
+                            <hr/>
+                            <Pagination defaultActivePage={query.page} 
+                                totalPages={page_historial.last_page}
+                                enabled={loading}
+                                onPageChange={this.handlePage}
+                            />
+                        </Show>
+                    </div>
                 </Body>
             </div>
         )
