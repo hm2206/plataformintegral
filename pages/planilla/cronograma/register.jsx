@@ -92,14 +92,12 @@ export default class RegisterCronograma extends Component
 
         return (
             <div className="col-md-12">
-                <Body>
-                    <BtnBack
-                        onClick={this.handleBack}
-                    />
-                    
+                <Body>                    
                     <div className="card- mt-3">
                         <div className="card-header">
-                            <i className="fas fa-plus ml-2"></i> Registrar Nuevo Cronograma
+                        <BtnBack
+                            onClick={this.handleBack}
+                        /> Registrar Nuevo Cronograma
                         </div>
                         <div className="card-body">
                             <div className="row justify-content-center">

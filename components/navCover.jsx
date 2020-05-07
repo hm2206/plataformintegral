@@ -35,11 +35,11 @@ export default class NavCover extends Component
 
     render() {
         return (
-            <nav class="page-navs">
-              <div class="nav-scroller">
-                <div class={this.props.align ? `nav nav-${this.props.align} nav-tabs` : 'nav nav-center nav-tabs'}>
+            <nav className="page-navs">
+              <div className="nav-scroller">
+                <div className={this.props.align ? `nav nav-${this.props.align} nav-tabs` : 'nav nav-center nav-tabs'}>
                   {this.state.newOptions && this.state.newOptions.map(obj => 
-                    <a class={`nav-link ${obj.active ? 'active' : ''}`}
+                    <a className={`nav-link ${obj.active ? 'active' : ''}`}
                       key={`option-${obj.key}`}
                       style={{ cursor: "pointer" }}
                       onClick={(e) => this.handleOption(obj.key)}

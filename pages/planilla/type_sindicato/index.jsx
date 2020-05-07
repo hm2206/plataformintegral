@@ -68,7 +68,7 @@ export default class TypeRemuneracion extends Component {
         return (
                 <Form className="col-md-12">
                     <Body>
-                        <Datatable titulo="Lista de Tip. Remuneraciones"
+                        <Datatable titulo="Lista de Tip. Afiliaciones"
                         isFilter={false}
                         loading={loading}
                         headers={
