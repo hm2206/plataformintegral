@@ -101,18 +101,6 @@ export default class Work extends Component {
                                     )}
                                 </select>
                             </Form.Field>
-
-                            <Form.Field>
-                                <b>Sincronización de datos de RENIEC</b>
-                                <Button 
-                                    basic
-                                    fluid
-                                    color="olive"
-                                    disabled={!this.props.edit}
-                                >
-                                    <i className="fas fa-sync"></i> Sincronizar RENIEC
-                                </Button>
-                            </Form.Field>
                         </div>
 
                         <div className="col-md-3">
@@ -159,8 +147,9 @@ export default class Work extends Component {
                                 <b>Fecha de Nacimiento</b>
                                 <input type="date" 
                                     name="date_of_birth"
-                                    defaultValue={moment.utc(work.date_of_birth).format('YYYY-MM-DD')}
+                                    value={work.date_of_birth}
                                     disabled={true}
+                                    onChange={this.handleInput}
                                 />
                             </Form.Field>
 
