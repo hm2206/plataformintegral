@@ -145,6 +145,7 @@ export default class Work extends Component {
 
                             <Form.Field>
                                 <b>Fecha de Nacimiento</b>
+                                <b className="ml-1 badge badge-warning mb-1">{moment(work.date_of_birth, "YYYY/MM/DD").fromNow()}</b>
                                 <input type="date" 
                                     name="date_of_birth"
                                     value={work.date_of_birth}
