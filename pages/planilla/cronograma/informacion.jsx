@@ -70,8 +70,8 @@ export default class CronogramaInformacion extends Component
         }
     }
 
-    componentWillReceiveProps = (nextProps) => {
-        if (nextProps != this.props) this.setting(nextProps);
+    componentWillReceiveProps = async (nextProps) => {
+        if (nextProps != this.props) await this.setting(nextProps);
     }
 
     componentWillUpdate = (nextProps, nextState) => {
@@ -93,7 +93,7 @@ export default class CronogramaInformacion extends Component
             descuentos,
             aportaciones,
             loading: false,
-            page: query.page ? query.page : 1,
+            page: query.page ? parseInt(query.page) : 1,
             like: query.like ? query.like : "",
             cargo_id: query.cargo_id ? parseInt(query.cargo_id) : "",
             type_categoria_id: query.type_categoria_id ? parseInt(query.type_categoria_id) : "",
@@ -194,10 +194,11 @@ export default class CronogramaInformacion extends Component
     }
 
     next = async (e) => {
-        let { page, last_page, edit } = this.state;
+        let { last_page, edit } = this.state;
+        let { page } = this.props.query;
         if (!edit) {
-            if (page < last_page) {
-                await this.setState(state => ({ page: parseInt(state.page) + 1, loading: true }));
+            if (parseInt(page) < last_page) {
+                await this.setState((state, props) => ({ page: parseInt(page) + 1, loading: true }));
                 let { push, pathname, query } = Router;
                 query.page = this.state.page;
                 query.active = this.state.active;
@@ -246,7 +247,7 @@ export default class CronogramaInformacion extends Component
     updatingHistorial = async () => {
         let { push, query, pathname } = Router;
         query.active = this.state.active;
-        push({ pathname, query });
+        await push({ pathname, query });
         this.setState({ send: false, edit: false });
     }
 
@@ -309,8 +310,10 @@ export default class CronogramaInformacion extends Component
             await this.syncRemuneracion();
         } else if(name == 'sync-aportacion') {
             await this.syncAportacion();
-        }else if (name == 'processing') {
+        } else if (name == 'processing') {
             await this.processing();
+        } else if (name == 'sync-afp') {
+            await this.syncAfp();
         }
         // end loading
         this.setState({ loading: false });
@@ -353,6 +356,28 @@ export default class CronogramaInformacion extends Component
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });
+                // volver a obtener los datos
+                if (success) {
+                    await this.updatingHistorial();
+                }
+            }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
+            this.setState({ loading: false });
+        }
+    }
+
+    syncAfp = async () => {
+        let response = await Confirm("warning", "¿Desea Sincronizar las Leyes Sociales?", "Confirmar");
+        if (response) {
+            this.setState({ loading: true });
+            await unujobs.post(`config_afp/sync/${this.state.cronograma.id}`)
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                // volver a obtener los datos
+                if (success) {
+                    await this.updatingHistorial();
+                }
             }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
             this.setState({ loading: false });
         }
@@ -433,6 +458,7 @@ export default class CronogramaInformacion extends Component
                                                     { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
                                                     { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
                                                     { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
+                                                    { key: "sync-afp", text: "Sync Leyes Sociales", icon: "cloud download" },
                                                     { key: "processing", text: "Procesar Cronograma", icon: "database" },
                                                     { key: "report", text: "Reportes", icon: "file text outline" },
                                                 ]}
@@ -579,7 +605,7 @@ export default class CronogramaInformacion extends Component
                                                         fluid
                                                         disabled={this.state.loading}
                                                     >
-                                                        {this.state.page} de {this.state.total}
+                                                        {this.props.query && this.props.query.page} de {this.state.total}
                                                     </Button>
                                                 </div>
                                             </Show>

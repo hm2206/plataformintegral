@@ -218,7 +218,7 @@ export default class RegisterCronograma extends Component
                                 
                                         <div className="col-md-12 text-right">
                                             <Button color="teal"
-                                                disabled={!this.readySend()}
+                                                disabled={!this.readySend() || this.state.loading}
                                                 onClick={this.saveAndContinue}
                                                 loading={this.state.loading}
                                             >

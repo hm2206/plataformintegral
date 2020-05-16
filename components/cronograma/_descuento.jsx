@@ -187,8 +187,9 @@ export default class Descuento extends Component
                                     <Show condicion={!this.props.edit}>
                                         <div className="col-md-12 col-12">
                                             <Input icon='wait' iconPosition='left' 
-                                                defaultValue={obj.monto} 
+                                                value={obj.monto} 
                                                 disabled
+                                                onChange={({target}) => this.handleMonto(index, target.value, obj)}
                                             />
                                         </div>
                                     </Show>
