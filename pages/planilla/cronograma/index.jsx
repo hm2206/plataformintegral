@@ -8,9 +8,6 @@ import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import SendEmail from '../../../components/cronograma/sendEmail';
 import Add from '../../../components/cronograma/add';
-import Close from '../../../components/cronograma/close';
-import Open from '../../../components/cronograma/open';
-import Edit from '../../../components/cronograma/edit';
 import { allCronograma } from '../../../storage/actions/cronogramaActions';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -97,9 +94,11 @@ export default class Cronograma extends Component {
             query = { id };
             pathname = `${pathname}/remove`;
         } else if (key == 'report') {
-            
             query = { id };
             pathname = `${pathname}/report`;
+        } else if (key == 'edit') {
+            query = { id };
+            pathname = `${pathname}/edit`;
         }
         // execute
         await Router.push({pathname, query});
@@ -304,24 +303,6 @@ export default class Cronograma extends Component {
                     <Show condicion={query.add}>
                         <Add query={query}
                             isClose={(e) => Router.push({ pathname, query: { add: "" } })}
-                        />
-                    </Show>
-                    {/* editar cronograma */}
-                    <Show condicion={query.edit}>
-                        <Edit query={query}
-                            isClose={(e) => Router.push({ pathname, query: { edit: "" } })}
-                        />
-                    </Show>
-                    {/* cerrar planilla */}
-                    <Show condicion={query.close}>
-                        <Close query={query}
-                            isClose={(e) => Router.push({ pathname, query: { close: "" } })}
-                        />
-                    </Show>
-                    {/* abrir planilla */}
-                    <Show condicion={query.open}>
-                        <Open query={query}
-                            isClose={(e) => Router.push({ pathname, query: { open: "" } })}
                         />
                     </Show>
                     {/* event create cronograma */}
