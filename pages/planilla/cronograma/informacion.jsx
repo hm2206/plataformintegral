@@ -55,6 +55,7 @@ export default class CronogramaInformacion extends Component
         await ctx.store.dispatch(findCronograma(ctx));
         let { cronograma } = store.getState().cronograma;
         query.active = query.active ? query.active : 0;
+        query.page = query.page ? query.page : 1;
         return { pathname, query, cronograma }
     }
 
