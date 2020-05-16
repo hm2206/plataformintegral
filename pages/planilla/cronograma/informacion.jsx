@@ -213,10 +213,11 @@ export default class CronogramaInformacion extends Component
     }
 
     previus = async (e) => {
-        let { page, edit } = this.state;
+        let { edit } = this.state;
+        let { page } = this.props.query;
         if (!edit) {
-            if (page > 1) {
-                await this.setState(state => ({ page: state.page - 1, loading: true }));
+            if (parseInt(page) > 1) {
+                await this.setState(state => ({ page: parseInt(page) - 1, loading: true }));
                 let { push, pathname, query } = Router;
                 query.page = this.state.page;
                 query.active = this.state.active;
