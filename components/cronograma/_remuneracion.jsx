@@ -126,7 +126,7 @@ export default class Remuneracion extends Component
 
                 {remuneraciones.map((obj, index) => 
                     <div  key={`remuneracion-${obj.id}`}
-                         className="col-md-3 mb-1"
+                         className="col-md-3 mb-3"
                     >
                         <span className={obj.monto > 0 ? 'text-red' : ''}>
                             {obj.key}
@@ -137,7 +137,9 @@ export default class Remuneracion extends Component
                         </span>
 
                         <Show condicion={obj.base == 0}>
-                            <small className="text-red">*</small>
+                            <b className="ml-1 badge badge-dark mb-1" title="Calculable a la Base imponible">
+                                <i className="fas fa-calculator"></i>
+                            </b>
                         </Show>
 
                         <Form.Field>

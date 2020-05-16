@@ -147,7 +147,7 @@ export default class Descuento extends Component
 
                 {descuentos.map((obj, index) => 
                     <div  key={`remuneracion-${obj.id}`}
-                         className="col-md-3 mb-1"
+                         className="col-md-3 mb-3"
                     >
                         <span className={obj.monto > 0 ? 'text-red' : ''}>
                             {obj.key}
@@ -157,8 +157,8 @@ export default class Descuento extends Component
                             {obj.descripcion}
                         </span>
                         <Form.Field>
-                            <Show condicion={obj.edit}>
-                                <div className="row justify-aligns-center">
+                            <div className="row justify-aligns-center">
+                                <Show condicion={obj.edit}>
                                     <div className={this.props.edit ? 'col-md-9 col-9' : 'col-md-12 col-12'}>
                                         <input type="number"
                                             step="any" 
@@ -172,22 +172,53 @@ export default class Descuento extends Component
                                     <Show condicion={this.props.edit}>
                                         <div className="col-md-3 col-3">
                                             <Button 
+                                                icon="asl"
                                                 onClick={(e) => this.handleEdit(obj, 0)}
                                                 style={{ width: "100%", height: "100%" }}
                                                 size="small"
+                                                basic
                                                 disabled={this.state.loading || !this.props.edit}>
-                                                <Icon name="asl"/>
                                             </Button>
                                         </div>
                                     </Show>
-                                </div>
-                            </Show>
-                            <Show condicion={!obj.edit}>
-                                <Input icon='wait' iconPosition='left' 
-                                    defaultValue={obj.monto} 
-                                    disabled
-                                />
-                            </Show>
+                                </Show>
+
+                                <Show condicion={!obj.edit}>
+                                    <Show condicion={!this.props.edit}>
+                                        <div className="col-md-12 col-12">
+                                            <Input icon='wait' iconPosition='left' 
+                                                defaultValue={obj.monto} 
+                                                disabled
+                                            />
+                                        </div>
+                                    </Show>
+
+                                    <Show condicion={this.props.edit}>
+                                        <div className="col-md-9 col-9">
+                                            <input type="number"
+                                                step="any" 
+                                                value={obj.monto}
+                                                disabled={!this.props.edit}
+                                                onChange={({target}) => this.handleMonto(index, target.value, obj)}
+                                                disabled
+                                                min="0"
+                                            />
+                                        </div>
+                                    </Show>
+
+                                    <Show condicion={this.props.edit}>
+                                        <div className="col-md-3 col-3">
+                                            <Button 
+                                                icon="wait"
+                                                onClick={(e) => this.handleEdit(obj, 1)}
+                                                style={{ width: "100%", height: "100%" }}
+                                                size="small"
+                                                disabled={this.state.loading || !this.props.edit}>
+                                            </Button>
+                                        </div>
+                                    </Show>
+                                </Show>
+                            </div>
                         </Form.Field>
                     </div>
                 )}
