@@ -12,6 +12,7 @@ import Router from 'next/router';
 import { responsive } from '../../../services/storage.json';
 import { Body, BtnBack, DrownSelect } from '../../../components/Utils';
 import UpdateDesctMassive from '../../../components/cronograma/updateDesctMassive';
+import ImpDescuento from '../../../components/cronograma/impDescuento';
 import Open from '../../../components/cronograma/open';
 import Cerrar from '../../../components/cronograma/close';
 
@@ -302,20 +303,32 @@ export default class CronogramaInformacion extends Component
     handleOnSelect = async (e, { name }) => {
         this.setState({ loading: true });
         let { push, pathname, query } = Router;
-        if (name == 'desc-massive') {
-            query.desc_massive = 1;
-            await push({ pathname, query });
-        } else if (name == 'report') {
-            query.href = pathname;
-            await push({ pathname: parseUrl(pathname, 'report'), query });
-        } else if (name == 'sync-remuneracion') {
-            await this.syncRemuneracion();
-        } else if(name == 'sync-aportacion') {
-            await this.syncAportacion();
-        } else if (name == 'processing') {
-            await this.processing();
-        } else if (name == 'sync-afp') {
-            await this.syncAfp();
+        switch (name) {
+            case 'desc-massive':
+                query.desc_massive = 1;
+                await push({ pathname, query });
+                break;
+            case 'report':
+                query.href = pathname;
+                await push({ pathname: parseUrl(pathname, 'report'), query });
+                break;
+            case 'sync-remuneracion':
+                await this.syncRemuneracion();
+                break;
+            case 'sync-aportacion':
+                await this.syncAportacion();
+                break;
+            case 'processing':
+                await this.processing();
+                break;
+            case 'sync-afp':
+                await this.syncAfp();
+                break;
+            case 'imp-descuento':
+                query.imp_descuento = 1;
+                await push({ pathname, query });
+            default:
+                break;
         }
         // end loading
         this.setState({ loading: false });
@@ -461,6 +474,7 @@ export default class CronogramaInformacion extends Component
                                                     { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
                                                     { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
                                                     { key: "sync-afp", text: "Sync Leyes Sociales", icon: "cloud download" },
+                                                    { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
                                                     { key: "processing", text: "Procesar Cronograma", icon: "database" },
                                                     { key: "report", text: "Reportes", icon: "file text outline" },
                                                 ]}
@@ -724,6 +738,14 @@ export default class CronogramaInformacion extends Component
                     <UpdateDesctMassive isClose={(e) => {
                         let { push, pathname, query } = Router;
                         query.desc_massive = null;
+                        push({ pathname, query });
+                    }}/>
+                </Show>
+
+                <Show condicion={query.imp_descuento}>
+                    <ImpDescuento isClose={(e) => {
+                        let { push, pathname, query } = Router;
+                        query.imp_descuento = null;
                         push({ pathname, query });
                     }}/>
                 </Show>
