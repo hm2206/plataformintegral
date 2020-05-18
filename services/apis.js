@@ -36,8 +36,11 @@ export const unujobs = {
     post: (path, body = {}, config = { headers }) => {
         return axios.post(`${url.API_UNUJOBS}/${path}`, body, config);
     },
-    fetch: (path, config = { headers }) => {
-        return fetch(`${url.API_UNUJOBS}/${path}`, config);
+    fetch: (path, config = {}) => {
+        let newConfig = Object.assign({}, config);
+        newConfig.headers = newConfig.headers || {};
+        newConfig.headers.Authorization = headers.Authorization;
+        return fetch(`${url.API_UNUJOBS}/${path}`, newConfig);
     },
     path: url.API_UNUJOBS
 };

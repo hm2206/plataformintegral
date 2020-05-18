@@ -15,10 +15,13 @@ export default class ImpDescuento extends Component
     state = {
         id: "",
         loading: false,
+        block: false,
         type_descuentos: [],
         type_descuento_id: "",
-        monto: 0,
-        paso: "VALIDAR"
+        validar: null,
+        imp_descuento: null,
+        paso: "VALIDAR",
+        btn: "Archivo"
     };
 
     componentDidMount = async () => {
@@ -46,22 +49,40 @@ export default class ImpDescuento extends Component
         this.setState({ [name]: value });
     }
 
-    update = async () => {
-        let value = await Confirm("warning", "¿Estas seguró en actualizar el descuento masivamente?", "Confirmar")
+    handleFile = ({ name, value, files }) => {
+        if (files && files.length > 0) {
+            this.setState({ [name]: files[0] });
+        }
+    }
+
+    validar = async () => {
+        let value = await Confirm("warning", "¿Estas seguró en validar el archivo?", "Validar")
         if (value) {
             this.setState({ loading: true });
-            await unujobs.post(`cronograma/${this.state.id}/update_descuento`, { 
-                _method: 'PUT',
-                type_descuento_id: this.state.type_descuento_id,
-                monto: this.state.monto 
-            })
+            let form = new FormData();
+            form.append('cronograma_id', this.state.id);
+            form.append('validar', this.state.validar);
+            await unujobs.post(`import/descuento/${this.state.type_descuento_id}/validar`, form)
             .then(async res => {
-                let { success, message } = res.data;
+                let { success, message, filename, name, type } = res.data;
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });
-            }).catch(err => Swal.fire({ icon: 'error', text: "Algo salió mal!" }));
-            this.setState({ loading: false, type_descuento_id: "", monto: 0 });
+                if (success) {
+                    let file = `data:${type};base64,${filename}`;
+                    let a = document.createElement('a');
+                    a.href = file;
+                    a.download = name;
+                    a.target = '_blank';
+                    await a.click();
+                }
+            })
+            .catch(err => Swal.fire({ icon: 'error', text: "Algo salió mal!" }));
+            this.setState({ loading: false });
         }
+    }
+
+    importar = () => {
+        alert('importar');
     }
 
     render() {
@@ -71,7 +92,7 @@ export default class ImpDescuento extends Component
             >
                 <div className="card-body">
                     <Form loading={this.state.loading}>
-                        <div className="row">
+                        <div className="row justify-content-center">
                             <div className="col-md-4 mb-1">
                                 <Form.Field>
                                     <Select
@@ -80,6 +101,7 @@ export default class ImpDescuento extends Component
                                         name="type_descuento_id"
                                         value={this.state.type_descuento_id}
                                         onChange={(e, obj) => this.handleInput(obj)}
+                                        disabled={this.state.block}
                                     />
                                 </Form.Field>
                             </div>
@@ -92,6 +114,7 @@ export default class ImpDescuento extends Component
                                         name="type_descuento_id"
                                         value={this.state.type_descuento_id}
                                         onChange={(e, obj) => this.handleInput(obj)}
+                                        disabled={this.state.block}
                                     />
                                 </Form.Field>
                             </div>
@@ -105,7 +128,7 @@ export default class ImpDescuento extends Component
                                 <div className="col-md-12 mb-5 text-center">
                                     <b><u>VALIDAR ARCHIVO.</u></b> <br/>
                                     <ul className="pl-5 text-left mt-3">
-                                        <li>1. Descargar Formato. <a href={`${url.URL_UNUJOBS || ""}/formatos/imp_descuento.xlsx`} target="_blank" className="text-success"><i className="fas fa-file-excel"></i> Archivo Excel</a></li>
+                                        <li>1. Descargar Formato. <a href={`${url.URL_UNUJOBS || ""}/formatos/validar_descuento.xlsx`} target="_blank" className="text-success"><i className="fas fa-file-excel"></i> Archivo Excel</a></li>
                                         <li>2. Rellenar los campos correspondientes.</li>
                                         <li>3. Subir el archivo del formato </li>
                                         <li>4. Esperar que el sistema valide el archivo.</li>
@@ -115,26 +138,66 @@ export default class ImpDescuento extends Component
                                 <div className="col-md-5 mb-1">
                                     <Form.Field>
                                         <label htmlFor="validar-import"
-                                            className="ui button"
+                                            className={`ui button ${this.state.validar ? 'primary basic' : ''}`}
                                         >
-                                            <Icon name="upload"/>
+                                            <Icon name={this.state.validar ? 'check' : 'upload'}/>
                                             <input type="file"
                                                 id="validar-import"
                                                 hidden
                                                 name="validar"
                                                 disabled={!this.state.type_descuento_id}
+                                                onChange={(e) => this.handleFile(e.target)}
                                             />
-                                            Archivo
+                                            {this.state.validar ? this.state.validar && this.state.validar.name : 'Archivo'}
                                         </label>
                                     </Form.Field>
                                 </div>
 
                                 <div className="col-md-3 mb-1">
                                     <Button fluid color="yellow"
-                                        onClick={this.update}
-                                        disabled={!this.state.type_descuento_id}
+                                        onClick={this.validar}
+                                        disabled={!this.state.type_descuento_id || !this.state.validar}
                                     >
                                         <Icon name="cloud upload"/>Subir y Validar
+                                    </Button>
+                                </div>
+                            </Show>
+
+                            {/* Procesar descuento*/}
+                            <Show condicion={this.state.paso == 'PROCESAR'}>
+                                <div className="col-md-12 mb-5 text-center">
+                                    <b><u>PROCESAR ARCHIVO.</u></b> <br/>
+                                    <ul className="pl-5 text-left mt-3">
+                                        <li>1. Revisar el archivo y corregir errores</li>
+                                        <li>2. Subir archivo rectificado.</li>
+                                        <li>3. Esperar que el sistema importe los descuentos.</li>
+                                    </ul>
+                                </div>
+
+                                <div className="col-md-5 mb-1">
+                                    <Form.Field>
+                                        <label htmlFor="imp_descuento"
+                                            className={`ui button ${this.state.imp_descuento ? 'black text-white' : ''}`}
+                                        >
+                                            <Icon name={this.state.imp_descuento? 'check' : 'upload'}/>
+                                            <input type="file"
+                                                id="imp_descuento"
+                                                hidden
+                                                name="imp_descuento"
+                                                disabled={!this.state.type_descuento_id}
+                                                onChange={(e) => this.handleFile(e.target)}
+                                            />
+                                            {this.state.imp_descuento ? this.state.imp_descuento && this.state.imp_descuento.name : 'Archivo'}
+                                        </label>
+                                    </Form.Field>
+                                </div>
+
+                                <div className="col-md-4 mb-1">
+                                    <Button fluid color="olive"
+                                        onClick={this.importar}
+                                        disabled={!this.state.type_descuento_id || !this.state.imp_descuento}
+                                    >
+                                        <Icon name="cloud upload"/>Importar Descuentos
                                     </Button>
                                 </div>
                             </Show>
