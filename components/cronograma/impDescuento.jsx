@@ -55,6 +55,11 @@ export default class ImpDescuento extends Component
         }
     }
 
+    setPaso = async (name = 'VALIDAR') => {
+        let validar = await Confirm("warning", `¿Deseas Ir al paso: ${name}?`, "Confirmar");
+        if (validar) this.setState({ paso: name, block: name == 'PROCESAR', validar: null, imp_descuento: null });
+    }
+
     validar = async () => {
         let value = await Confirm("warning", "¿Estas seguró en validar el archivo?", "Validar")
         if (value) {
@@ -74,6 +79,7 @@ export default class ImpDescuento extends Component
                     a.download = name;
                     a.target = '_blank';
                     await a.click();
+                    await this.setState({ paso: 'PROCESAR', block: true });
                 }
             })
             .catch(err => Swal.fire({ icon: 'error', text: "Algo salió mal!" }));
@@ -81,8 +87,31 @@ export default class ImpDescuento extends Component
         }
     }
 
-    importar = () => {
-        alert('importar');
+    importar = async () => {
+        let value = await Confirm("warning", "¿Estas seguró en importar el archivo?", "Importar")
+        if (value) {
+            this.setState({ loading: true });
+            let form = new FormData();
+            form.append('cronograma_id', this.state.id);
+            form.append('imp_descuento', this.state.imp_descuento);
+            await unujobs.post(`import/descuento/${this.state.type_descuento_id}/importar`, form)
+            .then(async res => {
+                let { success, message, filename, name, type } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                if (success) {
+                    let file = `data:${type};base64,${filename}`;
+                    let a = document.createElement('a');
+                    a.href = file;
+                    a.download = name;
+                    a.target = '_blank';
+                    await a.click();
+                    await this.setState({ paso: 'VALIDAR', block: false });
+                }
+            })
+            .catch(err => Swal.fire({ icon: 'error', text: "Algo salió mal!" }));
+            this.setState({ loading: false });
+        }
     }
 
     render() {
@@ -126,7 +155,17 @@ export default class ImpDescuento extends Component
                             {/* Validar archivo */}
                             <Show condicion={this.state.paso == 'VALIDAR'}>
                                 <div className="col-md-12 mb-5 text-center">
-                                    <b><u>VALIDAR ARCHIVO.</u></b> <br/>
+                                    <b><u>VALIDAR ARCHIVO.</u></b> 
+                                    <Button size="mini" 
+                                        className="ml-2" 
+                                        basic 
+                                        color="olive"
+                                        disabled={!this.state.type_descuento_id || this.state.loading}
+                                        onClick={(e) => this.setPaso('PROCESAR')}
+                                    >
+                                        <i className="fas fa-arrow-right"></i>
+                                    </Button> 
+                                    <br/>
                                     <ul className="pl-5 text-left mt-3">
                                         <li>1. Descargar Formato. <a href={`${url.URL_UNUJOBS || ""}/formatos/validar_descuento.xlsx`} target="_blank" className="text-success"><i className="fas fa-file-excel"></i> Archivo Excel</a></li>
                                         <li>2. Rellenar los campos correspondientes.</li>
@@ -166,7 +205,17 @@ export default class ImpDescuento extends Component
                             {/* Procesar descuento*/}
                             <Show condicion={this.state.paso == 'PROCESAR'}>
                                 <div className="col-md-12 mb-5 text-center">
-                                    <b><u>PROCESAR ARCHIVO.</u></b> <br/>
+                                    <Button size="mini" 
+                                        className="mr-2" 
+                                        basic 
+                                        color="olive"
+                                        onClick={(e) => this.setPaso('VALIDAR')}
+                                        disabled={!this.state.type_descuento_id || this.state.loading}
+                                    >
+                                        <i className="fas fa-arrow-left"></i>
+                                    </Button> 
+                                    <b><u>PROCESAR ARCHIVO.</u></b> 
+                                    <br/>
                                     <ul className="pl-5 text-left mt-3">
                                         <li>1. Revisar el archivo y corregir errores</li>
                                         <li>2. Subir archivo rectificado.</li>
