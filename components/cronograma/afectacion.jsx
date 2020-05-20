@@ -23,7 +23,7 @@ export default class Afectacion extends Component {
         errors: {},
         error_message: "",
         ssp: false,
-        essalud: false
+        essalud: false,
     };
 
 
@@ -51,7 +51,7 @@ export default class Afectacion extends Component {
 
     setting = async (nextProps) => {
         await this.setState({ history: {} });
-        this.setState({ history: nextProps.historial ? nextProps.historial : {} });
+        this.setState({ history: nextProps.historial || {}, errors: {} });
     }
 
     getDependencias = async () => {
@@ -68,8 +68,10 @@ export default class Afectacion extends Component {
 
     handleInput = ({ name, value }) => {
         let newObject = Object.assign({}, this.state.history);
+        let newErrors = Object.assign({}, this.state.errors);
         newObject[name] = value;
-        this.setState({history: newObject});
+        newErrors[name] ? newErrors[name] = "" : null;
+        this.setState({ history: newObject, errors: newErrors });
     }
 
     getMetas = () => {
@@ -96,12 +98,21 @@ export default class Afectacion extends Component {
             if (success) {
                 this.props.updatingHistorial();
                 Swal.fire({ icon: 'success', text: message });
+                this.props.setEdit(false);
             } else {
                 Swal.fire({ icon: 'error', text: message });
+                this.props.setEdit(true);
             }
         })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.props.setEdit(false);
+        .catch(err => {
+            try {
+                let { message, errors } = err.response.data;
+                this.setState({ errors });
+                Swal.fire({ icon: 'error', text: 'Datos incorrectos' });
+            } catch (error) {
+                Swal.fire({ icon: 'error', text: 'Algo salió mal' });
+            }
+        });
         this.props.setSend(false);
         this.props.setLoading(false);
     }
@@ -111,25 +122,14 @@ export default class Afectacion extends Component {
         let {
             history,
             cargos,
-            info,
             dependencias,
             afps,
-            type_afps,
             metas,
             errors,
-            error_message
         } = this.state;
 
         return (
             <Form className="row" id="form-afectacion">
-                <Show condicion={error_message}>
-                    <div className="col-md-12 mb-4">
-                        <Message color="red">
-                            Error: {error_message}
-                        </Message>
-                    </div>
-                </Show>
-
                 <Show condicion={this.props.edit}>
                     <div className="col-md-12">
                         <Button color="teal" basic
@@ -149,8 +149,8 @@ export default class Afectacion extends Component {
                 </Show>
 
                 <div className="col-md-3">
-                    <Form.Field>
-                        <b>Ley Social <b className="text-red">*</b></b>
+                    <Form.Field error={errors.afp_id && errors.afp_id[0]}>
+                        <label><h5>Ley Social <b className="text-red">*</b></h5></label>
                         <Show condicion={this.props.edit}>
                             <Select
                                 options={parseOptions(afps, ['sel-afp', '', 'Select. AFP'], ['id', 'id', 'descripcion'])}
@@ -160,6 +160,7 @@ export default class Afectacion extends Component {
                                 onChange={(e, obj) => this.handleInput(obj)}
                                 error={errors.afp_id && errors.afp_id[0]}
                             />
+                            <label>{errors.afp_id && errors.afp_id[0]}</label>
                         </Show>
                         <Show condicion={!this.props.edit}>
                             <input type="text"
@@ -171,7 +172,7 @@ export default class Afectacion extends Component {
                     </Form.Field>
 
                     <Form.Field>
-                        <b>Fecha de Ingreso</b>
+                        <label><h5>Fecha de Ingreso</h5></label>
                         <input type="date" 
                             name="fecha_de_ingreso"
                             value={history.fecha_de_ingreso}
@@ -180,8 +181,8 @@ export default class Afectacion extends Component {
                         />
                     </Form.Field>
 
-                    <Form.Field>
-                        <b>Meta <b className="text-red">*</b></b>
+                    <Form.Field error={errors.meta_id && errors.meta_id[0]}>
+                        <label><h5>Meta <b className="text-red">*</b></h5></label>
                         <Show condicion={this.props.edit}>
                             <Select
                                 options={parseOptions(metas, ['sel-meta', '', 'Select. Meta'], ['id', 'id', 'metaID'])}
@@ -191,6 +192,7 @@ export default class Afectacion extends Component {
                                 onChange={(e, obj) => this.handleInput(obj)}
                                 error={errors.meta_id && errors.meta_id[0]}
                             />
+                            <label>{errors.meta_id && errors.meta_id[0]}</label>
                         </Show>
                         <Show condicion={!this.props.edit}>
                             <input type="text" name="meta_id"
@@ -202,7 +204,7 @@ export default class Afectacion extends Component {
                     </Form.Field>
                     
                     <Form.Field>
-                        <b>Planilla</b>
+                        <label><h5>Planilla</h5></label>
                         <input type="text"
                             value={history.planilla ? history.planilla : ''}
                             disabled={true}
@@ -211,7 +213,7 @@ export default class Afectacion extends Component {
                     </Form.Field>
 
                     <Form.Field>
-                        <b>Tip. Cuenta</b>
+                        <label><h5>Tip. Cuenta</h5></label>
                         <input type="text"
                             value={history.banco ? history.banco : 'B NACIÓN'}
                             disabled={true}
@@ -223,7 +225,7 @@ export default class Afectacion extends Component {
 
                 <div className="col-md-3">
                     <Form.Field>
-                        <b>N° CUSSP</b>
+                        <label><h5>N° CUSSP</h5></label>
                         <input type="text" 
                             name="numero_de_cussp"  
                             min="8"
@@ -234,7 +236,7 @@ export default class Afectacion extends Component {
                     </Form.Field>
 
                     <Form.Field>
-                        <b>Fecha de Cese</b>
+                        <label><h5>Fecha de Cese</h5></label>
                         <input type="date" 
                             name="fecha_de_cese"
                             value={history.fecha_de_cese ? history.fecha_de_cese : ''}
@@ -243,8 +245,8 @@ export default class Afectacion extends Component {
                         />
                     </Form.Field>
 
-                    <Form.Field>
-                        <b>Cargo <b className="text-red">*</b></b>
+                    <Form.Field error={errors.cargo_id && errors.cargo_id[0]}>
+                        <label><h5>Cargo <b className="text-red">*</b></h5></label>
                         <Show condicion={this.props.edit}>
                             <Select
                                 options={parseOptions(cargos, ['sel-cargo', '', 'Select. Cargo'], ['id', 'id', 'descripcion'])}
@@ -252,8 +254,8 @@ export default class Afectacion extends Component {
                                 value={history.cargo_id}
                                 name="cargo_id"
                                 onChange={(e, obj) => this.handleInput(obj)}
-                                error={errors.cargo_id && errors.cargo_id[0]}
                             />
+                            <label>{errors.cargo_id && errors.cargo_id[0]}</label>
                         </Show>
                         <Show condicion={!this.props.edit}>
                             <input type="text" 
@@ -264,8 +266,8 @@ export default class Afectacion extends Component {
                         </Show>
                     </Form.Field>
 
-                    <Form.Field>
-                        <b>Dependencia/Oficina</b>
+                    <Form.Field error={errors.dependencia_id && errors.dependencia_id[0]}>
+                        <label><h5>Dependencia/Oficina <b className="text-red">*</b></h5></label>
                         <Show condicion={this.props.edit}>
                             <Select
                                 options={parseOptions(dependencias, ['sel_dep', '', 'Select. Dependencia/Oficina'], ['id', 'id', 'nombre'])}
@@ -275,6 +277,7 @@ export default class Afectacion extends Component {
                                 onChange={(e, obj) => this.handleInput(obj)}
                                 error={errors.dependencia_id && errors.dependencia_id[0]}
                             />
+                            <label>{errors.dependencia_id && errors.dependencia_id[0]}</label>
                         </Show>
                         <Show condicion={!this.props.edit}>
                             <input type="text"
@@ -286,7 +289,7 @@ export default class Afectacion extends Component {
                     </Form.Field>
 
                     <Form.Field>
-                        <b>N° Cuenta</b>
+                        <label><h5>N° Cuenta</h5></label>
                         <input type="text"
                             value={history.numero_de_cuenta ? history.numero_de_cuenta : ''}
                             disabled={!this.props.edit}
@@ -298,7 +301,7 @@ export default class Afectacion extends Component {
 
                 <div className="col-md-3">
                     <Form.Field>
-                        <b>Fecha de Afiliación</b>
+                        <label><h5>Fecha de Afiliación</h5></label>
                         <input type="date" 
                             name="fecha_de_afiliacion"
                             value={history.fecha_de_afiliacion ? history.fecha_de_afiliacion : ''}
@@ -307,18 +310,19 @@ export default class Afectacion extends Component {
                         />
                     </Form.Field>
 
-                    <Form.Field
-                        control={Input}
-                        label={<b>Perfil Laboral</b>}
-                        name="perfil_laboral"
-                        value={history.perfil_laboral ? history.perfil_laboral : ''}
-                        onChange={(e, obj) => this.handleInput(obj)}
-                        disabled={!this.props.edit}
-                        error={errors.perfil_laboral && errors.perfil_laboral[0]}
-                    />
+                    <Form.Field error={errors.perfil_laboral && errors.perfil_laboral[0]}>
+                        <label><h5>Perfil Laboral <b className="text-red">*</b></h5></label>
+                        <input
+                            name="perfil_laboral"
+                            value={history.perfil_laboral ? history.perfil_laboral : ''}
+                            onChange={(e) => this.handleInput(e.target)}
+                            disabled={!this.props.edit}
+                        />
+                        <label>{errors.perfil_laboral && errors.perfil_laboral[0]}</label>
+                    </Form.Field>
 
                     <Form.Field>
-                        <b>Ext. Presupuestal</b>
+                        <label><h5>Ext. Presupuestal</h5></label>
                         <Show condicion={this.props.edit}>
                             <Select
                                 options={parseOptions(cargos, ['sel-cargo', '', 'Select. Cargo'], ['id', 'id', 'ext_pptto'])}
@@ -334,7 +338,7 @@ export default class Afectacion extends Component {
                     </Form.Field>
 
                     <Form.Field>
-                        <b>Prima Seguros</b>
+                        <label><h5>Prima Seguros</h5></label>
                         <Select
                             options={[
                                 {key: "n", value: 0, text: "No Afecto"},
@@ -351,7 +355,7 @@ export default class Afectacion extends Component {
 
                 <div className="col-md-3">
                     <Form.Field>
-                        <b>N° Autogenerado</b>
+                        <label><h5>N° Autogenerado</h5></label>
                         <input type="text" 
                             name="numero_de_essalud"
                             value={history.numero_de_essalud ? history.numero_de_essalud : ''}
@@ -361,7 +365,7 @@ export default class Afectacion extends Component {
                     </Form.Field>
 
                     <Form.Field>
-                        <b>Plaza</b>
+                        <label><h5>Plaza</h5></label>
                         <input type="text" 
                             name="plaza"
                             value={history.plaza ? history.plaza : ''}
@@ -370,8 +374,8 @@ export default class Afectacion extends Component {
                         />
                     </Form.Field>
 
-                    <Form.Field>
-                        <b>P.A.P</b>
+                    <Form.Field error={errors.pap && errors.pap[0]}>
+                        <label><h5>P.A.P <b className="text-red">*</b></h5></label>
                         <Select
                             options={storage.pap}
                             placeholder="Select. P.A.P"
@@ -380,10 +384,11 @@ export default class Afectacion extends Component {
                             onChange={(e, obj) => this.handleInput(obj)}
                             disabled={!this.props.edit}
                         />
+                        <label>{errors.pap && errors.pap[0]}</label>
                     </Form.Field>
 
                     <Form.Field>
-                        <b>Tipo Categoría</b>
+                        <label><h5>Tipo Categoría</h5></label>
                         <input type="text"
                             disabled={true}
                             name="type_categoria_id"
@@ -393,20 +398,18 @@ export default class Afectacion extends Component {
                     </Form.Field>
                 </div>
 
-                <div className="col-md-9 mt-2">
-                    <Form.Field>
-                        <Form.Field
-                            control={TextArea}
-                            label={<b>Observación <span className="text-red">*</span></b>}
+                <div className="col-md-9 mt-3">
+                    <Form.Field error={errors.observacion && errors.observacion[0]}>
+                        <label><h5>Observación <b className="text-red">*</b></h5></label>
+                        <textarea
                             name="observacion"  
                             rows="8"
                             style={{width: "100%"}}
                             value={history.observacion ? history.observacion : ''}
-                            onChange={this.handleSelect}
                             disabled={!this.props.edit}
-                            onChange={(e, obj) => this.handleInput(obj)}
-                            error={errors.observacion && errors.observacion[0]}
+                            onChange={(e) => this.handleInput(e.target)}
                         />
+                        <label>{errors.observacion && errors.observacion[0]}</label>
                     </Form.Field>
                 </div>
 
