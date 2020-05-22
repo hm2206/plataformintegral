@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react";
 import Loader from "../components/loader";
 import { CheckList, CheckBox } from "../components/Utils";
 import { Form } from 'semantic-ui-react';
+import Show from "./show";
 
 
 export default class DataTable extends Component {
@@ -330,6 +331,15 @@ export default class DataTable extends Component {
                                     {attr.type == "switch" ? <span className={`badge badge-${this.verifyObjects(obj, attr) ? `${attr.bg_true ? attr.bg_true : 'success'}` : `${attr.bg_false ? attr.bg_false : 'danger'}`}`}>{this.verifyObjects(obj, attr) ? attr.is_true : attr.is_false}</span> : null}
                                     {attr.type == "timestamp" ? new Date(this.verifyObjects(obj, attr)).toDateString() : null}
                                     {attr.type == "date" ? new Date(this.verifyObjects(obj, attr)).toLocaleDateString() : null}
+                                    <Show condicion={attr.type == 'option'}>
+                                      {attr.data && attr.data.map(da => {
+                                        return this.verifyObjects(obj, attr) == da.key 
+                                        ? <span className={`badge ${da.className}`}>
+                                            {this.verifyObjects(obj, attr)}
+                                          </span> 
+                                          : null
+                                      })}
+                                    </Show>
                                     {attr.children && attr.children.length > 0 && attr.children.map(chi => 
                                         <span className="row align-items-center" key={`children-${chi}`}>
                                           {this.verifyObjects(obj, chi) ? 
