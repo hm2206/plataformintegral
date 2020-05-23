@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Form, Button, Icon } from 'semantic-ui-react';
+import { Form, Button, Icon, Select } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import { unujobs } from '../../../services/apis';
 import { parseOptions } from '../../../services/utils';
@@ -25,6 +25,8 @@ export default class EditConvocatoria extends Component
         fecha_inicio: "",
         fecha_final: "",
         observacion: "",
+        estado_actual: "",
+        estado: "",
         loading: false,
         errors: {},
         cancel: false,
@@ -56,7 +58,8 @@ export default class EditConvocatoria extends Component
             numero_de_convocatoria: data.numero_de_convocatoria,
             fecha_inicio: data.fecha_inicio,
             fecha_final: data.fecha_final,
-            observacion: data.observacion
+            observacion: data.observacion,
+            estado_actual: data.estado
         })
     }
 
@@ -94,7 +97,11 @@ export default class EditConvocatoria extends Component
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
-            if (success) this.setState({ cancel: false });
+            if (success) {
+                await this.setState({ cancel: false });
+                let { push, pathname, query } = Router;
+                await push({ pathname, query });
+            }
         })
         .catch(async err => {
             try {
@@ -175,36 +182,93 @@ export default class EditConvocatoria extends Component
                             <Form className="row justify-content-center" loading={this.state.loading} method="POST" action="#" onSubmit={(e) => e.preventDefault()}>
                                 <div className="col-md-10">
                                     <div className="row justify-content-center">
-                                            <Form.Field className="col-md-6">
-                                                <label htmlFor="" className="text-left">N° de Convocatoria <b className="text-red">*</b></label>
+                                        <Form.Field className="col-md-6">
+                                            <label htmlFor="" className="text-left">N° de Convocatoria <b className="text-red">*</b></label>
+                                            <input type="text"
+                                                name="numero_de_convocatoria"
+                                                placeholder="Ingrese el N° de Convocatoria. Ejm: ENTIDAD-001"
+                                                value={this.state.numero_de_convocatoria}
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                disabled
+                                            />
+                                        </Form.Field>
+
+                                        <Form.Field className="col-md-6">
+                                            <label>Fecha de Inicio <b className="text-red">*</b></label>
+                                            <input type="date"
+                                                name="fecha_inicio"
+                                                value={this.state.fecha_inicio}
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                disabled
+                                            />
+                                        </Form.Field>
+
+                                        <Form.Field className="col-md-6">
+                                            <label>Fecha Final <b className="text-red">*</b></label>
+                                            <input type="date"
+                                                name="fecha_final"
+                                                value={this.state.fecha_final}
+                                                onChange={(e) => this.handleInput(e.target)}
+                                            />
+                                        </Form.Field>
+
+                                        <Form.Field className="col-md-6">
+                                            <label>Estado Actual <b className="text-red">*</b></label>
+                                            <input type="text" 
+                                                value={this.state.estado_actual}
+                                                name="estado_actual"
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                disabled
+                                            />
+                                        </Form.Field>
+
+                                        <Form.Field className="col-md-6">
+                                            <label>Estado <b className="text-red">*</b></label>
+                                            {/* creado */}
+                                            <Show condicion={this.state.estado_actual == 'CREADO'}>
+                                                <Select
+                                                    placeholder="Select. Estado"
+                                                    name="estado"
+                                                    value={this.state.estado}
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                    options={[
+                                                        {key: 'CREADO', value: "", text: 'Select. Estado'},
+                                                        {key: 'PUBLICADO', value: 'PUBLICADO', text: 'PUBLICAR'},
+                                                        {key: 'CANCELADO', value: 'CANCELADO', text: 'CANCELAR'},
+                                                        {key: 'TERMINADO', value: 'TERMINADO', text: 'TERMINAR'},
+                                                    ]}
+                                                />
+                                            </Show>
+                                            {/* publicado */}
+                                            <Show condicion={this.state.estado_actual == 'PUBLICADO'}>
+                                                <Select
+                                                    placeholder="Select. Estado"
+                                                    name="estado"
+                                                    value={this.state.estado}
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                    options={[
+                                                        {key: 'PUBLICADO', value: "", text: 'Select. Estado'},
+                                                        {key: 'TERMINADO', value: 'TERMINADO', text: 'TERMINAR'},
+                                                    ]}
+                                                />
+                                            </Show>
+                                            {/* cancelado */}
+                                            <Show condicion={this.state.estado_actual == 'CANCELADO'}>
                                                 <input type="text"
-                                                    name="numero_de_convocatoria"
-                                                    placeholder="Ingrese el N° de Convocatoria. Ejm: ENTIDAD-001"
-                                                    value={this.state.numero_de_convocatoria}
-                                                    onChange={(e) => this.handleInput(e.target)}
+                                                    name="estado_actual"
+                                                    value={this.state.estado_actual}
                                                     disabled
                                                 />
-                                            </Form.Field>
-
-                                            <Form.Field className="col-md-6">
-                                                <label>Fecha de Inicio <b className="text-red">*</b></label>
-                                                <input type="date"
-                                                    name="fecha_inicio"
-                                                    value={this.state.fecha_inicio}
-                                                    onChange={(e) => this.handleInput(e.target)}
+                                            </Show>
+                                            {/* terminar */}
+                                            <Show condicion={this.state.estado_actual == 'TERMINADO'}>
+                                                <input type="text"
+                                                    name="estado_actual"
+                                                    value={this.state.estado_actual}
                                                     disabled
                                                 />
-                                            </Form.Field>
-
-                                            <Form.Field className="col-md-6">
-                                                <label>Fecha Final <b className="text-red">*</b></label>
-                                                <input type="date"
-                                                    name="fecha_final"
-                                                    value={this.state.fecha_final}
-                                                    onChange={(e) => this.handleInput(e.target)}
-                                                />
-                                            </Form.Field>
-
+                                            </Show>
+                                        </Form.Field>
                                     
                                         <Form.Field className="col-md-6">
                                             <label htmlFor="" className="text-left">Observación <b className="text-red">*</b></label>
