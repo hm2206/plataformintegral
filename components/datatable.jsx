@@ -210,7 +210,7 @@ export default class DataTable extends Component {
     let { datatable } = this.state;
 
     return (
-      <div className="car card-fluid" style={{ position: "relative" }} loading={loading}>
+      <div className="car card-fluid" style={{ position: "relative" }}>
         <div className="card-header">
           {titulo}
         </div>
