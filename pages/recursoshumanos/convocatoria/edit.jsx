@@ -118,10 +118,12 @@ export default class EditConvocatoria extends Component
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
             if (success) {
-                this.setState(state => {
+                await this.setState(state => {
                     state.actividades.push(actividad);
                     return { actividades: state.actividades };
                 });
+                // update actividad
+                await this.settingActividad(this.props.actividad);
             }
         })
         .catch(async err => {
@@ -249,6 +251,7 @@ export default class EditConvocatoria extends Component
                                         value={actividad.descripcion}
                                         placeholder="Ingrese la descripción de la actividad"
                                         onChange={(e) => this.handleActivity(e.target)}
+                                        disabled={this.state.loading_actividad}
                                     />
                                     <label>{errors_actividad.descripcion && errors_actividad.descripcion[0]}</label>
                                 </Form.Field>
@@ -259,6 +262,7 @@ export default class EditConvocatoria extends Component
                                         name="fecha_inicio"
                                         value={actividad.fecha_inicio}
                                         onChange={(e) => this.handleActivity(e.target)}
+                                        disabled={this.state.loading_actividad}
                                     />
                                     <label>{errors_actividad.fecha_inicio && errors_actividad.fecha_inicio[0]}</label>
                                 </Form.Field>
@@ -269,6 +273,7 @@ export default class EditConvocatoria extends Component
                                         name="fecha_final"
                                         value={actividad.fecha_final}
                                         onChange={(e) => this.handleActivity(e.target)}
+                                        disabled={this.state.loading_actividad}
                                     />
                                     <label>{errors_actividad.fecha_final && errors_actividad.fecha_final[0]}</label>
                                 </Form.Field>
@@ -280,12 +285,13 @@ export default class EditConvocatoria extends Component
                                         placeholder="Ingrese el área responsable"
                                         value={actividad.responsable}
                                         onChange={(e) => this.handleActivity(e.target)}
+                                        disabled={this.state.loading_actividad}
                                     />
                                     <label>{errors_actividad.responsable && errors_actividad.responsable[0]}</label>
                                 </Form.Field>
 
                                 <Form.Field className="col-md-1">
-                                    <label>Agregar</label>
+                                    <label className="text-center">Agregar</label>
                                     <Button fluid 
                                         icon="plus"
                                         onClick={this.createActividad}
