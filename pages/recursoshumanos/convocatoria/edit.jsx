@@ -130,7 +130,7 @@ export default class EditConvocatoria extends Component
                     return { actividades: state.actividades };
                 });
                 // update actividad
-                await this.settingActividad(this.props.actividad);
+                await this.settingActividad(this.props.convocatoria);
             }
         })
         .catch(async err => {
@@ -409,7 +409,7 @@ export default class EditConvocatoria extends Component
                                             <input type="text" 
                                                 name="responsable"
                                                 placeholder="Ingrese el área responsable"
-                                                value={obj.responsable}
+                                                value={obj.responsable || ""}
                                                 onChange={(e) => this.handleActivity(e.target)}
                                                 disabled
                                             />
