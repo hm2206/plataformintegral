@@ -27,6 +27,12 @@ export default class EditPersonal extends Component
             sede_id: 1,
         },
         bases: [],
+        questions: [],
+        question: {
+            requisito: "",
+            body: "",
+            bodies: []
+        },
         loading: false,
         errors: {},
         dependencias: [],
@@ -44,14 +50,29 @@ export default class EditPersonal extends Component
         this.setting();
         this.getMetas();
         this.getDependencias();
+        this.getQuestions();
     }
 
-    setting = () => {
-        this.setState((state, props) => {
+    setting = async () => {
+        await this.setState((state, props) => {
             state.bases = JSON.parse(props.personal.bases);
             props.personal.bases = "";
-            return { form: props.personal, bases: state.bases };
+             return {
+                form: props.personal, 
+                bases: state.bases
+            };
         })
+    }
+
+    settingBody = () => {
+        this.setState(async state => {
+            let newQuestion = await state.questions.filter(obj => {
+                obj.body = JSON.parse(obj.body);
+                return obj;
+            });
+            // response
+            return { questions: newQuestion };
+        });
     }
 
     getMetas = async () => {
@@ -79,6 +100,12 @@ export default class EditPersonal extends Component
         .catch(err => console.log(err.message));
     }
 
+    getQuestions = async () => {
+        await unujobs.get(`personal/${this.props.personal.id}/questions`)
+        .then(async res => this.setState({ questions: res.data }))
+        .catch(err => console.log(err.message));
+    }
+
     handleInput = ({ name, value }, obj = 'form', err = 'errors') => {
         this.setState(state => {
             let newObj = state[obj];
@@ -95,33 +122,42 @@ export default class EditPersonal extends Component
     }
 
     saveAndContinue = async () => {
-        await this.setState({ loading: true });
-        let form = new FormData;
-        for(let attr in this.state.form) {
-            form.append(attr, this.state.form[attr]);
+        let continuar = this.state.question.bodies.length;
+        if (continuar) {
+            await this.saveQuestion();
         }
-        //leave convocatoria
-        form.delete('convocatoria');
-        // add method
-        form.append('_method', 'PUT');
-        // add bases
-        form.append('bases', this.state.bases.join(';;'));
-        // send
-        await unujobs.post(`personal/${this.props.personal.id}`, form)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-        })
-        .catch(err => {
-            try {
-                let { data } = err.response;
-                this.setState({ errors: data.errors })
-            } catch (error) {
-                Swal.fire({ icon: 'error', text: err.message });
+        // validar
+        let validate = await Confirm('warning', '¿Desea guardar los datos?');
+        if (validate) {
+            await this.setState({ loading: true });
+            let form = new FormData;
+            for(let attr in this.state.form) {
+                form.append(attr, this.state.form[attr]);
             }
-        });
-        this.setState({ loading: false });
+            //leave convocatoria y questions
+            form.delete('convocatoria');
+            form.delete('questions');
+            // add method
+            form.append('_method', 'PUT');
+            // add bases
+            form.append('bases', this.state.bases.join(';;'));
+            // send
+            await unujobs.post(`personal/${this.props.personal.id}`, form)
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+            })
+            .catch(err => {
+                try {
+                    let { data } = err.response;
+                    this.setState({ errors: data.errors })
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: err.message });
+                }
+            });
+            this.setState({ loading: false });
+        }
     }
 
     handleClose = () => {
@@ -142,7 +178,7 @@ export default class EditPersonal extends Component
 
     addBase = async () => {
         let bases = this.state.form.bases || "";
-        if (bases.length < 10) {
+        if (bases.length < 3) {
             await Swal.fire({ icon: 'warning', text: 'La base debe tener como minimo 10 carácteres' });
         } else {
             await this.setState(state => {
@@ -164,9 +200,64 @@ export default class EditPersonal extends Component
         }
     }
 
+    addQuestion = () => {
+        this.setState(async state => {
+            if (state.question.body.length < 3) {
+                Confirm('warning', '¿El contenido debe tener más de 10 carácteres?')
+                return { question: state.question };
+            } else {
+                if (state.question.bodies.length == 10) {
+                    Swal.fire({ icon: 'warning', text: 'Solo se pude tener como máximo 10 contenidos por requisito' })
+                } else {
+                    let newBodies = state.question.bodies;
+                    await newBodies.push(state.question.body);
+                    state.question.bodies = newBodies;
+                    await this.handleInput({ name: "body", value: "" }, 'question');
+                    return { question: state.question };
+                }
+            }
+        });
+    }
+
+    saveQuestion = async () => {
+        let validate = await Confirm('warning', '¿Estás seguro en agregar esté perfil de trabajador?');
+        if (validate) {
+            await this.setState({ loading: true });
+            let form = new FormData;
+            // add forms
+            form.append('personal_id', this.props.personal.id);
+            form.append('requisito', this.state.question.requisito);
+            form.append('body', this.state.question.bodies.join(';;'));
+            // send
+            await unujobs.post(`question`, form)
+            .then(async res => {
+                let { success, message, question } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                if (success) {
+                    this.setState(state => {
+                        state.question.bodies = [];
+                        state.question.requisito = "";
+                        state.questions.push(question);
+                        return { question: state.question, questions: state.questions };
+                    });
+                }
+            })
+            .catch(err => {
+                try {
+                    let { data } = err.response;
+                    this.setState({ errors: data.errors })
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: err.message });
+                }
+            });
+            this.setState({ loading: false });
+        }
+    }
+
     render() {
 
-        let { errors, form, meta } = this.state;
+        let { errors, form, meta, question } = this.state;
 
         return (
             <div className="col-md-12">
@@ -182,11 +273,11 @@ export default class EditPersonal extends Component
                                 <Form loading={this.state.loading} action="#" className="col-md-10" onSubmit={(e) => e.preventDefault()}>
                                     <div className="row justify-content-center">
 
-                                        <h5 className="col-md-12">
+                                        <h4 className="col-md-12">
                                             <hr/>
                                             <i className="fas fa-sync"></i> Convocatoria Vinculada
                                             <hr/>
-                                        </h5>
+                                        </h4>
 
                                         <div className="col-md-12">
                                             <div className="row">
@@ -208,11 +299,11 @@ export default class EditPersonal extends Component
                                             </div>
                                         </div>
 
-                                        <h5 className="col-md-12">
+                                        <h4 className="col-md-12">
                                             <hr/>
                                             <i className="fas fa-info-circle"></i> Información del Requerimiento de Personal
                                             <hr/>
-                                        </h5>
+                                        </h4>
 
                                         <Form.Field className="col-md-6">
                                             <label htmlFor="" className="text-left">Sede </label>
@@ -356,11 +447,13 @@ export default class EditPersonal extends Component
                                             <label>{errors.lugar && errors.lugar[0]}</label>
                                         </Form.Field>
 
-                                        <h5 className="col-md-12">
+                                        {/* Bases legales */}
+
+                                        <h4 className="col-md-12">
                                             <hr/>
                                             <i className="fas fa-landmark"></i> Bases Legales <Show condicion={this.state.bases.length}>({this.state.bases.length})</Show>
                                             <hr/>
-                                        </h5>
+                                        </h4>
 
                                         <Form.Field className="col-md-10" error={errors.bases && errors.bases[0]}>
                                             <label htmlFor="" className="text-left">Descripción de la Base Legal <b className="text-red">*</b></label>
@@ -405,7 +498,121 @@ export default class EditPersonal extends Component
                                             </Fragment>    
                                         )}
 
-                                        <div className="col-md-12">
+                                        {/* Requerimientos para el puesto */}
+
+                                        <h4 className="col-md-12">
+                                            <hr/>
+                                            <i className="fas fa-user"></i> Perfil del Postulante <Show condicion={this.state.questions.length}>({this.state.questions.length})</Show>
+                                            <hr/>
+                                        </h4>
+
+                                        <Form.Field className="col-md-5" error={errors.bases && errors.bases[0]}>
+                                            <label htmlFor="" className="text-left">Titulo del Requisito <b className="text-red">*</b></label>
+                                            <input type="text"
+                                                name="requisito"
+                                                value={question.requisito || ""}
+                                                onChange={(e) => this.handleInput(e.target, 'question')}
+                                                placeholder="Ingrese el requisito al puesto"
+                                            />
+                                        </Form.Field>
+
+                                        <Form.Field className="col-md-7">
+                                            <label className="mb-1">Contenido del Requisito <b className="text-red">*</b></label>
+                                            <div className="row jsutify-content-end">
+                                                <Form.Field className="col-md-9">
+                                                    <textarea
+                                                        disabled={!question.requisito}
+                                                        rows="3"
+                                                        name="body"
+                                                        value={question.body || ""}
+                                                        placeholder="Ingrese el contenido del requisito"
+                                                        onChange={(e) => this.handleInput(e.target, 'question')}
+                                                    />
+                                                </Form.Field>
+
+                                                <div className="col-md-3">
+                                                    <Button icon="plus"
+                                                        disabled={question.body.length < 3}
+                                                        onClick={this.addQuestion}
+                                                    />
+                                                    <Show condicion={question.bodies.length == 0}>
+                                                        <Button icon="save" color="blue" disabled/>
+                                                    </Show>
+                                                    <Show condicion={question.bodies.length > 0}>
+                                                        <Button
+                                                            color="blue"
+                                                            onClick={this.saveQuestion}
+                                                            disabled={this.state.loading || !question.requisito || !question.bodies.length || question.body}
+                                                        >
+                                                            <Icon name="save"/> ({question.bodies.length})
+                                                        </Button>
+                                                    </Show>
+                                                </div>
+
+                                                {question.bodies.map((b, b_index) =>
+                                                    <Fragment key={`body-${b}`}>
+                                                        <Form.Field className="col-md-9">
+                                                            <textarea type="text"
+                                                                rows="3"
+                                                                name="body"
+                                                                value={b}
+                                                                disabled
+                                                                placeholder="Ingrese el requisito al puesto"
+                                                                onChange={(e) => this.handleInput(e.target, 'question')}
+                                                            />
+                                                        </Form.Field>
+                                                    </Fragment>
+                                                )}
+                                            </div>
+                                        </Form.Field>
+
+                                        {/* Questions */}
+
+                                        {this.state.questions.map(que => 
+                                            <Fragment key={`question-${que.id}`}>
+                                                <Form.Field className="col-md-5">
+                                                    <label htmlFor="" className="text-left">Titulo del Requisito <b className="text-red">*</b></label>
+                                                    <input type="text"
+                                                        name="requisito"
+                                                        disabled
+                                                        value={que.requisito || ""}
+                                                        onChange={(e) => this.handleInput(e.target, 'question')}
+                                                        placeholder="Ingrese el requisito al puesto"
+                                                    />
+                                                </Form.Field>
+
+                                                <div className="col-md-7">
+                                                    <label htmlFor="">
+                                                        <i className="fas fa-list"></i> Lista de contenidos
+                                                    </label>
+                                                    <div className="row">
+                                                        {que.body.map(_b =>
+                                                            <Fragment key={`body-${_b}`}>
+                                                                <Form.Field className="col-md-9">
+                                                                    <textarea type="text"
+                                                                        rows="3"
+                                                                        name="body"
+                                                                        value={_b}
+                                                                        disabled
+                                                                        placeholder="Ingrese el requisito al puesto"
+                                                                        onChange={(e) => this.handleInput(e.target, 'question')}
+                                                                    />
+                                                                </Form.Field>
+                                                            </Fragment>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-md-12">
+                                                    <hr/>
+                                                </div>
+                                            </Fragment>   
+                                            
+                                        )}
+
+                                        {/* Guardar los datos */}
+
+                                        <div className="col-md-12 mt-4">
                                             <hr/>
                                         </div>
 
@@ -415,7 +622,7 @@ export default class EditPersonal extends Component
                                                 onClick={this.saveAndContinue}
                                                 loading={this.state.loading}
                                             >
-                                                <Icon name="save"/> Guardar y Continuar
+                                                <Icon name="save"/> Actualizar Información
                                             </Button>
                                         </div>
                                     </div>

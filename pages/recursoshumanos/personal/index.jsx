@@ -223,7 +223,7 @@ export default class Convocatoria extends Component {
                         disabled={this.state.loading}
                         onClick={(e) => {
                             this.setState({ loading: true });
-                            Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }});
+                            Router.push({ pathname: `${pathname}/create`, query:  { clickb: "cronograma" }});
                         }}
                     >
                         <i className="fas fa-plus"></i>
