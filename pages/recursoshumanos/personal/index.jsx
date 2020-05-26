@@ -1,145 +1,201 @@
-import React, {Component, Fragment} from 'react';
-import {Button, Form} from 'semantic-ui-react';
+import React, { Component } from 'react';
 import Datatable from '../../../components/datatable';
-import {authentication} from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
-import {BtnFloat, Body} from '../../../components/Utils';
-import { AUTHENTICATE, AUTH } from '../../../services/auth';
-import { pageCargo } from '../../../storage/actions/cargoActions';
+import { AUTHENTICATE } from '../../../services/auth';
+import { Form, Button, Select, Pagination } from 'semantic-ui-react';
+import { BtnFloat } from '../../../components/Utils';
+import Show from '../../../components/show';
+import { pagePersonal } from '../../../storage/actions/personalActions';
+import { Body } from '../../../components/Utils';
 
-export default class Personal extends Component {
+
+export default class Convocatoria extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             page: false,
-            loading: false,
-            estado: "1"
+            loading: true,
+            block: false,
+            estado: "",
+            year: "",
+            mes: ""
         }
 
+        this.handleInput = this.handleInput.bind(this);
         this.getOption = this.getOption.bind(this);
     }
 
-    static getInitialProps = async (ctx) => {
+    static getInitialProps  = async (ctx) => {
         await AUTHENTICATE(ctx);
-        let {query, pathname, store} = ctx;
-        query.estado = query.estado ? query.estado : 1;
-        await store.dispatch(pageCargo(ctx));
-        let { page_cargos } = store.getState().cargo;
-        return {query, pathname, page_cargos}
+        let date = new Date;
+        let {query, pathname} = ctx;
+        query.year = query.year ? query.year : date.getFullYear();
+        query.mes = query.mes ? query.mes : date.getMonth() + 1;
+        query.estado = query.estado ? query.estado : "";
+        await ctx.store.dispatch(pagePersonal(ctx));
+        let { page_personal } = ctx.store.getState().personal;
+        return {query, pathname, page_personal }
     }
 
-    componentWillReceiveProps = (nextProps) => {
-        this.setState({ loading: false });
+    componentDidMount = () => {
+        this.setting(this.props);
     }
 
-    handleInput = ({ name, value }) => {
-        this.setState({ [name]: value })
+    componentWillReceiveProps(nextProps) {
+        let { query } = this.props;
+        if (query.mes != nextProps.query.mes || query.year != nextProps.query.year) {
+            this.setting(nextProps);
+        } else {
+            this.setState({ loading: false });
+        }
     }
 
-    getOption(obj, key, index) {
-        let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
-        Router.push({pathname, query});
+    setting = (props) => {
+        this.setState({ 
+            year: props.query.year,
+            mes: props.query.mes,
+            estado: props.query.estado,
+            loading: false
+        })
     }
 
-    handleSearch = () => {
+    handleInput({ name, value }) {
+        this.setState({[name]: value});
+    }
+
+    handleConvocatoria = async () => {
         this.setState({ loading: true });
-        let { pathname, query, push } = Router;
+        let { push, query, pathname } = Router;
+        query.year = this.state.year;
+        query.mes = this.state.mes;
         query.estado = this.state.estado;
         push({ pathname, query });
     }
 
+    async getOption(obj, key, index) {
+        this.setState({ loading: true });
+        let {pathname, query} = Router;
+        let id = btoa(obj.id);
+        query =  { id, __ref: key };
+        // verificar
+        if (key == 'edit') {
+            pathname = pathname + "/edit";
+        } else if (key == 'report') {
+            pathname = `${pathname}/report`;
+        } 
+        // execute
+        await Router.push({pathname, query});
+        this.setState({ loading: false });
+    }
+
     render() {
 
-        let {loading} = this.state;
-        let { page_cargos } = this.props;
+        let {loading } = this.state;
+        let {query, pathname, page_personal} = this.props;
 
         return (
-                <Form className="col-md-12">
-                    <Body>
-                        <Datatable titulo="Lista de Requerimientos de Personal"
+            <div className="col-md-12">
+                <Body>
+                    <Datatable titulo="Lista de Convocatorias"
                         isFilter={false}
                         loading={loading}
-                        headers={
-                            ["#ID", "Descripcion", "Planilla", "Ext Presupuestal", "Estado"]
-                        }
+                        headers={ ["#ID", "Perfil Laboral", "F. Inicio", "F. Termino", "Estado"]}
                         index={
                             [
                                 {
                                     key: "id",
                                     type: "text"
-                                }, {
-                                    key: "descripcion",
+                                }, 
+                                {
+                                    key: "perfil_laboral",
                                     type: "text"
-                                }, {
-                                    key: "planilla.nombre",
-                                    type: "icon"
-                                }, {
-                                    key: "ext_pptto",
-                                    type: "icon",
-                                    bg: "dark",
-                                    justify: "center"
-                                }, {
+                                }, 
+                                {
+                                    key: "fecha_inicio",
+                                    type: "date"
+                                }, 
+                                {
+                                    key: "fecha_final",
+                                    type: "date"
+                                },
+                                {
                                     key: "estado",
-                                    type: "switch",
-                                    justify: "center",
-                                    is_true: "Activo",
-                                    is_false: "Eliminado"
+                                    type: "option",
+                                    data: [
+                                        { key: "CREADO", className: 'badge-dark text-white'},
+                                        { key: "PUBLICADO", className: 'badge-success'},
+                                        { key: "CANCELADO", className: 'badge-danger text-white'},
+                                        { key: "TERMINADO", className: 'badge-primary text-white'}
+                                    ]
                                 }
                             ]
                         }
                         options={
                             [
                                 {
-                                    id: 1,
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
-                                    title: "Editar Cargo",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
-                                }, {
-                                    id: 1,
-                                    key: "restore",
-                                    icon: "fas fa-sync",
-                                    title: "Restaurar Cargo",
-                                    rules: {
-                                        key: "estado",
-                                        value: 0
-                                    }
-                                }, {
-                                    id: 1,
-                                    key: "delete",
-                                    icon: "fas fa-trash-alt",
-                                    title: "Eliminar Cargo",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
+                                    title: "Editar"
+                                },
+                                {
+                                    key: "report",
+                                    icon: "fas fa-file-alt",
+                                    title: "Reportes"
                                 }
                             ]
                         }
-                        optionAlign="text-center"
                         getOption={this.getOption}
-                        data={page_cargos.data}>
-                        <div className="form-group">
+                        data={page_personal && page_personal.data || []}>
+                        <Form className="mb-3">
                             <div className="row">
-
-                                <div className="col-md-4 mb-1">
-                                    <select  name="estado"
-                                        value={this.state.estado}
-                                        onChange={(e) => this.handleInput(e.target)}
-                                    >
-                                        <option value="1">Cargos Activos</option>
-                                        <option value="0">Cargos Deshabilitado</option>
-                                    </select>
+                                <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
+                                    <Form.Field>
+                                        <input type="number" 
+                                            min="2019" 
+                                            placeholder="Año" 
+                                            name="year"
+                                            value={this.state.year}
+                                            disabled={this.state.loading}
+                                            onChange={(e) => this.handleInput(e.target)}
+                                        />
+                                    </Form.Field>
                                 </div>
-
-                                <div className="col-md-2">
-                                    <Button onClick={this.handleSearch}
+                                <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
+                                    <Form.Field>
+                                        <input type="number" 
+                                            min="1" 
+                                            max="12" 
+                                            placeholder="Mes" 
+                                            name="mes"
+                                            value={this.state.mes}
+                                            onChange={(e) => this.handleInput(e.target)}
+                                            disabled={this.state.loading}
+                                        />
+                                    </Form.Field>
+                                </div>
+                                <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
+                                    <Form.Field>
+                                        <Select
+                                            placeholder="TODOS"
+                                            name="estado"
+                                            value={this.state.estado}
+                                            onChange={(e, obj) => this.handleInput(obj)}
+                                            options={[
+                                                { key: 'ALL', value: "", text: 'TODOS'},
+                                                { key: 'CREADO', value: 'CREADO', text: 'CREADOS'},
+                                                { key: 'PUBLICADO', value: 'PUBLICADO', text: 'PUBLICADOS'},
+                                                { key: 'CANCELADO', value: 'CANCELADO', text: 'CANCELADOS'},
+                                                { key: 'TERMINADO', value: 'TERMINADO', text: 'TERMINADOS'},
+                                            ]}
+                                        />
+                                    </Form.Field>
+                                </div>
+                                <div className="col-md-3 col-6 col-sm-12 col-xl-2 mb-1">
+                                    <Button 
+                                        fluid
+                                        onClick={this.handleConvocatoria}
                                         disabled={this.state.loading}
                                         color="blue"
                                     >
@@ -148,20 +204,32 @@ export default class Personal extends Component {
                                     </Button>
                                 </div>
                             </div>
-                        </div>
+                            <hr/>
+                        </Form>
                     </Datatable>
+                    {/* paginacion */}
+                    <div className="text-center">
+                        <Show condicion={page_personal && page_personal.data}>
+                            <hr/>
+                            <Pagination defaultActivePage={query.page} 
+                                totalPages={page_personal.last_page}
+                                enabled={this.state.loading}
+                                onPageChange={this.handlePage}
+                            />
+                        </Show>
+                    </div>
+                    {/* event create cronograma */}
+                    <BtnFloat
+                        disabled={this.state.loading}
+                        onClick={(e) => {
+                            this.setState({ loading: true });
+                            Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }});
+                        }}
+                    >
+                        <i className="fas fa-plus"></i>
+                    </BtnFloat>
                 </Body>
-
-                <BtnFloat
-                    onClick={async (e) => {
-                        await this.setState({ loading: true });
-                        let { pathname, push } = Router;
-                        push({ pathname: `${pathname}/create` });
-                    }}
-                >
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
-            </Form>
+            </div>
         )
     }
 

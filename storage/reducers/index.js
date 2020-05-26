@@ -15,6 +15,7 @@ import type_sindicato from './typeSindicatoReducer'
 import afp from './afpReducer';
 import meta from './metaReducer';
 import convocatoria from './convocatoriaReducer';
+import personal from './personalReducer';
 
 const rootReducer = combineReducers({
     auth,
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
     afp,
     meta,
     convocatoria,
+    personal,
 });
 
 export default rootReducer;

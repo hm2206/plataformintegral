@@ -105,7 +105,8 @@ class MyApp extends App {
           <script src="/js/jquery.min.js"></script>
           <script src="/js/popper.min.js"></script>
           <script src="/js/bootstrap.min.js"></script>
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" />
+          {/* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" /> */}
+          <link rel="stylesheet" href="/css/semantic-ui.css" />
 
           {/* WPA */}
           <link rel="manifest" href="/manifest.json" />
