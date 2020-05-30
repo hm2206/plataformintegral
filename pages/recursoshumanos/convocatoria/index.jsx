@@ -78,13 +78,15 @@ export default class Convocatoria extends Component {
         this.setState({ loading: true });
         let {pathname, query} = Router;
         let id = btoa(obj.id);
-        query =  { id, __ref: "btn-convocatoria" };
+        query =  { id, __ref: `option-${key}` };
         // verificar
         if (key == 'edit') {
             pathname = pathname + "/edit";
         } else if (key == 'report') {
             pathname = `${pathname}/report`;
-        } 
+        } else if (key == 'etapa') {
+            pathname = `${pathname}/etapa`;
+        }
         // execute
         await Router.push({pathname, query});
         this.setState({ loading: false });
@@ -138,6 +140,11 @@ export default class Convocatoria extends Component {
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
                                     title: "Editar"
+                                },
+                                {
+                                    key: "etapa",
+                                    icon: "fas fa-file",
+                                    title: "Etapas"
                                 },
                                 {
                                     key: "report",

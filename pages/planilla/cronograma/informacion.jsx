@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { unujobs, authentication } from '../../../services/apis';
-import { Form, Button, Select, Icon } from 'semantic-ui-react';
+import { Form, Button, Select, Icon, Message } from 'semantic-ui-react';
 import { Row } from 'react-bootstrap';
 import { AUTHENTICATE } from '../../../services/auth';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
@@ -458,6 +458,7 @@ export default class CronogramaInformacion extends Component
                         <div className="col-md-12 mt-3">
                             <div className="card-" style={{ minHeight: "80vh" }}>
                                 <div className="card-header">
+                                    <Message color="yellow">El trabajador ya superó el limite de edad establecido en la partición presupuestal</Message>
                                     <div className="row align-items-center">
                                         <div className="col-md-9 mb-2">
                                             <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
