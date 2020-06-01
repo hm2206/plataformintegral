@@ -47,7 +47,8 @@ export default class CronogramaInformacion extends Component
         cancel: false,
         type_documents: [],
         export: true,
-        active: 0
+        active: 0,
+        config_edad: {}
     }
 
     static getInitialProps = async (ctx) => {
@@ -84,10 +85,10 @@ export default class CronogramaInformacion extends Component
     }
 
     setting = (props) => {
-        let { cronograma, historial, aportaciones, descuentos, remuneraciones } = props.cronograma;
+        let { cronograma, historial, aportaciones, descuentos, remuneraciones, config_edad } = props.cronograma;
         let { query } = this.props;
         this.setState({
-            cronograma: cronograma, 
+            cronograma,
             historial: historial.data, 
             total: historial.total, 
             last_page: historial.last_page,
@@ -100,7 +101,8 @@ export default class CronogramaInformacion extends Component
             cargo_id: query.cargo_id ? parseInt(query.cargo_id) : "",
             type_categoria_id: query.type_categoria_id ? parseInt(query.type_categoria_id) : "",
             export: true,
-            active: props.query.active
+            active: props.query.active,
+            config_edad
         });
     }
 
@@ -400,7 +402,7 @@ export default class CronogramaInformacion extends Component
 
     render() {
 
-        let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id } = this.state;
+        let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id, config_edad } = this.state;
         let { pathname, query } = this.props;
 
         return (
@@ -458,7 +460,11 @@ export default class CronogramaInformacion extends Component
                         <div className="col-md-12 mt-3">
                             <div className="card-" style={{ minHeight: "80vh" }}>
                                 <div className="card-header">
-                                    <Message color="yellow">El trabajador ya superó el limite de edad establecido en la partición presupuestal</Message>
+                                    <Show condicion={config_edad && config_edad.valido == 0}>
+                                        <Message color="yellow">
+                                            El trabajador ya superó el limite de edad({config_edad.limite_edad}) establecido en la partición presupuestal.
+                                        </Message>
+                                    </Show>
                                     <div className="row align-items-center">
                                         <div className="col-md-9 mb-2">
                                             <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
