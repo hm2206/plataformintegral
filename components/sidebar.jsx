@@ -33,8 +33,9 @@ class Sidebar extends Component {
   getProfile =  async () => {
     await authentication.get(`profile`)
     .then(res => {
-        this.setState({ options: res.data });
-    }).catch(err => console.log(err));
+      this.setState({ options: res.data });
+      if (res.data.success == false) this.setState({ options: [] });
+    }).catch(err => this.setState({ options: [] }));
   }
 
   render() {

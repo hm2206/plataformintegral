@@ -1,4 +1,4 @@
-import {  unujobs, configAuthorization } from '../../services/apis';
+import {  unujobs } from '../../services/apis';
 
 
 export const typeRemuneracionActionsTypes = {
@@ -9,8 +9,7 @@ export const typeRemuneracionActionsTypes = {
 export const pageTypeRemuneracion = (ctx) => {
     return async (dispatch) => {
         let { query } = ctx;
-        let Authorization = await configAuthorization(ctx);
-        await unujobs.get(`type_remuneracion?page=${query.page}`, { headers: { Authorization } })
+        await unujobs.get(`type_remuneracion?page=${query.page}`, {}, ctx)
         .then(res =>  dispatch({ type: typeRemuneracionActionsTypes.PAGE_TYPE_REMUNERACION, payload: res.data }))
         .catch(err => console.log(err.message));
     }

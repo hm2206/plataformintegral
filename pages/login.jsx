@@ -8,6 +8,7 @@ import Show from '../components/show';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { app } from '../env.json';
+import Router from 'next/router';
 
 
 class Login extends Component
@@ -60,12 +61,11 @@ class Login extends Component
         .then(async res => {
             let { success, message, token } = res.data;
             if (success) {
-                Cookies.remove('auth_token');
-                Cookies.set('auth_token', token);
+                await Cookies.set('auth_token', token);
                 history.go('/');
             }else {
                 // mensage de error
-                Swal.fire({icon: 'error', text: message });
+                await Swal.fire({icon: 'error', text: message });
             }
         })
         .catch(err => Swal.fire({icon: 'error', text: err.message}));

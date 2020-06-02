@@ -11,8 +11,7 @@ export const authsActionsTypes = {
 
 export const getAuth = (ctx) => {
     return async (dispatch) => {
-        let Authorization = configAuthorization(ctx);
-        await authentication.get('me', { headers: { Authorization } })
+        await authentication.get('me', {}, ctx)
         .then(res => dispatch({ type: authsActionsTypes.AUTH, payload: res.data }))
         .catch(err => console.log(err.message));
     }
@@ -27,7 +26,13 @@ export const logout = (ctx) => {
             let { success, message } = res.data;
             if (success) {
                 cookies.remove('auth_token');
-                setCookie(ctx, 'device', message);
+                await setCookie(ctx, 'device', message);
+                if (ctx.isServer) {
+                    ctx.res.writeHead(301, { Location: '/login' })
+                    ctx.res.end();
+                    ctx.res.finished = true;
+                    console.log(ctx.isServer);
+                }
             }
         }).catch(err => console.log(err.message));
     }

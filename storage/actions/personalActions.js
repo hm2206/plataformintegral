@@ -1,4 +1,4 @@
-import {  unujobs, configAuthorization } from '../../services/apis';
+import {  unujobs } from '../../services/apis';
 
 
 export const personalActionsTypes = {
@@ -10,8 +10,7 @@ export const personalActionsTypes = {
 export const pagePersonal = (ctx) => {
     return async (dispatch) => {
         let { query } = ctx;
-        let Authorization = await configAuthorization(ctx);
-        await unujobs.get(`personal?year=${query.year}&mes=${query.mes}`, { headers: { Authorization } })
+        await unujobs.get(`personal?year=${query.year}&mes=${query.mes}`, {}, ctx)
         .then(res =>  dispatch({ type: personalActionsTypes.PAGE_PERSONAL, payload: res.data }))
         .catch(err => console.log(err.message));
     }
@@ -21,9 +20,8 @@ export const pagePersonal = (ctx) => {
 export const findPersonal = (ctx) => {
     return async (dispatch) => {
         let { query } = ctx;
-        let Authorization = await configAuthorization(ctx);
         let path = `personal/${query.id || '_error'}`;
-        await unujobs.get(`personal/${query.id || '_error'}`, { headers: { Authorization } })
+        await unujobs.get(`personal/${query.id || '_error'}`, {}, ctx)
         .then(res =>  dispatch({ type: personalActionsTypes.FIND_PERSONAL, payload: res.data }))
         .catch(err => console.log(err.message));
     }

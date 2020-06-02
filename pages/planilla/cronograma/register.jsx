@@ -11,7 +11,7 @@ import { Body, BtnBack } from '../../../components/Utils';
 export default class RegisterCronograma extends Component
 {
 
-    static getInititalProps = async (ctx) => {
+    static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         return { pathname: ctx.pathname, query: ctx.query };
     };

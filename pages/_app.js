@@ -14,15 +14,32 @@ import { Provider } from 'react-redux';
 import withRedux from 'next-redux-wrapper';
 import initsStore from '../storage/store';
 
+// config router
+Router.onRouteChangeStart = () => {
+  let pageChange = document.getElementById('page_change');
+  pageChange.className = 'page_loading';
+};
+
+Router.onRouteChangeComplete = () => {
+  let pageChange = document.getElementById('page_change');
+  pageChange.className = 'page_end';
+};
+
+Router.onRouteChangeError = () => {
+  let pageChange = document.getElementById('page_change');
+  pageChange.className = 'page_end';
+};
+
+
 class MyApp extends App {
 
   static getInitialProps = async ({ Component, ctx, store }) => {
     let pageProps = {};
     // obtener auth
-    let auth = await AUTH(ctx)
+    let isLoggin = await AUTH(ctx) ? await AUTH(ctx) : "";
     // ejecutar initial de los children
     if (await Component.getInitialProps) {
-      if (auth) {
+      if (isLoggin) {
         await ctx.store.dispatch(getAuth(ctx));
       } else {
         await ctx.store.dispatch({ type: authsActionsTypes.LOGOUT });
@@ -30,6 +47,11 @@ class MyApp extends App {
       // props
      try {
         pageProps = await Component.getInitialProps(ctx)
+        let { user } = await ctx.store.getState().auth
+        pageProps.auth = user;
+        pageProps.isLoggin = isLoggin;
+        // page
+        return { pageProps, store, isLoggin };
      } catch (error) {
         if (ctx && ctx.res) {
           ctx.res.writeHead(301, { location: '/404' });
@@ -38,8 +60,6 @@ class MyApp extends App {
         }
      }
     }
-    // page
-    return { pageProps, store, auth_token: auth };
   }
 
   constructor(props) {
@@ -78,7 +98,7 @@ class MyApp extends App {
   }
   
   render() {
-    const { Component, pageProps, store, auth_token } = this.props
+    const { Component, pageProps, store, isLoggin } = this.props
 
     let paths = typeof location == 'object' ? location.pathname.split('/') : [];
     let titulo = paths[paths.length == 0 ? 0 : paths.length - 1];
@@ -93,7 +113,7 @@ class MyApp extends App {
           <link rel="shortcut icon" href="/img/logo-unu.png"></link>
           <meta name="theme-color" content="#3063A0"></meta>
           <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,600,700,900" rel="stylesheet" type="text/css" />
-          {/* <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css" /> */}
+          <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css" />
           <link rel="stylesheet" href="/css/all.css" />
           <link rel="stylesheet" href="/css/buttons.bootstrap4.min.css"></link>
           <link rel="stylesheet" href="/css/flatpickr.min.css" />
@@ -105,8 +125,10 @@ class MyApp extends App {
           <script src="/js/jquery.min.js"></script>
           <script src="/js/popper.min.js"></script>
           <script src="/js/bootstrap.min.js"></script>
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" />
-          {/* <link rel="stylesheet" href="/css/semantic-ui.css" /> */}
+          {/* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" /> */}
+          {/* develoment */}
+          <link rel="stylesheet" href="/css/semantic-ui.css" />
+          <link rel="stylesheet" href="/css/page_loading.css" />
 
           {/* WPA */}
           <link rel="manifest" href="/manifest.json" />
@@ -115,7 +137,7 @@ class MyApp extends App {
           <link rel="apple-touch-icon" href="/apple-icon.png"></link>
           <meta name="theme-color" content="#346cb0"/>
 
-          {auth_token ? <script src="/js/pace.min.js"></script> : ''}
+          {/* {auth_token ? <script src="/js/pace.min.js"></script> : ''} */}
 
           <script src="/js/stacked-menu.min.js"></script>
           {/* <script src="/js/perfect-scrollbar.min.js"></script> */}
@@ -127,9 +149,10 @@ class MyApp extends App {
           <script data-ad-client="ca-pub-6166160936934803" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         </Head>
 
+        <div id="page_change"></div>
 
         {
-          auth_token ?
+          isLoggin ?
             <Fragment>
               <div className="full-layout" id="main">
                 <div className="gx-app-layout ant-layout ant-layout-has-sider">
