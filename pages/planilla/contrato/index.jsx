@@ -60,10 +60,12 @@ export default class Contrato extends Component
     }
 
     handleOption = (obj, key, index) => {
-        let { pathname, push } = Router;
+        let { pathname, push, query } = Router;
         let id = btoa(obj.id);
         if (key == 'pay') {
-            push({ pathname: `${pathname}/pay`, query: { id, clickb: "Info" } });
+            query.id = id;
+            query.clickb = 'Info';
+            push({ pathname: `${pathname}/pay`, query });
         } 
     }
 
@@ -77,7 +79,8 @@ export default class Contrato extends Component
             pathname: Router.pathname, 
             query: { 
                 query_search: this.state.query_search,
-                estado: this.state.estado
+                estado: this.state.estado,
+                page: 1
             } 
         })
     }

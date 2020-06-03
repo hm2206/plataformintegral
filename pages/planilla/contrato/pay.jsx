@@ -41,10 +41,11 @@ export default class Pay extends Component
     }
 
     handleBack = () => {
-        let { push, pathname } = Router;
+        let { push, pathname, query } = Router;
         let newPath = pathname.split('/');
+        query.id = null;
         newPath.splice(-1, 1);
-        push({ pathname: newPath.join('/') });
+        push({ pathname: newPath.join('/'), query });
     }
 
     handleFile = (path) => {
