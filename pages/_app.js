@@ -127,13 +127,9 @@ class MyApp extends App {
           <script src="/js/popper.min.js"></script>
           <script src="/js/bootstrap.min.js"></script>
           {/* production */}
-          <Show condicion={app.env == 'production'}>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" />
-          </Show>
-          {/* develoment */}
-          <Show condicion={app.env == 'local'}>
-            <link rel="stylesheet" href="/css/semantic-ui.css" />
-          </Show>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" />
+          {/* develoment */}  
+          {/* <link rel="stylesheet" href="/css/semantic-ui.css" /> */}
           <link rel="stylesheet" href="/css/page_loading.css" />
 
           {/* WPA */}
