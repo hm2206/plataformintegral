@@ -13,6 +13,7 @@ import { app } from '../env.json';
 import { Provider } from 'react-redux';
 import withRedux from 'next-redux-wrapper';
 import initsStore from '../storage/store';
+import Show from '../components/show';
 
 // config router
 Router.onRouteChangeStart = () => {
@@ -126,9 +127,13 @@ class MyApp extends App {
           <script src="/js/popper.min.js"></script>
           <script src="/js/bootstrap.min.js"></script>
           {/* production */}
-          {/* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" /> */}
+          <Show condicion={app.env == 'production'}>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" />
+          </Show>
           {/* develoment */}
-          <link rel="stylesheet" href="/css/semantic-ui.css" />
+          <Show condicion={app.env == 'local'}>
+            <link rel="stylesheet" href="/css/semantic-ui.css" />
+          </Show>
           <link rel="stylesheet" href="/css/page_loading.css" />
 
           {/* WPA */}
