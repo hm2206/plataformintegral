@@ -330,8 +330,8 @@ export default class CronogramaInformacion extends Component
             case 'processing':
                 await this.processing();
                 break;
-            case 'sync-afp':
-                await this.syncAfp();
+            case 'sync-config':
+                await this.syncConfigs();
                 break;
             case 'imp-descuento':
                 query.imp_descuento = 1;
@@ -389,11 +389,11 @@ export default class CronogramaInformacion extends Component
         }
     }
 
-    syncAfp = async () => {
-        let response = await Confirm("warning", "¿Desea Sincronizar las Leyes Sociales?", "Confirmar");
+    syncConfigs = async () => {
+        let response = await Confirm("warning", "¿Desea Sincronizar las Configuraciones?", "Confirmar");
         if (response) {
             this.setState({ loading: true });
-            await unujobs.post(`config_afp/sync/${this.state.cronograma.id}`)
+            await unujobs.post(`cronograma/${this.state.cronograma.id}/sync_configs`)
             .then(async res => {
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
@@ -487,7 +487,7 @@ export default class CronogramaInformacion extends Component
                                                     { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
                                                     { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
                                                     { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
-                                                    { key: "sync-afp", text: "Sync Leyes Sociales", icon: "cloud download" },
+                                                    { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
                                                     { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
                                                     { key: "processing", text: "Procesar Cronograma", icon: "database" },
                                                     { key: "report", text: "Reportes", icon: "file text outline" },
