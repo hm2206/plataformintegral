@@ -428,6 +428,17 @@ export default class CronogramaInformacion extends Component
         }
     }
 
+    verifyBoleta = async (e) => {
+        e.preventDefault();
+        let answer = await Confirm('warning', '¿Desea visualizar la boleta verificada del trabajador actual?', 'Ir');
+        if (answer) {
+            let a = document.createElement('a');
+            a.href = unujobs.path;
+            a.target = '_blank';
+            a.click();
+        }
+    }
+
     render() {
 
         let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id, config_edad } = this.state;
@@ -495,7 +506,18 @@ export default class CronogramaInformacion extends Component
                                     </Show>
                                     <div className="row align-items-center">
                                         <div className="col-md-9 mb-2">
-                                            <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
+                                            <Show condicion={historial.token_verify}>
+                                                <a href="#" title="Boleta verificada"
+                                                    onClick={this.verifyBoleta}
+                                                >
+                                                    <i className="fas fa-qrcode text-warning mr-2"></i>
+                                                    <span className="text-dark">BOLETA DE "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"</span>
+                                                </a>
+                                            </Show>
+                                            <Show condicion={!historial.token_verify}>
+                                                <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
+                                            </Show> 
+                                            
                                         </div>
 
                                         <div className="col-md-3 text-center">
