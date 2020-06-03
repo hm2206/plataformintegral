@@ -333,6 +333,9 @@ export default class CronogramaInformacion extends Component
             case 'sync-config':
                 await this.syncConfigs();
                 break;
+            case 'generate-token':
+                await this.generateToken();
+                break;
             case 'imp-descuento':
                 query.imp_descuento = 1;
                 await push({ pathname, query });
@@ -394,6 +397,24 @@ export default class CronogramaInformacion extends Component
         if (response) {
             this.setState({ loading: true });
             await unujobs.post(`cronograma/${this.state.cronograma.id}/sync_configs`)
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                // volver a obtener los datos
+                if (success) {
+                    await this.updatingHistorial();
+                }
+            }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
+            this.setState({ loading: false });
+        }
+    }
+
+    generateToken = async () => {
+        let response = await Confirm("warning", "¿Desea Generar los tokens de las boletas?", "Confirmar");
+        if (response) {
+            this.setState({ loading: true });
+            await unujobs.post(`cronograma/${this.state.cronograma.id}/generate_token`)
             .then(async res => {
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
@@ -490,6 +511,7 @@ export default class CronogramaInformacion extends Component
                                                     { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
                                                     { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
                                                     { key: "processing", text: "Procesar Cronograma", icon: "database" },
+                                                    { key: "generate-token", text: "Generar Token", icon: "cloud upload" },
                                                     { key: "report", text: "Reportes", icon: "file text outline" },
                                                 ]}
                                                 onSelect={this.handleOnSelect}
