@@ -98,7 +98,7 @@ export default class Convocatoria extends Component {
         return (
             <div className="col-md-12">
                 <Body>
-                    <Datatable titulo="Lista de Convocatorias"
+                    <Datatable titulo="Lista de Requerimientos de Personal"
                         isFilter={false}
                         loading={loading}
                         headers={ ["#ID", "Perfil Laboral", "F. Inicio", "F. Termino", "Estado"]}

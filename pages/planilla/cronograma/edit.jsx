@@ -4,6 +4,7 @@ import { backUrl } from '../../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
 import { unujobs } from '../../../services/apis';
 import Router from 'next/router';
+import Swal from 'sweetalert2'
 
 export default class EditCronograma extends Component
 {
@@ -26,8 +27,9 @@ export default class EditCronograma extends Component
 
     handleBack = (e) => {
         this.setState({ loading: true });
+        let { cronograma } = this.state;
         let { pathname, push } = Router;
-        push({ pathname: backUrl(pathname) });
+        push({ pathname: backUrl(pathname), query: { mes: cronograma.mes, year: cronograma.year } });
     }
 
     getCronograma = async () => {

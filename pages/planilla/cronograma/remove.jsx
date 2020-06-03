@@ -57,8 +57,9 @@ export default class RemoveCronograma extends Component
 
     handleBack = (e) => {
         this.setState({ loading: true });
+        let { cronograma } = this.state;
         let { pathname, push } = Router;
-        push({ pathname: backUrl(pathname) });
+        push({ pathname: backUrl(pathname), query: { mes: cronograma.mes, year: cronograma.year } });
     }
 
     handleInput = ({ name, value }) => {

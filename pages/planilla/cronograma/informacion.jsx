@@ -67,6 +67,7 @@ export default class CronogramaInformacion extends Component
         this.getDocumentType();
         this.getBancos();
         this.getPlanillas();
+        this.getUbigeo();
         // window
         if (typeof window == 'object') {
             this.setState({ screen: window.screen })
@@ -109,6 +110,12 @@ export default class CronogramaInformacion extends Component
     getDocumentType = async () => {
         await authentication.get('get_document_type')
         .then(res => this.setState({ type_documents: res.data }))
+        .catch(err => console.log(err.message));
+    }
+
+    getUbigeo = async () => {
+        await authentication.get('badge')
+        .then(res => this.setState({ ubigeos: res.data }))
         .catch(err => console.log(err.message));
     }
 
@@ -713,7 +720,7 @@ export default class CronogramaInformacion extends Component
                             <div className="col-md-2 mb-1 col-6">
                                 <Button
                                     fluid
-                                    disabled={loading || this.state.block}
+                                    disabled={loading || this.state.block || cronograma.year != new Date().getFullYear() || cronograma.mes != (new Date().getMonth() + 1)}
                                     onClick={e => {
                                         e.preventDefault();
                                         let { push, pathname, query } = Router;

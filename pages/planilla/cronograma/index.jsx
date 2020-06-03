@@ -101,7 +101,7 @@ export default class Cronograma extends Component {
             pathname = `${pathname}/edit`;
         }
         // execute
-        await Router.push({pathname, query});
+        Router.push({pathname, query});
         this.setState({ loading: false });
     }
 
