@@ -30,16 +30,17 @@ export default class CreateTrabajador extends Component
             date_of_birth: "",
             address: 'S/D',
             phone: '',
-            departamento_id: "",
-            provincia_id: "",
-            distrito_id: ""
+            cod_dep: "",
+            cod_pro: "",
+            cod_dis: ""
         },
         image_render: "/img/base.png",
         image: null,
         document_types: [],
         departamentos: [],
         provincias: [],
-        distritos: []
+        distritos: [],
+        errors: {}
     }
 
     componentDidMount = () => {
@@ -50,9 +51,9 @@ export default class CreateTrabajador extends Component
 
     componentWillUpdate = async (nextProps, nextState) => {
         let { form, works } = this.state;
-        if (nextState.form.departamento_id && form.departamento_id != nextState.form.departamento_id) {
+        if (nextState.form.cod_dep && form.cod_dep != nextState.form.cod_dep) {
             await this.getProvincias(nextState.form);
-        } else if (nextState.form.provincia_id && form.provincia_id != nextState.form.provincia_id) {
+        } else if (nextState.form.cod_pro && form.cod_pro != nextState.form.cod_pro) {
             await this.getDistritos(nextState.form);
         }
 
@@ -85,8 +86,10 @@ export default class CreateTrabajador extends Component
 
     handleInput = async ({ name, value }, object = 'form') => {
         let newObj = Object.assign({}, this.state[object]);
+        let newErrors = Object.assign({}, this.state.errors);
         newObj[name] = value;
-        await this.setState({ [object]: newObj });
+        newErrors[name] = "";
+        await this.setState({ [object]: newObj, errors: newErrors });
     }
 
     getReniec = async (dni = "") => {
@@ -124,21 +127,21 @@ export default class CreateTrabajador extends Component
     }
 
     getProvincias = async (form) => {
-        await authentication.get(`get_provincias/${form.departamento_id}`)
+        await authentication.get(`get_provincias/${form.cod_dep}`)
         .then(res => this.setState({ provincias: res.data }))
         .catch(err => console.log(err.message));
         let obj = Object.assign({}, this.state.form);
-        obj['provincia_id'] = "";
-        obj['distrito_id'] = "";
+        obj['cod_pro'] = "";
+        obj['cod_dis'] = "";
         this.setState({ form: obj });
     }
 
     getDistritos = async (form) => {
-        await authentication.get(`get_distritos/${form.departamento_id}/${form.provincia_id}`)
+        await authentication.get(`get_distritos/${form.cod_dep}/${form.cod_pro}`)
         .then(res => this.setState({ distritos: res.data }))
         .catch(err => console.log(err.message));
         let obj = Object.assign({}, this.state.form);
-        obj['distrito_id'] = "";
+        obj['cod_dis'] = "";
         this.setState({ form: obj });
     }
 
@@ -160,7 +163,13 @@ export default class CreateTrabajador extends Component
                 let id = btoa(person.id)
                 await Router.push({ pathname: parseUrl(Router.pathname, "add"), query: { id } });
             }
-        }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        }).catch(err => {
+            try {
+                let { message } = err.response.data.error || "";
+                let newErrors = JSON.parse(message);
+                this.setState({ errors: newErrors.errors || {} });
+            } catch (error) { Swal.fire({ icon: 'error', text: 'Algo salió mal' })}
+        });
         this.setState({ loader: false });
     }
 
@@ -175,7 +184,7 @@ export default class CreateTrabajador extends Component
 
     render() {    
 
-        let { image_render, form } = this.state;
+        let { image_render, form, errors } = this.state;
         let { query } = this.props;
 
             return (
@@ -214,72 +223,77 @@ export default class CreateTrabajador extends Component
                                         <div className="col-md-8">
                                             <div className="row">
                                                 <div className="col-md-4 mb-2">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Tipo Documento <b className="text-red">*</b></label>
+                                                    <Form.Field error={errors && errors.document_type && errors.document_type[0]}>
+                                                        <label>Tipo Documento <b className="text-red">*</b></label>
                                                         <Select
                                                             placeholder="Select. Tipo Documento"
                                                             name="document_type"
                                                             options={this.state.document_types}
                                                             onChange={(e, obj) => this.handleInput(obj)}
-                                                            value={form.document_type ? form.document_type : ''}
+                                                            value={form.document_type || ''}
                                                         />
+                                                        <label htmlFor="">{errors && errors.document_type && errors.document_type[0]}</label>
                                                     </Form.Field>
                                                 </div>
 
                                                 <div className="col-md-4 mb-2">
-                                                    <Form.Field>
+                                                    <Form.Field error={errors && errors.document_number && errors.document_number[0]}>
                                                         <label htmlFor="">N° Documento <b className="text-red">*</b></label>
                                                         <input type="text"
                                                             name="document_number"
-                                                            value={form.document_number ? form.document_number : ''}
+                                                            value={form.document_number || ''}
                                                             onChange={(e) => this.handleInput(e.target)}
                                                         />
+                                                        <label>{errors && errors.document_number && errors.document_number[0]}</label>
                                                     </Form.Field>
                                                 </div>
 
                                                 <div className="col-md-4 mb-2">
-                                                    <Form.Field>
+                                                    <Form.Field error={errors && errors.ape_pat && errors.ape_pat[0]}>
                                                         <label htmlFor="">Apellido Paterno <b className="text-red">*</b></label>
                                                         <input type="text"
                                                             disabled={this.state.block}
                                                             name="ape_pat"
-                                                            value={form.ape_pat ? form.ape_pat : ''}
+                                                            value={form.ape_pat || ''}
                                                             onChange={(e) => this.handleInput(e.target)}
                                                         />
+                                                        <label>{errors && errors.ape_pat && errors.ape_pat[0]}</label>
                                                     </Form.Field>
                                                 </div>
 
                                                 <div className="col-md-4">
-                                                    <Form.Field>
+                                                    <Form.Field error={errors && errors.ape_mat && errors.ape_mat[0]}>
                                                         <label htmlFor="">Apellido Materno <b className="text-red">*</b></label>
                                                         <input type="text"
                                                             disabled={this.state.block}
                                                             name="ape_mat"
-                                                            value={form.ape_mat ? form.ape_mat : ''}
+                                                            value={form.ape_mat || ''}
                                                             onChange={(e) => this.handleInput(e.target)}
                                                         />
+                                                        <label>{errors && errors.ape_mat && errors.ape_mat[0]}</label>
                                                     </Form.Field>
                                                 </div>
 
                                                 <div className="col-md-4 mb-2">
-                                                    <Form.Field>
+                                                    <Form.Field error={errors && errors.name && errors.name[0]}>
                                                         <label htmlFor="">Nombres <b className="text-red">*</b></label>
                                                         <input type="text"
                                                             disabled={this.state.block}
                                                             name="name"
-                                                            value={form.name ? form.name : ''}
+                                                            value={form.name || ''}
                                                             onChange={(e) => this.handleInput(e.target)}
                                                         />
+                                                        <label>{errors && errors.name && errors.name[0]}</label>
                                                     </Form.Field>
                                                 </div>
                                                 
                                                 <div className="col-md-4">
-                                                    <Form.Field>
+                                                    <Form.Field error={errors && errors.gender && errors.gender[0]}>
                                                         <label htmlFor="">Genero <b className="text-red">*</b></label>
                                                         <Select
                                                             placeholder="Select. Genero"
                                                             name="gender"
-                                                            value={this.state.form.gender}
+                                                            value={this.state.form.gender || 'I'}
                                                             options={[
                                                                 { key: "M", value: "M", text: "Masculino" },
                                                                 { key: "F", value: "F", text: "Femenino" },
@@ -287,26 +301,28 @@ export default class CreateTrabajador extends Component
                                                             ]}
                                                             onChange={(e, obj) => this.handleInput(obj)}
                                                         />
+                                                        <label>{errors && errors.gender && errors.gender[0]}</label>
                                                     </Form.Field>
                                                 </div>
 
                                                 <div className="col-md-4">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Prefijo <b className="text-red">*</b></label>
+                                                    <Form.Field error={errors && errors.profession && errors.profession[0]}>
+                                                        <label htmlFor="">Prefesion Abr. <b className="text-red">*</b></label>
                                                         <input type="text"
                                                             name="profession"
-                                                            value={form.profession ? form.profession : ''}
+                                                            value={form.profession || ''}
                                                             onChange={(e) => this.handleInput(e.target)}
                                                         />
+                                                        <label>{errors && errors.profession && errors.profession[0]}</label>
                                                     </Form.Field>
                                                 </div>
                     
                                                 <div className="col-md-4">
-                                                    <Form.Field>
+                                                    <Form.Field error={errors && errors.marital_status && errors.marital_status[0]}>
                                                         <label htmlFor="">Estado Cívil <b className="text-red">*</b></label>
                                                         <select
                                                             name="marital_status"
-                                                            value={form.marital_status ? form.marital_status : ''}
+                                                            value={form.marital_status || ''}
                                                             onChange={(e) => this.handleInput(e.target)}
                                                         >
                                                             <option value="">Select. Estado Cívil</option>
@@ -315,18 +331,20 @@ export default class CreateTrabajador extends Component
                                                             <option value="D">Divorsiado(a)</option>
                                                             <option value="V">Viudo(a)</option>
                                                         </select>
+                                                        <label>{errors && errors.marital_status && errors.marital_status[0]}</label>
                                                     </Form.Field>
                                                 </div>       
 
                                                 <div className="col-md-4 mb-2">
-                                                    <Form.Field>
+                                                    <Form.Field error={errors && errors.date_of_birth && errors.date_of_birth[0]}>
                                                         <label htmlFor="">Fecha de nacimiento <b className="text-red">*</b></label>
                                                         <input type="date"
                                                             disabled={this.state.block}
                                                             name="date_of_birth"
-                                                            value={form.date_of_birth ? form.date_of_birth : ''}
+                                                            value={form.date_of_birth || ''}
                                                             onChange={(e) => this.handleInput(e.target)}
                                                         />
+                                                        <label>{errors && errors.date_of_birth && errors.date_of_birth[0]}</label>
                                                     </Form.Field>
                                                 </div>
                                             </div>
@@ -339,10 +357,10 @@ export default class CreateTrabajador extends Component
                                         </div>
 
                                         <div className="col-md-4 mb-2">
-                                            <Form.Field>
+                                            <Form.Field error={errors && errors.cod_dep && errors.cod_dep[0]}>
                                                 <label htmlFor="">Departamento <b className="text-red">*</b></label>
-                                                <select name="departamento_id"
-                                                    value={form.departamento_id ? form.departamento_id : ''}
+                                                <select name="cod_dep"
+                                                    value={form.cod_dep || ''}
                                                     onChange={(e) => this.handleInput(e.target)}
                                                 >
                                                     <option value="">Select. Departamento</option>
@@ -350,51 +368,55 @@ export default class CreateTrabajador extends Component
                                                         <option value={obj.cod_dep} key={`dep-${obj.departamento}`}>{obj.departamento}</option>
                                                     )}
                                                 </select>
+                                                <label>{errors && errors.cod_dep && errors.cod_dep[0]}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mb-2">
-                                            <Form.Field>
+                                            <Form.Field error={errors && errors.cod_pro && errors.cod_pro[0]}>
                                                 <label htmlFor="">Provincias <b className="text-red">*</b></label>
                                                 <select
-                                                    name="provincia_id"
-                                                    value={form.provincia_id ? form.provincia_id : ''}
+                                                    name="cod_pro"
+                                                    value={form.cod_pro || ''}
                                                     onChange={(e) => this.handleInput(e.target)}
-                                                    disabled={!form.departamento_id}
+                                                    disabled={!form.cod_dep}
                                                 >
                                                     <option value="">Select. Provincia</option>
                                                     {this.state.provincias.map(obj =>
                                                         <option key={`prov-${obj.pro}`} value={obj.cod_pro}>{obj.provincia}</option>    
                                                     )}
                                                 </select>
+                                                <label>{errors && errors.cod_pro && errors.cod_pro[0]}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mb-2">
-                                            <Form.Field>
+                                            <Form.Field error={errors && errors.cod_dis && errors.cod_dis[0]}>
                                                 <label htmlFor="">Distrito <b className="text-red">*</b></label>
                                                 <select
-                                                    name="distrito_id"
-                                                    value={form.distrito_id ? form.distrito_id : ''}
+                                                    name="cod_dis"
+                                                    value={form.cod_dis || ''}
                                                     onChange={(e) => this.handleInput(e.target)}
-                                                    disabled={!form.provincia_id}
+                                                    disabled={!form.cod_pro}
                                                 >
                                                     <option value="">Select. Distrito</option>
                                                     {this.state.distritos.map(obj =>
                                                         <option key={`dis-${obj.dis}`} value={obj.cod_dis}>{obj.distrito}</option>    
                                                     )}
                                                 </select>
+                                                <label>{errors && errors.cod_dis && errors.cod_dis[0]}</label>
                                             </Form.Field>
                                         </div>
                                         
                                         <div className="col-md-4 mb-2">            
-                                            <Form.Field>
+                                            <Form.Field error={errors && errors.address && errors.address[0]}>
                                                 <label htmlFor="">Dirección <b className="text-red">*</b></label>
                                                 <input type="text"
                                                     name="address"
-                                                    value={form.address ? form.address : ''}
+                                                    value={form.address || ''}
                                                     onChange={(e) => this.handleInput(e.target)}
                                                 />
+                                                <label>{errors && errors.address && errors.address[0]}</label>
                                             </Form.Field>
                                         </div>
 
@@ -404,7 +426,7 @@ export default class CreateTrabajador extends Component
                                                 <input type="text"
                                                     name="email_contact"
                                                     placeholder="Ingrese el correo de contacto"
-                                                    value={form.email_contact ? form.email_contact : ''}
+                                                    value={form.email_contact || ''}
                                                     onChange={(e) => this.handleInput(e.target)}
                                                 />
                                             </Form.Field>
@@ -415,7 +437,7 @@ export default class CreateTrabajador extends Component
                                                 <label htmlFor="">Teléfono</label>
                                                 <input type="text"
                                                     name="phone"
-                                                    value={form.phone ? form.phone : ''}
+                                                    value={form.phone || ''}
                                                     onChange={(e) => this.handleInput(e.target)}
                                                     placeholder="Ingrese un número telefónico"
                                                 />

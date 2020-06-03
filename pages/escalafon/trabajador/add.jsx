@@ -95,10 +95,13 @@ export default class AddWork extends Component
                 await Swal.fire({ icon, text: message });
                 if (body) {
                     let answer = await Confirm("warning", "¿Desea agregarle un contrato?", "Aceptar");
+                    let { push } = Router;
                     if (answer) {
-                        let { push } = Router;
                         let  id = btoa(body.id);
                         await push({ pathname: '/planilla/contrato/register', query: { id } });
+                    } else {
+                        let { person } = this.props;
+                        await push({ pathname: '/escalafon/trabajador', query: { query_search: person.fullname } });
                     }
                 }
             })

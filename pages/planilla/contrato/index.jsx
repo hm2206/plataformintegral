@@ -5,7 +5,6 @@ import { AUTHENTICATE } from '../../../services/auth';
 import DataTable from '../../../components/datatable';
 import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
-import { unujobs } from '../../../services/apis';
 import btoa from 'btoa';
 import { responsive } from '../../../services/storage.json';
 import { Body } from '../../../components/Utils';
