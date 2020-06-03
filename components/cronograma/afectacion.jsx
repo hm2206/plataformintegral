@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { unujobs } from '../../services/apis';
-import { Form, Select, Message, Input, TextArea, Button } from 'semantic-ui-react';
+import { Form, Select, Button, Radio } from 'semantic-ui-react';
 import Show from '../show';
 import ConsultaIframe from '../consultaIframe';
 import { parseOptions } from '../../services/utils';
@@ -345,10 +345,18 @@ export default class Afectacion extends Component {
                                 {key: "a", value: 1, text: "Afecto"}
                             ]}
                             placeholder="Select. Prima Seguro"
-                            value={history.prima_seguro ? history.prima_seguro : 0}
+                            value={history.prima_seguro || 0}
                             name="prima_seguro"
                             onChange={(e, obj) => this.handleInput(obj)}
                             disabled={!this.props.edit}
+                        />
+                    </Form.Field>
+
+                    <Form.Field>
+                        <label className="mb-2"><h5>Enviar Email</h5></label>
+                        <Radio toggle checked={history.is_email || 0}
+                            disabled={!this.props.edit}
+                            onChange={(e, obj) => this.handleInput({ name: 'is_email', value: obj.checked ? 1 : 0 })}
                         />
                     </Form.Field>
                 </div>

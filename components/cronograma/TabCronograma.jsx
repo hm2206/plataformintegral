@@ -44,7 +44,7 @@ export default class TabCronograma extends Component
                     </Tab.Pane> 
             },
             {
-                menuItem: {key: 'afectacion', icon: 'cogs', content: 'Afectació Pres.', disabled: edit },
+                menuItem: {key: 'afectacion', icon: 'cogs', content: 'Config. Trab.', disabled: edit },
                 render: () => (
                     <Tab.Pane style={styles}>
                         <Afectacion
