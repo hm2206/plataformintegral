@@ -16,7 +16,7 @@ export default class Close extends Component
     close = async () => {
         this.setState({ loader: true });
         let { cronograma } = this.props;
-        await unujobs.post(`cronograma/${cronograma.id}/close`)
+        await unujobs.post(`cronograma/${cronograma.id}/close`, {}, { headers: { CronogramaID: cronograma.id } })
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';

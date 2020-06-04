@@ -16,7 +16,7 @@ export default class Open extends Component
     open = async () => {
         this.setState({ loader: true });
         let { cronograma } = this.props;
-        await unujobs.post(`cronograma/${cronograma.id}/open`)
+        await unujobs.post(`cronograma/${cronograma.id}/open`, {}, { headers: { CronogramaID: cronograma.id } })
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
