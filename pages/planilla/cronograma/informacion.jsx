@@ -15,6 +15,7 @@ import UpdateDesctMassive from '../../../components/cronograma/updateDesctMassiv
 import ImpDescuento from '../../../components/cronograma/impDescuento';
 import Open from '../../../components/cronograma/open';
 import Cerrar from '../../../components/cronograma/close';
+import { url } from '../../../env.json';
 
 export default class CronogramaInformacion extends Component
 {
@@ -442,8 +443,9 @@ export default class CronogramaInformacion extends Component
         e.preventDefault();
         let answer = await Confirm('warning', '¿Desea visualizar la boleta verificada del trabajador actual?', 'Ir');
         if (answer) {
+            let { historial } = this.state;
             let a = document.createElement('a');
-            a.href = unujobs.path;
+            a.href = `${url.URL_BOLETA}?token_verify=${historial && historial.token_verify}`;
             a.target = '_blank';
             a.click();
         }
