@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { unujobs } from '../../services/apis';
 import { Button, Form, Select, Icon } from 'semantic-ui-react';
-import { parseOptions } from '../../services/utils';
+import { parseOptions, Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import { responsive } from '../../services/storage.json';
@@ -35,25 +35,29 @@ export default class Sindicato extends Component
     }
 
     create = async () => {
-        this.setState({ loader: true });
-        let payload = {
-            historial_id: this.props.historial.id,
-            type_sindicato_id: this.state.sindicato_id
-        };
-        // send
-        await unujobs.post('sindicato', payload)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) {
-                this.setState({ loader: false });
-                await this.props.updatingHistorial();
-                this.getSindicatos(this.props);
-            }
-        })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.setState({ loader: false });
+        let answer = await Confirm('warning', '¿Deseas guardar el Sindicato/Afiliación?');
+        if (answer) {
+            this.setState({ loader: true });
+            let payload = {
+                historial_id: this.props.historial.id,
+                type_sindicato_id: this.state.sindicato_id
+            };
+            let { historial } = this.props;
+            // send
+            await unujobs.post('sindicato', payload, { headers: { CronogramaID: historial.cronograma_id } })
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                if (success) {
+                    this.setState({ loader: false });
+                    await this.props.updatingHistorial();
+                    this.getSindicatos(this.props);
+                }
+            })
+            .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loader: false });
+        }
     }
 
     getSindicatos = async (props) => {
@@ -72,20 +76,24 @@ export default class Sindicato extends Component
     }
 
     delete = async (id) => {
-        this.setState({ loader: true });
-        await unujobs.post(`sindicato/${id}`, { _method: 'DELETE' })
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            Swal.fire({ icon, text: message });
-            if (success) {
-                this.setState({ loader: false });
-                await this.props.updatingHistorial();
-                this.getSindicatos(this.props);
-            }
-        })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.setState({ loader: false });
+        let answer = await Confirm('warning', '¿Deseas eliminar el Sindicato/Afiliación?');
+        if (answer) {
+            this.setState({ loader: true });
+            let { historial } = this.props;
+            await unujobs.post(`sindicato/${id}`, { _method: 'DELETE' }, { headers: { CronogramaID: historial.cronograma_id } })
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                if (success) {
+                    this.setState({ loader: false });
+                    await this.props.updatingHistorial();
+                    this.getSindicatos(this.props);
+                }
+            })
+            .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loader: false });
+        }
     }
 
     render() {
@@ -110,7 +118,7 @@ export default class Sindicato extends Component
                         </div>
                         <div className="col-xs col-md-4 col-lg-2 col-2">
                             <Button color="green"
-                                disabled={!sindicato_id}   
+                                disabled={!sindicato_id || !this.props.edit}   
                                 onClick={this.create} 
                                 fluid
                             >

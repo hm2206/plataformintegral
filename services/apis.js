@@ -12,14 +12,14 @@ export const configAuthorization = (ctx) => {
     return `Bearer ${NextCookies(ctx)['auth_token']}`;
 }
 
-const ConfigHeaders = async (ctx = null, config = { }) => {
-    let newConfig = await Object.assign({}, config);
+const ConfigHeaders = (ctx = null, config = { }) => {
+    let newConfig = Object.assign({}, config);
     newConfig.headers = config.headers || {};
     // validar ctx
     if (ctx) {
-        newConfig.headers.Authorization = await configAuthorization(ctx);
+        newConfig.headers.Authorization = configAuthorization(ctx);
     } else {
-        newConfig.headers.Authorization = await headers.Authorization
+        newConfig.headers.Authorization = headers.Authorization
     };
     return newConfig;
 }   
@@ -29,11 +29,11 @@ const ConfigHeaders = async (ctx = null, config = { }) => {
  *  api para consumir el authenticador
  */
 export const authentication = {
-    get: async (path, config = { }, ctx = null) => {
-        return axios.get(`${url.API_AUTHENTICATION}/${path}`, await ConfigHeaders(ctx, config));
+    get: (path, config = { }, ctx = null) => {
+        return axios.get(`${url.API_AUTHENTICATION}/${path}`, ConfigHeaders(ctx, config));
     },
-    post: async (path, body = { }, config = { }, ctx = null) => {
-        return axios.post(`${url.API_AUTHENTICATION}/${path}`, body, await ConfigHeaders(ctx, config));
+    post: (path, body = { }, config = { }, ctx = null) => {
+        return axios.post(`${url.API_AUTHENTICATION}/${path}`, body, ConfigHeaders(ctx, config));
     },
     path: url.API_AUTHENTICATION
 };
@@ -43,14 +43,14 @@ export const authentication = {
  * api para consumir el sistema de planillas
  */
 export const unujobs = {
-    get: async (path, config = { }, ctx) => {
-        return axios.get(`${url.API_UNUJOBS}/${path}`, await ConfigHeaders(ctx, config));
+    get: (path, config = { }, ctx) => {
+        return axios.get(`${url.API_UNUJOBS}/${path}`, ConfigHeaders(ctx, config));
     },
-    post: async (path, body = { }, config = { }, ctx) => {
-        return axios.post(`${url.API_UNUJOBS}/${path}`, body, await ConfigHeaders(ctx, config));
+    post: (path, body = { }, config = { }, ctx) => {
+        return axios.post(`${url.API_UNUJOBS}/${path}`, body, ConfigHeaders(ctx, config));
     },
-    fetch: async (path, config = { }, ctx) => {
-        return fetch(`${url.API_UNUJOBS}/${path}`, await ConfigHeaders(ctx, config));
+    fetch: (path, config = { }, ctx) => {
+        return fetch(`${url.API_UNUJOBS}/${path}`, ConfigHeaders(ctx, config));
     },
     path: url.API_UNUJOBS
 };

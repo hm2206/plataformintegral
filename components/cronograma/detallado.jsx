@@ -78,7 +78,15 @@ export default class Remuneracion extends Component
 
     getTypeDetalles = async () => {
         await unujobs.get('type_detalle')
-        .then(res => this.setState({ type_detalles: res.data }))
+        .then(async res => {
+            let type_detalles = res.data;
+            await type_detalles.map(obj => {
+                obj.descripcion = `${obj.type_descuento && obj.type_descuento.key}.- ${obj.descripcion}`;
+                return obj;
+            })
+            // set
+            this.setState({ type_detalles })
+        })
         .catch(err => console.log(err.message));
     }
 
@@ -90,8 +98,9 @@ export default class Remuneracion extends Component
 
     update = async () => {
         let form = new FormData;
+        let { historial } = this.props;
         form.append('detalles', JSON.stringify(this.state.payload));
-        await unujobs.post(`detalle/${this.props.historial.id}/all`, form)
+        await unujobs.post(`detalle/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
@@ -110,7 +119,7 @@ export default class Remuneracion extends Component
         let { detalles, type_detalle_id, monto, type_detalles, loader } = this.state;
  
         return (
-            <Form className="row" loading={loader}>
+            <Form className="row" loading={!this.props.loading && loader}>
 
                 <div className="col-md-12">
                     <div className="row">
@@ -141,7 +150,7 @@ export default class Remuneracion extends Component
 
                         <div className="col-xs col-md-4 col-2 col-sm-3 col-lg-3">
                             <Button color="green"
-                                disabled={!type_detalle_id}
+                                disabled={!type_detalle_id || !this.props.edit}
                                 onClick={this.create}    
                                 fluid
                             >

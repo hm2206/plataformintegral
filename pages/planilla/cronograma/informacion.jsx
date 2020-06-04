@@ -259,8 +259,8 @@ export default class CronogramaInformacion extends Component
     updatingHistorial = async () => {
         let { push, query, pathname } = Router;
         query.active = this.state.active;
-        await push({ pathname, query });
         this.setState({ send: false, edit: false });
+        await push({ pathname, query });
     }
 
     handleConfirm = async (e) => {

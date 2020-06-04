@@ -5,6 +5,7 @@ import Show from '../show';
 import storage from '../../services/storage.json';
 import Swal from 'sweetalert2';
 import { responsive } from '../../services/storage.json';
+import {  Confirm } from '../../services/utils';
 
 
 export default class Obligacion extends Component
@@ -41,35 +42,39 @@ export default class Obligacion extends Component
             await this.getObligaciones(nextProps);
         }
         // send
-        if (nextProps.send && nextProps.send != this.props.send) {
+        if (nextProps.edit && nextProps.send && nextProps.send != this.props.send) {
             await this.update();
         }
     }
 
     create = async () => {
-        this.setState({ loader: true });
-        let form = Object.assign({}, this.state.form);
-        form.info_id = this.props.historial.info_id;
-        await unujobs.post('type_obligacion', form)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            // is success
-            if (success) {
-                await unujobs.post(`cronograma/${this.props.historial.cronograma_id}/add_obligacion`)
-                .then(async res => {
-                    let { success, message } = res.data;
-                    let icon = success ? 'success' : 'error';
-                    await Swal.fire({ icon, text: message });
-                })
-                .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-                await this.getObligaciones(this.props);
-                await this.props.updatingHistorial();
-            }
-        })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.setState({ loader: false });
+        let answer = await Confirm('warning', '¿Deseas guardar la obligación judicial?');
+        if (answer) {
+            this.setState({ loader: true });
+            let form = Object.assign({}, this.state.form);
+            form.info_id = this.props.historial.info_id;
+            await unujobs.post('type_obligacion', form)
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                let { historial } = this.props;
+                // is success
+                if (success) {
+                    await unujobs.post(`cronograma/${historial.cronograma_id}/add_obligacion`, {}, { headers: { CronogramaID: historial.cronograma_id } })
+                    .then(async res => {
+                        let { success, message } = res.data;
+                        let icon = success ? 'success' : 'error';
+                        await Swal.fire({ icon, text: message });
+                    })
+                    .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+                    await this.getObligaciones(this.props);
+                    await this.props.updatingHistorial();
+                }
+            })
+            .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loader: false });
+        }
     }
 
     getDatosReniec = async (dni) => {
@@ -122,39 +127,43 @@ export default class Obligacion extends Component
     update = async () => {
         let form = new FormData;
         form.append('obligaciones', JSON.stringify(this.state.obligaciones));
-        await unujobs.post(`obligacion/${this.props.historial.id}/all`, form)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            Swal.fire({ icon, text: message });
-            if (success) {
-                await this.props.updatingHistorial();
-            } 
-            // recargar
-            this.getObligaciones(this.props);
-        })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.props.setEdit(false);
-        this.props.setSend(false);
-        this.props.setLoading(false);
-    }
-
-    delete = async (id) => {
-        this.setState({ loader: true });
-        await unujobs.post(`obligacion/${id}`, { _method: 'DELETE' })
+        let { historial } = this.props;
+        await unujobs.post(`obligacion/${this.props.historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
             if (success) {
                 await this.props.updatingHistorial();
+                // recargar
                 this.getObligaciones(this.props);
-            }
-        }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.setState({ loader: false });
-        this.props.setEdit(false);
-        this.props.setSend(false);
+            } 
+        })
+        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.props.setLoading(false);
+        this.props.setSend(false);
+    }
+
+    delete = async (id) => {
+        let answer = await Confirm('warning', '¿Deseas eliminar la obligación judicial?', 'Confirmar')
+        if (answer) {
+            this.setState({ loader: true });
+            let { historial } = this.props;
+            await unujobs.post(`obligacion/${id}`, { _method: 'DELETE' }, { headers: { CronogramaID: historial.cronograma_id } })
+            .then(async res => {
+                let { success, message } = res.data;
+                let icon = success ? 'success' : 'error';
+                await Swal.fire({ icon, text: message });
+                if (success) {
+                    await this.props.updatingHistorial();
+                    this.getObligaciones(this.props);
+                }
+            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loader: false });
+            this.props.setEdit(false);
+            this.props.setSend(false);
+            this.props.setLoading(false);
+        }
     }
 
     render() {
@@ -297,7 +306,7 @@ export default class Obligacion extends Component
                         <div className="col-md-4 col-lg-2 mb-2">
                             <Button color="green"
                                 fluid
-                                disabled={!this.permisionAdd()}  
+                                disabled={!this.permisionAdd() || !this.props.edit}  
                                 onClick={this.create}  
                             >
                                 <Icon name="plus"/> Agregar

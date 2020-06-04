@@ -29,7 +29,7 @@ export default class Remuneracion extends Component
             await this.getRemuneraciones(nextProps);
         }
         // update 
-        if (nextProps.send && nextProps.send != this.props.send) {
+        if (nextProps.edit && nextProps.send && nextProps.send != this.props.send) {
             await this.updateRemuneraciones();
         }
         // update al cancelar
@@ -61,14 +61,18 @@ export default class Remuneracion extends Component
     }
     
     updateRemuneraciones = async () => {
+        let { historial } = this.props;
         const form = new FormData();
         form.append('_method', 'PUT');
         form.append('remuneraciones', JSON.stringify(this.state.payload));
-        await unujobs.post(`remuneracion/${this.props.historial.id}/all`, form)
+        await unujobs.post(`remuneracion/${this.props.historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
             let { success, message, body } = res.data;
             let icon = success ? 'success' : 'error';
+            await Swal.fire({ icon, text: message });
             if (success) {
+                await this.props.setEdit(false);
+                await this.props.setSend(false);
                 await this.props.updatingHistorial();
                 this.setState({
                     total_bruto: body.total_bruto,
@@ -80,7 +84,6 @@ export default class Remuneracion extends Component
                 this.props.setSend(false);
                 this.props.setLoading(false);
             }
-            await Swal.fire({ icon, text: message });
         })
         .catch(err => {
             Swal.fire({ icon: 'error', text: err.message })

@@ -30,7 +30,7 @@ export default class Descuento extends Component
             await this.getDescuentos(nextProps);
         }
         // update 
-        if (nextProps.send && nextProps.send != this.props.send) {
+        if (nextProps.edit && nextProps.send && nextProps.send != this.props.send) {
             await this.updateDescuentos();
         }
         // update al cancelar
@@ -63,13 +63,17 @@ export default class Descuento extends Component
     
     updateDescuentos = async () => {
         const form = new FormData();
+        let { historial } = this.props;
         form.append('_method', 'PUT');
         form.append('descuentos', JSON.stringify(this.state.payload));
-        await unujobs.post(`descuento/${this.props.historial.id}/all`, form)
+        await unujobs.post(`descuento/${this.props.historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
             let { success, message, body } = res.data;
             let icon = success ? 'success' : 'error';
+            await Swal.fire({ icon, text: message });
             if (success) {
+                await this.props.setEdit(false);
+                await this.props.setSend(false);
                 await this.props.updatingHistorial();
                 this.setState({
                     total_bruto: body.total_bruto,
@@ -81,7 +85,6 @@ export default class Descuento extends Component
                 this.props.setSend(false);
                 this.props.setLoading(false);
             }
-            await Swal.fire({ icon, text: message });
         })
         .catch(err => {
             Swal.fire({ icon: 'error', text: err.message })
@@ -94,8 +97,9 @@ export default class Descuento extends Component
         let res = await Confirm("warning", `Deseas ${edit ? 'Desactivar' : 'Activar'} el calculo automático para "${obj.descripcion}"`, "Confirmar");
         if (res) {
             this.props.setLoading(true);
+            let { historial } = this.props; 
             this.setState({ loader: true });
-            await unujobs.post(`descuento/${obj.id}/edit`, { _method: 'PUT', edit })
+            await unujobs.post(`descuento/${obj.id}/edit`, { _method: 'PUT', edit }, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => { 
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';

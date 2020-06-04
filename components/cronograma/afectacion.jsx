@@ -90,9 +90,10 @@ export default class Afectacion extends Component {
     }
 
     update = async () => {
-        let form = Object.assign({}, this.state.history);
+        let { history } = this.state;
+        let form = Object.assign({}, history);
         form._method = 'PUT';
-        await unujobs.post(`historial/${this.state.history.id}`, form)
+        await unujobs.post(`historial/${this.state.history.id}`, form, { headers: { CronogramaID: history.cronograma_id } })
         .then(res => {
             let { success, message } = res.data;
             if (success) {
