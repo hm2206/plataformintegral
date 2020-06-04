@@ -48,7 +48,7 @@ export default class UpdateDesctMassive extends Component
                 _method: 'PUT',
                 type_descuento_id: this.state.type_descuento_id,
                 monto: this.state.monto 
-            })
+            }, { headers: { CronogramaID: this.state.id } })
             .then(async res => {
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
