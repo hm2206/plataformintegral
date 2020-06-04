@@ -29,10 +29,10 @@ const ConfigHeaders = async (ctx = null, config = { }) => {
  *  api para consumir el authenticador
  */
 export const authentication = {
-    get: async (path, config = {}, ctx = null) => {
+    get: async (path, config = { }, ctx = null) => {
         return axios.get(`${url.API_AUTHENTICATION}/${path}`, await ConfigHeaders(ctx, config));
     },
-    post: async (path, body = {}, config = {}, ctx = null) => {
+    post: async (path, body = { }, config = { }, ctx = null) => {
         return axios.post(`${url.API_AUTHENTICATION}/${path}`, body, await ConfigHeaders(ctx, config));
     },
     path: url.API_AUTHENTICATION
@@ -43,13 +43,13 @@ export const authentication = {
  * api para consumir el sistema de planillas
  */
 export const unujobs = {
-    get: async (path, config = { headers }, ctx) => {
+    get: async (path, config = { }, ctx) => {
         return axios.get(`${url.API_UNUJOBS}/${path}`, await ConfigHeaders(ctx, config));
     },
-    post: async (path, body = {}, config = { headers }, ctx) => {
+    post: async (path, body = { }, config = { }, ctx) => {
         return axios.post(`${url.API_UNUJOBS}/${path}`, body, await ConfigHeaders(ctx, config));
     },
-    fetch: async (path, config = {}, ctx) => {
+    fetch: async (path, config = { }, ctx) => {
         return fetch(`${url.API_UNUJOBS}/${path}`, await ConfigHeaders(ctx, config));
     },
     path: url.API_UNUJOBS

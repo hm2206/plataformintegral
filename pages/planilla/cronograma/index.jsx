@@ -102,7 +102,6 @@ export default class Cronograma extends Component {
         }
         // execute
         Router.push({pathname, query});
-        this.setState({ loading: false });
     }
 
     handleExport = async () => {
