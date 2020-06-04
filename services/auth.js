@@ -5,7 +5,6 @@ export const AUTH =  (ctx) => {
     return NextCookie(ctx)['auth_token'] || false;
 };
 
-
 export const AUTHENTICATE = (ctx) => {
     // authorize
     if (AUTH(ctx)) return true;

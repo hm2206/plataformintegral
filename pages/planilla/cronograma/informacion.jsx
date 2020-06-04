@@ -346,11 +346,19 @@ export default class CronogramaInformacion extends Component
         this.setState({ loading: false });
     }
 
+    getHeaders = (state) => {
+        let { cronograma } = state;
+        return {
+            CronogramaID: cronograma.id
+        }
+    }
+
     syncRemuneracion = async () => {
         let response = await Confirm("warning", "¿Desea agregar las remuneraciones a los trabajadores?", "Confirmar");
         if (response) {
             this.setState({ loading: true });
-            await unujobs.post(`cronograma/${this.state.cronograma.id}/add_remuneracion`)
+            let { cronograma } = this.state;
+            await unujobs.post(`cronograma/${cronograma.id}/add_remuneracion`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
@@ -364,7 +372,8 @@ export default class CronogramaInformacion extends Component
         let response = await Confirm("warning", "¿Desea agregar las aportaciones a los trabajadores?", "Confirmar");
         if (response) {
             this.setState({ loading: true });
-            await unujobs.post(`cronograma/${this.state.cronograma.id}/add_aportacion`)
+            let { cronograma } = this.state;
+            await unujobs.post(`cronograma/${cronograma.id}/add_aportacion`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
@@ -378,7 +387,7 @@ export default class CronogramaInformacion extends Component
         let response = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
         if (response) {
             this.setState({ loading: true });
-            await unujobs.post(`cronograma/${this.state.cronograma.id}/processing`)
+            await unujobs.post(`cronograma/${this.state.cronograma.id}/processing`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
@@ -396,7 +405,8 @@ export default class CronogramaInformacion extends Component
         let response = await Confirm("warning", "¿Desea Sincronizar las Configuraciones?", "Confirmar");
         if (response) {
             this.setState({ loading: true });
-            await unujobs.post(`cronograma/${this.state.cronograma.id}/sync_configs`)
+            let { cronograma } = this.state;
+            await unujobs.post(`cronograma/${cronograma.id}/sync_configs`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
@@ -414,7 +424,7 @@ export default class CronogramaInformacion extends Component
         let response = await Confirm("warning", "¿Desea Generar los tokens de las boletas?", "Confirmar");
         if (response) {
             this.setState({ loading: true });
-            await unujobs.post(`cronograma/${this.state.cronograma.id}/generate_token`)
+            await unujobs.post(`cronograma/${this.state.cronograma.id}/generate_token`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
