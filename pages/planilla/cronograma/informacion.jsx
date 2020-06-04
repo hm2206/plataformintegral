@@ -509,6 +509,11 @@ export default class CronogramaInformacion extends Component
                         <div className="col-md-12 mt-3">
                             <div className="card-" style={{ minHeight: "80vh" }}>
                                 <div className="card-header">
+                                    <Show condicion={historial.total_neto < 0}>
+                                        <Message color="red">
+                                            El trabajador tiene saldo negativo de ({historial.total_neto})
+                                        </Message>
+                                    </Show>
                                     <Show condicion={config_edad && config_edad.valido == 0}>
                                         <Message color="yellow">
                                             El trabajador ya superó el limite de edad({config_edad.limite_edad}) establecido en la partición presupuestal.

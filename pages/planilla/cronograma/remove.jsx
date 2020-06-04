@@ -160,15 +160,16 @@ export default class RemoveCronograma extends Component
         if (value) {
             this.setState({ loading: true });
             let payload = [];
+            let { cronograma } = this.state;
             await this.state.rows.filter(obj => payload.push(obj.id));
             // request
-            await unujobs.post(`cronograma/${this.state.cronograma.id}/remove`, { 
+            await unujobs.post(`cronograma/${cronograma.id}/remove`, { 
                 _method: 'DELETE' ,
                 cargo_id: this.state.cargo_id,
                 condicion: this.state.condicion,
                 type_categoria_id: this.state.type_categoria_id,
                 historial: JSON.stringify(payload)
-            })
+            }, { headers: { CronogramaID: cronograma.id } })
             .then(async res => {
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
