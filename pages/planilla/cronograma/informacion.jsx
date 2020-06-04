@@ -782,7 +782,7 @@ export default class CronogramaInformacion extends Component
                                 <Button
                                     fluid
                                     color="orange"
-                                    disabled={loading || this.state.block}
+                                    disabled={loading || this.state.block || !historial.is_email}
                                     onClick={this.sendEmail}
                                 >
                                     <Icon name="send"/> { this.state.send ? 'Enviando...' : 'Enviar Email' }
