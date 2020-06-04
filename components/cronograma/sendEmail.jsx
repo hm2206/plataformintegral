@@ -41,15 +41,19 @@ export default class SendEmail extends Component
     
     sendEmail = async () => {
         this.setState({ send: true });
-        await unujobs.post(`cronograma/${this.state.id}/send_email`)
-        .then(res => {
-            let { errors, send, no_send } = res.data;
-            this.setState(state => ({
-                new_enviados: send,
-                new_fallidos: errors,
-                enviados: state.enviados + send,
-                new_sincorreos: no_send
-            }));
+        await unujobs.post(`cronograma/${this.state.id}/send_email`, {}, { headers: { CronogramaID: this.state.id } })
+        .then(async res => {
+            let { errors, send, no_send, success, message } = res.data;
+            if (success == false) {
+                await Swal.fire({ icon: 'error', text: message });
+            } else {
+                this.setState(state => ({
+                    new_enviados: send,
+                    new_fallidos: errors,
+                    enviados: state.enviados + send,
+                    new_sincorreos: no_send
+                }));
+            }
         }).catch( err => Swal.fire({ icon: 'error', text: err.message }));
         this.setState({ send: false });
     }
