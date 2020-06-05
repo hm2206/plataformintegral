@@ -50,3 +50,14 @@
 .capitalize {
     text-transform: capitalize;    
 }
+
+
+.login-fondo {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    object-fit: cover;
+    z-index: -1;
+}

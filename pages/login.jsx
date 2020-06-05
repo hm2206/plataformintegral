@@ -8,7 +8,6 @@ import Show from '../components/show';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { app } from '../env.json';
-import Router from 'next/router';
 
 
 class Login extends Component
@@ -79,12 +78,13 @@ class Login extends Component
 
         return (
             <div className="auth" style={{ minHeight: "100vh" }}>
+
                 <header
                     id="auth-header"
                     className={`auth-header bg-${app.theme}`}
-                    style={{ paddingTop: "3em" }}
+                    style={{ paddingTop: "3em", backgroundImage: 'url(/img/fondo.jpg)' }}
                 >
-    
+
                     <img src={app.logo}
                         alt={app.descripcion}
                         style={{ width: "120px", borderRadius: "0.5em", padding: '0.5em', background: '#fff' }}
