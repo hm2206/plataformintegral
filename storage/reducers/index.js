@@ -16,6 +16,7 @@ import afp from './afpReducer';
 import meta from './metaReducer';
 import convocatoria from './convocatoriaReducer';
 import personal from './personalReducer';
+import dependencia from './dependenciaReducer';
 
 const rootReducer = combineReducers({
     auth,
@@ -35,6 +36,7 @@ const rootReducer = combineReducers({
     meta,
     convocatoria,
     personal,
+    dependencia,
 });
 
 export default rootReducer;

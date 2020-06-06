@@ -127,9 +127,9 @@ class MyApp extends App {
           <script src="/js/popper.min.js"></script>
           <script src="/js/bootstrap.min.js"></script>
           {/* production */}
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" />
+          {/* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" /> */}
           {/* develoment */}
-          {/* <link rel="stylesheet" href="/css/semantic-ui.css" /> */}
+          <link rel="stylesheet" href="/css/semantic-ui.css" />
           <link rel="stylesheet" href="/css/page_loading.css" />
 
           {/* WPA */}
