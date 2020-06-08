@@ -76,7 +76,9 @@ export default class CronogramaInformacion extends Component
     }
 
     componentWillReceiveProps = async (nextProps) => {
-        if (nextProps != this.props) await this.setting(nextProps);
+        if (nextProps.screenX || !nextProps.screenY) {
+            if (nextProps != this.props) await this.setting(nextProps);
+        }
     }
 
     componentWillUpdate = (nextProps, nextState) => {
@@ -292,18 +294,22 @@ export default class CronogramaInformacion extends Component
     }
 
     handleExport = async () => {
-        this.setState({ loading: true });
-        let { cronograma, cargo_id, type_categoria_id, like } = this.state;
-        let query = `cronograma_id=${cronograma.id}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&query_search=${like}`;
-        await unujobs.fetch(`exports/personal/${cronograma.year}/${cronograma.mes}?${query}`)
-        .then(resData => resData.blob())
-        .then(blob => {
-            let a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.target = "_blank";
-            a.click();
-        }).catch(err => Swal.fire({ icon: 'error', text: err.message }))
-        this.setState({ loading: false });
+        let answer = await Confirm('warning', '¿Deseas exportar?', 'Exportar');
+        if (answer) {
+            this.setState({ loading: true });
+            let { cronograma, cargo_id, type_categoria_id, like } = this.state;
+            let query = `cronograma_id=${cronograma.id}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&query_search=${like}`;
+            await unujobs.fetch(`exports/personal/${cronograma.year}/${cronograma.mes}?${query}`)
+            .then(resData => resData.blob())
+            .then(blob => {
+                let a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.target = "_blank";
+                a.click();
+            }).catch(err => Swal.fire({ icon: 'error', text: err.message }))
+            this.setState({ loading: false });
+        }
+
     }
 
     handleActive = (e, data) => {
