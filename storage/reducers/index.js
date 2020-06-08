@@ -17,6 +17,7 @@ import meta from './metaReducer';
 import convocatoria from './convocatoriaReducer';
 import personal from './personalReducer';
 import dependencia from './dependenciaReducer';
+import user from './userReducer';
 
 const rootReducer = combineReducers({
     auth,
@@ -37,6 +38,7 @@ const rootReducer = combineReducers({
     convocatoria,
     personal,
     dependencia,
+    user,
 });
 
 export default rootReducer;

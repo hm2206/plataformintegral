@@ -9,9 +9,9 @@ import Show from '../../../components/show';
 import SendEmail from '../../../components/cronograma/sendEmail';
 import Add from '../../../components/cronograma/add';
 import { allCronograma } from '../../../storage/actions/cronogramaActions';
-import { unujobs } from '../../../services/apis';
-import Swal from 'sweetalert2';
 import { Body } from '../../../components/Utils';
+import { Confirm } from '../../../services/utils';
+import { unujobs } from '../../../services/apis';
 
 
 export default class Cronograma extends Component {
@@ -105,19 +105,22 @@ export default class Cronograma extends Component {
     }
 
     handleExport = async () => {
-        this.setState({ loading: true });
+        let answer = await Confirm("warning", "¿Deseas exportar los cronogramas a excel?")
+        if (answer) {
+            this.setState({ loading: true });
         let { year, mes } = this.props.query;
-        await unujobs.fetch(`exports/personal/${year}/${mes}`)
-        .then(resdata => resdata.blob())
-        .then(blob => {
-            let a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `report_${year}_${mes}.xlsx`;
-            a.target = "_blank";
-            a.click();
-        })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.setState({ loading: false });
+            await unujobs.fetch(`exports/personal/${year}/${mes}`)
+            .then(resdata => resdata.blob())
+            .then(blob => {
+                let a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `report_${year}_${mes}.xlsx`;
+                a.target = "_blank";
+                a.click();
+            })
+            .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loading: false });
+        }
     }
 
     render() {
@@ -278,8 +281,7 @@ export default class Cronograma extends Component {
                                     <div className="col-md-3 col-6 col-sm-12 col-xl-2">
                                         <Button 
                                             fluid
-                                            onClick={this.handleCronograma}
-                                            disabled={this.state.loading}
+                                            disabled={this.state.loading || !cronogramas.total}
                                             color="olive"
                                             onClick={this.handleExport}
                                         >
