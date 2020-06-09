@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { url } from '../env.json';
+import { url, credencials } from '../env.json';
 import Cookies from 'js-cookie';
 import NextCookies from 'next-cookies';
 
@@ -15,6 +15,10 @@ export const configAuthorization = (ctx) => {
 const ConfigHeaders = (ctx = null, config = { }) => {
     let newConfig = Object.assign({}, config);
     newConfig.headers = config.headers || {};
+    // add credenciales
+    for(let attr in credencials) {
+        newConfig.headers[attr] = credencials[attr];
+    }
     // validar ctx
     if (ctx) {
         newConfig.headers.Authorization = configAuthorization(ctx);
