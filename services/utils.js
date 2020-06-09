@@ -1,4 +1,4 @@
-
+import { credencials } from '../env.json';
 
 export const parseOptions = (
     data = [], 
@@ -61,4 +61,24 @@ export const Confirm = async (icon = null, text = null, btn = null) => {
     });
     // response
     return value;
+}
+
+
+export const urlStringQuery = (path = "", query = {}) => {
+    let newString = path.split("?");
+    let newPath = newString[0];
+    let index = 0;
+    // crendenciales
+    for (let cre in credencials) {
+        newPath += index == 0 ? `?${cre}=${credencials[cre]}` : `&${cre}=${credencials[cre]}`;
+        index++;
+    }
+    // add query
+    for (let q in query) {
+        newPath += `&${cre}=${credencials[cre]}`;
+    }
+    // add queryString
+    newPath += `&${newPath[1] || ""}`;
+    // response pathname
+    return newPath;
 }

@@ -4,7 +4,7 @@ import { Form, Button, Select, Icon, Message } from 'semantic-ui-react';
 import { Row } from 'react-bootstrap';
 import { AUTHENTICATE } from '../../../services/auth';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
-import { parseOptions, parseUrl, Confirm } from '../../../services/utils';
+import { parseOptions, parseUrl, Confirm, urlStringQuery } from '../../../services/utils';
 import Show from '../../../components/show';
 import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
@@ -451,7 +451,7 @@ export default class CronogramaInformacion extends Component
         if (answer) {
             let { historial } = this.state;
             let a = document.createElement('a');
-            a.href = `${url.URL_BOLETA}?token_verify=${historial && historial.token_verify}`;
+            a.href = urlStringQuery(`${url.URL_BOLETA}?token_verify=${historial && historial.token_verify}`);
             a.target = '_blank';
             a.click();
         }
