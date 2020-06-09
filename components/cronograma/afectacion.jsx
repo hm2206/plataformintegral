@@ -20,6 +20,7 @@ export default class Afectacion extends Component {
         cargos: [],
         type_categorias: [],
         dependencias: [],
+        perfil_laborales: [],
         errors: {},
         error_message: "",
         ssp: false,
@@ -49,6 +50,11 @@ export default class Afectacion extends Component {
         }
     }
 
+    componentDidUpdate = (prevProps, prevState) => {
+        let { history } = this.state;
+        if (history.dependencia_id != prevState.history.dependencia_id) this.handlePerfilLaborales(history.dependencia_id)
+    }
+
     setting = async (nextProps) => {
         await this.setState({ history: {} });
         this.setState({ history: nextProps.historial || {}, errors: {} });
@@ -56,9 +62,25 @@ export default class Afectacion extends Component {
 
     getDependencias = async () => {
         await unujobs.get('dependencia')
-        .then(res => this.setState({ dependencias: res.data }))
+        .then(async res => {
+            await  this.setState({ dependencias: res.data, perfil_laborales: [] });
+            this.handlePerfilLaborales(this.state.history.dependencia_id);
+        })
         .catch(err => console.log(err.message));
     }
+
+    handlePerfilLaborales = async (dependencia_id = null) => {
+        if (dependencia_id) {
+            this.setState(state => {
+                for (let dep of state.dependencias) {
+                    if (dep.id == dependencia_id) return { perfil_laborales: dep.perfil_laborales || [] };
+                }
+            });
+        } else {
+            this.setState({ perfil_laborales: [] });
+            this.handleInput({ name: 'perfil_laboral_id', value: '' });
+        }
+    } 
 
     getAFPs = async () => {
         await unujobs.get(`afp`).then(res => this.setState({
@@ -127,6 +149,7 @@ export default class Afectacion extends Component {
             afps,
             metas,
             errors,
+            perfil_laborales
         } = this.state;
 
         return (
@@ -247,7 +270,7 @@ export default class Afectacion extends Component {
                     </Form.Field>
 
                     <Form.Field error={errors.cargo_id && errors.cargo_id[0]}>
-                        <label><h5>Cargo <b className="text-red">*</b></h5></label>
+                        <label><h5>Partición Presup. <b className="text-red">*</b></h5></label>
                         <Show condicion={this.props.edit}>
                             <Select
                                 options={parseOptions(cargos, ['sel-cargo', '', 'Select. Cargo'], ['id', 'id', 'descripcion'])}
@@ -311,15 +334,14 @@ export default class Afectacion extends Component {
                         />
                     </Form.Field>
 
-                    <Form.Field error={errors.perfil_laboral && errors.perfil_laboral[0]}>
-                        <label><h5>Perfil Laboral <b className="text-red">*</b></h5></label>
-                        <input
-                            name="perfil_laboral"
-                            value={history.perfil_laboral ? history.perfil_laboral : ''}
+                    <Form.Field>
+                        <label><h5>Tipo Categoría</h5></label>
+                        <input type="text"
+                            disabled={true}
+                            name="type_categoria_id"
                             onChange={(e) => this.handleInput(e.target)}
-                            disabled={!this.props.edit}
+                            value={history.type_categoria ? history.type_categoria : ''}
                         />
-                        <label>{errors.perfil_laboral && errors.perfil_laboral[0]}</label>
                     </Form.Field>
 
                     <Form.Field>
@@ -338,19 +360,26 @@ export default class Afectacion extends Component {
                         </Show>
                     </Form.Field>
 
-                    <Form.Field>
-                        <label><h5>Prima Seguros</h5></label>
-                        <Select
-                            options={[
-                                {key: "n", value: 0, text: "No Afecto"},
-                                {key: "a", value: 1, text: "Afecto"}
-                            ]}
-                            placeholder="Select. Prima Seguro"
-                            value={history.prima_seguro || 0}
-                            name="prima_seguro"
-                            onChange={(e, obj) => this.handleInput(obj)}
-                            disabled={!this.props.edit}
-                        />
+                    <Form.Field error={errors.perfil_laboral_id && errors.perfil_laboral_id[0]}>
+                        <label><h5>Perfil Laboral <b className="text-red">*</b></h5></label>
+                        <Show condicion={this.props.edit}>
+                            <Select
+                                options={parseOptions(perfil_laborales, ['sel_per_lab', '', 'Select. Perfil Laboral'], ['id', 'id', 'nombre'])}
+                                placeholder="Select. Perfil Laboral"
+                                value={history.perfil_laboral_id || ''}
+                                name="perfil_laboral_id"
+                                onChange={(e, obj) => this.handleInput(obj)}
+                                error={errors.perfil_laboral_id && errors.perfil_laboral_id[0]}
+                            />
+                            <label>{errors.perfil_laboral_id && errors.perfil_laboral_id[0]}</label>
+                        </Show>
+                        <Show condicion={!this.props.edit}>
+                            <input type="text"
+                                disabled={true}
+                                value={history.perfil_laboral || ''}
+                                onChange={({target}) => this.handleInput(target)}
+                            />
+                        </Show>
                     </Form.Field>
 
                     <Form.Field>
@@ -395,14 +424,19 @@ export default class Afectacion extends Component {
                         />
                         <label>{errors.pap && errors.pap[0]}</label>
                     </Form.Field>
-
+                    
                     <Form.Field>
-                        <label><h5>Tipo Categoría</h5></label>
-                        <input type="text"
-                            disabled={true}
-                            name="type_categoria_id"
-                            onChange={(e) => this.handleInput(e.target)}
-                            value={history.type_categoria ? history.type_categoria : ''}
+                        <label><h5>Prima Seguros</h5></label>
+                        <Select
+                            options={[
+                                {key: "n", value: 0, text: "No Afecto"},
+                                {key: "a", value: 1, text: "Afecto"}
+                            ]}
+                            placeholder="Select. Prima Seguro"
+                            value={history.prima_seguro || 0}
+                            name="prima_seguro"
+                            onChange={(e, obj) => this.handleInput(obj)}
+                            disabled={!this.props.edit}
                         />
                     </Form.Field>
                 </div>
