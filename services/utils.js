@@ -75,10 +75,10 @@ export const urlStringQuery = (path = "", query = {}) => {
     }
     // add query
     for (let q in query) {
-        newPath += `&${cre}=${credencials[cre]}`;
+        newPath += `&${q}=${query[q]}`;
     }
     // add queryString
     newPath += `&${newPath[1] || ""}`;
     // response pathname
-    return newPath;
+    return newPath.toLocaleLowerCase();
 }

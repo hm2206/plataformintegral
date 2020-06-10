@@ -450,8 +450,10 @@ export default class CronogramaInformacion extends Component
         let answer = await Confirm('warning', '¿Desea visualizar la boleta verificada del trabajador actual?', 'Ir');
         if (answer) {
             let { historial } = this.state;
+            let token_verify = historial && historial.token_verify || "";
             let a = document.createElement('a');
-            a.href = urlStringQuery(`${url.URL_BOLETA}?token_verify=${historial && historial.token_verify}`);
+            let pathname = await urlStringQuery(`${url.URL_BOLETA || ""}`, { token_verify });
+            a.href = pathname;
             a.target = '_blank';
             a.click();
         }
