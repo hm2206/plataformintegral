@@ -6,16 +6,17 @@ import Router from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
-import { pageCargo } from '../../../storage/actions/cargoActions';
+import { pageSystem } from '../../../storage/actions/systemActions';
 
-export default class Cargo extends Component {
+export default class SystemIndex extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             page: false,
             loading: false,
-            estado: "1"
+            estado: "1",
+            query_search: ""
         }
 
         this.getOption = this.getOption.bind(this);
@@ -24,14 +25,25 @@ export default class Cargo extends Component {
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let {query, pathname, store} = ctx;
-        query.estado = query.estado ? query.estado : 1;
-        await store.dispatch(pageCargo(ctx));
-        let { page_cargos } = store.getState().cargo;
-        return {query, pathname, page_cargos}
+        query.page = query.page || 1;
+        query.query_search = query.query_search || "";
+        await store.dispatch(pageSystem(ctx));
+        let { page_system } = store.getState().system;
+        return {query, pathname, page_system}
+    }
+
+    componentDidMount = () => {
+        this.setting(this.props.query || {});
     }
 
     componentWillReceiveProps = (nextProps) => {
         this.setState({ loading: false });
+    }
+
+    setting = (query = {}) => {
+        this.setState({
+            query_search: query.query_search || ""
+        })
     }
 
     handleInput = ({ name, value }) => {
@@ -47,23 +59,24 @@ export default class Cargo extends Component {
     handleSearch = () => {
         this.setState({ loading: true });
         let { pathname, query, push } = Router;
-        query.estado = this.state.estado;
+        query.page = 1;
+        query.query_search = this.state.query_search;
         push({ pathname, query });
     }
 
     render() {
 
         let {loading} = this.state;
-        let { page_cargos } = this.props;
+        let { page_system } = this.props;
 
         return (
                 <Form className="col-md-12">
                     <Body>
-                        <Datatable titulo="Lista de Los Cargos o Particiones Presupuestales"
+                        <Datatable titulo="Lista de Sistemas Integrados"
                         isFilter={false}
                         loading={loading}
                         headers={
-                            ["#ID", "Descripcion", "Planilla", "Ext Presupuestal", "Estado"]
+                            ["#ID", "Nombre", "Email", "Token", "Versión"]
                         }
                         index={
                             [
@@ -71,22 +84,21 @@ export default class Cargo extends Component {
                                     key: "id",
                                     type: "text"
                                 }, {
-                                    key: "descripcion",
+                                    key: "name",
                                     type: "text"
                                 }, {
-                                    key: "planilla.nombre",
+                                    key: "email",
                                     type: "icon"
                                 }, {
-                                    key: "ext_pptto",
+                                    key: "token",
                                     type: "icon",
                                     bg: "dark",
                                     justify: "center"
                                 }, {
-                                    key: "estado",
-                                    type: "switch",
-                                    justify: "center",
-                                    is_true: "Activo",
-                                    is_false: "Eliminado"
+                                    key: "version",
+                                    type: "icon",
+                                    bg: "warning",
+                                    justify: "center"
                                 }
                             ]
                         }
@@ -94,22 +106,9 @@ export default class Cargo extends Component {
                             [
                                 {
                                     id: 1,
-                                    key: "edit",
-                                    icon: "fas fa-pencil-alt",
-                                    title: "Editar Cargo",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
-                                }, {
-                                    id: 1,
                                     key: "restore",
                                     icon: "fas fa-sync",
-                                    title: "Restaurar Cargo",
-                                    rules: {
-                                        key: "estado",
-                                        value: 0
-                                    }
+                                    title: "Restaurar Cargo"    
                                 }, {
                                     id: 1,
                                     key: "delete",
@@ -124,18 +123,17 @@ export default class Cargo extends Component {
                         }
                         optionAlign="text-center"
                         getOption={this.getOption}
-                        data={page_cargos.data}>
+                        data={page_system.data || []}>
                         <div className="form-group">
                             <div className="row">
 
                                 <div className="col-md-4 mb-1">
-                                    <select  name="estado"
-                                        value={this.state.estado}
+                                    <input type="text"
+                                        value={this.state.query_search || ""}
+                                        name="query_search"
                                         onChange={(e) => this.handleInput(e.target)}
-                                    >
-                                        <option value="1">Cargos Activos</option>
-                                        <option value="0">Cargos Deshabilitado</option>
-                                    </select>
+                                        placeholder="Buscar por: nombre"
+                                    />
                                 </div>
 
                                 <div className="col-md-2">

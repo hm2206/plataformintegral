@@ -8,7 +8,7 @@ import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { pageCargo } from '../../../storage/actions/cargoActions';
 
-export default class Cargo extends Component {
+export default class PermissionIndex extends Component {
 
     constructor(props) {
         super(props);
@@ -59,11 +59,11 @@ export default class Cargo extends Component {
         return (
                 <Form className="col-md-12">
                     <Body>
-                        <Datatable titulo="Lista de Los Cargos o Particiones Presupuestales"
+                        <Datatable titulo="Lista de Permisos"
                         isFilter={false}
                         loading={loading}
                         headers={
-                            ["#ID", "Descripcion", "Planilla", "Ext Presupuestal", "Estado"]
+                            ["#ID", "Usuario", "Sistema", "Modulo", "Estado"]
                         }
                         index={
                             [
@@ -129,13 +129,12 @@ export default class Cargo extends Component {
                             <div className="row">
 
                                 <div className="col-md-4 mb-1">
-                                    <select  name="estado"
-                                        value={this.state.estado}
+                                    <input
+                                        placeholder="Buscar por: usuario"
+                                        name="query_search"
+                                        value={this.state.query_search || ""}
                                         onChange={(e) => this.handleInput(e.target)}
-                                    >
-                                        <option value="1">Cargos Activos</option>
-                                        <option value="0">Cargos Deshabilitado</option>
-                                    </select>
+                                    />
                                 </div>
 
                                 <div className="col-md-2">
