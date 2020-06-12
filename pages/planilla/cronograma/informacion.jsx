@@ -519,14 +519,22 @@ export default class CronogramaInformacion extends Component
                         <div className="col-md-12 mt-3">
                             <div className="card-" style={{ minHeight: "80vh" }}>
                                 <div className="card-header">
+                                    {/* mensaje cuando el trabajador tiene saldo negativo o neutro */}
                                     <Show condicion={historial.total_neto < 0}>
                                         <Message color="red">
                                             El trabajador tiene saldo negativo de ({historial.total_neto})
                                         </Message>
                                     </Show>
+                                    {/* mensaje cuando el trabajador superó el limite de edad */}
                                     <Show condicion={config_edad && config_edad.valido == 0}>
                                         <Message color="yellow">
                                             El trabajador ya superó el limite de edad({config_edad.limite_edad}) establecido en la partición presupuestal.
+                                        </Message>
+                                    </Show>
+                                    {/* mensaje cuento el cronograma esta cerrado y el trabajador no tiene generado su token */}
+                                    <Show condicion={!cronograma.estado && !historial.token_verify}>
+                                        <Message color="orange">
+                                            Falta generar el token de verificación del trabajador
                                         </Message>
                                     </Show>
                                     <div className="row align-items-center">
@@ -546,23 +554,39 @@ export default class CronogramaInformacion extends Component
                                         </div>
 
                                         <div className="col-md-3 text-center">
-                                            <DrownSelect text="Opciones"
-                                                button
-                                                icon="options"
-                                                labeled
-                                                disabled={this.state.loading || this.state.edit}
-                                                options={[
-                                                    { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
-                                                    { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
-                                                    { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
-                                                    { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
-                                                    { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
-                                                    { key: "processing", text: "Procesar Cronograma", icon: "database" },
-                                                    { key: "generate-token", text: "Generar Token", icon: "cloud upload" },
-                                                    { key: "report", text: "Reportes", icon: "file text outline" },
-                                                ]}
-                                                onSelect={this.handleOnSelect}
-                                            />
+                                            {/* cronograma abierta */}
+                                            <Show condicion={cronograma.estado}>
+                                                <DrownSelect text="Opciones"
+                                                    button
+                                                    icon="options"
+                                                    labeled
+                                                    disabled={this.state.loading || this.state.edit}
+                                                    options={[
+                                                        { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
+                                                        { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
+                                                        { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
+                                                        { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
+                                                        { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
+                                                        { key: "processing", text: "Procesar Cronograma", icon: "database" },
+                                                        { key: "report", text: "Reportes", icon: "file text outline" },
+                                                    ]}
+                                                    onSelect={this.handleOnSelect}
+                                                />
+                                            </Show>
+                                            {/* cronograma cerrada */}
+                                            <Show condicion={!cronograma.estado}>
+                                                <DrownSelect text="Opciones"
+                                                    button
+                                                    icon="options"
+                                                    labeled
+                                                    disabled={this.state.loading || this.state.edit}
+                                                    options={[
+                                                        { key: "generate-token", text: "Generar Token", icon: "cloud upload" },
+                                                        { key: "report", text: "Reportes", icon: "file text outline" },
+                                                    ]}
+                                                    onSelect={this.handleOnSelect}
+                                                />
+                                            </Show>
                                         </div>
                                     </div>
                                 </div>
