@@ -19,6 +19,8 @@ import personal from './personalReducer';
 import dependencia from './dependenciaReducer';
 import user from './userReducer';
 import system from './systemReducer';
+import permission from './permissionReducer';
+import apps from './appsReducer';
 
 const rootReducer = combineReducers({
     auth,
@@ -41,6 +43,8 @@ const rootReducer = combineReducers({
     dependencia,
     user,
     system,
+    permission,
+    apps,
 });
 
 export default rootReducer;

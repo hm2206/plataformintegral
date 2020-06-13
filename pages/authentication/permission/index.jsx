@@ -6,16 +6,17 @@ import Router from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
-import { pageCargo } from '../../../storage/actions/cargoActions';
+import { pagePermission } from '../../../storage/actions/permissionActions';
 
-export default class PermissionIndex extends Component {
+export default class SystemIndex extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             page: false,
             loading: false,
-            estado: "1"
+            estado: "1",
+            query_search: ""
         }
 
         this.getOption = this.getOption.bind(this);
@@ -24,14 +25,25 @@ export default class PermissionIndex extends Component {
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let {query, pathname, store} = ctx;
-        query.estado = query.estado ? query.estado : 1;
-        await store.dispatch(pageCargo(ctx));
-        let { page_cargos } = store.getState().cargo;
-        return {query, pathname, page_cargos}
+        query.page = query.page || 1;
+        query.query_search = query.query_search || "";
+        await store.dispatch(pagePermission(ctx));
+        let { page_permission } = store.getState().permission
+        return {query, pathname, page_permission}
+    }
+
+    componentDidMount = () => {
+        this.setting(this.props.query || {});
     }
 
     componentWillReceiveProps = (nextProps) => {
         this.setState({ loading: false });
+    }
+
+    setting = (query = {}) => {
+        this.setState({
+            query_search: query.query_search || ""
+        })
     }
 
     handleInput = ({ name, value }) => {
@@ -47,23 +59,24 @@ export default class PermissionIndex extends Component {
     handleSearch = () => {
         this.setState({ loading: true });
         let { pathname, query, push } = Router;
-        query.estado = this.state.estado;
+        query.page = 1;
+        query.query_search = this.state.query_search;
         push({ pathname, query });
     }
 
     render() {
 
         let {loading} = this.state;
-        let { page_cargos } = this.props;
+        let { page_permission } = this.props;
 
         return (
                 <Form className="col-md-12">
                     <Body>
-                        <Datatable titulo="Lista de Permisos"
+                        <Datatable titulo="Lista de Sistemas Integrados"
                         isFilter={false}
                         loading={loading}
                         headers={
-                            ["#ID", "Usuario", "Sistema", "Modulo", "Estado"]
+                            ["#ID", "Sistema", "Modulo", "Usuario", "Username"]
                         }
                         index={
                             [
@@ -71,22 +84,21 @@ export default class PermissionIndex extends Component {
                                     key: "id",
                                     type: "text"
                                 }, {
-                                    key: "descripcion",
+                                    key: "system",
                                     type: "text"
                                 }, {
-                                    key: "planilla.nombre",
+                                    key: "module",
                                     type: "icon"
                                 }, {
-                                    key: "ext_pptto",
+                                    key: "email",
                                     type: "icon",
                                     bg: "dark",
                                     justify: "center"
                                 }, {
-                                    key: "estado",
-                                    type: "switch",
-                                    justify: "center",
-                                    is_true: "Activo",
-                                    is_false: "Eliminado"
+                                    key: "username",
+                                    type: "icon",
+                                    bg: "warning",
+                                    justify: "center"
                                 }
                             ]
                         }
@@ -94,22 +106,9 @@ export default class PermissionIndex extends Component {
                             [
                                 {
                                     id: 1,
-                                    key: "edit",
-                                    icon: "fas fa-pencil-alt",
-                                    title: "Editar Cargo",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
-                                }, {
-                                    id: 1,
                                     key: "restore",
                                     icon: "fas fa-sync",
-                                    title: "Restaurar Cargo",
-                                    rules: {
-                                        key: "estado",
-                                        value: 0
-                                    }
+                                    title: "Restaurar Cargo"    
                                 }, {
                                     id: 1,
                                     key: "delete",
@@ -124,16 +123,16 @@ export default class PermissionIndex extends Component {
                         }
                         optionAlign="text-center"
                         getOption={this.getOption}
-                        data={page_cargos.data}>
+                        data={page_permission.data || []}>
                         <div className="form-group">
                             <div className="row">
 
                                 <div className="col-md-4 mb-1">
-                                    <input
-                                        placeholder="Buscar por: usuario"
-                                        name="query_search"
+                                    <input type="text"
                                         value={this.state.query_search || ""}
+                                        name="query_search"
                                         onChange={(e) => this.handleInput(e.target)}
+                                        placeholder="Buscar por: nombre"
                                     />
                                 </div>
 
