@@ -532,7 +532,7 @@ export default class CronogramaInformacion extends Component
                                         </Message>
                                     </Show>
                                     {/* mensaje cuento el cronograma esta cerrado y el trabajador no tiene generado su token */}
-                                    <Show condicion={!cronograma.estado && !historial.token_verify}>
+                                    <Show condicion={cronograma && !cronograma.estado && !historial.token_verify}>
                                         <Message color="orange">
                                             Falta generar el token de verificación del trabajador
                                         </Message>

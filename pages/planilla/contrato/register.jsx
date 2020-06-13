@@ -33,6 +33,7 @@ export default class Register extends Component
         dependencias: [],
         cargos: [],
         type_categorias: [],
+        perfile_laborales: [],
         form: {
             is_aportacion: "1",
             planilla_id: "",
@@ -40,7 +41,8 @@ export default class Register extends Component
             dependencia_id: "",
             pap: "",
             cargo_id: "",
-            type_categoria_id: ""
+            type_categoria_id: "",
+            perfil_laboral_id: ""
         },
         errors: {}
     }
@@ -57,6 +59,9 @@ export default class Register extends Component
         if (nextState.form && nextState.form.cargo_id != form.cargo_id) {
             await this.getTypeCategoria();
         }
+        if (nextState.form && nextState.form.dependencia_id != form.dependencia_id) {
+            await this.handlePerfilLaborales(form.dependencia_id)
+        }
     }
 
     handleInput = async ({ name, value }) => {
@@ -72,6 +77,19 @@ export default class Register extends Component
             this.handleInput({ name, value: files[0] });
         }
     }
+
+    handlePerfilLaborales = async (dependencia_id = null) => {
+        if (dependencia_id) {
+            this.setState(state => {
+                for (let dep of state.dependencias) {
+                    if (dep.id == dependencia_id) return { perfil_laborales: dep.perfil_laborales || [] };
+                }
+            });
+        } else {
+            this.setState({ perfil_laborales: [] });
+            this.handleInput({ name: 'perfil_laboral_id', value: '' });
+        }
+    } 
 
     getPlanilla = async () => {
         this.setState({ loading: true });
@@ -143,7 +161,7 @@ export default class Register extends Component
     render() {
 
         let { query, work } = this.props;
-        let { errors } = this.state;
+        let { errors, perfil_laborales } = this.state;
 
         return (
             <Fragment>
@@ -255,7 +273,7 @@ export default class Register extends Component
 
                                         <div className="col-md-4 mb-2">
                                             <Form.Field>
-                                                <label htmlFor="">Cargo <b className="text-red">*</b></label>
+                                                <label htmlFor="">Partición Presupuestal. <b className="text-red">*</b></label>
                                                 <Select
                                                     options={parseOptions(this.state.cargos, ['Sel-car', '', 'Select. Cargo'], ['id', 'id', 'alias'])}
                                                     placeholder="Select. Cargo"
@@ -325,13 +343,15 @@ export default class Register extends Component
                                         </div>
 
                                         <div className="col-md-4 mb-2">
-                                            <Form.Field>
+                                            <Form.Field err>
                                                 <label htmlFor="">Perfil Laboral <b className="text-red">*</b></label>
-                                                <input type="text" 
-                                                    name="perfil_laboral"
-                                                    placeholder="Perfil Laboral"
-                                                    value={this.state.form.perfil_laboral}
-                                                    onChange={(e) => this.handleInput(e.target)}
+                                                <Select
+                                                     options={parseOptions(perfil_laborales, ['Sel-per', '', 'Select. Perfil Laboral'], ['id', 'id', 'nombre'])}
+                                                     placeholder="Select. Perfil Laboral"
+                                                     name="perfil_laboral_id"
+                                                     value={this.state.form.perfil_laboral_id || ""}
+                                                     onChange={(e, obj) => this.handleInput(obj)}
+                                                     error={errors && errors.perfil_laboral_id && errors.perfil_laboral_id[0]}
                                                 />
                                                 <b className="text-red">{errors && errors.perfil_laboral && errors.perfil_laboral[0]}</b>
                                             </Form.Field>
