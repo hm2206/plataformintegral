@@ -94,7 +94,7 @@ export default class Add extends Component
         this.setState({ loading: true });
         let form = new FormData();
         form.append('info_id', this.state.index); 
-        await unujobs.post(`cronograma/${this.state.id}/add_all`, form)
+        await unujobs.post(`cronograma/${this.state.id}/add_all`, form, { headers: { CronogramaID: this.state.id } })
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
