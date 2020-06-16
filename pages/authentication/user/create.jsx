@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, parseOptions } from '../../../services/utils';
+import { backUrl } from '../../../services/utils';
 import Router from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
@@ -8,12 +8,14 @@ import Swal from 'sweetalert2';
 import Show from '../../../components/show';
 import AssignPerson from '../../../components/authentication/user/assignPerson';
 import { tipo_documento } from '../../../services/storage.json';
+import {  AUTHENTICATE } from '../../../services/auth';
 
 
 export default class CreateUser extends Component
 {
 
-    static getInitialProps = (ctx) => {
+    static getInitialProps = async (ctx) => {
+        await AUTHENTICATE(ctx);
         let { pathname, query } = ctx;
         return { pathname, query };
     }
@@ -25,9 +27,8 @@ export default class CreateUser extends Component
         form: {},
         errors: {},
         check: false,
-        person: {}
+        person: {},
     }
-
 
     handleInput = ({ name, value }, obj = 'form') => {
         this.setState((state, props) => {
@@ -46,6 +47,7 @@ export default class CreateUser extends Component
 
     save = async () => {
         this.setState({ loading: true });
+        await this.handleInput({ name: 'redirect', value: `${location.origin}/login` });
         let { person, form } = this.state;
         form.person_id = person.id
         await authentication.post('register', form)

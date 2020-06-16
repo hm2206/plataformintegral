@@ -61,3 +61,45 @@
     object-fit: cover;
     z-index: -1;
 }
+
+
+.fixed-error {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+}
+
+
+.fixed-error-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.3em;
+    text-align: center;
+    color: #fff;
+    text-shadow: 2px 0px #000;
+    padding-top: 6em;
+}
+
+
+.fixed-error-button {
+    padding-top: 0px;
+    color: #1e88e5;
+    text-shadow: 0px;
+}
+
+
+.form-error {
+    color: #b71c1c!important;
+}
+
+.form-error input {
+    border-color: #b71c1c;
+}
+
+.form-error input:focus {
+    border-color: #b71c1c;
+}

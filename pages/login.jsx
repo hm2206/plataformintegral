@@ -8,6 +8,7 @@ import Show from '../components/show';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { app } from '../env.json';
+import Link from 'next/link';
 
 
 class Login extends Component
@@ -158,15 +159,17 @@ class Login extends Component
                     </div>
 
                     <div className="text-center pt-0">
-                        <a href="/recovery_password" className="link">
-                        Recuperar cuenta
-                        </a>
+                        <Link href="/recovery_password">
+                            <a className="link">
+                                Recuperar cuenta
+                            </a>
+                        </Link>
                     </div>
                 </form>
 
                 <footer className="auth-footer">
                     {" "}
-                    © 2019 Todos Los Derechos Reservados <a href="#">Privacidad</a> y
+                    © 2019 {app.name} Todos Los Derechos Reservados <a href="#">Privacidad</a> y
                     <a href="#">Terminos</a>
                 </footer>
 

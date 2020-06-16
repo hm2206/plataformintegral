@@ -129,6 +129,7 @@ class MyApp extends App {
           {/* css dinamico */}
           <link rel="stylesheet" href={app.css || ""} />
           <link rel="stylesheet" href="/css/page_loading.css" />
+          {!isLoggin ?  <link rel="stylesheet" href="/css/no_auth_page_loading.css" /> : null}
 
           {/* WPA */}
           <link rel="manifest" href="/manifest.json" />
