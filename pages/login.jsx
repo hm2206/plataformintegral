@@ -148,20 +148,19 @@ class Login extends Component
                         </button>
                     </div>
 
-                    <div className="form-group text-center">
-                        <div className="custom-control custom-control-inline custom-checkbox">
-                        <input
-                            type="checkbox"
-                            className="custom-control-input"
-                            id="remember-me"
-                        />
-                        </div>
-                    </div>
-
                     <div className="text-center pt-0">
                         <Link href="/recovery_password">
                             <a className="link">
                                 Recuperar cuenta
+                            </a>
+                        </Link>
+
+                        <br/>
+                        <br/>
+
+                        <Link href="/apps">
+                            <a className="link">
+                                <i className="fa fa-box mr-1"></i> Más apps
                             </a>
                         </Link>
                     </div>
