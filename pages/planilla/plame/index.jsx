@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Body } from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { unujobs } from '../../../services/apis';
-import { Form, Button } from 'semantic-ui-react';
+import { Form, Button, Label, Menu, Icon } from 'semantic-ui-react';
 import Show from '../../../components/show';
 
 
@@ -82,7 +82,7 @@ export default class Plame extends Component
                                     </Form.Field>
                                 </div>
 
-                                <div className="col-md-2 mb-1 col-12">
+                                <div className="col-md-2 mb-1 col-12 mt-1">
                                     <Button
                                         fluid
                                         color="blue"
@@ -110,25 +110,31 @@ export default class Plame extends Component
 
                                 <Show condicion={this.state.success}>
                                     <div className="col-md-12 mb-1">
-                                        <a href={`${unujobs.path}/pdf/plame/${this.state.year}/${this.state.mes}?auth_token=${auth_token}`} className="ml-2 mr-2" target="_blank">
-                                            <i className="fas fa-users mr-1"></i>
-                                            Reporte PLAME
-                                        </a>
+                                        <div className="row">
+                                            <div className="col-md-3">
+                                                <a href={`${unujobs.path}/pdf/plame/${this.state.year}/${this.state.mes}?auth_token=${auth_token}`} target="_blank" className="card card-body">
+                                                    <span><i className="fas fa-users mr-1"></i> Reporte PLAME</span>
+                                                </a>
+                                            </div>
 
-                                        <a href={`${unujobs.path}/plame/jor/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} className="ml-2 mr-2 text-success" target="_blank">
-                                            <i className="fas fa-file-alt mr-1"></i>
-                                            Generar JOR
-                                        </a>
+                                            <div className="col-md-3">
+                                                <a href={`${unujobs.path}/plame/jor/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} className="card card-body text-success">
+                                                    <span><i className="fas fa-file-alt mr-1"></i> Generar JOR</span>
+                                                </a>
+                                            </div>
 
-                                        <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} className="ml-2 mr-2 text-dark" target="_blank">
-                                            <i className="fas fa-file-alt mr-1"></i>
-                                            Generar REM
-                                        </a>
+                                            <div className="col-md-3">
+                                                <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} className="card card-body text-dark">
+                                                    <span><i className="fas fa-file-alt mr-1"></i> Generar REM</span>
+                                                </a>
+                                            </div>
 
-                                        <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen&auth_token=${auth_token}`} className="ml-2 mr-2 text-red" target="_blank">
-                                            <i className="fas fa-file-alt mr-1"></i>
-                                            Generar PEN
-                                        </a>
+                                            <div className="col-md-3">
+                                                <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen&auth_token=${auth_token}`} className="card card-body text-red">
+                                                    <span><i className="fas fa-file-alt mr-1"></i> Generar </span>
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </Show>
                             </div>
