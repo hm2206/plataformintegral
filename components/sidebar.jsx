@@ -5,7 +5,6 @@ import Router from 'next/router';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { version } from '../package.json';
-import Link from 'next/link';
 
 
 class Sidebar extends Component {
@@ -41,10 +40,11 @@ class Sidebar extends Component {
   render() {
 
     let { auth } = this.state;
+    let { screen_lg } = this.props;
 
     return (
         <Fragment>   
-          <aside className={`app-aside app-aside-expand-md app-aside-light ${this.props.toggle ? 'show' : ''}`}>
+          <aside className={`app-aside app-aside-expand-md app-aside-light ${this.props.toggle ? 'show' : ''}`} style={{ display: screen_lg ? 'none' : 'block' }}>
           <div className="aside-content">
             <header className="aside-header d-block d-md-none">
               <button
@@ -116,7 +116,7 @@ class Sidebar extends Component {
               </nav>
             </div>
             <footer className="aside-footer border-top p-3">
-                Versión <b className="badge badge-dark">{version}</b>
+              Versión <b className="badge badge-dark">{version}</b>
             </footer>
           </div>
         </aside>

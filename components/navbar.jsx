@@ -49,6 +49,11 @@ class Navbar extends Component {
     this.setState(state => ({ config: !state.config }));
   }
 
+  handleExtends = () => {
+    let { setScreenLg } = this.props;
+    if (typeof setScreenLg == 'function') setScreenLg();
+  }
+
   async logout(e) {
     e.preventDefault();
     await authentication.post('logout')
@@ -68,17 +73,27 @@ class Navbar extends Component {
   render() {
 
     let { loading, auth } = this.state;
+    let { screen_lg } = this.props;
 
     return (
       <Fragment>
         <header className={`app-header app-header-dark bg-${app.theme}`}>
           <div className="top-bar">
-            <div className="top-bar-brand">
+            <div className="top-bar-brand" style={{ display: screen_lg ? 'none' : 'flex' }}>
               <a href="/">
                 <Logo />
               </a>
             </div>
             <div className="top-bar-list">
+              <div className="top-bar-item px-2">
+                <button className="btn text-white"
+                  style={{ fontSize: '1.15em' }}
+                  onClick={this.handleExtends}
+                >
+                  <i className={`fas fa-${screen_lg ? 'times' : 'bars'}`}></i>
+                </button>
+              </div>
+              
               <div className="top-bar-item px-2 d-md-none d-lg-none d-xl-none">
                 <button
                   className={`hamburger hamburger-squeeze ${this.props.toggle ? 'active' : ''}`}

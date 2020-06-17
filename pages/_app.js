@@ -68,7 +68,8 @@ class MyApp extends App {
     this.state = {
       toggle: false,
       screenY: 0,
-      screenX: 0
+      screenX: 0,
+      screen_lg: false
     }
   }
 
@@ -91,6 +92,10 @@ class MyApp extends App {
 
   handleToggle = async () => {
     await this.setState(state => ({ toggle: !state.toggle }));
+  }
+
+  handleScreenLg = async (estado) => {
+    await this.setState({ screen_lg: !this.state.screen_lg });
   }
 
   capitalize(word) {
@@ -158,11 +163,11 @@ class MyApp extends App {
               <div className="full-layout" id="main">
                 <div className="gx-app-layout ant-layout ant-layout-has-sider">
                   <div className="ant-layout">
-                    <Navbar onToggle={this.handleToggle} toggle={this.state.toggle}/>
+                    <Navbar onToggle={this.handleToggle} toggle={this.state.toggle} setScreenLg={this.handleScreenLg} screen_lg={this.state.screen_lg}/>
                     <div className="gx-layout-content ant-layout-content">
                       <div className="gx-main-content-wrapper">
-                      <Sidebar onToggle={this.handleToggle} toggle={this.state.toggle}/>
-                        <Content>
+                      <Sidebar onToggle={this.handleToggle} toggle={this.state.toggle} screen_lg={this.state.screen_lg}/>
+                        <Content screen_lg={this.state.screen_lg}>
                             <Component {...pageProps} {...this.state}/>
                         </Content>
                       </div>

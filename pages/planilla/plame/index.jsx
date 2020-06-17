@@ -118,20 +118,20 @@ export default class Plame extends Component
                                             </div>
 
                                             <div className="col-md-3">
-                                                <a href={`${unujobs.path}/plame/jor/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} className="card card-body text-success">
+                                                <a href={`${unujobs.path}/plame/jor/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} target="_blank" className="card card-body text-success">
                                                     <span><i className="fas fa-file-alt mr-1"></i> Generar JOR</span>
                                                 </a>
                                             </div>
 
                                             <div className="col-md-3">
-                                                <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} className="card card-body text-dark">
+                                                <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} target="_blank" className="card card-body text-dark">
                                                     <span><i className="fas fa-file-alt mr-1"></i> Generar REM</span>
                                                 </a>
                                             </div>
 
                                             <div className="col-md-3">
-                                                <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen&auth_token=${auth_token}`} className="card card-body text-red">
-                                                    <span><i className="fas fa-file-alt mr-1"></i> Generar </span>
+                                                <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen&auth_token=${auth_token}`} target="_blank" className="card card-body text-red">
+                                                    <span><i className="fas fa-file-alt mr-1"></i> Generar PEN</span>
                                                 </a>
                                             </div>
                                         </div>

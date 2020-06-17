@@ -103,3 +103,8 @@
 .form-error input:focus {
     border-color: #b71c1c;
 }
+
+
+.app-main-extend {
+    padding-top: 3.5em;
+}

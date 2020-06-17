@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 
 const Content = props => (
   <Fragment>
-    <div className="app-main">
+    <div className={props.screen_lg ? 'app-main-extend' : 'app-main'}>
       <div className="wrapper">
         <div className="page mb-5">
           <div className={`page-inner- row`}>{props.children}</div>
