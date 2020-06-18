@@ -1,5 +1,6 @@
 import NextCookie from 'next-cookies';
-import { setCookie } from 'nookies';
+import { setCookie, destroyCookie } from 'nookies';
+import Cookies from 'js-cookie';
 
 export const AUTH =  (ctx) => {
     return NextCookie(ctx)['auth_token'] || false;

@@ -15,8 +15,10 @@ export default class Logout extends Component
         let { user } = await store.getState().auth;
         let device = cookies.get('device');
         if (ctx.isServer == false) {
-            history.go('/');
+            await history.go('/');
         }
+        // redirigir
+        await AUTHENTICATE(ctx);
         return { query, pathname, device, user }
     }
 
