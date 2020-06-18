@@ -40,19 +40,7 @@ export default class Logout extends Component
                     <h3 className="text-center"> 
                         {this.props.device}
                         <div className="mt-5 row justify-content-center">
-                            <Button basic 
-                                color="blue"
-                                onClick={this.handleGo}
-                            >
-                                Ir al Inicio
-                            </Button>
-
-                            <Button
-                                color="black"
-                                onClick={this.saveUser}
-                            >
-                                Guardar Usuario
-                            </Button>
+                            Redirigiendo al login...
                         </div>
                     </h3>
                   </div>
