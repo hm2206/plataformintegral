@@ -163,7 +163,7 @@ class MyApp extends App {
               <div className="full-layout" id="main">
                 <div className="gx-app-layout ant-layout ant-layout-has-sider">
                   <div className="ant-layout">
-                    <Navbar onToggle={this.handleToggle} toggle={this.state.toggle} setScreenLg={this.handleScreenLg} screen_lg={this.state.screen_lg}/>
+                    <Navbar onToggle={this.handleToggle} toggle={this.state.toggle} setScreenLg={this.handleScreenLg} screen_lg={this.state.screen_lg} screenX={this.state.screenX}/>
                     <div className="gx-layout-content ant-layout-content">
                       <div className="gx-main-content-wrapper">
                       <Sidebar onToggle={this.handleToggle} toggle={this.state.toggle} screen_lg={this.state.screen_lg}/>

@@ -9,6 +9,7 @@ import initStore from '../storage/store';
 import Notification from './notification';
 import { app } from '../env.json';
 import Router from "next/router";
+import Show from "./show";
 
 
 class Navbar extends Component {
@@ -73,7 +74,7 @@ class Navbar extends Component {
   render() {
 
     let { loading, auth } = this.state;
-    let { screen_lg } = this.props;
+    let { screen_lg, screenX } = this.props;
 
     return (
       <Fragment>
@@ -85,14 +86,16 @@ class Navbar extends Component {
               </a>
             </div>
             <div className="top-bar-list">
-              <div className="top-bar-item px-2">
-                <button className="btn text-white"
-                  style={{ fontSize: '1.15em' }}
-                  onClick={this.handleExtends}
-                >
-                  <i className={`fas fa-${screen_lg ? 'times' : 'bars'}`}></i>
-                </button>
-              </div>
+              <Show condicion={screenX > 767}>
+                <div className="top-bar-item px-2">
+                  <button className="btn text-white"
+                    style={{ fontSize: '1.15em' }}
+                    onClick={this.handleExtends}
+                  >
+                    <i className={`fas fa-${screen_lg ? 'times' : 'bars'}`}></i>
+                  </button>
+                </div>
+              </Show>
               
               <div className="top-bar-item px-2 d-md-none d-lg-none d-xl-none">
                 <button
