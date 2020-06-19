@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Body, BtnBack, BtnSelect } from '../../../components/Utils';
+import { Body, BtnBack, BtnSelect, BtnFloat } from '../../../components/Utils';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { backUrl, parseOptions } from '../../../services/utils';
@@ -9,6 +9,7 @@ import Show from '../../../components/show';
 import ContentControl from '../../../components/contentControl';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import SearchCronograma from '../../../components/cronograma/searchCronograma';
 
 export default class Report extends Component
 {
@@ -338,6 +339,7 @@ export default class Report extends Component
     render() {
 
         let { cronograma } = this.props.cronograma;
+        let { query } = this.props;
 
         return (
             <div className="col-md-12">
@@ -452,6 +454,27 @@ export default class Report extends Component
                         />
                     </div>
                 </ContentControl>
+
+                <BtnFloat style={{ bottom: '65px', background: "#cecece" }}
+                    size="md"
+                    onClick={(e) => {
+                        let { push, pathname, query } = Router;
+                        query.search_cronograma = true;
+                        push({ pathname, query })
+                    }}
+                >
+                    <i className="fas fa-search"></i>
+                </BtnFloat>
+
+                <Show condicion={query.search_cronograma}>
+                    <SearchCronograma cronograma={cronograma}
+                        isClose={e => {
+                            let { push, pathname, query } = Router;
+                            query.search_cronograma = null;
+                            push({ pathname, query });
+                        }}
+                    />
+                </Show>
             </div>
         )
     }

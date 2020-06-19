@@ -155,19 +155,22 @@ const BtnToolBasic = props => (
   </div>
 );
 
-const BtnFloat = ({ theme, children, onClick, disabled = false }) => (
-  <button
+const BtnFloat = ({ theme, children, onClick, disabled = false, size = 'lg', style = {} }) => {
+  
+  style.overflow = 'hidden';
+  
+  return (<button
     type="button"
-    style={{ overflow: 'hidden' }}
+    style={style}
     onClick={onClick}
-    className={`btn ${theme ? theme : "btn-success"} btn-lg btn-floated`}
+    className={`btn ${theme ? theme : "btn-success"} btn-${size} btn-floated`}
     disabled={disabled}
   >
     <Show condicion={children}>
       {children}
     </Show>
-  </button>
-);
+  </button>);
+};
 
 const BtnBack = ({ title = 'Ir atrás', theme, children, onClick, disabled }) =>  (
   <button style={{ 

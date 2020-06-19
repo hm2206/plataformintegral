@@ -10,12 +10,13 @@ import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { responsive } from '../../../services/storage.json';
-import { Body, BtnBack, DrownSelect } from '../../../components/Utils';
+import { Body, BtnBack, DrownSelect, BtnFloat } from '../../../components/Utils';
 import UpdateDesctMassive from '../../../components/cronograma/updateDesctMassive';
 import ImpDescuento from '../../../components/cronograma/impDescuento';
 import Open from '../../../components/cronograma/open';
 import Cerrar from '../../../components/cronograma/close';
 import { url } from '../../../env.json';
+import SearchCronograma from '../../../components/cronograma/searchCronograma';
 
 export default class CronogramaInformacion extends Component
 {
@@ -76,9 +77,7 @@ export default class CronogramaInformacion extends Component
     }
 
     componentWillReceiveProps = async (nextProps) => {
-        if (nextProps.screenX || !nextProps.screenY) {
-            if (nextProps != this.props) await this.setting(nextProps);
-        }
+        if (nextProps.cronograma != this.props.cronograma) await this.setting(nextProps);
     }
 
     componentWillUpdate = (nextProps, nextState) => {
@@ -841,6 +840,17 @@ export default class CronogramaInformacion extends Component
                     </div>              
                 </div>
 
+                <BtnFloat style={{ bottom: '120px', background: "#cecece" }}
+                    size="md"
+                    onClick={(e) => {
+                        let { push, pathname, query } = Router;
+                        query.search_cronograma = true;
+                        push({ pathname, query })
+                    }}
+                >
+                    <i className="fas fa-search"></i>
+                </BtnFloat>
+
                 <Show condicion={query.desc_massive}>
                     <UpdateDesctMassive isClose={(e) => {
                         let { push, pathname, query } = Router;
@@ -872,6 +882,16 @@ export default class CronogramaInformacion extends Component
                         isClose={e => {
                             let { push, pathname, query } = Router;
                             query.cerrar = null;
+                            push({ pathname, query });
+                        }}
+                    />
+                </Show>
+
+                <Show condicion={query.search_cronograma}>
+                    <SearchCronograma cronograma={this.state.cronograma}
+                        isClose={e => {
+                            let { push, pathname, query } = Router;
+                            query.search_cronograma = null;
                             push({ pathname, query });
                         }}
                     />

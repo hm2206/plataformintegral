@@ -102,6 +102,14 @@ class MyApp extends App {
     if (word)  return "- " + word[0].toUpperCase() + word.slice(1);
     return null;
   }
+
+  onlyState = (onlies = []) => {
+    let payload = {};
+    for(let only in onlies) {
+      payload[only] = this.state[only];
+    }
+    return payload
+  }
   
   render() {
     const { Component, pageProps, store, isLoggin } = this.props
@@ -168,7 +176,7 @@ class MyApp extends App {
                       <div className="gx-main-content-wrapper">
                       <Sidebar onToggle={this.handleToggle} toggle={this.state.toggle} screen_lg={this.state.screen_lg}/>
                         <Content screen_lg={this.state.screen_lg}>
-                            <Component {...pageProps} {...this.state}/>
+                            <Component {...pageProps} toggle={this.state.toggle} screenX={this.state.screenX}/>
                         </Content>
                       </div>
                     </div>

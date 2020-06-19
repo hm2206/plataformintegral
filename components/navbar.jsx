@@ -80,7 +80,7 @@ class Navbar extends Component {
       <Fragment>
         <header className={`app-header app-header-dark bg-${app.theme}`}>
           <div className="top-bar">
-            <div className="top-bar-brand" style={{ display: screen_lg ? 'none' : 'flex' }}>
+            <div className="top-bar-brand" style={{ display: screen_lg || screenX < 767 ? 'none' : 'flex' }}>
               <a href="/">
                 <Logo />
               </a>
