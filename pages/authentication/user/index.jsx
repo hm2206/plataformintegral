@@ -53,9 +53,8 @@ export default class UserIndex extends Component {
     }
 
     getOption(obj, key, index) {
-        let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
-        Router.push({pathname, query});
+        let {push, pathname } = Router;
+        push({ pathname: `${pathname}/${key}` , query: { id: btoa(obj.id) } });
     }
 
     handleSearch = async () => {
@@ -110,20 +109,12 @@ export default class UserIndex extends Component {
                                     id: 1,
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
-                                    title: "Editar Cargo",
-                                    rules: {
-                                        key: "state",
-                                        value: 1
-                                    }
+                                    title: "Editar Cargo"
                                 }, {
                                     id: 1,
-                                    key: "restore",
+                                    key: "audit",
                                     icon: "fas fa-sync",
-                                    title: "Restaurar Cargo",
-                                    rules: {
-                                        key: "state",
-                                        value: 0
-                                    }
+                                    title: "Auditoría"
                                 }
                             ]
                         }

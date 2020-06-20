@@ -4,7 +4,7 @@ import { Form, Button, Select, Icon, Message } from 'semantic-ui-react';
 import { Row } from 'react-bootstrap';
 import { AUTHENTICATE } from '../../../services/auth';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
-import { parseOptions, parseUrl, Confirm, urlStringQuery } from '../../../services/utils';
+import { parseOptions, parseUrl, Confirm, InputCredencias } from '../../../services/utils';
 import Show from '../../../components/show';
 import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
@@ -449,12 +449,20 @@ export default class CronogramaInformacion extends Component
         let answer = await Confirm('warning', '¿Desea visualizar la boleta verificada del trabajador actual?', 'Ir');
         if (answer) {
             let { historial } = this.state;
-            let token_verify = historial && historial.token_verify || "";
-            let a = document.createElement('a');
-            let pathname = await urlStringQuery(`${url.URL_BOLETA || ""}`, { token_verify });
-            a.href = pathname;
-            a.target = '_blank';
-            a.click();
+            let token_verify = document.createElement('input');
+            token_verify.name = 'token_verify';
+            token_verify.value = historial && historial.token_verify || "";
+            token_verify.hidden = true;
+            let form = document.createElement('form');
+            document.body.appendChild(form);
+            // add credenciales
+            InputCredencias().filter(i => form.appendChild(i));
+            // add token_auth
+            form.appendChild(token_verify);
+            form.action = `${url.URL_BOLETA || ""}`;
+            form.method = 'GET';
+            form.target = '_blank';
+            form.submit();
         }
     }
 

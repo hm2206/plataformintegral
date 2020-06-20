@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Body } from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { unujobs } from '../../../services/apis';
-import { Form, Button, Label, Menu, Icon } from 'semantic-ui-react';
+import { InputCredencias } from '../../../services/utils';
+import { Form, Button } from 'semantic-ui-react';
 import Show from '../../../components/show';
 
 
@@ -48,9 +49,24 @@ export default class Plame extends Component
         this.setState({ loading: false })
     }
 
-    render() {
+    handleClick = (url) => {
+        let form = document.createElement('form');
+        document.body.appendChild(form);
+        // add credenciales
+        InputCredencias().filter(i => form.appendChild(i));
+        // add token 
+        let token = document.createElement('input');
+        token.name = 'auth_token'
+        token.value = this.props.auth_token;
+        form.appendChild(token);
+        // config form
+        form.method = 'POST'
+        form.action = `${unujobs.path}/${url}`;
+        form.target = '_blank'
+        form.submit();
+    }
 
-        let { auth_token } = this.props;
+    render() {
 
         return (
             <div className="col-md-12">
@@ -112,27 +128,43 @@ export default class Plame extends Component
                                     <div className="col-md-12 mb-1">
                                         <div className="row">
                                             <div className="col-md-3">
-                                                <a href={`${unujobs.path}/pdf/plame/${this.state.year}/${this.state.mes}?auth_token=${auth_token}`} target="_blank" className="card card-body">
+                                                <div 
+                                                    className="card card-body text-primary"
+                                                    style={{ cursor: 'pointer'  }}
+                                                    onClick={(e) => this.handleClick(`pdf/plame/${this.state.year}/${this.state.mes}`)}
+                                                >
                                                     <span><i className="fas fa-users mr-1"></i> Reporte PLAME</span>
-                                                </a>
+                                                </div>
                                             </div>
 
                                             <div className="col-md-3">
-                                                <a href={`${unujobs.path}/plame/jor/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} target="_blank" className="card card-body text-success">
+                                                <div
+                                                    className="card card-body text-success"
+                                                    style={{ cursor: 'pointer'  }}
+                                                    onClick={(e) => this.handleClick(`plame/jor/${this.state.year}/${this.state.mes}?download=1`)}
+                                                >
                                                     <span><i className="fas fa-file-alt mr-1"></i> Generar JOR</span>
-                                                </a>
+                                                </div>
                                             </div>
 
                                             <div className="col-md-3">
-                                                <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&auth_token=${auth_token}`} target="_blank" className="card card-body text-dark">
+                                                <div 
+                                                    className="card card-body text-dark"
+                                                    style={{ cursor: 'pointer'  }}
+                                                    onClick={(e) => this.handleClick(`plame/rem/${this.state.year}/${this.state.mes}?download=1`)}
+                                                >
                                                     <span><i className="fas fa-file-alt mr-1"></i> Generar REM</span>
-                                                </a>
+                                                </div>
                                             </div>
 
                                             <div className="col-md-3">
-                                                <a href={`${unujobs.path}/plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen&auth_token=${auth_token}`} target="_blank" className="card card-body text-red">
+                                                <div
+                                                    className="card card-body text-red"
+                                                    style={{ cursor: 'pointer'  }}
+                                                    onClick={(e) => this.handleClick(`plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen`)}
+                                                >
                                                     <span><i className="fas fa-file-alt mr-1"></i> Generar PEN</span>
-                                                </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

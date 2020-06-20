@@ -82,3 +82,18 @@ export const urlStringQuery = (path = "", query = {}) => {
     // response pathname
     return newPath.toLocaleLowerCase();
 }
+
+
+
+export const InputCredencias = () => {
+    let inputs = [];
+    for(let cre in credencials) {
+        let input = document.createElement('input');
+        input.name = cre;
+        input.value = credencials[cre];
+        input.hidden = true;
+        inputs.push(input);
+    }
+    // response
+    return inputs;
+}

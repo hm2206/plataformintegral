@@ -13,7 +13,6 @@ import { app } from '../env.json';
 import { Provider } from 'react-redux';
 import withRedux from 'next-redux-wrapper';
 import initsStore from '../storage/store';
-import Show from '../components/show';
 
 // config router
 Router.onRouteChangeStart = () => {
@@ -159,8 +158,6 @@ class MyApp extends App {
           {/* <script src="/js/jquery.easypiechart.min.js"></script> */}
           {/* <script src="/js/Chart.min.js"></script> */}
           <script src="/js/theme.min.js"></script>
-
-          <script data-ad-client="ca-pub-6166160936934803" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         </Head>
 
         <div id="page_change"></div>
