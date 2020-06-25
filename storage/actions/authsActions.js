@@ -35,17 +35,17 @@ export const getAuth = (ctx) => {
 
 export const logout = (ctx) => {
     return async (dispatch) => {
-        let Authorization = configAuthorization(ctx);
-        await authentication.post('logout', { headers: { Authorization } })
+        await authentication.post('logout', {}, ctx)
         .then(async res => {
             let { success, message } = res.data;
             if (success) {
-                cookies.remove('auth_token');
-                await setCookie(ctx, 'device', message);
+                await LOGOUT(ctx);
                 if (ctx.isServer) {
                     ctx.res.writeHead(301, { Location: '/login' })
                     ctx.res.end();
                     ctx.res.finished = true;
+                } else {
+                   await history.go('/login');
                 }
             }
         }).catch(err => console.log(err.message));

@@ -12,14 +12,9 @@ export default class Logout extends Component
         await AUTHENTICATE(ctx);
         let { query, pathname, store } = ctx;
         await store.dispatch(logout(ctx));
-        let { user } = await store.getState().auth;
-        let device = cookies.get('device');
-        if (ctx.isServer == false) {
-            await history.go('/');
-        }
         // redirigir
         await AUTHENTICATE(ctx);
-        return { query, pathname, device, user }
+        return { query, pathname }
     }
 
     saveUser = async () => {
