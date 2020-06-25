@@ -1,6 +1,7 @@
-import { authentication, configAuthorization } from '../../services/apis';
+import { authentication } from '../../services/apis';
 import cookies from 'js-cookie';
 import { setCookie } from 'nookies';
+import { LOGOUT, AUTHENTICATE } from '../../services/auth';
 
 
 export const authsActionsTypes = {
@@ -12,8 +13,22 @@ export const authsActionsTypes = {
 export const getAuth = (ctx) => {
     return async (dispatch) => {
         await authentication.get('me', {}, ctx)
-        .then(res => dispatch({ type: authsActionsTypes.AUTH, payload: res.data }))
-        .catch(err => console.log(err.message));
+        .then(res => {
+            let { success, message, user } = res.data;
+            if (success) {
+                dispatch({ type: authsActionsTypes.AUTH, payload: user });
+            } else throw new Error(message);
+        })
+        .catch(async err => {
+            let { isServer } = ctx;
+            await LOGOUT(ctx);
+            if (isServer) {
+                await AUTHENTICATE(ctx);
+            } else {
+                history.go('/login')
+            }
+            
+        });
     }
 }
 
@@ -31,7 +46,6 @@ export const logout = (ctx) => {
                     ctx.res.writeHead(301, { Location: '/login' })
                     ctx.res.end();
                     ctx.res.finished = true;
-                    console.log(ctx.isServer);
                 }
             }
         }).catch(err => console.log(err.message));

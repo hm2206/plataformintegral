@@ -29,3 +29,8 @@ export const GUEST = (ctx) => {
 export const LOGIN = (ctx, token) => {
     setCookie(ctx, 'auth_token', token);
 };
+
+
+export const LOGOUT = (ctx) => {
+    destroyCookie(ctx, 'auth_token');
+}
