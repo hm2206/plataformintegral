@@ -1,33 +1,26 @@
 import React, { Fragment } from 'react'
 import Head from 'next/head'
 import App from 'next/app';
+import LoaderPage from '../components/loaderPage';
 import Sidebar from '../components/sidebar';
 import Router from 'next/router';
 import Navbar from '../components/navbar';
-import { Content, Body } from '../components/Utils';
+import { Content } from '../components/Utils';
 import { AUTH } from '../services/auth';
 import { getAuth, authsActionsTypes } from '../storage/actions/authsActions';
 import { app } from '../env.json';
+import {  authentication } from '../services/apis';
 
 // config redux
 import { Provider } from 'react-redux';
 import withRedux from 'next-redux-wrapper';
 import initsStore from '../storage/store';
+import Show from '../components/show';
 
 // config router
 Router.onRouteChangeStart = () => {
   let pageChange = document.getElementById('page_change');
   pageChange.className = 'page_loading';
-};
-
-Router.onRouteChangeComplete = () => {
-  let pageChange = document.getElementById('page_change');
-  pageChange.className = 'page_end';
-};
-
-Router.onRouteChangeError = () => {
-  let pageChange = document.getElementById('page_change');
-  pageChange.className = 'page_end';
 };
 
 
@@ -60,11 +53,24 @@ class MyApp extends App {
         }
      }
     }
+    // state pages
+    Router.onRouteChangeComplete = () => {
+      let pageChange = document.getElementById('page_change');
+      pageChange.className = 'page_end';
+    };
+    
+    Router.onRouteChangeError = () => {
+      let pageChange = document.getElementById('page_change');
+      pageChange.className = 'page_end';
+    };
   }
 
   constructor(props) {
     super(props);
     this.state = {
+      loading: false,
+      is_render: false,
+      my_app: {},
       toggle: false,
       screenY: 0,
       screenX: 0,
@@ -74,6 +80,7 @@ class MyApp extends App {
 
   componentDidMount = () => {
     this.handleScreen();
+    this.getApp();
     window.addEventListener('resize', this.handleScreen);
   }
 
@@ -102,16 +109,21 @@ class MyApp extends App {
     return null;
   }
 
-  onlyState = (onlies = []) => {
-    let payload = {};
-    for(let only in onlies) {
-      payload[only] = this.state[only];
-    }
-    return payload
+  getApp = async () => {
+    this.setState({ loading: true })
+    await authentication.get('app/me')
+    .then(res => {
+      let { success, message, app } = res.data;
+      if (success) {
+        this.setState({ is_render: true, my_app: app });
+      }
+    }).catch(err => console.log(err.message));
+    this.setState({ loading: false })
   }
   
   render() {
     const { Component, pageProps, store, isLoggin } = this.props
+    let { loading, is_render, my_app } = this.state;
 
     let paths = typeof location == 'object' ? location.pathname.split('/') : [];
     let titulo = paths[paths.length == 0 ? 0 : paths.length - 1];
@@ -123,7 +135,7 @@ class MyApp extends App {
           <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></meta>
           {/* <meta http-equiv="Content-Security-Policy" content="default-src 'self' *:*; style-src https://* http://*;"></meta> */}
           <title>{app.name} {this.capitalize(titulo)}</title>
-          <link rel="shortcut icon" href="/img/logo-unu.png"></link>
+          <link rel="shortcut icon" href={my_app.icon}></link>
           <meta name="theme-color" content="#3063A0"></meta>
           <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,600,700,900" rel="stylesheet" type="text/css" />
           <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css" />
@@ -162,32 +174,38 @@ class MyApp extends App {
 
         <div id="page_change"></div>
 
-        {
-          isLoggin ?
-            <Fragment>
-              <div className="full-layout" id="main">
-                <div className="gx-app-layout ant-layout ant-layout-has-sider">
-                  <div className="ant-layout">
-                    <Navbar onToggle={this.handleToggle} toggle={this.state.toggle} setScreenLg={this.handleScreenLg} screen_lg={this.state.screen_lg} screenX={this.state.screenX}/>
-                    <div className="gx-layout-content ant-layout-content">
-                      <div className="gx-main-content-wrapper">
-                      <Sidebar onToggle={this.handleToggle} toggle={this.state.toggle} screen_lg={this.state.screen_lg}/>
-                        <Content screen_lg={this.state.screen_lg}>
-                            <Component {...pageProps} toggle={this.state.toggle} screenX={this.state.screenX}/>
-                        </Content>
+        <Show condicion={loading || !is_render}>
+          <LoaderPage/>
+        </Show>
+
+        <Show condicion={is_render}>
+          {
+            isLoggin ?
+              <Fragment>
+                <div className="full-layout" id="main">
+                  <div className="gx-app-layout ant-layout ant-layout-has-sider">
+                    <div className="ant-layout">
+                      <Navbar onToggle={this.handleToggle} my_app={my_app} toggle={this.state.toggle} setScreenLg={this.handleScreenLg} screen_lg={this.state.screen_lg} screenX={this.state.screenX}/>
+                      <div className="gx-layout-content ant-layout-content">
+                        <div className="gx-main-content-wrapper">
+                        <Sidebar my_app={my_app} onToggle={this.handleToggle} toggle={this.state.toggle} screen_lg={this.state.screen_lg}/>
+                          <Content screen_lg={this.state.screen_lg}>
+                              <Component {...pageProps} toggle={this.state.toggle} screenX={this.state.screenX} my_app={my_app}/>
+                          </Content>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div 
-                className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
-                onClick={this.handleToggle}
-              />
-            </Fragment>
-          : <Component {...pageProps}/>
-        }
+                <div 
+                  className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
+                  onClick={this.handleToggle}
+                />
+              </Fragment>
+            : <Component {...pageProps} my_app={my_app}/>
+          }
+        </Show>
       
       </Provider>
 

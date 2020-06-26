@@ -74,7 +74,7 @@ class Navbar extends Component {
   render() {
 
     let { loading, auth } = this.state;
-    let { screen_lg, screenX } = this.props;
+    let { screen_lg, screenX, my_app } = this.props;
 
     return (
       <Fragment>
@@ -82,7 +82,7 @@ class Navbar extends Component {
           <div className="top-bar">
             <div className="top-bar-brand" style={{ display: screen_lg || screenX < 767 ? 'none' : 'flex' }}>
               <a href="/">
-                <Logo />
+                <Logo my_app={my_app}/>
               </a>
             </div>
             <div className="top-bar-list">
@@ -126,7 +126,7 @@ class Navbar extends Component {
                           >
                             <span className="user-avatar user-avatar-md">
                               <img
-                                src={auth.person && auth.person.image ? `${authentication.path}/${auth.person.image}` : '/img/perfil.jpg'}
+                                src={auth.person && auth.person.image ? `${auth.person.image}` : '/img/perfil.jpg'}
                                 alt=""
                               />
                             </span>{" "}

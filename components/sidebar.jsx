@@ -40,7 +40,7 @@ class Sidebar extends Component {
   render() {
 
     let { auth } = this.state;
-    let { screen_lg } = this.props;
+    let { screen_lg, my_app } = this.props;
 
     return (
         <Fragment>   
@@ -116,7 +116,7 @@ class Sidebar extends Component {
               </nav>
             </div>
             <footer className="aside-footer border-top p-3">
-              Versión <b className="badge badge-dark">{version}</b>
+              <a className="text-dark text-center" href={my_app.support_link} target="_blank"><b className="badge badge-dark w-100">Soporte: {my_app && my_app.support_name}</b></a>
             </footer>
           </div>
         </aside>

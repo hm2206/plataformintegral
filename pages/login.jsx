@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { app } from '../env.json';
 import Link from 'next/link';
+import auth from '../storage/reducers/authReducer';
 
 
 class Login extends Component
@@ -76,6 +77,7 @@ class Login extends Component
     render() {
 
         let { errors, email, password, loading, remember } = this.state;
+        let { my_app } = this.props;
 
         return (
             <div className="auth" style={{ minHeight: "100vh" }}>
@@ -86,10 +88,12 @@ class Login extends Component
                     style={{ paddingTop: "3em", backgroundImage: 'url(/img/fondo.jpg)' }}
                 >
 
-                    <img src={app.logo}
-                        alt={app.descripcion}
-                        style={{ width: "120px", borderRadius: "0.5em", padding: '0.5em', background: '#fff' }}
-                    />
+                    <a href={my_app && my_app.support}>
+                        <img src={my_app && my_app.icon}
+                            alt={app.descripcion}
+                            style={{ width: "120px", borderRadius: "0.5em", padding: '0.5em', background: '#fff' }}
+                        />
+                    </a>
                     
                     <h4>{app.name}</h4>
 
