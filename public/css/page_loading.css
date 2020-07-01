@@ -108,3 +108,14 @@
 .app-main-extend {
     padding-top: 3.5em;
 }
+
+
+.btn-outline-file {
+    border: 1px solid #000;
+    cursor: pointer;
+}
+
+.btn-outline-file:hover {
+    background: #000;
+    color: #fff!important;
+}

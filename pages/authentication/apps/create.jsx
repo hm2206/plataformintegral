@@ -5,6 +5,7 @@ import Router from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import { RequestParse } from 'validator-error-adonis';
 
 
 export default class CreateApps extends Component
@@ -20,9 +21,19 @@ export default class CreateApps extends Component
         planillas: [],
         type_cargos: [],
         form: {},
+        files: {},
         errors: {},
         check: false,
         person: {}
+    }
+
+
+    handleFile = ({ name, files }) => {
+        let file = files[0];
+        this.setState(state => {
+            state.files[name] = file;
+            return { files: state.files }; 
+        });
     }
 
 
@@ -37,21 +48,26 @@ export default class CreateApps extends Component
 
     save = async () => {
         this.setState({ loading: true });
-        let { form } = this.state;
-        await authentication.post('app', form)
+        let data = new FormData();
+        let { form, files } = this.state;
+        for(let attr in form) data.append(attr, form[attr]);
+        // add files
+        for(let attr in files) data.append(attr, files[attr]);
+        // crear app
+        await authentication.post('app', data)
         .then(async res => {
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) this.setState({ form: {}, errors: {} });
+            if (!success) throw new Error(message);
+            Swal.fire({ icon: 'success', text: message });
+            this.setState({ form: {}, errors: {}, files: {} });
         })
         .catch(async err => {
             try {
-                let { data } = err.response
-                let { message, errors } = data;
-                this.setState({ errors });
+                let response = JSON.parse(err.message);
+                await Swal.fire({ icon: 'error', text: response.message });
+                await this.setState({ errors: response.errors });
             } catch (error) {
-                await Swal.fire({ icon: 'error', text: 'Algo salió mal' });
+                await Swal.fire({ icon: 'error', text: err.message });
             }
         });
         this.setState({ loading: false });
@@ -65,7 +81,7 @@ export default class CreateApps extends Component
     render() {
 
         let { pathname, query } = this.props;
-        let { form, errors, person } = this.state;
+        let { form, errors, files } = this.state;
 
         return (
             <div className="col-md-12">
@@ -83,7 +99,7 @@ export default class CreateApps extends Component
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.name && errors.name[0]}>
+                                        <Form.Field error={errors && errors.name && errors.name[0] || false}>
                                             <label htmlFor="">Nombre <b className="text-red">*</b></label>
                                             <input type="text" 
                                                 name="name"
@@ -96,7 +112,7 @@ export default class CreateApps extends Component
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field  error={errors && errors.client_device && errors.client_device[0]}>
+                                        <Form.Field  error={errors && errors.client_device && errors.client_device[0] || false}>
                                             <label htmlFor="">Cliente <b className="text-red">*</b></label>
                                             <Select
                                                 placeholder="Select. Tip. Cliente"
@@ -104,10 +120,91 @@ export default class CreateApps extends Component
                                                 onChange={(e, obj) => this.handleInput(obj)}
                                                 value={form.client_device || ""}
                                                 options={[
-                                                    { key: 'movil', value: 'MOVIL', text: 'Movil' }
+                                                    { key: 'android', value: 'ANDROID', text: 'Android' },
+                                                    { key: 'ios', value: 'IOS', text: 'IOS' },
+                                                    { key: 'app_desktop', value: 'APP_DESKTOP', text: 'Desktop' },
+                                                    { key: 'app_web', value: 'APP_WEB', text: 'App Web' },
+                                                    { key: 'otro', value: 'OTRO', text: 'Otro' },
                                                 ]}
                                             />
                                             <label>{errors && errors.client_device && errors.client_device[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.cover && errors.cover[0]}>
+                                            <label htmlFor="">Cover <b className="text-red">*</b></label>
+                                            <label className="btn btn-outline-file" htmlFor="cover">
+                                                <i className="fas fa-image"></i> {files.cover ? files.cover.name : 'Seleccionar Cover'}
+                                                <input type="file"
+                                                    id="cover" 
+                                                    onChange={(e) => this.handleFile(e.target)}
+                                                    accept="image/*"
+                                                    name="cover"
+                                                    hidden
+                                                />
+                                            </label>
+                                            <label>{errors && errors.cover && errors.cover[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.icon && errors.icon[0]}>
+                                            <label htmlFor="">icon <b className="text-red">*</b></label>
+                                            <label className="btn btn-outline-file" htmlFor="icon">
+                                                <i className="fas fa-image"></i> {files.icon ? files.icon.name : 'Seleccionar Icon'}
+                                                <input type="file"
+                                                    id="icon" 
+                                                    name="icon"
+                                                    onChange={(e) => this.handleFile(e.target)}
+                                                    accept="image/*"
+                                                    hidden
+                                                />
+                                            </label>
+                                            <label>{errors && errors.icon && errors.icon[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.support_name && errors.support_name[0]}>
+                                            <label htmlFor="">Soporte <b className="text-red">*</b></label>
+                                            <input type="text" 
+                                                name="support_name"
+                                                value={form.support_name || ""}
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                placeholder="Nombre del Soporte"
+                                            />
+                                            <label>{errors && errors.support_name && errors.support_name[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.support_link && errors.support_link[0]}>
+                                            <label htmlFor="">Soporte Enlace <b className="text-red">*</b></label>
+                                            <input type="text" 
+                                                name="support_link"
+                                                value={form.support_link || ""}
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                placeholder="Página web del Soporte. Ejm http://ejemplo.com"
+                                            />
+                                            <label>{errors && errors.support_link && errors.support_link[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.file && errors.file[0]}>
+                                            <label htmlFor="">Archivo <b className="text-red">*</b></label>
+                                            <label className="btn btn-outline-file" htmlFor="file">
+                                                <i className="fas fa-image"></i> {files.file ? files.file.name : 'Seleccionar Archivo'}
+                                                <input type="file"
+                                                    id="file" 
+                                                    name="file"
+                                                    onChange={(e) => this.handleFile(e.target)}
+                                                    hidden
+                                                />
+                                            </label>
+                                            <label>{errors && errors.file && errors.file[0]}</label>
                                         </Form.Field>
                                     </div>
 
@@ -115,7 +212,7 @@ export default class CreateApps extends Component
                                         <hr/>
                                     </div>
 
-                                    <div className="col-md-2">
+                                    <div className="col-md-2 text-right">
                                         <Button color="teal" fluid
                                             disabled={this.state.loading || !this.validate()}
                                             onClick={this.save}
