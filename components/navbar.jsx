@@ -74,7 +74,7 @@ class Navbar extends Component {
   render() {
 
     let { loading, auth } = this.state;
-    let { screen_lg, screenX, my_app } = this.props;
+    let { screen_lg, screenX, my_app, logout } = this.props;
 
     return (
       <Fragment>
@@ -158,7 +158,7 @@ class Navbar extends Component {
                                   className="dropdown-item"
                                   onClick={(e) => {
                                     e.preventDefault();
-                                    Router.push('/logout')
+                                    logout();
                                   }}
                                 >
                                   <span className="fas fa-sign"></span>{" "}

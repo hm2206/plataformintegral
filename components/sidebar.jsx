@@ -5,6 +5,7 @@ import Router from 'next/router';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { version } from '../package.json';
+import { logout } from "../storage/actions/authsActions";
 
 
 class Sidebar extends Component {
@@ -40,7 +41,7 @@ class Sidebar extends Component {
   render() {
 
     let { auth } = this.state;
-    let { screen_lg, my_app } = this.props;
+    let { screen_lg, my_app, logout } = this.props;
 
     return (
         <Fragment>   
@@ -80,7 +81,7 @@ class Sidebar extends Component {
                   <a className="dropdown-item" href="#" 
                     onClick={(e) => {
                       e.preventDefault();
-                      Router.push('/logout');
+                      logout();
                     }}
                   >
                     <span className="fas fa-sign"></span>{" "}

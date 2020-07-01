@@ -9,13 +9,16 @@ import { Content } from '../components/Utils';
 import { AUTH } from '../services/auth';
 import { getAuth, authsActionsTypes } from '../storage/actions/authsActions';
 import { app } from '../env.json';
-import {  authentication } from '../services/apis';
+import { authentication } from '../services/apis';
+import Cookies from 'js-cookie';
 
 // config redux
 import { Provider } from 'react-redux';
 import withRedux from 'next-redux-wrapper';
 import initsStore from '../storage/store';
 import Show from '../components/show';
+import Swal from 'sweetalert2';
+import cookies from 'next-cookies';
 
 // config router
 Router.onRouteChangeStart = () => {
@@ -23,13 +26,39 @@ Router.onRouteChangeStart = () => {
   pageChange.className = 'page_loading';
 };
 
+// state pages
+Router.onRouteChangeComplete = () => {
+  let pageChange = document.getElementById('page_change');
+  pageChange.className = 'page_end';
+};
+
+Router.onRouteChangeError = () => {
+  let pageChange = document.getElementById('page_change');
+  pageChange.className = 'page_end';
+};
+
 
 class MyApp extends App {
 
   static getInitialProps = async ({ Component, ctx, store }) => {
     let pageProps = {};
+    let _app = {};
+    let message = "";
+    let is_render = false;
+    // obterner el app client
+    await authentication.get('app/me')
+    .then(res => {
+      let { success, message, app } = res.data;
+      if (!success) throw new Error(message); 
+      _app = app;
+      is_render = true;
+    }).catch(err => {
+      message = err.message;
+      _app = {};
+      is_render = false;
+    });
     // obtener auth
-    let isLoggin = await AUTH(ctx) ? await AUTH(ctx) : "";
+    let isLoggin = await AUTH(ctx) ? await AUTH(ctx) : false;
     // ejecutar initial de los children
     if (await Component.getInitialProps) {
       if (isLoggin) {
@@ -43,8 +72,9 @@ class MyApp extends App {
         let { user } = await ctx.store.getState().auth
         pageProps.auth = user;
         pageProps.isLoggin = isLoggin;
+        pageProps.app = _app;
         // page
-        return { pageProps, store, isLoggin };
+        return { pageProps, store, isLoggin, _app, is_render, message };
      } catch (error) {
         if (ctx && ctx.res) {
           ctx.res.writeHead(301, { location: '/404' });
@@ -53,16 +83,6 @@ class MyApp extends App {
         }
      }
     }
-    // state pages
-    Router.onRouteChangeComplete = () => {
-      let pageChange = document.getElementById('page_change');
-      pageChange.className = 'page_end';
-    };
-    
-    Router.onRouteChangeError = () => {
-      let pageChange = document.getElementById('page_change');
-      pageChange.className = 'page_end';
-    };
   }
 
   constructor(props) {
@@ -70,7 +90,6 @@ class MyApp extends App {
     this.state = {
       loading: false,
       is_render: false,
-      my_app: {},
       toggle: false,
       screenY: 0,
       screenX: 0,
@@ -80,7 +99,6 @@ class MyApp extends App {
 
   componentDidMount = () => {
     this.handleScreen();
-    this.getApp();
     window.addEventListener('resize', this.handleScreen);
   }
 
@@ -109,33 +127,27 @@ class MyApp extends App {
     return null;
   }
 
-  getApp = async () => {
-    this.setState({ loading: true })
-    await authentication.get('app/me')
-    .then(res => {
-      let { success, message, app } = res.data;
-      if (success) {
-        this.setState({ is_render: true, my_app: app });
-      }
-    }).catch(err => console.log(err.message));
-    this.setState({ loading: false })
+  logout = async () => {
+    await authentication.post('logout')
+      .then(async res => {
+          let { success, message } = res.data;
+          if (!success) throw new Error(message); 
+          let { push } = Router;
+          await Cookies.remove('auth_token');
+          await push('/login');
+      }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
   }
-  
-  render() {
-    const { Component, pageProps, store, isLoggin } = this.props
-    let { loading, is_render, my_app } = this.state;
 
-    let paths = typeof location == 'object' ? location.pathname.split('/') : [];
-    let titulo = paths[paths.length == 0 ? 0 : paths.length - 1];
+  render() {
+    const { Component, pageProps, store, isLoggin, _app, is_render, message } = this.props
 
     return  <Fragment>
       <Provider store={store}>
         <Head>
           <meta charSet="utf-8"></meta>
           <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></meta>
-          {/* <meta http-equiv="Content-Security-Policy" content="default-src 'self' *:*; style-src https://* http://*;"></meta> */}
-          <title>{app.name} {this.capitalize(titulo)}</title>
-          <link rel="shortcut icon" href={my_app.icon}></link>
+          <title>{_app.name || "Integración"}</title>
+          <link rel="shortcut icon" href={_app.icon}></link>
           <meta name="theme-color" content="#3063A0"></meta>
           <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,600,700,900" rel="stylesheet" type="text/css" />
           <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css" />
@@ -161,21 +173,14 @@ class MyApp extends App {
           <link href='/favicon-32x32.png' rel='icon' type='image/png' sizes='32x32' />
           <link rel="apple-touch-icon" href="/apple-icon.png"></link>
           <meta name="theme-color" content="#346cb0"/>
-
-          {/* {auth_token ? <script src="/js/pace.min.js"></script> : ''} */}
-
           <script src="/js/stacked-menu.min.js"></script>
-          {/* <script src="/js/perfect-scrollbar.min.js"></script> */}
-          {/* <script src="/js/flatpickr.min.js"></script> */}
-          {/* <script src="/js/jquery.easypiechart.min.js"></script> */}
-          {/* <script src="/js/Chart.min.js"></script> */}
           <script src="/js/theme.min.js"></script>
         </Head>
 
         <div id="page_change"></div>
 
-        <Show condicion={loading || !is_render}>
-          <LoaderPage/>
+        <Show condicion={!is_render}>
+          <LoaderPage message={message}/>
         </Show>
 
         <Show condicion={is_render}>
@@ -185,12 +190,26 @@ class MyApp extends App {
                 <div className="full-layout" id="main">
                   <div className="gx-app-layout ant-layout ant-layout-has-sider">
                     <div className="ant-layout">
-                      <Navbar onToggle={this.handleToggle} my_app={my_app} toggle={this.state.toggle} setScreenLg={this.handleScreenLg} screen_lg={this.state.screen_lg} screenX={this.state.screenX}/>
+                      {/* menu navbar */}
+                      <Navbar onToggle={this.handleToggle} 
+                        my_app={_app} toggle={this.state.toggle} 
+                        setScreenLg={this.handleScreenLg} 
+                        screen_lg={this.state.screen_lg} 
+                        screenX={this.state.screenX}
+                        logout={this.logout}
+                      />
+                      {/* content */}
                       <div className="gx-layout-content ant-layout-content">
                         <div className="gx-main-content-wrapper">
-                        <Sidebar my_app={my_app} onToggle={this.handleToggle} toggle={this.state.toggle} screen_lg={this.state.screen_lg}/>
+                          <Sidebar 
+                            my_app={_app} 
+                            onToggle={this.handleToggle} 
+                            toggle={this.state.toggle} 
+                            screen_lg={this.state.screen_lg}
+                            logout={this.logout}
+                          />
                           <Content screen_lg={this.state.screen_lg}>
-                              <Component {...pageProps} toggle={this.state.toggle} screenX={this.state.screenX} my_app={my_app}/>
+                              <Component {...pageProps} toggle={this.state.toggle} screenX={this.state.screenX} my_app={_app}/>
                           </Content>
                         </div>
                       </div>
@@ -203,7 +222,7 @@ class MyApp extends App {
                   onClick={this.handleToggle}
                 />
               </Fragment>
-            : <Component {...pageProps} my_app={my_app}/>
+            : <Component {...pageProps} my_app={_app}/>
           }
         </Show>
       
