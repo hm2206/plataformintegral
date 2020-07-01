@@ -26,13 +26,14 @@ class Login extends Component
     state = {
         email: "",
         password: "",
-        loading: false,
+        loading: true,
         errors: {},
         progress: 0,
         remember: null
     };
 
     componentDidMount = () => {
+        this.setState({ loading: false });
         this.setting();
     }
 
@@ -85,17 +86,17 @@ class Login extends Component
                 <header
                     id="auth-header"
                     className={`auth-header bg-${app.theme}`}
-                    style={{ paddingTop: "3em", backgroundImage: 'url(/img/fondo.jpg)' }}
+                    style={{ paddingTop: "3em", backgroundImage: `url(${my_app.cover || '/img/fondo.jpg'})` }}
                 >
 
                     <a href={my_app && my_app.support}>
                         <img src={my_app && my_app.icon}
-                            alt={app.descripcion}
+                            alt={my_app.name || "Integración"}
                             style={{ width: "120px", borderRadius: "0.5em", padding: '0.5em', background: '#fff' }}
                         />
                     </a>
                     
-                    <h4>{app.name}</h4>
+                    <h4>{my_app.name || "Integración"}</h4>
 
                     <h1>
                         <span className="sr-only">Iniciar Sesión</span>
@@ -119,6 +120,7 @@ class Login extends Component
                             name="email"
                             onChange={this.handleInput}
                             value={email}
+                            disabled={loading}
                         />{" "}
                             <label htmlFor="inputUser">Correo</label>
                         </div>
@@ -135,6 +137,7 @@ class Login extends Component
                             name="password"
                             onChange={this.handleInput}
                             value={password}
+                            disabled={loading}
                         />{" "}
                             <label htmlFor="inputPassword">Contraseña</label>
                         </div>
