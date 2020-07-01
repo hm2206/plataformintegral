@@ -23,6 +23,10 @@ class Sidebar extends Component {
     if (typeof Router == 'object') await this.setState({ pathname: Router.pathname });
   }
 
+  componentWillReceiveProps = (nextProps) => {
+    if (nextProps.refresh && nextProps.refresh != this.props.refresh) this.getProfile();
+  }
+
   setting = () => {
     this.setState((state, props) => {
       let { user } = props.getState().auth ? props.getState().auth : {};

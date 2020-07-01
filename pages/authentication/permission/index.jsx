@@ -9,7 +9,7 @@ import { pagePermission } from '../../../storage/actions/permissionActions';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 
-export default class SystemIndex extends Component {
+export default class PermissionIndex extends Component {
 
     constructor(props) {
         super(props);
@@ -71,6 +71,7 @@ export default class SystemIndex extends Component {
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 await this.handleSearch();
+                await this.props.fireRefreshProfile();
             })
             .catch(err => Swal.fire({ icon: 'error', text: err.message }));
             this.setState({ loading: false });

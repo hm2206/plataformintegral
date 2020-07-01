@@ -7,13 +7,14 @@ import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
 import AssignUser from '../../../components/authentication/permission/assignUser';
-import { tipo_documento } from '../../../services/storage.json';
+import { AUTHENTICATE } from '../../../services/auth';
 
 
 export default class CreatePermission extends Component
 {
 
-    static getInitialProps = (ctx) => {
+    static getInitialProps = async (ctx) => {
+        await AUTHENTICATE(ctx);
         let { pathname, query } = ctx;
         return { pathname, query };
     }
@@ -92,6 +93,7 @@ export default class CreatePermission extends Component
                 await this.findPermissions(form.user_id);
                 await this.handleInput({ name: 'module_id', value: "" });
                 this.setState({ errors: {} });
+                await this.props.fireRefreshProfile();
             }
         })
         .catch(async err => {

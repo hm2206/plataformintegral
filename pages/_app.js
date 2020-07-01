@@ -94,7 +94,8 @@ class MyApp extends App {
       toggle: false,
       screenY: 0,
       screenX: 0,
-      screen_lg: false
+      screen_lg: false,
+      refresh: false
     }
   }
 
@@ -138,6 +139,11 @@ class MyApp extends App {
           await clearStorage(store);
           history.go('/login');
       }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+  }
+
+  refreshProfile = async () => {
+    this.setState({ refresh: true });
+    this.setState({ refresh: false });
   }
 
   render() {
@@ -209,9 +215,15 @@ class MyApp extends App {
                             toggle={this.state.toggle} 
                             screen_lg={this.state.screen_lg}
                             logout={this.logout}
+                            refresh={this.state.refresh}
                           />
                           <Content screen_lg={this.state.screen_lg}>
-                              <Component {...pageProps} toggle={this.state.toggle} screenX={this.state.screenX} my_app={_app}/>
+                              <Component {...pageProps} 
+                                toggle={this.state.toggle} 
+                                screenX={this.state.screenX}
+                                my_app={_app}
+                                fireRefreshProfile={this.refreshProfile}
+                              />
                           </Content>
                         </div>
                       </div>

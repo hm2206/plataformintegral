@@ -7,6 +7,8 @@ import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { pageApps } from '../../../storage/actions/appsActions';
+import { Confirm } from '../../../services/utils';
+import Swal from 'sweetalert2';
 
 export default class SystemIndex extends Component {
 
@@ -50,10 +52,22 @@ export default class SystemIndex extends Component {
         this.setState({ [name]: value })
     }
 
-    getOption(obj, key, index) {
+    getOption = async (obj, key, index) => {
         let {pathname, query} = Router;
         query[key] = btoa(obj.id);
-        Router.push({pathname, query});
+        switch (key) {
+            case "edit":
+                
+                break;
+            case "delete":
+                this.changeState(obj, 0);
+                break;
+            case "restore":
+                this.changeState(obj, 1);
+                break;
+            default:
+                break;
+        }
     }
 
     handleSearch = () => {
@@ -62,6 +76,22 @@ export default class SystemIndex extends Component {
         query.page = 1;
         query.query_search = this.state.query_search;
         push({ pathname, query });
+    }
+
+    changeState = async (obj, condicion = 0) => {
+        let answer = await Confirm("warning", `¿Desea ${condicion ? 'restaurar' : 'desactivar'} al aplicación "${obj.name}"?`, `${condicion ? 'Restaurar' : 'Desactivar'}`);
+        if (answer) {
+            this.setState({ loading: true });
+            await authentication.post(`app/${obj.id}/state`, { state: condicion })
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await  Swal.fire({ icon: 'success', text: message });
+                let { push, pathname } = Router;
+                await push({ pathname });
+            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loading: false });
+        }
     }
 
     render() {
@@ -99,18 +129,30 @@ export default class SystemIndex extends Component {
                         options={
                             [
                                 {
-                                    id: 1,
+                                    key: "edit",
+                                    icon: "fas fa-pencil-alt",
+                                    title: "Editar Aplicación",
+                                    rules: {
+                                        key: "state",
+                                        value: 1
+                                    }
+                                },
+                                {
+                                    key: "delete",
+                                    icon: "fas fa-times",
+                                    title: "Desactivar Aplicación",
+                                    rules: {
+                                        key: "state",
+                                        value: 1
+                                    }
+                                },
+                                {
                                     key: "restore",
                                     icon: "fas fa-sync",
-                                    title: "Restaurar Cargo"    
-                                }, {
-                                    id: 1,
-                                    key: "delete",
-                                    icon: "fas fa-trash-alt",
-                                    title: "Eliminar Cargo",
+                                    title: "Restaurar Aplicación",
                                     rules: {
-                                        key: "estado",
-                                        value: 1
+                                        key: "state",
+                                        value: 0
                                     }
                                 }
                             ]
