@@ -3,7 +3,8 @@ import {  unujobs } from '../../services/apis';
 
 export const personalActionsTypes = {
     PAGE_PERSONAL: 'PAGE_PERSONAL',
-    FIND_PERSONAL: 'FIND_PERSONAL'
+    FIND_PERSONAL: 'FIND_PERSONAL',
+    CLEAR_PERSONAL: 'CLEAR_PERSONAL'
 };
 
 

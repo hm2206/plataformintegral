@@ -9,6 +9,8 @@ const type_categoria = (state = initialState, action) => {
         case typeCategoriaActionsTypes.PAGE_TYPE_CATEGORIA:
             state.page_type_categoria = action.payload;
             return state;
+        case typeCategoriaActionsTypes.CLEAR_TYPE_CATEGORIA:
+            return initialState;
         default:
             return state;
     }

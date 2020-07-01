@@ -9,6 +9,9 @@ const dependencia = (state = initialState, action) => {
         case dependenciaActionsTypes.ALL_DEPENDENCIAS:
             state.dependencias = action.payload;
             return state;
+        case dependenciaActionsTypes.CLEAR_DEPENDENCIAS:
+            state.dependencias = [];
+            return state;
         default:
             return state;
     }

@@ -3,7 +3,8 @@ import {  unujobs } from '../../services/apis';
 
 export const cargoActionsTypes = {
     ALL_CARGO: 'ALL_CARGO',
-    PAGE_CARGO: 'PAGE_CARGO'
+    PAGE_CARGO: 'PAGE_CARGO',
+    CLEAR_CARGO: 'CLEAR_CARGO'
 };
 
 

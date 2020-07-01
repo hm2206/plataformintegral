@@ -2,7 +2,8 @@ import {  unujobs } from '../../services/apis';
 
 
 export const typeSindicatoActionsTypes = {
-    TYPE_SINDICATO: 'TYPE_SINDICATO'
+    TYPE_SINDICATO: 'TYPE_SINDICATO',
+    CLEAR_TYPE_SINDICATO: 'CLEAR_TYPE_SINDICATO'
 };
 
 

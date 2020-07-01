@@ -2,7 +2,8 @@ import {  unujobs } from '../../services/apis';
 
 
 export const typeCategoriaActionsTypes = {
-    PAGE_TYPE_CATEGORIA: 'PAGE_TYPE_CATEGORIA'
+    PAGE_TYPE_CATEGORIA: 'PAGE_TYPE_CATEGORIA',
+    CLEAR_TYPE_CATEGORIA: 'CLEAR_TYPE_CATEGORIA'
 };
 
 

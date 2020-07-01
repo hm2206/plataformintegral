@@ -11,6 +11,7 @@ import { getAuth, authsActionsTypes } from '../storage/actions/authsActions';
 import { app } from '../env.json';
 import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
+import { clearStorage } from '../storage/clear';
 
 // config redux
 import { Provider } from 'react-redux';
@@ -128,12 +129,13 @@ class MyApp extends App {
   }
 
   logout = async () => {
+    let { store } = this.props;
     await authentication.post('logout')
       .then(async res => {
           let { success, message } = res.data;
           if (!success) throw new Error(message); 
-          let { push } = Router;
           await Cookies.remove('auth_token');
+          await clearStorage(store);
           history.go('/login');
       }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
   }

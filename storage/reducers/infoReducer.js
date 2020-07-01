@@ -13,6 +13,11 @@ const info = (state = initialState, action) => {
         case infoActionsTypes.ALL_INFO :
             state.infos_paginate = action.payload;
             return state;
+        case infoActionsTypes.CLEAR_INFO :
+            state.info = {};
+            state.infos_paginate = {};
+            state.infos = [];
+            return state;
         default: 
             return state;
     }

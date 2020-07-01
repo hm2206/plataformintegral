@@ -10,6 +10,8 @@ const type_descuento = (state = initialState, action) => {
         case typeDescuentoActionsTypes.PAGE_TYPE_DESCUENTO:
             state.page_type_descuento = action.payload;
             return state;
+        case typeDescuentoActionsTypes.CLEAR_TYPE_DESCUENTO:
+            return initialState;
         default:
             return state;
     }

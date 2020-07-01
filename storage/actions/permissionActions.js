@@ -3,6 +3,7 @@ import {  authentication } from '../../services/apis';
 
 export const permissionActionsTypes = {
     PAGE_PERMISSION: 'PAGE_PERMISSION',
+    CLEAR_PERMISSION: 'CLEAR_PERMISSION'
 };
 
 

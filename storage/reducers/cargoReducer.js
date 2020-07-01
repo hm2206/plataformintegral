@@ -13,6 +13,10 @@ const cargo = (state = initialState, action) => {
         case cargoActionsTypes.ALL_CARGO:
             state.cargos = action.payload;
             return state;
+        case cargoActionsTypes.CLEAR_CARGO:
+            state.cargos = [];
+            state.page_cargos = {};
+            return state;
         default:
             return state;
     }

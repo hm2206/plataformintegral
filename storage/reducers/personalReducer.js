@@ -13,6 +13,9 @@ const personal = (state = initialState, action) => {
         case personalActionsTypes.FIND_PERSONAL: 
             state.personal = action.payload;
             return state;
+        case personalActionsTypes.CLEAR_PERSONAL:
+            state = initialState;
+            return state;
         default:
             return state;
     }

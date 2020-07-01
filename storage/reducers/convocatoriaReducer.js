@@ -13,6 +13,10 @@ const convocatoria = (state = initialState, action) => {
         case convocatoriaActionsTypes.CONVOCATORIA:
             state.convocatoria = action.payload;
             return state;
+        case convocatoriaActionsTypes.CLEAR_CONVOCATORIA:
+            state.convocatoria = {};
+            state.page_convocatoria = {};
+            return state;
         default:
             return state;
     }

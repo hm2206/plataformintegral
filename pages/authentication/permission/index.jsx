@@ -123,7 +123,7 @@ export default class SystemIndex extends Component {
                                         value={this.state.query_search || ""}
                                         name="query_search"
                                         onChange={(e) => this.handleInput(e.target)}
-                                        placeholder="Buscar por: nombre"
+                                        placeholder="Buscar por: Username o Email"
                                     />
                                 </div>
 

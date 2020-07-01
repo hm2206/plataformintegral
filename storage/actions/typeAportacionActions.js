@@ -2,7 +2,8 @@ import {  unujobs } from '../../services/apis';
 
 
 export const typeAportacionActionsTypes = {
-    TYPE_APORTACION: 'TYPE_APORTACION'
+    TYPE_APORTACION: 'TYPE_APORTACION',
+    CLEAR_TYPE_APORTACION: 'CLEAR_TYPE_APORTACION'
 };
 
 

@@ -3,6 +3,7 @@ import {  authentication } from '../../services/apis';
 
 export const userActionsTypes = {
     PAGE_USER: 'PAGE_USER',
+    CLEAR_USER: 'CLEAR_USER'
 };
 
 

@@ -2,7 +2,8 @@ import {  unujobs } from '../../services/apis';
 
 
 export const typeDescuentoActionsTypes = {
-    PAGE_TYPE_DESCUENTO: 'PAGE_TYPE_DESCUENTO'
+    PAGE_TYPE_DESCUENTO: 'PAGE_TYPE_DESCUENTO',
+    CLEAR_TYPE_DESCUENTO: 'CLEAR_TYPE_DESCUENTO'
 };
 
 

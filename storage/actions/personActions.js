@@ -2,7 +2,8 @@ import { authentication } from '../../services/apis';
 import atob from 'atob';
 
 export const personActionsTypes = {
-    FIND_PERSON: "FIND_PERSON"
+    FIND_PERSON: "FIND_PERSON",
+    CLEAR_PERSON: 'FIND_PERSON'
 };
 
 

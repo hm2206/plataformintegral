@@ -9,6 +9,9 @@ const apps = (state = initialState, action) => {
         case appsActionsTypes.PAGE_APPS:
             state.page_apps = action.payload;
             return state;
+        case appsActionsTypes.CLEAR_APPS:
+            state.page_apps = {};
+            return state;
         default:
             return state;
     }

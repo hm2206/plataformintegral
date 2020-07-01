@@ -9,6 +9,8 @@ const type_aportacion = (state = initialState, action) => {
         case typeAportacionActionsTypes.TYPE_APORTACION:
             state.type_aportaciones = action.payload;
             return state;
+        case typeAportacionActionsTypes.CLEAR_TYPE_APORTACION:
+            return initialState;
         default:
             return state;
     }

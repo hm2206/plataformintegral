@@ -17,6 +17,11 @@ const cronograma = (state = initialState, action) => {
         case cronogramaActionsTypes.REMOVE :
             state.remove = action.payload;
             return state;
+        case cronogramaActionsTypes.CLEAR_CRONOGRAMA:
+            state.cronograma = {};
+            state.cronogramas = {},
+            state.remove = {}
+            return state;
         default:
             return state;
     }

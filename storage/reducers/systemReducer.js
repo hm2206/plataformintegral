@@ -9,6 +9,8 @@ const system = (state = initialState, action) => {
         case systemActionsTypes.PAGE_SYSTEM:
             state.page_system = action.payload;
             return state;
+        case systemActionsTypes.CLEAR_SYSTEM:
+            return initialState;
         default:
             return state;
     }

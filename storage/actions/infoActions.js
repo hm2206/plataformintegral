@@ -3,7 +3,8 @@ import atob from 'atob';
 
 export const infoActionsTypes = {
     ALL_INFO: "ALL_INFO",
-    FIND_INFO: "FIND_INFO"
+    FIND_INFO: "FIND_INFO",
+    CLEAR_INFO: "CLEAR_INFO"
 };
 
 

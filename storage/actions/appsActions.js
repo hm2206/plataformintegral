@@ -3,6 +3,7 @@ import { authentication } from '../../services/apis';
 
 export const appsActionsTypes = {
     PAGE_APPS: 'PAGE_APPS',
+    CLEAR_APPS: 'CLEAR_APPS'
 };
 
 

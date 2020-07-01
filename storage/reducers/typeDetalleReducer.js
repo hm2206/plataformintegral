@@ -9,6 +9,8 @@ const type_detalle = (state = initialState, action) => {
         case typeDetalleActionsTypes.TYPE_DETALLE:
             state.type_detalles = action.payload;
             return state;
+        case typeDetalleActionsTypes.CLEAR_TYPE_DETALLE:
+            return initialState;
         default:
             return state;
     }

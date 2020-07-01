@@ -3,6 +3,7 @@ import {  unujobs } from '../../services/apis';
 
 export const metaActionsTypes = {
     PAGE_META: 'PAGE_META',
+    CLEAR_META: 'CLEAR_META'
 };
 
 

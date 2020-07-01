@@ -5,6 +5,7 @@ import atob from 'atob';
 export const convocatoriaActionsTypes = {
     PAGE_CONVOCATORIA: 'PAGE_CONVOCATORIA',
     CONVOCATORIA: 'CONVOCATORIA',
+    CLEAR_CONVOCATORIA: 'CLEAR_CONVOCATORIA'
 };
 
 

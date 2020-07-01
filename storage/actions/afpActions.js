@@ -3,6 +3,7 @@ import {  unujobs, configAuthorization } from '../../services/apis';
 
 export const afpActionsTypes = {
     ALL_AFP: 'ALL_AFP',
+    CLEAR_AFP: 'CLEAR_AFP'
 };
 
 

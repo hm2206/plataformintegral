@@ -2,7 +2,8 @@ import {  unujobs } from '../../services/apis';
 
 
 export const typeRemuneracionActionsTypes = {
-    PAGE_TYPE_REMUNERACION: 'PAGE_TYPE_REMUNERACION'
+    PAGE_TYPE_REMUNERACION: 'PAGE_TYPE_REMUNERACION',
+    CLEAR_TYPE_REMUNERACION: 'CLEAR_TYPE_REMUNERACION'
 };
 
 

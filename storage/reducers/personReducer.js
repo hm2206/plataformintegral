@@ -9,6 +9,8 @@ const person = (state = initialState, action) => {
         case personActionsTypes.FIND_PERSON:
             state.person = action.payload;
             return state;
+        case personActionsTypes.CLEAR_PERSON:
+            return initialState;
         default:
             return state;
     }

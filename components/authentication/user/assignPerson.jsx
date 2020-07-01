@@ -60,7 +60,7 @@ export default class AssignPerson extends Component
                         <div className="col-md-10 mb-2 text-left">
                             <Form.Field>
                                 <input type="text"
-                                    placeholder="Buscar persona por: Apellidos Completos"
+                                    placeholder="Buscar persona por: Nombre Completos"
                                     value={query_search || ""}
                                     name="query_search"
                                     onChange={({ target }) => this.setState({ [target.name]: target.value })}
@@ -87,10 +87,12 @@ export default class AssignPerson extends Component
                                         <Button color="blue"
                                             onClick={(e) => this.handleAdd(obj)}
                                         >
-                                            Add
+                                            <i className="fas fa-plus"></i>
                                         </Button>
                                     </List.Content>
-                                    <Image avatar src={obj.image ? `${authentication.path}${obj.image}` : '/img/base.png'} />
+                                    <Image avatar src={obj.image ? `${obj.image}` : '/img/base.png'} 
+                                        style={{ objectFit: 'cover' }}
+                                    />
                                     <List.Content>{obj.fullname}</List.Content>
                                 </List.Item>
                             )}

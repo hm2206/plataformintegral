@@ -3,6 +3,7 @@ import {  authentication } from '../../services/apis';
 
 export const systemActionsTypes = {
     PAGE_SYSTEM: 'PAGE_SYSTEM',
+    CLEAR_SYSTEM: 'CLEAR_SYSTEM'
 };
 
 

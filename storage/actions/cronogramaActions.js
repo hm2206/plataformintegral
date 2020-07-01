@@ -6,6 +6,7 @@ export const cronogramaActionsTypes = {
     FIND_CRONOGRAMA: 'FIND_CRONOGRAMA',
     ALL_CRONOGRAMA: 'ALL_CRONOGRAMA',
     REMOVE: 'REMOVE',
+    CLEAR_CRONOGRAMA: 'CLEAR_CRONOGRAMA'
 };
 
 export const findCronograma = (ctx) => {

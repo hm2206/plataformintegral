@@ -4,6 +4,7 @@ import atob from 'atob';
 export const workActionsTypes = {
     FIND_WORK: "FIND_WORK",
     PAGE_WORK: "PAGE_WORK",
+    CLEAR_WORK: "CLEAR_WORK"
 };
 
 

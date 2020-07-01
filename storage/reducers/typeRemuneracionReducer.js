@@ -10,6 +10,8 @@ const type_remuneracion = (state = initialState, action) => {
         case typeRemuneracionActionsTypes.PAGE_TYPE_REMUNERACION:
             state.page_type_remuneracion = action.payload;
             return state;
+        case typeRemuneracionActionsTypes.CLEAR_TYPE_REMUNERACION:
+            return initialState;
         default:
             return state;
     }

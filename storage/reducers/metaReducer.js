@@ -10,6 +10,10 @@ const meta = (state = initialState, action) => {
         case metaActionsTypes.PAGE_META:
             state.page_meta = action.payload;
             return state;
+        case metaActionsTypes.CLEAR_META:
+            state.metas = [];
+            state.page_meta = {};
+            return state;
         default:
             return state;
     }

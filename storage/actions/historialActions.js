@@ -3,7 +3,8 @@ import atob from 'atob';
 
 export const historialActionsTypes = {
     ALL_HISTORIAL: "ALL_HISTORIAL",
-    FIND_HISTORIAL: "FIND_HISTORIAL"
+    FIND_HISTORIAL: "FIND_HISTORIAL",
+    CLEAR_HISTORIAL: "CLEAR_HISTORIAL",
 };
 
 

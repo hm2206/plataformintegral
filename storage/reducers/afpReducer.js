@@ -9,6 +9,8 @@ const afp = (state = initialState, action) => {
         case afpActionsTypes.ALL_AFP:
             state.afps = action.payload;
             return state;
+        case afpActionsTypes.CLEAR_AFP:
+            state.afps = [];
         default:
             return state;
     }

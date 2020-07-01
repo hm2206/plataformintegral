@@ -13,6 +13,8 @@ const work = (state = initialState, action) => {
         case workActionsTypes.PAGE_WORK:
             state.page_work = action.payload;
             return state;
+        case workActionsTypes.CLEAR_WORK:
+            return initialState;
         default:
             return state;
     }

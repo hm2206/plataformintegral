@@ -2,7 +2,8 @@ import {  unujobs } from '../../services/apis';
 
 
 export const dependenciaActionsTypes = {
-    ALL_DEPENDENCIAS: 'ALL_DEPENDENCIAS'
+    ALL_DEPENDENCIAS: 'ALL_DEPENDENCIAS',
+    CLEAR_DEPENDENCIAS: 'CLEAR_DEPENDENCIAS'
 };
 
 

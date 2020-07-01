@@ -2,7 +2,8 @@ import {  unujobs } from '../../services/apis';
 
 
 export const typeDetalleActionsTypes = {
-    TYPE_DETALLE: 'TYPE_DETALLE'
+    TYPE_DETALLE: 'TYPE_DETALLE',
+    CLEAR_DETALLE: 'CLEAR_TYPE_DETALLE'
 };
 
 
