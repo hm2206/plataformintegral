@@ -134,7 +134,7 @@ class MyApp extends App {
           if (!success) throw new Error(message); 
           let { push } = Router;
           await Cookies.remove('auth_token');
-          await push('/login');
+          history.go('/login');
       }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
   }
 
