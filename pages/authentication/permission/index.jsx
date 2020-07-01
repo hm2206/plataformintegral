@@ -72,7 +72,7 @@ export default class SystemIndex extends Component {
         return (
                 <Form className="col-md-12">
                     <Body>
-                        <Datatable titulo="Lista de Sistemas Integrados"
+                        <Datatable titulo="Lista de Permisos"
                         isFilter={false}
                         loading={loading}
                         headers={
@@ -106,18 +106,9 @@ export default class SystemIndex extends Component {
                             [
                                 {
                                     id: 1,
-                                    key: "restore",
-                                    icon: "fas fa-sync",
-                                    title: "Restaurar Cargo"    
-                                }, {
-                                    id: 1,
                                     key: "delete",
                                     icon: "fas fa-trash-alt",
-                                    title: "Eliminar Cargo",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
+                                    title: "Quitar Permiso"
                                 }
                             ]
                         }

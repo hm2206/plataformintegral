@@ -90,7 +90,7 @@ export default class AssignPerson extends Component
                                             Add
                                         </Button>
                                     </List.Content>
-                                    <Image avatar src={obj.image ? `${authentication.path}${obj.image}` : '/img/base.png'} />
+                                    <Image avatar src={obj.image ? obj.image : '/img/base.png'} style={{ objectFit: 'cover' }}/>
                                     <List.Content>{obj.email || ""} - <small className="badge badge-warning">{obj.username || ""}</small></List.Content>
                                 </List.Item>
                             )}
