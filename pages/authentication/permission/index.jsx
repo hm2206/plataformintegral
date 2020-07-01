@@ -1,12 +1,13 @@
 import React, {Component, Fragment} from 'react';
 import {Button, Form} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import {authentication} from '../../../services/apis';
+import { authentication } from '../../../services/apis';
 import Router from 'next/router';
-import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { pagePermission } from '../../../storage/actions/permissionActions';
+import { Confirm } from '../../../services/utils';
+import Swal from 'sweetalert2';
 
 export default class SystemIndex extends Component {
 
@@ -50,10 +51,30 @@ export default class SystemIndex extends Component {
         this.setState({ [name]: value })
     }
 
-    getOption(obj, key, index) {
-        let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
-        Router.push({pathname, query});
+    getOption = async (obj, key, index) => {
+        switch (key) {
+            case "delete":
+                this.destroy(obj);
+                break;
+            default:
+                break;
+        }
+    }
+
+    destroy = async (obj) => {
+        let answer = await Confirm("warning", `¿Deseas Eliminar El Permiso "${obj.module}"?`, "Eliminar")
+        if (answer) {
+            this.setState({ loading: true });
+            await authentication.post(`permission/${obj.id}/delete`)
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.handleSearch();
+            })
+            .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loading: false });
+        }
     }
 
     handleSearch = () => {
