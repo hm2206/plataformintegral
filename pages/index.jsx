@@ -22,7 +22,7 @@ export default class Index extends Component
         return (
             <div className="col-md-12">
                 <CoverSimple 
-                    image={user.person && user.person.image ? `${authentication.path}/${user.person.image}` : '/img/perfil.jpg'}
+                    image={user.person && user.image ? user.image : '/img/perfil.jpg'}
                     titulo={user.person.fullname}
                     username={user.username}
                     email={user.email}

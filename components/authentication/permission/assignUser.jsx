@@ -87,7 +87,7 @@ export default class AssignPerson extends Component
                                         <Button color="blue"
                                             onClick={(e) => this.handleAdd(obj)}
                                         >
-                                            Add
+                                            <i className="fas fa-plus"></i>
                                         </Button>
                                     </List.Content>
                                     <Image avatar src={obj.image ? obj.image : '/img/base.png'} style={{ objectFit: 'cover' }}/>
