@@ -6,9 +6,10 @@ import { Form, Button, Select } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
+import Show from '../../../components/show';
 
 
-export default class CreateMeta extends Component
+export default class EditMeta extends Component
 {
 
     static getInitialProps = async (ctx) => {
@@ -20,7 +21,23 @@ export default class CreateMeta extends Component
     state = {
         loading: false,
         form: {},
-        errors: {}
+        errors: {},
+        old: {},
+        edit: false
+    }
+
+    componentWillMount = async () => {
+        await this.findMeta();
+    }
+
+    findMeta = async () => {
+        let { query } = this.props;
+        let id = query.id ? atob(query.id) : "_error";
+        this.setState({ loading: true });
+        await unujobs.get(`meta/${id}`)
+        .then(res => this.setState({ form: res.data, old: res.data }))
+        .catch(err => this.setState({ form: {} }));
+        this.setState({ loading: false });
     }
 
     handleInput = ({ name, value }, obj = 'form') => {
@@ -28,18 +45,20 @@ export default class CreateMeta extends Component
             let newObj = Object.assign({}, state[obj]);
             newObj[name] = value;
             state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors };
+            return { [obj]: newObj, errors: state.errors, edit: true };
         });
     }
 
     save = async () => {
         this.setState({ loading: true });
-        await unujobs.post('meta', this.state.form)
+        let { form } = this.state;
+        form._method = 'PUT';
+        await unujobs.post(`meta/${form.id}`, form)
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
-            if (success) this.setState({ form: {}, errors: {} })
+            if (success) this.setState({ errors: {}, edit: false });
         })
         .catch(async err => {
             try {
@@ -62,7 +81,7 @@ export default class CreateMeta extends Component
             <div className="col-md-12">
                 <Body>
                     <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Meta Presupuestal
+                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Meta Presupuestal
                     </div>
                     <div className="card-body">
                         <Form className="row justify-content-center">
@@ -280,8 +299,18 @@ export default class CreateMeta extends Component
                                         <hr/>
                                     </div>
 
-                                    <div className="col-md-2">
-                                        <Button color="teal" fluid
+                                    <div className="col-md-4 text-right">
+                                        <Show condicion={this.state.edit}>
+                                            <Button color="red"
+                                                disabled={this.state.loading}
+                                                onClick={(e) => this.setState(state => ({ edit: false, errors: {}, form: state.old }))}
+                                            >
+                                                <i className="fas fa-save"></i> Guardar
+                                            </Button>
+                                        </Show>
+
+                                        <Button color="teal" 
+                                            disabled={!this.state.edit}
                                             loading={this.state.loading}
                                             onClick={this.save}
                                         >

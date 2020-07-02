@@ -49,10 +49,22 @@ export default class Meta extends Component {
         this.setState({ [name]: value })
     }
 
-    getOption(obj, key, index) {
-        let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
-        Router.push({pathname, query});
+    getOption = async (obj, key, index) => {
+        this.setState({ loading: true });
+        let {pathname, push} = Router;
+        let id = btoa(obj.id);
+        switch (key) {
+            case 'edit':
+                await push({pathname: `${pathname}/${key}`, query: { id }});
+                break;
+            case 'delete':
+                break;
+            case 'restore':
+                break;
+            default:
+                break;
+        }
+        this.setState({ loading: false });
     }
 
     handleSearch = () => {
