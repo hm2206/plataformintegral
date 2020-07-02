@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
 
 
-export default class CreateCargo extends Component
+export default class EditCargo extends Component
 {
 
     static getInitialProps = async (ctx) => {
@@ -25,9 +25,23 @@ export default class CreateCargo extends Component
         errors: {}
     }
 
+    componentWillMount = async () => {
+        await this.findCargo();
+    }
+
     componentDidMount = () => {
         this.getPlanillas();
         this.getTypeCargos();
+    }
+
+    findCargo = async () => {
+        this.setState({ loading: true });
+        let { query } = this.props;
+        let id = query.id ? atob(query.id) : "_error";
+        await unujobs.get(`cargo/${id}`)
+        .then(res => this.setState({ form: res.data }))
+        .catch(err => this.setState({ form: {} }));
+        this.setState({ loading: false });
     }
 
     handleInput = ({ name, value }, obj = 'form') => {
@@ -57,12 +71,13 @@ export default class CreateCargo extends Component
 
     save = async () => {
         this.setState({ loading: true });
-        await unujobs.post('cargo', this.state.form)
+        let { form } = this.state;
+        form._method = "PUT";
+        await unujobs.post(`cargo/${form.id}`, form)
         .then(async res => {
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) this.setState({ form: {}, errors: {} });
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: "success", text: message });
         })
         .catch(async err => {
             try {
@@ -70,7 +85,7 @@ export default class CreateCargo extends Component
                 let { message, errors } = data;
                 this.setState({ errors });
             } catch (error) {
-                await Swal.fire({ icon: 'error', text: 'Algo salió mal' });
+                await Swal.fire({ icon: 'error', text: err.message });
             }
         });
         this.setState({ loading: false });
@@ -85,7 +100,7 @@ export default class CreateCargo extends Component
             <div className="col-md-12">
                 <Body>
                     <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Partición Presupuestal
+                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Partición Presupuestal
                     </div>
                     <div className="card-body">
                         <Form className="row justify-content-center">
@@ -97,7 +112,8 @@ export default class CreateCargo extends Component
                                             <input type="text" 
                                                 name="alias"
                                                 placeholder="Ingrese un alias"
-                                                value={form.alias}
+                                                disabled={this.state.loading}
+                                                value={form.alias || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors && errors.alias && errors.alias[0]}</label>
@@ -109,6 +125,8 @@ export default class CreateCargo extends Component
                                             <label htmlFor="">Descripción <b className="text-red">*</b></label>
                                             <input type="text"
                                                 name="descripcion"
+                                                value={form.descripcion || ""}
+                                                disabled={this.state.loading}
                                                 placeholder="Ingrese una descripción, similar al alias"
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
@@ -118,8 +136,10 @@ export default class CreateCargo extends Component
 
                                     <div className="col-md-4 mb-3">
                                         <Form.Field  error={errors && errors.ext_pptto && errors.ext_pptto[0]}>
-                                            <label htmlFor="">Exp Presupuestal <b className="text-red">*</b></label>
+                                            <label htmlFor="">Exp Presupuestal</label>
                                             <input type="text"
+                                                disabled
+                                                value={form.ext_pptto || ""}
                                                 placeholder="Ingrese una extensión presupuestal"
                                                 name="ext_pptto"
                                                 onChange={(e) => this.handleInput(e.target)}
@@ -130,12 +150,13 @@ export default class CreateCargo extends Component
 
                                     <div className="col-md-4 mb-3">
                                         <Form.Field error={errors && errors.planilla_id && errors.planilla_id[0]}>
-                                            <label htmlFor="">Planilla <b className="text-red">*</b></label>
+                                            <label htmlFor="">Planilla</label>
                                             <Select
+                                                disabled
                                                 placeholder="Select. Planilla"
                                                 options={parseOptions(this.state.planillas, ["sel-pla", "", "Select. Planilla"], ["id", "id", "nombre"])}
                                                 name="planilla_id"
-                                                value={form.planilla_id}
+                                                value={form.planilla_id || ""}
                                                 onChange={(e, obj) => this.handleInput(obj)}
                                             />
                                             <label>{errors && errors.planilla_id && errors.planilla_id[0]}</label>
@@ -144,11 +165,12 @@ export default class CreateCargo extends Component
 
                                     <div className="col-md-4 mb-3">
                                         <Form.Field error={errors && errors.type_cargo_id && errors.type_cargo_id[0]}>
-                                            <label htmlFor="">Tip. Cargo <b className="text-red">*</b></label>
+                                            <label htmlFor="">Tip. Cargo</label>
                                             <Select
+                                                disabled
                                                 placeholder="Select. Descuento"
                                                 options={parseOptions(this.state.type_cargos, ["sel-pla", "", "Select. Tip. Cargo"], ["id", "id", "nombre"])}
-                                                value={form.type_cargo_id}
+                                                value={form.type_cargo_id || ""}
                                                 name="type_cargo_id"
                                                 onChange={(e, obj) => this.handleInput(obj)}
                                             />

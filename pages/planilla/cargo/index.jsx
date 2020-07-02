@@ -1,14 +1,16 @@
 import React, {Component, Fragment} from 'react';
 import {Button, Form} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import {authentication} from '../../../services/apis';
+import { unujobs } from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { pageCargo } from '../../../storage/actions/cargoActions';
+import Swal from 'sweetalert2';
+import { Confirm } from '../../../services/utils';
 
-export default class Cargo extends Component {
+export default class CargoIndex extends Component {
 
     constructor(props) {
         super(props);
@@ -38,10 +40,25 @@ export default class Cargo extends Component {
         this.setState({ [name]: value })
     }
 
-    getOption(obj, key, index) {
-        let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
-        Router.push({pathname, query});
+    getOption = async (obj, key, index) => {
+        this.setState({ loading: true });
+        let { pathname, push } = Router;
+        let id = btoa(`${obj.id || ""}`);
+        switch (key) {
+            case 'edit':
+                await push({ pathname: `${pathname}/edit`, query: { id } });
+                break;
+            case 'delete':
+                await this.changedState(obj, 0);
+                break;
+            case 'restore':
+                this.changedState(obj, 1);
+                break;
+            default:
+                break;
+        }
+        // disable option
+        this.setState({ loading: false });
     }
 
     handleSearch = () => {
@@ -49,6 +66,21 @@ export default class Cargo extends Component {
         let { pathname, query, push } = Router;
         query.estado = this.state.estado;
         push({ pathname, query });
+    }
+
+    changedState = async (obj, estado = 1) => {
+        let answer = await Confirm("warning", `¿Deseas ${estado ? 'restaurar' : 'desactivar'} la partición "${obj.descripcion}"?`)
+        if (answer) {
+            this.setState({ loading: true });
+            await unujobs.post(`cargo/${obj.id}/estado`, { estado })
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.handleSearch();
+            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loading: false });
+        }
     }
 
     render() {
@@ -59,7 +91,7 @@ export default class Cargo extends Component {
         return (
                 <Form className="col-md-12">
                     <Body>
-                        <Datatable titulo="Lista de Los Cargos o Particiones Presupuestales"
+                        <Datatable titulo="Lista de Particiones Presupuestales"
                         isFilter={false}
                         loading={loading}
                         headers={
@@ -93,28 +125,25 @@ export default class Cargo extends Component {
                         options={
                             [
                                 {
-                                    id: 1,
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
-                                    title: "Editar Cargo",
+                                    title: "Editar Partición Presup.",
                                     rules: {
                                         key: "estado",
                                         value: 1
                                     }
                                 }, {
-                                    id: 1,
                                     key: "restore",
                                     icon: "fas fa-sync",
-                                    title: "Restaurar Cargo",
+                                    title: "Restaurar Partición Presup.",
                                     rules: {
                                         key: "estado",
                                         value: 0
                                     }
                                 }, {
-                                    id: 1,
                                     key: "delete",
                                     icon: "fas fa-trash-alt",
-                                    title: "Eliminar Cargo",
+                                    title: "Eliminar Partición Presup.",
                                     rules: {
                                         key: "estado",
                                         value: 1
