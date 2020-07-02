@@ -81,6 +81,7 @@ export default class SystemIndex extends Component {
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
+                this.handleSearch();
             }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
             this.setState({ loading: false });
         }
