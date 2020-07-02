@@ -7,6 +7,8 @@ import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { pageSystem } from '../../../storage/actions/systemActions';
+import { Confirm } from '../../../services/utils';
+import Swal from 'sweetalert2';
 
 export default class SystemIndex extends Component {
 
@@ -53,7 +55,13 @@ export default class SystemIndex extends Component {
     getOption(obj, key, index) {
         let {pathname, query} = Router;
         query[key] = btoa(obj.id);
-        Router.push({pathname, query});
+        switch (key) {
+            case 'generate':
+                this.generateToken(obj, index);
+                break;
+            default:
+                break;
+        }
     }
 
     handleSearch = () => {
@@ -62,6 +70,20 @@ export default class SystemIndex extends Component {
         query.page = 1;
         query.query_search = this.state.query_search;
         push({ pathname, query });
+    }
+
+    generateToken = async (obj, index) => {
+        let answer = await Confirm("warning", `¿Deseas generar el Token a sistema de ${obj.name}?`);
+        if (answer) {
+            this.setState({ loading: true });
+            await authentication.post(`system/${obj.id}/generate_token`)
+            .then(res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                Swal.fire({ icon: 'success', text: message });
+            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loading: false });
+        }
     }
 
     render() {
@@ -105,18 +127,19 @@ export default class SystemIndex extends Component {
                         options={
                             [
                                 {
-                                    id: 1,
-                                    key: "restore",
-                                    icon: "fas fa-sync",
-                                    title: "Restaurar Cargo"    
-                                }, {
-                                    id: 1,
-                                    key: "delete",
-                                    icon: "fas fa-trash-alt",
-                                    title: "Eliminar Cargo",
+                                    key: "edit",
+                                    icon: "fas fa-pencil-alt",
+                                    title: "Editar Sistema",
                                     rules: {
-                                        key: "estado",
-                                        value: 1
+                                        key: "token"
+                                    }
+                                },
+                                {
+                                    key: "generate",
+                                    icon: "fas fa-sync",
+                                    title: "Generar Token",
+                                    rules: {
+                                        key: "token"
                                     }
                                 }
                             ]
