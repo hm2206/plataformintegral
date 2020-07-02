@@ -18,7 +18,7 @@ const InputFile = ({ id, name, onChange, error = false, children = null, title =
             name={name}
             onChange={(e) => {
               let { files, name } = e.target;
-              let tmp = files[0];
+              let tmp = files[0] || null; 
               setFile(tmp);
               if (typeof onChange == 'function') onChange({ name, file: tmp });
             }}

@@ -53,11 +53,12 @@ export default class SystemIndex extends Component {
     }
 
     getOption = async (obj, key, index) => {
-        let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
+        let {pathname, query, push} = Router;
+        query.id = btoa(obj.id);
         switch (key) {
             case "edit":
-                
+                this.setState({ loading: true });
+                await push({ pathname: `${pathname}/${key}`, query });
                 break;
             case "delete":
                 this.changeState(obj, 0);

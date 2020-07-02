@@ -164,7 +164,6 @@ class MyApp extends App {
           <link rel="stylesheet" href="/css/flatpickr.min.css" />
           <link rel="stylesheet" href="/css/theme.min.css" data-skin="default" />
           <link rel="stylesheet" href="/css/theme-dark.min.css" data-skin="dark" disabled={true} />
-          <link rel="stylesheet" href="/css/custom.css" />
           <link rel="stylesheet" href="/css/skull.css" />
 
           <script src="/js/jquery.min.js"></script>
@@ -174,6 +173,8 @@ class MyApp extends App {
           <link rel="stylesheet" href={app.css || ""} />
           <link rel="stylesheet" href="/css/page_loading.css" />
           {!isLoggin ?  <link rel="stylesheet" href="/css/no_auth_page_loading.css" /> : null}
+          {/* custom */}
+          <link rel="stylesheet" href="/css/custom.css" />
 
           {/* WPA */}
           <link rel="manifest" href="/manifest.json" />

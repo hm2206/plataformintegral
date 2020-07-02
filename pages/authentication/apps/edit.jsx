@@ -5,14 +5,15 @@ import Router from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
-import { RequestParse } from 'validator-error-adonis';
 import { AUTHENTICATE } from '../../../services/auth';
+import atob from 'atob';
+import Show from '../../../components/show';
 
 
-export default class CreateApps extends Component
+export default class EditApp extends Component
 {
 
-    static getInitialProps = (ctx) => {
+    static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let { pathname, query } = ctx;
         return { pathname, query };
@@ -20,8 +21,10 @@ export default class CreateApps extends Component
 
     state = {
         loading: false,
+        edit: false,
         planillas: [],
         type_cargos: [],
+        old: {},
         form: {},
         files: {},
         errors: {},
@@ -29,12 +32,25 @@ export default class CreateApps extends Component
         person: {}
     }
 
+    componentWillMount = async () => {
+        await this.getApp();
+    }
+
+    getApp = async () => {
+        let { query } = this.props;
+        let id = query.id ? atob(query.id) : "__error";
+        this.setState({ loading: true });
+        await authentication.get(`app/${id}/show`)
+        .then(res => this.setState({ form: res.data, old: res.data }))
+        .catch(err => this.setState({ form: {} }));
+        this.setState({ loading: false });
+    }
 
     handleFile = ({ name, files }) => {
-        let file = files[0];
+        let file = files[0] || null;
         this.setState(state => {
             state.files[name] = file;
-            return { files: state.files }; 
+            return { files: state.files, edit: true }; 
         });
     }
 
@@ -44,7 +60,7 @@ export default class CreateApps extends Component
             let newObj = Object.assign({}, state[obj]);
             newObj[name] = value;
             state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors };
+            return { [obj]: newObj, errors: state.errors, edit: true };
         });
     }
 
@@ -56,12 +72,12 @@ export default class CreateApps extends Component
         // add files
         for(let attr in files) data.append(attr, files[attr]);
         // crear app
-        await authentication.post('app', data)
+        await authentication.post(`app/${form.id}/update`, data)
         .then(async res => {
-            let { success, message } = res.data;
+            let { success, message, app } = res.data;
             if (!success) throw new Error(message);
-            Swal.fire({ icon: 'success', text: message });
-            this.setState({ form: {}, errors: {}, files: {} });
+            await  Swal.fire({ icon: 'success', text: message });
+            await this.setState({ form: app, files: {}, errors: {} });
         })
         .catch(async err => {
             try {
@@ -83,13 +99,13 @@ export default class CreateApps extends Component
     render() {
 
         let { pathname, query } = this.props;
-        let { form, errors, files } = this.state;
+        let { form, errors, files, loading } = this.state;
 
         return (
             <div className="col-md-12">
                 <Body>
                     <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Nueva App
+                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar App
                     </div>
                     <div className="card-body">
                         <Form className="row justify-content-center">
@@ -108,19 +124,21 @@ export default class CreateApps extends Component
                                                 placeholder="Ingrese un nombre"
                                                 value={form.name || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
+                                                disabled={loading}
                                             />
                                             <label>{errors && errors.name && errors.name[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field  error={errors && errors.client_device && errors.client_device[0] || false}>
+                                        <Form.Field>
                                             <label htmlFor="">Cliente <b className="text-red">*</b></label>
                                             <Select
                                                 placeholder="Select. Tip. Cliente"
                                                 name="client_device"
                                                 onChange={(e, obj) => this.handleInput(obj)}
                                                 value={form.client_device || ""}
+                                                disabled={true}
                                                 options={[
                                                     { key: 'android', value: 'ANDROID', text: 'Android' },
                                                     { key: 'ios', value: 'IOS', text: 'IOS' },
@@ -129,42 +147,44 @@ export default class CreateApps extends Component
                                                     { key: 'otro', value: 'OTRO', text: 'Otro' },
                                                 ]}
                                             />
-                                            <label>{errors && errors.client_device && errors.client_device[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.cover && errors.cover[0]}>
-                                            <label htmlFor="">Cover <b className="text-red">*</b></label>
-                                            <label className="btn btn-outline-file" htmlFor="cover">
-                                                <i className="fas fa-image"></i> {files.cover ? files.cover.name : 'Seleccionar Cover'}
-                                                <input type="file"
-                                                    id="cover" 
-                                                    onChange={(e) => this.handleFile(e.target)}
-                                                    accept="image/*"
-                                                    name="cover"
-                                                    hidden
-                                                />
-                                            </label>
-                                            <label>{errors && errors.cover && errors.cover[0]}</label>
-                                        </Form.Field>
+                                        <label htmlFor="">Cover <b className="text-red">*</b></label>
+                                        <Show condicion={form.cover && !files.cover }>
+                                            <img src={form.cover} alt="cover" className="img-content mb-2"/>
+                                        </Show>
+                                        <label className="btn btn-outline-file w-100" htmlFor="cover">
+                                            <i className="fas fa-image"></i> {files.cover ? files.cover.name : 'Seleccionar Cover'}
+                                            <input type="file"
+                                                id="cover" 
+                                                disabled={loading}
+                                                onChange={(e) => this.handleFile(e.target)}
+                                                accept="image/*"
+                                                name="cover"
+                                                hidden
+                                            />
+                                        </label>
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.icon && errors.icon[0]}>
-                                            <label htmlFor="">icon <b className="text-red">*</b></label>
-                                            <label className="btn btn-outline-file" htmlFor="icon">
-                                                <i className="fas fa-image"></i> {files.icon ? files.icon.name : 'Seleccionar Icon'}
-                                                <input type="file"
-                                                    id="icon" 
-                                                    name="icon"
-                                                    onChange={(e) => this.handleFile(e.target)}
-                                                    accept="image/*"
-                                                    hidden
-                                                />
-                                            </label>
-                                            <label>{errors && errors.icon && errors.icon[0]}</label>
-                                        </Form.Field>
+                                        <label htmlFor="">icon <b className="text-red">*</b></label>
+                                        <Show condicion={form.icon && !files.icon}>
+                                            <img src={form.icon} alt="icon" className="img-content mb-2"/>
+                                        </Show>
+                                        <label className="btn btn-outline-file w-100" htmlFor="icon">
+                                            <i className="fas fa-image"></i> {files.icon ? files.icon.name : 'Seleccionar Icon'}
+                                            <input type="file"
+                                                id="icon" 
+                                                name="icon"
+                                                disabled={loading}
+                                                onChange={(e) => this.handleFile(e.target)}
+                                                accept="image/*"
+                                                hidden
+                                            />
+                                        </label>
+                                        <label>{errors && errors.icon && errors.icon[0]}</label>
                                     </div>
 
                                     <div className="col-md-6 mb-3">
@@ -173,6 +193,7 @@ export default class CreateApps extends Component
                                             <input type="text" 
                                                 name="support_name"
                                                 value={form.support_name || ""}
+                                                disabled={loading}
                                                 onChange={(e) => this.handleInput(e.target)}
                                                 placeholder="Nombre del Soporte"
                                             />
@@ -180,12 +201,14 @@ export default class CreateApps extends Component
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-6 mb-3">
+                                    <div className="col-md-6">
                                         <Form.Field error={errors && errors.support_link && errors.support_link[0]}>
                                             <label htmlFor="">Soporte Enlace <b className="text-red">*</b></label>
                                             <input type="text" 
+                                                className="mb-3"
                                                 name="support_link"
                                                 value={form.support_link || ""}
+                                                disabled={loading}
                                                 onChange={(e) => this.handleInput(e.target)}
                                                 placeholder="Página web del Soporte. Ejm http://ejemplo.com"
                                             />
@@ -194,28 +217,41 @@ export default class CreateApps extends Component
                                     </div>
 
 
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.file && errors.file[0]}>
-                                            <label htmlFor="">Archivo <b className="text-red">*</b></label>
-                                            <label className="btn btn-outline-file" htmlFor="file">
-                                                <i className="fas fa-image"></i> {files.file ? files.file.name : 'Seleccionar Archivo'}
-                                                <input type="file"
-                                                    id="file" 
-                                                    name="file"
-                                                    onChange={(e) => this.handleFile(e.target)}
-                                                    hidden
-                                                />
-                                            </label>
-                                            <label>{errors && errors.file && errors.file[0]}</label>
-                                        </Form.Field>
+                                    <div className="col-md-6">
+                                        <label className="mb-2">Archivo <b className="text-red">*</b></label>
+                                        <Show condicion={form.file}>
+                                            <div className="text-right mb-2">
+                                                <a href={form.file} target="_blank"><i className="fas fa-download"></i> Descargar Archivo</a>
+                                            </div>
+                                        </Show>
+                                        <label className="btn btn-outline-file w-100 mb-3" htmlFor="file">
+                                            <i className="fas fa-image"></i> {files.file ? files.file.name : 'Seleccionar Archivo'}
+                                            <input type="file"
+                                                id="file" 
+                                                name="file"
+                                                disabled={loading}
+                                                onChange={(e) => this.handleFile(e.target)}
+                                                hidden
+                                            />
+                                        </label>
+                                        <label>{errors && errors.file && errors.file[0]}</label>
                                     </div>
 
-                                    <div className="col-md-12">
+                                    <div className="col-md-12 mt-5">
                                         <hr/>
                                     </div>
 
-                                    <div className="col-md-2 text-right">
-                                        <Button color="teal" fluid
+                                    <div className="col-md-4 text-right">
+                                        <Show condicion={this.state.edit}> 
+                                            <Button color="red"
+                                                disabled={this.state.loading}
+                                                onClick={(e) => this.setState(state => ({ form: state.old, edit: false, files: {}, errors: {} }))}
+                                            >
+                                                <i className="fas fa-times"></i> Cancelar
+                                            </Button>
+                                        </Show>
+
+                                        <Button color="teal"
                                             disabled={this.state.loading || !this.validate()}
                                             onClick={this.save}
                                             loading={this.state.loading}
