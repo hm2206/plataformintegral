@@ -12,7 +12,7 @@ import { AUTHENTICATE } from '../../../services/auth';
 export default class CreateApps extends Component
 {
 
-    static getInitialProps = (ctx) => {
+    static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let { pathname, query } = ctx;
         return { pathname, query };
