@@ -1,12 +1,14 @@
-import React, {Component, Fragment} from 'react';
-import {Button, Form} from 'semantic-ui-react';
+import React, { Component, Fragment } from 'react';
+import { Button, Form } from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import {authentication} from '../../../services/apis';
+import { authentication } from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
-import {BtnFloat, Body} from '../../../components/Utils';
+import { BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { pageUser } from '../../../storage/actions/userActions';
+import { Confirm } from '../../../services/utils';
+import Swal from 'sweetalert2';
 
 export default class UserIndex extends Component {
 
@@ -52,9 +54,17 @@ export default class UserIndex extends Component {
         this.setState({ [name]: value })
     }
 
-    getOption(obj, key, index) {
-        let {push, pathname } = Router;
-        push({ pathname: `${pathname}/${key}` , query: { id: btoa(obj.id) } });
+    getOption =  (obj, key, index) => {
+        switch (key) {
+            case "delete":
+                this.setChangeState(obj, 0);
+                break;
+            case "restore":
+                this.setChangeState(obj, 1);
+                break;
+            default:
+                break;
+        }
     }
 
     handleSearch = async () => {
@@ -64,6 +74,21 @@ export default class UserIndex extends Component {
         query.page = 1;
         query.query_search = this.state.query_search || "";
         await push({ pathname, query });
+    }
+
+    setChangeState = async (obj, condicion) => {
+        let answer = await Confirm("warning", `¿Deseas ${condicion ? 'restaurar' : 'desactivar'} la Cuenta ${obj.email}?`);
+        if (answer) {
+            this.setState({ loading: true });
+            await authentication.post(`user/${obj.id}/state`, { state: condicion })
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.handleSearch();
+            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loading: false });
+        }
     }
 
     render() {
@@ -106,14 +131,26 @@ export default class UserIndex extends Component {
                         options={
                             [
                                 {
-                                    id: 1,
-                                    key: "edit",
-                                    icon: "fas fa-pencil-alt",
-                                    title: "Editar Cargo"
-                                }, {
-                                    id: 1,
-                                    key: "audit",
+                                    key: "delete",
+                                    icon: "fas fa-times",
+                                    title: "Desactivar Cuenta",
+                                    rules: {
+                                        key: "state",
+                                        value: 1
+                                    }
+                                }, 
+                                {
+                                    key: "restore",
                                     icon: "fas fa-sync",
+                                    title: "Restaurar Cuenta",
+                                    rules: {
+                                        key: "state",
+                                        value: 0
+                                    }
+                                },
+                                {
+                                    key: "audit",
+                                    icon: "fas fa-shield-alt",
                                     title: "Auditoría"
                                 }
                             ]
