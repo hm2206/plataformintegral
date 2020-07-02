@@ -1,7 +1,33 @@
 import React, { Fragment, useState, Component } from "react";
 import Show from "./show";
-import { Dropdown, Button, Icon } from 'semantic-ui-react';
+import { Dropdown, Button, Icon, Form } from 'semantic-ui-react';
 import Swal from "sweetalert2";
+
+
+const InputFile = ({ id, name, onChange, error = false, children = null, title = "Select", accept = "*", icon = 'image', label = null }) => {
+
+  const [file, setFile] = useState(null);
+
+  return <Form.Field error={error || false}>
+    <label htmlFor={id}>{label}</label>
+    <label className="btn btn-outline-file" htmlFor={id}>
+        <i className={`fas fa-${icon}`}></i> {file ? file.name : title}
+        <input type="file"
+            id={id} 
+            accept={accept}
+            name={name}
+            onChange={(e) => {
+              let { files, name } = e.target;
+              let tmp = files[0];
+              setFile(tmp);
+              if (typeof onChange == 'function') onChange({ name, file: tmp });
+            }}
+            hidden
+        />
+    </label>
+    <label>{error || ""}</label>
+  </Form.Field>
+}
 
 const Content = props => (
   <Fragment>
@@ -390,5 +416,6 @@ export {
   BtnEditar,
   BtnBack,
   DrownSelect,
-  BtnSelect
+  BtnSelect,
+  InputFile,
 };
