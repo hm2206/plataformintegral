@@ -8,6 +8,9 @@ import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { pageMeta } from '../../../storage/actions/metaActions';
 import { Pagination } from 'semantic-ui-react';
 import Show from '../../../components/show';
+import { Confirm } from '../../../services/utils';
+import { unujobs } from '../../../services/apis';
+import Swal from 'sweetalert2';
 
 export default class Meta extends Component {
 
@@ -58,13 +61,30 @@ export default class Meta extends Component {
                 await push({pathname: `${pathname}/${key}`, query: { id }});
                 break;
             case 'delete':
+                await this.changedState(obj, 0);
                 break;
             case 'restore':
+                await this.changedState(obj, 1);
                 break;
             default:
                 break;
         }
         this.setState({ loading: false });
+    }
+
+    changedState = async (obj, estado) => {
+        let answer = await Confirm("warning", `¿Deseas ${estado ? 'restaurar' : 'desactivar' } la meta "${obj.metaID}"?`)
+        if (answer) {
+            this.setState({ loading: true });
+            await unujobs.post(`meta/${obj.id}/estado`)
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.handleSearch();
+            }).catch(err => Swal.fire({ icon:' error', text: err.message }));
+            this.setState({ loading: false });
+        }
     }
 
     handleSearch = () => {
@@ -132,7 +152,7 @@ export default class Meta extends Component {
                                     id: 1,
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
-                                    title: "Editar Cargo",
+                                    title: "Editar Meta",
                                     rules: {
                                         key: "estado",
                                         value: 1
@@ -141,7 +161,7 @@ export default class Meta extends Component {
                                     id: 1,
                                     key: "restore",
                                     icon: "fas fa-sync",
-                                    title: "Restaurar Cargo",
+                                    title: "Restaurar Meta",
                                     rules: {
                                         key: "estado",
                                         value: 0
@@ -149,8 +169,8 @@ export default class Meta extends Component {
                                 }, {
                                     id: 1,
                                     key: "delete",
-                                    icon: "fas fa-trash-alt",
-                                    title: "Eliminar Cargo",
+                                    icon: "fas fa-times",
+                                    title: "Desactivar Meta",
                                     rules: {
                                         key: "estado",
                                         value: 1
