@@ -8,6 +8,9 @@ import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { pageTypeRemuneracion } from '../../../storage/actions/typeRemuneracionActions';
 import { Pagination } from 'semantic-ui-react';
 import Show from '../../../components/show';
+import { Confirm } from '../../../services/utils';
+import { unujobs } from '../../../services/apis';
+import Swal from 'sweetalert2';
 
 export default class TypeRemuneracion extends Component {
 
@@ -39,10 +42,24 @@ export default class TypeRemuneracion extends Component {
         this.setState({ [name]: value })
     }
 
-    getOption(obj, key, index) {
-        let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
-        Router.push({pathname, query});
+    getOption = async (obj, key, index) => {
+        let {pathname, push} = Router;
+        let id = btoa(obj.id);
+        await this.setState({ loading: true });
+        switch (key) {
+            case 'edit':
+                await push({pathname: `${pathname}/${key}`, query: { id }});
+                break;
+            case 'delete':
+                await this.changedState(obj, 0);
+                break;
+            case 'restore':
+                await this.changedState(obj, 1);
+                break;
+            default:
+                break;
+        }
+        await this.setState({ loading: false });
     }
 
     handleSearch = () => {
@@ -58,6 +75,21 @@ export default class TypeRemuneracion extends Component {
         query.page = activePage;
         await push({ pathname, query });
         this.setState({ loading: false });
+    }
+
+    changedState = async (obj, estado = 0) => {
+        let answer = await Confirm("warning", `¿Deseas ${estado ? 'restaurar' : 'desactivar'} el Tip Remuneración "${obj.descripcion}"?`)
+        if (answer) {
+            this.setState({ loading: true });
+            await unujobs.post(`type_remuneracion/${obj.id}/estado`, { estado })
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.handleSearch();
+            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loading: false });
+        }
     }
 
     render() {
@@ -113,7 +145,7 @@ export default class TypeRemuneracion extends Component {
                                     id: 1,
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
-                                    title: "Editar Cargo",
+                                    title: "Editar Tip. Remuneración",
                                     rules: {
                                         key: "estado",
                                         value: 1
@@ -122,7 +154,7 @@ export default class TypeRemuneracion extends Component {
                                     id: 1,
                                     key: "restore",
                                     icon: "fas fa-sync",
-                                    title: "Restaurar Cargo",
+                                    title: "Restaurar Tip. Remuneración",
                                     rules: {
                                         key: "estado",
                                         value: 0
@@ -130,8 +162,8 @@ export default class TypeRemuneracion extends Component {
                                 }, {
                                     id: 1,
                                     key: "delete",
-                                    icon: "fas fa-trash-alt",
-                                    title: "Eliminar Cargo",
+                                    icon: "fas fa-times",
+                                    title: "Desactivar Tip. Remuneración",
                                     rules: {
                                         key: "estado",
                                         value: 1
