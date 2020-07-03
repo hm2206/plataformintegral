@@ -59,7 +59,7 @@ class Sidebar extends Component {
                 data-target="#dropdown-aside"
               >
                 <span className="user-avatar user-avatar-lg">
-                  <img src={auth && auth.person && auth.person.image ? `${authentication.path}/${auth.person.image}` : '/img/perfil.jpg'} alt={auth && auth.person && auth.person.fullname} />
+                  <img src={auth && auth.person && auth.person.image ? auth.person.image : '/img/perfil.jpg'} alt={auth && auth.person && auth.person.fullname} />
                 </span>{" "}
                 <span className="account-icon">
                   <span className="fa fa-caret-down fa-lg"></span>
