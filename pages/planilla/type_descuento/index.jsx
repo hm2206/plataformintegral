@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from 'react';
-import {Button, Form} from 'semantic-ui-react';
+import {Button, Form, Select} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
@@ -8,6 +8,9 @@ import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { pageTypeDescuento } from '../../../storage/actions/typeDescuentoActions';
 import { Pagination } from 'semantic-ui-react';
 import Show from '../../../components/show';
+import { Confirm } from '../../../services/utils';
+import { unujobs } from '../../../services/apis';
+import Swal from 'sweetalert2';
 
 export default class TypeDescuento extends Component {
 
@@ -26,6 +29,7 @@ export default class TypeDescuento extends Component {
         await AUTHENTICATE(ctx);
         let {query, pathname, store} = ctx;
         query.page = query.page ? query.page : 1;
+        query.estado = query.estado || 1;
         await store.dispatch(pageTypeDescuento(ctx));
         let { page_type_descuento } = store.getState().type_descuento;
         return {query, pathname, page_type_descuento}
@@ -39,10 +43,23 @@ export default class TypeDescuento extends Component {
         this.setState({ [name]: value })
     }
 
-    getOption(obj, key, index) {
+    getOption = async (obj, key, index) => {
         let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
-        Router.push({pathname, query});
+        let id = btoa(obj.id);
+        this.setState({ loading: true });
+        switch (key) {
+            case 'edit':
+                break;
+            case 'delete':
+                await this.changedState(obj, 0);
+                break;
+            case 'restore':
+                await this.changedState(obj, 1);
+                break;
+            default:
+                break;
+        }
+        this.setState({ loading: false });
     }
 
     handleSearch = () => {
@@ -58,6 +75,21 @@ export default class TypeDescuento extends Component {
         query.page = activePage;
         await push({ pathname, query });
         this.setState({ loading: false });
+    }
+
+    changedState = async (obj, estado = 1) => {
+        let answer = await Confirm("warning", `¿Deseas ${estado ? 'restaurar' : 'desactivar'} el Tip. Descuento "${obj.descripcion}"?`);
+        if (answer) {
+            this.setState({ loading: true });
+            await unujobs.post(`type_descuento/${obj.id}/estado`, { estado })
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.handleSearch();
+            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            this.setState({ loading: false });
+        }
     }
 
     render() {
@@ -107,7 +139,7 @@ export default class TypeDescuento extends Component {
                                     id: 1,
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
-                                    title: "Editar Cargo",
+                                    title: "Editar Tip Descuento",
                                     rules: {
                                         key: "estado",
                                         value: 1
@@ -116,7 +148,7 @@ export default class TypeDescuento extends Component {
                                     id: 1,
                                     key: "restore",
                                     icon: "fas fa-sync",
-                                    title: "Restaurar Cargo",
+                                    title: "Restaurar Tip Descuento",
                                     rules: {
                                         key: "estado",
                                         value: 0
@@ -124,8 +156,8 @@ export default class TypeDescuento extends Component {
                                 }, {
                                     id: 1,
                                     key: "delete",
-                                    icon: "fas fa-trash-alt",
-                                    title: "Eliminar Cargo",
+                                    icon: "fas fa-times",
+                                    title: "Desactivar Tip Descuento",
                                     rules: {
                                         key: "estado",
                                         value: 1
@@ -136,7 +168,32 @@ export default class TypeDescuento extends Component {
                         optionAlign="text-center"
                         getOption={this.getOption}
                         data={page_type_descuento.data}
-                    />
+                    >
+                        <div className="form-group">
+                            <div className="row">
+
+                                <div className="col-md-4 mb-1">
+                                    <select  name="estado"
+                                        value={this.state.estado}
+                                        onChange={(e) => this.handleInput(e.target)}
+                                    >
+                                        <option value="1">Tip. Descuentos Activos</option>
+                                        <option value="0">Tip. Descuentos Deshabilitado</option>
+                                    </select>
+                                </div>
+
+                                <div className="col-md-2">
+                                    <Button onClick={this.handleSearch}
+                                        disabled={this.state.loading}
+                                        color="blue"
+                                    >
+                                        <i className="fas fa-search mr-1"></i>
+                                        <span>Buscar</span>
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </Datatable>
                         
                     <div className="text-center">
                         <Show condicion={page_type_descuento && page_type_descuento.data.length > 0}>

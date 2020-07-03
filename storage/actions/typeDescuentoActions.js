@@ -10,7 +10,7 @@ export const typeDescuentoActionsTypes = {
 export const pageTypeDescuento = (ctx) => {
     return async (dispatch) => {
         let { query } = ctx;
-        await unujobs.get(`type_descuento?page=${query.page}`, {}, ctx)
+        await unujobs.get(`type_descuento?page=${query.page || 1}&estado=${query.estado || 1}`, {}, ctx)
         .then(res =>  dispatch({ type: typeDescuentoActionsTypes.PAGE_TYPE_DESCUENTO, payload: res.data }))
         .catch(err => console.log(err.message));
     }
