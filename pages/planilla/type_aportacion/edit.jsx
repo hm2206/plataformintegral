@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
 import { backUrl } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
+import { Form, Button } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
@@ -24,7 +24,7 @@ export default class CreateTypeAportacion extends Component
         errors: {}
     }
 
-    componentWillMount = async () => {
+    componentDidMount = async () => {
         await this.findTypeAportacion();
     }
 

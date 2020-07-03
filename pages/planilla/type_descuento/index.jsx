@@ -44,11 +44,12 @@ export default class TypeDescuento extends Component {
     }
 
     getOption = async (obj, key, index) => {
-        let {pathname, query} = Router;
+        let {pathname, push} = Router;
         let id = btoa(obj.id);
         this.setState({ loading: true });
         switch (key) {
             case 'edit':
+                await push({ pathname: `${pathname}/${key}`, query: {id} });
                 break;
             case 'delete':
                 await this.changedState(obj, 0);

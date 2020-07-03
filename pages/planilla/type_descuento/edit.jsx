@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
 import { backUrl } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
+import { Form, Button, Select, Checkbox } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import Show from '../../../components/show';
 
 
 export default class EditTypeDescuento extends Component
@@ -17,11 +18,27 @@ export default class EditTypeDescuento extends Component
 
     state = {
         loading: false,
+        edit: false,
+        old: {},
         form: { 
-            plame: "0",
-            edit: "1"
+            plame: 0,
+            edit: 0
         },
         errors: {}
+    }
+
+    componentDidMount = async () => {
+        await this.findTypeDescuento();
+    }
+
+    findTypeDescuento = async () => {
+        this.setState({ loading: true });
+        let { query } = this.props;
+        let id = query.id ? atob(query.id) : '__error';
+        await unujobs.get(`type_descuento/${id}`)
+        .then(res => this.setState({ form: res.data, old: res.data }))
+        .catch(err => this.setState({ form: {}, old: {} }));
+        this.setState({ loading: false });
     }
 
     handleInput = ({ name, value }, obj = 'form') => {
@@ -29,18 +46,20 @@ export default class EditTypeDescuento extends Component
             let newObj = Object.assign({}, state[obj]);
             newObj[name] = value;
             state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors };
+            return { [obj]: newObj, errors: state.errors, edit: true };
         });
     }
 
     save = async () => {
         this.setState({ loading: true });
-        await unujobs.post('type_descuento', this.state.form)
+        let { form } = this.state;
+        form._method = 'PUT';
+        await unujobs.post(`type_descuento/${form.id}`, form)
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
-            if (success) this.setState({ form: {}, errors: {} })
+            if (success) this.setState(state => ({ old: state.form, errors: {}, edit: false }));
         })
         .catch(async err => {
             try {
@@ -57,13 +76,13 @@ export default class EditTypeDescuento extends Component
     render() {
 
         let { pathname, query } = this.props;
-        let { form, errors } = this.state;
+        let { form, errors, edit } = this.state;
 
         return (
             <div className="col-md-12">
                 <Body>
                     <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Tip. Descuento
+                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Tip. Descuento
                     </div>
                     <div className="card-body">
                         <Form className="row justify-content-center">
@@ -73,6 +92,7 @@ export default class EditTypeDescuento extends Component
                                         <Form.Field error={errors && errors.key && errors.key[0]}>
                                             <label htmlFor="">ID-MANUAL</label>
                                             <input type="text"
+                                                disabled
                                                 placeholder="Ingrese un identificador unico"
                                                 name="key"
                                                 value={form.key || ""}
@@ -98,15 +118,10 @@ export default class EditTypeDescuento extends Component
                                     <div className="col-md-4 mb-3">
                                         <Form.Field>
                                             <label htmlFor="">¿Mostrar en el Reporte Plame?</label>
-                                            <Select
-                                                placeholder="Select. Condición"
-                                                options={[
-                                                    { key: "plame", value: "1", text: "Si" },
-                                                    { key: "no-plame", value: "0", text: "No" }
-                                                ]}
-                                                value={this.state.form.plame}
-                                                name="base"
-                                                onChange={(e, obj) => this.handleInput(obj)}
+                                            <Checkbox toggle checked={form.plame || 0} 
+                                                disabled={this.state.loading}
+                                                name="plame"
+                                                onChange={(e, obj) => this.handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
                                             />
                                         </Form.Field>
                                     </div>
@@ -114,16 +129,7 @@ export default class EditTypeDescuento extends Component
                                     <div className="col-md-4 mb-3">
                                         <Form.Field>
                                             <label htmlFor="">¿Edicion/Descuento Manual?</label>
-                                            <Select
-                                                placeholder="Select. Condición de la Edición"
-                                                options={[
-                                                    { key: "edit", value: "1", text: "Descuento Manual" },
-                                                    { key: "no-edit", value: "0", text: "Descuento Automatico" }
-                                                ]}
-                                                value={this.state.form.edit}
-                                                name="edit"
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                            />
+                                            <Checkbox toggle checked={form.edit || 0} disabled/>
                                         </Form.Field>
                                     </div>
 
@@ -131,8 +137,17 @@ export default class EditTypeDescuento extends Component
                                         <hr/>
                                     </div>
 
-                                    <div className="col-md-2">
-                                        <Button color="teal" fluid
+                                    <div className="col-md-4 text-right">
+                                        <Show condicion={edit}>
+                                            <Button color="red"
+                                                onClick={(e) => this.setState(state => ({ errors: {}, edit: false, form: state.old }))}
+                                            >
+                                                <i className="fas fa-times"></i> Cancelar
+                                            </Button>
+                                        </Show>
+                                        
+                                        <Button color="teal"
+                                            disabled={!edit || this.state.loading}
                                             loading={this.state.loading}
                                             onClick={this.save}
                                         >
