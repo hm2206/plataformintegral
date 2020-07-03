@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl } from '../../../services/utils';
+import { backUrl, parseOptions } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select, Checkbox } from 'semantic-ui-react'
+import { Form, Button, Select } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
-import { AUTHENTICATE } from '../../../services/auth';a
+import { AUTHENTICATE } from '../../../services/auth';
 
 
-export default class EditTypeDescuento extends Component
+export default class CreateTypeDetalle extends Component
 {
 
     static getInitialProps = async (ctx) => {
@@ -20,24 +20,21 @@ export default class EditTypeDescuento extends Component
 
     state = {
         loading: false,
-        edit: false,
-        old: {},
-        form: { 
-            plame: 0,
-            edit: 0
-        },
+        type_descuentos: [],
+        form: {},
         errors: {}
     }
 
     componentDidMount = async () => {
-        await this.findTypeDescuento();
+        this.getTypeDescuento();
+        await this.findTypeDetalle();
     }
 
-    findTypeDescuento = async () => {
+    findTypeDetalle = async () => {
         this.setState({ loading: true });
         let { query } = this.props;
         let id = query.id ? atob(query.id) : '__error';
-        await unujobs.get(`type_descuento/${id}`)
+        await unujobs.get(`type_detalle/${id}`)
         .then(res => this.setState({ form: res.data, old: res.data }))
         .catch(err => this.setState({ form: {}, old: {} }));
         this.setState({ loading: false });
@@ -52,11 +49,19 @@ export default class EditTypeDescuento extends Component
         });
     }
 
+    getTypeDescuento = async () => {
+        this.setState({ loading: true });
+        await unujobs.get('type_descuento?paginate=0')
+        .then(res => this.setState({ type_descuentos: res.data }))
+        .catch(err => console.log(err.message));
+        this.setState({ loading: false });
+    }
+
     save = async () => {
         this.setState({ loading: true });
         let { form } = this.state;
         form._method = 'PUT';
-        await unujobs.post(`type_descuento/${form.id}`, form)
+        await unujobs.post(`type_detalle/${form.id}`, form)
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
@@ -84,54 +89,53 @@ export default class EditTypeDescuento extends Component
             <div className="col-md-12">
                 <Body>
                     <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Tip. Descuento
+                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Tip. Detalle
                     </div>
                     <div className="card-body">
                         <Form className="row justify-content-center">
                             <div className="col-md-10">
                                 <div className="row justify-content-end">
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.key && errors.key[0]}>
-                                            <label htmlFor="">ID-MANUAL</label>
-                                            <input type="text"
-                                                disabled
-                                                placeholder="Ingrese un identificador unico"
-                                                name="key"
-                                                value={form.key || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
-                                            />
-                                            <label>{errors && errors.key && errors.key[0]}</label>
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-4 mb-3">
                                         <Form.Field error={errors && errors.descripcion && errors.descripcion[0]}>
                                             <label htmlFor="">Descripción</label>
                                             <input type="text"
                                                 placeholder="Ingrese una descripción"
                                                 name="descripcion"
-                                                value={form.descripcion || ""}
+                                                value={form.descripcion}
                                                 onChange={(e) => this.handleInput(e.target)}
-                                            />
-                                            <label>{errors && errors.descripcion && errors.descripcion[0]}</label>
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field>
-                                            <label htmlFor="">¿Mostrar en el Reporte Plame?</label>
-                                            <Checkbox toggle checked={form.plame ? true : false} 
                                                 disabled={this.state.loading}
-                                                name="plame"
-                                                onChange={(e, obj) => this.handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
                                             />
+                                            <label>{errors && errors.descripcion && errors.descripcion[0]}</label>  
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field>
-                                            <label htmlFor="">¿Edicion/Descuento Manual?</label>
-                                            <Checkbox toggle checked={form.edit ? true : false} disabled/>
+                                        <Form.Field error={errors && errors.type_descuento_id && errors.type_descuento_id[0]}>
+                                            <label htmlFor="">Clave</label>
+                                            <Select
+                                                placeholder="Select. Clave Descuento"
+                                                options={parseOptions(this.state.type_descuentos, ["sel-clave", "", "Select. Clave"], ["id", "id", "key"])}
+                                                value={form.type_descuento_id}
+                                                name="type_descuento_id"
+                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                disabled={this.state.loading}
+                                            />
+                                            <label>{errors && errors.type_descuento_id && errors.type_descuento_id[0]}</label>  
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-4 mb-3">
+                                        <Form.Field error={errors && errors.type_descuento_id && errors.type_descuento_id[0]}>
+                                            <label htmlFor="">Descuento</label>
+                                            <Select
+                                                placeholder="Select. Descripcion Descuento"
+                                                options={parseOptions(this.state.type_descuentos, ["sel-descripcion", "", "Select. Descripcion"], ["id", "id", "descripcion"])}
+                                                value={form.type_descuento_id}
+                                                name="type_descuento_id"
+                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                disabled={this.state.loading}
+                                            />
+                                            <label>{errors && errors.type_descuento_id && errors.type_descuento_id[0]}</label>  
                                         </Form.Field>
                                     </div>
 

@@ -5,12 +5,14 @@ import Router from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import { AUTHENTICATE } from '../../../services/auth';
 
 
 export default class CreateTypeDetalle extends Component
 {
 
-    static getInitialProps = (ctx) => {
+    static getInitialProps = async (ctx) => {
+        await AUTHENTICATE(ctx);
         let { pathname, query } = ctx;
         return { pathname, query };
     }
