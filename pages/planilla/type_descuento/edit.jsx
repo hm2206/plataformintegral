@@ -6,7 +6,7 @@ import { Form, Button, Select, Checkbox } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
-import { AUTHENTICATE } from '../../../services/auth';a
+import { AUTHENTICATE } from '../../../services/auth';
 
 
 export default class EditTypeDescuento extends Component
