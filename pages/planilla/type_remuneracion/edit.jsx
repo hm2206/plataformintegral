@@ -146,7 +146,7 @@ export default class EditTypeRemuneracion extends Component
                                             <label htmlFor="">¿Aplica a la Base Imponible?</label>
                                             <Checkbox toggle
                                                 name="base"
-                                                checked={form.base || 0}
+                                                checked={form.base ? false : true}
                                                 disabled={this.state.loading}
                                                 onChange={(e, obj) => this.handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
                                             />

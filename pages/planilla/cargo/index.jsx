@@ -142,7 +142,7 @@ export default class CargoIndex extends Component {
                                     }
                                 }, {
                                     key: "delete",
-                                    icon: "fas fa-trash-alt",
+                                    icon: "fas fa-times",
                                     title: "Eliminar Partición Presup.",
                                     rules: {
                                         key: "estado",
