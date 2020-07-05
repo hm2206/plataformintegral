@@ -157,18 +157,19 @@ export default class CreateTrabajador extends Component
         await authentication.post(`create_person`, form)
         .then(async res => {
             let { success, message, person } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) {
-                let id = btoa(person.id)
-                await Router.push({ pathname: parseUrl(Router.pathname, "add"), query: { id } });
-            }
+            console.log(res.data);
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            let id = btoa(person.id)
+            await Router.push({ pathname: parseUrl(Router.pathname, "add"), query: { id } });
         }).catch(err => {
             try {
-                let { message } = err.response.data.error || "";
-                let newErrors = JSON.parse(message);
-                this.setState({ errors: newErrors.errors || {} });
-            } catch (error) { Swal.fire({ icon: 'error', text: 'Algo salió mal' })}
+                let response = JSON.parse(err.message);
+                Swal.fire({ icon: 'warning', text: response.message });
+                this.setState({ errors: response.errors || {} });
+            } catch (error) { 
+                Swal.fire({ icon: 'error', text: err.message })
+            }
         });
         this.setState({ loader: false });
     }
@@ -209,7 +210,7 @@ export default class CreateTrabajador extends Component
                                                         style={{ cursor: "pointer" }}
                                                         title="Agregar foto personal"
                                                     >
-                                                        <b><i className="fas fa-image"></i> Seleccinar Foto Personal</b>
+                                                        <b><i className="fas fa-image"></i> Seleccionar Foto Personal</b>
                                                         <input type="file" 
                                                             accept="image/png" 
                                                             hidden id="image"
