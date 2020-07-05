@@ -21,7 +21,7 @@ export const parseOptions = (
             for(let i in index) {
                 let key = replace[i];
                 let value = d[index[i]];
-                metaData[key] = value;
+                metaData[key] = key == 'key' ? `${selected[0]}-${value}` : value;
             }
             // add
             newData.push(metaData);
