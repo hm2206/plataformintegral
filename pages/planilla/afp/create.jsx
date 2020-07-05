@@ -246,6 +246,7 @@ export default class CreateAfp extends Component
                                                     placeholder="Ingrese el Porcentaje"
                                                     value={form.aporte || ""}
                                                     onChange={(e) => this.handleInput(e.target)}
+                                                    disabled={loading}
                                                 />
                                             </Form.Field>
                                         </div>
@@ -292,6 +293,7 @@ export default class CreateAfp extends Component
                                                     placeholder="Ingrese el Porcentaje"
                                                     value={form.prima || ""}
                                                     onChange={(e) => this.handleInput(e.target)}
+                                                    disabled={loading}
                                                 />
                                             </Form.Field>
                                         </div>
@@ -304,6 +306,7 @@ export default class CreateAfp extends Component
                                                     placeholder="Ingrese el monto Limite de la Prima Seguro"
                                                     value={form.prima_limite || ""}
                                                     onChange={(e) => this.handleInput(e.target)}
+                                                    disabled={loading}
                                                 />
                                             </Form.Field>
                                         </div>
