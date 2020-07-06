@@ -159,8 +159,7 @@ export default class CreateTrabajador extends Component
             let { success, message, person } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
-            let id = btoa(person.id)
-            await Router.push({ pathname: parseUrl(Router.pathname, "add"), query: { id } });
+            this.setState({ person: {}, form: {} });
         }).catch(err => {
             try {
                 let response = JSON.parse(err.message);

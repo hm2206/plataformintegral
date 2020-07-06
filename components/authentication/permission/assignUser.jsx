@@ -104,8 +104,8 @@ export default class AssignPerson extends Component
                         <div className="col-md-12">
                             <Pagination 
                                 defaultActivePage={people && people.page || 1} 
-                                totalPages={people && people.lastPage}
-                                enabled={loader}
+                                totalPages={people && people.lastPage || 0}
+                                enabled={loader ? true : false}
                                 onPageChange={this.handlePage}
                             />
                         </div>

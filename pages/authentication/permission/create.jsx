@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
 import { backUrl, parseOptions } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
+import { Form, Button, Select, Accordion, Menu, Message } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
@@ -29,16 +29,17 @@ export default class CreatePermission extends Component
         user: {},
         systems: [],
         modules: [],
-        permissions: []
+        permissions: [],
+        indexCheck: null
     }
 
     componentDidMount = () => {
         this.getSystem();
     }
 
-    componentDidUpdate = (prevProps, prevState) => {
-        let { form  } = this.state;
-        if (form.system_id != prevState.form.system_id) this.findSystem(form.system_id) 
+    handleClick = async (id, index) => {
+        await this.findSystem(id)
+        this.setState({ indexCheck: index });
     }
 
     handleInput = ({ name, value }, obj = 'form') => {
@@ -47,6 +48,31 @@ export default class CreatePermission extends Component
             newObj[name] = value;
             state.errors[name] = "";
             return { [obj]: newObj, errors: state.errors };
+        });
+    }
+
+    handleCheck = async (mod, modIndex, checked) => {
+        // variables
+        let { user, modules } = this.state;
+        let module = modules[modIndex];
+        let form = {};
+        form.user_id = user.id;
+        form.module_id = mod.id;
+        // accion
+        if (checked) {
+            await this.save(form, modIndex, module);
+        } else {
+            await this.delete(modIndex, module);
+        }
+        // actualizar permisos
+        await this.findPermissions(user.id);
+        await this.props.fireRefreshProfile();
+    } 
+
+    updateChecked = async (index, mod) => {
+        await this.setState(state => {
+            state.modules[index] = mod;
+            return { modules: state.modules };
         });
     }
 
@@ -72,29 +98,44 @@ export default class CreatePermission extends Component
     }
 
     findSystem = async (id) => {
-        this.setState({ loading: true });
+        this.setState({ loading: true, modules: [] });
+        let newPermissions = await this.state.permissions.filter(per => per.system_id == id);
         await authentication.get(`system/${id}`)
-        .then(async res =>  this.setState({ modules: res.data.modules || [] }))
+        .then(async res =>  {
+            let { modules } = res.data;
+            await modules.map(mod => {
+                let isCheck = false;
+                let permission_id = "";
+                for(let per of newPermissions) {
+                    if (mod.id == per.module_id) {
+                        isCheck = true;
+                        permission_id = per.id;
+                        break;
+                    }
+                }
+                // add checked
+                mod.checked = isCheck;  
+                mod.permission_id = permission_id;
+            });
+            // add
+            this.setState({ modules })
+        })
         .catch(err => console.log(err.message))
         this.setState({ loading: false });
         this.handleInput({ name: 'module_id', value: "" });
     }
 
-    save = async () => {
+    save = async (form, index, module) => {
         this.setState({ loading: true });
-        let { user, form } = this.state;
-        form.user_id = user.id
         await authentication.post('permission', form)
         .then(async res => {
-            let { success, message } = res.data;
+            let { success, message, permission } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
-            if (success) {
-                await this.findPermissions(form.user_id);
-                await this.handleInput({ name: 'module_id', value: "" });
-                this.setState({ errors: {} });
-                await this.props.fireRefreshProfile();
-            }
+            if (!success) throw new Error(message);
+            module.permission_id = permission.id;
+            module.checked = true;
+            await this.updateChecked(index, module);
         })
         .catch(async err => {
             try {
@@ -102,16 +143,31 @@ export default class CreatePermission extends Component
                 let newErrors = JSON.parse(message);
                 this.setState({ errors: newErrors.errors || {} });
             } catch (error) {
-                await Swal.fire({ icon: 'error', text: 'Algo salió mal' });
+                await Swal.fire({ icon: 'error', text: err.message });
             }
         });
+        this.setState({ loading: false });
+    }
+
+    delete = async (index, module) => {
+        this.setState({ loading: true });
+        await authentication.post(`permission/${module.permission_id}/delete`)
+        .then(async res => {
+            let { success, message } = res.data;
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            module.checked = false;
+            await this.updateChecked(index, module);
+        })
+        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.setState({ loading: false });
     }
 
     getAdd = async (obj) => {
         this.setState({
             user: obj,
-            check: true
+            check: true,
+            indexCheck: null
         })
         // add person
         this.findPerson(obj.person_id);
@@ -146,7 +202,7 @@ export default class CreatePermission extends Component
     render() {
 
         let { pathname, query } = this.props;
-        let { form, errors, user, systems, modules, permissions } = this.state;
+        let { form, user, systems, modules, permissions, indexCheck } = this.state;
 
         return (
             <div className="col-md-12">
@@ -239,48 +295,41 @@ export default class CreatePermission extends Component
                                         <hr/>
                                     </div>
 
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.system_id && errors.system_id[0]}>
-                                            <label htmlFor="">Sistema <b className="text-red">*</b></label>
-                                            <Select
-                                                value={form.system_id || ""}
-                                                placeholder="Select. Sistema"
-                                                options={parseOptions(systems, ["sel-sys", "", "Select. Sistemas"], ["id", "id", "name"])}
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                                name="system_id"
-                                                disabled={this.state.loading || user && user.id ? false : true}
-                                            />
-                                            <label>{errors && errors.system_id && errors.system_id[0]}</label>
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field  error={errors && errors.module_id && errors.module_id[0]}>
-                                            <label htmlFor="">Modulo <b className="text-red">*</b></label>
-                                            <Select
-                                                value={form.module_id || ""}
-                                                placeholder="Select. Modulo"
-                                                options={parseOptions(modules, ["sel-mod", "", "Select. Modulo"], ["id", "id", "name"])}
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                                name="module_id"
-                                                disabled={this.state.loading || user && user.id ? false : true}
-                                            />
-                                            <label>{errors && errors.module_id && errors.module_id[0]}</label>
-                                        </Form.Field>
-                                    </div>
-
                                     <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-2">
-                                        <Button color="teal" fluid
-                                            disabled={this.state.loading || !this.validate() || !this.state.check}
-                                            onClick={this.save}
-                                            loading={this.state.loading}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
+                                        <Show condicion={this.state.check}>
+                                            <Accordion as={Menu} vertical fluid>
+                                                {systems.map((sys, index) => 
+                                                    <Menu.Item key={`system-${sys.id}`} disabled={!this.state.check}>
+                                                        <Accordion.Title
+                                                            active={indexCheck === index}
+                                                            content={<b>{sys.name}</b>}
+                                                            index={0}
+                                                            onClick={(e) => this.handleClick(sys.id, index)}
+                                                        />
+                                                        <Accordion.Content active={indexCheck === index}>
+                                                            <Fragment>
+                                                                <Form.Group grouped>
+                                                                    {modules.map((mod, modIndex) => 
+                                                                        <Form.Checkbox 
+                                                                            label={mod.name} 
+                                                                            key={`modulo-${mod.id}`}
+                                                                            checked={mod.checked ? true : false}
+                                                                            onChange={(e, obj) => this.handleCheck(mod, modIndex, obj.checked)}
+                                                                        />    
+                                                                    )}
+                                                                </Form.Group>
+                                                            </Fragment>
+                                                        </Accordion.Content>
+                                                    </Menu.Item>    
+                                                )}
+                                            </Accordion>
+                                        </Show>
+                                        <Show condicion={!this.state.check}>
+                                            <Message color="yellow">
+                                                <Message.Header>Porfavor seleccione un usuario</Message.Header>
+                                                <p>Para mostrar el selector de permisos</p>
+                                            </Message>
+                                        </Show>
                                     </div>
                                 </div>
                             </div>
