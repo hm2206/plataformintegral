@@ -7,3 +7,8 @@
     object-fit: contain;
     border: 1px solid #000;
 }
+
+
+.uppercase {
+    text-transform: uppercase!important;
+}

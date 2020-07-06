@@ -93,7 +93,7 @@ export default class AssignPerson extends Component
                                     <Image avatar src={obj.image ? `${obj.image}` : '/img/base.png'} 
                                         style={{ objectFit: 'cover' }}
                                     />
-                                    <List.Content>{obj.fullname}</List.Content>
+                                    <List.Content><span className="uppercase">{obj.fullname}</span></List.Content>
                                 </List.Item>
                             )}
                         </List>    

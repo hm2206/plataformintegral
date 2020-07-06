@@ -3,15 +3,14 @@ import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Button, Form, Pagination } from 'semantic-ui-react'
-import { unujobs } from '../../../services/apis';
+import { authentication} from '../../../services/apis';
 import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import { responsive } from '../../../services/storage.json';
 import { Body } from '../../../components/Utils';
-import { pageWork } from '../../../storage/actions/workActions';
 import Show from '../../../components/show';
 
-export default class IndexPerson extends Component
+export default class Index extends Component
 {
 
     static getInitialProps = async (ctx) => {
@@ -19,22 +18,29 @@ export default class IndexPerson extends Component
         let { pathname, query } = ctx;
         query.page = query.page || 1;
         query.query_search = query.query_search || "";
-        await ctx.store.dispatch(pageWork(ctx));
-        let { page_work } = ctx.store.getState().work;
-        return { pathname, query, page_work };
+        return { pathname, query };
     }
 
     state = {
         loading: false,
-        query_search: ""
+        query_search: "",
+        people : {}
     }
 
     componentDidMount = async () => {
-        this.setting(this.props);
+        await this.getPerson(this.props.query);
     }
 
     componentWillReceiveProps = async (nextProps) => {
-       if (nextProps.query || this.props.query) this.setting(nextProps);
+       if (nextProps.query != this.props.query) await this.getPerson(nextProps.query);
+    }
+
+    getPerson = async ({ page, query_search }) => {
+        this.setState({ loading: true, query_search });
+        await authentication.get(`person?page=${page}&query_search=${query_search}`)
+        .then(res => this.setState({ people: res.data }))
+        .catch(err => console.log(err.message));
+        this.setState({ loading: false });
     }
 
     setting = (props) => {
@@ -64,7 +70,8 @@ export default class IndexPerson extends Component
 
     render() {
 
-        let { page_work, query } = this.props || {};
+        let { query } = this.props || {};
+        let { people } = this.state;
 
         return (
             <div className="col-md-12">
@@ -72,13 +79,13 @@ export default class IndexPerson extends Component
                     <Form loading={this.state.loading}>
                         <div className="col-md-12">
                             <DataTable titulo={<span>Lista de Trabajadores</span>}
-                                headers={["#ID", "Apellidos y Nombres", "N° Documento", "N° Cussp"]}
-                                data={page_work && page_work.data}
+                                headers={["#ID", "Apellidos y Nombres", "N° Documento", "Fecha de Nac."]}
+                                data={people && people.data}
                                 index={[
-                                    { key: "person.id", type: "text" },
-                                    { key: "person.fullname", type: "text", className: "uppercase" },
-                                    { key: "person.document_number", type: "icon" },
-                                    { key: "numero_de_cussp", type: "icon", bg: 'dark' }
+                                    { key: "id", type: "text" },
+                                    { key: "fullname", type: "text", className: "uppercase" },
+                                    { key: "document_number", type: "icon" },
+                                    { key: "date_of_birth", type: "date", bg: 'dark' }
                                 ]}
                                 options={[
                                     { key: "info", icon: "fas fa-info" }
@@ -110,19 +117,17 @@ export default class IndexPerson extends Component
                                 </div>
 
                                 <div className="card-body mt-4">
-                                    <h4>Resultados: {page_work && page_work.total || 0}</h4>
+                                    <h4>Resultados: {people && people.total || 0}</h4>
                                 </div>
 
                             </DataTable>
                             <div className="text-center">
-                                <Show condicion={page_work&& page_work.data && page_work.data.length > 0}>
-                                    <hr/>
-                                    <Pagination defaultActivePage={query.page} 
-                                        totalPages={page_work.last_page || 0}
-                                        enabled={this.state.loading}
-                                        onPageChange={this.handlePage}
-                                    />
-                                </Show>
+                                <hr/>
+                                <Pagination defaultActivePage={query.page} 
+                                    totalPages={people.lastPage || 1}
+                                    enabled={this.state.loading}
+                                    onPageChange={this.handlePage}
+                                />
                             </div>
                         </div>
 
