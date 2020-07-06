@@ -11,7 +11,9 @@ export default class AssignPerson extends Component
 
     state = {
         loader: false,
-        people: {},
+        people: {
+            data: []
+        },
         query_search: ""
         
     }
@@ -20,17 +22,24 @@ export default class AssignPerson extends Component
         await this.getPeople(1, this.state);
     }
 
-    getPeople = async (page = 1, state) => {
+    getPeople = async (page = 1, state, update = false) => {
         this.setState({ loader: true });
         await authentication.get(`person?page=${page}&query_search=${state.query_search || ""}`)
-        .then(res => this.setState({ people: res.data }))
+        .then(res => this.setState(state => {
+            let { data, lastPage, page, total } = res.data;
+            state.people.data = update ? data : [...state.people.data, ...data];
+            state.people.lastPage = lastPage;
+            state.people.page = page;
+            state.people.total = total;
+            return { people: state.people };
+        }))
         .catch(err => console.log(err.message));
         this.setState({ loader: false });
     }
 
-    handlePage = async (e, { activePage }) => {
+    handlePage = async (nextPage) => {
         this.setState({ loader: true });
-        await this.getPeople(activePage, this.state);
+        await this.getPeople(nextPage, this.state);
         
     }
 
@@ -71,7 +80,7 @@ export default class AssignPerson extends Component
                         <div className="col-md-2">
                             <Button fluid
                                 onClick={async (e) => {
-                                    await this.getPeople(1, this.state)
+                                    await this.getPeople(1, this.state, true)
                                 }}
                             >
                                 <i className="fas fa-search"></i>
@@ -98,19 +107,14 @@ export default class AssignPerson extends Component
                             )}
                         </List>    
                     </div>
-                    
-                    <div className="row justify-content-center mt-3">
-                        <div className="col-md-12">
-                            <hr/>
-                        </div>
-                        <div className="col-md-12">
-                            <Pagination 
-                                defaultActivePage={people && people.page || 1} 
-                                totalPages={people && people.lastPage}
-                                enabled={loader}
-                                onPageChange={this.handlePage}
-                            />
-                        </div>
+
+                    <div className="col-md-12 mt-3">
+                        <Button fluid
+                            disabled={loader || people.lastPage == people.page}
+                            onClick={(e) => this.handlePage(people.page + 1)}
+                        >
+                            Obtener más registros
+                        </Button>
                     </div>
                 </Form>
             </Modal>
