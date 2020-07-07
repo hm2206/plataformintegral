@@ -17,24 +17,32 @@ export default class ListCheck extends Component
         this.setting(this.props);
     }
 
+    componentWillReceiveProps = (nextProps) => {
+        this.setting(nextProps);
+    }
+
     setting = (props) => {
         this.setState({ parents: props.list, children: props.listChild })
     }
 
     handleClick = async (par, index) => {
-        await this.setState({ indexCheck: index });
         let { onParent } = this.props;
-        if (typeof onParent == 'function') await onParent(par, index);
+        if (typeof onParent == 'function') {
+            let next = await onParent(par, index);
+            if (next) await this.setState({ indexCheck: index });
+        }   
     }
 
     handleCheck = async (child, index, checked) => {
-        await  this.setState(state => {
-            state.children[index].checked = checked;
-            return { childIndexCheck: index, children: state.children };
-        });
         // fire event
         let { onChild } = this.props;
-        if (typeof onChild == 'function') await onChild(child, index);
+        if (typeof onChild == 'function') {
+            let next = await onChild(child, index, checked);
+            if (next) await  this.setState(state => {
+                state.children[index].checked = checked;
+                return { childIndexCheck: index, children: state.children };
+            });
+        }
     }
 
     render() {
