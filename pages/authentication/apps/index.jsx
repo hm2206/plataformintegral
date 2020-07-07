@@ -53,12 +53,15 @@ export default class SystemIndex extends Component {
     }
 
     getOption = async (obj, key, index) => {
-        let {pathname, query, push} = Router;
-        query.id = btoa(obj.id);
+        let {pathname, push} = Router;
+        let id = btoa(obj.id);
+        this.setState({ loading: true });
         switch (key) {
             case "edit":
-                this.setState({ loading: true });
-                await push({ pathname: `${pathname}/${key}`, query });
+                await push({ pathname: `${pathname}/${key}`, query: { id } });
+                break;
+            case "menu":
+                await push({ pathname: `${pathname}/menu`, query: { id } });
                 break;
             case "delete":
                 this.changeState(obj, 0);
@@ -69,6 +72,7 @@ export default class SystemIndex extends Component {
             default:
                 break;
         }
+        this.setState({ loading: false });
     }
 
     handleSearch = () => {
@@ -133,6 +137,15 @@ export default class SystemIndex extends Component {
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
                                     title: "Editar Aplicación",
+                                    rules: {
+                                        key: "state",
+                                        value: 1
+                                    }
+                                },
+                                {
+                                    key: "menu",
+                                    icon: "fas fa-list",
+                                    title: "Agregar Menus",
                                     rules: {
                                         key: "state",
                                         value: 1
