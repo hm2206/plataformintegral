@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Modal from '../../modal';
 import atob from 'atob';
-import { Button, Form, List, Image, Pagination } from 'semantic-ui-react';
+import { Button, Form, List, Image } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { authentication } from '../../../services/apis';
@@ -11,27 +11,39 @@ export default class AssignPerson extends Component
 
     state = {
         loader: false,
-        people: {},
+        people: {
+            data: []
+        },
         query_search: ""
         
     }
 
     componentDidMount = async () => {
-        await this.getPeople(1, this.state);
+        await this.getUser(1, this.state);
     }
 
-    getPeople = async (page = 1, state) => {
+    componentDidMount = async () => {
+        await this.getUser(1, this.state);
+    }
+
+    getUser = async (page = 1, state, update = false) => {
         this.setState({ loader: true });
         await authentication.get(`user?page=${page}&query_search=${state.query_search || ""}`)
-        .then(res => this.setState({ people: res.data }))
+        .then(res => this.setState(state => {
+            let { data, lastPage, page, total } = res.data;
+            state.people.data = update ? data : [...state.people.data, ...data];
+            state.people.lastPage = lastPage;
+            state.people.page = page;
+            state.people.total = total;
+            return { people: state.people };
+        }))
         .catch(err => console.log(err.message));
         this.setState({ loader: false });
     }
 
-    handlePage = async (e, { activePage }) => {
+    handlePage = async (nextPage) => {
         this.setState({ loader: true });
-        await this.getPeople(activePage, this.state);
-        
+        await this.getPeople(nextPage, this.state);
     }
 
     handleAdd = async (obj) => {
@@ -90,7 +102,7 @@ export default class AssignPerson extends Component
                                             <i className="fas fa-plus"></i>
                                         </Button>
                                     </List.Content>
-                                    <Image avatar src={obj.image ? obj.image : '/img/base.png'} style={{ objectFit: 'cover' }}/>
+                                    <Image avatar src={obj.image ? obj.image && obj.image_images && obj.image_images.image_50x50 : '/img/base.png'} style={{ objectFit: 'cover' }}/>
                                     <List.Content>{obj.email || ""} - <small className="badge badge-warning">{obj.username || ""}</small></List.Content>
                                 </List.Item>
                             )}
@@ -102,12 +114,12 @@ export default class AssignPerson extends Component
                             <hr/>
                         </div>
                         <div className="col-md-12">
-                            <Pagination 
-                                defaultActivePage={people && people.page || 1} 
-                                totalPages={people && people.lastPage || 0}
-                                enabled={loader ? true : false}
-                                onPageChange={this.handlePage}
-                            />
+                            <Button fluid
+                                disabled={loader || people.lastPage == people.page}
+                                onClick={(e) => this.handlePage(people.page + 1)}
+                            >
+                                Obtener más registros
+                            </Button>
                         </div>
                     </div>
                 </Form>

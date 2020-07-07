@@ -153,7 +153,7 @@ export default class EditApp extends Component
                                     <div className="col-md-6 mb-3">
                                         <label htmlFor="">Cover <b className="text-red">*</b></label>
                                         <Show condicion={form.cover && !files.cover }>
-                                            <img src={form.cover} alt="cover" className="img-content mb-2"/>
+                                            <img src={form.cover && form.cover_images && form.cover_images.cover_200x200} alt="cover" className="img-content mb-2"/>
                                         </Show>
                                         <label className="btn btn-outline-file w-100" htmlFor="cover">
                                             <i className="fas fa-image"></i> {files.cover ? files.cover.name : 'Seleccionar Cover'}
@@ -171,7 +171,7 @@ export default class EditApp extends Component
                                     <div className="col-md-6 mb-3">
                                         <label htmlFor="">icon <b className="text-red">*</b></label>
                                         <Show condicion={form.icon && !files.icon}>
-                                            <img src={form.icon} alt="icon" className="img-content mb-2"/>
+                                            <img src={form.icon && form.icon_images && form.icon_images.icon_200x200} alt="icon" className="img-content mb-2"/>
                                         </Show>
                                         <label className="btn btn-outline-file w-100" htmlFor="icon">
                                             <i className="fas fa-image"></i> {files.icon ? files.icon.name : 'Seleccionar Icon'}

@@ -40,7 +40,6 @@ export default class AssignPerson extends Component
     handlePage = async (nextPage) => {
         this.setState({ loader: true });
         await this.getPeople(nextPage, this.state);
-        
     }
 
     handleAdd = async (obj) => {
@@ -99,7 +98,7 @@ export default class AssignPerson extends Component
                                             <i className="fas fa-plus"></i>
                                         </Button>
                                     </List.Content>
-                                    <Image avatar src={obj.image ? `${obj.image}` : '/img/base.png'} 
+                                    <Image avatar src={obj.image ? `${obj.image && obj.image_images && obj.image_images.image_50x50}` : '/img/base.png'} 
                                         style={{ objectFit: 'cover' }}
                                     />
                                     <List.Content><span className="uppercase">{obj.fullname}</span></List.Content>

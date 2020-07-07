@@ -86,11 +86,11 @@ class Login extends Component
                 <header
                     id="auth-header"
                     className={`auth-header bg-${app.theme}`}
-                    style={{ paddingTop: "3em", backgroundImage: `url(${my_app.cover || '/img/fondo.jpg'})` }}
+                    style={{ paddingTop: "3em", backgroundImage: `url(${my_app.cover && my_app.cover_images && my_app.cover_images.cover_400x400 || '/img/fondo.jpg'})` }}
                 >
 
                     <a href={my_app && my_app.support}>
-                        <img src={my_app && my_app.icon}
+                        <img src={my_app && my_app.icon_images && my_app.icon_images.icon_50x50}
                             alt={my_app.name || "Integración"}
                             style={{ width: "120px", borderRadius: "0.5em", padding: '0.5em', background: '#fff' }}
                         />

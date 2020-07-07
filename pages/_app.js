@@ -155,7 +155,7 @@ class MyApp extends App {
           <meta charSet="utf-8"></meta>
           <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></meta>
           <title>{_app.name || "Integración"}</title>
-          <link rel="shortcut icon" href={_app.icon}></link>
+          <link rel="shortcut icon" href={_app.icon_images.icon_50x50}></link>
           <meta name="theme-color" content="#3063A0"></meta>
           <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,600,700,900" rel="stylesheet" type="text/css" />
           <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css" />
