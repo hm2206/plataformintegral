@@ -90,7 +90,7 @@ class Login extends Component
                 >
 
                     <a href={my_app && my_app.support}>
-                        <img src={my_app && my_app.icon_images && my_app.icon_images.icon_50x50}
+                        <img src={my_app && my_app.icon_images && my_app.icon_images.icon_200x200}
                             alt={my_app.name || "Integración"}
                             style={{ width: "120px", borderRadius: "0.5em", padding: '0.5em', background: '#fff' }}
                         />
