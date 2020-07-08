@@ -11,6 +11,7 @@ import { allCronograma } from '../../../storage/actions/cronogramaActions';
 import { Body } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { unujobs } from '../../../services/apis';
+import Swal from 'sweetalert2';
 
 
 export default class Cronograma extends Component {
