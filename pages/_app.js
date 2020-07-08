@@ -135,10 +135,10 @@ class MyApp extends App {
       .then(async res => {
           let { success, message } = res.data;
           if (!success) throw new Error(message); 
-          await Cookies.remove('auth_token');
           await clearStorage(store);
-          history.go('/login');
       }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+    history.go('/login');
+    await Cookies.remove('auth_token');
   }
 
   refreshProfile = async () => {
@@ -155,7 +155,7 @@ class MyApp extends App {
           <meta charSet="utf-8"></meta>
           <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></meta>
           <title>{_app.name || "Integración"}</title>
-          <link rel="shortcut icon" href={_app.icon_images.icon_50x50}></link>
+          <link rel="shortcut icon" href={_app.icon_images && _app.icon_images.icon_50x50}></link>
           <meta name="theme-color" content="#3063A0"></meta>
           <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,600,700,900" rel="stylesheet" type="text/css" />
           <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css" />

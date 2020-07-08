@@ -42,9 +42,9 @@ export default class Add extends Component
 
     getInfos = async () => {
         this.setState({ loading: true });
-        await unujobs.get(`info/${this.state.id}/add?query_search=${this.state.query_search}&except=${this.state.index}`)
+        await unujobs.get(`cronograma/${this.state.id}/add?query_search=${this.state.query_search}&except=${this.state.index}`)
         .then(res => {
-            let { data, total } = res.data;
+            let { data, total } = res.data.infos;
             this.setState({ infos: data, total });
         })
         .catch(err => console.log(err.message));

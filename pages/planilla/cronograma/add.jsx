@@ -1,140 +1,141 @@
 import React, { Component, Fragment } from 'react';
 import { BtnBack, Body, BtnFloat } from '../../../components/Utils';
-import { Form, Button, Select } from 'semantic-ui-react';
-import DataTable from '../../../components/datatable';
-import { removeHistorialCronograma } from '../../../storage/actions/cronogramaActions';
+import { Form, Button, Select, List, Image } from 'semantic-ui-react';
 import { unujobs } from '../../../services/apis';
 import { parseOptions, Confirm, backUrl } from '../../../services/utils';
 import Router from 'next/router';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
+import atob from 'atob';
+import { parse } from 'native-url';
 
-export default class AddCronograma extends Component
+export default class RemoveCronograma extends Component
 {
 
     static getInitialProps = async (ctx) => {
-        let { query, pathname, store } = ctx;
-        query.page = 1;
+        let { query, pathname } = ctx;
         query.query_search = query.query_search ? query.query_search : "";
         query.cargo_id = query.cargo_id ? query.cargo_id : "";
         query.type_categoria_id = query.type_categoria_id ? query.type_categoria_id : "";
-        await store.dispatch(removeHistorialCronograma(ctx));
-        let { remove } = await store.getState().cronograma;
-        return { query, pathname, remove };
+        return { query, pathname };
     }
 
     state = {
-        loading: true,
+        loading: false,
         rows: [],
         cronograma: {},
-        historial: [],
+        infos: [],
         cargos: [],
         type_categorias: [],
         query_search: "",
         cargo_id: "",
         type_categoria_id: "",
-        page: 2,
+        page: 1,
         total: 0,
         condicion: 0,
-        stop: false,
         block: false,
-        send: false
+        last_page: 0
     };
 
     componentDidMount = async () => {
         await this.setting(this.props);
+        await this.getinfos(false);
         await this.getCargo();
     }
 
-    componentWillUpdate = async (nextProps, nextState) => {
+    componentDidUpdate = async (nextProps, nextState) => {
         let { cargo_id } = this.state;
-        if (cargo_id != nextState.cargo_id) await this.getTypeCategoria(nextState);
+        if (cargo_id != nextState.cargo_id) await this.getTypeCategoria(cargo_id);
     }
 
-    componentWillReceiveProps = (nextProps) => {
-        this.setting(nextProps);
+    componentWillReceiveProps = async (nextProps) => {
+        if (nextProps.query != this.props.query) {
+            await this.setting(nextProps);
+            await this.getinfos(false);
+        }
     }
 
     handleBack = (e) => {
         this.setState({ loading: true });
+        let { cronograma } = this.state;
         let { pathname, push } = Router;
-        push({ pathname: backUrl(pathname) });
+        push({ pathname: backUrl(pathname), query: { mes: cronograma.mes, year: cronograma.year } });
     }
 
     handleInput = ({ name, value }) => {
         this.setState({ [name]: value });
     }
 
-    handleSearch = () => {
-        this.setState({ loading: true });
+    handleSearch = async () => {
+        let { rows } = this.state;
+        if (rows.length) {
+            if (!await Confirm("warning", `Existen trabajadores seleccionados, al filtrar se perderá la selección`, 'Continuar')) return false;
+        }
+        // search
+        await this.setState({ loading: true, page: 1 });
         let { push, pathname, query } = Router;
         query.cargo_id = this.state.cargo_id;
         query.type_categoria_id = this.state.type_categoria_id;
         query.query_search = this.state.query_search;
-        push({ pathname, query });
+        push({ pathname, query }); 
     }
 
-    handleRow = (rows) => {
-        if (rows.length == 0) {
-            this.setState({ block: false, rows });
-        } else {
-            this.setState({ block: true, rows });
-        }
+    handlePage = async (nextPage = 1) => {
+        await this.setState({ page: nextPage });
+        this.getinfos(true);
     }
 
-    handleAllSelect = (rows) => {
-        this.setState({ stop: true, rows: [], send: true });
+    handleRows = async () => {
+        let newRows = await this.state.infos.filter(his => his.check == true);
+        this.setState({ rows: newRows });
     }
 
-    handleAllUnSelect = (row) => {
-        this.setState({ stop: false, rows: [], send: false });
+    handleCheck = async (obj, index) => {
+        // check
+        await this.setState(state => {
+            obj.check = obj.check ? false : true;
+            state.infos[index] = obj;
+            // store
+            return { infos: state.infos, send: true };
+        });
+        // add check
+        this.handleRows();
     }
 
     setting = (props) => {
-        let { cronograma, historial } = props.remove;
         let { cargo_id, type_categoria_id, query_search  } = props.query;
         // set state
         this.setState({
             loading: false,
             stop: false,
             block: false,
-            cronograma: cronograma,
-            historial: historial.data,
-            total: historial.total,
             cargo_id: cargo_id ? parseInt(cargo_id) : "",
             type_categoria_id: type_categoria_id ? parseInt(type_categoria_id) : "",
             query_search: query_search ? query_search : ""
         });
     }
 
-    handleScroll = async (e, body) => {
-        await this.getHistorial();
-        body.style.overflow = 'auto';
-    }
-
-    getHistorial = async () => {
-        if (!this.state.stop) {
-            this.setState({ loading: true });
-            let { cronograma, cargo_id, type_categoria_id, query_search, page } = this.state;
-            let params = `page=${page}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&query_search=${query_search}`;
-            await unujobs.get(`cronograma/${cronograma.id}/remove?${params}`)
-            .then(res => {
-                let { historial } = res.data;
-                let { data, total, next_page_url } = historial;
-                if (next_page_url) {
-                    this.setState(state => ({ 
-                        historial: [...state.historial, ...data], 
-                        page: state.page + 1, 
-                        total, 
-                        stop: false 
-                    }));
-                } else {
-                    this.setState({ stop: true });
-                }
-            })
-            .catch(err => console.log(err.message));
-            await this.setState({ loading: false });
-        }
+    getinfos = async (changed = true) => {
+        this.setState({ loading: true });
+        let { query } = this.props;
+        let id = query.id ? atob(query.id) : "__error";
+        let { cargo_id, type_categoria_id, query_search, page } = this.state;
+        let params = `page=${page}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&query_search=${query_search}`;
+        await unujobs.get(`cronograma/${id}/add?${params}`)
+        .then(async res => {
+            let { infos, cronograma } = res.data;
+            let { data, total, last_page } = infos;
+            await this.setState(state => ({ 
+                cronograma,
+                infos: changed ? [...this.state.infos, ...data] : data,
+                total, 
+                page: state.page + 1,
+                stop: false,
+                last_page
+            }));
+        })
+        .catch(err => console.log(err.message));
+        await this.setState({ loading: false });
     }
 
     getCargo = async () => {
@@ -146,52 +147,48 @@ export default class AddCronograma extends Component
         this.setState({ loading: false });
     }
 
-    getTypeCategoria = async (nextState) => {
+    getTypeCategoria = async (cargo_id) => {
         this.setState({ loading: true });
-        await unujobs.get(`cargo/${nextState.cargo_id}`)
+        await unujobs.get(`cargo/${cargo_id}`)
         .then(res => this.setState({ type_categorias: res.data.type_categorias }))
         .catch(err => console.log(err.message));
         this.setState({ loading: false, type_categoria_id: "" });
     }
 
-    delete = async () => {
-        let value = await Confirm("info", "¿Desea confirmar al eliminación de los trabajadores?", "Continuar");
-        if (value) {
+    add = async () => {
+        let { cronograma, rows } = this.state;
+        let answer = await Confirm("warning", `¿Está seguro en agregar a los trabajadores(${rows.length}) al cronograma #${cronograma.id}?`);
+        if (answer) {
             this.setState({ loading: true });
+            let form = new FormData();
             let payload = [];
-            await this.state.rows.filter(obj => payload.push(obj.id));
-            // request
-            await unujobs.post(`cronograma/${this.state.cronograma.id}/remove`, { 
-                _method: 'DELETE' ,
-                cargo_id: this.state.cargo_id,
-                condicion: this.state.condicion,
-                type_categoria_id: this.state.type_categoria_id,
-                historial: JSON.stringify(payload)
-            })
+            // preparar envio
+            await rows.filter(r => payload.push(r.id));
+            // send
+            form.append('info_id', payload.join(',')); 
+            await unujobs.post(`cronograma/${cronograma.id}/add_all`, form, { headers: { CronogramaID: cronograma.id } })
             .then(async res => {
                 let { success, message } = res.data;
-                let icon = success ? 'success' : 'error';
-                await Swal.fire({ icon, text: message });
-                if (success) {
-                    this.setState({ historial: [], rows: [] });
-                    await this.handleSearch();
-                }
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.setState({ rows: [], page: 1 });
+                await this.getinfos(false);
             })
-            .catch(err => Swal.fire({ icon: "error", text: "Algo salió mal al eliminar a los trabajadores" }));
+            .catch(err => Swal.fire({ icon: 'error', text: err.message }));
             this.setState({ loading: false });
         }
     }
 
     render() {
 
-        let { remove } = this.props;
+        let { infos, cronograma, rows } = this.state;
 
         return (
             <Fragment>
                 <div className="col-md-12">
                     <Body>
                         <BtnBack onClick={this.handleBack}/> 
-                        <span className="ml-2">Agregar Trabajador del Cronograma <b>#{remove && remove.cronograma && remove.cronograma.id}</b></span>
+                        <span className="ml-2">Agregar Trabajador al Cronograma <b>#{cronograma && cronograma.id}</b></span>
                         <hr/>
                     </Body>
                 </div>
@@ -238,22 +235,6 @@ export default class AddCronograma extends Component
                                     </Form.Field>
                                 </div>
 
-                                <div className="col-md-2 mb-1">
-                                    <Form.Field>
-                                        <Select
-                                            options={[
-                                                { key: "remove", value: 0, text: "Solo Quitar" },
-                                                { key: "end", value: 1, text: "Quitar y Terminar Contrato" }
-                                            ]}
-                                            placeholder="Select. Condición"
-                                            name="condicion"
-                                            onChange={(e, obj) => this.handleInput(obj)}
-                                            value={this.state.condicion}
-                                            disabled={this.state.block}
-                                        />
-                                    </Form.Field>
-                                </div>
-
                                 <div className="col-md-2 col-12">
                                     <Button color="blue"
                                         fluid
@@ -264,39 +245,63 @@ export default class AddCronograma extends Component
                                     </Button>
                                 </div>
 
-                                <div className="col-md-12 mt-4">
-                                    <h4>Resultados: {this.state.total}</h4>
+                                <div className="col-md-12">
+                                    <hr/>
                                 </div>
 
-                                <div className="col-md-12">
-                                    <DataTable
-                                        selectRow={this.handleRow}
-                                        isCheck={true}
-                                        headers={["#ID", "Apellidos y Nombres", "Cargo", "Tip. Categoría"]}
-                                        index={[
-                                            { key: "id", type: "text" },
-                                            { key: "person.fullname", type: "text"},
-                                            { key: "cargo.alias", type: "icon"},
-                                            { key: "type_categoria.descripcion", type: "icon", bg: "dark" }
-                                        ]}
-                                        data={this.state.historial}
-                                        onScroll={this.handleScroll}
-                                        onStop={this.state.stop}
-                                        newRows={this.state.rows}
-                                        onAllSelect={this.handleAllSelect}
-                                        onAllUnSelect={this.handleAllUnSelect}
-                                    />
+                                <div className="col-md-12 mt-3">
+                                    <List divided verticalAlign='middle'>
+                                        {infos.map((obj, index) => 
+                                            <List.Item key={`list-people-${obj.id}`}>
+                                                <List.Content floated='right'>
+                                                    <Button color={'olive'}
+                                                        basic={obj.check ? false : true}
+                                                        className="mt-1"
+                                                        onClick={(e) => this.handleCheck(obj, index)}
+                                                    >
+                                                        <i className={`fas fa-${obj.check ? 'check' : 'plus'}`}></i>
+                                                    </Button>
+                                                </List.Content>
+                                                <Image avatar src={obj.person && obj.person.image_images && obj.person.image_images.image_50x50 || '/img/base.png'} 
+                                                    style={{ objectFit: 'cover' }}
+                                                />
+                                                <List.Content>
+                                                    <span className="uppercase mt-1">{obj.person && obj.person.fullname}</span>
+                                                    <br/>
+                                                    <span className="badge badge-dark mt-1 mb-2">
+                                                        {obj.cargo} - {obj.type_categoria}
+                                                    </span>
+                                                </List.Content>
+                                            </List.Item>
+                                        )}
+                                    </List>    
+                                </div>
+
+                                <Show condicion={!infos.length && !this.state.loading}>
+                                    <div className="col-md-12 text-center pt-5 pb-5">
+                                        <h4 className="text-muted">No se encontraron regístros</h4>
+                                    </div>
+                                </Show>
+
+                                <div className="col-md-12 mt-3">
+                                    <Button fluid
+                                        onClick={(e) => this.handlePage(this.state.page)}
+                                        disabled={this.state.last_page == (this.state.page - 1)  || this.state.last_page == 1}
+                                    >
+                                        Obtener más registros
+                                    </Button>
                                 </div>
                             </div>
                         </Form>
                     </Body>
                 </div>
 
-                <Show condicion={this.state.rows.length || this.state.send}>
+                <Show condicion={rows.length}>
                     <BtnFloat theme="btn-success"
-                        onClick={this.delete}    
+                        style={{ right: "40px" }}
+                        onClick={this.add}    
                     >
-                        <i className="fas fa-plus"></i>
+                        <i className="fas fa-plus"></i> 
                     </BtnFloat>
                 </Show>
             </Fragment>

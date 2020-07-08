@@ -38,7 +38,10 @@ class Sidebar extends Component {
     await authentication.get(`profile`)
     .then(res => {
       this.setState({ options: res.data });
-      if (res.data.success == false) this.setState({ options: [] });
+      if (res.data.success == false) {
+        this.setState({ options: [] });
+        this.props.logout();
+      };
     }).catch(err => this.setState({ options: [] }));
   }
 

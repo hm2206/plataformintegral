@@ -45,15 +45,7 @@ export default class Cronograma extends Component {
 
     componentWillReceiveProps(nextProps) {
         let { query } = this.props;
-        if (!nextProps.query.create && nextProps.query.create != query.create) {
-            this.handleCronograma();
-        } else if (!nextProps.query.open && nextProps.query.open != query.open) {
-            this.handleCronograma();
-        } else if (!nextProps.query.close && nextProps.query.close != query.close) {
-            this.handleCronograma();
-        } else if (!nextProps.query.edit && nextProps.query.edit != query.edit) {
-            this.handleCronograma();
-        } else if (query.mes != nextProps.query.mes || query.year != nextProps.query.year) {
+        if (query.mes != nextProps.query.mes || query.year != nextProps.query.year) {
             this.setting(nextProps);
         } else {
             this.setState({ loading: false });
@@ -90,7 +82,10 @@ export default class Cronograma extends Component {
         if (key == 'info') {
             query = { id, clickb: "Cronograma" };
             pathname = pathname + "/informacion";
-        } else if (key == 'remove') {
+        } else if (key == 'add') {
+            query = { id };
+            pathname = `${pathname}/add`;
+        }else if (key == 'remove') {
             query = { id };
             pathname = `${pathname}/remove`;
         } else if (key == 'report') {
