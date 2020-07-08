@@ -109,6 +109,7 @@ class MyApp extends App {
   }
 
   componentDidCatch = (error, info) => {
+    console.log(error);
     // Router.push({ pathname: "/error", query: { error: error }});
   }
 

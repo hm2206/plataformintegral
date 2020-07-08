@@ -93,6 +93,9 @@ export default class Cronograma extends Component {
         } else if (key == 'edit') {
             query = { id };
             pathname = `${pathname}/edit`;
+        } else if (key == 'send_email') {
+            query = { id };
+            pathname = `${pathname}/email`;
         }
         // execute
         Router.push({pathname, query});
@@ -288,12 +291,6 @@ export default class Cronograma extends Component {
                             <hr/>
                         </Form>
                     </Datatable>
-                    {/* enviar email */}
-                    <Show condicion={query.send_email}>
-                        <SendEmail query={query}
-                            isClose={(e) => Router.push({ pathname, query: { send_email: "" } })}
-                        />
-                    </Show>
                     {/* event create cronograma */}
                     <BtnFloat
                         disabled={this.state.loading}
