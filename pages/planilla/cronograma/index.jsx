@@ -7,7 +7,6 @@ import { Form, Button } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import SendEmail from '../../../components/cronograma/sendEmail';
-import Add from '../../../components/cronograma/add';
 import { allCronograma } from '../../../storage/actions/cronogramaActions';
 import { Body } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
@@ -293,12 +292,6 @@ export default class Cronograma extends Component {
                     <Show condicion={query.send_email}>
                         <SendEmail query={query}
                             isClose={(e) => Router.push({ pathname, query: { send_email: "" } })}
-                        />
-                    </Show>
-                    {/* add infos */}
-                    <Show condicion={query.add}>
-                        <Add query={query}
-                            isClose={(e) => Router.push({ pathname, query: { add: "" } })}
                         />
                     </Show>
                     {/* event create cronograma */}
