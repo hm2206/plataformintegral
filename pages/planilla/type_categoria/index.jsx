@@ -50,6 +50,9 @@ export default class TypeCategoriaIndex extends Component {
             case 'edit':
                 await push({ pathname: `${pathname}/${key}`, query: { id } });
                 break;
+            case 'coin' :
+                await push({ pathname: `${pathname}/${key}`, query: { id } });
+                break;
             case 'delete':
                 await this.changedState(obj, 0);
                 break;
@@ -128,7 +131,6 @@ export default class TypeCategoriaIndex extends Component {
                         options={
                             [
                                 {
-                                    id: 1,
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
                                     title: "Editar Tip. Categoría",
@@ -136,8 +138,17 @@ export default class TypeCategoriaIndex extends Component {
                                         key: "estado",
                                         value: 1
                                     }
-                                }, {
-                                    id: 1,
+                                }, 
+                                {
+                                    key: "coin",
+                                    icon: "fas fa-coins",
+                                    title: "Config Monto de Tip. Categoría",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
+                                    }
+                                },
+                                {
                                     key: "restore",
                                     icon: "fas fa-sync",
                                     title: "Restaurar Tip. Categoría",
@@ -145,8 +156,8 @@ export default class TypeCategoriaIndex extends Component {
                                         key: "estado",
                                         value: 0
                                     }
-                                }, {
-                                    id: 1,
+                                }, 
+                                {
                                     key: "delete",
                                     icon: "fas fa-times",
                                     title: "Eliminar Tip. Categoría",
