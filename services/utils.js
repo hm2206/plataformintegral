@@ -1,4 +1,5 @@
 import { credencials } from '../env.json';
+import Cookies from 'js-cookie';
 
 export const parseOptions = (
     data = [], 
@@ -96,4 +97,13 @@ export const InputCredencias = () => {
     }
     // response
     return inputs;
+}
+
+
+export const InputAuth = () => {
+    let input = document.createElement('input');
+    input.name = 'auth_token';
+    input.value = Cookies.get('auth_token');
+    input.hidden = true;
+    return input;
 }

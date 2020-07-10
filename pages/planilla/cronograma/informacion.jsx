@@ -4,7 +4,7 @@ import { Form, Button, Select, Icon, Message } from 'semantic-ui-react';
 import { Row } from 'react-bootstrap';
 import { AUTHENTICATE } from '../../../services/auth';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
-import { parseOptions, parseUrl, Confirm, InputCredencias } from '../../../services/utils';
+import { parseOptions, parseUrl, Confirm, InputCredencias, InputAuth } from '../../../services/utils';
 import Show from '../../../components/show';
 import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
@@ -469,16 +469,12 @@ export default class CronogramaInformacion extends Component
     linkRenta = async (e) => {
         e.preventDefault();
         let { historial, cronograma } = this.state;
-        let token_verify = document.createElement('input');
-        token_verify.name = 'token_verify';
-        token_verify.value = historial && historial.token_verify || "";
-        token_verify.hidden = true;
         let form = document.createElement('form');
         document.body.appendChild(form);
         // add credenciales
         InputCredencias().filter(i => form.appendChild(i));
-        // add token_auth
-        form.appendChild(token_verify);
+        // add auth_token
+        form.appendChild(InputAuth());
         form.action = `${unujobs.path + '/pdf/renta/' + historial.work_id + '?year=' + cronograma.year || ""}`;
         form.method = 'POST';
         form.target = '_blank';
