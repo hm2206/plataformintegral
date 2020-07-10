@@ -40,7 +40,7 @@ class TrabajadorID extends Component
                     back={backUrl(this.props.pathname)}
                     titulo={work && work.person && work.person.fullname}
                     email={work && work.person && work.person.email_contact}
-                    image={work && work.person && work.person.image ? `${authentication.path}/${work.person.image}` : '/img/perfil.jpg'}
+                    image={work && work.person && work.person.image ? `${work.person.image && work.person.image_images && work.person.image_images.image_200x200}` : '/img/perfil.jpg'}
                 />
                 <NavCover
                     active={query.method}

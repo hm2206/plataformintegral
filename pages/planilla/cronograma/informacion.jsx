@@ -466,6 +466,26 @@ export default class CronogramaInformacion extends Component
         }
     }
 
+    linkRenta = async (e) => {
+        e.preventDefault();
+        let { historial, cronograma } = this.state;
+        let token_verify = document.createElement('input');
+        token_verify.name = 'token_verify';
+        token_verify.value = historial && historial.token_verify || "";
+        token_verify.hidden = true;
+        let form = document.createElement('form');
+        document.body.appendChild(form);
+        // add credenciales
+        InputCredencias().filter(i => form.appendChild(i));
+        // add token_auth
+        form.appendChild(token_verify);
+        form.action = `${unujobs.path + '/pdf/renta/' + historial.work_id + '?year=' + cronograma.year || ""}`;
+        form.method = 'POST';
+        form.target = '_blank';
+        form.submit();
+        document.body.removeChild(form);
+    }
+
     render() {
 
         let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id, config_edad } = this.state;
@@ -558,6 +578,15 @@ export default class CronogramaInformacion extends Component
                                                 <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{historial.person ? historial.person.fullname : "NO HAY TRABAJADOR"}"
                                             </Show> 
                                             
+                                            {/* link temporarl del reporte de renta */}
+                                            <Show condicion={historial.work_id}>
+                                                <a href="#" className="ml-3" title="Reporte de Renta"
+                                                    style={{ cursor: "pointer" }}
+                                                    onClick={this.linkRenta}
+                                                >
+                                                    <i className="fas fa-link"></i>
+                                                </a>
+                                            </Show>
                                         </div>
 
                                         <div className="col-md-3 text-center">
