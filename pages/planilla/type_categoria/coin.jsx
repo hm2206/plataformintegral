@@ -51,7 +51,7 @@ export default class CoinTypeCategoria extends Component
         await unujobs.get(`type_categoria/${type_categoria.id}/categoria`)
         .then(res => this.setState({ categorias: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false, block: false });
+        this.setState({ loading: false, edit: false });
     }
 
     getTypeCategorias = async (page) => {
@@ -151,7 +151,7 @@ export default class CoinTypeCategoria extends Component
     }
 
     update = async (obj) => {
-        this.setState({ loading: true });
+        this.setState({ loading: true, block: true });
         obj._method = 'PUT';
         await unujobs.post(`categoria/${obj.id}`, obj)
         .then(res => {
@@ -162,7 +162,7 @@ export default class CoinTypeCategoria extends Component
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });
-        this.setState({ loading: false });
+        this.setState({ loading: false, block: false });
     }
 
     render() {
@@ -286,6 +286,7 @@ export default class CoinTypeCategoria extends Component
                                                                 <Show condicion={obj.edit}>
                                                                     <input type="number"
                                                                         name="monto"
+                                                                        disabled={block}
                                                                         value={obj.monto || ""}
                                                                         placeholder="ingrese un monto"
                                                                         onChange={(e) => this.handleInput(e.target, obj, index)}
@@ -321,6 +322,7 @@ export default class CoinTypeCategoria extends Component
                                                                     <Button color={'green'}
                                                                         className="mt-1"
                                                                         title="Guardar"
+                                                                        disabled={block}
                                                                         onClick={(e) => this.update(obj)}
                                                                     >
                                                                         <i className={`fas fa-save`}></i>
@@ -329,6 +331,7 @@ export default class CoinTypeCategoria extends Component
                                                                     <Button color={'red'}
                                                                         className="mt-1"
                                                                         title="Cancelar"
+                                                                        disabled={block}
                                                                         onClick={(e) => this.handleEdit(obj, index, true)}
                                                                     >
                                                                         <i className={`fas fa-times`}></i>
