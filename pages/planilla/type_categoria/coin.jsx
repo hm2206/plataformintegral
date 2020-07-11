@@ -51,7 +51,7 @@ export default class CoinTypeCategoria extends Component
         await unujobs.get(`type_categoria/${type_categoria.id}/categoria`)
         .then(res => this.setState({ categorias: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.setState({ loading: false, block: false });
     }
 
     getTypeCategorias = async (page) => {
@@ -150,8 +150,19 @@ export default class CoinTypeCategoria extends Component
         }
     }
 
-    udpate = async (obj) => {
-        alert('update');
+    update = async (obj) => {
+        this.setState({ loading: true });
+        obj._method = 'PUT';
+        await unujobs.post(`categoria/${obj.id}`, obj)
+        .then(res => {
+            let { success, message } = res.data;
+            if (!success) throw new Error(message);
+            Swal.fire({ icon: 'success', text: message });
+            this.getCategoria();
+        }).catch(err => {
+            Swal.fire({ icon: 'error', text: err.message });
+        });
+        this.setState({ loading: false });
     }
 
     render() {
@@ -310,7 +321,7 @@ export default class CoinTypeCategoria extends Component
                                                                     <Button color={'green'}
                                                                         className="mt-1"
                                                                         title="Guardar"
-                                                                        onClick={(e) => this.udpate(obj)}
+                                                                        onClick={(e) => this.update(obj)}
                                                                     >
                                                                         <i className={`fas fa-save`}></i>
                                                                     </Button>
