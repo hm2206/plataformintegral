@@ -137,7 +137,7 @@ class Login extends Component
                             name="password"
                             onChange={this.handleInput}
                             value={password}
-                            disabled={loading}
+                            disabled={loading || !email}
                         />{" "}
                             <label htmlFor="inputPassword">Contraseña</label>
                         </div>
@@ -146,7 +146,7 @@ class Login extends Component
 
                     <div className="form-group">
                         <button
-                            disabled={loading}
+                            disabled={loading || !password || !email}
                             className={`btn btn-lg btn-primary btn-block btn-${app.theme}`}
                             type="submit"
                         >
