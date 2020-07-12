@@ -126,11 +126,6 @@ class MyApp extends App {
     await this.setState({ screen_lg: !this.state.screen_lg });
   }
 
-  capitalize(word) {
-    if (word)  return "- " + word[0].toUpperCase() + word.slice(1);
-    return null;
-  }
-
   logout = async () => {
     let { store } = this.props;
     await authentication.post('logout')
@@ -146,6 +141,10 @@ class MyApp extends App {
   refreshProfile = async () => {
     this.setState({ refresh: true });
     this.setState({ refresh: false });
+  }
+
+  fireLoading = async (loading = true) => {
+    this.setState({ loading });
   }
 
   render() {
@@ -232,6 +231,8 @@ class MyApp extends App {
                                 screenX={this.state.screenX}
                                 my_app={_app}
                                 fireRefreshProfile={this.refreshProfile}
+                                fireLoading={this.fireLoading}
+                                isLoading={loading}
                               />
                           </Content>
                         </div>
@@ -245,7 +246,11 @@ class MyApp extends App {
                   onClick={this.handleToggle}
                 />
               </Fragment>
-            : <Component {...pageProps} my_app={_app}/>
+            : <Component {...pageProps} 
+                my_app={_app} 
+                fireLoading={this.fireLoading}
+                isLoading={loading}
+              />
           }
         </Show>
       

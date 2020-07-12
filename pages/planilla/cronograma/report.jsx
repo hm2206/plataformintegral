@@ -153,7 +153,6 @@ export default class Report extends Component
     }
 
     handleBack = (e) => {
-        this.setState({ loading: true })
         let { cronograma } = this.props.cronograma;
         let { pathname, push, query } = Router; 
         if (query.href) {
@@ -191,6 +190,7 @@ export default class Report extends Component
     }
 
     handleClick = async (e, obj) => {
+        this.props.fireLoading(true);
         if (obj.action == 'link') {
             let query = await this.genetateQuery();
             let link = await this.handleUrl(obj.url, obj.params);
@@ -209,7 +209,6 @@ export default class Report extends Component
         } else if (obj.action == 'blob') {
             let params = await this.genetateQuery(false);
             let link = await this.handleUrl(obj.url, obj.params);
-            this.setState({ loading: true });
             await unujobs.post(link, params)
             .then(res => {
                 let { message } = res.data;
@@ -225,8 +224,8 @@ export default class Report extends Component
                 a.click();
             })
             .catch(err => Swal.fire({ icon: 'error', text:  err.message }));
-            this.setState({ loading: false });
         }   
+        this.props.fireLoading(false);
     }
 
     handleUrl = async (url, params) => {
@@ -259,83 +258,83 @@ export default class Report extends Component
     }
 
     getMetas = async () => {
+        this.props.fireLoading(true);
         let { cronograma } = this.props.cronograma;
-        this.setState({ loading: true });
         await unujobs.get(`cronograma/${cronograma.id}/meta`)
         .then(res => this.setState({ metas: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getCargos = async () => {
+        this.props.fireLoading(true);
         let { cronograma } = this.props.cronograma;
-        this.setState({ loading: true });
         await unujobs.get(`cronograma/${cronograma.id}/cargo`)
         .then(res => this.setState({ cargos: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getTypeCategorias = async () => {
+        this.props.fireLoading(true);
         let { cronograma } = this.props.cronograma;
-        this.setState({ loading: true });
         await unujobs.get(`cronograma/${cronograma.id}/type_categoria`)
         .then(res => this.setState({ type_categorias: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getAfps = async () => {
+        this.props.fireLoading(true);
         let { cronograma } = this.props.cronograma;
-        this.setState({ loading: true });
         await unujobs.get(`cronograma/${cronograma.id}/afp`)
         .then(res => this.setState({ afps: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getTypeRemuneraciones = async () => {
+        this.props.fireLoading(true);
         let { cronograma } = this.props.cronograma;
-        this.setState({ loading: true });
         await unujobs.get(`cronograma/${cronograma.id}/afp`)
         .then(res => this.setState({ afps: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getTypeRemuneraciones = async () => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         await unujobs.get('type_remuneracion?paginate=0')
         .then(res => this.setState({ type_remuneraciones: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getTypeDescuentos = async () => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         let { cronograma } = this.props.cronograma;
         await unujobs.get(`cronograma/${cronograma.id}/type_descuento`)
         .then(res => this.setState({ type_descuentos: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getTypeDetalles = async () => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         let { cronograma } = this.props.cronograma;
         await unujobs.get(`cronograma/${cronograma.id}/type_detalle`)
         .then(res => this.setState({ type_detalles: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getTypeAportacion = async () => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         let { cronograma } = this.props.cronograma;
         await unujobs.get(`cronograma/${cronograma.id}/type_aportacion`)
         .then(res => this.setState({ type_aportaciones: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     render() {

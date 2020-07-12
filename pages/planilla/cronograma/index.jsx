@@ -6,7 +6,6 @@ import { AUTHENTICATE } from '../../../services/auth';
 import { Form, Button } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
-import SendEmail from '../../../components/cronograma/sendEmail';
 import { allCronograma } from '../../../storage/actions/cronogramaActions';
 import { Body } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
@@ -47,16 +46,13 @@ export default class Cronograma extends Component {
         let { query } = this.props;
         if (query.mes != nextProps.query.mes || query.year != nextProps.query.year) {
             this.setting(nextProps);
-        } else {
-            this.setState({ loading: false });
         }
     }
 
     setting = (props) => {
         this.setState({ 
             year: props.query.year,
-            mes: props.query.mes,
-            loading: false
+            mes: props.query.mes
         })
     }
 
@@ -66,15 +62,15 @@ export default class Cronograma extends Component {
     }
 
     handleCronograma = async () => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         let { push, query, pathname } = Router;
         query.year = this.state.year;
         query.mes = this.state.mes;
-        push({ pathname, query });
+        await push({ pathname, query });
+        this.props.fireLoading(false);
     }
 
     async getOption(obj, key, index) {
-        this.setState({ loading: true });
         let {pathname, query} = Router;
         let id = btoa(obj.id);
         query[key] = id;
@@ -105,8 +101,8 @@ export default class Cronograma extends Component {
     handleExport = async () => {
         let answer = await Confirm("warning", "¿Deseas exportar los cronogramas a excel?")
         if (answer) {
-            this.setState({ loading: true });
-        let { year, mes } = this.props.query;
+            this.props.fireLoading(true);
+            let { year, mes } = this.props.query;
             await unujobs.fetch(`exports/personal/${year}/${mes}`)
             .then(resdata => resdata.blob())
             .then(blob => {
@@ -117,13 +113,12 @@ export default class Cronograma extends Component {
                 a.click();
             })
             .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-            this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
     }
 
     render() {
 
-        let {loading } = this.state;
         let {query, pathname, cronogramas} = this.props;
 
         return (
@@ -131,7 +126,6 @@ export default class Cronograma extends Component {
                 <Body>
                     <Datatable titulo="Lista de Planillas x Mes"
                         isFilter={false}
-                        loading={loading}
                         headers={ ["#ID", "Planilla", "Sede", "F. Creado", "N° Trabajadores", "Estado"]}
                         index={
                             [
@@ -245,7 +239,7 @@ export default class Cronograma extends Component {
                                             placeholder="Año" 
                                             name="year"
                                             value={this.state.year}
-                                            disabled={this.state.loading}
+                                            disabled={this.props.isLoading}
                                             onChange={this.handleInput}
                                         />
                                     </Form.Field>
@@ -259,7 +253,7 @@ export default class Cronograma extends Component {
                                             name="mes"
                                             value={this.state.mes}
                                             onChange={this.handleInput}
-                                            disabled={this.state.loading}
+                                            disabled={this.props.isLoading}
                                         />
                                     </Form.Field>
                                 </div>
@@ -267,7 +261,7 @@ export default class Cronograma extends Component {
                                     <Button 
                                         fluid
                                         onClick={this.handleCronograma}
-                                        disabled={this.state.loading}
+                                        disabled={this.props.isLoading}
                                         color="blue"
                                     >
                                         <i className="fas fa-search mr-1"></i>
@@ -279,7 +273,7 @@ export default class Cronograma extends Component {
                                     <div className="col-md-3 col-6 col-sm-12 col-xl-2">
                                         <Button 
                                             fluid
-                                            disabled={this.state.loading || !cronogramas.total}
+                                            disabled={this.props.isLoading || !cronogramas.total}
                                             color="olive"
                                             onClick={this.handleExport}
                                         >
@@ -294,7 +288,7 @@ export default class Cronograma extends Component {
                     </Datatable>
                     {/* event create cronograma */}
                     <BtnFloat
-                        disabled={this.state.loading}
+                        disabled={this.props.isLoading}
                         onClick={(e) => {
                             this.setState({ loading: true });
                             Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }});

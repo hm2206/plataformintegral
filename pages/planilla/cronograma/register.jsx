@@ -13,10 +13,12 @@ export default class RegisterCronograma extends Component
 
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
-        return { pathname: ctx.pathname, query: ctx.query };
+        let { query, pathname } = ctx; 
+        return { pathname, query };
     };
 
     state = {
+        loading: false,
         planillas: [],
         planilla_id: "",
         year: 2020,
@@ -25,7 +27,6 @@ export default class RegisterCronograma extends Component
         observacion: "",
         adicional: 0,
         remanente: 0,
-        loading: true,
         errors: {},
         type_id: 0,
         types: [
@@ -35,13 +36,14 @@ export default class RegisterCronograma extends Component
     }
 
     componentDidMount = async () => {
+        this.props.fireLoading(true);
         let newDate = new Date();
         await this.getPlanillas();
         this.setState({
             year: newDate.getFullYear(),
-            mes: newDate.getMonth() + 1,
-            loading: false,
+            mes: newDate.getMonth() + 1
         });
+        this.props.fireLoading(false);
     }
 
     handleInput = ({ name, value }) => {
@@ -73,7 +75,6 @@ export default class RegisterCronograma extends Component
     }
 
     handleClose = () => {
-        this.setState({ loading: true });
         let { push, pathname } = Router;
         let newPath = pathname.split('/');
         newPath.splice(-1, 1);
@@ -81,8 +82,7 @@ export default class RegisterCronograma extends Component
     }
 
     handleBack = async () => {
-        this.setState({ loading: true });
-        let { pathname, query } = Router;
+        let { pathname } = Router;
         let newBack = pathname.split('/');
         newBack.splice(-1, 1);
         Router.push({ pathname: newBack.join('/') });
