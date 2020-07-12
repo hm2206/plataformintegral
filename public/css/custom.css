@@ -12,3 +12,24 @@
 .uppercase {
     text-transform: uppercase!important;
 }
+
+.loading-brand {
+    transition: all 0.4s;
+    transform: scale(1);
+    animation-name: loading_zoom;
+    animation-fill-mode: both;
+    animation-timing-function: ease-out;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+
+
+@keyframes loading_zoom {
+    from {
+        transition: all 0.4s;
+        transform: scale(0.7);
+    } to {
+        transition: all 0.4s;
+        transform: scale(0.9);
+    }
+}

@@ -12,6 +12,7 @@ import { app } from '../env.json';
 import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
 import { clearStorage } from '../storage/clear';
+import LoadingGlobal from '../components/loadingGlobal';
 
 // config redux
 import { Provider } from 'react-redux';
@@ -19,24 +20,25 @@ import withRedux from 'next-redux-wrapper';
 import initsStore from '../storage/store';
 import Show from '../components/show';
 import Swal from 'sweetalert2';
-import cookies from 'next-cookies';
+
+let isLoadingPage = false;
 
 // config router
 Router.onRouteChangeStart = () => {
-  let pageChange = document.getElementById('page_change');
-  pageChange.className = 'page_loading';
-};
+  let loadingBrand = document.getElementById('loading-brand');
+  loadingBrand.style.display = 'block';
+}
 
 // state pages
 Router.onRouteChangeComplete = () => {
-  let pageChange = document.getElementById('page_change');
-  pageChange.className = 'page_end';
-};
+  let loadingBrand = document.getElementById('loading-brand');
+  loadingBrand.style.display = 'none';
+}
 
 Router.onRouteChangeError = () => {
-  let pageChange = document.getElementById('page_change');
-  pageChange.className = 'page_end';
-};
+  let loadingBrand = document.getElementById('loading-brand');
+  loadingBrand.style.display = 'none';
+}
 
 
 class MyApp extends App {
@@ -109,7 +111,6 @@ class MyApp extends App {
   }
 
   componentDidCatch = (error, info) => {
-    console.log(error);
     // Router.push({ pathname: "/error", query: { error: error }});
   }
 
@@ -149,6 +150,7 @@ class MyApp extends App {
 
   render() {
     const { Component, pageProps, store, isLoggin, _app, is_render, message } = this.props
+    const { loading } = this.state;
 
     return  <Fragment>
       <Provider store={store}>
@@ -189,10 +191,15 @@ class MyApp extends App {
 
         <div id="page_change"></div>
 
+
         <Show condicion={!is_render}>
           <LoaderPage message={message}/>
         </Show>
 
+        <Show condicion={is_render}>
+          <LoadingGlobal display={loading ? 'block' : 'none'}/>
+        </Show>
+        
         <Show condicion={is_render}>
           {
             isLoggin ?
