@@ -634,7 +634,7 @@ export default class CronogramaInformacion extends Component
                                                     <Form.Field> 
                                                         <input type="search" 
                                                             className={`${this.state.like ? 'border-dark text-dark' : ''}`}
-                                                            disabled={loading || this.state.edit || this.state.block}
+                                                            disabled={isLoading || this.state.edit || this.state.block}
                                                             value={this.state.like}
                                                             onChange={this.handleInput}
                                                             name="like"
