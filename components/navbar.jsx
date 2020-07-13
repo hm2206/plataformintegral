@@ -64,21 +64,20 @@ class Navbar extends Component {
   }
 
   settingEntity = async () => {
-    await this.setState({ entity_id: parseInt(Cookies.get('EntityId')) || "" });
-    let { entities } = this.state;
+    await this.setState({ entity_id: parseInt(await Cookies.get('EntityId')) || "" });
+    let { entities, entity_id } = this.state;
     // validate
-    if (entities.length) {
+    if (!entity_id && entities.length) {
       let entity_id = entities[0].id;
       await this.setState({ entity_id });
-      this.handleEntity({ name: 'entity_id', value: entity_id });
+      await this.handleEntity({ name: 'entity_id', value: entity_id });
     }
   }
 
-  handleEntity = ({ name, value }) => {
-    this.setState({ [name]: value });
-    Cookies.set('EntityId', value);
+  handleEntity = async ({ name, value }) => {
+    await this.setState({ [name]: value });
+    await Cookies.set('EntityId', value);
     let { push, pathname, query } = Router;
-    query[name] = value;
     push({ pathname, query });
   }
 

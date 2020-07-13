@@ -41,7 +41,8 @@ export default class Preparate extends Component
         this.setState({ [name]: value });
         // validamos buscador
         if (value.length >= 3) {
-            this.setState({ loading: true, open: true });
+            this.props.fireLoading(true);
+            this.setState({ open: true });
             if (!this.state.loading) {
                 await unujobs.get(`work?query_search=${value}`)
                 .then(res => this.setState({ 
@@ -52,7 +53,7 @@ export default class Preparate extends Component
             }
         }
         // loading
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     render() {
@@ -63,10 +64,11 @@ export default class Preparate extends Component
             <Fragment>
                 <div className="col-md-12">
                     <Body>
-                        <Form loading={this.state.loading}>
-                            <div className="card-header">
-                                <BtnBack onClick={this.handleBack}/> <span className="ml-3">Buscar trabajador para agregar contrato</span>
-                            </div>
+                        <div className="card-header">
+                            <BtnBack onClick={this.handleBack}/> <span className="ml-3">Buscar trabajador para agregar contrato</span>
+                        </div>
+
+                        <Form onSubmit={(e) => e.preventDefault()}>
 
                             <div className="card-header">
                                 <div className="col-md-5">
@@ -74,6 +76,7 @@ export default class Preparate extends Component
                                         <input type="text" 
                                             placeholder="Buscar por: Apellidos y Nombres"
                                             name="query_search"
+                                            disabled={this.props.isLoading}
                                             onChange={(e) => this.handleSearch(e.target)}
                                         />
                                     </Form.Field>
@@ -87,7 +90,7 @@ export default class Preparate extends Component
                                                 <Card key={`result-item-${obj.id}`} fluid>
                                                     <Image 
                                                         style={{minHeight: "150px", maxHeight: "300px", width: "100%", objectFit: "cover" }}
-                                                        src={obj.person && obj.person.image ? `${authentication.path}/${obj.person.image}` : '/img/perfil.jpg'}
+                                                        src={obj.person && obj.person.image ? `${obj.person.image_images && obj.person.image_images.image_200x200}` : '/img/perfil.jpg'}
                                                     />
                                                     <Card.Content>
                                                         <Card.Header>{obj.person && obj.person.fullname}</Card.Header>

@@ -29,6 +29,8 @@ export default class Pay extends Component
     }
 
     componentDidMount = async () => {
+        let { info } = this.props;
+        this.props.fireEntity({ render: true, disabled: true, entity_id: info.entity_id });
         await this.getWork();
         await this.getConfig();
     }

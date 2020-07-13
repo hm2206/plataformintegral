@@ -5,10 +5,12 @@ import { Form, Button } from 'semantic-ui-react';
 import { unujobs } from '../../../services/apis';
 import Router from 'next/router';
 import Swal from 'sweetalert2'
+import { AUTHENTICATE } from '../../../services/auth';
 
 export default class EditCronograma extends Component
 {
-    static getInitialProps = (ctx) => {
+    static getInitialProps = async (ctx) => {
+        await AUTHENTICATE(ctx);
         let { query, pathname } = ctx;
         return { query, pathname }
     }
@@ -37,6 +39,9 @@ export default class EditCronograma extends Component
         await unujobs.get(`cronograma/${this.state.id}`)
         .then(res => {
             let { cronograma } = res.data;
+            // add entity
+            this.props.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
+            // datos
             this.setState({ cronograma })
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));

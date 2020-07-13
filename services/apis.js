@@ -4,10 +4,10 @@ import Cookies from 'js-cookie';
 import NextCookies from 'next-cookies';
 
 
-let headers = {
-    Authorization: `Bearer ${Cookies.get('auth_token')}`,
-    EntityId: `${Cookies.get('EntityId') || '__error'}`
-};
+let headers = async () => ({
+    Authorization: `Bearer ${await Cookies.get('auth_token')}`,
+    EntityId: `${await Cookies.get('EntityId') || '__error'}`
+});
 
 export const configAuthorization = (ctx) => {
     return `Bearer ${NextCookies(ctx)['auth_token']}`;
@@ -17,7 +17,7 @@ export const configEntityId = (ctx) => {
     return NextCookies(ctx)['EntityId'];
 }
 
-const ConfigHeaders = (ctx = null, config = { }) => {
+const ConfigHeaders = async (ctx = null, config = { }) => {
     let newConfig = Object.assign({}, config);
     newConfig.headers = config.headers || {};
     // add credenciales
@@ -26,11 +26,12 @@ const ConfigHeaders = (ctx = null, config = { }) => {
     }
     // validar ctx
     if (ctx) {
-        newConfig.headers.Authorization = configAuthorization(ctx);
-        newConfig.headers.EntityId = configEntityId(ctx) || "__error" ;
+        newConfig.headers.Authorization = await configAuthorization(ctx);
+        newConfig.headers.EntityId = await configEntityId(ctx) || "__error" ;
     } else {
-        newConfig.headers.Authorization = headers.Authorization
-        newConfig.headers.EntityId = headers.EntityId || "__error";
+        let clientHeaders = await headers();
+        newConfig.headers.Authorization = clientHeaders.Authorization
+        newConfig.headers.EntityId = clientHeaders.EntityId || "__error";
     };
     return newConfig;
 }   
@@ -40,11 +41,11 @@ const ConfigHeaders = (ctx = null, config = { }) => {
  *  api para consumir el authenticador
  */
 export const authentication = {
-    get: (path, config = { }, ctx = null) => {
-        return axios.get(`${url.API_AUTHENTICATION}/${path}`, ConfigHeaders(ctx, config));
+    get: async (path, config = { }, ctx = null) => {
+        return axios.get(`${url.API_AUTHENTICATION}/${path}`, await ConfigHeaders(ctx, config));
     },
-    post: (path, body = { }, config = { }, ctx = null) => {
-        return axios.post(`${url.API_AUTHENTICATION}/${path}`, body, ConfigHeaders(ctx, config));
+    post: async (path, body = { }, config = { }, ctx = null) => {
+        return axios.post(`${url.API_AUTHENTICATION}/${path}`, body, await ConfigHeaders(ctx, config));
     },
     path: url.API_AUTHENTICATION
 };
@@ -54,14 +55,14 @@ export const authentication = {
  * api para consumir el sistema de planillas
  */
 export const unujobs = {
-    get: (path, config = { }, ctx) => {
-        return axios.get(`${url.API_UNUJOBS}/${path}`, ConfigHeaders(ctx, config));
+    get: async (path, config = { }, ctx) => {
+        return axios.get(`${url.API_UNUJOBS}/${path}`, await ConfigHeaders(ctx, config));
     },
-    post: (path, body = { }, config = { }, ctx) => {
-        return axios.post(`${url.API_UNUJOBS}/${path}`, body, ConfigHeaders(ctx, config));
+    post: async (path, body = { }, config = { }, ctx) => {
+        return axios.post(`${url.API_UNUJOBS}/${path}`, body, await ConfigHeaders(ctx, config));
     },
-    fetch: (path, config = { }, ctx) => {
-        return fetch(`${url.API_UNUJOBS}/${path}`, ConfigHeaders(ctx, config));
+    fetch: async (path, config = { }, ctx) => {
+        return fetch(`${url.API_UNUJOBS}/${path}`, await ConfigHeaders(ctx, config));
     },
     path: url.API_UNUJOBS
 };

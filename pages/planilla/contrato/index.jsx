@@ -33,6 +33,7 @@ export default class Contrato extends Component
     }
 
     componentDidMount = () => {
+        this.props.fireEntity({ render: true });
         this.setting(this.props);
     }
 
@@ -102,7 +103,7 @@ export default class Contrato extends Component
                 <Body>
                     <Form loading={this.state.loading}>
                         <div className="col-md-12">
-                            <DataTable titulo={<span><i className="fas fa-list"></i> Lista de Contratos</span>}
+                            <DataTable titulo={<span>Lista de Contratos</span>}
                                 headers={["#ID", "Apellidos y Nombres", "F. Ingreso", "Plaza", "Perfil Laboral", "Estado"]}
                                 data={this.state.infos}
                                 index={[

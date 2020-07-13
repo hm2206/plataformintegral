@@ -113,10 +113,10 @@ class MyApp extends App {
     window.removeEventListener('resize', this.handleScreen);
   }
 
-  // componentWillReceiveProps = (nextProps) => {
-  //   let { pageProps } = this.props;
-  //   if (pageProps.pathname != nextProps.pageProps.pathname) this.fireEntity({ render: false, disabled: false });
-  // } 
+  componentWillReceiveProps = (nextProps) => {
+    let { pageProps } = this.props;
+    if (pageProps.pathname != nextProps.pageProps.pathname) this.fireEntity({ render: false, disabled: false });
+  } 
 
   componentDidCatch = (error, info) => {
     // Router.push({ pathname: "/error", query: { error: error }});

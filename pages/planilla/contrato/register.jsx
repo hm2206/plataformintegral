@@ -2,11 +2,10 @@ import React, { Component, Fragment } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
-import { Body } from '../../../components/Utils';
+import { Body, BtnBack } from '../../../components/Utils';
 import ContentControl from '../../../components/contentControl';
 import Show from '../../../components/show';
 import { unujobs, authentication } from '../../../services/apis';
-import { responsive } from '../../../services/storage.json';
 import { parseUrl } from '../../../services/utils';
 import { findWork } from '../../../storage/actions/workActions';
 import { parseOptions } from '../../../services/utils';
@@ -48,6 +47,7 @@ export default class Register extends Component
     }
 
     componentDidMount = async () => {
+        this.props.fireEntity({ render: true });
         await this.getPlanilla();
         await this.getMeta();
         await this.getDependencias();
@@ -167,22 +167,15 @@ export default class Register extends Component
             <Fragment>
                 <div className="col-md-12">
                     <Body>
-                        <Button 
-                            disabled={this.state.loading}
-                            onClick={(e) => {
-                                let { push, pathname } = Router;
-                                this.setState({ loading: true })
-                                push({ pathname: parseUrl(pathname, 'preparate')});
-                            }}
-                        >
-                            <i className="fas fa-arrow-left"></i> Atrás
-                        </Button>
+                        <div className="card-header">
+                            <BtnBack onClick={this.handleBack}/> <span className="ml-3">Crear contrato de trabajo</span>
+                        </div>
                     </Body>
                 </div>
 
                 <div className="col-md-12 mt-3">
                     <Body>
-                        <Form loading={this.state.loading}>
+                        <Form loading={this.state.loading} onSubmit={(e) => e.preventDefault()}>
         
                             <Show condicion={true}>
                                 <div className="card-header">

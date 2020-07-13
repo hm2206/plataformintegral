@@ -37,6 +37,7 @@ export default class RegisterCronograma extends Component
 
     componentDidMount = async () => {
         this.props.fireLoading(true);
+        this.props.fireEntity({ render: true });
         let newDate = new Date();
         await this.getPlanillas();
         this.setState({
@@ -62,16 +63,25 @@ export default class RegisterCronograma extends Component
     }
 
     saveAndContinue = async () => {
-        await this.setState({ loading: true });
+        this.props.fireLoading(true);
         // send
         await unujobs.post('cronograma', this.state)
         .then(async res => {
+            this.props.fireLoading(false);
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
         })
-        .catch(err => this.setState({ errors: err.response.data }));
-        this.setState({ loading: false });
+        .catch(err => {
+            try {
+                let { data } = err.response;
+                Swal.fire({ icon: 'warning', text: 'Datos incorrectos!' });
+                this.setState({ errors: data });
+            } catch (error) {
+                Swal.fire({ icon: 'error', text: err.message });
+            }
+        });
+        this.props.fireLoading(false);
     }
 
     handleClose = () => {

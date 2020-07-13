@@ -60,6 +60,9 @@ export default class CronogramaEmail extends Component
         await unujobs.get(`cronograma/${id}/sent_email?page=${page}&query_search=${query_search}&send_email=${send_email}`)
         .then(res => {
             let { cronograma, enviados, no_enviados, historial } = res.data;
+            // add entity
+            this.props.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
+            // datos
             this.setState(state => {
                 // add
                 state.historial.data = changed ? [...state.historial.data, ...historial.data] : historial.data;
@@ -86,7 +89,7 @@ export default class CronogramaEmail extends Component
     }
 
     send = async () => {
-        this.setState({ loading: true });
+        this.setState({ loadinbg: true });
         let { cronograma, errors } = this.state;
         await unujobs.post(`cronograma/${cronograma.id}/send_email`, { errors: JSON.stringify(errors) }, { headers: { CronogramaID: cronograma.id }})
         .then(async res => {

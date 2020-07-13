@@ -123,6 +123,9 @@ export default class RemoveCronograma extends Component
         await unujobs.get(`cronograma/${id}/remove?${params}`)
         .then(async res => {
             let { historial, cronograma } = res.data;
+            // add entity
+            this.props.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
+            // datos
             let { data, total, last_page } = historial;
             await this.setState(state => ({ 
                 cronograma,

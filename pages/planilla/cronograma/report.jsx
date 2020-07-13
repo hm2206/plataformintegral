@@ -121,6 +121,9 @@ export default class Report extends Component
     componentDidMount = async () => {
         this.setState((state, props) => {
             let { cronograma } = props.cronograma;
+            // add entity
+            this.props.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
+            // return states
             return { id: cronograma.id };
         });
         // settings
@@ -206,11 +209,14 @@ export default class Report extends Component
             form.method = 'POST';
             form.target = '_blank';
             form.submit();
+            document.body.removeChild(form);
+            this.props.fireLoading(false);
         } else if (obj.action == 'blob') {
             let params = await this.genetateQuery(false);
             let link = await this.handleUrl(obj.url, obj.params);
             await unujobs.post(link, params)
             .then(res => {
+                this.props.fireLoading(false);
                 let { message } = res.data;
                 if (message) throw new Error(message);
                 let array = res.headers['content-type'].split(';');
@@ -223,9 +229,11 @@ export default class Report extends Component
                 a.target = '_blank';
                 a.click();
             })
-            .catch(err => Swal.fire({ icon: 'error', text:  err.message }));
+            .catch(async err => {
+                this.props.fireLoading(false);
+                await Swal.fire({ icon: 'error', text: err.message })
+            });
         }   
-        this.props.fireLoading(false);
     }
 
     handleUrl = async (url, params) => {

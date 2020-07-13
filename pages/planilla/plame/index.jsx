@@ -26,11 +26,16 @@ export default class Plame extends Component
     }
 
     componentDidMount = async () => {
+        this.props.fireEntity({ render: true });
         await this.setState({
             year: new Date().getFullYear(),
             mes: new Date().getMonth() + 1
         });
         // obtener plame
+        await this.getPlame();
+    }
+
+    componentWillReceiveProps = async (nextProps) => {
         await this.getPlame();
     }
 

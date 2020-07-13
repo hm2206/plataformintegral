@@ -463,9 +463,10 @@ export default class CronogramaInformacion extends Component
             // add token_auth
             form.appendChild(token_verify);
             form.action = `${url.URL_BOLETA || ""}`;
-            form.method = 'GET';
+            form.method = 'POST';
             form.target = '_blank';
             form.submit();
+            document.body.removeChild(form);
         }
     }
 

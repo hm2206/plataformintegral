@@ -39,6 +39,7 @@ export default class DuplicadoBoleta extends Component {
     }
 
     componentDidMount = () => {
+        this.props.fireEntity({ render: true });
         this.setting(this.props);
     }
 
@@ -80,18 +81,21 @@ export default class DuplicadoBoleta extends Component {
     }
 
     handleBoleta = async (obj) => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         let path = `pdf/boleta/${obj.cronograma_id}?meta_id=${obj.meta_id}&historial_id=${obj.id}`;
         await unujobs.fetch(path, { method: 'POST', headers: { Authorization: `Bearer ${this.props.auth_token}`  } })
         .then(resData => resData.blob())
         .then(blob => {
+            this.props.fireLoading(false);
             let a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.target = '_blank';
             a.click();
         })
-        .catch(err => Swal.fire({ icon: 'error', text: 'No se pudó generar la boleta' }));
-        this.setState({ loading: false });
+        .catch(err => {
+            this.props.fireLoading(false);
+            Swal.fire({ icon: 'error', text: 'No se pudó generar la boleta' })
+        });
     }
 
     getOption = (obj, key, index) => {
@@ -109,7 +113,7 @@ export default class DuplicadoBoleta extends Component {
         return (
             <div className="col-md-12">
                 <Body>
-                    <Datatable titulo={<span><i className="fas fa-file-pdf"></i> Lista histórica de boletas</span>}
+                    <Datatable titulo={<span> Lista histórica de boletas de pago</span>}
                         isFilter={false}
                         loading={loading}
                         headers={ ["#ID", "Apellidos y Nombres", "Año", "Mes", "Cargo", 'Tip. Categoría']}
