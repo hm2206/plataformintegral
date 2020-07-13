@@ -4,7 +4,7 @@ import { Form, Button, Select, Icon, Message } from 'semantic-ui-react';
 import { Row } from 'react-bootstrap';
 import { AUTHENTICATE } from '../../../services/auth';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
-import { parseOptions, parseUrl, Confirm, InputCredencias, InputAuth } from '../../../services/utils';
+import { parseOptions, parseUrl, Confirm, InputCredencias, InputAuth, InputEntity } from '../../../services/utils';
 import Show from '../../../components/show';
 import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
@@ -477,6 +477,8 @@ export default class CronogramaInformacion extends Component
         document.body.appendChild(form);
         // add credenciales
         InputCredencias().filter(i => form.appendChild(i));
+        // add entityID
+        form.appendChild(InputEntity());
         // add auth_token
         form.appendChild(InputAuth());
         form.action = `${unujobs.path + '/pdf/renta/' + historial.work_id + '?year=' + cronograma.year || ""}`;
