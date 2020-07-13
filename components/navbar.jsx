@@ -59,7 +59,7 @@ class Navbar extends Component {
     .then(res => {
       let { lastPage, data } = res.data;
       this.setState(state => ({ entities: [...state.entities, ...data] }))
-      if (!page == lastPage || lastPage != 0) this.getEntities(page + 1);
+      if (page < lastPage) this.getEntities(page + 1);
     }).catch(err => console.log(err.message))
   }
 
