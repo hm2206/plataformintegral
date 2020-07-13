@@ -107,3 +107,11 @@ export const InputAuth = () => {
     input.hidden = true;
     return input;
 }
+
+export const InputEntity = () => {
+    let input = document.createElement('input');
+    input.name = 'EntityId';
+    input.value = Cookies.get('EntityId');
+    input.hidden = true;
+    return input;
+}

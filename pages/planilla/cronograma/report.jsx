@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Body, BtnBack, BtnSelect, BtnFloat } from '../../../components/Utils';
 import { findCronograma } from '../../../storage/actions/cronogramaActions';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
-import { backUrl, parseOptions, InputCredencias } from '../../../services/utils';
+import { backUrl, parseOptions, InputCredencias, InputAuth, InputEntity } from '../../../services/utils';
 import Router from 'next/dist/client/router';
 import { Form, Select } from 'semantic-ui-react';
 import Show from '../../../components/show';
@@ -198,12 +198,13 @@ export default class Report extends Component
             let query = await this.genetateQuery();
             let link = await this.handleUrl(obj.url, obj.params);
             let form = document.createElement('form');
-            let input = document.createElement('input');
-            form.appendChild(input);
+            // add auth
+            form.appendChild(InputAuth());
             // add credenciales
             InputCredencias().filter(i => form.appendChild(i));
-            input.name = 'auth_token';
-            input.value = this.props.auth_token;
+            // add EntityId
+            form.appendChild(InputEntity());
+            // add form al body
             document.body.appendChild(form);
             form.action = `${unujobs.path}/${link}?${query}`;
             form.method = 'POST';
