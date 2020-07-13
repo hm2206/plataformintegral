@@ -21,8 +21,6 @@ import initsStore from '../storage/store';
 import Show from '../components/show';
 import Swal from 'sweetalert2';
 
-let isLoadingPage = false;
-
 // config router
 Router.onRouteChangeStart = () => {
   let loadingBrand = document.getElementById('loading-brand');
@@ -97,7 +95,12 @@ class MyApp extends App {
       screenY: 0,
       screenX: 0,
       screen_lg: false,
-      refresh: false
+      refresh: false,
+      config_entity: {
+        render: false,
+        disabled: false,
+        entity_id: ""
+      }
     }
   }
 
@@ -110,12 +113,21 @@ class MyApp extends App {
     window.removeEventListener('resize', this.handleScreen);
   }
 
+  // componentWillReceiveProps = (nextProps) => {
+  //   let { pageProps } = this.props;
+  //   if (pageProps.pathname != nextProps.pageProps.pathname) this.fireEntity({ render: false, disabled: false });
+  // } 
+
   componentDidCatch = (error, info) => {
     // Router.push({ pathname: "/error", query: { error: error }});
   }
 
   handleScreen = () => {
     this.setState({ screenX: window.innerWidth, screenY: window.innerHeight });
+  }
+
+  fireEntity = (config = this.state.config_entity) => {
+    this.setState({ config_entity: config });
   }
 
   handleToggle = async () => {
@@ -213,6 +225,7 @@ class MyApp extends App {
                         screen_lg={this.state.screen_lg} 
                         screenX={this.state.screenX}
                         logout={this.logout}
+                        config_entity={this.state.config_entity}
                       />
                       {/* content */}
                       <div className="gx-layout-content ant-layout-content">
@@ -227,6 +240,7 @@ class MyApp extends App {
                           />
                           <Content screen_lg={this.state.screen_lg}>
                               <Component {...pageProps} 
+                                fireEntity={this.fireEntity}
                                 toggle={this.state.toggle} 
                                 screenX={this.state.screenX}
                                 my_app={_app}

@@ -39,6 +39,7 @@ export default class Cronograma extends Component {
     }
 
     componentDidMount = () => {
+        this.props.fireEntity({ render: true });
         this.setting(this.props);
     }
 

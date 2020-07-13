@@ -20,6 +20,7 @@ export const getAuth = (ctx) => {
             } else throw new Error(message);
         })
         .catch(async err => {
+            console.log(err);
             let { isServer } = ctx;
             await LOGOUT(ctx);
             if (isServer) {

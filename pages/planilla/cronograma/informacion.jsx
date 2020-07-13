@@ -89,7 +89,10 @@ export default class CronogramaInformacion extends Component
 
     setting = (props) => {
         let { cronograma, historial, aportaciones, descuentos, remuneraciones, config_edad } = props.cronograma;
-        let { query } = this.props;
+        let { query, fireLoading, fireEntity } = this.props;
+        fireLoading(false);
+        fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
+        // set state
         this.setState({
             cronograma,
             historial: historial.data, 
@@ -98,7 +101,6 @@ export default class CronogramaInformacion extends Component
             remuneraciones,
             descuentos,
             aportaciones,
-            loading: false,
             page: query.page ? parseInt(query.page) : 1,
             like: query.like ? query.like : "",
             cargo_id: query.cargo_id ? parseInt(query.cargo_id) : "",
@@ -122,13 +124,13 @@ export default class CronogramaInformacion extends Component
     }
 
     getPlanillas = async () => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         await unujobs.get(`planilla`)
         .then(res => {
             let planillas = res.data ? res.data : []
             this.setState({ planillas });
         }).catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getBancos = () => {
@@ -148,7 +150,6 @@ export default class CronogramaInformacion extends Component
 
     readCronograma = async (e) => {
         if (!this.state.edit) {
-            await this.setState({ loading: true });
             let { pathname, query } = Router;
             query.like = this.state.like;
             query.page = 1;
@@ -211,7 +212,7 @@ export default class CronogramaInformacion extends Component
         let { page } = this.props.query;
         if (!edit) {
             if (parseInt(page) < last_page) {
-                await this.setState((state, props) => ({ page: parseInt(page) + 1, loading: true }));
+                await this.setState((state, props) => ({ page: parseInt(page) + 1 }));
                 let { push, pathname, query } = Router;
                 query.page = this.state.page;
                 query.active = this.state.active;
@@ -229,7 +230,7 @@ export default class CronogramaInformacion extends Component
         let { page } = this.props.query;
         if (!edit) {
             if (parseInt(page) > 1) {
-                await this.setState(state => ({ page: parseInt(page) - 1, loading: true }));
+                await this.setState(state => ({ page: parseInt(page) - 1 }));
                 let { push, pathname, query } = Router;
                 query.page = this.state.page;
                 query.active = this.state.active;
@@ -243,7 +244,7 @@ export default class CronogramaInformacion extends Component
     }
 
     setLoading = async (value) => {
-        await this.setState({ loading : value })
+        await this.props.fireLoading(value);
     }
 
     setEdit = async (value) => {
@@ -272,7 +273,10 @@ export default class CronogramaInformacion extends Component
             confirmButtonText: "Continuar",
             showCancelButton: true
         });
-        if (value) await this.setState({ loading: true, send: true });
+        if (value) {
+            this.props.fireLoading(true);
+            await this.setState({ send: true });
+        }
     }
 
     handleClose = async () => {
@@ -284,7 +288,6 @@ export default class CronogramaInformacion extends Component
     }
 
     handleBack = () => {
-        this.setState({ loading: true });
         let { push, pathname, query } = Router;
         let { cronograma } = this.state;
         let newPath = pathname.split('/');
@@ -295,7 +298,7 @@ export default class CronogramaInformacion extends Component
     handleExport = async () => {
         let answer = await Confirm('warning', '¿Deseas exportar?', 'Exportar');
         if (answer) {
-            this.setState({ loading: true });
+            this.props.fireLoading(true);
             let { cronograma, cargo_id, type_categoria_id, like } = this.state;
             let query = `cronograma_id=${cronograma.id}&cargo_id=${cargo_id}&type_categoria_id=${type_categoria_id}&query_search=${like}`;
             await unujobs.fetch(`exports/personal/${cronograma.year}/${cronograma.mes}?${query}`)
@@ -306,7 +309,7 @@ export default class CronogramaInformacion extends Component
                 a.target = "_blank";
                 a.click();
             }).catch(err => Swal.fire({ icon: 'error', text: err.message }))
-            this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
 
     }
@@ -316,7 +319,7 @@ export default class CronogramaInformacion extends Component
     }
 
     handleOnSelect = async (e, { name }) => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         let { push, pathname, query } = Router;
         switch (name) {
             case 'desc-massive':
@@ -349,7 +352,7 @@ export default class CronogramaInformacion extends Component
                 break;
         }
         // end loading
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getHeaders = (state) => {
@@ -362,7 +365,7 @@ export default class CronogramaInformacion extends Component
     syncRemuneracion = async () => {
         let response = await Confirm("warning", "¿Desea agregar las remuneraciones a los trabajadores?", "Confirmar");
         if (response) {
-            this.setState({ loading: true });
+            this.props.fireLoading(true);
             let { cronograma } = this.state;
             await unujobs.post(`cronograma/${cronograma.id}/add_remuneracion`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
@@ -370,14 +373,14 @@ export default class CronogramaInformacion extends Component
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });
             }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
-            this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
     }
 
     syncAportacion = async () => {
         let response = await Confirm("warning", "¿Desea agregar las aportaciones a los trabajadores?", "Confirmar");
         if (response) {
-            this.setState({ loading: true });
+            this.props.fireLoading(true);
             let { cronograma } = this.state;
             await unujobs.post(`cronograma/${cronograma.id}/add_aportacion`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
@@ -385,14 +388,14 @@ export default class CronogramaInformacion extends Component
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });
             }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
-            this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
     }
 
     processing = async () => {
         let response = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
         if (response) {
-            this.setState({ loading: true });
+            this.props.fireLoading(true);
             await unujobs.post(`cronograma/${this.state.cronograma.id}/processing`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
                 let { success, message } = res.data;
@@ -403,14 +406,14 @@ export default class CronogramaInformacion extends Component
                     await this.updatingHistorial();
                 }
             }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
-            this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
     }
 
     syncConfigs = async () => {
         let response = await Confirm("warning", "¿Desea Sincronizar las Configuraciones?", "Confirmar");
         if (response) {
-            this.setState({ loading: true });
+            this.props.fireLoading(true);
             let { cronograma } = this.state;
             await unujobs.post(`cronograma/${cronograma.id}/sync_configs`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
@@ -422,14 +425,14 @@ export default class CronogramaInformacion extends Component
                     await this.updatingHistorial();
                 }
             }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
-            this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
     }
 
     generateToken = async () => {
         let response = await Confirm("warning", "¿Desea Generar los tokens de las boletas?", "Confirmar");
         if (response) {
-            this.setState({ loading: true });
+            this.props.fireLoading(true);
             await unujobs.post(`cronograma/${this.state.cronograma.id}/generate_token`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
                 let { success, message } = res.data;
@@ -440,7 +443,7 @@ export default class CronogramaInformacion extends Component
                     await this.updatingHistorial();
                 }
             }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal' }))
-            this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
     }
 
@@ -485,16 +488,16 @@ export default class CronogramaInformacion extends Component
     render() {
 
         let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id, config_edad } = this.state;
-        let { pathname, query } = this.props;
+        let { query, isLoading } = this.props;
 
         return (
             <Fragment>
-                <Form className="col-md-12" disabled={loading} onSubmit={(e) => e.preventDefault()}>
+                <Form className="col-md-12" disabled={isLoading} onSubmit={(e) => e.preventDefault()}>
                     <Body>
                         <div className="row pl-2 pr-2">
                             <div className="col-md-2 col-4">
                                 <BtnBack onClick={this.handleBack}
-                                    disabled={this.state.loading}
+                                    disabled={isLoading}
                                 />
                             </div>
 
@@ -592,7 +595,7 @@ export default class CronogramaInformacion extends Component
                                                     button
                                                     icon="options"
                                                     labeled
-                                                    disabled={this.state.loading || this.state.edit}
+                                                    disabled={isLoading|| this.state.edit}
                                                     options={[
                                                         { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
                                                         { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
@@ -611,7 +614,7 @@ export default class CronogramaInformacion extends Component
                                                     button
                                                     icon="options"
                                                     labeled
-                                                    disabled={this.state.loading || this.state.edit}
+                                                    disabled={isLoading || this.state.edit}
                                                     options={[
                                                         { key: "generate-token", text: "Generar Token", icon: "cloud upload" },
                                                         { key: "report", text: "Reportes", icon: "file text outline" },
@@ -624,7 +627,7 @@ export default class CronogramaInformacion extends Component
                                 </div>
 
                                 <div className="card-body" style={{ marginBottom: "10em" }}>
-                                        <Form loading={loading}>
+                                        <Form>
                                             <Row>
                                                 <div className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1">
                                                     <Form.Field> 
@@ -644,7 +647,7 @@ export default class CronogramaInformacion extends Component
                                                         <Select placeholder='Select. Cargo'
                                                             fluid 
                                                             options={parseOptions(cargos, ['sel-car', '', 'Select. Cargo'], ['id', 'id', 'descripcion'])} 
-                                                            disabled={loading || this.state.edit || this.state.block}
+                                                            disabled={isLoading || this.state.edit || this.state.block}
                                                             value={cargo_id}
                                                             name="cargo_id"
                                                             onChange={this.handleSelect}
@@ -656,7 +659,7 @@ export default class CronogramaInformacion extends Component
                                                     <Select placeholder='Select. Categoría' 
                                                         fluid
                                                         options={parseOptions(type_categorias, ['sel-cat', '', 'Select. Categoría'], ['id', 'id', 'descripcion'])}
-                                                        disabled={loading || this.state.edit || this.state.block}
+                                                        disabled={isLoading || this.state.edit || this.state.block}
                                                         value={type_categoria_id}
                                                         name="type_categoria_id"
                                                         onChange={this.handleSelect}
@@ -668,7 +671,7 @@ export default class CronogramaInformacion extends Component
                                                         fluid
                                                         onClick={this.readCronograma}
                                                         title="Realizar Búsqueda"
-                                                        disabled={loading || this.state.edit || this.state.block || this.state.export}
+                                                        disabled={isLoading || this.state.edit || this.state.block || this.state.export}
                                                     >
                                                         <Icon name="filter"/> Filtrar
                                                     </Button>
@@ -679,7 +682,7 @@ export default class CronogramaInformacion extends Component
                                                         fluid
                                                         onClick={this.handleExport}
                                                         title="Realizar Búsqueda"
-                                                        disabled={loading || this.state.edit || this.state.block || !this.state.export}
+                                                        disabled={isLoading || this.state.edit || this.state.block || !this.state.export}
                                                     >
                                                         <Icon name="share"/> Export
                                                     </Button>
@@ -695,7 +698,7 @@ export default class CronogramaInformacion extends Component
                                                         bancos={this.state.bancos}
                                                         ubigeos={this.state.ubigeos}
                                                         edit={this.state.edit}
-                                                        loading={this.state.loading}
+                                                        loading={isLoading}
                                                         send={this.state.send}
                                                         total={this.state.total}
                                                         setSend={this.setSend}
@@ -709,7 +712,7 @@ export default class CronogramaInformacion extends Component
                                                     />  
                                                 </Show>          
                                                 
-                                                <Show condicion={!this.state.loading && !this.state.total}>
+                                                <Show condicion={!isLoading && !this.state.total}>
                                                     <div className="w-100 text-center">
                                                         <h4 className="mt-5">No se encontró trabajadores</h4>
                                                     </div>
@@ -731,7 +734,7 @@ export default class CronogramaInformacion extends Component
                                 <Show condicion={!this.state.total}>
                                     <div className="col-md-4 mb-1">   
                                         <Button color="red"
-                                            disabled={loading}
+                                            disabled={isLoading}
                                             onClick={this.clearSearch}
                                             fluid
                                         >
@@ -746,7 +749,7 @@ export default class CronogramaInformacion extends Component
                                             <div className="col-md-4 col-ms-4 col-4">
                                                 <Button  
                                                     color="black"
-                                                    disabled={loading || this.state.edit || this.state.block}
+                                                    disabled={isLoading || this.state.edit || this.state.block}
                                                     onClick={this.previus}
                                                     fluid
                                                 >
@@ -758,7 +761,7 @@ export default class CronogramaInformacion extends Component
                                                 <div className="col-md-4 col-4 mb-1">
                                                     <Button color="black"
                                                         fluid
-                                                        disabled={this.state.loading}
+                                                        disabled={isLoading}
                                                     >
                                                         {this.props.query && this.props.query.page} de {this.state.total}
                                                     </Button>
@@ -769,7 +772,7 @@ export default class CronogramaInformacion extends Component
                                                 <Button 
                                                     fluid
                                                     color="black"
-                                                    disabled={loading || this.state.edit || this.state.block}
+                                                    disabled={isLoading || this.state.edit || this.state.block}
                                                     onClick={this.next}
                                                 >
                                                     <Icon name="triangle right"/>
@@ -790,7 +793,7 @@ export default class CronogramaInformacion extends Component
                                                 fluid
                                                 color="blue"
                                                 loading={this.state.send}
-                                                disabled={loading || !this.state.edit || this.state.block}
+                                                disabled={isLoading || !this.state.edit || this.state.block}
                                                 onClick={this.handleConfirm}
                                             >
                                                 <i className="fas fa-save mr-1"></i>
@@ -807,7 +810,7 @@ export default class CronogramaInformacion extends Component
                                                 color="red"
                                                 basic
                                                 fluid
-                                                disabled={loading}
+                                                disabled={isLoading}
                                                 onClick={e => {
                                                     e.preventDefault();
                                                     let { push, pathname, query } = Router;
@@ -826,7 +829,7 @@ export default class CronogramaInformacion extends Component
                                     <Show condicion={this.state.total && cronograma.estado}>
                                         <div className={`col-md-6 ${this.state.edit ? 'col-6' : 'col-6 col-sm-12'}`}>
                                             <Button color={this.state.edit ? 'red' : 'teal'}
-                                                disabled={loading || this.state.block || this.state.send}
+                                                disabled={isLoading || this.state.block || this.state.send}
                                                 onClick={(e) => this.setState(state => ({ edit: !state.edit }))}
                                                 fluid
                                             >
@@ -845,7 +848,7 @@ export default class CronogramaInformacion extends Component
                             <div className="col-md-2 mb-1 col-6">
                                 <Button
                                     fluid
-                                    disabled={loading || this.state.block || cronograma.year != new Date().getFullYear() || cronograma.mes != (new Date().getMonth() + 1)}
+                                    disabled={isLoading || this.state.block || cronograma.year != new Date().getFullYear() || cronograma.mes != (new Date().getMonth() + 1)}
                                     onClick={e => {
                                         e.preventDefault();
                                         let { push, pathname, query } = Router;
@@ -863,7 +866,7 @@ export default class CronogramaInformacion extends Component
                                 <Button
                                     fluid
                                     color="orange"
-                                    disabled={loading || this.state.block || !historial.is_email}
+                                    disabled={isLoading || this.state.block || !historial.is_email}
                                     onClick={this.sendEmail}
                                 >
                                     <Icon name="send"/> { this.state.send ? 'Enviando...' : 'Enviar Email' }

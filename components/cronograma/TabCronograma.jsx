@@ -18,7 +18,7 @@ export default class TabCronograma extends Component
 
     render() {
 
-        let { loading, cancel, edit, send, total, ubigeos, bancos, screenX } = this.props;
+        let { cancel, edit, send, total, ubigeos, bancos, screenX } = this.props;
 
         let styles = {
             border: '0px'
@@ -39,6 +39,7 @@ export default class TabCronograma extends Component
                             cancel={cancel}
                             total={total}
                             updatingHistorial={this.props.updatingHistorial}
+                            setLoading={this.props.setLoading}
                             screenX={screenX}
                         />
                     </Tab.Pane> 

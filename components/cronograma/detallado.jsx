@@ -51,14 +51,13 @@ export default class Remuneracion extends Component
         await unujobs.post('detalle', payload)
         .then(async res => {
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            Swal.fire({ icon, text: message });
-            if (success) {
-                await this.getDetalles(this.props);
-                await this.setState({ loader: false });
-                await this.props.updatingHistorial();
-                this.props.setEdit(false);
-            }
+            if (!success) throw new Error(message);
+            this.props.setLoading(false);
+            await Swal.fire({ icon: 'success', text: message });
+            await this.getDetalles(this.props);
+            this.setState({ loader: false });
+            await this.props.updatingHistorial();
+            this.props.setEdit(false);
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.setState({ loader: false });
@@ -103,11 +102,10 @@ export default class Remuneracion extends Component
         await unujobs.post(`detalle/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) {
-                await this.props.updatingHistorial();
-            }
+            if(!success) throw new Error(message);
+            this.props.setLoading(false);
+            await Swal.fire({ icon: 'success', text: message });
+            await this.props.updatingHistorial();
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.props.setLoading(false);

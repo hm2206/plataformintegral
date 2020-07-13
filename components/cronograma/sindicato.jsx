@@ -46,17 +46,17 @@ export default class Sindicato extends Component
             // send
             await unujobs.post('sindicato', payload, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => {
+                this.props.setLoading(false);
                 let { success, message } = res.data;
-                let icon = success ? 'success' : 'error';
-                await Swal.fire({ icon, text: message });
-                if (success) {
-                    this.setState({ loader: false });
-                    await this.props.updatingHistorial();
-                    this.getSindicatos(this.props);
-                }
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                this.setState({ loader: false });
+                await this.props.updatingHistorial();
+                await this.getSindicatos(this.props);
             })
             .catch(err => Swal.fire({ icon: 'error', text: err.message }));
             this.setState({ loader: false });
+            this.props.setLoading(false);
         }
     }
 
@@ -83,13 +83,10 @@ export default class Sindicato extends Component
             await unujobs.post(`sindicato/${id}`, { _method: 'DELETE' }, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => {
                 let { success, message } = res.data;
-                let icon = success ? 'success' : 'error';
-                await Swal.fire({ icon, text: message });
-                if (success) {
-                    this.setState({ loader: false });
-                    await this.props.updatingHistorial();
-                    this.getSindicatos(this.props);
-                }
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.props.updatingHistorial();
+                await this.getSindicatos(this.props);
             })
             .catch(err => Swal.fire({ icon: 'error', text: err.message }));
             this.setState({ loader: false });

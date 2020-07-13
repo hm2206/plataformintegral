@@ -43,17 +43,15 @@ export default class Aportacion extends Component
             type_aportacion_id: this.state.type_aportacion_id
         })
         .then(async res => {
+            this.props.setLoading(false);
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            Swal.fire({ icon, text: message });
-            if (success) {
-                this.setState({ loader: false });
-                await this.props.updatingHistorial();
-                this.getAportaciones(this.props);
-            }
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            await this.props.updatingHistorial();
+            await this.getAportaciones(this.props);
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        await this.setState({ loader: false });
+        this.setState({ loader: false });
     }
 
     _delete = async (id) => {
@@ -61,13 +59,10 @@ export default class Aportacion extends Component
         await unujobs.post(`aportacion/${id}`, { _method: "DELETE" })
         .then(async res => {
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            Swal.fire({ icon, text: message });
-            if (success) {
-                await this.props.updatingHistorial();
-                this.setState({ loader: false });
-                this.getAportaciones(this.props);
-            }
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            await this.props.updatingHistorial();
+            await this.getAportaciones(this.props);
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.setState({ loader: false });

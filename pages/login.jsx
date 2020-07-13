@@ -53,7 +53,6 @@ class Login extends Component
 
 
     handleSubmit = async (e) => {
-        e.preventDefault();
         this.setState({ loading: true });
         let payload = { 
             email: this.state.email, 
@@ -62,13 +61,9 @@ class Login extends Component
         await authentication.post('login', payload)
         .then(async res => {
             let { success, message, token } = res.data;
-            if (success) {
-                await Cookies.set('auth_token', token);
-                history.go('/');
-            }else {
-                // mensage de error
-                await Swal.fire({icon: 'error', text: message });
-            }
+            if (!success) throw new Error(message); 
+            await Cookies.set('auth_token', token);
+            history.go('/');
         })
         .catch(err => Swal.fire({icon: 'error', text: err.message}));
         this.setState({ loading: false });
@@ -108,7 +103,7 @@ class Login extends Component
 
                 <form
                     className="auth-form"
-                    onSubmit={this.handleSubmit}
+                    onSubmit={(e) => e.preventDefault()}
                 >
                     <div className="form-group">
                         <div className="form-label-group">
@@ -148,7 +143,7 @@ class Login extends Component
                         <button
                             disabled={loading || !password || !email}
                             className={`btn btn-lg btn-primary btn-block btn-${app.theme}`}
-                            type="submit"
+                            onClick={this.handleSubmit}
                         >
                             {loading ? "Verificando...." : "Iniciar Sesión"}
                             <i className="icon-circle-right2 ml-2"></i>

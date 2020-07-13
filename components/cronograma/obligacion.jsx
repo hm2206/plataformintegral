@@ -130,14 +130,12 @@ export default class Obligacion extends Component
         let { historial } = this.props;
         await unujobs.post(`obligacion/${this.props.historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
+            this.props.setLoading(false);
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) {
-                await this.props.updatingHistorial();
-                // recargar
-                this.getObligaciones(this.props);
-            } 
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            await this.props.updatingHistorial();
+            this.getObligaciones(this.props);
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.props.setLoading(false);
@@ -151,13 +149,12 @@ export default class Obligacion extends Component
             let { historial } = this.props;
             await unujobs.post(`obligacion/${id}`, { _method: 'DELETE' }, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => {
+                this.props.setLoading(false);
                 let { success, message } = res.data;
-                let icon = success ? 'success' : 'error';
-                await Swal.fire({ icon, text: message });
-                if (success) {
-                    await this.props.updatingHistorial();
-                    this.getObligaciones(this.props);
-                }
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.props.updatingHistorial();
+                this.getObligaciones(this.props);
             }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
             this.setState({ loader: false });
             this.props.setEdit(false);

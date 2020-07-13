@@ -68,25 +68,15 @@ export default class Remuneracion extends Component
         await unujobs.post(`remuneracion/${this.props.historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
             let { success, message, body } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) {
-                await this.props.setEdit(false);
-                await this.props.setSend(false);
-                await this.props.updatingHistorial();
-                this.setState({
-                    total_bruto: body.total_bruto,
-                    total_desct: body.total_desct,
-                    total_neto: body.total_neto,
-                    base: body.base
-                });
-            } else {
-                this.props.setSend(false);
-                this.props.setLoading(false);
-            }
+            if (!success) throw new Error(message);
+            this.props.setSend(false);
+            this.props.setEdit(false);
+            this.props.setLoading(false);
+            await Swal.fire({ icon: 'success', text: message });
+            await this.props.updatingHistorial();
         })
-        .catch(err => {
-            Swal.fire({ icon: 'error', text: err.message })
+        .catch(async err => {
+            await Swal.fire({ icon: 'error', text: err.message })
             this.props.setSend(false);
             this.props.setLoading(false);
         });

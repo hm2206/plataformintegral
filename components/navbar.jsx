@@ -2,14 +2,15 @@ import React, { Component, Fragment } from "react";
 import SkullAuth from "../components/loaders/skullAuth";
 import Logo from "../components/logo";
 import { authentication } from '../services/apis';
-import Cookies from 'js-cookie';
-import Swal from 'sweetalert2';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import Notification from './notification';
 import { app } from '../env.json';
-import Router from "next/router";
 import Show from "./show";
+import { Select } from 'semantic-ui-react';
+import { parseOptions } from '../services/utils'
+import Cookies from 'js-cookie';
+import Router from "next/router";
 
 
 class Navbar extends Component {
@@ -21,23 +22,21 @@ class Navbar extends Component {
       config: false,
       loading: true,
       auth: { },
+      entities: [],
+      entity_id: "",
     };
 
-    this.responsive = this.responsive.bind(this);
     this.handleConfig = this.handleConfig.bind(this);
   }
 
 
-  componentDidMount() {
+  async componentDidMount() {
     this.setState((state, props) => {
       let { user } = props.getState().auth ? props.getState().auth : {};
       return { auth: user };
     });
-  }
-
-
-  async responsive(e) {
-    
+    await this.getEntities();
+    this.settingEntity();
   }
 
   handleNavBar = () => {
@@ -55,26 +54,38 @@ class Navbar extends Component {
     if (typeof setScreenLg == 'function') setScreenLg();
   }
 
-  async logout(e) {
-    e.preventDefault();
-    await authentication.post('logout')
-    .then(async res => {
-      let { success, message } = res.data;
-      if (success) {
-        Cookies.remove('auth_token');
-        await Swal.fire({ icon: 'success', text: message });
-        history.go('/login');
-      } else {
-        Swal.fire({ icon: 'error', text: message });
-      }
-    }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+  getEntities = async (page = 1) => {
+    await authentication.get(`auth/entity?page=${page}`)
+    .then(res => {
+      let { lastPage, data } = res.data;
+      this.setState(state => ({ entities: [...state.entities, ...data] }))
+      if (!page == lastPage) this.getEntities(page + 1);
+    }).catch(err => console.log(err.message))
   }
 
-  
+  settingEntity = async () => {
+    await this.setState({ entity_id: parseInt(Cookies.get('EntityId')) || "" });
+    let { entities } = this.state;
+    // validate
+    if (entities.length) {
+      let entity_id = entities[0].id;
+      await this.setState({ entity_id });
+      this.handleEntity({ name: 'entity_id', value: entity_id });
+    }
+  }
+
+  handleEntity = ({ name, value }) => {
+    this.setState({ [name]: value });
+    Cookies.set('EntityId', value);
+    let { push, pathname, query } = Router;
+    query[name] = value;
+    push({ pathname, query });
+  }
+
   render() {
 
     let { loading, auth } = this.state;
-    let { screen_lg, screenX, my_app, logout } = this.props;
+    let { screen_lg, screenX, my_app, logout, config_entity } = this.props;
 
     return (
       <Fragment>
@@ -94,6 +105,20 @@ class Navbar extends Component {
                   >
                     <i className={`fas fa-${screen_lg ? 'times' : 'bars'}`}></i>
                   </button>
+                </div>
+              </Show>
+
+              <Show condicion={config_entity.render}>
+                <div className="col-md-5 capitalize">
+                  <Select
+                    options={parseOptions(this.state.entities, ['select-enti-nav', '', 'Select. Entidad'], ['id', 'id', 'name'])}
+                    fluid
+                    placeholder="Select. Entidad"
+                    value={this.state.entity_id}
+                    name="entity_id"
+                    onChange={(e, obj) => this.handleEntity(obj)}
+                    disabled={config_entity.disabled}
+                  />
                 </div>
               </Show>
               

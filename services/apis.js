@@ -5,11 +5,16 @@ import NextCookies from 'next-cookies';
 
 
 let headers = {
-    Authorization: `Bearer ${Cookies.get('auth_token')}`
+    Authorization: `Bearer ${Cookies.get('auth_token')}`,
+    EntityId: `${Cookies.get('EntityId') || '__error'}`
 };
 
 export const configAuthorization = (ctx) => {
     return `Bearer ${NextCookies(ctx)['auth_token']}`;
+}
+
+export const configEntityId = (ctx) => {
+    return NextCookies(ctx)['EntityId'];
 }
 
 const ConfigHeaders = (ctx = null, config = { }) => {
@@ -22,8 +27,10 @@ const ConfigHeaders = (ctx = null, config = { }) => {
     // validar ctx
     if (ctx) {
         newConfig.headers.Authorization = configAuthorization(ctx);
+        newConfig.headers.EntityId = configEntityId(ctx) || "__error" ;
     } else {
         newConfig.headers.Authorization = headers.Authorization
+        newConfig.headers.EntityId = headers.EntityId || "__error";
     };
     return newConfig;
 }   
