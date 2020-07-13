@@ -83,7 +83,7 @@ export default class DuplicadoBoleta extends Component {
     handleBoleta = async (obj) => {
         this.props.fireLoading(true);
         let path = `pdf/boleta/${obj.cronograma_id}?meta_id=${obj.meta_id}&historial_id=${obj.id}`;
-        await unujobs.fetch(path, { method: 'POST', headers: { Authorization: `Bearer ${this.props.auth_token}`  } })
+        await unujobs.fetch(path, { method: 'POST' })
         .then(resData => resData.blob())
         .then(blob => {
             this.props.fireLoading(false);
