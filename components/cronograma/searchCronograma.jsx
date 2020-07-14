@@ -16,8 +16,9 @@ export default class SearchCronograma extends Component
         cronograma: {}
     }
 
-    componentDidMount = () => {
-        this.setting(this.props.cronograma);
+    componentDidMount = async () => {
+        await this.setting(this.props.cronograma);
+        await this.getCronogramas();
     }
 
     componentWillReceiveProps = (nextProps) => {

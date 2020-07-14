@@ -119,22 +119,7 @@ export default class Report extends Component
     }
 
     componentDidMount = async () => {
-        this.setState((state, props) => {
-            let { cronograma } = props.cronograma;
-            // add entity
-            this.props.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
-            // return states
-            return { id: cronograma.id };
-        });
-        // settings
-        this.getMetas();
-        this.getCargos();
-        this.getTypeCategorias();
-        this.getTypeRemuneraciones();
-        this.getTypeDescuentos();
-        this.getTypeAportacion();
-        this.getAfps();
-        await this.getTypeDetalles();
+        await this.setting();
     }
 
     componentWillUpdate = (nextProps, nextState) => {
@@ -153,6 +138,30 @@ export default class Report extends Component
                 negativo: ""
             });
         }
+    }
+
+    componentWillReceiveProps = async (nextProps) => {
+        let { query } = this.props;
+        if (nextProps.query.id != query.id) await this.setting();
+    }
+
+    setting = async () => {
+        this.setState((state, props) => {
+            let { cronograma } = props.cronograma;
+            // add entity
+            this.props.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
+            // return states
+            return { id: cronograma.id };
+        });
+        // settings
+        this.getMetas();
+        this.getCargos();
+        this.getTypeCategorias();
+        this.getTypeRemuneraciones();
+        this.getTypeDescuentos();
+        this.getTypeAportacion();
+        this.getAfps();
+        await this.getTypeDetalles();
     }
 
     handleBack = (e) => {
