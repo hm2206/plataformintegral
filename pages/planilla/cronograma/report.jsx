@@ -24,7 +24,6 @@ export default class Report extends Component
     }
 
     state = {
-        id: "",
         loading: false,
         text: "Seleccionar",
         options: [
@@ -146,13 +145,9 @@ export default class Report extends Component
     }
 
     setting = async () => {
-        this.setState((state, props) => {
-            let { cronograma } = props.cronograma;
-            // add entity
-            this.props.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
-            // return states
-            return { id: cronograma.id };
-        });
+        this.setState({ type_report_id: "" });
+        let { cronograma } = this.props.cronograma;
+        await this.props.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id }); 
         // settings
         this.getMetas();
         this.getCargos();
@@ -249,7 +244,12 @@ export default class Report extends Component
     handleUrl = async (url, params) => {
         let newUrl = "";
         for(let param of params) {
-            newUrl = await url.replace(`{${param}}`, this.state[param]);
+            if (param == 'id')  {
+                let { cronograma } = this.props.cronograma;
+                newUrl = await url.replace(`{${param}}`, cronograma[param]);
+            } else {
+                newUrl = await url.replace(`{${param}}`, this.state[param]);
+            }
         }
         return newUrl;
     }
