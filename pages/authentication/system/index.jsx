@@ -53,11 +53,15 @@ export default class SystemIndex extends Component {
     }
 
     getOption(obj, key, index) {
-        let {pathname, query} = Router;
-        query[key] = btoa(obj.id);
+        let {push, pathname} = Router;
+        let id = btoa(obj.id);
         switch (key) {
             case 'generate':
                 this.generateToken(obj, index);
+                break;
+            case 'module':
+            case 'edit':
+                push({ pathname: `${pathname}/${key}`, query: { id }});
                 break;
             default:
                 break;
@@ -134,6 +138,11 @@ export default class SystemIndex extends Component {
                                     rules: {
                                         key: "token"
                                     }
+                                },
+                                {
+                                    key: "module",
+                                    icon: "fas fa-list",
+                                    title: "Modulo Sistema",
                                 },
                                 {
                                     key: "generate",
