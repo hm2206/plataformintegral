@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Body } from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { unujobs } from '../../../services/apis';
-import { InputCredencias } from '../../../services/utils';
+import { InputCredencias, InputEntity, InputAuth } from '../../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
 import Show from '../../../components/show';
 
@@ -59,11 +59,10 @@ export default class Plame extends Component
         document.body.appendChild(form);
         // add credenciales
         InputCredencias().filter(i => form.appendChild(i));
+        // add entity
+        form.appendChild(InputEntity());
         // add token 
-        let token = document.createElement('input');
-        token.name = 'auth_token'
-        token.value = this.props.auth_token;
-        form.appendChild(token);
+        form.appendChild(InputAuth());
         // config form
         form.method = 'POST'
         form.action = `${unujobs.path}/${url}`;
