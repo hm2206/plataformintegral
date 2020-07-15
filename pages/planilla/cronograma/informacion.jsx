@@ -319,7 +319,6 @@ export default class CronogramaInformacion extends Component
     }
 
     handleOnSelect = async (e, { name }) => {
-        this.props.fireLoading(true);
         let { push, pathname, query } = Router;
         switch (name) {
             case 'desc-massive':
@@ -351,8 +350,6 @@ export default class CronogramaInformacion extends Component
             default:
                 break;
         }
-        // end loading
-        this.props.fireLoading(false);
     }
 
     getHeaders = (state) => {
@@ -369,6 +366,7 @@ export default class CronogramaInformacion extends Component
             let { cronograma } = this.state;
             await unujobs.post(`cronograma/${cronograma.id}/add_remuneracion`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
+                this.props.fireLoading(false);
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });
@@ -384,6 +382,7 @@ export default class CronogramaInformacion extends Component
             let { cronograma } = this.state;
             await unujobs.post(`cronograma/${cronograma.id}/add_aportacion`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
+                this.props.fireLoading(false);
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });
@@ -398,6 +397,7 @@ export default class CronogramaInformacion extends Component
             this.props.fireLoading(true);
             await unujobs.post(`cronograma/${this.state.cronograma.id}/processing`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
+                this.props.fireLoading(false);
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });
@@ -417,6 +417,7 @@ export default class CronogramaInformacion extends Component
             let { cronograma } = this.state;
             await unujobs.post(`cronograma/${cronograma.id}/sync_configs`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
+                this.props.fireLoading(false);
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });

@@ -185,7 +185,6 @@ class MyApp extends App {
     const { loading, current } = this.state;
 
     return  <Fragment>
-      <Beforeunload onBeforeunload={(e) => e.preventDefault()}>
         <Provider store={store}>
           <Head>
             <meta charSet="utf-8"></meta>
@@ -294,7 +293,6 @@ class MyApp extends App {
           </Show>
         
         </Provider>
-      </Beforeunload>
     </Fragment>
   }
 }
