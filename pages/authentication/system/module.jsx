@@ -158,10 +158,10 @@ export default class SystemModule extends Component
 
                                     <div className="col-md-6 mb-3">
                                         <Form.Field>
-                                            <label htmlFor="">Nombre</label>
+                                            <label htmlFor="">Correo</label>
                                             <input type="text" 
                                                 name="name"
-                                                placeholder="Ingrese un nombre"
+                                                placeholder="Ingrese un correo"
                                                 value={system.email || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                                 disabled={true}
