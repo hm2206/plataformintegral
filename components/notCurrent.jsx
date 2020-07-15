@@ -13,7 +13,8 @@ export default ({ my_app }) => {
                         border: "4px solid #fff",
                         boxShadow: "10px 10px rgba(0, 0, 0, .15)",
                         objectFit: "contain",
-                        background: "#346cb0"
+                        background: "#346cb0",
+                        padding: "0.35em"
                     }}
                     src={my_app.icon && my_app.icon_images && my_app.icon_images.icon_200x200 || '/img/base.png'} 
                     alt="logo"
