@@ -61,6 +61,7 @@ export default class SystemIndex extends Component {
                 break;
             case 'module':
             case 'edit':
+            case 'method':
                 push({ pathname: `${pathname}/${key}`, query: { id }});
                 break;
             default:
@@ -143,6 +144,11 @@ export default class SystemIndex extends Component {
                                     key: "module",
                                     icon: "fas fa-list",
                                     title: "Modulo Sistema",
+                                },
+                                {
+                                    key: "method",
+                                    icon: "fas fa-wrench",
+                                    title: "Metodo de Sistema",
                                 },
                                 {
                                     key: "generate",
