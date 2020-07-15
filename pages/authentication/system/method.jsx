@@ -37,23 +37,18 @@ export default class SystemMethod extends Component
     }
 
     componentDidMount = async () => {
+        this.props.fireLoading(true);
         await this.findSystem();
-        this.getMethod();
-    }
-
-    componentWillUpdate = async (nextProps, nextState) => {
-        let { state } = this;
-        if (state.form.system_id != nextState.form.system_id) await this.findSystem(nextState.form.system_id);
+        await this.getMethod();
+        this.props.fireLoading(false);
     }
 
     findSystem = async () => {
-        this.props.fireLoading(true);
         let { query } = this.props;
         let id = query.id ? atob(query.id) : '__error';
         await authentication.get(`system/${id}`)
         .then(res => this.setState({ system: res.data }))
         .catch(err => console.log(err.message));
-        this.props.fireLoading(false);
     }
 
     getMethod = async (changed = false) => {
