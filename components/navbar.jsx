@@ -11,6 +11,7 @@ import { Select } from 'semantic-ui-react';
 import { parseOptions } from '../services/utils'
 import Cookies from 'js-cookie';
 import Router from "next/router";
+import Link from "next/link";
 
 
 class Navbar extends Component {
@@ -176,6 +177,13 @@ class Navbar extends Component {
                             <span className="fas fa-user"></span>{" "}
                             Perfil
                           </a>{" "}
+
+                          <Link href="/docs">
+                            <a className="dropdown-item">
+                              <span className="fas fa-info-circle"></span>{" "}
+                              Ayuda
+                            </a>
+                          </Link>
 
                                 <a
                                   href="#logout"

@@ -4,8 +4,7 @@ import { authentication } from '../services/apis';
 import Router from 'next/router';
 import { connect } from 'react-redux';
 import initStore from '../storage/store';
-import { version } from '../package.json';
-import { logout } from "../storage/actions/authsActions";
+import Link from 'next/link';
 
 
 class Sidebar extends Component {
@@ -109,17 +108,6 @@ class Sidebar extends Component {
                     </a>
                   </li>
                   <Navigation options={this.state.options}/>
-                  <li className={`menu-item ${this.state.pathname == '/help' ? 'has-active' : ''}`}>
-                    {/* <Link> */}
-                      <a href="/help#menu" style={{ cursor: 'pointer' }}
-                        className="menu-link"
-                        onClick={(e) => Router.push('/help')}
-                      >
-                        <b className="menu-icon fas fa-info-circle"></b>{" "}
-                        <b className="menu-text">Help</b>
-                      </a>
-                    {/* </Link> */}
-                  </li>
                 </ul>
               </nav>
             </div>
