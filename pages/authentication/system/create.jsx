@@ -111,11 +111,11 @@ export default class CreateSystem extends Component
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.icon && errors.icon[0] || false}>
-                                            <label htmlFor="">Icono <small>(Opcional)</small></label>
-                                            <InputFile id="icon" 
-                                                name="icon" 
-                                                title="Seleccionar Icono"
+                                        <Form.Field error={errors && errors.imagen && errors.imagen[0] || false}>
+                                            <label htmlFor="">Imagen <small>(Opcional)</small></label>
+                                            <InputFile id="imagen" 
+                                                name="imagen" 
+                                                title="Seleccionar Imagen"
                                                 accept="image/*"
                                                 onChange={(obj) => {
                                                     this.setState(state => {
@@ -123,6 +123,19 @@ export default class CreateSystem extends Component
                                                         return { files: state.files };
                                                     })
                                                 }}
+                                            />
+                                            <label>{errors && errors.imagen && errors.imagen[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.icon && errors.icon[0] || false}>
+                                            <label htmlFor="">Icono <small>(Opcional)</small></label>
+                                            <input type="text"
+                                                name="icon"
+                                                placeholder="Ingrese el texto del icono"
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                value={form.icon || ""}
                                             />
                                             <label>{errors && errors.icon && errors.icon[0]}</label>
                                         </Form.Field>
@@ -154,7 +167,7 @@ export default class CreateSystem extends Component
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-6 mb-3">
+                                    <div className="col-md-12 mb-3">
                                         <Form.Field error={errors && errors.description && errors.description[0] || false}>
                                             <label htmlFor="">Descripción <b className="text-red">*</b></label>
                                             <textarea type="text"
@@ -164,6 +177,51 @@ export default class CreateSystem extends Component
                                                 value={form.description || ""}
                                             />
                                             <label>{errors && errors.description && errors.description[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-12">
+                                        <hr/>
+                                        <i className="fas fa-info-circle"></i> Soporte
+                                        <hr/>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.support_name && errors.support_name[0] || false}>
+                                            <label htmlFor="">Nombre <b className="text-red">*</b></label>
+                                            <input type="text"
+                                                name="support_name"
+                                                placeholder="Ingrese una descripción del Sistema"
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                value={form.support_name || ""}
+                                            />
+                                            <label>{errors && errors.support_name && errors.support_name[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.support_link && errors.support_link[0] || false}>
+                                            <label htmlFor="">Sitio Web <b className="text-red">*</b></label>
+                                            <input type="text"
+                                                name="support_link"
+                                                placeholder="Ingrese una descripción del Sistema"
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                value={form.support_link || ""}
+                                            />
+                                            <label>{errors && errors.support_link && errors.support_link[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.support_email && errors.support_email[0] || false}>
+                                            <label htmlFor="">Correo <b className="text-red">*</b></label>
+                                            <input type="text"
+                                                name="support_email"
+                                                placeholder="Ingrese una descripción del Sistema"
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                value={form.support_email || ""}
+                                            />
+                                            <label>{errors && errors.support_email && errors.support_email[0]}</label>
                                         </Form.Field>
                                     </div>
 

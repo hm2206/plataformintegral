@@ -138,14 +138,14 @@ export default class EditSystem extends Component
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.icon && errors.icon[0] || false}>
-                                            <label htmlFor="">Icono <small>(Opcional)</small></label>
-                                            <Show condicion={form.icon && !files.icon }>
-                                                <img src={form.icon && form.icon_images && form.icon_images.icon_200x200} alt="icon" className="img-content mb-2"/>
+                                        <Form.Field error={errors && errors.imagen && errors.imagen[0] || false}>
+                                            <label htmlFor="">Imagen <small>(Opcional)</small></label>
+                                            <Show condicion={form.image && !files.image}>
+                                                <img src={form.image && form.image_images && form.image_images.image_200x200} alt="image" className="img-content mb-2"/>
                                             </Show>
-                                            <InputFile id="icon" 
-                                                name="icon" 
-                                                title="Seleccionar Icono"
+                                            <InputFile id="image" 
+                                                name="image" 
+                                                title="Seleccionar Imagen"
                                                 accept="image/*"
                                                 onChange={(obj) => {
                                                     this.setState(state => {
@@ -153,6 +153,19 @@ export default class EditSystem extends Component
                                                         return { files: state.files, edit: true };
                                                     })
                                                 }}
+                                            />
+                                            <label>{errors && errors.imagen && errors.imagen[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.icon && errors.icon[0] || false}>
+                                            <label htmlFor="">Icono <small>(Opcional)</small></label>
+                                            <input type="text"
+                                                name="icon"
+                                                placeholder="Ingrese el texto del icono"
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                value={form.icon || ""}
                                             />
                                             <label>{errors && errors.icon && errors.icon[0]}</label>
                                         </Form.Field>
@@ -184,7 +197,7 @@ export default class EditSystem extends Component
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-6 mb-3">
+                                    <div className="col-md-12 mb-3">
                                         <Form.Field error={errors && errors.description && errors.description[0] || false}>
                                             <label htmlFor="">Descripción <b className="text-red">*</b></label>
                                             <textarea type="text"
