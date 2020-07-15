@@ -12,7 +12,7 @@ export default ({ my_app }) => {
                         borderRadius: "0.7em",
                         border: "4px solid #fff",
                         boxShadow: "10px 10px rgba(0, 0, 0, .15)",
-                        objectFit: "cover"
+                        objectFit: "contain"
                     }}
                     src={my_app.icon && my_app.icon_images && my_app.icon_images.icon_200x200 || '/img/base.png'} 
                     alt="logo"
