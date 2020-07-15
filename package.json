@@ -39,6 +39,7 @@
     "nookies": "^2.0.8",
     "pdf-viewer-reactjs": "^2.0.2",
     "react": "^16.12.0",
+    "react-beforeunload": "^2.2.2",
     "react-bootstrap": "^1.0.0-beta.16",
     "react-csv": "^1.1.2",
     "react-csv-reader": "^2.0.2",
@@ -53,6 +54,7 @@
     "socket.io-client": "^2.3.0",
     "sweetalert2": "^9.5.4",
     "table-to-json": "^1.0.0",
+    "uid": "^1.0.0",
     "validator-error-adonis": "^1.0.0"
   }
 }
