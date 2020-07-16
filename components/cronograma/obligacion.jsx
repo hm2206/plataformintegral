@@ -15,7 +15,7 @@ export default class Obligacion extends Component
     state = {
         obligaciones: [],
         type_aportacion_id: "",
-        loader: true,
+        loader: false,
         form: {
             tipo_documento: "01",
             numero_de_documento: "",
@@ -110,13 +110,13 @@ export default class Obligacion extends Component
     }
 
     getObligaciones = async (props) => {
-        this.setState({ loader: true });
+        this.props.setLoading(true);
         let { historial } = props;
         await unujobs.get(`historial/${historial.id}/obligacion`)
         .then(async res => {
             await this.setState({ obligaciones: res.data ? res.data : [] });
         }).catch(err => console.log(err.message));
-        this.setState({ loader: false });
+        this.props.setLoading(false);
     }
 
     permisionAdd = () => {

@@ -5,21 +5,24 @@ import { parseOptions, Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import { responsive } from '../../services/storage.json';
+import { LoadingContext } from '../../contexts';
 
 
 export default class Sindicato extends Component
 {
 
+    static contextType = LoadingContext
 
     state = {
         type_sindicatos: [],
         sindicatos: [],
         sindicato_id: "",
-        loader: true,
+        loader: false,
     }
 
 
     componentDidMount = async () => {
+        this.context.setLoading(true);
         await this.getTypeSindicatos();
         await this.getSindicatos(this.props);
     }
@@ -61,12 +64,12 @@ export default class Sindicato extends Component
     }
 
     getSindicatos = async (props) => {
-        this.setState({ loader: true });
+        this.context.setLoading(true);
         let { historial } = props;
         await unujobs.get(`historial/${historial.id}/sindicato`)
         .then(async res => await this.setState({ sindicatos: res.data ? res.data : [] }))
         .catch(err => console.log(err.message));
-        this.setState({ loader: false });
+        this.context.setLoading(false);
     }
 
     getTypeSindicatos = async () => {

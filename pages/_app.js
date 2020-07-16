@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, createContext } from 'react'
 import Head from 'next/head'
 import App from 'next/app';
 import LoaderPage from '../components/loaderPage';
@@ -20,9 +20,11 @@ import withRedux from 'next-redux-wrapper';
 import initsStore from '../storage/store';
 import Show from '../components/show';
 import Swal from 'sweetalert2';
-import { Beforeunload } from 'react-beforeunload';
 import uid from 'uid';
 import NotCurrent from '../components/notCurrent';
+
+// config context
+import { AppProvider, LoadingProvider } from '../contexts';
 
 // config router
 Router.onRouteChangeStart = () => {
@@ -107,6 +109,11 @@ class MyApp extends App {
         entity_id: ""
       }
     }
+    // add context
+    this.LoadingProvider = createContext({
+      loading : this.state.loading,
+      setLoading : (value) => this.setState({ loading: value })
+    });
   }
 
   focusMeTab = async () => {
@@ -235,62 +242,67 @@ class MyApp extends App {
             <NotCurrent my_app={_app}/>
           </Show>
           
-          <Show condicion={is_render && current}>
-            {
-              isLoggin ?
-                <Fragment>
-                  <div className="full-layout" id="main">
-                    <div className="gx-app-layout ant-layout ant-layout-has-sider">
-                      <div className="ant-layout">
-                        {/* menu navbar */}
-                        <Navbar onToggle={this.handleToggle} 
-                          my_app={_app} toggle={this.state.toggle} 
-                          setScreenLg={this.handleScreenLg} 
-                          screen_lg={this.state.screen_lg} 
-                          screenX={this.state.screenX}
-                          logout={this.logout}
-                          config_entity={this.state.config_entity}
-                        />
-                        {/* content */}
-                        <div className="gx-layout-content ant-layout-content">
-                          <div className="gx-main-content-wrapper">
-                            <Sidebar 
-                              my_app={_app} 
-                              onToggle={this.handleToggle} 
-                              toggle={this.state.toggle} 
-                              screen_lg={this.state.screen_lg}
-                              logout={this.logout}
-                              refresh={this.state.refresh}
-                            />
-                            <Content screen_lg={this.state.screen_lg}>
-                                <Component {...pageProps} 
-                                  fireEntity={this.fireEntity}
-                                  toggle={this.state.toggle} 
-                                  screenX={this.state.screenX}
-                                  my_app={_app}
-                                  fireRefreshProfile={this.refreshProfile}
-                                  fireLoading={this.fireLoading}
-                                  isLoading={loading}
-                                />
-                            </Content>
+          <LoadingProvider value={{ 
+              isLoading: this.state.loading,
+              setLoading: (value) => this.setState({ loading: value })
+           }}>
+            <Show condicion={is_render && current}>
+              {
+                isLoggin ?
+                  <Fragment>
+                    <div className="full-layout" id="main">
+                      <div className="gx-app-layout ant-layout ant-layout-has-sider">
+                        <div className="ant-layout">
+                          {/* menu navbar */}
+                          <Navbar onToggle={this.handleToggle} 
+                            my_app={_app} toggle={this.state.toggle} 
+                            setScreenLg={this.handleScreenLg} 
+                            screen_lg={this.state.screen_lg} 
+                            screenX={this.state.screenX}
+                            logout={this.logout}
+                            config_entity={this.state.config_entity}
+                          />
+                          {/* content */}
+                          <div className="gx-layout-content ant-layout-content">
+                            <div className="gx-main-content-wrapper">
+                              <Sidebar 
+                                my_app={_app} 
+                                onToggle={this.handleToggle} 
+                                toggle={this.state.toggle} 
+                                screen_lg={this.state.screen_lg}
+                                logout={this.logout}
+                                refresh={this.state.refresh}
+                              />
+                              <Content screen_lg={this.state.screen_lg}>
+                                  <Component {...pageProps} 
+                                    fireEntity={this.fireEntity}
+                                    toggle={this.state.toggle} 
+                                    screenX={this.state.screenX}
+                                    my_app={_app}
+                                    fireRefreshProfile={this.refreshProfile}
+                                    fireLoading={this.fireLoading}
+                                    isLoading={loading}
+                                  />
+                              </Content>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div 
-                    className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
-                    onClick={this.handleToggle}
+                    <div 
+                      className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
+                      onClick={this.handleToggle}
+                    />
+                  </Fragment>
+                : <Component {...pageProps} 
+                    my_app={_app} 
+                    fireLoading={this.fireLoading}
+                    isLoading={loading}
                   />
-                </Fragment>
-              : <Component {...pageProps} 
-                  my_app={_app} 
-                  fireLoading={this.fireLoading}
-                  isLoading={loading}
-                />
-            }
-          </Show>
+              }
+            </Show>
+          </LoadingProvider>
         
         </Provider>
     </Fragment>

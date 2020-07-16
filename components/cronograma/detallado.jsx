@@ -1,33 +1,32 @@
-import React, { Component } from 'react';
+import React, { Component, Context } from 'react';
 import { unujobs } from '../../services/apis';
 import { Button, Form, Select, Icon, Grid } from 'semantic-ui-react';
 import { parseOptions } from '../../services/utils';
 import Swal from 'sweetalert2';
 import { responsive } from '../../services/storage.json';
-
+import { LoadingContext } from '../../contexts';
 
 export default class Remuneracion extends Component
 {
-
-
     state = {
         type_detalles: [],
         detalles: [],
         type_detalle_id: "",
         monto: "",
-        loader: true,
+        loader: false,
         payload: []
     }
 
+    static contextType = LoadingContext
 
     componentDidMount = async () => {
         await this.getTypeDetalles();
         await this.getDetalles(this.props);
-        await this.setState({ loader: false });
     }
 
     componentWillReceiveProps = async (nextProps) => {
         if (nextProps.historial && nextProps.historial.id != this.props.historial.id) {
+            this.setState({ detalles: [] });
             await this.getDetalles(nextProps);
         }
         // update
@@ -66,16 +65,17 @@ export default class Remuneracion extends Component
     }
 
     getDetalles = async (props) => {
-        this.setState({ loader: true });
+        this.context.setLoading(true);
         let { historial } = props;
         await unujobs.get(`historial/${historial.id}/detalle`)
         .then(async res => {
             await this.setState({ detalles: res.data ? res.data : [] });
         }).catch(err => console.log(err.message));
-        this.setState({ loader: false });
+        this.context.setLoading(false);
     }
 
     getTypeDetalles = async () => {
+        this.context.setLoading(true);
         await unujobs.get('type_detalle')
         .then(async res => {
             let type_detalles = res.data;
@@ -87,6 +87,7 @@ export default class Remuneracion extends Component
             this.setState({ type_detalles })
         })
         .catch(err => console.log(err.message));
+        this.context.setLoading(false);
     }
 
     handleMonto = async (id, monto, index) => {
@@ -115,6 +116,7 @@ export default class Remuneracion extends Component
     render() {
 
         let { detalles, type_detalle_id, monto, type_detalles, loader } = this.state;
+        let { loading } = this.props;
  
         return (
             <Form className="row" loading={!this.props.loading && loader}>
@@ -164,7 +166,7 @@ export default class Remuneracion extends Component
 
                 <div className="col-md-12">
                     <Grid columns={4} fluid>
-                        {detalles.map(det => 
+                        {!loading && detalles.map(det => 
                             <Grid.Column key={`type_detalle_${det.id}`}>
                                 <b><span className="text-red mb-2">{det.key}</span>.- <span className="text-primary">{det.descripcion}</span></b>
                                 <hr/>
