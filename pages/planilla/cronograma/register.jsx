@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Form, Select, Button, Icon, Divider } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import { unujobs } from '../../../services/apis';
-import { parseOptions } from '../../../services/utils';
+import { parseOptions, Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -63,25 +63,28 @@ export default class RegisterCronograma extends Component
     }
 
     saveAndContinue = async () => {
-        this.props.fireLoading(true);
-        // send
-        await unujobs.post('cronograma', this.state)
-        .then(async res => {
+        let answer = await Confirm("warning", `¿Estás seguro en crear el cronograma?`, 'Crear')
+        if (answer) {
+            this.props.fireLoading(true);
+            // send
+            await unujobs.post('cronograma', this.state)
+            .then(async res => {
+                this.props.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+            })
+            .catch(err => {
+                try {
+                    let { data } = err.response;
+                    Swal.fire({ icon: 'warning', text: 'Datos incorrectos!' });
+                    this.setState({ errors: data });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: err.message });
+                }
+            });
             this.props.fireLoading(false);
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
-            await Swal.fire({ icon: 'success', text: message });
-        })
-        .catch(err => {
-            try {
-                let { data } = err.response;
-                Swal.fire({ icon: 'warning', text: 'Datos incorrectos!' });
-                this.setState({ errors: data });
-            } catch (error) {
-                Swal.fire({ icon: 'error', text: err.message });
-            }
-        });
-        this.props.fireLoading(false);
+        }
     }
 
     handleClose = () => {
