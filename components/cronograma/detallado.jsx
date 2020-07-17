@@ -1,4 +1,4 @@
-import React, { Component, Context } from 'react';
+import React, { Component, Context, Fragment } from 'react';
 import { unujobs } from '../../services/apis';
 import { Button, Form, Select, Icon, Grid } from 'semantic-ui-react';
 import { parseOptions } from '../../services/utils';
@@ -58,7 +58,10 @@ export default class Remuneracion extends Component
             await this.props.updatingHistorial();
             this.props.setEdit(false);
         })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        .catch(err => {
+            this.props.setLoading(false);
+            Swal.fire({ icon: 'error', text: err.message })
+        });
         this.setState({ loader: false });
         this.props.setLoading(false);
         this.props.setSend(false);
@@ -90,10 +93,19 @@ export default class Remuneracion extends Component
         this.context.setLoading(false);
     }
 
-    handleMonto = async (id, monto, index) => {
-        let newPayload = this.state.payload;
-        newPayload[index] = { id, monto };
-        this.setState({ payload: newPayload });
+    handleMonto = async ({ name, value }, parent, detalle, index) => {
+        this.setState(state => {
+            detalle[name] = value;
+            detalle.edit = true;
+            state.detalles[parent].detalles[index] = detalle;
+            state.payload[index] = {
+                id: detalle.id,
+                monto: detalle.monto,
+                descripcion: detalle.descripcion
+            };
+            // response
+            return { detalles: state.detalles };
+        });
     }
 
     update = async () => {
@@ -108,7 +120,11 @@ export default class Remuneracion extends Component
             await Swal.fire({ icon: 'success', text: message });
             await this.props.updatingHistorial();
         })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        .catch(err => {
+            this.props.setLoading(false);
+            Swal.fire({ icon: 'error', text: err.message })
+        });
+        // setting
         this.props.setLoading(false);
         this.props.setSend(false);
     }
@@ -165,22 +181,34 @@ export default class Remuneracion extends Component
                 </div>
 
                 <div className="col-md-12">
-                    <Grid columns={4} fluid>
-                        {!loading && detalles.map(det => 
+                    <Grid columns={2} fluid>
+                        {!loading && detalles.map((det, parent) => 
                             <Grid.Column key={`type_detalle_${det.id}`}>
                                 <b><span className="text-red mb-2">{det.key}</span>.- <span className="text-primary">{det.descripcion}</span></b>
                                 <hr/>
                                 {det.detalles.map((detalle, index) => 
-                                    <Form.Field key={`detalle-${detalle.id}`}>
-                                        <label htmlFor="">{detalle.type_detalle && detalle.type_detalle.descripcion}</label>
-                                        <input type="number" 
-                                            step="any"
-                                            defaultValue={detalle.monto}
-                                            disabled={!this.props.edit}
-                                            onChange={({target}) => this.handleMonto(detalle.id, target.value, index)}
-                                            min="0"
-                                        />
-                                    </Form.Field>    
+                                    <Fragment>
+                                        <Form.Field key={`detalle-${detalle.id}`}>
+                                            <label htmlFor="">{detalle.type_detalle && detalle.type_detalle.descripcion}</label>
+                                            <input type="number" 
+                                                name="monto"
+                                                step="any"
+                                                value={detalle.monto || ""}
+                                                disabled={!this.props.edit}
+                                                onChange={({target}) => this.handleMonto(target, parent, detalle, index)}
+                                                min="0"
+                                            />
+                                        </Form.Field>   
+                                        <hr/>
+                                        <Form.Field>
+                                            <textarea 
+                                                disabled={!this.props.edit}
+                                                name="descripcion"    
+                                                onChange={({ target }) => this.handleMonto(target, parent, detalle, index)}
+                                                value={detalle.descripcion || ""}
+                                            />
+                                        </Form.Field>
+                                    </Fragment> 
                                 )}
                             </Grid.Column>    
                         )}

@@ -3,6 +3,7 @@ import { Body } from '../../components/Utils';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { BtnFloat } from '../../components/Utils';
+import { AUTHENTICATE } from '../../services/auth';
 
 const Draft = dynamic(() => import('../../components/darftEditor'), { ssr: false });
 
@@ -10,7 +11,8 @@ const Draft = dynamic(() => import('../../components/darftEditor'), { ssr: false
 export default class DocsEditor extends Component
 {
 
-    static getInitialProps = (ctx) => {
+    static getInitialProps = async (ctx) => {
+        await AUTHENTICATE(ctx);
         let { pathname, query } = ctx;
         return { pathname, query };
     }

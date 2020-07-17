@@ -5,7 +5,7 @@ import { authentication } from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
 import { BtnFloat, Body} from '../../../components/Utils';
-import { AUTHENTICATE, AUTH } from '../../../services/auth';
+import { AUTHENTICATE } from '../../../services/auth';
 import { pageUser } from '../../../storage/actions/userActions';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
@@ -62,6 +62,10 @@ export default class UserIndex extends Component {
             case "restore":
                 this.setChangeState(obj, 1);
                 break;
+            case "block_user":
+                let { push, pathname } = Router;
+                let id = btoa(obj.id);
+                push({ pathname: `${pathname}/${key}`, query: { id } });
             default:
                 break;
         }
@@ -147,6 +151,11 @@ export default class UserIndex extends Component {
                                         key: "state",
                                         value: 0
                                     }
+                                },
+                                {
+                                    key: "block_user",
+                                    icon: "fas fa-ban",
+                                    title: "Restricciones"
                                 },
                                 {
                                     key: "audit",
