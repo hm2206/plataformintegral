@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import { responsive } from '../../services/storage.json';
 import { LoadingContext } from '../../contexts';
 
-export default class Remuneracion extends Component
+export default class Detalle extends Component
 {
     state = {
         type_detalles: [],
@@ -40,7 +40,7 @@ export default class Remuneracion extends Component
     }
 
     create = async () => {
-        this.setState({ loader: true });
+        this.context.setLoading(true);
         let payload = {
             historial_id: this.props.historial.id,
             type_detalle_id: this.state.type_detalle_id,
@@ -49,21 +49,19 @@ export default class Remuneracion extends Component
         // request
         await unujobs.post('detalle', payload)
         .then(async res => {
+            this.context.setLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
-            this.props.setLoading(false);
             await Swal.fire({ icon: 'success', text: message });
             await this.getDetalles(this.props);
-            this.setState({ loader: false });
             await this.props.updatingHistorial();
             this.props.setEdit(false);
         })
         .catch(err => {
-            this.props.setLoading(false);
+            this.context.setLoading(false);
             Swal.fire({ icon: 'error', text: err.message })
         });
         this.setState({ loader: false });
-        this.props.setLoading(false);
         this.props.setSend(false);
     }
 
@@ -128,6 +126,25 @@ export default class Remuneracion extends Component
         this.props.setLoading(false);
         this.props.setSend(false);
     }
+
+    delete = async (id) => {
+        this.context.setLoading(true);
+        await unujobs.post(`detalle/${id}`, { _method: 'DELETE' })
+        .then(async res => {
+            this.context.setLoading(false);
+            let { success, message } = res.data;
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message })
+            await this.getDetalles(this.props);
+            await this.props.updatingHistorial();
+            this.props.setEdit(false);
+        })
+        .catch(err => {
+            this.context.setLoading(false);
+            Swal.fire({ icon: 'error', text: err.message })
+        });
+        this.context.setLoading(false);
+    }
     
     render() {
 
@@ -190,16 +207,30 @@ export default class Remuneracion extends Component
                                     <Fragment>
                                         <Form.Field key={`detalle-${detalle.id}`}>
                                             <label htmlFor="">{detalle.type_detalle && detalle.type_detalle.descripcion}</label>
-                                            <input type="number" 
-                                                name="monto"
-                                                step="any"
-                                                value={detalle.monto || ""}
-                                                disabled={!this.props.edit}
-                                                onChange={({target}) => this.handleMonto(target, parent, detalle, index)}
-                                                min="0"
-                                            />
+                                            <div className="row">
+                                                <div className="col-md-10">
+                                                    <input type="number" 
+                                                        name="monto"
+                                                        step="any"
+                                                        value={detalle.monto || ""}
+                                                        disabled={!this.props.edit}
+                                                        onChange={({target}) => this.handleMonto(target, parent, detalle, index)}
+                                                        min="0"
+                                                    />
+                                                </div>
+                                                <div className="col-md-2">
+                                                    <Button
+                                                        fluid
+                                                        color="red"
+                                                        disabled={!this.props.edit}
+                                                        onClick={(e) => this.delete(detalle.id)}
+                                                    >
+                                                        <i className="fas fa-trash-alt"></i>
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         </Form.Field>   
-                                        <hr/>
+
                                         <Form.Field>
                                             <textarea 
                                                 disabled={!this.props.edit}
