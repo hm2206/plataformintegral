@@ -65,7 +65,7 @@ export default class Index extends Component
         let { query, pathname, push } = Router;
         let id = await btoa(obj.id);
         query.id = id;
-        if (key == 'info') push({ pathname: `${pathname}/profile`, query });
+        if (key == 'info') push({ pathname: `${pathname}/edit`, query });
     }
 
     render() {

@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Form, Button, Select } from 'semantic-ui-react';
+import { Form, Button, Select, Checkbox } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
 import { Body, BtnFloat, BtnBack } from '../../../components/Utils';
@@ -8,7 +8,8 @@ import { unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
 import CreateConfigRemuneracion from '../../../components/contrato/createConfigRemuneracion';
 import Swal from 'sweetalert2';
-import { Confirm } from '../../../services/utils'
+import { Confirm, parseOptions } from '../../../services/utils'
+import { tipo_documento } from '../../../services/storage.json';
 
 export default class Pay extends Component
 {
@@ -25,12 +26,16 @@ export default class Pay extends Component
         loading: false,
         work: {},
         configs: [],
+        situacion_laborals: [],
+        perfil_laboral: {},
         edit: false
     }
 
     componentDidMount = async () => {
         let { info } = this.props;
         this.props.fireEntity({ render: true, disabled: true, entity_id: info.entity_id });
+        this.getSituacionLaboral();
+        this.getPerfilLaboral();
         await this.getWork();
         await this.getConfig();
     }
@@ -57,13 +62,30 @@ export default class Pay extends Component
         a.click();
     }
 
+    getPerfilLaboral = async () => {
+        let { info } = this.props;
+        await unujobs.get(`perfil_laboral/${info.perfil_laboral_id}`)
+        .then(res => this.setState({ perfil_laboral: res.data }))
+        .catch(err => console.log(err.message));
+    }
+
+    getSituacionLaboral = async (page = 1) => {
+        await unujobs.get(`situacion_laboral?page=${page}`)
+        .then(async res => {
+            let { data, last_page } = res.data;
+            this.setState(state => ({ situacion_laborals: [...state.situacion_laborals, ...data] }));
+            if (last_page > page + 1) await this.getSituacionLaboral(page + 1);
+        }).catch(err => console.log(err.message));
+    }
+
     getWork = async () => {
+        this.setState({ loading: true })
         let { info } = this.props;
         this.setState({ loading: true });
         await unujobs.get(`work/${info.work_id}`)
         .then(res => this.setState({ work: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.setState({ loading: false })
     }
 
     getConfig = async () => {
@@ -78,7 +100,6 @@ export default class Pay extends Component
     handleInput = ({ name, value }, index) => {
         this.setState(state => {
             let newObj = state.configs[index];
-            console.log(newObj);
             newObj[name] = value;
             state.configs[index] = newObj;
             return { configs: state.configs, edit: true };
@@ -121,14 +142,14 @@ export default class Pay extends Component
 
     render() {
 
-        let { work } = this.state;
+        let { work, perfil_laboral } = this.state;
         let { info, query, pathname } = this.props;
 
         return (
             <Fragment>
                 <div className="col-md-12">
                     <Body>
-                        <div className="card-" loading={this.state.loading}>
+                        <div className="card-">
                             <div className="card-header">
                                 <BtnBack 
                                     onClick={this.handleBack} 
@@ -140,99 +161,154 @@ export default class Pay extends Component
                                 <Form loading={this.state.loading}>
                                     <div className="row">
                                         <div className="col-md-4 mt-3 text-center">
-                                            <img src="/img/perfil.jpg"
-                                            style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "50%" }}
+                                            <img src={work && work.person && work.person.image_images && work.person.image_images.image_200x200 || '/img/perfil.jpg'}
+                                                style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "50%" }}
                                             />
-                                            <h3 className="text-center">{work && work.person ? work.person.fullname : ''}</h3>
+                                            
+                                            <div className="row">
+                                                <div className="col-md-12 mt-3">
+                                                    <h3 className="text-center">{work && work.person ? work.person.fullname : ''}</h3>
+                                                </div>
+
+                                                <div className="col-md-12 mt-5 text-left">
+                                                    <label>Tip. Documento</label>
+                                                    <Select
+                                                        fluid
+                                                        options={tipo_documento}
+                                                        value={work && work.person && work.person.document_type || ""}
+                                                        disabled
+                                                    />
+                                                </div>
+
+                                                <div className="col-md-12 mt-3 text-left">
+                                                    <Form.Field>
+                                                        <label>N° Documento</label>
+                                                        <input type="text"
+                                                            disabled
+                                                            readOnly
+                                                            value={work && work.person && work.person.document_number || ""}
+                                                        />
+                                                    </Form.Field>
+                                                </div>
+                                            </div>
+                                            
                                         </div>
 
                                         <div className="col-md-8">
                                             <div className="row">
-                                                <div className="col-md-4">
+                                                <div className="col-md-4 mt-3">
                                                     <Form.Field>
                                                         <label htmlFor="">Planilla</label>
                                                         <input type="text" disabled defaultValue={info.planilla && info.planilla.nombre}/>
                                                     </Form.Field>
                                                 </div>
 
-                                                <div className="col-md-4">
+                                                <div className="col-md-4 mt-3">
                                                     <Form.Field>
-                                                        <label htmlFor="">Cargo</label>
+                                                        <label htmlFor="">Partición Presupuestal</label>
                                                         <input type="text" disabled defaultValue={info.cargo && info.cargo.descripcion}/>
                                                     </Form.Field>
                                                 </div>
 
-                                                <div className="col-md-4">
+                                                <div className="col-md-4 mt-3">
                                                     <Form.Field>
-                                                        <label htmlFor="">Tip. Categoría</label>
-                                                        <input type="text" disabled defaultValue={info.type_categoria && info.type_categoria.descripcion}/>
+                                                        <label htmlFor="">Ext. Presupuestal</label>
+                                                        <input type="text" disabled defaultValue={info.cargo && info.cargo.ext_pptto}/>
                                                     </Form.Field>
                                                 </div>
 
-                                                <div className="col-md-4">
-                                                    <Form.Field>
-                                                        <label htmlFor="">MetaID</label>
-                                                        <input type="text" disabled defaultValue={info.meta && info.meta.metaID}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4">
-                                                    <Form.Field>
-                                                        <label htmlFor="">ActividadID</label>
-                                                        <input type="text" disabled defaultValue={info.meta && info.meta.actividadID}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Meta</label>
-                                                        <input type="text" disabled defaultValue={info.meta && info.meta.meta}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Dependencia</label>
-                                                        <input type="text" disabled defaultValue={info.dependencia && info.dependencia.nombre}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4">
+                                                <div className="col-md-4 mt-3">
                                                     <Form.Field>
                                                         <label htmlFor="">P.A.P</label>
                                                         <input type="text" disabled defaultValue={info.pap}/>
                                                     </Form.Field>
                                                 </div>
 
-                                                <div className="col-md-4">
+                                                <div className="col-md-4 mt-3">
                                                     <Form.Field>
-                                                        <label htmlFor="">Perfil Laboral</label>
-                                                        <input type="text" disabled defaultValue={info.perfil_laboral}/>
+                                                        <label htmlFor="">Tip. Categoría</label>
+                                                        <input type="text" disabled defaultValue={info.type_categoria && info.type_categoria.descripcion}/>
                                                     </Form.Field>
                                                 </div>
 
-                                                <div className="col-md-4">
+                                                <div className="col-md-4 mt-3">
+                                                    <Form.Field>
+                                                        <label htmlFor="">MetaID</label>
+                                                        <input type="text" disabled defaultValue={info.meta && info.meta.metaID}/>
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 mt-3">
+                                                    <Form.Field>
+                                                        <label htmlFor="">ActividadID</label>
+                                                        <input type="text" disabled defaultValue={info.meta && info.meta.actividadID}/>
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 mt-3">
+                                                    <Form.Field>
+                                                        <label htmlFor="">Meta</label>
+                                                        <input type="text" disabled defaultValue={info.meta && info.meta.meta}/>
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 mt-3">
+                                                    <Form.Field>
+                                                        <label htmlFor="">Dependencia</label>
+                                                        <input type="text" disabled defaultValue={info.dependencia && info.dependencia.nombre}/>
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 mt-3">
+                                                    <Form.Field>
+                                                        <label htmlFor="">Perfil Laboral</label>
+                                                        <input type="text" disabled defaultValue={perfil_laboral.nombre || ""}/>
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 mt-3">
+                                                    <Form.Field>
+                                                        <label htmlFor="">Situación Laboral</label>
+                                                        <Select
+                                                            options={parseOptions(this.state.situacion_laborals, ['sel_sit_lab', '', 'Select. Situación Laboral'], ['id', 'id', 'nombre'])}
+                                                            placeholder="Select. Situación Laboral"
+                                                            value={info.situacion_laboral_id || ""}
+                                                            name="situacion_laboral_id"
+                                                            disabled
+                                                        />
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 mt-3">
+                                                    <Form.Field>
+                                                        <label htmlFor="">{info.is_pay ? 'Remunerada' : 'No Remunerada'}</label>
+                                                        <Checkbox toggle checked={info.is_pay ? true : false} readOnly disabled/>
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 mt-3">
                                                     <Form.Field>
                                                         <label htmlFor="">Plaza</label>
                                                         <input type="text" disabled defaultValue={info.plaza}/>
                                                     </Form.Field>
                                                 </div>
 
-                                                <div className="col-md-4">
+                                                <div className="col-md-4 mt-3">
                                                     <Form.Field>
                                                         <label htmlFor="">Fecha de Ingreso</label>
-                                                        <input type="text" disabled defaultValue={info.fecha_de_ingreso}/>
+                                                        <input type="date" disabled defaultValue={info.fecha_de_ingreso}/>
                                                     </Form.Field>
                                                 </div>
 
-                                                <div className="col-md-4">
+                                                <div className="col-md-4 mt-3">
                                                     <Form.Field>
                                                         <label htmlFor="">Fecha de Cese</label>
-                                                        <input type="text" disabled defaultValue={info.fecha_de_cese}/>
+                                                        <input type="date" disabled defaultValue={info.fecha_de_cese}/>
                                                     </Form.Field>
                                                 </div>
 
-                                                <div className="col-md-8">
+
+                                                <div className="col-md-8 mt-3">
                                                     <Form.Field>
                                                         <label htmlFor="">Observación</label>
                                                         <textarea type="text" disabled defaultValue={info.observacion}/>
@@ -290,18 +366,14 @@ export default class Pay extends Component
 
                                                     <div className="col-md-4 col-6">
                                                         <b>Base imponible</b>
-                                                        <Select
-                                                            key={`opt-${obj.id}`}
-                                                            fluid
-                                                            options={[
-                                                                {key: "0", value: 0, text: "SI"},
-                                                                {key: "1", value: 1, text: "NO"}
-                                                            ]}
-                                                            disabled={this.state.loading}
-                                                            name="base"
-                                                            value={obj.base}
-                                                            onChange={(e, o) => this.handleInput(o, index)}
-                                                        />
+                                                        <div>
+                                                            <Checkbox
+                                                                toggle
+                                                                name="base"
+                                                                checked={obj.base == 0 ? true : false}
+                                                                onChange={(e, o) => this.handleInput({ name: o.name, value: o.value ? 0 : 1 }, index)}
+                                                            />
+                                                        </div>
                                                     </div>
                                                         
                                                     <div className="col-md-2 col-6">

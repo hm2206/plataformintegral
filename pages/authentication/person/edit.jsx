@@ -7,8 +7,9 @@ import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
 import btoa from 'btoa'
+import Show from '../../../components/show';
 
-export default class CreateTrabajador extends Component
+export default class EditTrabajador extends Component
 {
 
     static getInitialProps = async (ctx) => {
@@ -19,6 +20,7 @@ export default class CreateTrabajador extends Component
 
     state = {
         loader: false,
+        edit: false,
         block: false,
         form: {
             name: "",
@@ -47,19 +49,35 @@ export default class CreateTrabajador extends Component
         // apis
         this.getDocumentType();
         this.getDepartamento();
+        this.findPerson();
     }
 
     componentWillUpdate = async (nextProps, nextState) => {
-        let { form, works } = this.state;
-        if (nextState.form.cod_dep && form.cod_dep != nextState.form.cod_dep) {
+        let { form } = this.state;
+        if (nextState.form && form.cod_dep != nextState.form.cod_dep) {
             await this.getProvincias(nextState.form);
-        } else if (nextState.form.cod_pro && form.cod_pro != nextState.form.cod_pro) {
+        }
+        if (nextState.form && form.cod_pro != nextState.form.cod_pro) {
             await this.getDistritos(nextState.form);
         }
+    }
 
-        if (nextState.form.document_number != form.document_number) {
-            await this.getReniec(nextState.form.document_number);
-        }
+    findPerson = async () => {
+        this.props.fireLoading(true);
+        let { query } = this.props;
+        let id = query.id ? atob(query.id) : '__error';
+        await authentication.get(`find_person/${id}`)
+        .then(async res => {
+            let { data } = res;
+            // config 
+            data.cod_dep = `${data.badge_id}`.substr(0, 2);
+            data.cod_pro = `${data.badge_id}`.substr(2, 2);
+            data.cod_dis = `${data.badge_id}`.substr(4, 2);
+            // setting
+            await this.setState({ form: data, image_render: data.image_images.image_400x400 });
+        })
+        .catch(err => console.log(err.message));
+        this.props.fireLoading(false);
     }
 
     handleBack = () => {
@@ -68,7 +86,7 @@ export default class CreateTrabajador extends Component
         if (query.href) {
             push(query.href);
         } else {
-            push({ pathname: backUrl(pathname) });
+            push({ pathname: backUrl(pathname), query });
         }
     }
 
@@ -79,39 +97,18 @@ export default class CreateTrabajador extends Component
             this.setState({ image: archivo });
             reader.readAsDataURL(archivo);
             reader.onloadend = () => {
-                this.setState({ image_render: reader.result });
+                this.setState({ image_render: reader.result, edit: true });
             }
         }
     }
 
     handleInput = async ({ name, value }, object = 'form') => {
+        await this.setState({ edit: true });
         let newObj = Object.assign({}, this.state[object]);
         let newErrors = Object.assign({}, this.state.errors);
         newObj[name] = value;
         newErrors[name] = "";
         await this.setState({ [object]: newObj, errors: newErrors });
-    }
-
-    getReniec = async (dni = "") => {
-        if (dni.length == 8) {
-            this.setState({ loader: true });
-            await unujobs.get(`reniec/${dni}`)
-            .then(res => {
-                let { success, result, message } = res.data;
-                if (success) {
-                    let newForm = Object.assign({}, this.state.form);
-                    newForm.name = result.nombre;
-                    newForm.ape_pat = result.paterno;
-                    newForm.ape_mat = result.materno;
-                    newForm.date_of_birth = result.nacimiento_parse;
-                    newForm.gender = result.sexo ? 'M' : 'F';
-                    this.setState({ form: newForm });
-                } else {
-                    Swal.fire({ icon: 'warning', text: message });
-                }
-            }).catch(err => Swal.fire({ icon: "error", text: "Algo salió mal al consultar a reniec" }));
-            this.setState({ loader: false });
-        }
     }
 
     getDocumentType = async () => {
@@ -127,25 +124,41 @@ export default class CreateTrabajador extends Component
     }
 
     getProvincias = async (form) => {
-        await authentication.get(`get_provincias/${form.cod_dep}`)
-        .then(res => this.setState({ provincias: res.data }))
-        .catch(err => console.log(err.message));
-        let obj = Object.assign({}, this.state.form);
-        obj['cod_pro'] = "";
-        obj['cod_dis'] = "";
-        this.setState({ form: obj });
+        // validar cod_dep
+        if (form.cod_dep) {
+            await authentication.get(`get_provincias/${form.cod_dep}`)
+            .then(res => this.setState({ provincias: res.data }))
+            .catch(err => console.log(err.message));
+        } else this.setState({ provincias: [], distritos: [] });
+        // validar edit
+        let { edit } = this.state;
+        if (edit) {
+            let obj = Object.assign({}, this.state.form);
+            obj['cod_pro'] = "";
+            obj['cod_dis'] = "";
+            // set
+            this.setState({ form: obj });
+        }
     }
 
     getDistritos = async (form) => {
-        await authentication.get(`get_distritos/${form.cod_dep}/${form.cod_pro}`)
-        .then(res => this.setState({ distritos: res.data }))
-        .catch(err => console.log(err.message));
-        let obj = Object.assign({}, this.state.form);
-        obj['cod_dis'] = "";
-        this.setState({ form: obj });
+        // validar cod_dep
+        if (form.cod_pro) {
+            await authentication.get(`get_distritos/${form.cod_dep}/${form.cod_pro}`)
+            .then(res => this.setState({ distritos: res.data }))
+            .catch(err => console.log(err.message));
+        } else this.setState({ distritos: [] });
+        // validar edit
+        let { edit } = this.state;
+        if (edit) {
+            let obj = Object.assign({}, this.state.form);
+            obj['cod_dis'] = "";
+            // set  
+            this.setState({ form: obj });
+        }
     }
 
-    create = async () => {
+    update = async () => {
         this.setState({ loader: true });
         const form = new FormData;
         for(let key in this.state.form) {
@@ -154,9 +167,9 @@ export default class CreateTrabajador extends Component
         // add imagen
         form.append('image', this.state.image);
         // request
-        await authentication.post(`person`, form)
+        await authentication.post(`person/${this.state.form.id}/update`, form)
         .then(async res => {
-            let { success, message, person } = res.data;
+            let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
             this.setState({ person: {}, form: {} });
@@ -182,7 +195,7 @@ export default class CreateTrabajador extends Component
                     <div className="col-md-12">
                         <Body>
                             <div className="card-header">
-                                <BtnBack onClick={this.handleBack}/> <span className="ml-3"><i className="fas fa-plus"></i> Agregar Nueva Persona</span>
+                                <BtnBack onClick={this.handleBack}/> <span className="ml-3"><i className="fas fa-plus"></i> Editar Persona</span>
                             </div>
 
                             <div className="card-body">
@@ -192,7 +205,7 @@ export default class CreateTrabajador extends Component
                                             <div className="row justify-content-center">
                                                 <Image circular src={image_render} 
                                                     size="small"
-                                                    style={{ width: "150px", height: "150px", objectFit: "contain" }}
+                                                    style={{ width: "150px", height: "150px", objectFit: "cover" }}
                                                 />
                                                 <div className="col-md-12 text-center">
                                                     <label htmlFor="image" className="text-primary" 
@@ -201,7 +214,7 @@ export default class CreateTrabajador extends Component
                                                     >
                                                         <b><i className="fas fa-image"></i> Seleccionar Foto de la Persona</b>
                                                         <input type="file" 
-                                                            accept="image/png" 
+                                                            accept="image/*" 
                                                             hidden id="image"
                                                             onChange={(e) => this.handleImage(e.target)}
                                                         />
@@ -354,8 +367,8 @@ export default class CreateTrabajador extends Component
                                                     onChange={(e) => this.handleInput(e.target)}
                                                 >
                                                     <option value="">Select. Departamento</option>
-                                                    {this.state.departamentos.map(obj => 
-                                                        <option value={obj.cod_dep} key={`dep-${obj.departamento}`}>{obj.departamento}</option>
+                                                    {this.state.departamentos.map((obj, indexDep) => 
+                                                        <option value={obj.cod_dep} key={`dep-${indexDep}`}>{obj.departamento}</option>
                                                     )}
                                                 </select>
                                                 <label>{errors && errors.cod_dep && errors.cod_dep[0]}</label>
@@ -372,8 +385,8 @@ export default class CreateTrabajador extends Component
                                                     disabled={!form.cod_dep}
                                                 >
                                                     <option value="">Select. Provincia</option>
-                                                    {this.state.provincias.map(obj =>
-                                                        <option key={`prov-${obj.pro}`} value={obj.cod_pro}>{obj.provincia}</option>    
+                                                    {this.state.provincias.map((obj, indexPro ) =>
+                                                        <option key={`prov-${indexPro}`} value={obj.cod_pro}>{obj.provincia}</option>    
                                                     )}
                                                 </select>
                                                 <label>{errors && errors.cod_pro && errors.cod_pro[0]}</label>
@@ -390,8 +403,8 @@ export default class CreateTrabajador extends Component
                                                     disabled={!form.cod_pro}
                                                 >
                                                     <option value="">Select. Distrito</option>
-                                                    {this.state.distritos.map(obj =>
-                                                        <option key={`dis-${obj.dis}`} value={obj.cod_dis}>{obj.distrito}</option>    
+                                                    {this.state.distritos.map((obj, indexDis) =>
+                                                        <option key={`dis-${indexDis}`} value={obj.cod_dis}>{obj.distrito}</option>    
                                                     )}
                                                 </select>
                                                 <label>{errors && errors.cod_dis && errors.cod_dis[0]}</label>
@@ -439,8 +452,15 @@ export default class CreateTrabajador extends Component
                                         </div>
 
                                         <div className="col-md-12 text-right">
+                                            <Show condicion={this.state.edit}>
+                                                <Button color="red">
+                                                    <i className="fas fa-times"></i> Cancelar
+                                                </Button>
+                                            </Show>
+
                                             <Button color="teal"
-                                                onClick={this.create}
+                                                disabled={!this.state.edit}
+                                                onClick={this.update}
                                             >
                                                 <i className="fas fa-save"></i> Guardar Datos
                                             </Button>
