@@ -559,6 +559,7 @@ export default class CronogramaInformacion extends Component
                             </div>
 
                             <div className="col-md-12 mt-3">
+                                <hr/>
                                 <div className="card-" style={{ minHeight: "80vh" }}>
                                     <div className="card-header">
                                         {/* mensaje cuando el trabajador tiene saldo negativo o neutro */}
@@ -593,7 +594,7 @@ export default class CronogramaInformacion extends Component
                                                     }}    
                                                 />
                                             </div>
-                                            <div className="col-md-8 col-lg-7 mb-2">
+                                            <div className="col-md-8 col-lg-8 mb-2">
                                                 <Show condicion={historial.token_verify}>
                                                     <a href="#" title="Boleta verificada"
                                                         onClick={this.verifyBoleta}
