@@ -383,10 +383,17 @@ export default class Afectacion extends Component {
                     </Form.Field>
 
                     <Form.Field>
-                        <label className="mb-2"><h5>Enviar Email</h5></label>
-                        <Radio toggle checked={history.is_email || 0}
+                        <label className="mb-2"><h5>Situación Laboral</h5></label>
+                        <Select
+                            options={[
+                                {key: "n", value: 0, text: "No Afecto"},
+                                {key: "a", value: 1, text: "Afecto"}
+                            ]}
+                            placeholder="Select. Prima Seguro"
+                            value={history.prima_seguro || 0}
+                            name="prima_seguro"
+                            onChange={(e, obj) => this.handleInput(obj)}
                             disabled={!this.props.edit}
-                            onChange={(e, obj) => this.handleInput({ name: 'is_email', value: obj.checked ? 1 : 0 })}
                         />
                     </Form.Field>
                 </div>
@@ -439,6 +446,14 @@ export default class Afectacion extends Component {
                             disabled={!this.props.edit}
                         />
                     </Form.Field>
+
+                    <Form.Field>
+                        <label className="mb-2"><h5>{history.is_pay ? 'Remunerada' : 'No Remunerada'}</h5></label>
+                        <Radio toggle checked={history.is_pay ? true : false}
+                            disabled={!this.props.edit}
+                            onChange={(e, obj) => this.handleInput({ name: 'is_pay', value: obj.checked ? 1 : 0 })}
+                        />
+                    </Form.Field>
                 </div>
 
                 <div className="col-md-9 mt-3">
@@ -453,6 +468,16 @@ export default class Afectacion extends Component {
                             onChange={(e) => this.handleInput(e.target)}
                         />
                         <label>{errors.observacion && errors.observacion[0]}</label>
+                    </Form.Field>
+                </div>
+
+                <div className="col-md-3 mt-3">
+                    <Form.Field>
+                        <label className="mb-2"><h5>{history.is_email ? 'Enviar Email' : 'No Enviar Email'}</h5></label>
+                        <Radio toggle checked={history.is_email ? true : false}
+                            disabled={!this.props.edit}
+                            onChange={(e, obj) => this.handleInput({ name: 'is_email', value: obj.checked ? 1 : 0 })}
+                        />
                     </Form.Field>
                 </div>
 

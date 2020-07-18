@@ -105,7 +105,8 @@ export default class Descuento extends Component
     render() {
 
         let { descuentos, total_bruto, total_desct, total_neto, base, loader } = this.state;
- 
+        let { historial } = this.props;
+
         return (
             <Form className="row">
                 <div className="col-md-12">
@@ -155,7 +156,7 @@ export default class Descuento extends Component
                                         <input type="number"
                                             step="any" 
                                             value={obj.monto}
-                                            disabled={!this.props.edit}
+                                            disabled={!this.props.edit || !historial.is_pay}
                                             onChange={({target}) => this.handleMonto(index, target.value, obj)}
                                             min="0"
                                         />
@@ -169,7 +170,7 @@ export default class Descuento extends Component
                                                 style={{ width: "100%", height: "100%" }}
                                                 size="small"
                                                 basic
-                                                disabled={this.state.loading || !this.props.edit}>
+                                                disabled={this.state.loading || !this.props.edit || !historial.is_pay}>
                                             </Button>
                                         </div>
                                     </Show>
@@ -181,7 +182,6 @@ export default class Descuento extends Component
                                             <Input icon='wait' iconPosition='left' 
                                                 value={obj.monto} 
                                                 disabled
-                                                onChange={({target}) => this.handleMonto(index, target.value, obj)}
                                             />
                                         </div>
                                     </Show>
@@ -191,9 +191,8 @@ export default class Descuento extends Component
                                             <input type="number"
                                                 step="any" 
                                                 value={obj.monto}
-                                                disabled={!this.props.edit}
+                                                disabled={!this.props.edit || !historial.is_pay}
                                                 onChange={({target}) => this.handleMonto(index, target.value, obj)}
-                                                disabled
                                                 min="0"
                                             />
                                         </div>
@@ -206,7 +205,7 @@ export default class Descuento extends Component
                                                 onClick={(e) => this.handleEdit(obj, 1)}
                                                 style={{ width: "100%", height: "100%" }}
                                                 size="small"
-                                                disabled={this.state.loading || !this.props.edit}>
+                                                disabled={this.state.loading || !this.props.edit || !historial.is_pay}>
                                             </Button>
                                         </div>
                                     </Show>

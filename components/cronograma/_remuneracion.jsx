@@ -67,11 +67,11 @@ export default class Remuneracion extends Component
         form.append('remuneraciones', JSON.stringify(this.state.payload));
         await unujobs.post(`remuneracion/${this.props.historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
+            this.props.setLoading(false);
             let { success, message, body } = res.data;
             if (!success) throw new Error(message);
             this.props.setSend(false);
             this.props.setEdit(false);
-            this.props.setLoading(false);
             await Swal.fire({ icon: 'success', text: message });
             await this.props.updatingHistorial();
         })
@@ -85,6 +85,7 @@ export default class Remuneracion extends Component
     render() {
 
         let { remuneraciones, total_bruto, total_desct, total_neto, base, loader } = this.state;
+        let { historial } = this.props;
  
         return (
             <Form className="row">
@@ -139,7 +140,7 @@ export default class Remuneracion extends Component
                             <input type="number"
                                 step="any" 
                                 value={obj.monto}
-                                disabled={!obj.edit ? true : !this.props.edit}
+                                disabled={!obj.edit || !historial.is_pay ? true : !this.props.edit}
                                 onChange={({target}) => this.handleMonto(index, target.value, obj)}
                                 min="0"
                             />
