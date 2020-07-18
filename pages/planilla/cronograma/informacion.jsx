@@ -475,7 +475,7 @@ export default class CronogramaInformacion extends Component
             InputCredencias().filter(i => form.appendChild(i));
             // add token_auth
             form.appendChild(token_verify);
-            form.action = `${url.URL_BOLETA || ""}`;
+            form.action = `${unujobs.path + `/my_boleta` || ""}`;
             form.method = 'POST';
             form.target = '_blank';
             form.submit();
