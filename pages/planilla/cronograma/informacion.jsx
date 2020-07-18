@@ -50,7 +50,8 @@ export default class CronogramaInformacion extends Component
         type_documents: [],
         export: true,
         active: 0,
-        config_edad: {}
+        config_edad: {},
+        situacion_laborals: []
     }
 
     static getInitialProps = async (ctx) => {
@@ -70,6 +71,7 @@ export default class CronogramaInformacion extends Component
         this.getBancos();
         this.getPlanillas();
         this.getUbigeo();
+        this.getSituacionLaboral();
         // window
         if (typeof window == 'object') {
             this.setState({ screen: window.screen })
@@ -131,6 +133,16 @@ export default class CronogramaInformacion extends Component
             this.setState({ planillas });
         }).catch(err => console.log(err.message));
         this.props.fireLoading(false);
+    }
+
+    getSituacionLaboral = async (page = 1) => {
+        await unujobs.get(`situacion_laboral?page=${page}`)
+        .then(res => {
+            let { last_page, data } = res.data;
+            this.setState(state => ({ situacion_laborals: [...state.situacion_laborals, ...data] }));
+            if (last_page > page + 1) this.getSituacionLaboral(page + 1);
+        })
+        .catch(err => console.log(err.message));
     }
 
     getBancos = () => {
@@ -491,12 +503,12 @@ export default class CronogramaInformacion extends Component
 
     render() {
 
-        let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id, config_edad } = this.state;
+        let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id, config_edad, situacion_laborals } = this.state;
         let { query, isLoading } = this.props;
 
         return (
             <Fragment>
-                <Form className="col-md-12" disabled={isLoading} onSubmit={(e) => e.preventDefault()}>
+                <div className="col-md-12 ui form row">
                     <Body>
                         <div className="row pl-2 pr-2">
                             <div className="col-md-2 col-4">
@@ -631,7 +643,6 @@ export default class CronogramaInformacion extends Component
                                 </div>
 
                                 <div className="card-body" style={{ marginBottom: "10em" }}>
-                                        <Form>
                                             <Row>
                                                 <div className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1">
                                                     <Form.Field> 
@@ -695,6 +706,7 @@ export default class CronogramaInformacion extends Component
                                                 <Show condicion={this.state.total}>
                                                     <TabCronograma
                                                         type_documents={this.state.type_documents}
+                                                        situacion_laborals={situacion_laborals}
                                                         historial={historial}
                                                         remuneraciones={this.state.remuneraciones}
                                                         descuentos={this.state.descuentos}
@@ -722,12 +734,11 @@ export default class CronogramaInformacion extends Component
                                                     </div>
                                                 </Show>                    
                                             </Row>
-                                        </Form>
                                     </div>
                                 </div>
                             </div>
                     </Body>
-                </Form>
+                </div>
 
                 <div className="nav-bottom">
                     <div className="row justify-content-end">

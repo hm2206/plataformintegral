@@ -18,7 +18,7 @@ export default class TabCronograma extends Component
 
     render() {
 
-        let { cancel, edit, send, total, ubigeos, bancos, screenX } = this.props;
+        let { cancel, edit, send, total, ubigeos, bancos, screenX, situacion_laborals } = this.props;
 
         let styles = {
             border: '0px'
@@ -49,6 +49,7 @@ export default class TabCronograma extends Component
                 render: () => (
                     <Tab.Pane style={styles}>
                         <Afectacion
+                            situacion_laborals={situacion_laborals}
                             bancos={bancos}
                             ubigeos={ubigeos}
                             edit={this.props.edit}

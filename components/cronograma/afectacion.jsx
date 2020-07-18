@@ -190,18 +190,19 @@ export default class Afectacion extends Component {
                             <input type="text"
                                 disabled={true}
                                 value={history.afp ? history.afp : ''}
-                                onChange={({target}) => this.handleInput(target)}
+                                readOnly
                             />
                         </Show>
                     </Form.Field>
 
                     <Form.Field>
                         <label><h5>Fecha de Ingreso</h5></label>
-                        <input type="date" 
+                        <input 
+                            type="date" 
                             name="fecha_de_ingreso"
-                            value={history.fecha_de_ingreso}
-                            onChange={({target}) => this.handleInput(target)}
+                            value={history.fecha_de_ingreso || ""}
                             disabled={true}
+                            readOnly
                         />
                     </Form.Field>
 
@@ -222,7 +223,7 @@ export default class Afectacion extends Component {
                             <input type="text" name="meta_id"
                                 disabled={true}
                                 value={history.meta ? history.meta : ''}
-                                onChange={({target}) => this.handleInput(target)}
+                                readOnly
                             />
                         </Show>
                     </Form.Field>
@@ -232,7 +233,7 @@ export default class Afectacion extends Component {
                         <input type="text"
                             value={history.planilla ? history.planilla : ''}
                             disabled={true}
-                            onChange={({target}) => this.handleInput(target)}
+                            readOnly
                         />
                     </Form.Field>
 
@@ -241,7 +242,7 @@ export default class Afectacion extends Component {
                         <input type="text"
                             value={history.banco ? history.banco : 'B NACIÓN'}
                             disabled={true}
-                            onClick={(e) => this.handleInput(e.target)}
+                            readOnly
                         />
                     </Form.Field>
 
@@ -264,8 +265,8 @@ export default class Afectacion extends Component {
                         <input type="date" 
                             name="fecha_de_cese"
                             value={history.fecha_de_cese ? history.fecha_de_cese : ''}
-                            onChange={(e) => this.handleInput(e.target)}
                             disabled={true}
+                            readOnly
                         />
                     </Form.Field>
 
@@ -285,7 +286,7 @@ export default class Afectacion extends Component {
                             <input type="text" 
                                 value={history.cargo ? history.cargo : ''}
                                 disabled={true}
-                                onClick={(e) => this.handleInput(e.target)}
+                                readOnly
                             />
                         </Show>
                     </Form.Field>
@@ -307,7 +308,7 @@ export default class Afectacion extends Component {
                             <input type="text"
                                 disabled={true}
                                 value={history.dependencia ? history.dependencia : ''}
-                                onChange={({target}) => this.handleInput(target)}
+                                readOnly
                             />
                         </Show>
                     </Form.Field>
@@ -339,7 +340,7 @@ export default class Afectacion extends Component {
                         <input type="text"
                             disabled={true}
                             name="type_categoria_id"
-                            onChange={(e) => this.handleInput(e.target)}
+                            readOnly
                             value={history.type_categoria ? history.type_categoria : ''}
                         />
                     </Form.Field>
@@ -351,12 +352,12 @@ export default class Afectacion extends Component {
                                 options={parseOptions(cargos, ['sel-cargo', '', 'Select. Cargo'], ['id', 'id', 'ext_pptto'])}
                                 placeholder="Select. Cargo"
                                 value={history.cargo_id}
-                                onChange={(e, obj) => this.handleInput(obj)}
                                 disabled
+                                readOnly
                             />
                         </Show>
                         <Show condicion={!this.props.edit}>
-                            <input type="text" name="ext_pptto" value={history.ext_pptto} disabled/>
+                            <input type="text" name="ext_pptto" value={history.ext_pptto} disabled readOnly/>
                         </Show>
                     </Form.Field>
 
@@ -377,21 +378,18 @@ export default class Afectacion extends Component {
                             <input type="text"
                                 disabled={true}
                                 value={history.perfil_laboral || ''}
-                                onChange={({target}) => this.handleInput(target)}
+                                readOnly
                             />
                         </Show>
                     </Form.Field>
 
                     <Form.Field>
-                        <label className="mb-2"><h5>Situación Laboral</h5></label>
+                        <label className="mb-2"><h5>Situación Laboral <b className="text-red">*</b></h5></label>
                         <Select
-                            options={[
-                                {key: "n", value: 0, text: "No Afecto"},
-                                {key: "a", value: 1, text: "Afecto"}
-                            ]}
-                            placeholder="Select. Prima Seguro"
-                            value={history.prima_seguro || 0}
-                            name="prima_seguro"
+                            options={parseOptions(this.props.situacion_laborals, ['sel_sit_lab', '', 'Select. Situación Laboral'], ['id', 'id', 'nombre'])}
+                            placeholder="Select. Situación Laboral"
+                            value={history.situacion_laboral_id || ""}
+                            name="situacion_laboral_id"
                             onChange={(e, obj) => this.handleInput(obj)}
                             disabled={!this.props.edit}
                         />
