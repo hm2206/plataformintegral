@@ -12,10 +12,10 @@ import Router from 'next/router';
 import { responsive } from '../../../services/storage.json';
 import { Body, BtnBack, DrownSelect, BtnFloat } from '../../../components/Utils';
 import UpdateDesctMassive from '../../../components/cronograma/updateDesctMassive';
+import UpdateRemuMassive from '../../../components/cronograma/updateRemuMassive';
 import ImpDescuento from '../../../components/cronograma/impDescuento';
 import Open from '../../../components/cronograma/open';
 import Cerrar from '../../../components/cronograma/close';
-import { url } from '../../../env.json';
 import SearchCronograma from '../../../components/cronograma/searchCronograma';
 
 export default class CronogramaInformacion extends Component
@@ -337,6 +337,10 @@ export default class CronogramaInformacion extends Component
                 query.desc_massive = 1;
                 await push({ pathname, query });
                 break;
+            case 'remu-massive':
+                query.remu_massive = 1;
+                await push({ pathname, query });
+                break;
             case 'report':
                 query.href = pathname;
                 await push({ pathname: parseUrl(pathname, 'report'), query });
@@ -628,6 +632,7 @@ export default class CronogramaInformacion extends Component
                                                         disabled={isLoading|| this.state.edit}
                                                         options={[
                                                             { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
+                                                            { key: "remu-massive", text: "Remuneración Masiva", icon: "cart arrow down" },
                                                             { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
                                                             { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
                                                             { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
@@ -921,6 +926,14 @@ export default class CronogramaInformacion extends Component
                     <UpdateDesctMassive isClose={(e) => {
                         let { push, pathname, query } = Router;
                         query.desc_massive = null;
+                        push({ pathname, query });
+                    }}/>
+                </Show>
+
+                <Show condicion={query.remu_massive}>
+                    <UpdateRemuMassive isClose={(e) => {
+                        let { push, pathname, query } = Router;
+                        query.remu_massive = null;
                         push({ pathname, query });
                     }}/>
                 </Show>
