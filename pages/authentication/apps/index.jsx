@@ -58,10 +58,9 @@ export default class SystemIndex extends Component {
         this.setState({ loading: true });
         switch (key) {
             case "edit":
-                await push({ pathname: `${pathname}/${key}`, query: { id } });
-                break;
             case "menu":
-                await push({ pathname: `${pathname}/menu`, query: { id } });
+            case "block":
+                await push({ pathname: `${pathname}/${key}`, query: { id } });
                 break;
             case "delete":
                 this.changeState(obj, 0);
@@ -150,6 +149,11 @@ export default class SystemIndex extends Component {
                                         key: "state",
                                         value: 1
                                     }
+                                },
+                                {
+                                    key: "block",
+                                    icon: "fas fa-ban",
+                                    title: "Restricciones",
                                 },
                                 {
                                     key: "delete",
