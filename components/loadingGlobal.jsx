@@ -15,7 +15,7 @@ export default class LoadingGlobal extends Component
                 position: 'fixed', 
                 top: '0px', 
                 left: '0px',
-                zIndex: '99999',
+                zIndex: '5000',
                 display: display ? display : 'block'
             }}  id={id ? id : 'id-loading-brand'}>
                 <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
