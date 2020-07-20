@@ -22,6 +22,7 @@ import Show from '../components/show';
 import Swal from 'sweetalert2';
 import uid from 'uid';
 import NotCurrent from '../components/notCurrent';
+import { Message } from 'semantic-ui-react';
 
 
 // config router
@@ -101,6 +102,7 @@ class MyApp extends App {
       screenX: 0,
       screen_lg: false,
       refresh: false,
+      online: false,
       config_entity: {
         render: false,
         disabled: false,
@@ -116,6 +118,9 @@ class MyApp extends App {
 
   focusMeTab = async () => {
     let currentTab = await localStorage.getItem('activeTabKey');
+    let isOnline = await navigator.onLine;
+    let { online } = this.state;
+    if (online != isOnline) this.setState({ online: isOnline });
     if (currentTab != this.state.activeTabKey) {
       this.setState({ current: false });
       clearInterval(this.intervalo);
@@ -234,7 +239,14 @@ class MyApp extends App {
 
           <LoadingGlobal display="none" id="loading-brand"/>
 
-          <Show condicion={is_render && this.state.loading}>
+          <Show condicion={is_render && (this.state.loading || !this.state.online)}>
+            <Show condicion={!this.state.online}>
+                <div style={{ position: "fixed", top: "0px", left: "0px", zIndex: "2147483647", width: "100%" }}>
+                  <Message color="red">
+                    <i className="fas fa-times"><span style={{ fontSize: "1.3em", marginLeft: "0.5em" }}>Ups, Sin conexión a internet.</span></i>
+                  </Message>
+                </div>
+            </Show>
             <LoadingGlobal/>
           </Show>
 

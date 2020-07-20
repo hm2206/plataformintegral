@@ -5,7 +5,7 @@ export default class LoadingGlobal extends Component
 
     render() {
 
-        let { display, id } = this.props;
+        let { display, id, message } = this.props;
 
         return (
             <div style={{
