@@ -4,7 +4,6 @@ import { Button, Form, Select, Icon, Grid } from 'semantic-ui-react';
 import { parseOptions } from '../../services/utils';
 import Swal from 'sweetalert2';
 import { responsive } from '../../services/storage.json';
-import { LoadingContext } from '../../contexts';
 
 export default class Detalle extends Component
 {
@@ -16,8 +15,6 @@ export default class Detalle extends Component
         loader: false,
         payload: []
     }
-
-    static contextType = LoadingContext
 
     componentDidMount = async () => {
         await this.getTypeDetalles();
@@ -40,7 +37,7 @@ export default class Detalle extends Component
     }
 
     create = async () => {
-        this.context.setLoading(true);
+        this.props.setLoading(true);
         let payload = {
             historial_id: this.props.historial.id,
             type_detalle_id: this.state.type_detalle_id,
@@ -49,7 +46,7 @@ export default class Detalle extends Component
         // request
         await unujobs.post('detalle', payload)
         .then(async res => {
-            this.context.setLoading(false);
+            this.props.setLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
@@ -58,7 +55,7 @@ export default class Detalle extends Component
             this.props.setEdit(false);
         })
         .catch(err => {
-            this.context.setLoading(false);
+            this.props.setLoading(false);
             Swal.fire({ icon: 'error', text: err.message })
         });
         this.setState({ loader: false });
@@ -66,17 +63,17 @@ export default class Detalle extends Component
     }
 
     getDetalles = async (props) => {
-        this.context.setLoading(true);
+        this.props.setLoading(true);
         let { historial } = props;
         await unujobs.get(`historial/${historial.id}/detalle`)
         .then(async res => {
             await this.setState({ detalles: res.data ? res.data : [] });
         }).catch(err => console.log(err.message));
-        this.context.setLoading(false);
+        this.props.setLoading(false);
     }
 
     getTypeDetalles = async () => {
-        this.context.setLoading(true);
+        this.props.setLoading(true);
         await unujobs.get('type_detalle')
         .then(async res => {
             let type_detalles = res.data;
@@ -88,7 +85,7 @@ export default class Detalle extends Component
             this.setState({ type_detalles })
         })
         .catch(err => console.log(err.message));
-        this.context.setLoading(false);
+        this.props.setLoading(false);
     }
 
     handleMonto = async ({ name, value }, parent, detalle, index) => {
@@ -128,10 +125,10 @@ export default class Detalle extends Component
     }
 
     delete = async (id) => {
-        this.context.setLoading(true);
+        this.props.setLoading(true);
         await unujobs.post(`detalle/${id}`, { _method: 'DELETE' })
         .then(async res => {
-            this.context.setLoading(false);
+            this.props.setLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message })
@@ -140,10 +137,10 @@ export default class Detalle extends Component
             this.props.setEdit(false);
         })
         .catch(err => {
-            this.context.setLoading(false);
+            this.props.setLoading(false);
             Swal.fire({ icon: 'error', text: err.message })
         });
-        this.context.setLoading(false);
+        this.props.setLoading(false);
     }
     
     render() {

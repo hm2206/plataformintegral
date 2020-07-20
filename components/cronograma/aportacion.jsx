@@ -20,8 +20,10 @@ export default class Aportacion extends Component
 
 
     componentDidMount = async () => {
+        this.props.setLoading(true);
         this.getAportaciones(this.props);
         await this.getTypeAportaciones();
+        this.props.setLoading(false);
     }
 
     componentWillReceiveProps = async (nextProps) => {

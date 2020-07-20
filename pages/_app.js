@@ -23,8 +23,6 @@ import Swal from 'sweetalert2';
 import uid from 'uid';
 import NotCurrent from '../components/notCurrent';
 
-// config context
-import { AppProvider, LoadingProvider } from '../contexts';
 
 // config router
 Router.onRouteChangeStart = () => {
@@ -184,7 +182,7 @@ class MyApp extends App {
   }
 
   fireLoading = async (loading = true) => {
-    this.setState({ loading });
+    await this.setState({ loading });
   }
 
   render() {
@@ -219,11 +217,11 @@ class MyApp extends App {
             <link rel="stylesheet" href="/css/custom.css" />
 
             {/* WPA */}
-            <link rel="manifest" href="/manifest.json" />
+            {/* <link rel="manifest" href="/manifest.json" />
             <link href='/favicon-16x16.png' rel='icon' type='image/png' sizes='16x16' />
             <link href='/favicon-32x32.png' rel='icon' type='image/png' sizes='32x32' />
             <link rel="apple-touch-icon" href="/apple-icon.png"></link>
-            <meta name="theme-color" content="#346cb0"/>
+            <meta name="theme-color" content="#346cb0"/> */}
             <script src="/js/stacked-menu.min.js"></script>
             <script src="/js/theme.min.js"></script>
           </Head>
@@ -234,18 +232,16 @@ class MyApp extends App {
             <LoaderPage message={message}/>
           </Show>
 
-          <Show condicion={is_render}>
-            <LoadingGlobal display={loading ? 'block' : 'none'}/>
+          <LoadingGlobal display="none" id="loading-brand"/>
+
+          <Show condicion={is_render && this.state.loading}>
+            <LoadingGlobal/>
           </Show>
 
           <Show condicion={is_render && !current}>
             <NotCurrent my_app={_app}/>
           </Show>
           
-          <LoadingProvider value={{ 
-              isLoading: this.state.loading,
-              setLoading: (value) => this.setState({ loading: value })
-           }}>
             <Show condicion={is_render && current}>
               {
                 isLoggin ?
@@ -302,7 +298,6 @@ class MyApp extends App {
                   />
               }
             </Show>
-          </LoadingProvider>
         
         </Provider>
     </Fragment>

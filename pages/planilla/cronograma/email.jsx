@@ -53,6 +53,7 @@ export default class CronogramaEmail extends Component
     }
 
     getSentEmail = async (changed = true) => {
+        this.props.fireLoading(true);
         let { query } = this.props;
         let { page, query_search, send_email } = this.state;
         let id = query.id ? atob(query.id) : '__error';
@@ -79,6 +80,7 @@ export default class CronogramaEmail extends Component
         })
         .catch(err => console.log(err.message));
         this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     safe = async () => {
@@ -89,7 +91,8 @@ export default class CronogramaEmail extends Component
     }
 
     send = async () => {
-        this.setState({ loadinbg: true });
+        this.props.fireLoading(true);
+        this.setState({ loading: true });
         let { cronograma, errors } = this.state;
         await unujobs.post(`cronograma/${cronograma.id}/send_email`, { errors: JSON.stringify(errors) }, { headers: { CronogramaID: cronograma.id }})
         .then(async res => {
@@ -103,11 +106,13 @@ export default class CronogramaEmail extends Component
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     render() {
 
         let { cronograma, loading, historial, enviados, no_enviados } = this.state;
+        let { isLoading } = this.props;
 
         return (
             <Fragment>
@@ -122,7 +127,7 @@ export default class CronogramaEmail extends Component
 
                 <div className="col-md-12">
                     <Body>
-                        <Form loading={loading}>
+                        <Form>
                             <div className="row">
                                 <div className="col-md-5 mb-1">
                                     <Form.Field>
@@ -142,8 +147,8 @@ export default class CronogramaEmail extends Component
                                             placeholder="Select. Filtro"
                                             options={[
                                                 { key: "SIN_FILTER", value: "SIN_FILTER", text: "TODOS" },
-                                                { key: "SIN_FILTER", value: "NOT_SEND", text: "NO ENVIADOS" },
-                                                { key: "SIN_FILTER", value: "SEND", text: "ENVIADOS" }
+                                                { key: "NOT_SEND", value: "NOT_SEND", text: "NO ENVIADOS" },
+                                                { key: "SEND", value: "SEND", text: "ENVIADOS" }
                                             ]}
                                             name="send_email"
                                             value={this.state.send_email || "SIN_FILTER"}

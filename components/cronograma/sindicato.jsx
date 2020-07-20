@@ -22,7 +22,7 @@ export default class Sindicato extends Component
 
 
     componentDidMount = async () => {
-        this.context.setLoading(true);
+        this.props.setLoading(true);
         await this.getTypeSindicatos();
         await this.getSindicatos(this.props);
     }
@@ -64,12 +64,12 @@ export default class Sindicato extends Component
     }
 
     getSindicatos = async (props) => {
-        this.context.setLoading(true);
+        this.props.setLoading(true);
         let { historial } = props;
         await unujobs.get(`historial/${historial.id}/sindicato`)
         .then(async res => await this.setState({ sindicatos: res.data ? res.data : [] }))
         .catch(err => console.log(err.message));
-        this.context.setLoading(false);
+        this.props.setLoading(false);
     }
 
     getTypeSindicatos = async () => {
