@@ -77,54 +77,32 @@ export default class BlockApp extends Component
         this.setState({ loading: false });
     }
 
-    handleFile = ({ name, files }) => {
-        let file = files[0] || null;
-        this.setState(state => {
-            state.files[name] = file;
-            return { files: state.files, edit: true }; 
-        });
+    add = async (obj, index) => {
+        await  this.handleRequest(`block_method_app`, obj, index);
     }
 
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors, edit: true };
-        });
+    delete = async (obj, index) => {
+        await this.handleRequest(`block_method_app/${obj.id}/delete`, obj, index);
     }
 
-    save = async () => {
+    handleRequest = async (path, obj, index) => {
         this.setState({ loading: true });
-        let data = new FormData();
-        let { form, files } = this.state;
-        for(let attr in form) data.append(attr, form[attr]);
-        // add files
-        for(let attr in files) data.append(attr, files[attr]);
-        // crear app
-        await authentication.post(`app/${form.id}/update`, data)
-        .then(async res => {
-            let { success, message, app } = res.data;
-            if (!success) throw new Error(message);
-            await  Swal.fire({ icon: 'success', text: message });
-            await this.setState({ form: app, files: {}, errors: {} });
+        let { form } = this.state;
+        // request
+        await authentication.post(path, {
+            app_id: form.id,
+            method_id: obj.id
         })
-        .catch(async err => {
-            try {
-                let response = JSON.parse(err.message);
-                await Swal.fire({ icon: 'error', text: response.message });
-                await this.setState({ errors: response.errors });
-            } catch (error) {
-                await Swal.fire({ icon: 'error', text: err.message });
-            }
-        });
+        .then(res => {
+            let { success, message } = res.data;
+            if (!success) throw new Error(message);
+            Swal.fire({ icon: 'success', text: message });
+            this.setState(state => {
+                state.method.data.splice(index, 1);
+                return { method: state.method }
+            });
+        }).catch(err => Swal.fire({ icon: 'error', text: message }));
         this.setState({ loading: false });
-    }
-
-    validate = () => {
-        let { name, client_device } = this.state.form;
-        return name && client_device;
     }
 
     render() {
@@ -233,6 +211,8 @@ export default class BlockApp extends Component
                                                                     <Button color={'olive'}
                                                                         className="mt-1"
                                                                         title="Permitir"
+                                                                        disabled={loading}
+                                                                        onClick={(e) => this.delete(obj, index)}
                                                                     >
                                                                         <i className={`fas fa-check`}></i>
                                                                     </Button>
@@ -242,6 +222,8 @@ export default class BlockApp extends Component
                                                                     <Button color={'red'}
                                                                         className="mt-1"
                                                                         title={'Bloquear'}
+                                                                        disabled={loading}
+                                                                        onClick={(e) => this.add(obj, index)}
                                                                     >
                                                                         <i className="fas fa-ban"></i>
                                                                     </Button>

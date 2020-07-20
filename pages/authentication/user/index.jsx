@@ -62,7 +62,7 @@ export default class UserIndex extends Component {
             case "restore":
                 this.setChangeState(obj, 1);
                 break;
-            case "block_user":
+            case "block":
                 let { push, pathname } = Router;
                 let id = btoa(obj.id);
                 push({ pathname: `${pathname}/${key}`, query: { id } });
@@ -153,7 +153,7 @@ export default class UserIndex extends Component {
                                     }
                                 },
                                 {
-                                    key: "block_user",
+                                    key: "block",
                                     icon: "fas fa-ban",
                                     title: "Restricciones"
                                 },
