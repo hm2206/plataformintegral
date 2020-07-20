@@ -232,6 +232,9 @@ class MyApp extends App {
             <script src="/js/theme.min.js"></script>
           </Head>
 
+          {/* precargar imagen */}
+          <img src="/img/loading_page.png" style={{ display: 'none' }}/>  
+
           <div id="page_change"></div>
 
           <Show condicion={!is_render}>
@@ -253,6 +256,10 @@ class MyApp extends App {
           </Show>
           
             <Show condicion={is_render && current}>
+
+              {/* precargar imagen de la app */}
+              <img src={_app.icon && _app.icon_images && _app.icon_images.icon_200x200 || '/img/base.png'} style={{ display: 'none' }}/>  
+              {/* logica de page auth */}
               {
                 isLoggin ?
                   <Fragment>
