@@ -56,7 +56,6 @@ export default class RemoveCronograma extends Component
     }
 
     handleBack = (e) => {
-        this.setState({ loading: true });
         let { cronograma } = this.state;
         let { pathname, push } = Router;
         push({ pathname: backUrl(pathname), query: { mes: cronograma.mes, year: cronograma.year } });
@@ -72,7 +71,7 @@ export default class RemoveCronograma extends Component
             if (!await Confirm("warning", `Existen trabajadores seleccionados, al filtrar se perderá la selección`, 'Continuar')) return false;
         }
         // search
-        await this.setState({ loading: true, page: 1 });
+        await this.setState({ page: 1 });
         let { push, pathname, query } = Router;
         query.cargo_id = this.state.cargo_id;
         query.type_categoria_id = this.state.type_categoria_id;
@@ -116,7 +115,7 @@ export default class RemoveCronograma extends Component
     }
 
     getinfos = async (changed = true) => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         let { query } = this.props;
         let id = query.id ? atob(query.id) : "__error";
         let { cargo_id, type_categoria_id, query_search, page } = this.state;
@@ -138,7 +137,7 @@ export default class RemoveCronograma extends Component
             }));
         })
         .catch(err => console.log(err.message));
-        await this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getCargo = async () => {
@@ -198,7 +197,7 @@ export default class RemoveCronograma extends Component
 
                 <div className="col-md-12">
                     <Body>
-                        <Form loading={this.state.loading}>
+                        <Form>
                             <div className="row">
                                 <div className="col-md-3 mb-1">
                                     <Form.Field>
