@@ -8,7 +8,7 @@ import { unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
 import CreateConfigRemuneracion from '../../../components/contrato/createConfigRemuneracion';
 import Swal from 'sweetalert2';
-import { Confirm, parseOptions } from '../../../services/utils'
+import { Confirm, parseOptions, backUrl } from '../../../services/utils'
 import { tipo_documento } from '../../../services/storage.json';
 
 export default class Pay extends Component
@@ -49,10 +49,9 @@ export default class Pay extends Component
 
     handleBack = () => {
         let { push, pathname, query } = Router;
-        let newPath = pathname.split('/');
-        query.id = null;
-        newPath.splice(-1, 1);
-        push({ pathname: newPath.join('/'), query });
+        let { href } = query;
+        if (href) push({ pathname: href });
+        else push({ pathname: backUrl(pathname), query });
     }
 
     handleFile = (path) => {

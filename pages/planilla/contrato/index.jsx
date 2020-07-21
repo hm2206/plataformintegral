@@ -178,7 +178,7 @@ export default class Contrato extends Component
 
                         <BtnFloat
                             disabled={this.state.loading}
-                            onClick={(e) => Router.push({ pathname: `${Router.pathname}/preparate` })}
+                            onClick={(e) => Router.push({ pathname: `${Router.pathname}/register` })}
                         >
                             <i className="fas fa-plus"></i>
                         </BtnFloat>
