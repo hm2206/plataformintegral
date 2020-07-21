@@ -1,20 +1,21 @@
 import React, { Component } from 'react';
 import { Form, Select, Button, Icon, Divider } from 'semantic-ui-react';
 import Show from '../../../components/show';
-import { unujobs } from '../../../services/apis';
+import { recursoshumanos } from '../../../services/apis';
 import { parseOptions } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
-import { format } from 'native-url';
+import Cookies from 'js-cookie'
 
 export default class RegisterConvocatoria extends Component
 {
 
-    static getInititalProps = async (ctx) => {
+    static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
-        return { pathname: ctx.pathname, query: ctx.query };
+        let { query, pathname } = ctx; 
+        return { pathname, query };
     };
 
     state = {
@@ -26,9 +27,15 @@ export default class RegisterConvocatoria extends Component
         errors: {}
     }
 
+    componentDidMount = () => {
+        this.props.fireEntity({ render: true });
+    }
 
     handleInput = ({ name, value }) => {
-        this.setState({[name]: value});
+        this.setState(state => {
+            state.errors[name] = "";
+            return { [name]: value, errors: state.errors };
+        });
     }
 
 
@@ -38,22 +45,30 @@ export default class RegisterConvocatoria extends Component
     }
 
     saveAndContinue = async () => {
+        this.props.fireLoading(true);
         await this.setState({ loading: true });
+        // add entity_id
+        let form = Object.assign({}, this.state);
+        form.entity_id = Cookies.get('EntityId');
         // send
-        await unujobs.post('convocatoria', this.state)
+        await recursoshumanos.post('convocatoria', form)
         .then(async res => {
+            this.props.fireLoading(false);
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
         })
         .catch(err => {
             try {
-                let { data } = err.response;
-                this.setState({ errors: data.errors })
+                this.props.fireLoading(false);
+                let response = JSON.parse(err.message);
+                Swal.fire({ icon: 'warning', text: response.message });
+                this.setState({ errors: response.errors })
             } catch (error) {
                 Swal.fire({ icon: 'error', text: err.message });
             }
         });
+        this.props.fireLoading(false);
         this.setState({ loading: false });
     }
 
@@ -84,11 +99,11 @@ export default class RegisterConvocatoria extends Component
                         <div className="card-header">
                         <BtnBack
                             onClick={this.handleBack}
-                        /> Registrar Nueva Convocatoria
+                        /> Registrar Convocatoria
                         </div>
                         <div className="card-body">
                             <div className="row justify-content-center">
-                                <Form loading={this.state.loading} action="#" className="col-md-10" onSubmit={(e) => e.preventDefault()}>
+                                <Form action="#" className="col-md-10" onSubmit={(e) => e.preventDefault()}>
                                     <div className="row justify-content-center">
                                             <Form.Field className="col-md-6" error={errors.numero_de_convocatoria && errors.numero_de_convocatoria[0]}>
                                                 <label htmlFor="" className="text-left">N° de Convocatoria <b className="text-red">*</b></label>
@@ -111,14 +126,14 @@ export default class RegisterConvocatoria extends Component
                                                 <label>{errors.fecha_inicio && errors.fecha_inicio[0]}</label>
                                             </Form.Field>
 
-                                            <Form.Field className="col-md-6" error={errors.fecha_inicio && errors.fecha_inicio[0]}>
+                                            <Form.Field className="col-md-6" error={errors.fecha_final && errors.fecha_final[0]}>
                                                 <label>Fecha Final <b className="text-red">*</b></label>
                                                 <input type="date"
                                                     name="fecha_final"
                                                     value={this.state.fecha_final}
                                                     onChange={(e) => this.handleInput(e.target)}
                                                 />
-                                                <label>{errors.fecha_inicio && errors.fecha_inicio[0]}</label>
+                                                <label>{errors.fecha_final && errors.fecha_final[0]}</label>
                                             </Form.Field>
 
                                     

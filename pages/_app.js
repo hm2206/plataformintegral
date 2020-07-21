@@ -108,7 +108,8 @@ class MyApp extends App {
         render: false,
         disabled: false,
         entity_id: ""
-      }
+      },
+      entity_id: ""
     }
     // add context
     this.LoadingProvider = createContext({
@@ -193,7 +194,7 @@ class MyApp extends App {
 
   render() {
     const { Component, pageProps, store, isLoggin, _app, is_render, message } = this.props
-    const { loading, current } = this.state;
+    const { loading, current, entity_id } = this.state;
 
     return  <Fragment>
         <Provider store={store}>
@@ -274,6 +275,7 @@ class MyApp extends App {
                             screenX={this.state.screenX}
                             logout={this.logout}
                             config_entity={this.state.config_entity}
+                            onFireEntityId={(e) => this.setState({ entity_id: e })}
                           />
                           {/* content */}
                           <div className="gx-layout-content ant-layout-content">
@@ -288,6 +290,7 @@ class MyApp extends App {
                               />
                               <Content screen_lg={this.state.screen_lg}>
                                   <Component {...pageProps} 
+                                    entity_id={entity_id}
                                     fireEntity={this.fireEntity}
                                     toggle={this.state.toggle} 
                                     screenX={this.state.screenX}

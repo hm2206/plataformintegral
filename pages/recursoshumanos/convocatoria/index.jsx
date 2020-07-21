@@ -8,6 +8,24 @@ import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import { pageConvocatoria } from '../../../storage/actions/convocatoriaActions';
 import { Body } from '../../../components/Utils';
+import { recursoshumanos } from '../../../services/apis';
+
+
+const getConvocatoria = async (ctx) => {
+    let { page, year, mes, estado } = ctx.query;
+    return await recursoshumanos.get(`convocatoria?page=${page}&year=${year}&mes=${mes}&estado=${estado}`, {}, ctx)
+    .then(res => (res.data))
+    .catch(err => ({
+        success: false,
+        code: err.status || 501,
+        message: err.message,
+        convocatoria: {
+            page: 1,
+            last_page: 1,
+            data: []
+        }
+    }));
+}
 
 
 export default class Convocatoria extends Component {
@@ -31,25 +49,18 @@ export default class Convocatoria extends Component {
         await AUTHENTICATE(ctx);
         let date = new Date;
         let {query, pathname} = ctx;
+        query.page = query.page || 1;
         query.year = query.year ? query.year : date.getFullYear();
         query.mes = query.mes ? query.mes : date.getMonth() + 1;
         query.estado = query.estado ? query.estado : "";
-        await ctx.store.dispatch(pageConvocatoria(ctx));
-        let { page_convocatoria } = ctx.store.getState().convocatoria;
-        return {query, pathname, page_convocatoria }
+        // get convocatoria
+        let { success, convocatoria } = await getConvocatoria(ctx) || {};
+        return { query, pathname, convocatoria, success }
     }
 
-    componentDidMount = () => {
-        this.setting(this.props);
-    }
-
-    componentWillReceiveProps(nextProps) {
-        let { query } = this.props;
-        if (query.mes != nextProps.query.mes || query.year != nextProps.query.year) {
-            this.setting(nextProps);
-        } else {
-            this.setState({ loading: false });
-        }
+    componentDidMount = async () => {
+        this.props.fireEntity({ render: true })
+        await this.setting(this.props);
     }
 
     setting = (props) => {
@@ -66,16 +77,14 @@ export default class Convocatoria extends Component {
     }
 
     handleConvocatoria = async () => {
-        this.setState({ loading: true });
         let { push, query, pathname } = Router;
         query.year = this.state.year;
         query.mes = this.state.mes;
         query.estado = this.state.estado;
-        push({ pathname, query });
+        await push({ pathname, query });
     }
 
     async getOption(obj, key, index) {
-        this.setState({ loading: true });
         let {pathname, query} = Router;
         let id = btoa(obj.id);
         query =  { id, __ref: `option-${key}` };
@@ -89,13 +98,12 @@ export default class Convocatoria extends Component {
         }
         // execute
         await Router.push({pathname, query});
-        this.setState({ loading: false });
     }
 
     render() {
 
-        let {loading } = this.state;
-        let {query, pathname, page_convocatoria} = this.props;
+        let {loading} = this.state;
+        let {query, pathname, convocatoria, success} = this.props;
 
         return (
             <div className="col-md-12">
@@ -154,7 +162,7 @@ export default class Convocatoria extends Component {
                             ]
                         }
                         getOption={this.getOption}
-                        data={page_convocatoria && page_convocatoria.data || []}>
+                        data={convocatoria && convocatoria.data || []}>
                         <Form className="mb-3">
                             <div className="row">
                                 <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
@@ -216,14 +224,12 @@ export default class Convocatoria extends Component {
                     </Datatable>
                     {/* paginacion */}
                     <div className="text-center">
-                        <Show condicion={page_convocatoria && page_convocatoria.data}>
-                            <hr/>
-                            <Pagination defaultActivePage={query.page} 
-                                totalPages={page_convocatoria.last_page}
-                                enabled={this.state.loading}
-                                onPageChange={this.handlePage}
-                            />
-                        </Show>
+                        <hr/>
+                        <Pagination defaultActivePage={success ? convocatoria.page : 1} 
+                            totalPages={success ? convocatoria.last_page : 1}
+                            enabled={this.state.loading}
+                            onPageChange={this.handlePage}
+                        />
                     </div>
                     {/* event create cronograma */}
                     <BtnFloat

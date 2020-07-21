@@ -1,13 +1,29 @@
 import React, { Component, Fragment } from 'react';
 import { Form, Button, Icon, Select } from 'semantic-ui-react';
 import Show from '../../../components/show';
-import { unujobs } from '../../../services/apis';
+import { recursoshumanos } from '../../../services/apis';
 import { parseOptions } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { findConvocatoria } from '../../../storage/actions/convocatoriaActions';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
+import atob from 'atob';
+
+
+
+const findEdit = async (ctx) => {
+    let { query } = ctx;
+    let id = query.id ? atob(query.id) : '_error';
+    return await recursoshumanos.get(`convocatoria/${id}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({
+            success: false,
+            code: 501,
+            message: error.message
+        }));
+}
+
 
 export default class EditConvocatoria extends Component
 {
@@ -15,9 +31,9 @@ export default class EditConvocatoria extends Component
     static getInitialProps  = async (ctx) => {
         await AUTHENTICATE(ctx);
         let {query, pathname} = ctx;
-        await ctx.store.dispatch(findConvocatoria(ctx));
-        let { convocatoria } = await ctx.store.getState().convocatoria;
-        return {query, pathname, convocatoria }
+        let response = await findEdit(ctx);
+        let { convocatoria, success } = response || {};
+        return {query, pathname, convocatoria, success }
     }
 
     state = {
@@ -42,33 +58,42 @@ export default class EditConvocatoria extends Component
     }
 
     componentDidMount = async () => {
-        await this.setting(this.props.convocatoria);
-        await this.settingActividad(this.props.convocatoria);
+        this.props.fireLoading(true);
+        await this.setting();
+        await this.settingActividad();
         this.getActividades();
+        this.props.fireLoading(false);
     }
 
     getActividades = () => {
-        unujobs.get(`convocatoria/${this.props.convocatoria.id}/actividades`)
+        recursoshumanos.get(`convocatoria/${this.props.convocatoria.id}/actividades`)
         .then(res => this.setState({ actividades: res.data }))
-        .catch(err => this.getActividades());
+        .catch(err => this.setState({ actividades: [] }));
     }
 
-    setting = (data) => {
-        this.setState({
-            numero_de_convocatoria: data.numero_de_convocatoria,
-            fecha_inicio: data.fecha_inicio,
-            fecha_final: data.fecha_final,
-            observacion: data.observacion,
-            estado_actual: data.estado
-        })
+    setting = () => {
+        let { success, convocatoria } = this.props;
+        if (success) {
+            this.props.fireEntity({ render: true, disabled: true, entity_id: convocatoria.entity_id });
+            this.setState({
+                numero_de_convocatoria: convocatoria.numero_de_convocatoria,
+                fecha_inicio: convocatoria.fecha_inicio,
+                fecha_final: convocatoria.fecha_final,
+                observacion: convocatoria.observacion,
+                estado_actual: convocatoria.estado
+            })
+        }
     }
 
-    settingActividad = (data) => {
-        this.setState(state => {
-            state.actividad.fecha_inicio = data.fecha_inicio;
-            state.actividad.fecha_final = data.fecha_final;
-            return { actividad: state.actividad };
-        });
+    settingActividad = () => {
+        let { success, convocatoria } = this.props;
+        if (success) {
+            this.setState(state => {
+                state.actividad.fecha_inicio = convocatoria.fecha_inicio;
+                state.actividad.fecha_final = convocatoria.fecha_final;
+                return { actividad: state.actividad };
+            });
+        }
     }
 
     handleInput = ({ name, value }) => {
@@ -90,9 +115,8 @@ export default class EditConvocatoria extends Component
     saveAndContinue = async () => {
         await this.setState({ loading: true });
         let form = Object.assign({}, this.state);
-        form._method = 'PUT';
         // send
-        await unujobs.post(`convocatoria/${this.props.convocatoria.id}`, form)
+        await recursoshumanos.post(`convocatoria/${this.props.convocatoria.id}/update`, form)
         .then(async res => {
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
@@ -119,19 +143,17 @@ export default class EditConvocatoria extends Component
         let form = Object.assign({}, this.state.actividad);
         form.convocatoria_id = this.props.convocatoria.id;
         // send
-        await unujobs.post(`actividad`, form)
+        await recursoshumanos.post(`actividad`, form)
         .then(async res => {
             let { success, message, actividad } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) {
-                await this.setState(state => {
-                    state.actividades.push(actividad);
-                    return { actividades: state.actividades };
-                });
-                // update actividad
-                await this.settingActividad(this.props.convocatoria);
-            }
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            await this.setState(state => {
+                state.actividades.push(actividad);
+                return { actividades: state.actividades };
+            });
+            // update actividad
+            await this.settingActividad(this.props.convocatoria);
         })
         .catch(async err => {
             try {
@@ -176,7 +198,7 @@ export default class EditConvocatoria extends Component
                         <div className="card-header">
                         <BtnBack
                             onClick={this.handleBack}
-                        /> Registrar Nueva Convocatoria
+                        /> Editar Convocatoria
                         </div>
                         <div className="card-body">
                             <Form className="row justify-content-center" loading={this.state.loading} method="POST" action="#" onSubmit={(e) => e.preventDefault()}>

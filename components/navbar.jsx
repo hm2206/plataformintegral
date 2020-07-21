@@ -12,6 +12,7 @@ import { parseOptions } from '../services/utils'
 import Cookies from 'js-cookie';
 import Router from "next/router";
 import Link from "next/link";
+import btoa from 'btoa';
 
 
 class Navbar extends Component {
@@ -70,7 +71,6 @@ class Navbar extends Component {
     // validate
     if (!entity_id && entities.length) {
       let entity_id = entities[0].id;
-      await this.setState({ entity_id });
       await this.handleEntity({ name: 'entity_id', value: entity_id });
     }
   }
@@ -79,6 +79,7 @@ class Navbar extends Component {
     await this.setState({ [name]: value });
     await Cookies.set('EntityId', value);
     let { push, pathname, query } = Router;
+    query.entity_id = btoa(value);
     push({ pathname, query });
   }
 
