@@ -115,6 +115,7 @@ export default class RemoveCronograma extends Component
     }
 
     getHistorial = async (changed = true) => {
+        this.props.fireLoading(true);
         this.setState({ loading: true });
         let { query } = this.props;
         let id = query.id ? atob(query.id) : "__error";
@@ -138,6 +139,7 @@ export default class RemoveCronograma extends Component
         })
         .catch(err => console.log(err.message));
         await this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     getCargo = async () => {
@@ -165,6 +167,7 @@ export default class RemoveCronograma extends Component
             condicion = await Confirm("info", `¿Desea terminar contrato de los trabajadores(${rows.length})?`, "Terminar") ? 1 : 0;
             if (!await Confirm("warning", `Se está eliminado a los trabajadores(${rows.length}) del cronograma ${condicion? ', y se está quitando el contrato. El sistema no agregará a estos trabajadores en los proximos cronogramas' : ''}`, "Estoy de acuerdo")) return false;
             // eliminar
+            this.props.fireLoading(true);
             this.setState({ loading: true });
             let payload = [];
             await rows.filter(obj => payload.push(obj.id));
@@ -178,6 +181,7 @@ export default class RemoveCronograma extends Component
                 historial: datos
             }, { headers: { CronogramaID: cronograma.id } })
             .then(async res => {
+                this.props.fireLoading(false);
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });
@@ -186,8 +190,12 @@ export default class RemoveCronograma extends Component
                     await this.getHistorial(false);
                 }
             })
-            .catch(err => Swal.fire({ icon: "error", text: "Algo salió mal al eliminar a los trabajadores" }));
+            .catch(err => {
+                this.props.fireLoading(false);
+                Swal.fire({ icon: "error", text: "Algo salió mal al eliminar a los trabajadores" })
+            });
             this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
     }
 
@@ -207,7 +215,7 @@ export default class RemoveCronograma extends Component
 
                 <div className="col-md-12">
                     <Body>
-                        <Form loading={this.state.loading}>
+                        <Form>
                             <div className="row">
                                 <div className="col-md-3 mb-1">
                                     <Form.Field>

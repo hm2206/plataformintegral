@@ -161,6 +161,7 @@ export default class RemoveCronograma extends Component
         let { cronograma, rows } = this.state;
         let answer = await Confirm("warning", `¿Está seguro en agregar a los trabajadores(${rows.length}) al cronograma #${cronograma.id}?`);
         if (answer) {
+            this.props.fireLoading(true);
             this.setState({ loading: true });
             let form = new FormData();
             let payload = [];
@@ -170,14 +171,19 @@ export default class RemoveCronograma extends Component
             form.append('info_id', payload.join(',')); 
             await unujobs.post(`cronograma/${cronograma.id}/add_all`, form, { headers: { CronogramaID: cronograma.id } })
             .then(async res => {
+                this.props.fireLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 await this.setState({ rows: [], page: 1 });
                 await this.getinfos(false);
             })
-            .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            .catch(err => {
+                this.props.fireLoading(true);
+                Swal.fire({ icon: 'error', text: err.message })
+            });
             this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
     }
 
