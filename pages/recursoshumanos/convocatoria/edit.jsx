@@ -5,24 +5,9 @@ import { recursoshumanos } from '../../../services/apis';
 import { parseOptions } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
-import { findConvocatoria } from '../../../storage/actions/convocatoriaActions';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
-import atob from 'atob';
-
-
-
-const findEdit = async (ctx) => {
-    let { query } = ctx;
-    let id = query.id ? atob(query.id) : '_error';
-    return await recursoshumanos.get(`convocatoria/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({
-            success: false,
-            code: 501,
-            message: error.message
-        }));
-}
+import { findConvocatoria } from '../../../services/requests';
 
 
 export default class EditConvocatoria extends Component
@@ -31,7 +16,7 @@ export default class EditConvocatoria extends Component
     static getInitialProps  = async (ctx) => {
         await AUTHENTICATE(ctx);
         let {query, pathname} = ctx;
-        let response = await findEdit(ctx);
+        let response = await findConvocatoria(ctx);
         let { convocatoria, success } = response || {};
         return {query, pathname, convocatoria, success }
     }
@@ -67,7 +52,7 @@ export default class EditConvocatoria extends Component
 
     getActividades = () => {
         recursoshumanos.get(`convocatoria/${this.props.convocatoria.id}/actividades`)
-        .then(res => this.setState({ actividades: res.data }))
+        .then(({ data }) => this.setState({ actividades: data.success ? data.actividades : [] }))
         .catch(err => this.setState({ actividades: [] }));
     }
 

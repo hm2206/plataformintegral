@@ -151,7 +151,7 @@ export default class Convocatoria extends Component {
                                 },
                                 {
                                     key: "etapa",
-                                    icon: "fas fa-file",
+                                    icon: "fas fa-layer-group",
                                     title: "Etapas"
                                 },
                                 {
