@@ -148,7 +148,7 @@ class MyApp extends App {
 
   componentWillReceiveProps = (nextProps) => {
     let { pageProps } = this.props;
-    if (nextProps.pathname && pageProps.pathname != nextProps.pageProps.pathname) this.fireEntity({ render: false, disabled: false });
+    if (nextProps.pageProps && pageProps.pathname != nextProps.pageProps.pathname) this.fireEntity({ render: false, disabled: false });
   } 
 
   componentDidCatch = (error, info) => {
