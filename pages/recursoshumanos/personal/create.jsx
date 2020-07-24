@@ -56,6 +56,10 @@ export default class RegisterPersonal extends Component
         this.getDependencias();
     }
 
+    componentWillUnmount = () => {
+        tmp_convocatorias = [];
+    }
+
     getMetas = async () => {
         let { meta } = this.state;
         await unujobs.get(`meta`)
