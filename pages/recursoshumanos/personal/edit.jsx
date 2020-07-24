@@ -1,14 +1,13 @@
 import React, { Component, Fragment } from 'react';
 import { Form, Select, Button, Icon, Divider } from 'semantic-ui-react';
 import Show from '../../../components/show';
-import { unujobs } from '../../../services/apis';
+import { unujobs, recursoshumanos } from '../../../services/apis';
 import { parseOptions, Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
-import { findPersonal } from '../../../storage/actions/personalActions';
-import atob from 'atob';
+import { findStaff } from '../../../services/requests';
 
 export default class EditPersonal extends Component
 {
@@ -16,10 +15,8 @@ export default class EditPersonal extends Component
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let { query, pathname } = ctx;
-        query.id = atob(query.id || '_error');
-        await ctx.store.dispatch(findPersonal(ctx));
-        let { personal } = ctx.store.getState().personal;
-        return { pathname, query, personal };
+        let { success, staff, message } = await findStaff(ctx);
+        return { pathname, query, success, staff };
     };
 
     state = {
@@ -36,10 +33,7 @@ export default class EditPersonal extends Component
         loading: false,
         errors: {},
         dependencias: [],
-        convocatoria: {
-            page: 1,
-            data: []
-        },
+        perfil_laborals: [],
         meta: {
             page: 1,
             data: []
@@ -47,18 +41,24 @@ export default class EditPersonal extends Component
     }
 
     componentDidMount = async () => {
-        this.setting();
-        this.getMetas();
-        this.getDependencias();
-        this.getQuestions();
+        let { success, staff, fireLoading } = this.props;
+        if (success) {
+            fireLoading(true);
+            this.setting();
+            this.getDependencias();
+            this.getQuestions();
+            this.getPerfilLaboral(staff.dependencia_id)
+            await this.getMetas();
+            fireLoading(false);
+        }
     }
 
     setting = async () => {
         await this.setState((state, props) => {
-            state.bases = JSON.parse(props.personal.bases);
-            props.personal.bases = "";
+            state.bases = props.success ? JSON.parse(props.staff.bases) : [];
+            props.staff.bases = "";
              return {
-                form: props.personal, 
+                form: props.staff, 
                 bases: state.bases
             };
         })
@@ -94,26 +94,58 @@ export default class EditPersonal extends Component
         }).catch(err => console.log(err.message));
     }
 
-    getDependencias = async () => {
-        await unujobs.get(`dependencia`)
-        .then(async res => this.setState({ dependencias: res.data }))
+    getDependencias = async (page = 1) => {
+        await recursoshumanos.get(`dependencia?page=${page}`)
+        .then(async res => {
+            let { dependencia, success, message } = res.data;
+            if (!success) throw new Error(message);
+            this.setState(state => ({ dependencias: [...state.dependencias, ...dependencia.data] }));
+            if (dependencia.lastPage > (page + 1)) await this.getDependencias(page + 1);
+        })
         .catch(err => console.log(err.message));
+    }
+
+    getPerfilLaboral = async (id, page = 1) => {
+        if (id) {
+            await recursoshumanos.get(`dependencia/${id}/perfil_laboral?page=${page}`)
+            .then(async res => {
+                let { perfil_laboral, success, message } = res.data;
+                if (!success) throw new Error(message);
+                this.setState(state => ({ perfil_laborals: page == 1 ? perfil_laboral.data : [...state.perfil_laborals, ...perfil_laboral.data] }));
+                if (perfil_laboral.lastPage > (page + 1)) await this.getPerfilLaboral(id, page + 1);
+            })
+            .catch(err => console.log(err.message));
+        } else {
+            this.setState({ perfil_laborals: [] });
+        }
     }
 
     getQuestions = async () => {
-        await unujobs.get(`personal/${this.props.personal.id}/questions`)
-        .then(async res => this.setState({ questions: res.data }))
-        .catch(err => console.log(err.message));
+        let { success, staff } = this.props;
+        if (success) {
+            await recursoshumanos.get(`staff_requirement/${staff.id}/requisitos`)
+            .then(async ({ data }) => this.setState({ questions: data.requisitos || [] }))
+            .catch(err => this.setState({ questions: [] }));
+        }
     }
 
-    handleInput = ({ name, value }, obj = 'form', err = 'errors') => {
-        this.setState(state => {
+    handleInput = async ({ name, value }, obj = 'form', err = 'errors') => {
+        await this.setState(state => {
             let newObj = state[obj];
             let newErr = state[err];
             newObj[name] = value;
             newErr[name] = null;
             return { [obj]: newObj, [err]: newErr };
         });
+        // changed
+        switch (name) {
+            case "dependencia_id":
+                this.handleInput({ name: "perfil_laboral_id", value: "" });
+                await this.getPerfilLaboral(value);
+                break;
+            default:
+                break;
+        }
     }
 
     readySend = () => {
@@ -129,7 +161,7 @@ export default class EditPersonal extends Component
         // validar
         let validate = await Confirm('warning', '¿Desea guardar los datos?');
         if (validate) {
-            await this.setState({ loading: true });
+            this.props.fireLoading(true);
             let form = new FormData;
             for(let attr in this.state.form) {
                 form.append(attr, this.state.form[attr]);
@@ -137,26 +169,29 @@ export default class EditPersonal extends Component
             //leave convocatoria y questions
             form.delete('convocatoria');
             form.delete('questions');
-            // add method
-            form.append('_method', 'PUT');
             // add bases
-            form.append('bases', this.state.bases.join(';;'));
+            form.append('bases', JSON.stringify(this.state.bases));
             // send
-            await unujobs.post(`personal/${this.props.personal.id}`, form)
+            await recursoshumanos.post(`staff_requirement/${this.props.staff.id}/update`, form)
             .then(async res => {
+                this.props.fireLoading(false);
                 let { success, message } = res.data;
-                let icon = success ? 'success' : 'error';
-                await Swal.fire({ icon, text: message });
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                let { pathname, query, push } = Router;
+                push({ pathname, query });
             })
             .catch(err => {
                 try {
-                    let { data } = err.response;
-                    this.setState({ errors: data.errors })
+                    this.props.fireLoading(false);
+                    let response = JSON.parse(err.message);
+                    this.setState({ errors: response.errors });
+                    Swal.fire({ icon: 'warning', text: response.message });
                 } catch (error) {
                     Swal.fire({ icon: 'error', text: err.message });
                 }
             });
-            this.setState({ loading: false });
+            this.props.fireLoading(false);
         }
     }
 
@@ -225,28 +260,21 @@ export default class EditPersonal extends Component
             await this.setState({ loading: true });
             let form = new FormData;
             // add forms
-            form.append('personal_id', this.props.personal.id);
-            form.append('requisito', this.state.question.requisito);
-            form.append('body', this.state.question.bodies.join(';;'));
+            form.append('staff_id', this.props.staff.id);
+            form.append('descripcion', this.state.question.requisito);
+            form.append('body', JSON.stringify(this.state.question.bodies));
             // send
-            await unujobs.post(`question`, form)
+            await recursoshumanos.post(`requisito`, form)
             .then(async res => {
-                let { success, message, question } = res.data;
-                let icon = success ? 'success' : 'error';
-                await Swal.fire({ icon, text: message });
-                if (success) {
-                    this.setState(state => {
-                        state.question.bodies = [];
-                        state.question.requisito = "";
-                        state.questions.push(question);
-                        return { question: state.question, questions: state.questions };
-                    });
-                }
+                let { success, message, requisito } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
             })
             .catch(err => {
                 try {
-                    let { data } = err.response;
-                    this.setState({ errors: data.errors })
+                    let response = JSON.parse(err.message);
+                    this.setState({ errors: response.errors })
+                    Swal.fire({ icon: 'warning', text: response.message });
                 } catch (error) {
                     Swal.fire({ icon: 'error', text: err.message });
                 }
@@ -266,7 +294,7 @@ export default class EditPersonal extends Component
                         <div className="card-header">
                         <BtnBack
                             onClick={this.handleBack}
-                        /> Registrar Requerimiento de Personal
+                        /> Editar Requerimiento de Personal
                         </div>
                         <div className="card-body">
                             <div className="row justify-content-center">
@@ -331,15 +359,16 @@ export default class EditPersonal extends Component
                                             <label>{errors.dependencia_id && errors.dependencia_id[0]}</label>
                                         </Form.Field>
 
-                                        <Form.Field className="col-md-6" error={errors.perfil_laboral && errors.perfil_laboral[0]}>
+                                        <Form.Field className="col-md-6" error={errors.perfil_laboral_id && errors.perfil_laboral_id[0] || ""}>
                                             <label htmlFor="" className="text-left">Perfil Laboral<b className="text-red">*</b></label>
-                                            <input type="text"
-                                                name="perfil_laboral"
-                                                placeholder="Ingrese el perfil laboral del trabajador"
-                                                value={form.perfil_laboral || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                            <Select
+                                                name="perfil_laboral_id"
+                                                placeholder="Select. Perfil Laboral"
+                                                value={form.perfil_laboral_id || ""}
+                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                options={parseOptions(this.state.perfil_laborals, ["Select-perfil-lab", "", "Select. Perfil Laboral"], ["id", "id", "nombre"])}
                                             />
-                                            <label>{errors.perfil_laboral && errors.perfil_laboral[0]}</label>
+                                            <label>{errors.perfil_laboral_id && errors.perfil_laboral_id[0]}</label>
                                         </Form.Field>
 
                                         <Form.Field className="col-md-6" error={errors.cantidad && errors.cantidad[0]}>
@@ -425,7 +454,7 @@ export default class EditPersonal extends Component
                                             <label>{errors.supervisora_id && errors.supervisora_id[0]}</label>
                                         </Form.Field>
                                     
-                                        <Form.Field className="col-md-6" error={errors.deberes && errors.deberes[0]}>
+                                        <Form.Field className="col-md-12" error={errors.deberes && errors.deberes[0]}>
                                             <label htmlFor="" className="text-left">Deberes a cumplir <b className="text-red">*</b></label>
                                             <textarea name="deberes"
                                                 rows="6"
@@ -434,17 +463,6 @@ export default class EditPersonal extends Component
                                                 onChange={({ target }) => this.handleInput(target)}
                                             />
                                             <label>{errors.deberes && errors.deberes[0]}</label>
-                                        </Form.Field>
-
-                                        <Form.Field className="col-md-6" error={errors.lugar && errors.lugar[0]}>
-                                            <label>Lugar <b className="text-red">*</b></label>
-                                            <input type="text"
-                                                name="lugar"
-                                                value={form.lugar}
-                                                placeholder="Ingrese el lugar de la entidad/institución"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                            />
-                                            <label>{errors.lugar && errors.lugar[0]}</label>
                                         </Form.Field>
 
                                         {/* Bases legales */}
@@ -498,9 +516,25 @@ export default class EditPersonal extends Component
                                             </Fragment>    
                                         )}
 
+                                        {/* Guardar los datos */}
+
+                                        <div className="col-md-12 mt-4">
+                                            <hr/>
+                                        </div>
+
+                                        <div className="col-md-12 text-right">
+                                            <Button color="teal"
+                                                disabled={this.state.loading || this.state.bases.length == 0}
+                                                onClick={this.saveAndContinue}
+                                                loading={this.state.loading}
+                                            >
+                                                <Icon name="save"/> Actualizar Información
+                                            </Button>
+                                        </div>
+
                                         {/* Requerimientos para el puesto */}
 
-                                        <h4 className="col-md-12">
+                                        <h4 className="col-md-12 mt-5">
                                             <hr/>
                                             <i className="fas fa-user"></i> Perfil del Postulante <Show condicion={this.state.questions.length}>({this.state.questions.length})</Show>
                                             <hr/>
@@ -609,22 +643,6 @@ export default class EditPersonal extends Component
                                             </Fragment>   
                                             
                                         )}
-
-                                        {/* Guardar los datos */}
-
-                                        <div className="col-md-12 mt-4">
-                                            <hr/>
-                                        </div>
-
-                                        <div className="col-md-12 text-right">
-                                            <Button color="teal"
-                                                disabled={this.state.loading || this.state.bases.length == 0}
-                                                onClick={this.saveAndContinue}
-                                                loading={this.state.loading}
-                                            >
-                                                <Icon name="save"/> Actualizar Información
-                                            </Button>
-                                        </div>
                                     </div>
                                 </Form>
                             </div>

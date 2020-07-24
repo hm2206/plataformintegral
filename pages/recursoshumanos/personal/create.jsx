@@ -154,7 +154,7 @@ export default class RegisterPersonal extends Component
                 this.setState({
                     form: { sede_id: 1 },
                     bases: []
-                 })
+                })
             })
             .catch(err => {
                 try {

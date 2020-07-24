@@ -14,3 +14,16 @@ export const getStaff = async (ctx) => {
         }
     }
 }
+
+
+export const findStaff = async (ctx) => {
+    let id = getId(ctx);
+    return await recursoshumanos.get(`staff_requirement/${id}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({
+        success: false,
+        staff: {},
+        code: 501,
+        message: err.message
+    }));
+}
