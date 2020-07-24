@@ -12,30 +12,25 @@ import { getStaff } from '../../../services/requests';
 
 export default class StaffIndex extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            page: false,
-            loading: true,
-            block: false,
-            estado: "",
-            year: "",
-            mes: ""
-        }
-
-        this.handleInput = this.handleInput.bind(this);
-        this.getOption = this.getOption.bind(this);
-    }
-
     static getInitialProps  = async (ctx) => {
         await AUTHENTICATE(ctx);
         let date = new Date;
         let {query, pathname} = ctx;
         query.year = query.year ? query.year : date.getFullYear();
         query.mes = query.mes ? query.mes : date.getMonth() + 1;
+        query.page = query.page || 1;
         query.estado = query.estado ? query.estado : "";
         let { success, staff } = await getStaff(ctx);
-        return {query, pathname, staff, success }
+        return { query, pathname, success, staff }
+    }
+
+    state = {
+        page: false,
+        loading: true,
+        block: false,
+        estado: "",
+        year: "",
+        mes: ""
     }
 
     componentDidMount = () => {
@@ -61,7 +56,7 @@ export default class StaffIndex extends Component {
         })
     }
 
-    handleInput({ name, value }) {
+    handleInput = ({ name, value }) => {
         this.setState({[name]: value});
     }
 
@@ -74,7 +69,7 @@ export default class StaffIndex extends Component {
         push({ pathname, query });
     }
 
-    async getOption(obj, key, index) {
+    getOption = async (obj, key, index) => {
         this.setState({ loading: true });
         let {pathname, query} = Router;
         let id = btoa(obj.id);

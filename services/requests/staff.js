@@ -2,17 +2,15 @@ import { recursoshumanos } from '../apis';
 import { getId } from './index';
 
 export const getStaff = async (ctx) => {
-    let { page, estado, year, mes } = ctx.query;
-    return await recursoshumanos.get(`staff_requirement?page=${page}&estado=${estado}&year=${year}&mes=${mes}`, {}, ctx)
+    try {
+        let { page, estado, year, mes } = ctx.query;
+        return await recursoshumanos.get(`staff_requirement?page=${page}&estado=${estado}&year=${year}&mes=${mes}`, {}, ctx)
         .then(res => res.data)
-        .catch(err => ({
+    } catch (error) {
+        return {
             success: false,
-            code: 501,
             message: error.message,
-            staff: {
-                page: 1,
-                lastPage: 1,
-                data: []
-            }
-        }));
+            staff: { data: [], page: 1, lastPage: 1 }
+        }
+    }
 }
