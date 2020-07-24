@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Form, Select, Button, Icon, Divider } from 'semantic-ui-react';
 import Show from '../../../components/show';
-import { unujobs } from '../../../services/apis';
+import { unujobs, recursoshumanos } from '../../../services/apis';
 import { parseOptions, Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
@@ -11,9 +11,10 @@ import { Body, BtnBack } from '../../../components/Utils';
 export default class RegisterPersonal extends Component
 {
 
-    static getInititalProps = async (ctx) => {
+    static getInitialProps  = async (ctx) => {
         await AUTHENTICATE(ctx);
-        return { pathname: ctx.pathname, query: ctx.query };
+        let { query, pathname } = ctx;
+        return { pathname, query };
     };
 
     state = {
@@ -24,6 +25,7 @@ export default class RegisterPersonal extends Component
         loading: false,
         errors: {},
         dependencias: [],
+        perfil_laborals: [],
         convocatoria: {
             page: 1,
             data: []
@@ -35,6 +37,7 @@ export default class RegisterPersonal extends Component
     }
 
     componentDidMount = async () => {
+        this.props.fireEntity({ render: true });
         this.getConvocatorias();
         this.getMetas();
         this.getDependencias();
@@ -42,9 +45,9 @@ export default class RegisterPersonal extends Component
 
     getConvocatorias = async () => {
         let { convocatoria } = this.state;
-        await unujobs.get(`convocatoria?estado=CREADO&page=${convocatoria.page}`)
+        await recursoshumanos.get(`convocatoria?estado=CREADO&page=${convocatoria.page}`)
         .then(async res => {
-            let { last_page, data } = res.data; 
+            let { last_page, data } = res.data.convocatoria; 
             // update
             await this.setState(async state => {
                 // add 
@@ -54,6 +57,7 @@ export default class RegisterPersonal extends Component
                     convocatoria.page += 1;
                     await this.getConvocatorias();
                 }
+                // response
                 return { convocatoria }
             });
         }).catch(err => console.log(err.message));
@@ -78,20 +82,54 @@ export default class RegisterPersonal extends Component
         }).catch(err => console.log(err.message));
     }
 
-    getDependencias = async () => {
-        await unujobs.get(`dependencia`)
-        .then(async res => this.setState({ dependencias: res.data }))
+    getDependencias = async (page = 1) => {
+        await recursoshumanos.get(`dependencia?page=${page}`)
+        .then(async res => {
+            let { dependencia, success, message } = res.data;
+            if (!success) throw new Error(message);
+            this.setState(state => ({ dependencias: [...state.dependencias, ...dependencia.data] }));
+            if (dependencia.lastPage > (page + 1)) await this.getDependencias(page + 1);
+        })
         .catch(err => console.log(err.message));
     }
 
-    handleInput = ({ name, value }, obj = 'form', err = 'errors') => {
-        this.setState(state => {
+    getPerfilLaboral = async (id, page = 1) => {
+        if (id) {
+            await recursoshumanos.get(`dependencia/${id}/perfil_laboral?page=${page}`)
+            .then(async res => {
+                let { perfil_laboral, success, message } = res.data;
+                if (!success) throw new Error(message);
+                this.setState(state => ({ perfil_laborals: page == 1 ? perfil_laboral.data : [...state.perfil_laborals, ...perfil_laboral.data] }));
+                if (perfil_laboral.lastPage > (page + 1)) await this.getPerfilLaboral(id, page + 1);
+            })
+            .catch(err => console.log(err.message));
+        } else {
+            this.setState({ perfil_laborals: [] });
+        }
+    }
+
+    handleInput = async ({ name, value }, obj = 'form', err = 'errors', limite = 0) => {
+        await this.setState(state => {
             let newObj = state[obj];
             let newErr = state[err];
-            newObj[name] = value;
-            newErr[name] = null;
+            // validar limite
+            if (limite && value.length <= limite) {
+                newObj[name] = value
+            } else if(!limite) {
+                newObj[name] = value;
+                newErr[name] = null;
+            }
+            // response
             return { [obj]: newObj, [err]: newErr };
         });
+        // changed
+        switch (name) {
+            case "dependencia_id":
+                await this.getPerfilLaboral(value);
+                break;
+            default:
+                break;
+        }
     }
 
     readySend = () => {
@@ -100,29 +138,39 @@ export default class RegisterPersonal extends Component
     }
 
     saveAndContinue = async () => {
-        await this.setState({ loading: true });
-        let form = new FormData;
-        for(let attr in this.state.form) {
-            form.append(attr, this.state.form[attr]);
-        }
-        // add bases
-        form.append('bases', this.state.bases.join(';;'));
-        // send
-        await unujobs.post('personal', form)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-        })
-        .catch(err => {
-            try {
-                let { data } = err.response;
-                this.setState({ errors: data.errors })
-            } catch (error) {
-                Swal.fire({ icon: 'error', text: err.message });
+        let answer = await Confirm('warning', `¿Deseas guardar los datos?`, 'Guardar')
+        if (answer) {
+            this.props.fireLoading(true);
+            let form = new FormData;
+            for(let attr in this.state.form) {
+                form.append(attr, this.state.form[attr]);
             }
-        });
-        this.setState({ loading: false });
+            // add bases
+            form.append('bases', JSON.stringify(this.state.bases));
+            // send
+            await recursoshumanos.post('staff_requirement', form)
+            .then(async res => {
+                this.props.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                this.setState({
+                    form: { sede_id: 1 },
+                    bases: []
+                 })
+            })
+            .catch(err => {
+                try {
+                    this.props.fireLoading(false);
+                    let response = JSON.parse(err.message);
+                    this.setState({ errors: response.errors });
+                    Swal.fire({ icon: 'warning', text: response.message });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: err.message });
+                }
+            });
+            this.props.fireLoading(false);
+        }
     }
 
     handleClose = () => {
@@ -180,7 +228,7 @@ export default class RegisterPersonal extends Component
                         </div>
                         <div className="card-body">
                             <div className="row justify-content-center">
-                                <Form loading={this.state.loading} action="#" className="col-md-10" onSubmit={(e) => e.preventDefault()}>
+                                <Form action="#" className="col-md-10" onSubmit={(e) => e.preventDefault()}>
                                     <div className="row justify-content-center">
 
                                         <h5 className="col-md-12">
@@ -237,15 +285,16 @@ export default class RegisterPersonal extends Component
                                             <label>{errors.dependencia_id && errors.dependencia_id[0]}</label>
                                         </Form.Field>
 
-                                        <Form.Field className="col-md-6" error={errors.perfil_laboral && errors.perfil_laboral[0]}>
+                                        <Form.Field className="col-md-6" error={errors.perfil_laboral_id && errors.perfil_laboral_id[0] || ""}>
                                             <label htmlFor="" className="text-left">Perfil Laboral<b className="text-red">*</b></label>
-                                            <input type="text"
-                                                name="perfil_laboral"
-                                                placeholder="Ingrese el perfil laboral del trabajador"
-                                                value={this.state.perfil_laboral}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                            <Select
+                                                name="perfil_laboral_id"
+                                                placeholder="Select. Perfil Laboral"
+                                                value={form.perfil_laboral_id || ""}
+                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                options={parseOptions(this.state.perfil_laborals, ["Select-perfil-lab", "", "Select. Perfil Laboral"], ["id", "id", "nombre"])}
                                             />
-                                            <label>{errors.perfil_laboral && errors.perfil_laboral[0]}</label>
+                                            <label>{errors.perfil_laboral_id && errors.perfil_laboral_id[0]}</label>
                                         </Form.Field>
 
                                         <Form.Field className="col-md-6" error={errors.cantidad && errors.cantidad[0]}>
@@ -254,7 +303,7 @@ export default class RegisterPersonal extends Component
                                                 name="cantidad"
                                                 pattern="^[0-9]+"
                                                 placeholder="Ingrese la cantidad de trabajadores requeridos"
-                                                value={this.state.cantidad}
+                                                value={this.state.cantidad || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors.cantidad && errors.cantidad[0]}</label>
@@ -265,7 +314,7 @@ export default class RegisterPersonal extends Component
                                             <input type="number"
                                                 name="honorarios"
                                                 placeholder="Ingrese los honorarios a pagar"
-                                                value={this.state.honorarios}
+                                                value={this.state.honorarios || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors.honorarios && errors.honorarios[0]}</label>
@@ -303,7 +352,7 @@ export default class RegisterPersonal extends Component
                                             <label>Fecha de Inicio <b className="text-red">*</b></label>
                                             <input type="date"
                                                 name="fecha_inicio"
-                                                value={form.fecha_inicio}
+                                                value={form.fecha_inicio || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors.fecha_inicio && errors.fecha_inicio[0]}</label>
@@ -313,7 +362,7 @@ export default class RegisterPersonal extends Component
                                             <label>Fecha Final <b className="text-red">*</b></label>
                                             <input type="date"
                                                 name="fecha_final"
-                                                value={form.fecha_final}
+                                                value={form.fecha_final || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors.fecha_final && errors.fecha_final[0]}</label>
@@ -331,7 +380,7 @@ export default class RegisterPersonal extends Component
                                             <label>{errors.supervisora_id && errors.supervisora_id[0]}</label>
                                         </Form.Field>
                                     
-                                        <Form.Field className="col-md-6" error={errors.deberes && errors.deberes[0]}>
+                                        <Form.Field className="col-md-12" error={errors.deberes && errors.deberes[0]}>
                                             <label htmlFor="" className="text-left">Deberes a cumplir <b className="text-red">*</b></label>
                                             <textarea name="deberes"
                                                 rows="6"
@@ -340,17 +389,6 @@ export default class RegisterPersonal extends Component
                                                 onChange={({ target }) => this.handleInput(target)}
                                             />
                                             <label>{errors.deberes && errors.deberes[0]}</label>
-                                        </Form.Field>
-
-                                        <Form.Field className="col-md-6" error={errors.lugar && errors.lugar[0]}>
-                                            <label>Lugar <b className="text-red">*</b></label>
-                                            <input type="text"
-                                                name="lugar"
-                                                value={form.lugar}
-                                                placeholder="Ingrese el lugar de la entidad/institución"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                            />
-                                            <label>{errors.lugar && errors.lugar[0]}</label>
                                         </Form.Field>
 
                                         <h5 className="col-md-12">
@@ -364,8 +402,8 @@ export default class RegisterPersonal extends Component
                                             <textarea 
                                                 name="bases"
                                                 rows="6"
-                                                value={form.bases}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                value={form.bases || ""}
+                                                onChange={(e) => this.handleInput(e.target, 'form', 'errors', 255)}
                                                 placeholder="Ingrese la descripción de la Base Legal"
                                             />
                                             <label>{errors.bases && errors.bases[0]}</label>
@@ -376,7 +414,10 @@ export default class RegisterPersonal extends Component
                                             <Button icon="plus"
                                                 fluid
                                                 onClick={(e) => this.addBase()}
+                                                disabled={form.bases && form.bases.length < 10}
                                             />
+
+                                            <small className="mt-3">{form.bases && form.bases.length || 0}/255</small>
                                         </Form.Field>
 
                                         {this.state.bases.map((obj, index) => 

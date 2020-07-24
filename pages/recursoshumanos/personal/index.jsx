@@ -6,11 +6,11 @@ import { AUTHENTICATE } from '../../../services/auth';
 import { Form, Button, Select, Pagination } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
-import { pagePersonal } from '../../../storage/actions/personalActions';
 import { Body } from '../../../components/Utils';
+import { getStaff } from '../../../services/requests';
 
 
-export default class Convocatoria extends Component {
+export default class StaffIndex extends Component {
 
     constructor(props) {
         super(props);
@@ -34,9 +34,8 @@ export default class Convocatoria extends Component {
         query.year = query.year ? query.year : date.getFullYear();
         query.mes = query.mes ? query.mes : date.getMonth() + 1;
         query.estado = query.estado ? query.estado : "";
-        await ctx.store.dispatch(pagePersonal(ctx));
-        let { page_personal } = ctx.store.getState().personal;
-        return {query, pathname, page_personal }
+        let { success, staff } = await getStaff(ctx);
+        return {query, pathname, staff, success }
     }
 
     componentDidMount = () => {
@@ -93,14 +92,13 @@ export default class Convocatoria extends Component {
     render() {
 
         let {loading } = this.state;
-        let {query, pathname, page_personal} = this.props;
+        let {query, pathname, page_personal, staff, success } = this.props;
 
         return (
             <div className="col-md-12">
                 <Body>
                     <Datatable titulo="Lista de Requerimientos de Personal"
                         isFilter={false}
-                        loading={loading}
                         headers={ ["#ID", "Perfil Laboral", "F. Inicio", "F. Termino", "Estado"]}
                         index={
                             [
@@ -147,7 +145,7 @@ export default class Convocatoria extends Component {
                             ]
                         }
                         getOption={this.getOption}
-                        data={page_personal && page_personal.data || []}>
+                        data={staff && staff.data || []}>
                         <Form className="mb-3">
                             <div className="row">
                                 <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
@@ -209,10 +207,10 @@ export default class Convocatoria extends Component {
                     </Datatable>
                     {/* paginacion */}
                     <div className="text-center">
-                        <Show condicion={page_personal && page_personal.data}>
+                        <Show condicion={staff && staff.data || false}>
                             <hr/>
-                            <Pagination defaultActivePage={query.page} 
-                                totalPages={page_personal.last_page}
+                            <Pagination defaultActivePage={query.page || 1} 
+                                totalPages={staff && staff.lastPage || 1}
                                 enabled={this.state.loading}
                                 onPageChange={this.handlePage}
                             />

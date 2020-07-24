@@ -1,5 +1,6 @@
 import atob from 'atob';
 import { findConvocatoria } from './convocatoria';
+import { getStaff } from './staff';
 
 // recuperar id
 export const getId = (ctx) => {
@@ -8,5 +9,6 @@ export const getId = (ctx) => {
 }
 
 export {
+    getStaff,
     findConvocatoria
 };
