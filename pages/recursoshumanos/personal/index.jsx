@@ -39,6 +39,7 @@ export default class StaffIndex extends Component {
     }
 
     componentDidMount = () => {
+        this.props.fireEntity({ render: true });
         this.setting(this.props);
     }
 

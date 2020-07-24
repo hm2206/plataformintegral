@@ -8,13 +8,31 @@ import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
 
+let tmp_convocatorias = [];
+
+const getConvocatorias = async (ctx, page = 1) => {
+    await recursoshumanos.get(`convocatoria?estado=CREADO&page=${page}`, {}, ctx)
+    .then(async res => {
+        let { lastPage, data } = res.data.convocatoria; 
+        // update
+        tmp_convocatorias = [...tmp_convocatorias, ...data];
+        // validate
+        if (lastPage > page + 1) {
+            await this.getConvocatorias(page + 1);
+        }
+    })
+    .catch(err => tmp_convocatorias = []);
+}
+
+
 export default class RegisterPersonal extends Component
 {
 
     static getInitialProps  = async (ctx) => {
         await AUTHENTICATE(ctx);
         let { query, pathname } = ctx;
-        return { pathname, query };
+        await getConvocatorias(ctx);
+        return { pathname, query, convocatorias: tmp_convocatorias };
     };
 
     state = {
@@ -26,10 +44,6 @@ export default class RegisterPersonal extends Component
         errors: {},
         dependencias: [],
         perfil_laborals: [],
-        convocatoria: {
-            page: 1,
-            data: []
-        },
         meta: {
             page: 1,
             data: []
@@ -38,29 +52,8 @@ export default class RegisterPersonal extends Component
 
     componentDidMount = async () => {
         this.props.fireEntity({ render: true });
-        this.getConvocatorias();
         this.getMetas();
         this.getDependencias();
-    }
-
-    getConvocatorias = async () => {
-        let { convocatoria } = this.state;
-        await recursoshumanos.get(`convocatoria?estado=CREADO&page=${convocatoria.page}`)
-        .then(async res => {
-            let { last_page, data } = res.data.convocatoria; 
-            // update
-            await this.setState(async state => {
-                // add 
-                convocatoria.data = await [...convocatoria.data, ...data];
-                // validate
-                if (last_page > convocatoria.page) {
-                    convocatoria.page += 1;
-                    await this.getConvocatorias();
-                }
-                // response
-                return { convocatoria }
-            });
-        }).catch(err => console.log(err.message));
     }
 
     getMetas = async () => {
@@ -215,7 +208,8 @@ export default class RegisterPersonal extends Component
 
     render() {
 
-        let { errors, form, convocatoria, meta } = this.state;
+        let { errors, form, meta } = this.state;
+        let { convocatorias } = this.props;
 
         return (
             <div className="col-md-12">
@@ -242,7 +236,7 @@ export default class RegisterPersonal extends Component
                                                 <Form.Field className="col-md-6" error={errors.convocatoria_id && errors.convocatoria_id[0]}>
                                                 <label htmlFor="" className="text-left">Convocatoria <b className="text-red">*</b></label>
                                                 <Select
-                                                    options={parseOptions(convocatoria.data, ["Select-conv", "", "Select. Convocatoria"], ["id", "id", "numero_de_convocatoria"])}
+                                                    options={parseOptions(convocatorias, ["Select-conv", "", "Select. Convocatoria"], ["id", "id", "numero_de_convocatoria"])}
                                                     name="convocatoria_id"
                                                     placeholder="Select. Convocatoria"
                                                     value={form.convocatoria_id || ""}
@@ -303,7 +297,7 @@ export default class RegisterPersonal extends Component
                                                 name="cantidad"
                                                 pattern="^[0-9]+"
                                                 placeholder="Ingrese la cantidad de trabajadores requeridos"
-                                                value={this.state.cantidad || ""}
+                                                value={form.cantidad || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors.cantidad && errors.cantidad[0]}</label>
@@ -314,7 +308,7 @@ export default class RegisterPersonal extends Component
                                             <input type="number"
                                                 name="honorarios"
                                                 placeholder="Ingrese los honorarios a pagar"
-                                                value={this.state.honorarios || ""}
+                                                value={form.honorarios || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors.honorarios && errors.honorarios[0]}</label>
