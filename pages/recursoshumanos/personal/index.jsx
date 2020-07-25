@@ -4,10 +4,12 @@ import Router from 'next/router';
 import btoa from 'btoa';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Form, Button, Select, Pagination } from 'semantic-ui-react';
-import { BtnFloat } from '../../../components/Utils';
+import { BtnFloat, Body } from '../../../components/Utils';
 import Show from '../../../components/show';
-import { Body } from '../../../components/Utils';
 import { getStaff } from '../../../services/requests';
+import { recursoshumanos } from '../../../services/apis';
+import Swal from 'sweetalert2';
+import { Confirm } from '../../../services/utils';
 
 
 export default class StaffIndex extends Component {
@@ -70,19 +72,43 @@ export default class StaffIndex extends Component {
     }
 
     getOption = async (obj, key, index) => {
-        this.setState({ loading: true });
-        let {pathname, query} = Router;
-        let id = btoa(obj.id);
-        query =  { id, __ref: key };
-        // verificar
-        if (key == 'edit') {
-            pathname = pathname + "/edit";
-        } else if (key == 'report') {
-            pathname = `${pathname}/report`;
-        } 
-        // execute
-        await Router.push({pathname, query});
-        this.setState({ loading: false });
+        let {push, pathname, query} = Router;
+        switch (key) {
+            case 'edit':
+            case 'report':
+                let id = btoa(obj.id);
+                query =  { id, __ref: key };
+                pathname = `${pathname}/${key}`;
+                await push({pathname, query});
+                break;
+            case 'publicar':
+            case 'terminar':
+            case 'cancelar':
+                let response = await this.changeState(obj.id, key);
+                if (response) push({ pathname, query });
+                break;
+            default:
+                break;
+        }
+    }
+
+    changeState = async (id, estado) => {
+        let answer = await Confirm("warning", `¿Deseas ${estado} el requerimiento de personal?`);
+        if (answer) {
+            this.props.fireLoading(true);
+            return await recursoshumanos.post(`staff_requirement/${id}/${estado}`)
+            .then(async res => {
+                this.props.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                return true;
+            }).catch(async err => {
+                this.props.fireLoading(false);
+                await Swal.fire({ icon: 'error', text: err.message });
+                return false;
+            });
+        }
     }
 
     render() {
@@ -132,6 +158,36 @@ export default class StaffIndex extends Component {
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
                                     title: "Editar"
+                                },
+                                {
+                                    key: "publicar",
+                                    icon: "fas fa-check",
+                                    title: "Publicar",
+                                    className: "text-success bg-success",
+                                    rules: {
+                                        key: "estado",
+                                        value: "CREADO"
+                                    }
+                                },
+                                {
+                                    key: "terminar",
+                                    icon: "fas fa-times",
+                                    title: "Terminar",
+                                    className: "text-red",
+                                    rules: {
+                                        key: "estado",
+                                        value: "PUBLICADO"
+                                    }
+                                },
+                                {
+                                    key: "cancelar",
+                                    icon: "fas fa-trash",
+                                    title: "Cancelar",
+                                    className: "text-red",
+                                    rules: {
+                                        key: "estado",
+                                        value: "CREADO"
+                                    }
                                 },
                                 {
                                     key: "report",

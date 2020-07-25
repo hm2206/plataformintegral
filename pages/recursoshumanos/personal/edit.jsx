@@ -269,6 +269,8 @@ export default class EditPersonal extends Component
                 let { success, message, requisito } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
+                this.setState({ question: { requisito: "", body: "", bodies: []} });
+                this.getQuestions();
             })
             .catch(err => {
                 try {
