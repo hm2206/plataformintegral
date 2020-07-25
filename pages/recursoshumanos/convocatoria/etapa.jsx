@@ -5,6 +5,7 @@ import { Form, Button, Icon, Select, List, Image } from 'semantic-ui-react'
 import { backUrl, parseOptions } from '../../../services/utils';
 import Router from 'next/router';
 import { recursoshumanos } from '../../../services/apis';
+import Show from '../../../components/show';
 
 
 export default class EtapaConvocatoria extends Component
@@ -19,7 +20,15 @@ export default class EtapaConvocatoria extends Component
 
     state = {
         loading: false,
-        staff: []
+        staff_id: "",
+        estado: "CURRICULAR",
+        staff: [],
+        etapa: {
+            total: 0,
+            page: 1,
+            lastPage: 1,
+            data: []
+        }
     }
 
     componentDidMount = async () => {
@@ -32,6 +41,15 @@ export default class EtapaConvocatoria extends Component
         }
     }
 
+    handleSelect = ({ name, value }) => {
+        this.setState({ [name]: value, etapa: {
+            total: 0,
+            page: 1,
+            lastPage: 1,
+            data: []
+        } });
+    }
+
     getStaff = async () => {
         let { _id } = this.props;
         await recursoshumanos.get(`convocatoria/${_id}/staff_requirements`)
@@ -39,8 +57,21 @@ export default class EtapaConvocatoria extends Component
         .catch(err => console.log(err.message));
     }
 
-    getEtapas = () => {
-        let { _id } = this.props;
+    getEtapas = async (changed = false) => {
+        let { staff_id, estado } = this.state;
+        await recursoshumanos.get(`staff_requirement/${staff_id}/etapa?estado=${estado}`)
+        .then(res => {
+            let { etapa, success, message } = res.data;
+            if (!success) throw new Error(message);
+            // setting
+            this.setState(state => {
+                state.etapa.total = etapa.total;
+                state.etapa.lastPage = etapa.lastPage;
+                state.etapa.page = etapa.page;
+                state.etapa.data = changed ? etapa.data : [...state.etapa.data, ...etapa.data]; 
+                return { etapa: state.etapa };
+            });
+        }).catch(err => console.log(err.message))
     }
 
     handleBack = () => {
@@ -55,7 +86,7 @@ export default class EtapaConvocatoria extends Component
     render() {
 
         let { convocatoria, success, isLoading } = this.props;
-        let { staff } = this.state;
+        let { staff, staff_id, estado, etapa } = this.state;
 
         return (
             <div className="col-md-12">
@@ -101,67 +132,111 @@ export default class EtapaConvocatoria extends Component
                                 <hr/>
                             </div>
 
-                            <div className="col-md-4">
+                            <div className="col-md-5">
                                 <Select
                                     fluid
                                     options={parseOptions(staff, ["select-staff", "", "Select. R. Personal"], ["id", "id", "slug"])}
-                                    placeholder="Select. R. Personal"
+                                    placeholder="Select. ID"
+                                    name="staff_id"
+                                    value={staff_id}
+                                    onChange={(e, obj) => this.handleSelect(obj)}
                                 />
                             </div>
 
-                            <div className="col-md-6"></div>
+                            <div className="col-md-3">
+                                <Select
+                                    fluid
+                                    options={[
+                                        { key: "CURRICULAR", value: "CURRICULAR", text: "CURRICULAR" },
+                                        { key: "CONOCIMIENTO", value: "CONOCIMIENTO", text: "CONOCIMIENTO" },
+                                        { key: "ENTREVISTA", value: "ENTREVISTA", text: "ENTREVISTA" },
+                                        { key: "GANADOR", value: "GANADOR", text: "GANADOR" }
+                                    ]}
+                                    placeholder="Select. estado"
+                                    name="estado"
+                                    value={estado}
+                                    onChange={(e, obj) => this.handleSelect(obj)}
+                                />
+                            </div>
 
-                            <div className="col-md-10 mt-3">
-                                <hr/>
-                                <div className="card">
-                                    <div className="card-header">
-                                        <div className="row">
-                                            <div className="col-md-10">Nombre de La etapa</div>
-                                            <div className="col-md-2">
-                                                <a href="#" target="__blank" className="text-dark">
-                                                    <i className="fas fa-file-pdf text-red"></i> Reporte
-                                                </a>
+                            <div className="col-md-2">
+                                <Button
+                                    fluid
+                                    color="blue"
+                                    onClick={this.getEtapas}
+                                    disabled={!staff_id || !estado}
+                                >
+                                    <i className="fas fa-search"></i>
+                                </Button>
+                            </div>
+
+                            <Show condicion={etapa.total}>
+                                <div className="col-md-10 mt-3">
+                                    <hr/>
+                                    <div className="card">
+                                        <div className="card-header">
+                                            <div className="row">
+                                                <div className="col-md-10">
+                                                    <i className="fas fa-clock"></i> Etapa 
+                                                    <i className="fas fa-arrow-right ml-2"></i> 
+                                                    <span className="badge badge-warning ml-2">{estado}</span>
+                                                </div>
+                                                <div className="col-md-2">
+                                                    <Show condicion={etapa.total}>
+                                                        <a href="#" target="__blank" className="text-dark">
+                                                            <i className="fas fa-file-pdf text-red"></i> Reporte
+                                                        </a>
+                                                    </Show>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="card-body">
-                                        <List divided verticalAlign='middle'>
-                                            <List.Item>
-                                                <List.Content>
-                                                    <div className="row">
-                                                        <div className="col-md-6">
-                                                            <input type="text"
-                                                                placeholder="Apellidos y Nombres"
-                                                                readOnly
-                                                            />
-                                                        </div>
-                                                        
-                                                        <div className="col-md-2">
-                                                            <input type="number"
-                                                                className="text-right"
-                                                                name=""placeholder="0"
-                                                            />
-                                                        </div>
+                                        <div className="card-body">
+                                            <List divided verticalAlign='middle'>
+                                                {etapa.data.map(obj => 
+                                                    <List.Item key={`etapa-${obj.id}`}>
+                                                        <List.Content>
+                                                            <div className="row">
+                                                                <div className="col-md-6">
+                                                                    <input type="text"
+                                                                        placeholder="Apellidos y Nombres"
+                                                                        className="uppercase"
+                                                                        value={obj.postulante && obj.postulante.nombre_completo || ""}
+                                                                        readOnly
+                                                                    />
+                                                                </div>
+                                                                
+                                                                <div className="col-md-2">
+                                                                    <input type="number"
+                                                                        className="text-right"
+                                                                        name="puntaje"
+                                                                        value={obj.puntaje}
+                                                                        placeholder="0"
+                                                                    />
+                                                                </div>
 
-                                                        <div className="col-md-2">
-                                                            <input type="text"
-                                                                defaultValue="/20"
-                                                                readOnly
-                                                            />
-                                                        </div>
+                                                                <div className="col-md-2">
+                                                                    <input type="text"
+                                                                        defaultValue="/20"
+                                                                        readOnly
+                                                                    />
+                                                                </div>
 
-                                                        <div className="col-md-2">
-                                                            <Button>
-                                                                <i className="fas fa-arrow-right"></i>
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                </List.Content>
-                                            </List.Item>
-                                        </List>
+                                                                <div className="col-md-2">
+                                                                    <Button
+                                                                        disabled={!obj.current}
+                                                                    >
+                                                                        <i className="fas fa-arrow-right"></i>
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </List.Content>
+                                                    </List.Item>
+                                                )}
+                                            </List>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Show>
                         </Form>
                     </div>
                 
