@@ -6,9 +6,10 @@ import { AUTHENTICATE } from '../../../services/auth';
 import { Form, Button, Select, Pagination } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
-import { pageConvocatoria } from '../../../storage/actions/convocatoriaActions';
 import { Body } from '../../../components/Utils';
 import { recursoshumanos } from '../../../services/apis';
+import { Confirm } from '../../../services/utils';
+import Swal from 'sweetalert2';
 
 
 const getConvocatoria = async (ctx) => {
@@ -84,20 +85,45 @@ export default class Convocatoria extends Component {
         await push({ pathname, query });
     }
 
-    async getOption(obj, key, index) {
-        let {pathname, query} = Router;
-        let id = btoa(obj.id);
-        query =  { id, __ref: `option-${key}` };
-        // verificar
-        if (key == 'edit') {
-            pathname = pathname + "/edit";
-        } else if (key == 'report') {
-            pathname = `${pathname}/report`;
-        } else if (key == 'etapa') {
-            pathname = `${pathname}/etapa`;
+    getOption = async (obj, key, index) => {
+        let {push, pathname, query} = Router;
+        switch (key) {
+            case 'edit':
+            case 'report':
+            case 'etapa':
+                let id = btoa(obj.id);
+                query =  { id, __ref: key };
+                pathname = `${pathname}/${key}`;
+                await push({pathname, query});
+                break;
+            case 'publicar':
+            case 'terminar':
+            case 'cancelar':
+                let response = await this.changeState(obj.id, key);
+                if (response) push({ pathname, query });
+                break;
+            default:
+                break;
         }
-        // execute
-        await Router.push({pathname, query});
+    }
+
+    changeState = async (id, estado) => {
+        let answer = await Confirm("warning", `¿Deseas ${estado} la convocatoria?`);
+        if (answer) {
+            this.props.fireLoading(true);
+            return await recursoshumanos.post(`convocatoria/${id}/${estado}`)
+            .then(async res => {
+                this.props.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                return true;
+            }).catch(async err => {
+                this.props.fireLoading(false);
+                await Swal.fire({ icon: 'error', text: err.message });
+                return false;
+            });
+        }
     }
 
     render() {
@@ -153,6 +179,36 @@ export default class Convocatoria extends Component {
                                     key: "etapa",
                                     icon: "fas fa-layer-group",
                                     title: "Etapas"
+                                },
+                                {
+                                    key: "publicar",
+                                    icon: "fas fa-check",
+                                    title: "Publicar",
+                                    className: "text-success bg-success",
+                                    rules: {
+                                        key: "estado",
+                                        value: "CREADO"
+                                    }
+                                },
+                                {
+                                    key: "terminar",
+                                    icon: "fas fa-times",
+                                    title: "Terminar",
+                                    className: "text-red",
+                                    rules: {
+                                        key: "estado",
+                                        value: "PUBLICADO"
+                                    }
+                                },
+                                {
+                                    key: "cancelar",
+                                    icon: "fas fa-trash",
+                                    title: "Cancelar",
+                                    className: "text-red",
+                                    rules: {
+                                        key: "estado",
+                                        value: "CREADO"
+                                    }
                                 },
                                 {
                                     key: "report",

@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Form, Button, Icon, Select } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import { recursoshumanos } from '../../../services/apis';
-import { parseOptions } from '../../../services/utils';
+import { parseOptions, Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -98,57 +98,69 @@ export default class EditConvocatoria extends Component
     }
 
     saveAndContinue = async () => {
-        await this.setState({ loading: true });
-        let form = Object.assign({}, this.state);
-        // send
-        await recursoshumanos.post(`convocatoria/${this.props.convocatoria.id}/update`, form)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) {
-                await this.setState({ cancel: false });
+        let answer = await Confirm('warning', `¿Deseas guardar los cambios?`, 'Confirmar');
+        if (answer) {
+            this.props.fireLoading(true);
+            let form = Object.assign({}, this.state);
+            // send
+            await recursoshumanos.post(`convocatoria/${this.props.convocatoria.id}/update`, form)
+            .then(async res => {
+                this.props.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.setState(state => {
+                    let nextActividad = Object.assign({}, state.actividad);
+                    nextActividad.descripcion = "";
+                    nextActividad.responsable = "";
+                    return { cancel: false, actividad: nextActividad };
+                });
                 let { push, pathname, query } = Router;
                 await push({ pathname, query });
-            }
-        })
-        .catch(async err => {
-            try {
-                let { data } = err.response;
-                this.setState({ errors: data })
-            } catch (error) {
-                Swal.fire({ icon: 'error', text: err.message });
-            }
-        });
-        this.setState({ loading: false });
+            })
+            .catch(async err => {
+                try {
+                    this.props.fireLoading(false);
+                    let { data } = err.response;
+                    this.setState({ errors: data })
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: err.message });
+                }
+            });
+        }
     }
 
     createActividad = async () => {
-        await this.setState({ loading_actividad: true });
-        let form = Object.assign({}, this.state.actividad);
-        form.convocatoria_id = this.props.convocatoria.id;
-        // send
-        await recursoshumanos.post(`actividad`, form)
-        .then(async res => {
-            let { success, message, actividad } = res.data;
-            if (!success) throw new Error(message);
-            await Swal.fire({ icon: 'success', text: message });
-            await this.setState(state => {
-                state.actividades.push(actividad);
-                return { actividades: state.actividades };
+        let answer = await Confirm('warning', `¿Deseas guardar la actividad?`);
+        if (answer) {
+            await this.setState({ loading_actividad: true });
+            let form = Object.assign({}, this.state.actividad);
+            form.convocatoria_id = this.props.convocatoria.id;
+            // send
+            await recursoshumanos.post(`actividad`, form)
+            .then(async res => {
+                let { success, message, actividad } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.setState(state => {
+                    state.actividades.push(actividad);
+                    state.actividad.descripcion = "";
+                    state.actividad.responsable = "";
+                    return { actividades: state.actividades, actividad: state.actividad };
+                });
+                // update actividad
+                await this.settingActividad(this.props.convocatoria);
+            })
+            .catch(async err => {
+                try {
+                    let { data } = err.response;
+                    this.setState({ errors_actividad: data })
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: err.message });
+                }
             });
-            // update actividad
-            await this.settingActividad(this.props.convocatoria);
-        })
-        .catch(async err => {
-            try {
-                let { data } = err.response;
-                this.setState({ errors_actividad: data })
-            } catch (error) {
-                Swal.fire({ icon: 'error', text: err.message });
-            }
-        });
-        this.setState({ loading_actividad: false });
+            this.setState({ loading_actividad: false });
+        }
     }
 
     handleClose = () => {
@@ -228,56 +240,8 @@ export default class EditConvocatoria extends Component
                                                 disabled
                                             />
                                         </Form.Field>
-
-                                        <Form.Field className="col-md-6">
-                                            <label>Estado <b className="text-red">*</b></label>
-                                            {/* creado */}
-                                            <Show condicion={this.state.estado_actual == 'CREADO'}>
-                                                <Select
-                                                    placeholder="Select. Estado"
-                                                    name="estado"
-                                                    value={this.state.estado}
-                                                    onChange={(e, obj) => this.handleInput(obj)}
-                                                    options={[
-                                                        {key: 'CREADO', value: "", text: 'Select. Estado'},
-                                                        {key: 'PUBLICADO', value: 'PUBLICADO', text: 'PUBLICAR'},
-                                                        {key: 'CANCELADO', value: 'CANCELADO', text: 'CANCELAR'},
-                                                        {key: 'TERMINADO', value: 'TERMINADO', text: 'TERMINAR'},
-                                                    ]}
-                                                />
-                                            </Show>
-                                            {/* publicado */}
-                                            <Show condicion={this.state.estado_actual == 'PUBLICADO'}>
-                                                <Select
-                                                    placeholder="Select. Estado"
-                                                    name="estado"
-                                                    value={this.state.estado}
-                                                    onChange={(e, obj) => this.handleInput(obj)}
-                                                    options={[
-                                                        {key: 'PUBLICADO', value: "", text: 'Select. Estado'},
-                                                        {key: 'TERMINADO', value: 'TERMINADO', text: 'TERMINAR'},
-                                                    ]}
-                                                />
-                                            </Show>
-                                            {/* cancelado */}
-                                            <Show condicion={this.state.estado_actual == 'CANCELADO'}>
-                                                <input type="text"
-                                                    name="estado_actual"
-                                                    value={this.state.estado_actual}
-                                                    disabled
-                                                />
-                                            </Show>
-                                            {/* terminar */}
-                                            <Show condicion={this.state.estado_actual == 'TERMINADO'}>
-                                                <input type="text"
-                                                    name="estado_actual"
-                                                    value={this.state.estado_actual}
-                                                    disabled
-                                                />
-                                            </Show>
-                                        </Form.Field>
                                     
-                                        <Form.Field className="col-md-6">
+                                        <Form.Field className="col-md-12">
                                             <label htmlFor="" className="text-left">Observación <b className="text-red">*</b></label>
                                             <textarea name="observacion"
                                                 rows="6"
@@ -311,7 +275,8 @@ export default class EditConvocatoria extends Component
 
                                 <div className="col-md-12">
                                     <hr/>
-                                    <i className="fas fa-clock"></i> Cronograma de Actividades
+                                    <i className="fas fa-clock"></i> Cronograma de Actividades 
+                                    <b className="ml-2">({this.state.actividades && this.state.actividades.length || 0})</b>
                                     <hr/>
                                 </div>
 
@@ -319,7 +284,7 @@ export default class EditConvocatoria extends Component
                                     <label>Descripción <b className="text-red">*</b></label>
                                     <textarea name="descripcion" 
                                         rows="5"
-                                        value={actividad.descripcion}
+                                        value={actividad.descripcion || ""}
                                         placeholder="Ingrese la descripción de la actividad"
                                         onChange={(e) => this.handleActivity(e.target)}
                                         disabled={this.state.loading_actividad}
@@ -331,7 +296,7 @@ export default class EditConvocatoria extends Component
                                     <label>F. Inicio <b className="text-red">*</b></label>
                                     <input type="date" 
                                         name="fecha_inicio"
-                                        value={actividad.fecha_inicio}
+                                        value={actividad.fecha_inicio || ""}
                                         onChange={(e) => this.handleActivity(e.target)}
                                         disabled={this.state.loading_actividad}
                                     />
@@ -342,7 +307,7 @@ export default class EditConvocatoria extends Component
                                     <label>F. Final <b className="text-red">*</b></label>
                                     <input type="date" 
                                         name="fecha_final"
-                                        value={actividad.fecha_final}
+                                        value={actividad.fecha_final || ""}
                                         onChange={(e) => this.handleActivity(e.target)}
                                         disabled={this.state.loading_actividad}
                                     />
@@ -354,7 +319,7 @@ export default class EditConvocatoria extends Component
                                     <input type="text" 
                                         name="responsable"
                                         placeholder="Ingrese el área responsable"
-                                        value={actividad.responsable}
+                                        value={actividad.responsable || ""}
                                         onChange={(e) => this.handleActivity(e.target)}
                                         disabled={this.state.loading_actividad}
                                     />
