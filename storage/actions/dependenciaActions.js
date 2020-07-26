@@ -1,4 +1,4 @@
-import {  unujobs } from '../../services/apis';
+import {  recursoshumanos } from '../../services/apis';
 
 
 export const dependenciaActionsTypes = {
@@ -10,7 +10,7 @@ export const dependenciaActionsTypes = {
 export const allDependencias = (ctx) => {
     return async (dispatch) => {
         let { query } = ctx;
-        await unujobs.get(`dependencia`, {}, ctx)
+        await recursoshumanos.get(`dependencia`, {}, ctx)
         .then(res =>  dispatch({ type: dependenciaActionsTypes.ALL_DEPENDENCIAS, payload: res.data }))
         .catch(err => console.log(err.message));
     }
