@@ -19,11 +19,10 @@ export default class Dependencia extends Component {
         super(props);
         this.state = {
             page: false,
-            loading: true,
+            loading: false,
             block: false,
-            estado: "",
-            year: "",
-            mes: ""
+            type: "",
+            query_search: ""
         }
     }
 
@@ -32,24 +31,23 @@ export default class Dependencia extends Component {
         let date = new Date;
         let {query, pathname} = ctx;
         query.page = query.page || 1;
-        query.year = query.year ? query.year : date.getFullYear();
-        query.mes = query.mes ? query.mes : date.getMonth() + 1;
-        query.estado = query.estado ? query.estado : "";
+        query.query_search = query.query_search || "";
+        query.type = query.type ? query.type : "";
         // get dependencia
         let { success, dependencia } = await getDependencia(ctx) || {};
         return { query, pathname, dependencia, success }
     }
 
     componentDidMount = async () => {
-        this.props.fireEntity({ render: true })
+        this.props.fireLoading(true);
         await this.setting(this.props);
+        this.props.fireLoading(false);
     }
 
     setting = (props) => {
         this.setState({ 
-            year: props.query.year,
-            mes: props.query.mes,
-            estado: props.query.estado,
+            type: props.query.type,
+            query_search: props.query.query_search,
             loading: false
         })
     }
@@ -60,9 +58,8 @@ export default class Dependencia extends Component {
 
     handledependencia = async () => {
         let { push, query, pathname } = Router;
-        query.year = this.state.year;
-        query.mes = this.state.mes;
-        query.estado = this.state.estado;
+        query.query_search = this.state.query_search;
+        query.type = this.state.type;
         await push({ pathname, query });
     }
 
@@ -101,6 +98,12 @@ export default class Dependencia extends Component {
                 return false;
             });
         }
+    }
+
+    handlePage = async (e, { activePage }) => {
+        let { pathname, query, push } = Router;
+        query.page = activePage;
+        await push({ pathname, query });
     }
 
     render() {
@@ -159,26 +162,12 @@ export default class Dependencia extends Component {
                         data={dependencia && dependencia.data || []}>
                         <Form className="mb-3">
                             <div className="row">
-                                <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
+                                <div className="col-md-6 mb-1 col-6 col-sm-6 col-xl-4">
                                     <Form.Field>
-                                        <input type="number" 
-                                            min="2019" 
-                                            placeholder="Año" 
-                                            name="year"
-                                            value={this.state.year}
-                                            disabled={this.state.loading}
-                                            onChange={(e) => this.handleInput(e.target)}
-                                        />
-                                    </Form.Field>
-                                </div>
-                                <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
-                                    <Form.Field>
-                                        <input type="number" 
-                                            min="1" 
-                                            max="12" 
-                                            placeholder="Mes" 
-                                            name="mes"
-                                            value={this.state.mes}
+                                        <input type="text" 
+                                            placeholder="Buscar dependencia" 
+                                            name="query_search"
+                                            value={this.state.query_search || ""}
                                             onChange={(e) => this.handleInput(e.target)}
                                             disabled={this.state.loading}
                                         />
@@ -187,16 +176,17 @@ export default class Dependencia extends Component {
                                 <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
                                     <Form.Field>
                                         <Select
+                                            fluid
                                             placeholder="TODOS"
-                                            name="estado"
-                                            value={this.state.estado}
+                                            name="type"
+                                            value={this.state.type}
                                             onChange={(e, obj) => this.handleInput(obj)}
                                             options={[
                                                 { key: 'ALL', value: "", text: 'TODOS'},
-                                                { key: 'CREADO', value: 'CREADO', text: 'CREADOS'},
-                                                { key: 'PUBLICADO', value: 'PUBLICADO', text: 'PUBLICADOS'},
-                                                { key: 'CANCELADO', value: 'CANCELADO', text: 'CANCELADOS'},
-                                                { key: 'TERMINADO', value: 'TERMINADO', text: 'TERMINADOS'},
+                                                { key: 'OTRO', value: 'OTRO', text: 'OTRO'},
+                                                { key: 'ESCUELA', value: 'ESCUELA', text: 'ESCUELA'},
+                                                { key: 'FACULTAD', value: 'FACULTAD', text: 'FACULTAD'},
+                                                { key: 'OFICINA', value: 'OFICINA', text: 'OFICINA'},
                                             ]}
                                         />
                                     </Form.Field>

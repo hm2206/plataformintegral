@@ -6,15 +6,17 @@ import { Form, Button, Select } from 'semantic-ui-react'
 import { recursoshumanos } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
+import { findDependencia } from '../../../services/requests/dependencia';
 
 
-export default class CreateDependencia extends Component
+export default class EditaDependencia extends Component
 {
 
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
         let { pathname, query } = ctx;
-        return { pathname, query };
+        let { success, dependencia } = await findDependencia(ctx);
+        return { pathname, query, success, dependencia };
     }
 
     state = {
@@ -25,6 +27,16 @@ export default class CreateDependencia extends Component
             type: "OTRO"
         },
         errors: {}
+    }
+
+    componentDidMount = () => {
+        this.setting();
+    }
+
+    setting = () => {
+        this.setState((state, props) => ({
+            form: props.dependencia || {}
+        }));
     }
 
     handleInput = ({ name, value }, obj = 'form') => {
@@ -38,13 +50,14 @@ export default class CreateDependencia extends Component
 
     save = async () => {
         this.props.fireLoading(true);
-        await recursoshumanos.post('dependencia', this.state.form)
+        let { form } = this.state;
+        await recursoshumanos.post(`dependencia/${form.id}/update`, form)
         .then(async res => {
             this.props.fireLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
-            if (success) this.setState({ form: {}, errors: {} });
+            if (success) this.setState({ errors: {} });
         })
         .catch(async err => {
             try {
@@ -68,7 +81,7 @@ export default class CreateDependencia extends Component
             <div className="col-md-12">
                 <Body>
                     <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Dependencia
+                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Dependencia
                     </div>
                     <div className="card-body">
                         <Form className="row justify-content-center">
