@@ -23,8 +23,9 @@ export const getDependencia = async (ctx) => {
             status: err.status || 501,
             message: err.message,
             dependencia: {
+                total: 0,
                 page: 1,
-                last_page: 1,
+                lastPage: 1,
                 data: []
             }
         }));
