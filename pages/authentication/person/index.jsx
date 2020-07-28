@@ -53,11 +53,9 @@ export default class Index extends Component
 
     
     handlePage = async (e, { activePage }) => {
-        this.setState({ loading: true });
         let { pathname, query, push } = Router;
         query.page = activePage;
         await push({ pathname, query });
-        this.setState({ loading: false });
     }
 
     handleOption = async (obj, key, index) => {

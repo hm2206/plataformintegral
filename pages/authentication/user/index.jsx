@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Button, Form } from 'semantic-ui-react';
+import { Button, Form, Pagination } from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import { authentication } from '../../../services/apis';
 import Router from 'next/router';
@@ -80,6 +80,12 @@ export default class UserIndex extends Component {
         await push({ pathname, query });
     }
 
+    handlePage = async (e, { activePage }) => {
+        let { pathname, query, push } = Router;
+        query.page = activePage;
+        await push({ pathname, query });
+    }
+
     setChangeState = async (obj, condicion) => {
         let answer = await Confirm("warning", `¿Deseas ${condicion ? 'restaurar' : 'desactivar'} la Cuenta ${obj.email}?`);
         if (answer) {
@@ -98,7 +104,7 @@ export default class UserIndex extends Component {
     render() {
 
         let {loading} = this.state;
-        let { page_user } = this.props;
+        let { page_user, query } = this.props;
 
         return (
                 <Form className="col-md-12">
@@ -203,6 +209,14 @@ export default class UserIndex extends Component {
                             </div>
                         </div>
                     </Datatable>
+                    <div className="text-center">
+                        <hr/>
+                        <Pagination defaultActivePage={query.page} 
+                            totalPages={page_user.lastPage || 1}
+                            enabled={this.state.loading}
+                            onPageChange={this.handlePage}
+                        />
+                    </div>
                 </Body>
 
                 <BtnFloat
