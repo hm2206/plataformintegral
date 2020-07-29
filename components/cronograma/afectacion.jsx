@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { unujobs } from '../../services/apis';
+import { unujobs, authentication, recursoshumanos } from '../../services/apis';
 import { Form, Select, Button, Radio } from 'semantic-ui-react';
 import Show from '../show';
 import ConsultaIframe from '../consultaIframe';
@@ -47,12 +47,8 @@ export default class Afectacion extends Component {
         // update al cancelar
         if (!nextProps.edit && nextProps.edit != this.props.edit) {
             await this.setting(nextProps);
+            this.handlePerfilLaborales(nextProps.historial.dependencia_id);
         }
-    }
-
-    componentDidUpdate = (prevProps, prevState) => {
-        let { history } = this.state;
-        if (history.dependencia_id != prevState.history.dependencia_id) this.handlePerfilLaborales(history.dependencia_id)
     }
 
     setting = async (nextProps) => {
@@ -60,22 +56,31 @@ export default class Afectacion extends Component {
         this.setState({ history: nextProps.historial || {}, errors: {} });
     }
 
-    getDependencias = async () => {
-        await unujobs.get('dependencia')
+    getDependencias = async (page = 1) => {
+        await recursoshumanos.get('dependencia')
         .then(async res => {
-            await  this.setState({ dependencias: res.data, perfil_laborales: [] });
-            this.handlePerfilLaborales(this.state.history.dependencia_id);
+            let { dependencia, success, message } = res.data;
+            if (!success) throw new Error(message);
+            await  this.setState(state => ({ 
+                dependencias: [...state.dependencias, ...dependencia.data], 
+                perfil_laborales: [] 
+            }));
+            // validar dependencia
+            if (dependencia.lastPage > page) await this.getDependencias(page + 1)
+            else this.handlePerfilLaborales(this.state.history.dependencia_id);
         })
         .catch(err => console.log(err.message));
     }
 
-    handlePerfilLaborales = async (dependencia_id = null) => {
+    handlePerfilLaborales = async (dependencia_id = null, page = 1) => {
         if (dependencia_id) {
-            this.setState(state => {
-                for (let dep of state.dependencias) {
-                    if (dep.id == dependencia_id) return { perfil_laborales: dep.perfil_laborales || [] };
-                }
-            });
+            await recursoshumanos.get(`dependencia/${dependencia_id}/perfil_laboral`)
+            .then(async res => {
+                let { success, message, perfil_laboral } = res.data;
+                if (!success) throw new Error(message);
+                this.setState(state => ({ perfil_laborales: [...state.perfil_laborales, ...perfil_laboral.data] }));
+                if (perfil_laboral.lastPage > page) await this.handlePerfilLaborales(dependencia_id, page + 1);
+            }).catch(err => console.log(err.message));
         } else {
             this.setState({ perfil_laborales: [] });
             this.handleInput({ name: 'perfil_laboral_id', value: '' });
@@ -88,12 +93,23 @@ export default class Afectacion extends Component {
         })).catch(err => console.log(err.message));
     }
 
-    handleInput = ({ name, value }) => {
+    handleInput = async ({ name, value }) => {
         let newObject = Object.assign({}, this.state.history);
         let newErrors = Object.assign({}, this.state.errors);
         newObject[name] = value;
         newErrors[name] ? newErrors[name] = "" : null;
-        this.setState({ history: newObject, errors: newErrors });
+        // setting data
+        await this.setState({ history: newObject, errors: newErrors });
+        // validar
+        switch (name) {
+            case 'dependencia_id':
+                this.handlePerfilLaborales(value, 1);
+                this.handleInput({ name: 'perfil_laboral_id', value: "" });
+                this.setState({ perfil_laborales: [] });
+                break;
+            default:
+                break;
+        }
     }
 
     getMetas = () => {
@@ -116,24 +132,22 @@ export default class Afectacion extends Component {
         let form = Object.assign({}, history);
         form._method = 'PUT';
         await unujobs.post(`historial/${this.state.history.id}`, form, { headers: { CronogramaID: history.cronograma_id } })
-        .then(res => {
+        .then(async res => {
+            this.props.setLoading(false);
             let { success, message } = res.data;
-            if (success) {
-                this.props.updatingHistorial();
-                Swal.fire({ icon: 'success', text: message });
-                this.props.setEdit(false);
-            } else {
-                Swal.fire({ icon: 'error', text: message });
-                this.props.setEdit(true);
-            }
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            this.props.setEdit(false);
+            this.props.updatingHistorial();
         })
         .catch(err => {
             try {
+                this.props.setLoading(false);
                 let { message, errors } = err.response.data;
                 this.setState({ errors });
-                Swal.fire({ icon: 'error', text: 'Datos incorrectos' });
+                Swal.fire({ icon: 'warning', text: 'Datos incorrectos' });
             } catch (error) {
-                Swal.fire({ icon: 'error', text: 'Algo salió mal' });
+                Swal.fire({ icon: 'error', text: err.message });
             }
         });
         this.props.setSend(false);
@@ -293,24 +307,16 @@ export default class Afectacion extends Component {
 
                     <Form.Field error={errors.dependencia_id && errors.dependencia_id[0]}>
                         <label><h5>Dependencia/Oficina <b className="text-red">*</b></h5></label>
-                        <Show condicion={this.props.edit}>
-                            <Select
-                                options={parseOptions(dependencias, ['sel_dep', '', 'Select. Dependencia/Oficina'], ['id', 'id', 'nombre'])}
-                                placeholder="Select. Dependencia/Oficina"
-                                value={history.dependencia_id ? history.dependencia_id : ''}
-                                name="dependencia_id"
-                                onChange={(e, obj) => this.handleInput(obj)}
-                                error={errors.dependencia_id && errors.dependencia_id[0]}
-                            />
-                            <label>{errors.dependencia_id && errors.dependencia_id[0]}</label>
-                        </Show>
-                        <Show condicion={!this.props.edit}>
-                            <input type="text"
-                                disabled={true}
-                                value={history.dependencia ? history.dependencia : ''}
-                                readOnly
-                            />
-                        </Show>
+                        <Select
+                            options={parseOptions(dependencias, ['sel_dep', '', 'Select. Dependencia/Oficina'], ['id', 'id', 'nombre'])}
+                            placeholder="Select. Dependencia/Oficina"
+                            value={history.dependencia_id || ""}
+                            name="dependencia_id"
+                            onChange={(e, obj) => this.handleInput(obj)}
+                            error={errors.dependencia_id && errors.dependencia_id[0]}
+                            disabled={!this.props.edit}
+                        />
+                        <label>{errors.dependencia_id && errors.dependencia_id[0]}</label>
                     </Form.Field>
 
                     <Form.Field>
@@ -363,24 +369,16 @@ export default class Afectacion extends Component {
 
                     <Form.Field error={errors.perfil_laboral_id && errors.perfil_laboral_id[0]}>
                         <label><h5>Perfil Laboral <b className="text-red">*</b></h5></label>
-                        <Show condicion={this.props.edit}>
-                            <Select
-                                options={parseOptions(perfil_laborales, ['sel_per_lab', '', 'Select. Perfil Laboral'], ['id', 'id', 'nombre'])}
-                                placeholder="Select. Perfil Laboral"
-                                value={history.perfil_laboral_id || ''}
-                                name="perfil_laboral_id"
-                                onChange={(e, obj) => this.handleInput(obj)}
-                                error={errors.perfil_laboral_id && errors.perfil_laboral_id[0]}
-                            />
-                            <label>{errors.perfil_laboral_id && errors.perfil_laboral_id[0]}</label>
-                        </Show>
-                        <Show condicion={!this.props.edit}>
-                            <input type="text"
-                                disabled={true}
-                                value={history.perfil_laboral || ''}
-                                readOnly
-                            />
-                        </Show>
+                        <Select
+                            disabled={!this.props.edit}
+                            options={parseOptions(perfil_laborales, ['sel_per_lab', '', 'Select. Perfil Laboral'], ['id', 'id', 'nombre'])}
+                            placeholder="Select. Perfil Laboral"
+                            value={history.perfil_laboral_id || ''}
+                            name="perfil_laboral_id"
+                            onChange={(e, obj) => this.handleInput(obj)}
+                            error={errors.perfil_laboral_id && errors.perfil_laboral_id[0]}
+                        />
+                        <label>{errors.perfil_laboral_id && errors.perfil_laboral_id[0]}</label>
                     </Form.Field>
 
                     <Form.Field>

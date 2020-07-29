@@ -104,14 +104,14 @@ export default class Contrato extends Component
                     <Form loading={this.state.loading}>
                         <div className="col-md-12">
                             <DataTable titulo={<span>Lista de Contratos</span>}
-                                headers={["#ID", "Apellidos y Nombres", "F. Ingreso", "Plaza", "Perfil Laboral", "Estado"]}
+                                headers={["#ID", "Apellidos y Nombres", "F. Ingreso", "Plaza", "P.A.P", "Estado"]}
                                 data={this.state.infos}
                                 index={[
                                     { key: "id", type: "text" },
                                     { key: "person.fullname", type: "text" },
                                     { key: "fecha_de_ingreso", type: "date", bg: "warning" },
                                     { key: "plaza", type: "icon" },
-                                    { key: "perfil_laboral", type: "icon", bg: "dark" },
+                                    { key: "pap", type: "icon", bg: "dark" },
                                     { key: "estado", type: "switch", is_true: "Activo", is_false: "Terminado"}
                                 ]}
                                 options={[

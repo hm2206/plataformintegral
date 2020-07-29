@@ -140,7 +140,7 @@ export default class CronogramaInformacion extends Component
         .then(res => {
             let { last_page, data } = res.data;
             this.setState(state => ({ situacion_laborals: [...state.situacion_laborals, ...data] }));
-            if (last_page > page + 1) this.getSituacionLaboral(page + 1);
+            if (last_page > page) this.getSituacionLaboral(page + 1);
         })
         .catch(err => console.log(err.message));
     }
@@ -189,17 +189,28 @@ export default class CronogramaInformacion extends Component
     }
 
     sendEmail = async () => {
-        let  { historial } = this.state;
-        this.setState({ block: true });
-        await unujobs.post(`historial/${historial.id}/send_boleta`)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-        }).catch(err => {
-            Swal.fire({ icon: 'error', text: "Algo salió mal, vuelva más tarde!" });
-        });
-        this.setState({ block: false });
+        let answer = await Confirm("warning", `¿Deseas enviar la boleta a su correo?`);
+        if (answer) {
+            this.props.fireLoading(true);
+            let  { historial } = this.state;
+            this.setState({ block: true });
+            await unujobs.post(`historial/${historial.id}/send_boleta`)
+            .then(async res => {
+                this.props.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+            }).catch(err => {
+                try {
+                    this.props.fireLoading(false);
+                    let { message } = err.response.data;
+                    Swal.fire({ icon: 'error', text: message });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: "Algo salió mal" });
+                }
+            });
+            this.setState({ block: false });
+        }
     }
 
     getCargos = (state) => {

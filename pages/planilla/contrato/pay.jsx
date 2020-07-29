@@ -4,7 +4,7 @@ import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
 import { Body, BtnFloat, BtnBack } from '../../../components/Utils';
 import { findInfo } from '../../../storage/actions/infoActions';
-import { unujobs } from '../../../services/apis';
+import { unujobs, recursoshumanos } from '../../../services/apis';
 import Show from '../../../components/show';
 import CreateConfigRemuneracion from '../../../components/contrato/createConfigRemuneracion';
 import Swal from 'sweetalert2';
@@ -28,6 +28,7 @@ export default class Pay extends Component
         configs: [],
         situacion_laborals: [],
         perfil_laboral: {},
+        dependencia: {},
         edit: false
     }
 
@@ -36,6 +37,7 @@ export default class Pay extends Component
         this.props.fireEntity({ render: true, disabled: true, entity_id: info.entity_id });
         this.getSituacionLaboral();
         this.getPerfilLaboral();
+        this.getDependencia();
         await this.getWork();
         await this.getConfig();
     }
@@ -63,8 +65,23 @@ export default class Pay extends Component
 
     getPerfilLaboral = async () => {
         let { info } = this.props;
-        await unujobs.get(`perfil_laboral/${info.perfil_laboral_id}`)
-        .then(res => this.setState({ perfil_laboral: res.data }))
+        await recursoshumanos.get(`perfil_laboral/${info.perfil_laboral_id}`)
+        .then(res => {
+            let { success, message, perfil_laboral } = res.data;
+            if (!success) throw new Error(message);
+            this.setState({ perfil_laboral })
+        })
+        .catch(err => console.log(err.message));
+    }
+
+    getDependencia = async () => {
+        let { info } = this.props;
+        await recursoshumanos.get(`dependencia/${info.dependencia_id}`)
+        .then(res => {
+            let { success, message, dependencia } = res.data;
+            if (!success) throw new Error(message);
+            this.setState({ dependencia })
+        })
         .catch(err => console.log(err.message));
     }
 
@@ -141,7 +158,7 @@ export default class Pay extends Component
 
     render() {
 
-        let { work, perfil_laboral } = this.state;
+        let { work, perfil_laboral, dependencia } = this.state;
         let { info, query, pathname } = this.props;
 
         return (
@@ -254,7 +271,7 @@ export default class Pay extends Component
                                                 <div className="col-md-4 mt-3">
                                                     <Form.Field>
                                                         <label htmlFor="">Dependencia</label>
-                                                        <input type="text" disabled defaultValue={info.dependencia && info.dependencia.nombre}/>
+                                                        <input type="text" disabled defaultValue={dependencia && dependencia.nombre}/>
                                                     </Form.Field>
                                                 </div>
 

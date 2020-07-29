@@ -4,7 +4,7 @@ import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
 import ContentControl from '../../../components/contentControl';
 import Show from '../../../components/show';
-import { unujobs, authentication } from '../../../services/apis';
+import { unujobs, authentication, recursoshumanos } from '../../../services/apis';
 import { parseUrl, Confirm } from '../../../services/utils';
 import { parseOptions, backUrl } from '../../../services/utils';
 import { pap } from '../../../services/storage.json';
@@ -34,7 +34,7 @@ export default class Register extends Component
         dependencias: [],
         cargos: [],
         type_categorias: [],
-        perfile_laborales: [],
+        perfil_laborales: [],
         form: {
             is_aportacion: "1",
             planilla_id: "",
@@ -64,6 +64,7 @@ export default class Register extends Component
             await this.getTypeCategoria();
         }
         if (nextState.form && nextState.form.dependencia_id != form.dependencia_id) {
+            await this.setState({ perfil_laborales: [] });
             await this.handlePerfilLaborales(form.dependencia_id)
         }
     }
@@ -102,18 +103,21 @@ export default class Register extends Component
         push({ pathname, query });
     }
 
-    handlePerfilLaborales = async (dependencia_id = null) => {
+    handlePerfilLaborales = async (dependencia_id = null, page = 1) => {
         if (dependencia_id) {
-            this.setState(state => {
-                for (let dep of state.dependencias) {
-                    if (dep.id == dependencia_id) return { perfil_laborales: dep.perfil_laborales || [] };
-                }
-            });
+            await recursoshumanos.get(`dependencia/${dependencia_id}/perfil_laboral?page=${page}`)
+            .then(async res => {
+                let { success, message, perfil_laboral } = res.data;
+                if (!success) throw new Error(message);
+                this.setState(state => ({ perfil_laborales: [...state.perfil_laborales, ...perfil_laboral.data] }));
+                if (perfil_laboral.lastPage > page) await this.handlePerfilLaborales(dependencia_id, page + 1);
+            }).catch(err => console.log(err.message));
         } else {
             this.setState({ perfil_laborales: [] });
             this.handleInput({ name: 'perfil_laboral_id', value: '' });
         }
     } 
+
 
     getPlanilla = async () => {
         this.setState({ loading: true });
@@ -131,12 +135,20 @@ export default class Register extends Component
         this.setState({ loading: false });
     }
 
-    getDependencias = async () => {
-        this.setState({ loading: true });
-        await unujobs.get('dependencia')
-        .then(res => this.setState({ dependencias: res.data }))
+    getDependencias = async (page = 1) => {
+        await recursoshumanos.get(`dependencia?page=${page}`)
+        .then(async res => {
+            let { dependencia, success, message } = res.data;
+            if (!success) throw new Error(message);
+            await  this.setState(state => ({ 
+                dependencias: [...state.dependencias, ...dependencia.data], 
+                perfil_laborales: [] 
+            }));
+            // validar dependencia
+            if (dependencia.lastPage > page) await this.getDependencias(page + 1)
+            else this.handlePerfilLaborales(this.state.history.dependencia_id);
+        })
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
     }
 
     getCargos = async () => {
@@ -157,7 +169,7 @@ export default class Register extends Component
     }
 
     create = async () => {
-        let answer = await Confirm("warning", "¿Estas seguro en guardar el contrato?", "Estyo Seguro");
+        let answer = await Confirm("warning", "¿Estas seguro en guardar el contrato?", "Estoy Seguro");
         if (answer) {
             this.props.fireLoading(true);
             this.setState({ loading: true });
