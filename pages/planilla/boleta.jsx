@@ -4,7 +4,7 @@ import Router from 'next/router';
 import { AUTHENTICATE, AUTH } from '../../services/auth';
 import { Form, Button, Pagination} from 'semantic-ui-react';
 import { allHistorial } from '../../storage/actions/historialActions';
-import { unujobs } from '../../services/apis';
+import { unujobs, authentication } from '../../services/apis';
 import Swal from 'sweetalert2';
 import { Body } from '../../components/Utils';
 import Show from '../../components/show'
@@ -83,19 +83,28 @@ export default class DuplicadoBoleta extends Component {
     handleBoleta = async (obj) => {
         this.props.fireLoading(true);
         let path = `pdf/boleta/${obj.cronograma_id}?meta_id=${obj.meta_id}&historial_id=${obj.id}`;
-        await unujobs.fetch(path, { method: 'POST' })
-        .then(resData => resData.blob())
-        .then(blob => {
-            this.props.fireLoading(false);
-            let a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.target = '_blank';
-            a.click();
-        })
-        .catch(err => {
+        await unujobs.post(path)
+        .then(async ({ data }) => {
+            let config = {
+                data,
+                orientation: 'landscape',
+                format: 'A4'
+            }
+            // generar pdf
+            await authentication.post('pdf', config, { responseType: 'blob' })
+            .then(res => {
+                this.props.fireLoading(false);
+                let a = document.createElement('a');
+                a.target = '_blank'
+                a.href = URL.createObjectURL(res.data);
+                a.click();
+            }).catch(err => {
+                throw new Error(err.message)
+            })
+        }).catch(err => {
             this.props.fireLoading(false);
             Swal.fire({ icon: 'error', text: 'No se pudó generar la boleta' })
-        });
+        })
     }
 
     getOption = (obj, key, index) => {
