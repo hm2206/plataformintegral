@@ -85,22 +85,11 @@ export default class DuplicadoBoleta extends Component {
         let path = `pdf/boleta/${obj.cronograma_id}?meta_id=${obj.meta_id}&historial_id=${obj.id}`;
         await unujobs.post(path)
         .then(async ({ data }) => {
-            let config = {
-                data,
-                orientation: 'landscape',
-                format: 'A4'
-            }
-            // generar pdf
-            await authentication.post('pdf', config, { responseType: 'blob' })
-            .then(res => {
-                this.props.fireLoading(false);
-                let a = document.createElement('a');
-                a.target = '_blank'
-                a.href = URL.createObjectURL(res.data);
-                a.click();
-            }).catch(err => {
-                throw new Error(err.message)
-            })
+            let blob = new Blob([data], { type: 'text/html' });
+            let a = document.createElement('a');
+            a.target = '_blank'
+            a.href = URL.createObjectURL(blob);
+            a.click();
         }).catch(err => {
             this.props.fireLoading(false);
             Swal.fire({ icon: 'error', text: 'No se pudó generar la boleta' })
