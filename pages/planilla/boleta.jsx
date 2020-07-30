@@ -87,10 +87,8 @@ export default class DuplicadoBoleta extends Component {
         .then(async ({ data }) => {
             this.props.fireLoading(false);
             let blob = new Blob([data], { type: 'text/html' });
-            let a = document.createElement('a');
-            a.target = '_blank'
-            a.href = URL.createObjectURL(blob);
-            a.click();
+            let newPrint = window.open(URL.createObjectURL(blob))
+            newPrint.onload = () => newPrint.print();
         }).catch(err => {
             this.props.fireLoading(false);
             Swal.fire({ icon: 'error', text: 'No se pudó generar la boleta' })
