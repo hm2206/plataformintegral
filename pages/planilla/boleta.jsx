@@ -85,6 +85,7 @@ export default class DuplicadoBoleta extends Component {
         let path = `pdf/boleta/${obj.cronograma_id}?meta_id=${obj.meta_id}&historial_id=${obj.id}`;
         await unujobs.post(path)
         .then(async ({ data }) => {
+            this.props.fireLoading(false);
             let blob = new Blob([data], { type: 'text/html' });
             let a = document.createElement('a');
             a.target = '_blank'
