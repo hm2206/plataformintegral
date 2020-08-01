@@ -80,15 +80,37 @@ export default class DuplicadoBoleta extends Component {
         this.setState({ loading: false });
     }
 
-    handleBoleta = async (obj) => {
+    handleBoleta = async (obj, generatePdf = false) => {
         this.props.fireLoading(true);
         let path = `pdf/boleta/${obj.cronograma_id}?meta_id=${obj.meta_id}&historial_id=${obj.id}`;
         await unujobs.post(path)
         .then(async ({ data }) => {
-            this.props.fireLoading(false);
-            let blob = new Blob([data], { type: 'text/html' });
-            let newPrint = window.open(URL.createObjectURL(blob))
-            newPrint.onload = () => newPrint.print();
+            if (!generatePdf) {
+                this.props.fireLoading(false);
+                let blob = new Blob([data], { type: 'text/html' });
+                let newPrint = window.open(URL.createObjectURL(blob))
+                newPrint.onload = () => newPrint.print();
+            } else {
+                // config api pdf
+                let payload = {
+                    data,
+                    format: 'A4'
+                };
+                // generate pdf
+                await authentication.post(`pdf`, payload, { responseType: 'blob' })
+                    .then(blob => {
+                        this.props.fireLoading(false);
+                        let filename = `${obj.person && obj.person.fullname}_${obj.cronograma && obj.cronograma.year}_${obj.cronograma && obj.cronograma.mes}.pdf`
+                        let a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob.data);
+                        a.target = '_black';
+                        a.download = filename;
+                        a.click();
+                    }).catch(err => {
+                        this.props.fireLoading(false);
+                        Swal.fire({ icon: 'error', text: err.message });
+                    });
+            }
         }).catch(err => {
             this.props.fireLoading(false);
             Swal.fire({ icon: 'error', text: 'No se pudó generar la boleta' })
@@ -96,8 +118,15 @@ export default class DuplicadoBoleta extends Component {
     }
 
     getOption = (obj, key, index) => {
-        if (key == 'report') {
-            this.handleBoleta(obj);
+        switch (key) {
+            case 'report':
+                this.handleBoleta(obj);
+                break;
+            case 'download':
+                this.handleBoleta(obj, true);
+                break;
+            default:
+                break;
         }
     }
 
@@ -127,6 +156,11 @@ export default class DuplicadoBoleta extends Component {
                                 {
                                     key: "report",
                                     icon: "fas fa-file-pdf",
+                                    title: "Reporte de Boleta"
+                                }, 
+                                {
+                                    key: "download",
+                                    icon: "fas fa-download",
                                     title: "Reporte de Boleta"
                                 }, 
                             ]
