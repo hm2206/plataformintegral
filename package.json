@@ -47,6 +47,7 @@
     "html-to-json": "^0.6.0",
     "jquery": "^1.9.1",
     "js-cookie": "^2.2.1",
+    "jspdf": "^1.5.3",
     "markdown-loader": "^5.1.0",
     "moment": "^2.24.0",
     "native-url": "^0.2.3",

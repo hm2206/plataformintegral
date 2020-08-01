@@ -138,6 +138,7 @@ export default class DuplicadoBoleta extends Component {
 
         return (
             <div className="col-md-12">
+                <div id="render-pdf"></div>
                 <Body>
                     <Datatable titulo={<span> Lista histórica de boletas de pago</span>}
                         isFilter={false}
