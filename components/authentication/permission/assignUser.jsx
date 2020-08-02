@@ -43,7 +43,7 @@ export default class AssignPerson extends Component
 
     handlePage = async (nextPage) => {
         this.setState({ loader: true });
-        await this.getPeople(nextPage, this.state);
+        await this.getUser(nextPage, this.state);
     }
 
     handleAdd = async (obj) => {
@@ -83,7 +83,7 @@ export default class AssignPerson extends Component
                         <div className="col-md-2">
                             <Button fluid
                                 onClick={async (e) => {
-                                    await this.getPeople(1, this.state)
+                                    await this.getUser(1, this.state)
                                 }}
                             >
                                 <i className="fas fa-search"></i>
