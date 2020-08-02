@@ -94,7 +94,7 @@ export default class DuplicadoBoleta extends Component {
                 // config api pdf
                 let payload = {
                     data,
-                    format: 'A4'
+                    format: 'A3'
                 };
                 // generate pdf
                 await authentication.post(`pdf`, payload, { responseType: 'blob' })
@@ -109,7 +109,7 @@ export default class DuplicadoBoleta extends Component {
                     }).catch(err => {
                         this.props.fireLoading(false);
                         Swal.fire({ icon: 'error', text: err.message });
-                    });
+                    });            
             }
         }).catch(err => {
             this.props.fireLoading(false);
