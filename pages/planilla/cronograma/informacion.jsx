@@ -463,6 +463,7 @@ export default class CronogramaInformacion extends Component
             this.props.fireLoading(true);
             await unujobs.post(`cronograma/${this.state.cronograma.id}/generate_token`, {}, { headers: this.getHeaders(this.state) })
             .then(async res => {
+                this.props.fireLoading(false);
                 let { success, message } = res.data;
                 let icon = success ? 'success' : 'error';
                 await Swal.fire({ icon, text: message });
