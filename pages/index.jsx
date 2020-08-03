@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { AUTH, AUTHENTICATE } from '../services/auth';
-import CoverSimple from '../components/coverSimple';
 import { authentication } from '../services/apis';
-import NavCover from '../components/navCover';
-
+import { Body } from '../components/Utils';
+import { Image } from 'semantic-ui-react';
+import CardProfile from '../components/cardProfile';
+import CardToken from '../components/cardToken';
 
 export default class Index extends Component
 {
@@ -15,27 +16,26 @@ export default class Index extends Component
         return { query, pathname, user }
     }
 
+    
     render() {
 
         let { user } = this.props;
 
         return (
             <div className="col-md-12">
-                <CoverSimple 
-                    image={user.person && user.image ? user.image : '/img/perfil.jpg'}
-                    titulo={user.person.fullname}
-                    username={user.username}
-                    email={user.email}
-                />
-                <NavCover
-                    align="left"
-                    active="activity"
-                    options={[
-                        { key: "activity", text: "Actividad", active: true },
-                        { key: "data", text: "Datos Personales" },
-                        { key: "account", text: "Cuenta" },
-                    ]}
-                />
+                <Body>
+                    <div className="row">
+                        <div className="col-md-7">
+                            <div className="card">
+                                <CardProfile {...this.props}/>
+                            </div>
+                        </div>
+
+                        <div className="col-md-5">
+                            <CardToken />
+                        </div>
+                    </div>
+                </Body>
             </div>
         )
     }

@@ -155,6 +155,7 @@ class Navbar extends Component {
                                 src={auth.person && auth.image ? `${auth.image && auth.image_images && auth.image_images.image_50x50}` : '/img/perfil.jpg'}
                                 alt=""
                               />
+                              <span className="avatar-badge online" title="online"></span>
                             </span>{" "}
                             <span className="account-summary pr-lg-4 d-none d-lg-block">
                               <span className="account-name" style={{ textTransform: 'capitalize' }}>
