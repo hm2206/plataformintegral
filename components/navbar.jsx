@@ -33,10 +33,6 @@ class Navbar extends Component {
 
 
   async componentDidMount() {
-    this.setState((state, props) => {
-      let { user } = props.getState().auth ? props.getState().auth : {};
-      return { auth: user };
-    });
     await this.getEntities();
     this.settingEntity();
   }
@@ -85,8 +81,9 @@ class Navbar extends Component {
 
   render() {
 
-    let { loading, auth } = this.state;
-    let { screen_lg, screenX, my_app, logout, config_entity } = this.props;
+    let { loading } = this.state;
+    let { screen_lg, screenX, my_app, logout, config_entity, auth } = this.props;
+    let isAuth = Object.keys(auth).length
 
     return (
       <Fragment>
@@ -142,7 +139,7 @@ class Navbar extends Component {
                 </ul>
 
                       <div className="dropdown d-flex">
-                        {auth ? (
+                        {isAuth ? (
                           <button
                             className="btn-account d-none d-md-flex"
                             type="button"
@@ -211,4 +208,4 @@ class Navbar extends Component {
   }
 }
 
-export default connect(initStore)(Navbar);
+export default Navbar;

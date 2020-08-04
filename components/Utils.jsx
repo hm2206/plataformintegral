@@ -1,7 +1,8 @@
 import React, { Fragment, useState, Component } from "react";
 import Show from "./show";
-import { Dropdown, Button, Icon, Form } from 'semantic-ui-react';
+import { Dropdown, Button, Icon, Form, Segment, Header, Progress } from 'semantic-ui-react';
 import Swal from "sweetalert2";
+import Modal from './modal';
 
 
 const InputFile = ({ id, name, onChange, error = false, children = null, title = "Select", accept = "*", icon = 'image', label = null }) => {
@@ -317,7 +318,7 @@ const BtnCircle = ({
   </button>
 );
 
-const Skull = ({ height, radius, padding, top }) => (
+const Skull = ({ height, radius, padding, top, width = 'auto' }) => (
   <div
     style={{
       padding: padding ? padding : "1em",
@@ -329,6 +330,7 @@ const Skull = ({ height, radius, padding, top }) => (
       className="elemento__image_left"
       style={{
         borderRadius: radius ? radius : "5em",
+        width: width,
         paddingBottom: height ? height : "1.5em"
       }}
     ></div>
@@ -401,6 +403,58 @@ const DrownSelect = ({ button, icon, text, direction, disabled, options = [], on
 }
 
 
+const LoadFile = ({ id = 'select-file', defaultImg = '/img/base.png', accept = '*/*', info = 'No documents are listed for this customer.', isClose, onSave, upload = false, porcentaje = 0 }) => {
+
+  const [file, setFile] = useState();
+
+  const handleFile = ({ files }) => {
+    if (files && files.length) {
+      setFile(files[0]);
+      let reader = new FileReader();
+      let render_img = document.getElementById(`render-${id}`);
+      reader.readAsDataURL(files[0]);
+      reader.onloadend = () => {
+        render_img.src = reader.result;
+      }
+    }
+  }
+
+  return (
+      <Modal show={true}  isClose={isClose}>
+        <div className="text-center" style={{ paddingTop: '3em' }}>
+
+          <div>
+            <div className="user-avatar user-avatar-xl mb-3" style={{ height: '200px', width: '200px', border: "2px solid #fff", boxShadow: '0px 0px 2px 2px rgba(0,0,0,.2)' }}>
+              <img src={defaultImg} alt="render-img" id={`render-${id}`} style={{ objectFit: 'contain', height: '100%', width: '100%', objectPosition: 'center' }}/>
+            </div>
+          </div>
+
+          <Header icon>
+            {info}
+          </Header>
+          <div className="text-center pb-3">
+            <label htmlFor={id} className="ui primary button" style={{ background: 'transparent', border: '2px solid #2185D0', color: '#2185D0' }}>
+              <input type="file" id={id} accept={accept} disabled={upload} hidden onChange={(e) => handleFile(e.target)}/> <i className="fas fa-folder-open"></i> Seleccionar Archivo
+            </label>
+            <Button primary 
+              onClick={(e) => typeof onSave == 'function' ? onSave(file) : null}
+              style={{ border: '2px solid #2185D0' }} 
+              disabled={!file || upload}>
+                Guardar Archivo
+            </Button>
+          </div>
+
+          <div className="py-3 ml-3 mr-3 load-none" style={{ display: porcentaje ? 'block' : 'none' }}>
+            <Progress inverted percent={porcentaje} active progress style={{ height: '50px' }} success={porcentaje == 100}>
+              Subiendo archivo...
+            </Progress>
+          </div>
+        </div>
+      </Modal>
+  )
+}
+
+
 export {
   Content,
   Body,
@@ -418,4 +472,5 @@ export {
   DrownSelect,
   BtnSelect,
   InputFile,
+  LoadFile,
 };

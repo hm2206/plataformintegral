@@ -7,7 +7,6 @@ import Router from 'next/router';
 import Navbar from '../components/navbar';
 import { Content } from '../components/Utils';
 import { AUTH } from '../services/auth';
-import { getAuth, authsActionsTypes } from '../storage/actions/authsActions';
 import { app } from '../env.json';
 import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
@@ -18,12 +17,14 @@ import LoadingGlobal from '../components/loadingGlobal';
 import { Provider } from 'react-redux';
 import withRedux from 'next-redux-wrapper';
 import initsStore from '../storage/store';
+
+// component utils
 import Show from '../components/show';
 import Swal from 'sweetalert2';
 import uid from 'uid';
 import NotCurrent from '../components/notCurrent';
 import NotInternet from '../components/notInternet';
-import { Message } from 'semantic-ui-react';
+import SkullContent from '../components/loaders/skullContent';
 
 
 // config router
@@ -67,16 +68,9 @@ class MyApp extends App {
     let isLoggin = await AUTH(ctx) ? await AUTH(ctx) : false;
     // ejecutar initial de los children
     if (await Component.getInitialProps) {
-      if (isLoggin) {
-        await ctx.store.dispatch(getAuth(ctx));
-      } else {
-        await ctx.store.dispatch({ type: authsActionsTypes.LOGOUT });
-      }
       // props
      try {
         pageProps = await Component.getInitialProps(ctx)
-        let { user } = await ctx.store.getState().auth
-        pageProps.auth = user;
         pageProps.isLoggin = isLoggin;
         pageProps.app = _app;
         // page
@@ -94,6 +88,7 @@ class MyApp extends App {
   constructor(props) {
     super(props);
     this.state = {
+      auth: {},
       activeTabKey: "",
       current: true,
       loading: false,
@@ -118,6 +113,20 @@ class MyApp extends App {
     });
   }
 
+
+  getAuth = async () => {
+    let { isLoggin } = this.props;
+    if (isLoggin) {
+      await authentication.get('me')
+        .then(res => {
+            let { success, message, user } = res.data;
+            if (success) this.setState({ auth: user });
+            else this.logout();
+        })
+        .catch(async err => console.log(err.message));
+    }
+  }
+
   focusMeTab = async () => {
     let currentTab = await localStorage.getItem('activeTabKey');
     let isOnline = await navigator.onLine;
@@ -129,7 +138,8 @@ class MyApp extends App {
     }
   }
 
-  componentDidMount = () => {
+  componentDidMount = async () => {
+    await this.getAuth();
     window.onload = async () => {
       let tab = uid(16);
       await localStorage.setItem('activeTabKey', tab);
@@ -192,9 +202,16 @@ class MyApp extends App {
     await this.setState({ loading });
   }
 
+  setAuth = (auth) => {
+    this.setState({ auth });
+  }
+
   render() {
     const { Component, pageProps, store, isLoggin, _app, is_render, message } = this.props
-    const { loading, current, entity_id } = this.state;
+    const { loading, current, entity_id, auth } = this.state;
+    pageProps.auth = auth;
+    pageProps.setAuth = this.setAuth;
+    let isAuth = Object.keys(auth).length;
 
     return  <Fragment>
         <Provider store={store}>
@@ -269,6 +286,7 @@ class MyApp extends App {
                         <div className="ant-layout">
                           {/* menu navbar */}
                           <Navbar onToggle={this.handleToggle} 
+                            auth={auth}
                             my_app={_app} toggle={this.state.toggle} 
                             setScreenLg={this.handleScreenLg} 
                             screen_lg={this.state.screen_lg} 
@@ -281,7 +299,8 @@ class MyApp extends App {
                           <div className="gx-layout-content ant-layout-content">
                             <div className="gx-main-content-wrapper">
                               <Sidebar 
-                                my_app={_app} 
+                                my_app={_app}
+                                auth={auth} 
                                 onToggle={this.handleToggle} 
                                 toggle={this.state.toggle} 
                                 screen_lg={this.state.screen_lg}
@@ -289,16 +308,24 @@ class MyApp extends App {
                                 refresh={this.state.refresh}
                               />
                               <Content screen_lg={this.state.screen_lg}>
-                                  <Component {...pageProps} 
-                                    entity_id={entity_id}
-                                    fireEntity={this.fireEntity}
-                                    toggle={this.state.toggle} 
-                                    screenX={this.state.screenX}
-                                    my_app={_app}
-                                    fireRefreshProfile={this.refreshProfile}
-                                    fireLoading={this.fireLoading}
-                                    isLoading={loading}
-                                  />
+                                  <Show condicion={isAuth}>
+                                    <Component {...pageProps} 
+                                      entity_id={entity_id}
+                                      fireEntity={this.fireEntity}
+                                      toggle={this.state.toggle} 
+                                      screenX={this.state.screenX}
+                                      my_app={_app}
+                                      fireRefreshProfile={this.refreshProfile}
+                                      fireLoading={this.fireLoading}
+                                      isLoading={loading}
+                                    />
+                                  </Show>
+
+                                  <Show condicion={!isAuth}>
+                                    <div className="col-md-12">
+                                      <SkullContent/>
+                                    </div>
+                                  </Show>
                               </Content>
                             </div>
                           </div>

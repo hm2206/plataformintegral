@@ -11,15 +11,12 @@ export default class Index extends Component
 
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
-        let { store, query, pathname } = ctx;
-        let { user } = store.getState().auth;
-        return { query, pathname, user }
+        let { query, pathname } = ctx;
+        return { query, pathname }
     }
 
     
     render() {
-
-        let { user } = this.props;
 
         return (
             <div className="col-md-12">

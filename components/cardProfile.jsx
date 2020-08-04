@@ -1,11 +1,11 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { Form, Button, Select } from 'semantic-ui-react';
 import { tipo_documento } from '../services/storage.json';
 import { authentication } from '../services/apis';
 import { parseOptions } from '../services/utils';
 import Show from '../components/show';
 import Swal from "sweetalert2";
-import Router from "next/router";
+import { LoadFile } from '../components/Utils';
 
 export default class CardProfile extends Component {
 
@@ -17,6 +17,9 @@ export default class CardProfile extends Component {
     departamentos: [],
     provincias: [],
     distritos: [],
+    selectImg: false,
+    load_img: 0,
+    uploading: false
   }
 
   componentDidMount = async () => {
@@ -24,9 +27,14 @@ export default class CardProfile extends Component {
     this.getDepartamento();
   }
 
+  componentWillReceiveProps = async (nextProps) => {
+    let { auth } = this.props;
+    if (auth != nextProps.auth) this.setting();
+  }
+
   setting = () => {
     this.setState((state, props) => {
-      state.person = props.user.person;
+      state.person = props.auth.person;
       state.person.cod_dep = state.person.badge_id.substr(0, 2);
       // get provincias
       this.getProvincias(state.person);
@@ -36,7 +44,7 @@ export default class CardProfile extends Component {
       state.person.cod_dis = state.person.badge_id.substr(4, 2);
       // response
       return {
-        user: JSON.parse(JSON.stringify(props.user)),
+        user: JSON.parse(JSON.stringify(props.auth)),
         person: JSON.parse(JSON.stringify(state.person)),
         edit: false
       }
@@ -156,18 +164,47 @@ export default class CardProfile extends Component {
     }
   }
 
+  handleSaveImg = async (img) => {
+    this.props.fireLoading(true);
+    let form = new FormData;
+    this.setState({ uploading: true });
+    form.append('image', img);
+    await authentication.post(`auth/change_image`, form)
+    .then(res => {
+      this.props.fireLoading(false);
+      let { success, message, auth } = res.data;
+      if (!success) throw new Error(message);
+      Swal.fire({ icon: 'success', text: message });
+      this.props.setAuth(auth);
+    }).catch(err => {
+      try {
+        this.props.fireLoading(false);
+        let response = JSON.parse(err.message);
+        Swal.fire({ icon: 'warning', text: response.message });
+      } catch (error) {
+        Swal.fire({ icon: 'error', text: err.message });
+      }
+    });
+    this.setState({ uploading: false });
+  } 
+
   render() {
 
     let { user, person, loader, departamentos, provincias, distritos } = this.state;
 
-    return (<div id="team-profile" className="tab-pane fade active show" role="tabpanel" aria-labelledby="team-profile">
+    return (
+      <Fragment>
+                <div id="team-profile" className="tab-pane fade active show" role="tabpanel" aria-labelledby="team-profile">
                     {/* <!-- .card --> */}
                     <div className="card card-reflow border-bottom">
                       {/* <!-- .card-body --> */}
                       <div className="card-body text-center">
                         {/* <!-- team avatar --> */}
-                        <a href="#" className="user-avatar user-avatar-xl my-3" style={{ width: "100px", height: "100px", objectFit: "cover" }}>
-                          <img src={user.image_images && user.image_images.image_200x200 || '/img/perfil.jpg'} alt=""/>
+                        <a href="#" className="user-avatar user-avatar-xl my-3" style={{ width: "100px", height: "100px", objectFit: "cover", overflow: 'hidden', }}>
+                          <button className="btn-change-img" onClick={(e) => this.setState({ selectImg: true })} title="Cambiar imagen de perfil">
+                            <i className="fas fa-image"></i>
+                          </button>
+                          <img src={user.image_images && user.image_images.image_200x200 || '/img/perfil.jpg'} alt="perfil"/>
                         </a> 
                         
                         <h3 className="card-title text-truncate">
@@ -433,7 +470,22 @@ export default class CardProfile extends Component {
                         </div>
                       </div>
                     </div>
-        )
+
+          <Show condicion={this.state.selectImg}>
+            <LoadFile 
+              defaultImg={user.image_images && user.image_images.image_200x200}
+              info="Cambiar Foto de perfil" 
+              isClose={(e) => this.setState({ selectImg: false })}
+              accept="image/*"
+              onSave={this.handleSaveImg}
+              upload={this.state.uploading}
+              porcentaje={this.state.load_img}
+
+            />
+          </Show>
+            
+      </Fragment>
+    )
   }
 
 };

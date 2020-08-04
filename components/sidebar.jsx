@@ -18,19 +18,11 @@ class Sidebar extends Component {
 
   async componentDidMount() {
     this.getProfile();
-    this.setting();
     if (typeof Router == 'object') await this.setState({ pathname: Router.pathname });
   }
 
   componentWillReceiveProps = (nextProps) => {
     if (nextProps.refresh && nextProps.refresh != this.props.refresh) this.getProfile();
-  }
-
-  setting = () => {
-    this.setState((state, props) => {
-      let { user } = props.getState().auth ? props.getState().auth : {};
-      return { auth: user };
-    });
   }
 
   getProfile =  async () => {
@@ -46,8 +38,7 @@ class Sidebar extends Component {
 
   render() {
 
-    let { auth } = this.state;
-    let { screen_lg, my_app, logout } = this.props;
+    let { screen_lg, my_app, logout, auth } = this.props;
 
     return (
         <Fragment>   
@@ -121,4 +112,4 @@ class Sidebar extends Component {
   }
 }
 
-export default connect(initStore)(Sidebar);
+export default Sidebar;
