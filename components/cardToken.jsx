@@ -68,9 +68,9 @@ class CardToken  extends Component {
                                                 <span className="tile tile-circle tile-sm">
                                                     <i className={`fab fa-${t.device == 'Windows' ? 'windows' : ''}`}></i>
                                                     <i className={`fab fa-${t.device == 'Linux' ? 'linux' : ''}`}></i>
-                                                    <i className={`fas fa-${t.device == 'Macintoch' ? 'apple-alt' : ''}`}></i>
+                                                    <i className={`fab fa-${t.device == 'Macintoch' ? 'apple' : ''}`}></i>
                                                     <i className={`fas fa-${t.device == 'Android' ? 'android' : ''}`}></i>
-                                                    <i className={`fas fa-${t.device == 'Unknow' ? 'question' : ''}`}></i>
+                                                    <i className={`fab fa-${t.device == 'Unknow' ? 'question' : ''}`}></i>
                                                 </span>
                                             </div>
                                             {/* <!-- .timeline-body --> */}
