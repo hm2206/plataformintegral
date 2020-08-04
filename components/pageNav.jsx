@@ -11,7 +11,7 @@ export default class PageNav extends Component
                     <div className="nav nav-tabs">
                         {this.props.options && this.props.options.map(obj => 
                             <a className={`nav-link show ${obj.active ? 'active' : ''}`} 
-                                key={obj.key}
+                                key={`notification-link-${obj.key}`}
                                 data-toggle="tab" 
                                 href={`#nav-option-${obj.key}`}
                             >

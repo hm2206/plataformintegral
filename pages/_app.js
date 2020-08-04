@@ -76,11 +76,11 @@ class MyApp extends App {
         // page
         return { pageProps, store, isLoggin, _app, is_render, message };
      } catch (error) {
-        if (ctx && ctx.res) {
+        if (ctx.isServer) {
           ctx.res.writeHead(301, { location: '/404' });
           ctx.res.end();
           ctx.finished = true;
-        }
+        } else history.go('/404')
      }
     }
   }
@@ -104,7 +104,15 @@ class MyApp extends App {
         disabled: false,
         entity_id: ""
       },
-      entity_id: ""
+      entity_id: "",
+      notification: {
+        data: [],
+        page: 1,
+        total: 0,
+        lastPage: 1
+      },
+      read: 0,
+      no_read: 0
     }
     // add context
     this.LoadingProvider = createContext({
@@ -113,18 +121,50 @@ class MyApp extends App {
     });
   }
 
+  componentDidMount = async () => {
+    this.handleRequestAuth();
+    window.onload = async () => {
+      let tab = uid(16);
+      await localStorage.setItem('activeTabKey', tab);
+      await this.setState({ activeTabKey: tab });
+      this.intervalo = setInterval(this.focusMeTab, 1000);
+    };
 
-  getAuth = async () => {
+    this.handleScreen();
+    window.addEventListener('resize', this.handleScreen);
+  }
+
+  handleRequestAuth = () => {
     let { isLoggin } = this.props;
     if (isLoggin) {
-      await authentication.get('me')
-        .then(res => {
-            let { success, message, user } = res.data;
-            if (success) this.setState({ auth: user });
-            else this.logout();
-        })
-        .catch(async err => console.log(err.message));
+      this.getAuth();
+      this.getNotication();
     }
+  }
+
+  getAuth = async () => {
+    authentication.get('me')
+      .then(res => {
+        let { success, message, user } = res.data;
+        if (success) this.setState({ auth: user });
+        else this.logout();
+      })
+      .catch(async err => console.log('error auth', err.message));
+  }
+
+  getNotication = (page = 1) => {
+    authentication.get(`auth/notification?page=${page}`)
+    .then(res => {
+        let { success, message, notification, no_read } = res.data;
+        if (!success) throw new Error(message);
+        this.setState(state => {
+            state.notification.page = notification.page;
+            state.notification.total = notification.total;
+            state.notification.lastPage = notification.lastPage;
+            state.notification.data = [...state.notification.data, ...notification.data];
+            return { notification: state.notification, no_read };
+        });
+    }).catch(err => console.log(err.message));
   }
 
   focusMeTab = async () => {
@@ -136,19 +176,6 @@ class MyApp extends App {
       this.setState({ current: false });
       clearInterval(this.intervalo);
     }
-  }
-
-  componentDidMount = async () => {
-    await this.getAuth();
-    window.onload = async () => {
-      let tab = uid(16);
-      await localStorage.setItem('activeTabKey', tab);
-      await this.setState({ activeTabKey: tab });
-      this.intervalo = setInterval(this.focusMeTab, 1000);
-    };
-
-    this.handleScreen();
-    window.addEventListener('resize', this.handleScreen);
   }
 
   componentWillUnmount = () => {
@@ -208,9 +235,13 @@ class MyApp extends App {
 
   render() {
     const { Component, pageProps, store, isLoggin, _app, is_render, message } = this.props
-    const { loading, current, entity_id, auth } = this.state;
+    const { loading, current, entity_id, auth, notification, no_read, read } = this.state;
     pageProps.auth = auth;
     pageProps.setAuth = this.setAuth;
+    pageProps.notification = {
+      notification, no_read, read
+    };
+    // is authenticado
     let isAuth = Object.keys(auth).length;
 
     return  <Fragment>
@@ -294,6 +325,9 @@ class MyApp extends App {
                             logout={this.logout}
                             config_entity={this.state.config_entity}
                             onFireEntityId={(e) => this.setState({ entity_id: e })}
+                            notification={notification}
+                            read={read}
+                            no_read={no_read}
                           />
                           {/* content */}
                           <div className="gx-layout-content ant-layout-content">

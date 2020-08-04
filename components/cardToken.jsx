@@ -22,7 +22,7 @@ class CardToken  extends Component {
         this.getTokens();
     }
 
-    getTokens = async (page = 1) => {
+    getTokens = async (page = 1, update = false) => {
         this.setState({ loader: true });
         let dom = document.getElementById('list-log');
         await authentication.get(`auth/tokens?page=${page}`)
@@ -38,7 +38,7 @@ class CardToken  extends Component {
             });
         }).catch(err => console.log(err.message));  
         this.setState({ loader: false });
-        dom.scrollTo({ top: dom.scrollHeight });
+        if (update) dom.scrollTo({ top: dom.scrollHeight });
     }
 
     render() {
@@ -69,12 +69,13 @@ class CardToken  extends Component {
                                                     <i className={`fab fa-${t.device == 'Windows' ? 'windows' : ''}`}></i>
                                                     <i className={`fab fa-${t.device == 'Linux' ? 'linux' : ''}`}></i>
                                                     <i className={`fab fa-${t.device == 'Macintoch' ? 'apple' : ''}`}></i>
+                                                    <i className={`fab fa-${t.device == 'Iphone' ? 'apple' : ''}`}></i>
                                                     <i className={`fab fa-${t.device == 'Android' ? 'android' : ''}`}></i>
                                                     <i className={`fas fa-${t.device == 'Unknow' ? 'question' : ''}`}></i>
                                                 </span>
                                             </div>
                                             {/* <!-- .timeline-body --> */}
-                                            <div className="timeline-body">
+                                            <div className="timeline-body" style={{ borderBottom: '1px solid rgba(34,34,48,.1)' }}>
                                                 {/* <!-- .media --> */}
                                                 <div className="media">
                                                 {/* <!-- .media-body --> */}
@@ -83,7 +84,10 @@ class CardToken  extends Component {
                                                             <a href="#" className="text-link">{t.device}</a>
                                                         </h6>
                                                         <p className="mb-0">
-                                                            <span className={`avatar-badge ${t.is_revoked ? 'offline' : 'online'}`} title={`${t.is_revoked == 1 ? 'offline' : 'online'}`}></span>
+                                                            <span className={`avatar-badge ${t.is_revoked ? 'offline' : 'online'}`} 
+                                                                title={`${t.is_revoked == 1 ? 'offline' : 'online'}`}
+                                                                style={{ bottom: '15px' }}
+                                                            />
                                                             <a href="#">
                                                                 Inició sessión desde la ip
                                                             </a> 
@@ -115,7 +119,7 @@ class CardToken  extends Component {
                                     <button type="button" 
                                         className="btn btn-light" 
                                         disabled={tokens && !tokens.lastPage > tokens.page || loader}
-                                        onClick={(e) => this.getTokens(tokens.page + 1)}
+                                        onClick={(e) => this.getTokens(tokens.page + 1, true)}
                                     >
                                         <i className="fa fa-fw fa-angle-double-down"></i> Obtener más datos
                                     </button>

@@ -82,7 +82,7 @@ class Navbar extends Component {
   render() {
 
     let { loading } = this.state;
-    let { screen_lg, screenX, my_app, logout, config_entity, auth } = this.props;
+    let { screen_lg, screenX, my_app, logout, config_entity, auth, notification, no_read } = this.props;
     let isAuth = Object.keys(auth).length
 
     return (
@@ -135,7 +135,7 @@ class Navbar extends Component {
               </div>
               <div className="top-bar-item top-bar-item-right px-0 d-none d-sm-flex">
                 <ul className="header-nav nav">
-                  <Notification/>
+                  <Notification notification={notification} no_read={no_read}/>
                 </ul>
 
                       <div className="dropdown d-flex">

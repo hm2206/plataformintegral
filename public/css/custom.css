@@ -55,3 +55,23 @@
 .progress {
     background: transparent;
 }
+
+
+.notify-icon {
+    background: #cfd8dc;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    color: #455a64;
+}
+
+.unread {
+    background: #eceff1;
+}
+
+.unread-important {
+    background: #eceff1!important;
+}
