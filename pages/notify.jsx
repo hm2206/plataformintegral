@@ -37,7 +37,7 @@ export default class Notify extends Component
                                             username={no.send && no.send.username}
                                             title={no.title}
                                             key={`notification-view-${no.id}`}
-                                            date={no.created_ad}
+                                            date={no.created_at}
                                             description={no.description}
                                             image={no.image}
                                             icon={no.icon}

@@ -9,7 +9,7 @@ import { pagePermission } from '../../../storage/actions/permissionActions';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 
-export default class PermissionIndex extends Component {
+export default class ConfigNotificationIndex extends Component {
 
     constructor(props) {
         super(props);
@@ -101,7 +101,7 @@ export default class PermissionIndex extends Component {
         return (
                 <Form className="col-md-12">
                     <Body>
-                        <Datatable titulo="Lista de Permisos"
+                        <Datatable titulo="Lista de Configuración de las Notificationes"
                         isFilter={false}
                         loading={loading}
                         headers={
