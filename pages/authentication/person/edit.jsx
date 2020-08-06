@@ -52,15 +52,18 @@ export default class EditTrabajador extends Component
         this.findPerson();
     }
 
-    componentWillUpdate = async (nextProps, nextState) => {
-        let { form } = this.state;
-        if (nextState.form && form.cod_dep != nextState.form.cod_dep) {
-            await this.getProvincias(nextState.form);
+    handleChangeInput = async ({ name, value }) => {
+        switch (name) {
+            case 'cod_dep':
+                await this.getProvincias(this.state.form);
+                break;
+            case 'cod_pro':
+                await this.getDistritos(this.state.form);
+                break;
+            default:
+                break;
         }
-        if (nextState.form && form.cod_pro != nextState.form.cod_pro) {
-            await this.getDistritos(nextState.form);
-        }
-    }
+    } 
 
     findPerson = async () => {
         this.props.fireLoading(true);
@@ -71,7 +74,9 @@ export default class EditTrabajador extends Component
             let { data } = res;
             // config 
             data.cod_dep = `${data.badge_id}`.substr(0, 2);
+            await this.getProvincias(data);
             data.cod_pro = `${data.badge_id}`.substr(2, 2);
+            await this.getDistritos(data);
             data.cod_dis = `${data.badge_id}`.substr(4, 2);
             // setting
             await this.setState({ form: data, image_render: data.image_images.image_400x400 });
@@ -109,6 +114,8 @@ export default class EditTrabajador extends Component
         newObj[name] = value;
         newErrors[name] = "";
         await this.setState({ [object]: newObj, errors: newErrors });
+        // on change
+        this.handleChangeInput({ name, value });
     }
 
     getDocumentType = async () => {
@@ -172,7 +179,7 @@ export default class EditTrabajador extends Component
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
-            this.setState({ person: {}, form: {} });
+            this.setState({ errors: {} });
         }).catch(err => {
             try {
                 let response = JSON.parse(err.message);
@@ -350,6 +357,58 @@ export default class EditTrabajador extends Component
                                                         <label>{errors && errors.date_of_birth && errors.date_of_birth[0]}</label>
                                                     </Form.Field>
                                                 </div>
+
+                                                <div className="col-md-4 mb-2">
+                                                    <Form.Field error={errors && errors.cod_dep && errors.cod_dep[0]}>
+                                                        <label htmlFor="">Departamento <b className="text-red">*</b></label>
+                                                        <select name="cod_dep"
+                                                            value={form.cod_dep || ''}
+                                                            onChange={(e) => this.handleInput(e.target)}
+                                                        >
+                                                            <option value="">Select. Departamento</option>
+                                                            {this.state.departamentos.map((obj, indexDep) => 
+                                                                <option value={obj.cod_dep} key={`dep-${indexDep}`}>{obj.departamento}</option>
+                                                            )}
+                                                        </select>
+                                                        <label>{errors && errors.cod_dep && errors.cod_dep[0]}</label>
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 mb-2">
+                                                    <Form.Field error={errors && errors.cod_pro && errors.cod_pro[0]}>
+                                                        <label htmlFor="">Provincias <b className="text-red">*</b></label>
+                                                        <select
+                                                            name="cod_pro"
+                                                            value={form.cod_pro || ''}
+                                                            onChange={(e) => this.handleInput(e.target)}
+                                                            disabled={!form.cod_dep}
+                                                        >
+                                                            <option value="">Select. Provincia</option>
+                                                            {this.state.provincias.map((obj, indexPro ) =>
+                                                                <option key={`prov-${indexPro}`} value={obj.cod_pro}>{obj.provincia}</option>    
+                                                            )}
+                                                        </select>
+                                                        <label>{errors && errors.cod_pro && errors.cod_pro[0]}</label>
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 mb-2">
+                                                    <Form.Field error={errors && errors.cod_dis && errors.cod_dis[0]}>
+                                                        <label htmlFor="">Distrito <b className="text-red">*</b></label>
+                                                        <select
+                                                            name="cod_dis"
+                                                            value={form.cod_dis || ''}
+                                                            onChange={(e) => this.handleInput(e.target)}
+                                                            disabled={!form.cod_pro}
+                                                        >
+                                                            <option value="">Select. Distrito</option>
+                                                            {this.state.distritos.map((obj, indexDis) =>
+                                                                <option key={`dis-${indexDis}`} value={obj.cod_dis}>{obj.distrito}</option>    
+                                                            )}
+                                                        </select>
+                                                        <label>{errors && errors.cod_dis && errors.cod_dis[0]}</label>
+                                                    </Form.Field>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -357,58 +416,6 @@ export default class EditTrabajador extends Component
                                             <hr/>
                                             <h4 className="mt-2 mb-2"><i className="fas fa-location-arrow"></i> Ubicación</h4>
                                             <hr/>
-                                        </div>
-
-                                        <div className="col-md-4 mb-2">
-                                            <Form.Field error={errors && errors.cod_dep && errors.cod_dep[0]}>
-                                                <label htmlFor="">Departamento <b className="text-red">*</b></label>
-                                                <select name="cod_dep"
-                                                    value={form.cod_dep || ''}
-                                                    onChange={(e) => this.handleInput(e.target)}
-                                                >
-                                                    <option value="">Select. Departamento</option>
-                                                    {this.state.departamentos.map((obj, indexDep) => 
-                                                        <option value={obj.cod_dep} key={`dep-${indexDep}`}>{obj.departamento}</option>
-                                                    )}
-                                                </select>
-                                                <label>{errors && errors.cod_dep && errors.cod_dep[0]}</label>
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mb-2">
-                                            <Form.Field error={errors && errors.cod_pro && errors.cod_pro[0]}>
-                                                <label htmlFor="">Provincias <b className="text-red">*</b></label>
-                                                <select
-                                                    name="cod_pro"
-                                                    value={form.cod_pro || ''}
-                                                    onChange={(e) => this.handleInput(e.target)}
-                                                    disabled={!form.cod_dep}
-                                                >
-                                                    <option value="">Select. Provincia</option>
-                                                    {this.state.provincias.map((obj, indexPro ) =>
-                                                        <option key={`prov-${indexPro}`} value={obj.cod_pro}>{obj.provincia}</option>    
-                                                    )}
-                                                </select>
-                                                <label>{errors && errors.cod_pro && errors.cod_pro[0]}</label>
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mb-2">
-                                            <Form.Field error={errors && errors.cod_dis && errors.cod_dis[0]}>
-                                                <label htmlFor="">Distrito <b className="text-red">*</b></label>
-                                                <select
-                                                    name="cod_dis"
-                                                    value={form.cod_dis || ''}
-                                                    onChange={(e) => this.handleInput(e.target)}
-                                                    disabled={!form.cod_pro}
-                                                >
-                                                    <option value="">Select. Distrito</option>
-                                                    {this.state.distritos.map((obj, indexDis) =>
-                                                        <option key={`dis-${indexDis}`} value={obj.cod_dis}>{obj.distrito}</option>    
-                                                    )}
-                                                </select>
-                                                <label>{errors && errors.cod_dis && errors.cod_dis[0]}</label>
-                                            </Form.Field>
                                         </div>
                                         
                                         <div className="col-md-4 mb-2">            

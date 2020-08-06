@@ -8,7 +8,6 @@ import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import { responsive } from '../../../services/storage.json';
 import { Body } from '../../../components/Utils';
-import Show from '../../../components/show';
 
 export default class Index extends Component
 {
@@ -36,11 +35,12 @@ export default class Index extends Component
     }
 
     getPerson = async ({ page, query_search }) => {
-        this.setState({ loading: true, query_search });
+        this.props.fireLoading(true);
+        this.setState({ query_search });
         await authentication.get(`person?page=${page}&query_search=${query_search}`)
         .then(res => this.setState({ people: res.data }))
         .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+        this.props.fireLoading(false);
     }
 
     setting = (props) => {
@@ -76,7 +76,7 @@ export default class Index extends Component
                 <Body>
                     <Form loading={this.state.loading}>
                         <div className="col-md-12">
-                            <DataTable titulo={<span>Lista de Trabajadores</span>}
+                            <DataTable titulo={<span>Lista de Personas </span>}
                                 headers={["#ID", "Apellidos y Nombres", "N° Documento", "Fecha de Nac."]}
                                 data={people && people.data}
                                 index={[
