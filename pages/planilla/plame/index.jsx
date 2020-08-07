@@ -5,6 +5,8 @@ import { unujobs } from '../../../services/apis';
 import { InputCredencias, InputEntity, InputAuth } from '../../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
 import Show from '../../../components/show';
+import { getPlame } from '../../../services/requests/cronograma'; 
+import Router from 'next/router';
 
 
 export default class Plame extends Component 
@@ -12,46 +14,30 @@ export default class Plame extends Component
 
     static getInitialProps = async (ctx) => {
         await AUTHENTICATE(ctx);
-        let auth_token = await AUTH(ctx);
         let { pathname, query } = ctx;
-        return { pathname, query, auth_token }
+        let date = new Date();
+        query.mes = query.mes || date.getMonth() + 1;
+        query.year = query.year || date.getFullYear();
+        let plame = await getPlame(ctx);
+        return { pathname, query, plame };
     }
 
     state = {
         year: 2020,
         mes: 6,
-        loading: false,
-        message: "",
-        success: false
+        loading: false
     }
 
     componentDidMount = async () => {
         this.props.fireEntity({ render: true });
-        await this.setState({
-            year: new Date().getFullYear(),
-            mes: new Date().getMonth() + 1
-        });
-        // obtener plame
-        await this.getPlame();
-    }
-
-    componentWillReceiveProps = async (nextProps) => {
-        await this.getPlame();
+        this.setState((state, props) => ({
+            year: props.query && props.query.year || 2020,
+            mes: props.query && props.query.mes || 6
+        }));
     }
 
     handleInput = ({name, value}) => {
         this.setState({ [name]: value });
-    }
-
-    getPlame = async () => {
-        this.setState({ loading: true });
-        let { year, mes } = this.state;
-        await unujobs.get(`plame/${year}/${mes}`)
-        .then(res => {
-            let { success, message } = res.data;
-            this.setState({ success, message });
-        }).catch(err => console.log(err.message));
-        this.setState({ loading: false })
     }
 
     handleClick = (url) => {
@@ -70,7 +56,17 @@ export default class Plame extends Component
         form.submit();
     }
 
+    handleSearch = () => {
+        let { query, pathname, push } = Router;
+        let { year, mes } = this.state;
+        query.year = year;
+        query.mes = mes;
+        push({ pathname, query });
+    }
+
     render() {
+
+        let { plame } = this.props;
 
         return (
             <div className="col-md-12">
@@ -106,7 +102,7 @@ export default class Plame extends Component
                                     <Button
                                         fluid
                                         color="blue"
-                                        onClick={(e) => this.getPlame()}
+                                        onClick={this.handleSearch}
                                     >
                                         <i className="fas fa-search"></i> Buscar
                                     </Button>
@@ -118,17 +114,17 @@ export default class Plame extends Component
                                     <hr/>
                                 </div>
 
-                                <Show condicion={!this.state.success}>
+                                <Show condicion={!plame.success}>
                                     <div className="col-md-12 mt-5">
                                         <h3 className="text-center">
                                             <i className="fas fa-file-alt mb-2" style={{ fontSize: '3em' }}></i>
                                             <br/>
-                                            {this.state.message}
+                                            {plame.message}
                                         </h3>
                                     </div>
                                 </Show>
 
-                                <Show condicion={this.state.success}>
+                                <Show condicion={plame.success}>
                                     <div className="col-md-12 mb-1">
                                         <div className="row">
                                             <div className="col-md-3">
