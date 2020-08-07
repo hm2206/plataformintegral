@@ -67,6 +67,7 @@
     "react-draft-wysiwyg": "^1.14.5",
     "react-html-parser": "^2.0.2",
     "react-iframe": "^1.8.0",
+    "react-json-view": "^1.19.1",
     "react-markdown-reader": "^1.2.0",
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",

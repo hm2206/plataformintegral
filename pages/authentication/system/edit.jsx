@@ -7,6 +7,9 @@ import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
 import { AUTHENTICATE } from '../../../services/auth';
+import dynamic from 'next/dynamic';
+
+const ReactJson = dynamic(() => import('react-json-view'), { ssr: false })
 
 
 export default class EditSystem extends Component
@@ -69,6 +72,8 @@ export default class EditSystem extends Component
         data.append('support_name', form.support_name);
         data.append('support_link', form.support_link);
         data.append('support_email', form.support_email);
+        data.append('config_mail_connection',  form.config_mail_connection)
+        data.append('config_mail_data',  form.config_mail_data)
         // add files
         for(let attr in files) data.append(attr, files[attr]);
         // crear sistema
@@ -253,6 +258,39 @@ export default class EditSystem extends Component
                                             />
                                             <label>{errors && errors.support_email && errors.support_email[0]}</label>
                                         </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-12">
+                                        <hr/>
+                                        <i className="fas fa-cogs"></i> Configuración del envio de correos
+                                        <hr/>
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.config_mail_connection && errors.config_mail_connection[0] || false}>
+                                            <label htmlFor="">Conexión <b className="text-red">*</b></label>
+                                            <input type="text"
+                                                name="config_mail_connection"
+                                                placeholder="Ingrese la conexión Ejm. smtp"
+                                                onChange={(e) => this.handleInput(e.target)}
+                                                value={form.config_mail_connection || ""}
+                                            />
+                                            <label>{errors && errors.config_mail_connection && errors.config_mail_connection[0]}</label>
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6"></div>
+
+                                    <div className="col-md-12 mb-3">
+                                        <label htmlFor="">Parámetros</label>
+                                        <ReactJson src={form && form.config_mail_data && JSON.parse(form.config_mail_data) || {}} 
+                                            onEdit={(e) => this.handleInput({ name: 'config_mail_data', value: JSON.stringify(e.updated_src) })}
+                                            onAdd={(e) => this.handleInput({ name: 'config_mail_data', value: JSON.stringify(e.updated_src) })}
+                                            onDelete={(e) => this.handleInput({ name: 'config_mail_data', value: JSON.stringify(e.updated_src) })}
+                                            displayDataTypes={false}
+                                            iconStyle="square"
+                                            enableClipboard={false}
+                                        />
                                     </div>
 
                                     <div className="col-md-12">
