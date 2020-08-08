@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { AUTH, AUTHENTICATE } from '../services/auth';
-import { authentication } from '../services/apis';
 import { Body } from '../components/Utils';
-import { Image } from 'semantic-ui-react';
 import CardProfile from '../components/cardProfile';
 import CardToken from '../components/cardToken';
+import cardChangePassword from '../components/cardChangePassword'
+import CardChangePassword from '../components/cardChangePassword';
 
 export default class Index extends Component
 {
@@ -29,7 +29,8 @@ export default class Index extends Component
                         </div>
 
                         <div className="col-md-5">
-                            <CardToken />
+                            <CardChangePassword {...this.props}/>
+                            <CardToken/>
                         </div>
                     </div>
                 </Body>
