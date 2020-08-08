@@ -142,6 +142,8 @@ class MyApp extends App {
       if (!newToken) return false;
       Cookies.set('auth_token', newToken);
       history.go('/');
+    } else {
+      localStorage.setItem('auth_token', token);
     }
   }
 

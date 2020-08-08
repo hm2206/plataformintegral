@@ -15,7 +15,10 @@ export default class CardChangePassword extends Component
     }
 
     handleInput = ({ name, value }) => {
-        this.setState({ [name]: value });
+        this.setState(state => {
+            state.errors[name] = "";
+            return { [name]: value, errors: state.errors };
+        });
     }
 
     val_password_confimation = () => {
