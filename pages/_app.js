@@ -122,6 +122,7 @@ class MyApp extends App {
   }
 
   componentDidMount = async () => {
+    await this.recoveryToken();
     this.handleRequestAuth();
     window.onload = async () => {
       let tab = uid(16);
@@ -132,6 +133,16 @@ class MyApp extends App {
 
     this.handleScreen();
     window.addEventListener('resize', this.handleScreen);
+  }
+
+  recoveryToken = async () => {
+    let token = await Cookies.get('auth_token')
+    if (!token) {
+      let newToken = await localStorage.getItem('auth_token');
+      if (!newToken) return false;
+      Cookies.set('auth_token', newToken);
+      history.go('/');
+    }
   }
 
   handleRequestAuth = () => {
@@ -215,9 +226,10 @@ class MyApp extends App {
           let { success, message } = res.data;
           if (!success) throw new Error(message); 
           await clearStorage(store);
+          localStorage.removeItem('auth_token');
+          history.go('/login');
+          await Cookies.remove('auth_token');
       }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
-    history.go('/login');
-    await Cookies.remove('auth_token');
   }
 
   refreshProfile = async () => {

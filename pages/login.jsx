@@ -63,6 +63,7 @@ class Login extends Component
             let { success, message, token } = res.data;
             if (!success) throw new Error(message); 
             await Cookies.set('auth_token', token);
+            localStorage.setItem('auth_token', token);
             history.go('/');
         })
         .catch(err => Swal.fire({icon: 'error', text: err.message}));
