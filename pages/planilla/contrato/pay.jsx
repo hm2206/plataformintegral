@@ -4,7 +4,7 @@ import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
 import { Body, BtnFloat, BtnBack } from '../../../components/Utils';
 import { findInfo } from '../../../storage/actions/infoActions';
-import { unujobs, recursoshumanos } from '../../../services/apis';
+import { unujobs, recursoshumanos, authentication } from '../../../services/apis';
 import Show from '../../../components/show';
 import CreateConfigRemuneracion from '../../../components/contrato/createConfigRemuneracion';
 import Swal from 'sweetalert2';
@@ -34,12 +34,14 @@ export default class Pay extends Component
 
     componentDidMount = async () => {
         let { info } = this.props;
+        this.props.fireLoading(true);
         this.props.fireEntity({ render: true, disabled: true, entity_id: info.entity_id });
         this.getSituacionLaboral();
         this.getPerfilLaboral();
         this.getDependencia();
         await this.getWork();
         await this.getConfig();
+        this.props.fireLoading(false);
     }
 
     componentWillReceiveProps = (nextProps) => {
@@ -65,7 +67,7 @@ export default class Pay extends Component
 
     getPerfilLaboral = async () => {
         let { info } = this.props;
-        await recursoshumanos.get(`perfil_laboral/${info.perfil_laboral_id}`)
+        await authentication.get(`perfil_laboral/${info.perfil_laboral_id}`)
         .then(res => {
             let { success, message, perfil_laboral } = res.data;
             if (!success) throw new Error(message);
@@ -76,7 +78,7 @@ export default class Pay extends Component
 
     getDependencia = async () => {
         let { info } = this.props;
-        await recursoshumanos.get(`dependencia/${info.dependencia_id}`)
+        await authentication.get(`dependencia/${info.dependencia_id}`)
         .then(res => {
             let { success, message, dependencia } = res.data;
             if (!success) throw new Error(message);
@@ -174,7 +176,7 @@ export default class Pay extends Component
                             </div>
 
                             <div className="card-body">
-                                <Form loading={this.state.loading}>
+                                <Form>
                                     <div className="row">
                                         <div className="col-md-4 mt-3 text-center">
                                             <img src={work && work.person && work.person.image_images && work.person.image_images.image_200x200 || '/img/perfil.jpg'}

@@ -57,7 +57,7 @@ export default class Afectacion extends Component {
     }
 
     getDependencias = async (page = 1) => {
-        await recursoshumanos.get('dependencia')
+        await authentication.get(`dependencia?page=${page}`)
         .then(async res => {
             let { dependencia, success, message } = res.data;
             if (!success) throw new Error(message);
@@ -74,7 +74,7 @@ export default class Afectacion extends Component {
 
     handlePerfilLaborales = async (dependencia_id = null, page = 1) => {
         if (dependencia_id) {
-            await recursoshumanos.get(`dependencia/${dependencia_id}/perfil_laboral`)
+            await authentication.get(`dependencia/${dependencia_id}/perfil_laboral`)
             .then(async res => {
                 let { success, message, perfil_laboral } = res.data;
                 if (!success) throw new Error(message);
@@ -363,7 +363,11 @@ export default class Afectacion extends Component {
                             />
                         </Show>
                         <Show condicion={!this.props.edit}>
-                            <input type="text" name="ext_pptto" value={history.ext_pptto} disabled readOnly/>
+                            <input type="text" 
+                            name="ext_pptto" 
+                            value={history.ext_pptto} 
+                            disabled
+                            readOnly/>
                         </Show>
                     </Form.Field>
 
