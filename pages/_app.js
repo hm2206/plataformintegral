@@ -158,9 +158,12 @@ class MyApp extends App {
   getAuth = async () => {
     authentication.get('me')
       .then(res => {
-        let { success, message, user } = res.data;
+        let { success, message, user, code } = res.data;
         if (success) this.setState({ auth: user });
-        else this.logout();
+        if (code == 'ERR_AUTHORIZATION') {
+          Cookies.remove('auth_token');
+          localStorage.removeItem('auth_token');
+        } else this.logout();
       })
       .catch(async err => console.log('error auth', err.message));
   }
