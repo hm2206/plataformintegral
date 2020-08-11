@@ -164,7 +164,7 @@ class MyApp extends App {
           return true;
         }
         // validar errors
-        if (code == 'ERR_AUTHORIZATION') {
+        if (code == 'ERR_AUTORIZATION') {
           Cookies.remove('auth_token');
           localStorage.removeItem('auth_token');
         } else this.logout();
