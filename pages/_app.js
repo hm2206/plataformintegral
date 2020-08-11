@@ -159,7 +159,11 @@ class MyApp extends App {
     authentication.get('me')
       .then(res => {
         let { success, message, user, code } = res.data;
-        if (success) this.setState({ auth: user });
+        if (success) {
+          this.setState({ auth: user });
+          return true;
+        }
+        // validar errors
         if (code == 'ERR_AUTHORIZATION') {
           Cookies.remove('auth_token');
           localStorage.removeItem('auth_token');
