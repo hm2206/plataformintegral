@@ -6,6 +6,7 @@ import { parseOptions } from '../services/utils';
 import Show from '../components/show';
 import Swal from "sweetalert2";
 import { LoadFile } from '../components/Utils';
+import Router from "next/router";
 
 export default class CardProfile extends Component {
 
@@ -170,12 +171,13 @@ export default class CardProfile extends Component {
     this.setState({ uploading: true });
     form.append('image', img);
     await authentication.post(`auth/change_image`, form)
-    .then(res => {
+    .then(async res => {
       this.props.fireLoading(false);
-      let { success, message, auth } = res.data;
+      let { success, message } = res.data;
       if (!success) throw new Error(message);
-      Swal.fire({ icon: 'success', text: message });
-      this.props.setAuth(auth);
+      await Swal.fire({ icon: 'success', text: message });
+      let { push, pathname, query } = Router;
+      await push({ pathname, query });
     }).catch(err => {
       try {
         this.props.fireLoading(false);

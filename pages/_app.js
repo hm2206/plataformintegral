@@ -6,7 +6,7 @@ import Sidebar from '../components/sidebar';
 import Router from 'next/router';
 import Navbar from '../components/navbar';
 import { Content } from '../components/Utils';
-import { AUTH } from '../services/auth';
+import { AUTH, LOGOUT } from '../services/auth';
 import { app } from '../env.json';
 import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
@@ -25,6 +25,9 @@ import uid from 'uid';
 import NotCurrent from '../components/notCurrent';
 import NotInternet from '../components/notInternet';
 import SkullContent from '../components/loaders/skullContent';
+
+// api auth
+import { getAuth } from '../services/requests/auth';
 
 
 // config router
@@ -52,6 +55,7 @@ class MyApp extends App {
     let _app = {};
     let message = "";
     let is_render = false;
+    let redirect = null;
     // obterner el app client
     await authentication.get('app/me')
     .then(res => {
@@ -64,8 +68,18 @@ class MyApp extends App {
       _app = {};
       is_render = false;
     });
-    // obtener auth
+    // obtener token
     let isLoggin = await AUTH(ctx) ? await AUTH(ctx) : false;
+    // checking auth
+    let auth = { user: {} };
+    if (isLoggin) {
+      auth = await getAuth(ctx);
+      // validar sesión
+      if (!auth.success) {
+        isLoggin = false;
+        redirect = '/login';
+      }
+    }
     // ejecutar initial de los children
     if (await Component.getInitialProps) {
       // props
@@ -73,8 +87,10 @@ class MyApp extends App {
         pageProps = await Component.getInitialProps(ctx)
         pageProps.isLoggin = isLoggin;
         pageProps.app = _app;
+        pageProps.auth = auth.user;
+        pageProps.redirect = redirect;
         // page
-        return { pageProps, store, isLoggin, _app, is_render, message };
+        return { pageProps, store, isLoggin, _app, is_render, message, auth: pageProps.auth, redirect };
      } catch (error) {
         if (ctx.isServer) {
           ctx.res.writeHead(301, { location: '/404' });
@@ -88,7 +104,6 @@ class MyApp extends App {
   constructor(props) {
     super(props);
     this.state = {
-      auth: {},
       activeTabKey: "",
       current: true,
       loading: false,
@@ -122,8 +137,8 @@ class MyApp extends App {
   }
 
   componentDidMount = async () => {
+    await this.handleRequestAuth(this.props);
     await this.recoveryToken();
-    this.handleRequestAuth();
     window.onload = async () => {
       let tab = uid(16);
       await localStorage.setItem('activeTabKey', tab);
@@ -147,29 +162,16 @@ class MyApp extends App {
     }
   }
 
-  handleRequestAuth = () => {
-    let { isLoggin } = this.props;
+  handleRequestAuth = ({ isLoggin, redirect }) => {
     if (isLoggin) {
-      this.getAuth();
       this.getNotication();
+    } 
+    // redirigir al login
+    if (!isLoggin && redirect) {
+      Cookies.remove('auth_token');
+      localStorage.removeItem('auth_token');
+      history.go(redirect || "/");
     }
-  }
-
-  getAuth = async () => {
-    authentication.get('me')
-      .then(res => {
-        let { success, message, user, code } = res.data;
-        if (success) {
-          this.setState({ auth: user });
-          return true;
-        }
-        // validar errors
-        if (code == 'ERR_AUTORIZATION') {
-          Cookies.remove('auth_token');
-          localStorage.removeItem('auth_token');
-        } else this.logout();
-      })
-      .catch(async err => console.log('error auth', err.message));
   }
 
   getNotication = (page = 1) => {
@@ -203,9 +205,14 @@ class MyApp extends App {
     clearInterval(this.intervalo);
   }
 
-  componentWillReceiveProps = (nextProps) => {
-    let { pageProps } = this.props;
+  componentWillReceiveProps = async (nextProps) => {
+    let { pageProps, redirect } = this.props;
     if (nextProps.pageProps && pageProps.pathname != nextProps.pageProps.pathname) this.fireEntity({ render: false, disabled: false });
+    // verificar login
+    if (nextProps.redirect != redirect) {
+      await this.handleRequestAuth(nextProps);
+      this.recoveryToken();
+    }
   } 
 
   componentDidCatch = (error, info) => {
@@ -250,19 +257,14 @@ class MyApp extends App {
     await this.setState({ loading });
   }
 
-  setAuth = (auth) => {
-    this.setState({ auth });
-  }
-
   render() {
-    const { Component, pageProps, store, isLoggin, _app, is_render, message } = this.props
-    const { loading, current, entity_id, auth, notification, no_read, read } = this.state;
-    pageProps.auth = auth;
-    pageProps.setAuth = this.setAuth;
+    const { Component, pageProps, store, isLoggin, _app, is_render, message, auth, redirect } = this.props
+    const { loading, current, entity_id, notification, no_read, read } = this.state;
+    // obtener notificaciones
     pageProps.notification = {
       notification, no_read, read
     };
-    // is authenticado
+    // isAuth
     let isAuth = Object.keys(auth).length;
 
     return  <Fragment>
@@ -330,75 +332,77 @@ class MyApp extends App {
               {/* precargar imagen de la app */}
               <img src={_app.icon && _app.icon_images && _app.icon_images.icon_200x200 || '/img/base.png'} style={{ display: 'none' }}/>  
               {/* logica de page auth */}
-              {
-                isLoggin ?
-                  <Fragment>
-                    <div className="full-layout" id="main">
-                      <div className="gx-app-layout ant-layout ant-layout-has-sider">
-                        <div className="ant-layout">
-                          {/* menu navbar */}
-                          <Navbar onToggle={this.handleToggle} 
-                            auth={auth}
-                            my_app={_app} toggle={this.state.toggle} 
-                            setScreenLg={this.handleScreenLg} 
-                            screen_lg={this.state.screen_lg} 
-                            screenX={this.state.screenX}
-                            logout={this.logout}
-                            config_entity={this.state.config_entity}
-                            onFireEntityId={(e) => this.setState({ entity_id: e })}
-                            notification={notification}
-                            read={read}
-                            no_read={no_read}
-                          />
-                          {/* content */}
-                          <div className="gx-layout-content ant-layout-content">
-                            <div className="gx-main-content-wrapper">
-                              <Sidebar 
-                                my_app={_app}
-                                auth={auth} 
-                                onToggle={this.handleToggle} 
-                                toggle={this.state.toggle} 
-                                screen_lg={this.state.screen_lg}
-                                logout={this.logout}
-                                refresh={this.state.refresh}
-                              />
-                              <Content screen_lg={this.state.screen_lg}>
-                                  <Show condicion={isAuth}>
-                                    <Component {...pageProps} 
-                                      entity_id={entity_id}
-                                      fireEntity={this.fireEntity}
-                                      toggle={this.state.toggle} 
-                                      screenX={this.state.screenX}
-                                      my_app={_app}
-                                      fireRefreshProfile={this.refreshProfile}
-                                      fireLoading={this.fireLoading}
-                                      isLoading={loading}
-                                    />
-                                  </Show>
+              <Show condicion={isLoggin}>
+                <Fragment>
+                      <div className="full-layout" id="main">
+                        <div className="gx-app-layout ant-layout ant-layout-has-sider">
+                          <div className="ant-layout">
+                            {/* menu navbar */}
+                            <Navbar onToggle={this.handleToggle} 
+                              auth={auth}
+                              my_app={_app} toggle={this.state.toggle} 
+                              setScreenLg={this.handleScreenLg} 
+                              screen_lg={this.state.screen_lg} 
+                              screenX={this.state.screenX}
+                              logout={this.logout}
+                              config_entity={this.state.config_entity}
+                              onFireEntityId={(e) => this.setState({ entity_id: e })}
+                              notification={notification}
+                              read={read}
+                              no_read={no_read} 
+                            />
+                            {/* content */}
+                            <div className="gx-layout-content ant-layout-content">
+                              <div className="gx-main-content-wrapper">
+                                <Sidebar 
+                                  my_app={_app} 
+                                  onToggle={this.handleToggle} 
+                                  toggle={this.state.toggle} 
+                                  screen_lg={this.state.screen_lg}
+                                  logout={this.logout}
+                                  refresh={this.state.refresh}
+                                  auth={auth}
+                                />
+                                <Content screen_lg={this.state.screen_lg}>
+                                    <Show condicion={isAuth}>
+                                      <Component {...pageProps} 
+                                        entity_id={entity_id}
+                                        fireEntity={this.fireEntity}
+                                        toggle={this.state.toggle} 
+                                        screenX={this.state.screenX}
+                                        my_app={_app}
+                                        fireRefreshProfile={this.refreshProfile}
+                                        fireLoading={this.fireLoading}
+                                        isLoading={loading}
+                                      />
+                                    </Show>
 
-                                  <Show condicion={!isAuth}>
-                                    <div className="col-md-12">
-                                      <SkullContent/>
-                                    </div>
-                                  </Show>
-                              </Content>
+                                    <Show condicion={!isAuth}>
+                                      <div className="col-md-12">
+                                        <SkullContent/>
+                                      </div>
+                                    </Show>
+                                </Content>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div 
-                      className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
-                      onClick={this.handleToggle}
-                    />
-                  </Fragment>
-                : <Component {...pageProps} 
-                    my_app={_app} 
-                    fireLoading={this.fireLoading}
-                    isLoading={loading}
-                  />
-              }
+                      <div 
+                        className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
+                        onClick={this.handleToggle}
+                      />
+                    </Fragment>
+              </Show>
+
+              <Show condicion={!redirect && !isLoggin}>
+                <Component {...pageProps} 
+                  my_app={_app} 
+                  fireLoading={this.fireLoading}
+                  isLoading={loading}
+                />
+              </Show>
             </Show>
         
         </Provider>
