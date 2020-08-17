@@ -32,18 +32,11 @@ export default class Contrato extends Component
         estado: "1"
     }
 
-    componentDidMount = () => {
+    componentDidMount = async () => {
         this.props.fireEntity({ render: true });
-        this.setting(this.props);
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        let { query } = this.props;
-        if (query.infos != nextProps.infos) {
-            this.setting(nextProps);
-        } else {
-            this.setState({ loading: false });
-        }
+        this.props.fireLoading(true);
+        await this.setting(this.props);
+        this.props.fireLoading(false);
     }
 
     setting = (props) => {
