@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
 import Router from 'next/router';
 import { backUrl } from '../../../services/utils';
-import { Form, Select } from 'semantic-ui-react';
+import { Form, Select, Button } from 'semantic-ui-react';
 
 
 export default class IndexTramiteInterno extends Component
@@ -87,6 +87,15 @@ export default class IndexTramiteInterno extends Component
                                             <label htmlFor="">Asunto de Tramite<b className="text-red">*</b></label>
                                             <textarea name="" rows="10"/>
                                         </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-12 mt-4">
+                                        <hr/>
+                                        <div className="text-right">
+                                            <Button color="teal">
+                                                <i className="fas fa-save"></i> Guardar Tramite
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
