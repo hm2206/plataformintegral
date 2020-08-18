@@ -83,7 +83,7 @@ export default class AssignPerson extends Component
                         <div className="col-md-2">
                             <Button fluid
                                 onClick={async (e) => {
-                                    await this.getUser(1, this.state)
+                                    await this.getUser(1, this.state, true)
                                 }}
                             >
                                 <i className="fas fa-search"></i>

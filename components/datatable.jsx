@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from "react";
 import Loader from "../components/loader";
 import { CheckList, CheckBox } from "../components/Utils";
-import { Form } from 'semantic-ui-react';
 import Show from "./show";
+import moment from 'moment';
 
 
 export default class DataTable extends Component {
@@ -327,10 +327,10 @@ export default class DataTable extends Component {
                                 <td key={`column-datatable-${attr}-${i}-${index}`}>
                                   <div className={`row justify-content-${attr.justify}`}>
                                     {attr.type == "icon" ? <span className={`badge badge-${attr.bg ? attr.bg : 'primary'} ${obj.className}`}>{this.verifyObjects(obj, attr)}</span> : null}
-                            {attr.type == "text" ? <span className={`${attr.className}`}>{this.verifyObjects(obj, attr)}</span> : null}
+                                    {attr.type == "text" ? <span className={`${attr.className}`}>{this.verifyObjects(obj, attr)}</span> : null}
                                     {attr.type == "switch" ? <span className={`${attr.className} badge badge-${this.verifyObjects(obj, attr) ? `${attr.bg_true ? attr.bg_true : 'success'}` : `${attr.bg_false ? attr.bg_false : 'danger'}`}`}>{this.verifyObjects(obj, attr) ? attr.is_true : attr.is_false}</span> : null}
-                                    {attr.type == "timestamp" ? new Date(this.verifyObjects(obj, attr)).toDateString() : null}
-                                    {attr.type == "date" ? new Date(this.verifyObjects(obj, attr)).toLocaleDateString() : null}
+                                    {attr.type == "timestamp" ? moment(this.verifyObjects(obj, attr)).format('DD/MM/YYYY') : null}
+                                    {attr.type == "date" ? moment(this.verifyObjects(obj, attr)).format('DD/MM/YYYY') : null}
                                     <Show condicion={attr.type == 'option'}>
                                       {attr.data && attr.data.map(da => {
                                         return this.verifyObjects(obj, attr) == da.key 
