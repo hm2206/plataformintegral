@@ -6,17 +6,9 @@ import { app } from '../env.json';
 export default class Error extends Component
 {
 
-    static getInitialProps = ({ res, err }) => {
-        const statusCode = res ? res.statusCode : err ? err.statusCode : 404
-        return { statusCode }
-    }
-
     render() {
         return (
             <Fragment>
-                <Head>
-                    <title>{app.name} | Error: Página no encontrada!</title>
-                </Head>
 
                 <div className="col-md-12">
                     <div className="empty-state">

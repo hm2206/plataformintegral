@@ -80,25 +80,14 @@ class MyApp extends App {
         redirect = '/login';
       }
     }
-    // ejecutar initial de los children
-    if (await Component.getInitialProps) {
-      // props
-     try {
-        pageProps = await Component.getInitialProps(ctx)
-        pageProps.isLoggin = isLoggin;
-        pageProps.app = _app;
-        pageProps.auth = auth.user;
-        pageProps.redirect = redirect;
-        // page
-        return { pageProps, store, isLoggin, _app, is_render, message, auth: pageProps.auth, redirect };
-     } catch (error) {
-        if (ctx.isServer) {
-          ctx.res.writeHead(301, { location: '/404' });
-          ctx.res.end();
-          ctx.finished = true;
-        } else history.go('/404')
-     }
-    }
+    // ejecutar initial
+    pageProps = Component.getInitialProps && await Component.getInitialProps(ctx) || {};
+    pageProps.isLoggin = isLoggin;
+    pageProps.app = _app;
+    pageProps.auth = auth.user;
+    pageProps.redirect = redirect;
+    // page
+    return { pageProps, store, isLoggin, _app, is_render, message, auth: pageProps.auth, redirect };
   }
 
   constructor(props) {
