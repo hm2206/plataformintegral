@@ -67,7 +67,6 @@ export default class Contrato extends Component
     }
 
     handleSearch = async (e) => {
-        await this.setState({ loading: true });
         Router.push({ 
             pathname: Router.pathname, 
             query: { 
