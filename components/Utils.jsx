@@ -11,7 +11,7 @@ const InputFile = ({ id, name, onChange, error = false, children = null, title =
 
   return <Form.Field error={error || false}>
     <label htmlFor={id}>{label}</label>
-    <label className="btn btn-outline-file" htmlFor={id}>
+    <label className="btn btn-outline-file" htmlFor={id} style={{ overflow: 'hidden' }}>
         <i className={`fas fa-${icon}`}></i> {file ? file.name : title}
         <input type="file"
             id={id} 

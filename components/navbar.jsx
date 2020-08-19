@@ -37,6 +37,11 @@ class Navbar extends Component {
     this.settingEntity();
   }
 
+  componentDidUpdate = (prevProps, prevState) => {
+    let { entity_id } = this.state;
+    if (entity_id != prevState.entity_id) this.props.onFireEntityId(entity_id);
+  }
+
   handleNavBar = () => {
     if (typeof this.props.onToggle == 'function') {
       this.props.onToggle();
@@ -81,7 +86,6 @@ class Navbar extends Component {
 
   render() {
 
-    let { loading } = this.state;
     let { screen_lg, screenX, my_app, logout, config_entity, auth, notification, no_read } = this.props;
     let isAuth = Object.keys(auth).length
 
