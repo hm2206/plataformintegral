@@ -351,8 +351,10 @@ export default class CronogramaInformacion extends Component
                 this.setState({ option: name });
                 break;
             case 'report':
-                query.href = pathname;
-                await push({ pathname: parseUrl(pathname, 'report'), query });
+                let newQuery = {};
+                newQuery.id = query.id;
+                newQuery.href = pathname;
+                await push({ pathname: parseUrl(pathname, 'report'), query: newQuery });
                 break;
             case 'sync-remuneracion':
                 await this.syncRemuneracion();
