@@ -97,7 +97,7 @@ export default class Contrato extends Component
                         <div className="col-md-12">
                             <DataTable titulo={<span>Lista de Contratos</span>}
                                 headers={["#ID", "Apellidos y Nombres", "F. Ingreso", "Plaza", "P.A.P", "Estado"]}
-                                data={this.state.infos}
+                                data={infos.data || []}
                                 index={[
                                     { key: "id", type: "text" },
                                     { key: "person.fullname", type: "text" },
@@ -152,7 +152,7 @@ export default class Contrato extends Component
                                 </div>
 
                                 <div className="card-body mt-4">
-                                    <h4>Resultados: {this.state.infos && this.state.infos.length} de {this.state.total}</h4>
+                                    <h4>Resultados: {infos && infos.length} de {this.state.total}</h4>
                                 </div>
 
                             </DataTable>
