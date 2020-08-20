@@ -6,6 +6,8 @@ import { tramite, authentication } from '../../services/apis';
 import { InputFile } from '../../components/Utils';
 import { Confirm } from '../../services/utils'
 import Swal from 'sweetalert2';
+import Show from '../show';
+import SearchUserToDependencia from '../authentication/user/searchUserToDependencia';
 
 export default class ModalNextTracking extends Component
 {
@@ -20,7 +22,9 @@ export default class ModalNextTracking extends Component
         },
         errors: {},
         query_search: "",
-        dependencias: []
+        dependencias: [],
+        option: "",
+        user: {}
     }
 
     componentDidMount = async () => {
@@ -105,9 +109,14 @@ export default class ModalNextTracking extends Component
         }
     }
 
+    handleAdd = (obj) => {
+        this.setState({ option: '', user: obj });
+        this.handleInput({ name: 'user_destino_id', value: obj.id });
+    }
+
     render() {
 
-        let { loader, form, dependencias, errors } = this.state;
+        let { loader, form, dependencias, errors, user } = this.state;
         let { tramite } = this.props;
 
         return (
@@ -146,19 +155,41 @@ export default class ModalNextTracking extends Component
                             </Form.Field>
                         </div>
 
-                        <div className="col-md-6 mt-3">
-                            <Form.Field error={errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}>
-                                <label htmlFor="">Dependencía Destino <b className="text-red">*</b></label>
-                                <Select
-                                    name="dependencia_destino_id"
-                                    placeholder="Select. Dependencía Destino"
-                                    options={dependencias}
-                                    value={form.dependencia_destino_id || ""}
-                                    onChange={(e, obj) => this.handleInput(obj)}
-                                />
-                                <label htmlFor="">{errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}</label>
-                            </Form.Field>
-                        </div>
+                        <Show condicion={tramite.parent && form.status == 'DERIVADO'}>
+                            <div className="col-md-6 mt-3">
+                                <Form.Field error={errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}>
+                                    <label htmlFor="">Dependencía Destino <b className="text-red">*</b></label>
+                                    <Select
+                                        name="dependencia_destino_id"
+                                        placeholder="Select. Dependencía Destino"
+                                        options={dependencias}
+                                        value={form.dependencia_destino_id || ""}
+                                        onChange={(e, obj) => this.handleInput(obj)}
+                                    />
+                                    <label htmlFor="">{errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}</label>
+                                </Form.Field>
+                            </div>
+                        </Show>
+
+                        <Show condicion={tramite.parent && form.status == 'DERIVADO' && tramite.dependencia_destino_id == form.dependencia_destino_id}>
+                            <div className="col-md-12">
+                                <hr/>
+                                    <Form.Field error={errors.user_destino_id && errors.user_destino_id[0] || ""}>
+                                        <i className="fas fa-user"></i> Agregar usuario 
+                                        <button className="btn btn-sm btn-dark ml-2"
+                                            onClick={(e) => this.setState({ option: 'assign-user' })}
+                                        >
+                                            <i className={`fas fa-${user.fullname ? 'sync' : 'plus'}`}></i>
+                                        </button>
+                                        <Show condicion={user && user.fullname}>
+                                            <span className="badge badge-warning ml-2">{user.fullname}</span>
+                                        </Show>
+
+                                        <label className="text-center">{errors.user_destino_id && errors.user_destino_id[0] || ""}</label>
+                                    </Form.Field>
+                                <hr/>
+                            </div>
+                        </Show>
 
                         <div className="col-md-12 mt-3">
                             <Form.Field  error={errors.description && errors.description[0] || ""}>
@@ -173,19 +204,21 @@ export default class ModalNextTracking extends Component
                             </Form.Field>
                         </div>
 
-                        <div className="col-md-12 mt-3">
-                            <Form.Field error={errors.file && errors.file[0] || ""}>
-                                <label htmlFor="">Adjuntar Archivo</label>
-                                <InputFile
-                                    id="file_"
-                                    name="file"
-                                    title="Adjuntar Archivo (*.docx, *.pdf)"
-                                    accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                    onChange={(e) => this.handleInput({ name: e.name, value: e.file })}
-                                />
-                                <label htmlFor="">{errors.file && errors.file[0] || ""}</label>
-                            </Form.Field>
-                        </div>
+                        <Show condicion={tramite.parent}>
+                            <div className="col-md-12 mt-3">
+                                <Form.Field error={errors.file && errors.file[0] || ""}>
+                                    <label htmlFor="">Adjuntar Archivo</label>
+                                    <InputFile
+                                        id="file_"
+                                        name="file"
+                                        title="Adjuntar Archivo (*.docx, *.pdf)"
+                                        accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                        onChange={(e) => this.handleInput({ name: e.name, value: e.file })}
+                                    />
+                                    <label htmlFor="">{errors.file && errors.file[0] || ""}</label>
+                                </Form.Field>
+                            </div>
+                        </Show>
 
                         <div className="col-md-12 mt-4">
                             <hr/>
@@ -199,6 +232,15 @@ export default class ModalNextTracking extends Component
                         </div>
                     </div>
                 </Form>
+
+                <Show condicion={this.state.option == 'assign-user'}>
+                    <SearchUserToDependencia
+                        entity_id={tramite.entity_id}
+                        dependencia_id={tramite.dependencia_destino_id}
+                        getAdd={this.handleAdd}
+                        isClose={(e) => this.setState({ option: '' })}
+                    />
+                </Show>
             </Modal>
         );
     }

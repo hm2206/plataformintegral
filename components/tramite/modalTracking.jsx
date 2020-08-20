@@ -5,6 +5,7 @@ import { Button, Form, List, Image } from 'semantic-ui-react';
 import Router from 'next/router';
 import { tramite } from '../../services/apis';
 import Show from '../show';
+import moment from 'moment';
 
 export default class ModalTracking extends Component
 {
@@ -46,7 +47,8 @@ export default class ModalTracking extends Component
 
     handlePage = async (nextPage) => {
         this.setState({ loader: true });
-        await this.getUser(nextPage, this.state);
+        let { tramite } = this.props;
+        await this.getTracking(tramite && tramite.slug, nextPage, true);
     }
 
     render() {
@@ -57,34 +59,11 @@ export default class ModalTracking extends Component
         return (
             <Modal
                 show={true}
+                md="8"
                 {...this.props}
                 titulo={<span><i className="fas fa-path"></i> Seguimiento del Trámite <span className="badge badge-dark">{tramite && tramite.slug}</span></span>}
             >
                 <Form className="card-body" loading={loader}>
-
-                    {/* <div className="row justify-content-center pl-4 pr-4">
-                        <div className="col-md-10 mb-2 text-left">
-                            <Form.Field>
-                                <input type="text"
-                                    placeholder="Buscar usuario por: email o username"
-                                    value={query_search || ""}
-                                    name="query_search"
-                                    onChange={({ target }) => this.setState({ [target.name]: target.value })}
-                                />
-                            </Form.Field>
-                        </div>
-
-                        <div className="col-md-2">
-                            <Button fluid
-                                onClick={async (e) => {
-                                    await this.getUser(1, this.state, true)
-                                }}
-                            >
-                                <i className="fas fa-search"></i>
-                            </Button>
-                        </div>
-                    </div> */}
-
                     <div className="pl-4 mt-4 pr-4">
                         <table className="table table-striped">
                             <thead>
@@ -93,14 +72,25 @@ export default class ModalTracking extends Component
                                     <th>Fecha</th>
                                     <th>Descripción</th>
                                     <th>Archivo</th>
+                                    <th>Estado</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <Show condicion={!loader && !tracking.total}>
                                     <tr>
-                                        <td colSpan="4" className="text-center">No hay registros</td>
+                                        <td colSpan="5" className="text-center">No hay registros</td>
                                     </tr>
                                 </Show>
+                                {/* tracking */}
+                                {tracking.data && tracking.data.map(tra => 
+                                    <tr key={`tracking-show-${tra.id}`}>
+                                        <td>{tra.dependencia_destino && tra.dependencia_destino.nombre}</td>
+                                        <td>{moment(tra.created_at).format('DD/MM/YYYY')}</td>
+                                        <td>{tra.description}</td>
+                                        <td>{tra.file ? <a href="">archivo</a> : ""}</td>
+                                        <td>{tra.status}</td>
+                                    </tr>    
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -111,7 +101,7 @@ export default class ModalTracking extends Component
                         </div>
                         <div className="col-md-12">
                             <Button fluid
-                                disabled={loader || tracking.lastPage > tracking.page + 1}
+                                disabled={loader || !(tracking.lastPage > tracking.page + 1)}
                                 onClick={(e) => this.handlePage(tracking.page + 1)}
                             >
                                 Obtener más registros
