@@ -45,10 +45,10 @@ export default class SearchCronograma extends Component
         })
     }
 
-    changeCronograma = (id) => {
+    changeCronograma = async (id) => {
         let { push, pathname, query } = Router;
-        query.id = btoa(id);
-        query.search_cronograma = null;
+        query.id = await btoa(id);
+        this.props.isClose();
         push({ pathname, query });
     }
 
@@ -61,6 +61,7 @@ export default class SearchCronograma extends Component
                 show={true}
                 {...this.props}
                 titulo={<span><i className="fas fa-search"></i> Buscar cronogramas</span>}
+                disabled={this.state.loader}
             >
                 <Form className="card-body" loading={this.state.loader}>
                     <div className="row">

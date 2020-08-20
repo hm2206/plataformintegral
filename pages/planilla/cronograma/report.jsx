@@ -24,6 +24,7 @@ export default class Report extends Component
     }
 
     state = {
+        search_cronograma: false,
         loading: false,
         text: "Seleccionar",
         options: [
@@ -358,6 +359,7 @@ export default class Report extends Component
     render() {
 
         let { cronograma } = this.props.cronograma;
+        let { search_cronograma } = this.state;
         let { query } = this.props;
 
         return (
@@ -476,22 +478,14 @@ export default class Report extends Component
 
                 <BtnFloat style={{ top: '60vh', background: "#cecece" }}
                     size="md"
-                    onClick={(e) => {
-                        let { push, pathname, query } = Router;
-                        query.search_cronograma = true;
-                        push({ pathname, query })
-                    }}
+                    onClick={(e) => this.setState({ search_cronograma: true })}
                 >
                     <i className="fas fa-search"></i>
                 </BtnFloat>
 
-                <Show condicion={query.search_cronograma}>
+                <Show condicion={search_cronograma}>
                     <SearchCronograma cronograma={cronograma}
-                        isClose={e => {
-                            let { push, pathname, query } = Router;
-                            query.search_cronograma = null;
-                            push({ pathname, query });
-                        }}
+                        isClose={e => this.setState({ search_cronograma: false })}
                     />
                 </Show>
             </div>

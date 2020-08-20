@@ -22,7 +22,7 @@ export default class Close extends Component
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
             let { pathname, query, push } = Router;
-            query.cerrar = null;
+            this.props.isClose();
             if (success) push({ pathname, query });
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));

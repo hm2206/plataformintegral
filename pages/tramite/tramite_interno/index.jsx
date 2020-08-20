@@ -35,6 +35,7 @@ export default class IndexTramiteInterno extends Component
         this.props.fireEntity({ render: true });
         this.getDependencias();
         this.getTramiteType();
+        this.getMyDependencias(this.props.entity_id || "", 1, true)
     }
 
     componentWillReceiveProps = (nextProps) => {

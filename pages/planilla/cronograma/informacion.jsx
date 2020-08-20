@@ -23,6 +23,7 @@ export default class CronogramaInformacion extends Component
 
     state = {
         loading: false,
+        option: "",
         total: 0,
         like: "",
         page: 1,
@@ -345,12 +346,9 @@ export default class CronogramaInformacion extends Component
         let { push, pathname, query } = Router;
         switch (name) {
             case 'desc-massive':
-                query.desc_massive = 1;
-                await push({ pathname, query });
-                break;
             case 'remu-massive':
-                query.remu_massive = 1;
-                await push({ pathname, query });
+            case 'imp-descuento':
+                this.setState({ option: name });
                 break;
             case 'report':
                 query.href = pathname;
@@ -371,9 +369,6 @@ export default class CronogramaInformacion extends Component
             case 'generate-token':
                 await this.generateToken();
                 break;
-            case 'imp-descuento':
-                query.imp_descuento = 1;
-                await push({ pathname, query });
             default:
                 break;
         }
@@ -857,12 +852,7 @@ export default class CronogramaInformacion extends Component
                                                     basic
                                                     fluid
                                                     disabled={isLoading}
-                                                    onClick={e => {
-                                                        e.preventDefault();
-                                                        let { push, pathname, query } = Router;
-                                                        query.cerrar = true;
-                                                        push({ pathname, query });
-                                                    }}
+                                                    onClick={e => this.setState({ option: 'cerrar' })}
                                                 >
                                                     <i className="fas fa-lock mr-1"></i>
                                                     <Show condicion={this.props.screenX > responsive.md}>
@@ -895,12 +885,7 @@ export default class CronogramaInformacion extends Component
                                     <Button
                                         fluid
                                         disabled={isLoading || this.state.block || cronograma.year != new Date().getFullYear() || cronograma.mes != (new Date().getMonth() + 1)}
-                                        onClick={e => {
-                                            e.preventDefault();
-                                            let { push, pathname, query } = Router;
-                                            query.open = true;
-                                            push({ pathname, query });
-                                        }}
+                                        onClick={e => this.setState({ option: 'open' })}
                                     >
                                         <Icon name="unlock"/> Abrir
                                     </Button>
@@ -925,66 +910,38 @@ export default class CronogramaInformacion extends Component
 
                 <BtnFloat style={{ bottom: '120px', background: "#cecece" }}
                     size="md"
-                    onClick={(e) => {
-                        let { push, pathname, query } = Router;
-                        query.search_cronograma = true;
-                        push({ pathname, query })
-                    }}
+                    onClick={(e) => this.setState({ option: 'search_cronograma' })}
                 >
                     <i className="fas fa-search"></i>
                 </BtnFloat>
 
-                <Show condicion={query.desc_massive}>
-                    <UpdateDesctMassive isClose={(e) => {
-                        let { push, pathname, query } = Router;
-                        query.desc_massive = null;
-                        push({ pathname, query });
-                    }}/>
+                <Show condicion={this.state.option == 'desc-massive'}>
+                    <UpdateDesctMassive isClose={(e) => this.setState({ option: "" })}/>
                 </Show>
 
-                <Show condicion={query.remu_massive}>
-                    <UpdateRemuMassive isClose={(e) => {
-                        let { push, pathname, query } = Router;
-                        query.remu_massive = null;
-                        push({ pathname, query });
-                    }}/>
+                <Show condicion={this.state.option == 'remu-massive'}>
+                    <UpdateRemuMassive isClose={(e) => this.setState({ option: "" })}/>
                 </Show>
 
-                <Show condicion={query.imp_descuento}>
-                    <ImpDescuento isClose={(e) => {
-                        let { push, pathname, query } = Router;
-                        query.imp_descuento = null;
-                        push({ pathname, query });
-                    }}/>
+                <Show condicion={this.state.option == 'imp-descuento'}>
+                    <ImpDescuento isClose={(e) => this.setState({ option: "" })}/>
                 </Show>
 
-                <Show condicion={query.open}>
+                <Show condicion={this.state.option == 'open'}>
                     <Open cronograma={this.state.cronograma}
-                        isClose={e => {
-                            let { push, pathname, query } = Router;
-                            query.open = null;
-                            push({ pathname, query });
-                        }}
+                        isClose={(e) => this.setState({ option: "" })}
                     />
                 </Show>
 
-                <Show condicion={query.cerrar}>
+                <Show condicion={this.state.option == 'cerrar'}>
                     <Cerrar cronograma={this.state.cronograma}
-                        isClose={e => {
-                            let { push, pathname, query } = Router;
-                            query.cerrar = null;
-                            push({ pathname, query });
-                        }}
+                        isClose={(e) => this.setState({ option: "" })}
                     />
                 </Show>
 
-                <Show condicion={query.search_cronograma}>
+                <Show condicion={this.state.option == 'search_cronograma'}>
                     <SearchCronograma cronograma={this.state.cronograma}
-                        isClose={e => {
-                            let { push, pathname, query } = Router;
-                            query.search_cronograma = null;
-                            push({ pathname, query });
-                        }}
+                        isClose={e => this.setState({ option: "" })}
                     />
                 </Show>
             </Fragment>

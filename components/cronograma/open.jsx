@@ -22,7 +22,7 @@ export default class Open extends Component
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
             let { pathname, query, push } = Router;
-            query.open = "";
+            this.props.isClose();
             if (success) await push({ pathname, query });
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
