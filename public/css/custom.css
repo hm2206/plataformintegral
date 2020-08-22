@@ -75,3 +75,23 @@
 .unread-important {
     background: #eceff1!important;
 }
+
+
+.badge-purple {
+    background: #5e35b1;
+    color: #fff;
+}
+
+
+.badge-orange {
+    background: #ff5722;
+    color: #fff;
+}
+
+
+.badge-red {
+    background: #c62828;
+    color: #fff;
+}
+
+

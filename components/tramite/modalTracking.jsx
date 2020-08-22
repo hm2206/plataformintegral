@@ -69,6 +69,7 @@ export default class ModalTracking extends Component
                             <thead>
                                 <tr>
                                     <th>Procedencia</th>
+                                    <th>Usuario</th>
                                     <th>Fecha</th>
                                     <th>Descripción</th>
                                     <th>Archivo</th>
@@ -78,13 +79,14 @@ export default class ModalTracking extends Component
                             <tbody>
                                 <Show condicion={!loader && !tracking.total}>
                                     <tr>
-                                        <td colSpan="5" className="text-center">No hay registros</td>
+                                        <td colSpan="6" className="text-center">No hay registros</td>
                                     </tr>
                                 </Show>
                                 {/* tracking */}
                                 {tracking.data && tracking.data.map(tra => 
                                     <tr key={`tracking-show-${tra.id}`}>
                                         <td>{tra.dependencia_destino && tra.dependencia_destino.nombre}</td>
+                                        <td>{tra.user && tra.user.username}</td>
                                         <td>{moment(tra.created_at).format('DD/MM/YYYY')}</td>
                                         <td>{tra.description}</td>
                                         <td>{tra.file ? <a href="">archivo</a> : ""}</td>

@@ -55,7 +55,18 @@ export default class ModalNextTracking extends Component
         .catch(err => console.log(err.message));
     }
 
-    getAction = (parent = 1) => {
+    getAction = (status, parent = 1) => {
+        if (status == 'REGISTRADO') return [
+            { key: "_DERIVAR", value: "DERIVADO", text: "DERIVAR" },
+            { key: "_ANULAR", value: "ANULADO", text: "ANULAR" }
+        ]
+        // pendiente
+        if (status == 'PENDIENTE') return [
+            { key: "_DERIVAR", value: "DERIVADO", text: "DERIVAR" },
+            { key: "_REPONDER", value: "RESPONDER", text: "RESPONDER" },
+            { key: "_FINALIZAR", value: "FINALIZADO", text: "FINALIZAR" }
+        ];
+        // parant
         if (parent) return [
             { key: "_DERIVAR", value: "DERIVADO", text: "DERIVAR" },
             { key: "_ANULAR", value: "ANULADO", text: "ANULAR" },
@@ -121,6 +132,7 @@ export default class ModalNextTracking extends Component
 
         return (
             <Modal
+                md="7"
                 show={true}
                 {...this.props}
                 titulo={<span><i className="fas fa-path"></i> Proceso del trámite: <span className="badge badge-dark">{tramite && tramite.slug}</span></span>}
@@ -139,7 +151,7 @@ export default class ModalNextTracking extends Component
                                 <label htmlFor="">Acción <b className="text-red">*</b></label>
                                 <Select
                                     placeholder="Select. Acción"
-                                    options={this.getAction(tramite.parent || 0)}
+                                    options={this.getAction(tramite.status, tramite.parent || 0)}
                                     name="status"
                                     value={form.status || ""}
                                     onChange={(e, obj) => this.handleInput(obj)}
