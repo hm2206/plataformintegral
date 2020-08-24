@@ -1,0 +1,118 @@
+import React, { Component } from 'react'
+import Modal from '../modal';
+import atob from 'atob';
+import { Button, Form, List, Image } from 'semantic-ui-react';
+import Router from 'next/router';
+import { tramite } from '../../services/apis';
+import Show from '../show';
+import moment from 'moment';
+
+export default class ModalSend extends Component
+{
+
+    state = {
+        loader: false,
+        tracking: {
+            total: 0,
+            page: 1,
+            lastPage: 1,
+            data: []
+        },
+        query_search: ""
+        
+    }
+
+    componentDidMount = async () => {
+        let { tramite } = this.props;
+        await this.getTracking(tramite && tramite.slug, 1);
+    }
+
+    getTracking = async (slug, page = 1, up = false) => {
+        this.setState({ loader: true });
+        await tramite.get(`public/tramite/${slug}/tracking?page=${page}`)
+        .then(res => {
+            let { success, message, tracking } = res.data;
+            if (!success) throw new Error(message);
+            this.setState(state => {
+                state.tracking.total = tracking.total;
+                state.tracking.page = tracking.page;
+                state.tracking.lastPage = tracking.lastPage;
+                state.tracking.data = up ? [...state.tracking.data, ...tracking.data] : tracking.data;
+                return { tracking: state.tracking };
+            })
+        })
+        .catch(err => console.log(err.message));
+        this.setState({ loader: false });
+    }
+
+    handlePage = async (nextPage) => {
+        this.setState({ loader: true });
+        let { tramite } = this.props;
+        await this.getTracking(tramite && tramite.slug, nextPage, true);
+    }
+
+    render() {
+
+        let { loader, tracking, query_search } = this.state;
+        let { tramite } = this.props;
+
+        return (
+            <Modal
+                show={true}
+                md="8"
+                {...this.props}
+                titulo={<span><i className="fas fa-path"></i> Seguimiento del Trámite <span className="badge badge-dark">{tramite && tramite.slug}</span></span>}
+            >
+                <Form className="card-body" loading={loader}>
+                    <div className="pl-4 mt-4 pr-4">
+                        <table className="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Procedencia</th>
+                                    <th>Usuario</th>
+                                    <th>Fecha</th>
+                                    <th>Descripción</th>
+                                    <th>Archivo</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <Show condicion={!loader && !tracking.total}>
+                                    <tr>
+                                        <td colSpan="6" className="text-center">No hay registros</td>
+                                    </tr>
+                                </Show>
+                                {/* tracking */}
+                                {tracking.data && tracking.data.map(tra => 
+                                    <tr key={`tracking-show-${tra.id}`}>
+                                        <td>{tra.dependencia_destino && tra.dependencia_destino.nombre}</td>
+                                        <td>{tra.user && tra.user.username}</td>
+                                        <td>{moment(tra.created_at).format('DD/MM/YYYY')}</td>
+                                        <td>{tra.description}</td>
+                                        <td>{tra.file ? <a href="">archivo</a> : ""}</td>
+                                        <td>{tra.status}</td>
+                                    </tr>    
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div className="row justify-content-center mt-3">
+                        <div className="col-md-12">
+                            <hr/>
+                        </div>
+                        <div className="col-md-12">
+                            <Button fluid
+                                disabled={loader || !(tracking.lastPage > tracking.page + 1)}
+                                onClick={(e) => this.handlePage(tracking.page + 1)}
+                            >
+                                Obtener más registros
+                            </Button>
+                        </div>
+                    </div>
+                </Form>
+            </Modal>
+        );
+    }
+
+}

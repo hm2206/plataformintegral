@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
 import Datatable from '../../components/datatable';
 import Router from 'next/router';
-import btoa from 'btoa';
-import { AUTHENTICATE } from '../../services/auth';
 import { Form, Button, Select } from 'semantic-ui-react';
 import Show from '../../components/show';
-import { Body } from '../../components/Utils';
+import { Body, Cardinfo } from '../../components/Utils';
 import { authentication } from '../../services/apis';
 import Swal from 'sweetalert2';
-import { getTracking } from '../../services/requests/tramite';
 import ModalTracking from '../../components/tramite/modalTracking';
 import ModalNextTracking from '../../components/tramite/modalNextTracking';
 
@@ -41,6 +38,17 @@ export default class TrackingIndex extends Component {
         if (entity_id != nextProps.entity_id) this.getMyDependencias(nextProps.entity_id, 1, false);
     }
 
+    findDependenciaDefault = async (my_dependencias) => {
+        let { query } = this.props;
+        if (!query.dependencia_id) {
+            if (my_dependencias.length) {
+                let dep = my_dependencias[0];
+                await this.handleInput({ name: 'dependencia_id', value: dep.value });
+                await this.handleSearch();  
+            }
+        }
+    }
+
     getMyDependencias = async (id, page = 1, up = true) => {
         if (id) {
             await authentication.get(`auth/dependencia/${id}?page=${page}`)
@@ -56,11 +64,14 @@ export default class TrackingIndex extends Component {
                     text: `${d.nombre}`
                 }));
                 // setting data
-                this.setState(state => ({
+                await this.setState(state => ({
                     my_dependencias: up ? [...state.my_dependencias, ...newData] : newData
                 }));
+                // obtener la primara dependencia
+                let { my_dependencias } = this.state;
+                this.findDependenciaDefault(my_dependencias);
                 // validar request
-                if (lastPage > page + 1) await this.getMyDependencias(page + 1);
+                if (lastPage >= page + 1) await this.getMyDependencias(page + 1);
             })
             .catch(err => console.log(err.message));
         } else {
@@ -103,13 +114,13 @@ export default class TrackingIndex extends Component {
 
     render() {
 
-        let { pathname, tracking } = this.props;
+        let { pathname, tracking, titulo, status_count } = this.props;
         let { form, my_dependencias, option } = this.state;
 
         return (
             <div className="col-md-12">
                 <Body>
-                    <Datatable titulo="Bandeja de Entrada"
+                    <Datatable titulo={titulo}
                         isFilter={false}
                         headers={ ["N° Seguimiento", "N° Documento", "Tip. Trámite", "N° Documento Remitente", "origen", "Estado"]}
                         index={
@@ -142,12 +153,9 @@ export default class TrackingIndex extends Component {
                                     type: "option",
                                     data: [
                                         { key: "REGISTRADO" },
-                                        { key: "PENDIENTE" },
+                                        { key: "PENDIENTE", className: 'badge-warning' },
                                         { key: "DERIVADO", className: "badge-purple" },
-                                        { key: "ACEPTADO", className: "badge-success" },
-                                        { key: 'RECHAZADO', className: "badge-warning" },
                                         { key: "FINALIZADO", className: "badge-dark" },
-                                        { key: "ENVIADO", className: "badge-orange" },
                                         { key: "ANULADO", className: "badge-red" }
                                     ]
                                 }
@@ -182,20 +190,50 @@ export default class TrackingIndex extends Component {
                                         key: "status",
                                         value: "PENDIENTE"
                                     }
-                                },
-                                {
-                                    key: "NEXT",
-                                    icon: "fas fa-arrow-right",
-                                    title: "Continuar Trámite",
-                                    rules: {
-                                        key: "status",
-                                        value: "ENVIADO"
-                                    }
                                 }
                             ]
                         }
                         getOption={this.getOption}
                         data={tracking && tracking.data || []}>
+                        
+                        <div className="mt-3">
+                            <div className="row">
+                                <div className="col-md-3 col-sm-6">
+                                    <Cardinfo
+                                        titulo="N° De Documentos"
+                                        count={status_count && status_count.data && status_count.data.REGISTRADO}
+                                        description="Documentos registrados"
+                                    />
+                                </div>
+                                <div className="col-md-3 col-sm-6">
+                                    <Cardinfo
+                                        style={{ background: "#ffca28" }}
+                                        titulo="N° De Documentos"
+                                        count={status_count && status_count.data && status_count.data.PENDIENTE}
+                                        description="Documentos pendientes"
+                                    />
+                                </div>
+                                <div className="col-md-3 col-sm-6">
+                                    <Cardinfo
+                                        style={{ background: "#673ab7", color: "#fff" }}
+                                        titulo="N° De Documentos"
+                                        count={status_count && status_count.data && status_count.data.DERIVADO}
+                                        description="Documentos derivados"
+                                    />
+                                </div>
+                                <div className="col-md-3 col-sm-6">
+                                    <Cardinfo
+                                        style={{ background: "#d32f2f", color: "#fff" }}
+                                        titulo="N° De Documentos"
+                                        count={status_count && status_count.data && status_count.data.ANULADO}
+                                        description="Documentos anulados"
+                                    />
+                                </div>
+                            </div>
+
+                            <hr/>
+                        </div>
+
                         <Form className="mb-3">
                             <div className="row">
                                 <div className="col-md-5 mb-1 col-12 col-sm-6 col-xl-4">
@@ -217,10 +255,6 @@ export default class TrackingIndex extends Component {
                                                 {key: 'REGISTRADO', value: "REGISTRADO", text: "REGISTRADO"},
                                                 {key: 'PENDIENTE', value: "PENDIENTE", text: "PENDIENTE"},
                                                 {key: 'DERIVADO', value: "DERIVADO", text: "DERIVADO"},
-                                                {key: 'ACEPTADO', value: "ACEPTADO", text: "ACEPTADO"},
-                                                {key: 'RECHAZADO', value: "RECHAZADO", text: "RECHAZADO"},
-                                                {key: 'ENVIADO', value: "ENVIADO", text: "ENVIADO"},
-                                                {key: 'FINALIZADO', value: "FINALIZADO", text: "FINALIZADO"},
                                                 {key: 'ANULADO', value: "ANULADO", text: "ANULADO"}
                                             ]}
                                             placeholder="TODOS" 

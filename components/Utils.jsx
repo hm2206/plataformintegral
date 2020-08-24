@@ -455,6 +455,30 @@ const LoadFile = ({ id = 'select-file', defaultImg = '/img/base.png', accept = '
 }
 
 
+const Cardinfo = ({ titulo, count, icon = 'fas fa-file-alt', description, onClick, style = {} }) => (
+  <div className="card" style={style}
+    onClick={(e) => typeof onClick == 'function'? onClick(e) : null}
+  >
+    <div className="card-body">
+      <div className="row">
+        <div className="col-md-4 col-4">
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '2.5em' }}>
+            <i className={icon}></i>
+          </div>
+        </div>
+        <div className="col-md-8 col-8">
+          <b>{titulo}</b>
+          <div className="mt-2 mb-2" style={{ fontSize: '2em', fontWeight: 'bold' }}>{count || 0}</div>
+          <div className="pt-2 mt-3" style={{ width: "100%", borderTop: `2px solid ${style.color || '#000'}` }}>
+            <b style={{ fontSize: '0.85em' }}>{description}</b>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+
 export {
   Content,
   Body,
@@ -473,4 +497,5 @@ export {
   BtnSelect,
   InputFile,
   LoadFile,
+  Cardinfo
 };
