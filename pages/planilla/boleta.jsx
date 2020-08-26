@@ -15,7 +15,6 @@ export default class DuplicadoBoleta extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            page: 2,
             loading: true,
             block: false,
             query_search: "",
@@ -198,14 +197,13 @@ export default class DuplicadoBoleta extends Component {
                         </Form>
                     </Datatable>
                     <div className="text-center">
-                        <Show condicion={page_historial && page_historial.data && page_historial.data.length > 0}>
-                            <hr/>
-                            <Pagination defaultActivePage={query.page} 
-                                totalPages={page_historial.last_page}
-                                enabled={loading}
-                                onPageChange={this.handlePage}
-                            />
-                        </Show>
+                        <hr/>
+                        <Pagination defaultActivePage={query.page || 1} 
+                            totalPages={page_historial.last_page || 0}
+                            enabled={loading}
+                            onPageChange={this.handlePage}
+                            activePage={query.page || 1}
+                        />
                     </div>
                 </Body>
             </div>

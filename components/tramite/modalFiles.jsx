@@ -7,7 +7,7 @@ import { tramite } from '../../services/apis';
 import Show from '../show';
 
 
-export default class ModalSend extends Component
+export default class ModalFiles extends Component
 {
 
     state = {
@@ -22,30 +22,6 @@ export default class ModalSend extends Component
         
     }
 
-    componentDidMount = async () => {
-        this.getSend();
-    }
-
-    getSend = async (page = 1, up = false) => {
-        let { query } = this.props;
-        await tramite.get(`tracking?status=ENVIADO&page=${page}`, { headers: { DependenciaId: query.dependencia_id } })
-            .then(res => {
-                let { success, message, tracking } = res.data;
-                if (!success) throw new Error(message);
-                this.setState(state => {
-                    state.tracking.page = tracking.page;
-                    state.tracking.total = tracking.total;
-                    state.tracking.lastPage = tracking.lastPage;
-                    state.tracking.data = up ? [...state.tracking.data, ...tracking.data] : tracking.data;
-                    return { tracking: state.tracking }
-                });
-            }).catch(err => console.log(err.message));
-    }
-
-    handlePage = async (nextPage) => {
-        this.setState({ loader: true });
-    }
-
     render() {
 
         let { loader, tracking } = this.state;
@@ -56,7 +32,8 @@ export default class ModalSend extends Component
                 show={true}
                 md="12"
                 {...this.props}
-                titulo={<span><i className="fas fa-path"></i>Buzón de Entrada <span className="badge badge-dark">{tramite && tramite.slug}</span></span>}
+                titulo={<span>Archivos</span>}
+                classClose="text-white opacity-1"
             >
                 <Form className="card-body" loading={loader}>
 
@@ -109,9 +86,17 @@ export default class ModalSend extends Component
                                             <td>{tra.person && tra.person.fullname}</td>
                                             <td>{tra.dependencia_origen && `${tra.dependencia_origen.nombre}`.toUpperCase()}</td>
                                             <td>
-                                                <button className="btn btn-dark" onClick={(e) => typeof onAction == 'function' ? onAction(tra, "NEXT", indexT) : null}>
-                                                    <i class="far fa-file-alt"></i>
-                                                </button>
+                                                <Show condicion={tra.tramite_files && tra.tramite_files.length}>
+                                                    <Dropdown direction="left">
+                                                        <Dropdown.Menu direction="left" open={false}>
+                                                           {tra.tramite_files.map((f, indexF) => 
+                                                                <Dropdown.Item text={`${f}`.split('/').pop()} 
+                                                                    key={`file-iten-tracking-${indexF}`}
+                                                                />
+                                                            )}
+                                                        </Dropdown.Menu>
+                                                    </Dropdown>
+                                                </Show>
                                             </td>
                                             <td>
                                                 <div className="btn-group">

@@ -3,7 +3,7 @@ import Modal from '../modal';
 import { Form, Select, Button } from 'semantic-ui-react';
 import Router from 'next/router';
 import { tramite, authentication } from '../../services/apis';
-import { InputFile } from '../../components/Utils';
+import { DropZone } from '../../components/Utils';
 import { Confirm } from '../../services/utils'
 import Swal from 'sweetalert2';
 import Show from '../show';
@@ -17,8 +17,11 @@ export default class ModalNextTracking extends Component
         form: {
             status: "",
             dependencia_destino_id: "",
-            description: "",
-            file: null
+            description: ""
+        },
+        file: {
+            size: 0,
+            data: []
         },
         errors: {},
         query_search: "",
@@ -92,18 +95,47 @@ export default class ModalNextTracking extends Component
         });
     }
 
+    handleFiles = ({ files }) => {
+        let { file } = this.state;
+        let size_total = file.size;
+        let size_limit = 2 * 1024;
+        for (let f of files) {
+            size_total += f.size;
+            if ((size_total / 1024) <= size_limit) {
+                this.setState(state => {
+                    state.file.size += size_total;
+                    state.file.data.push(f);
+                    return { file: state.file }
+                });
+            } else {
+                Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(2)}MB)` });
+                return false;
+            }
+        }
+    }
+ 
+    deleteFile = (index, file) => {
+        this.setState(state => {
+            state.file.data.splice(index, 1);
+            state.file.size = state.file.size - file.size; 
+            return { file: state.file };
+        });
+    }
+
     nextTracing = async () => {
         let answer = await Confirm(`warning`, `¿Deseas continuar?`);
         if (answer) {
             let { id, dependencia_destino_id } = this.props.tramite;
-            let { form } = this.state;
+            let { form, file } = this.state;
             let datos = new FormData;
             // assing form
             for(let attr in form) {
                 datos.append(attr, form[attr]);
             }
+            // add files
+            await file.data.map(f => datos.append('files', f));
             // send next
-            await tramite.post(`tracking/${id}/next`, form, { headers: { DependenciaId: dependencia_destino_id } })
+            await tramite.post(`tracking/${id}/next`, datos, { headers: { DependenciaId: dependencia_destino_id } })
                 .then(res => {
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
@@ -127,7 +159,7 @@ export default class ModalNextTracking extends Component
 
     render() {
 
-        let { loader, form, dependencias, errors, user } = this.state;
+        let { loader, form, dependencias, errors, user, file } = this.state;
         let { tramite } = this.props;
 
         return (
@@ -218,16 +250,18 @@ export default class ModalNextTracking extends Component
 
                         <Show condicion={tramite.parent}>
                             <div className="col-md-12 mt-3">
-                                <Form.Field error={errors.file && errors.file[0] || ""}>
+                                <Form.Field error={errors.files && errors.files[0] || ""}>
                                     <label htmlFor="">Adjuntar Archivo</label>
-                                    <InputFile
-                                        id="file_"
-                                        name="file"
-                                        title="Adjuntar Archivo (*.docx, *.pdf)"
+                                    <DropZone id="files" 
+                                        name="files"
+                                        onChange={(e) => this.handleFiles(e)} 
+                                        icon="save"
+                                        result={file.data}
+                                        title="Select. Archivo (*.docx, *.pdf)"
                                         accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                        onChange={(e) => this.handleInput({ name: e.name, value: e.file })}
+                                        onDelete={(e) => this.deleteFile(e.index, e.file)}
                                     />
-                                    <label htmlFor="">{errors.file && errors.file[0] || ""}</label>
+                                    <label htmlFor="">{errors.files && errors.files[0] || ""}</label>
                                 </Form.Field>
                             </div>
                         </Show>

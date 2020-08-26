@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Body, BtnBack, InputFile } from '../../../components/Utils';
+import { Body, BtnBack, DropZone } from '../../../components/Utils';
 import Router from 'next/router';
 import { backUrl, Confirm } from '../../../services/utils';
-import { Form, Select, Button, Input } from 'semantic-ui-react';
+import { Form, Select, Button } from 'semantic-ui-react';
 import { authentication, tramite } from '../../../services/apis';
 import Swal from 'sweetalert2';
 
@@ -26,8 +26,11 @@ export default class IndexTramiteInterno extends Component
             tramite_type_id: "",
             document_number: "",
             folio_count: "",
-            asunto: "",
-            file: null
+            asunto: ""
+        },
+        file: {
+            size: 0,
+            data: []
         }
     }
 
@@ -54,6 +57,33 @@ export default class IndexTramiteInterno extends Component
             state.errors[name] = [];
             return { form: state.form };
         })
+    }
+
+    handleFiles = ({ files }) => {
+        let { file } = this.state;
+        let size_total = file.size;
+        let size_limit = 2 * 1024;
+        for (let f of files) {
+            size_total += f.size;
+            if ((size_total / 1024) <= size_limit) {
+                this.setState(state => {
+                    state.file.size += size_total;
+                    state.file.data.push(f);
+                    return { file: state.file }
+                });
+            } else {
+                Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(2)}MB)` });
+                return false;
+            }
+        }
+    }
+ 
+    deleteFile = (index, file) => {
+        this.setState(state => {
+            state.file.data.splice(index, 1);
+            state.file.size = state.file.size - file.size; 
+            return { file: state.file };
+        });
     }
 
     getDependencias = async (page = 1) => {
@@ -129,10 +159,12 @@ export default class IndexTramiteInterno extends Component
         let answer = await Confirm('warning', `¿Deseas guardar el tramite?`, 'Guardar');
         if (answer) {
             let datos = new FormData();
-            let { form } = this.state;
+            let { form, file } = this.state;
             for (let attr in form) {
                 datos.append(attr, form[attr]);
             }
+            // add files
+            file.data.map(f => datos.append('files', f));
             // request
             this.props.fireLoading(true);
             await tramite.post('tramite', datos, { headers: { DependenciaId: form.dependencia_id } })
@@ -141,7 +173,7 @@ export default class IndexTramiteInterno extends Component
                 let { success, message, tramite } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
-                this.setState({ form: {} })
+                this.setState({ form: {}, file: { size: 0, data: [] } })
             }).catch(err => {
                 try {
                     this.props.fireLoading(false);
@@ -157,7 +189,7 @@ export default class IndexTramiteInterno extends Component
 
     render() {
 
-        let { my_dependencias, dependencias, form, tramite_types, errors } = this.state;
+        let { my_dependencias, form, tramite_types, errors, file } = this.state;
 
         return (
             <div className="col-md-12">
@@ -170,7 +202,7 @@ export default class IndexTramiteInterno extends Component
                         <Form className="row justify-content-center">
                             <div className="col-md-8">
                                 <div className="row">
-                                    <div className="col-md-12 mt-3">
+                                    <div className="col-md-6 mt-3">
                                         <Form.Field error={errors && errors.dependencia_id && errors.dependencia_id[0] || ""}>
                                             <label htmlFor="">Mi Dependencia <b className="text-red">*</b></label>
                                             <Select
@@ -224,31 +256,48 @@ export default class IndexTramiteInterno extends Component
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-6 mt-3">
-                                        <Form.Field error={errors && errors.file && errors.file[0] || ""}>
-                                            <label htmlFor="">Adjuntar Documento<b className="text-red">*</b></label>
-                                            <InputFile id="file" 
-                                                name="file" 
-                                                onChange={(e) => this.handleInput({ name: e.name, value: e.file })} 
-                                                icon="save"
-                                                title="Select. Archivo (*.docx, *.pdf)"
-                                                accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                            />
-                                            <label>{errors && errors.file && errors.file[0] || ""}</label>
-                                        </Form.Field>
-                                    </div>
-
                                     <div className="col-md-12 mt-3">
                                         <Form.Field error={errors && errors.asunto && errors.asunto[0] || ""}>
                                             <label htmlFor="">Asunto de Tramite<b className="text-red">*</b></label>
-                                            <textarea
-                                                placeholder="Ingres el asunto del tramite1"
+                                            <input
+                                                placeholder="Ingrese el asunto del trámite"
                                                 name="asunto"
                                                 value={form.asunto || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors && errors.asunto && errors.asunto[0] || ""}</label>
                                         </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-12 mt-3">
+                                        <Form.Field error={errors && errors.observation && errors.observation[0] || ""}>
+                                            <label htmlFor="">Observación</label>
+                                            <textarea
+                                                placeholder="Ingrese un observación"
+                                                name="observation"
+                                                value={form.observation || ""}
+                                                onChange={(e) => this.handleInput(e.target)}
+                                            />
+                                            <label>{errors && errors.observation && errors.observation[0] || ""}</label>
+                                        </Form.Field>
+                                    </div>
+                                    
+                                    <div className="col-md-12">
+                                        <hr/>
+                                        <i className="fas fa-file-alt"></i> Agregar archivos
+                                        <hr/>
+                                    </div>
+
+                                    <div className="col-md-12 mt-3">
+                                        <DropZone id="files" 
+                                            name="files"
+                                            onChange={(e) => this.handleFiles(e)} 
+                                            icon="save"
+                                            result={file.data}
+                                            title="Select. Archivo (*.docx, *.pdf)"
+                                            accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                            onDelete={(e) => this.deleteFile(e.index, e.file)}
+                                        />
                                     </div>
 
                                     <div className="col-md-12 mt-4">

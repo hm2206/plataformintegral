@@ -24,10 +24,7 @@ export const getTracking = async (ctx, config = {}) => {
 export const getMyTray = async (ctx, config) => {
     let { status } = ctx.query;
     return await tramite.get(`my_tray?status=${status || ""}`, config, ctx)
-        .then(res => {
-            console.log(res.data);
-            return res.data;
-        })
+        .then(res => res.data)
         .catch(err => ({
             success: false,
             status: err.status || 501,

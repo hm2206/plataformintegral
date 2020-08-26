@@ -95,3 +95,42 @@
 }
 
 
+/* dropzone */
+.dropzone {
+    width: 100%;
+    border: 1.7px solid #42a5f5;
+    border-style: dashed;
+    border-spacing: 2em;
+    border-radius: 0.4em;
+    cursor: pointer;
+}
+
+.dropzone-color {
+    color: #1976d2;
+}
+
+
+.dropzone-item-delete {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    padding: 0.3em 0.5em;
+    color: #f44336;
+    cursor: pointer;
+}
+
+
+.dropzone-text {
+    overflow: hidden!important;
+    text-overflow: ellipsis;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.table-res {
+    overflow: auto;
+    min-height: 200px;
+}
+
+
+.opacity-1 { opacity: 1; }

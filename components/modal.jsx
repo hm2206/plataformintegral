@@ -28,7 +28,7 @@ export default class Modal extends Component {
   }
 
   render() {
-    let { md, disabled = false, display } = this.props;
+    let { md, disabled = false, display, classHeader, classClose } = this.props;
     let { isShow } = this.state;
 
     if (isShow || display) {
@@ -52,10 +52,10 @@ export default class Modal extends Component {
               style={{ position: "relative" }}
             >
               <div className="card">
-                <div className="card-header">
+                <div className={`card-header ${classHeader}`}>
                   {this.props.titulo}
                   <button
-                    className="close"
+                    className={`close ${classClose}`}
                     disabled={disabled}
                     onClick={this.close}
                   >

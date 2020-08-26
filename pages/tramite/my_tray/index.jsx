@@ -6,6 +6,8 @@ import { getMyTray } from '../../../services/requests/tramite';
 import TableTracking from '../../../components/tramite/tableTracking';
 import { tramite } from '../../../services/apis';
 import { BtnFloat } from '../../../components/Utils';
+import Show from '../../../components/show';
+import ModalSend from '../../../components/tramite/modalSend';
 
 
 export default class TrackingIndex extends Component {
@@ -65,7 +67,7 @@ export default class TrackingIndex extends Component {
             <BtnFloat
                 disabled={isLoading}
                 onClick={(e) => {
-                Router.push({ pathname: `${pathname}/create`, query:  { clickb: "cronograma" }});
+                Router.push({ pathname: `${pathname}/create`, query:  { clickb: "my_tray" }});
             }}
             >
                 <i className="fas fa-plus"></i>

@@ -672,7 +672,10 @@ export default class CronogramaInformacion extends Component
 
                                     <div className="card-body" style={{ marginBottom: "10em" }}>
                                                 <Row>
-                                                    <div className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1">
+                                                    <form className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1" onSubmit={(e) => {
+                                                        e.preventDefault();
+                                                        this.readCronograma();
+                                                    }}>
                                                         <Form.Field> 
                                                             <input type="search" 
                                                                 className={`${this.state.like ? 'border-dark text-dark' : ''}`}
@@ -683,7 +686,7 @@ export default class CronogramaInformacion extends Component
                                                                 placeholder="Buscar por Apellidos y Nombres"
                                                             />  
                                                         </Form.Field>
-                                                    </div>
+                                                    </form>
 
                                                     <div className="col-md-6 col-12 mb-1 col-sm-6 col-lg-3">
                                                         <Form.Field>
@@ -724,7 +727,7 @@ export default class CronogramaInformacion extends Component
                                                         <Button color="olive"
                                                             fluid
                                                             onClick={this.handleExport}
-                                                            title="Realizar Búsqueda"
+                                                            title="Exporta los datos a excel"
                                                             disabled={isLoading || this.state.edit || this.state.block || !this.state.export}
                                                         >
                                                             <Icon name="share"/> Export

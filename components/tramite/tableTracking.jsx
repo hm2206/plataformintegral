@@ -8,12 +8,14 @@ import { authentication } from '../../services/apis';
 import Swal from 'sweetalert2';
 import ModalTracking from '../../components/tramite/modalTracking';
 import ModalNextTracking from '../../components/tramite/modalNextTracking';
+import ModalSend from '../../components/tramite/modalSend';
 
 
-export default class TrackingIndex extends Component {
+export default class TableTracking extends Component {
 
     state = {
         block: false,
+        send: true,
         my_dependencias: [],
         option: {
             key: "",
@@ -44,9 +46,11 @@ export default class TrackingIndex extends Component {
             if (my_dependencias.length) {
                 let dep = my_dependencias[0];
                 await this.handleInput({ name: 'dependencia_id', value: dep.value });
-                await this.handleSearch();  
+                await this.handleSearch();
             }
         }
+        // habilitar send
+        this.setState({ send: true });  
     }
 
     getMyDependencias = async (id, page = 1, up = true) => {
@@ -83,7 +87,7 @@ export default class TrackingIndex extends Component {
     setting = () => {
         this.setState((state, props) => {
             state.form.dependencia_id = props.query && props.query.dependencia_id || "";
-            state.form.status = props.query && props.query.status || "";
+            state.form.status = props.query && props.query.status || "PENDIENTE";
             return { form: state.form };
         })
     }
@@ -98,6 +102,8 @@ export default class TrackingIndex extends Component {
     handleSearch = () => {
         let { push, pathname, query } = Router;
         let { status, dependencia_id } = this.state.form;
+        // validar send
+        if (query.dependencia_id != dependencia_id) this.setState({ send: true });
         query.status = status;
         query.dependencia_id = dependencia_id;
         push({ pathname, query });
@@ -111,11 +117,10 @@ export default class TrackingIndex extends Component {
         });
     }
 
-
     render() {
 
         let { pathname, tracking, titulo, status_count } = this.props;
-        let { form, my_dependencias, option } = this.state;
+        let { form, my_dependencias, option, send } = this.state;
 
         return (
             <div className="col-md-12">
@@ -286,6 +291,10 @@ export default class TrackingIndex extends Component {
                     <ModalTracking tramite={option.tracking}
                         isClose={(e) => this.getOption({}, "")}
                     />
+                </Show>
+                {/* tramites enviados */}
+                <Show condicion={send && status_count.data && status_count.data.ENVIADO}>
+                    <ModalSend onAction={this.getOption} {...this.props} isClose={(e) => this.setState({ send: false })}/>
                 </Show>
                 {/* options next */}
                 <Show condicion={option.key == 'NEXT'}>
