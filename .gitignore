@@ -4,3 +4,4 @@ node_modules
 env.json
 /public/workbox*
 /public/sw*
+package-lock.json
