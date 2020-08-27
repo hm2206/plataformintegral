@@ -6,11 +6,17 @@ import Router from 'next/router';
 import { tramite } from '../../services/apis';
 import Show from '../show';
 import moment from 'moment';
+import ModalFiles from './modalFiles';
 
 export default class ModalTracking extends Component
 {
 
     state = {
+        view_file: {
+            show: false,
+            origen: [],
+            destino: []
+        },
         loader: false,
         tracking: {
             total: 0,
@@ -51,15 +57,22 @@ export default class ModalTracking extends Component
         await this.getTracking(tramite && tramite.slug, nextPage, true);
     }
 
+    openFiles = async () => {
+        this.setState(state => {
+            state.view_file.show = true;
+            return { view_file: state.view_file }
+        }); 
+    }
+ 
     render() {
 
-        let { loader, tracking, query_search } = this.state;
+        let { loader, tracking, view_file } = this.state;
         let { tramite } = this.props;
 
         return (
             <Modal
                 show={true}
-                md="8"
+                md="12"
                 {...this.props}
                 titulo={<span><i className="fas fa-path"></i> Seguimiento del Trámite <span className="badge badge-dark">{tramite && tramite.slug}</span></span>}
             >
@@ -89,7 +102,13 @@ export default class ModalTracking extends Component
                                         <td>{tra.user && tra.user.username}</td>
                                         <td>{moment(tra.created_at).format('DD/MM/YYYY')}</td>
                                         <td>{tra.description}</td>
-                                        <td>{tra.file ? <a href="">archivo</a> : ""}</td>
+                                        <td>
+                                            <button className="btn btn-dark"
+                                                onClick={(e) => this.openFiles(tra)}
+                                            >
+                                                <i className="far fa-file-alt"></i>
+                                            </button>
+                                        </td>
                                         <td>{tra.status}</td>
                                     </tr>    
                                 )}
@@ -111,6 +130,15 @@ export default class ModalTracking extends Component
                         </div>
                     </div>
                 </Form>
+                {/* visualizar files */}
+                <Show condicion={view_file.show}>
+                    <ModalFiles origen={view_file.origen}
+                        isClose={(e) => this.setState(state => {
+                            state.view_file.show = false;
+                            return { view_file: state.view_file }
+                        })}
+                    />
+                </Show>
             </Modal>
         );
     }

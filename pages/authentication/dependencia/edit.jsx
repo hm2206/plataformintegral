@@ -3,7 +3,7 @@ import { Body, BtnBack } from '../../../components/Utils';
 import { backUrl, parseOptions } from '../../../services/utils';
 import Router from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
-import { recursoshumanos } from '../../../services/apis';
+import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
 import { findDependencia } from '../../../services/requests/dependencia';
@@ -51,7 +51,7 @@ export default class EditaDependencia extends Component
     save = async () => {
         this.props.fireLoading(true);
         let { form } = this.state;
-        await recursoshumanos.post(`dependencia/${form.id}/update`, form)
+        await authentication.post(`dependencia/${form.id}/update`, form)
         .then(async res => {
             this.props.fireLoading(false);
             let { success, message } = res.data;

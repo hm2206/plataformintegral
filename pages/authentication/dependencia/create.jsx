@@ -3,7 +3,7 @@ import { Body, BtnBack } from '../../../components/Utils';
 import { backUrl, parseOptions } from '../../../services/utils';
 import Router from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
-import { recursoshumanos } from '../../../services/apis';
+import { auth, authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
 
@@ -38,7 +38,7 @@ export default class CreateDependencia extends Component
 
     save = async () => {
         this.props.fireLoading(true);
-        await recursoshumanos.post('dependencia', this.state.form)
+        await authentication.post('dependencia', this.state.form)
         .then(async res => {
             this.props.fireLoading(false);
             let { success, message } = res.data;

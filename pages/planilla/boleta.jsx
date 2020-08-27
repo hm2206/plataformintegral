@@ -158,11 +158,11 @@ export default class DuplicadoBoleta extends Component {
                                     icon: "fas fa-file-pdf",
                                     title: "Reporte de Boleta"
                                 }, 
-                                // {
-                                //     key: "download",
-                                //     icon: "fas fa-download",
-                                //     title: "Reporte de Boleta"
-                                // }, 
+                                {
+                                    key: "download",
+                                    icon: "fas fa-download",
+                                    title: "Reporte de Boleta"
+                                }, 
                             ]
                         }
                         getOption={this.getOption}

@@ -12,6 +12,7 @@ export default class ModalSend extends Component
 
     state = {
         loader: false,
+        block: true,
         tracking: {
             total: 0,
             page: 1,
@@ -26,9 +27,19 @@ export default class ModalSend extends Component
         this.getSend();
     }
 
+    handlePage = async (nextPage) => {
+        this.setState({ loader: true });
+    }
+
+    handleInput = async ({ name, value }) => {
+        this.setState({ [name]: value, block: false });   
+    }
+
     getSend = async (page = 1, up = false) => {
         let { query } = this.props;
-        await tramite.get(`tracking?status=ENVIADO&page=${page}`, { headers: { DependenciaId: query.dependencia_id } })
+        let { query_search } = this.state;
+        this.setState({ loader: true });
+        await tramite.get(`tracking?status=ENVIADO&page=${page}&query_search=${query_search}`, { headers: { DependenciaId: query.dependencia_id } })
             .then(res => {
                 let { success, message, tracking } = res.data;
                 if (!success) throw new Error(message);
@@ -40,10 +51,7 @@ export default class ModalSend extends Component
                     return { tracking: state.tracking }
                 });
             }).catch(err => console.log(err.message));
-    }
-
-    handlePage = async (nextPage) => {
-        this.setState({ loader: true });
+            this.setState({ loader: false, block: true });
     }
 
     render() {
@@ -67,12 +75,17 @@ export default class ModalSend extends Component
                                     <input type="text"
                                         name="query_search"
                                         placeholder="Buscar por codígo del trámite"
+                                        onChange={(e) => this.handleInput(e.target)}
+                                        value={this.state.query_search || ""}
                                     />
                                 </Form.Field>
                             </div>
 
                             <div className="col-md-2 mb-2">
-                                <Button fluid>
+                                <Button fluid
+                                    disabled={this.state.block}
+                                    onClick={(e) => this.getSend(1, false)}
+                                >
                                     <i className="fas fa-search"></i> Buscar
                                 </Button>
                             </div>

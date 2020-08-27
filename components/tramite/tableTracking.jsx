@@ -23,7 +23,8 @@ export default class TableTracking extends Component {
         },
         form: {
             dependencia_id: "",
-            status: ""
+            status: "",
+            query_search: ""
         }
     }
 
@@ -88,6 +89,7 @@ export default class TableTracking extends Component {
         this.setState((state, props) => {
             state.form.dependencia_id = props.query && props.query.dependencia_id || "";
             state.form.status = props.query && props.query.status || "PENDIENTE";
+            state.form.query_search = props.query && props.query.query_search || "";
             return { form: state.form };
         })
     }
@@ -101,11 +103,12 @@ export default class TableTracking extends Component {
 
     handleSearch = () => {
         let { push, pathname, query } = Router;
-        let { status, dependencia_id } = this.state.form;
+        let { status, dependencia_id, query_search } = this.state.form;
         // validar send
         if (query.dependencia_id != dependencia_id) this.setState({ send: true });
         query.status = status;
         query.dependencia_id = dependencia_id;
+        query.query_search = query_search || "";
         push({ pathname, query });
     }
 
@@ -241,6 +244,17 @@ export default class TableTracking extends Component {
 
                         <Form className="mb-3">
                             <div className="row">
+                                <div className="col-md-4 mb-1 col-12 col-sm-5 col-xl-3">
+                                    <Form.Field>
+                                        <input
+                                            placeholder="Ingres el código del trámite" 
+                                            name="query_search"
+                                            value={`${form.query_search}` || ""}
+                                            disabled={this.props.isLoading}
+                                            onChange={(e) => this.handleInput(e.target)}
+                                        />
+                                    </Form.Field>
+                                </div>
                                 <div className="col-md-5 mb-1 col-12 col-sm-6 col-xl-4">
                                     <Form.Field>
                                         <Select

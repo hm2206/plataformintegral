@@ -3,8 +3,8 @@ import { getId } from './index';
 
 
 export const getTracking = async (ctx, config = {}) => {
-    let { status } = ctx.query;
-    return await tramite.get(`tracking?status=${status || ""}`, config, ctx)
+    let { status, page, query_search } = ctx.query;
+    return await tramite.get(`tracking?status=${status || ""}&page=${page || 1}&query_search=${query_search || ""}`, config, ctx)
         .then(res => res.data)
         .catch(err => ({
             success: false,
@@ -22,8 +22,8 @@ export const getTracking = async (ctx, config = {}) => {
 
 
 export const getMyTray = async (ctx, config) => {
-    let { status } = ctx.query;
-    return await tramite.get(`my_tray?status=${status || ""}`, config, ctx)
+    let { status, page, query_search } = ctx.query;
+    return await tramite.get(`my_tray?status=${status || ""}&page=${page || 1}&query_search=${query_search || ""}`, config, ctx)
         .then(res => res.data)
         .catch(err => ({
             success: false,
