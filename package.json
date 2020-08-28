@@ -52,7 +52,7 @@
     "markdown-loader": "^5.1.0",
     "moment": "^2.24.0",
     "native-url": "^0.2.3",
-    "next": "^9.1.6",
+    "next": "^9.3.2",
     "next-cookies": "^2.0.3",
     "next-pwa": "^2.3.3",
     "next-redux-wrapper": "^4.0.1",
