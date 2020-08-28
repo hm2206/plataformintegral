@@ -27,6 +27,7 @@ export default class RegisterCronograma extends Component
         observacion: "",
         adicional: 0,
         remanente: 0,
+        copy_detalle: 0,
         errors: {},
         type_id: 0,
         types: [
@@ -183,6 +184,24 @@ export default class RegisterCronograma extends Component
                                             </Form.Field>
                                         </Show>
 
+                                        <Show condicion={this.state.adicional == 0 && this.state.type_id == 1}>
+                                            <Form.Field className="text-left col-md-6">
+                                                <label htmlFor="">Copiar Detallado</label>
+                                                <Select
+                                                    options={[
+                                                        {key: "copy_detallado_si", value: 1, text: "Si"},
+                                                        {key: "copy_detallado_no", value: 0, text: "No"}
+                                                    ]}
+                                                    value={this.state.copy_detalle}
+                                                    name="copy_detalle"
+                                                    fluid
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                />
+                                            </Form.Field>
+
+                                            <div className="col-md-6"></div>
+                                        </Show>
+
                                         <Show condicion={this.state.mes != 12}>
                                             <Form.Field className="col-md-6">
                                                 <label htmlFor="">¿Es una planilla adicional?</label>
@@ -197,6 +216,7 @@ export default class RegisterCronograma extends Component
                                                     onChange={(e, obj) => this.handleInput(obj)}
                                                 />
                                             </Form.Field>
+                                            <div className="col-md-6"></div>
                                         </Show>
 
                                         <Show condicion={this.state.mes == 12}>
