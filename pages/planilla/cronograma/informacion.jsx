@@ -10,6 +10,7 @@ import TabCronograma from '../../../components/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { responsive } from '../../../services/storage.json';
+import { credencials } from '../../../env.json';
 import { Body, BtnBack, DrownSelect, BtnFloat } from '../../../components/Utils';
 import UpdateDesctMassive from '../../../components/cronograma/updateDesctMassive';
 import UpdateRemuMassive from '../../../components/cronograma/updateRemuMassive';
@@ -478,21 +479,25 @@ export default class CronogramaInformacion extends Component
         let answer = await Confirm('warning', '¿Desea visualizar la boleta verificada del trabajador actual?', 'Ir');
         if (answer) {
             let { historial } = this.state;
-            let token_verify = document.createElement('input');
-            token_verify.name = 'token_verify';
-            token_verify.value = historial && historial.token_verify || "";
-            token_verify.hidden = true;
-            let form = document.createElement('form');
-            document.body.appendChild(form);
-            // add credenciales
-            InputCredencias().filter(i => form.appendChild(i));
-            // add token_auth
-            form.appendChild(token_verify);
-            form.action = `${unujobs.path + `/my_boleta` || ""}`;
-            form.method = 'POST';
-            form.target = '_blank';
-            form.submit();
-            document.body.removeChild(form);
+            this.props.fireLoading(true);
+            // payload
+            let payload = {
+                token_verify: historial && historial.token_verify || "",
+                ClientId: credencials.ClientId,
+                ClientSecret: credencials.ClientSecret
+            }
+            // request
+            await unujobs.post(`my_boleta`, payload)
+                .then(res => {
+                    this.props.fireLoading(false);
+                    let { data } = res;
+                    let blob = new Blob([data], { type: 'text/html' });
+                    let newPrint = window.open(URL.createObjectURL(blob))
+                    newPrint.onload = () => newPrint.print();
+                }).catch(err => {
+                    this.props.fireLoading(false);
+                    Swal.fire({ icon: 'error', text: 'No se pudo obtener la boleta verificada!' })
+                });
         }
     }
 
