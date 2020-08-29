@@ -926,11 +926,11 @@ export default class CronogramaInformacion extends Component
                 </BtnFloat>
 
                 <Show condicion={this.state.option == 'desc-massive'}>
-                    <UpdateDesctMassive isClose={(e) => this.setState({ option: "" })}/>
+                    <UpdateDesctMassive isClose={(e) => this.setState({ option: "" })} updatingHistorial={this.updatingHistorial}/>
                 </Show>
 
                 <Show condicion={this.state.option == 'remu-massive'}>
-                    <UpdateRemuMassive isClose={(e) => this.setState({ option: "" })}/>
+                    <UpdateRemuMassive isClose={(e) => this.setState({ option: "" })} updatingHistorial={this.updatingHistorial}/>
                 </Show>
 
                 <Show condicion={this.state.option == 'imp-descuento'}>

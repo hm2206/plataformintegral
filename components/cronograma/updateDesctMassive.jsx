@@ -14,13 +14,22 @@ export default class UpdateDesctMassive extends Component
         id: "",
         loading: false,
         type_descuentos: [],
-        type_descuento_id: "",
-        monto: 0
+        metas: [],
+        cargos: [],
+        type_categorias: [],
+        form: {
+            type_descuento_id: "",
+            meta_id: "",
+            cargo_id: "",
+            monto: 0
+        }
     };
 
     componentDidMount = async () => {
         await this.setting();
         await this.getTypeDescuento();
+        this.getMetas();
+        this.getCargos();
     }
 
     setting = async () => {
@@ -36,29 +45,70 @@ export default class UpdateDesctMassive extends Component
         this.setState({ loading: false });
     }
 
+    getMetas = () => {
+        let { id } = this.state;
+        unujobs.get(`cronograma/${id}/meta`)
+        .then(res => this.setState({metas: res.data}))
+        .catch(err => console.log(err.message));
+    }
+
+    getCargos = () => {
+        unujobs.get(`cronograma/${this.state.id}/cargo`)
+        .then(async res => {
+            this.setState({ cargos: res.data });
+        }).catch(err =>  console.log(err.message));
+    }
+
+    getTypeCategorias = (id) => {
+        if (id) {
+            unujobs.get(`cargo/${id}`)
+            .then(async res => {
+                let { type_categorias } = res.data;
+                this.setState({ type_categorias: type_categorias ? type_categorias : [] });
+            }).catch(err =>  console.log(err.message));
+        } else this.setState({ type_categorias: [] });
+    }
+
     handleInput = ({ name, value }) => {
-        this.setState({ [name]: value });
+        this.setState(state => {
+            state.form[name] = value;
+            return { form: state.form };
+        });
+        // handle change
+        this.handleChangeInput({ name, value });
+    }
+
+    handleChangeInput = async ({ name, value }) => {
+        switch (name) {
+            case 'cargo_id':
+                await this.getTypeCategorias(value);
+                break;
+            default:
+                break;
+        }
     }
 
     update = async () => {
         let value = await Confirm("warning", "¿Estas seguró en actualizar el descuento masivamente?", "Confirmar")
         if (value) {
             this.setState({ loading: true });
-            await unujobs.post(`cronograma/${this.state.id}/update_descuento`, { 
-                _method: 'PUT',
-                type_descuento_id: this.state.type_descuento_id,
-                monto: this.state.monto 
-            }, { headers: { CronogramaID: this.state.id } })
+            let { form, id } = this.state;
+            form._method = 'PUT';
+            await unujobs.post(`cronograma/${id}/update_descuento`, form, { headers: { CronogramaID: id } })
             .then(async res => {
                 let { success, message } = res.data;
-                let icon = success ? 'success' : 'error';
-                await Swal.fire({ icon, text: message });
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await this.props.updatingHistorial();
             }).catch(err => Swal.fire({ icon: 'error', text: "Algo salió mal!" }));
-            this.setState({ loading: false, type_descuento_id: "", monto: 0 });
+            this.setState({ loading: false });
         }
     }
 
     render() {
+
+        let { form } = this.state;
+
         return (
             <Modal show={true} {...this.props}
                 titulo={<span><Icon name="cart arrow down"/> Descuento Masivo</span>}
@@ -72,7 +122,7 @@ export default class UpdateDesctMassive extends Component
                                         options={parseOptions(this.state.type_descuentos, ["select-desct", "", "Select. por clave"], ["id", "id", "key"])}
                                         placeholder="Select por clave"
                                         name="type_descuento_id"
-                                        value={this.state.type_descuento_id}
+                                        value={form.type_descuento_id || ""}
                                         onChange={(e, obj) => this.handleInput(obj)}
                                     />
                                 </Form.Field>
@@ -84,10 +134,57 @@ export default class UpdateDesctMassive extends Component
                                         options={parseOptions(this.state.type_descuentos, ["select-desct", "", "Select. por descripción"], ["id", "id", "descripcion"])}
                                         placeholder="Select por descripción"
                                         name="type_descuento_id"
-                                        value={this.state.type_descuento_id}
+                                        value={form.type_descuento_id || ""}
                                         onChange={(e, obj) => this.handleInput(obj)}
                                     />
                                 </Form.Field>
+                            </div>
+
+                            <div className="col-md-12">
+                                <div className="row">
+
+                                    <div className="col-md-12 mt-2">
+                                        <hr/>
+                                        <i className="fas fa-filter"></i> Filtros
+                                        <hr/>
+                                    </div>
+                                    
+                                    <div className="col-md-6 mb-2">
+                                        <Form.Field>
+                                            <Select
+                                                options={parseOptions(this.state.metas, ["select-meta", "", "Select. Meta"], ["id", "id", "meta"])}
+                                                placeholder="Select Meta"
+                                                name="meta_id"
+                                                value={form.meta_id || ""}
+                                                onChange={(e, obj) => this.handleInput(obj)}
+                                            />
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-2">
+                                        <Form.Field>
+                                            <Select
+                                                options={parseOptions(this.state.cargos, ["select-cargo", "", "Select. Partición Pre."], ["id", "id", "alias"])}
+                                                placeholder="Select Particion Pre."
+                                                name="cargo_id"
+                                                value={form.cargo_id || ""}
+                                                onChange={(e, obj) => this.handleInput(obj)}
+                                            />
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-6 mb-2">
+                                        <Form.Field>
+                                            <Select
+                                                options={parseOptions(this.state.type_categorias, ["select-categoria", "", "Select. Tip. Categoría"], ["id", "id", "descripcion"])}
+                                                placeholder="Select Tip. Categoría"
+                                                name="type_categoria_id"
+                                                value={form.type_categoria_id || ""}
+                                                onChange={(e, obj) => this.handleInput(obj)}
+                                            />
+                                        </Form.Field>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="col-md-12 mb-1">
@@ -104,9 +201,9 @@ export default class UpdateDesctMassive extends Component
                                     <input type="number" step="any"
                                         placeholder="Ingrese un monto. Ejem. 0.00"
                                         name="monto"
-                                        value={this.state.monto}
+                                        value={form.monto}
                                         onChange={(e) => this.handleInput(e.target)}
-                                        disabled={!this.state.type_descuento_id}
+                                        disabled={!form.type_descuento_id}
                                     />
                                 </Form.Field>
                             </div>
@@ -114,7 +211,7 @@ export default class UpdateDesctMassive extends Component
                             <div className="col-md-3 mb-1">
                                 <Button fluid color="blue"
                                     onClick={this.update}
-                                    disabled={!this.state.type_descuento_id}
+                                    disabled={!form.type_descuento_id}
                                 >
                                     <i className="fas fa-save"></i> Guardar
                                 </Button>
