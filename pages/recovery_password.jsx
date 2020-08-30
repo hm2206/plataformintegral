@@ -87,17 +87,17 @@ export default class RecoveryPassword extends Component {
         await authentication.post('reset_password', this.state)
         .then(async res => {
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message }); 
-            if (success) Router.push('/login');
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message }); 
+            Router.push('/login');
         })
         .catch(async err => {
             try {
-                let { message } = err.response.data.error || "";
-                let newErrors = JSON.parse(message);
-                this.setState({ errors: newErrors.errors || {} });
+                let response = JSON.parse(err.message);
+                this.setState({ errors: response.errors || {} });
+                Swal.fire({ icon: 'warning', text: response.message });
             } catch (error) {
-                await Swal.fire({ icon: 'error', text: 'Algo salió mal' });
+                await Swal.fire({ icon: 'error', text: err.message });
             }
         });
         this.setState({ loading: false });
@@ -106,13 +106,26 @@ export default class RecoveryPassword extends Component {
     render() {
 
         let { errors } = this.state;
+        let { app } = this.props;
 
         return (
             <div className="auth" style={{ height: "100vh" }}>
                 <div class="auth-form auth-form-reflow">
                     <div class="text-center mb-4 mt-5 pt-5">
                         <div class="mb-4">
-                            <img class="rounded" src={app.logo || '/img/logo.png'} alt="" height="72"/>
+                            <img 
+                                style={{ 
+                                    width: "75px", height: "75px",
+                                    borderRadius: "0.7em",
+                                    border: "4px solid #fff",
+                                    boxShadow: "10px 10px rgba(0, 0, 0, .15)",
+                                    objectFit: "contain",
+                                    background: "#346cb0",
+                                    padding: "0.35em"
+                                }}
+                                src={app.icon && app.icon_images && app.icon_images.icon_200x200 || '/img/base.png'} 
+                                alt="logo"
+                            />
                         </div>
                         <h1 class="h3"> {this.state.block ? 'Cambiar Contraseña' : 'Restablecer su contraseña'} </h1>
                     </div>
@@ -126,6 +139,7 @@ export default class RecoveryPassword extends Component {
                         <label class="d-block text-left" for="inputUser">Correo electrónico o Nombre de usuario</label> 
                         <input type="text" id="inputUser" class="form-control form-control-lg" required="" autofocus=""
                             name="email"
+                            placeholder="Ejemplo@ejemplo.com"
                             value={this.state.email || ""}
                             onChange={(e) => this.handleInput(e.target)}
                             disabled={this.state.loading || this.state.block || this.state.send}
