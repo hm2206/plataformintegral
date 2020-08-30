@@ -302,10 +302,10 @@ class MyApp extends App {
             <LoaderPage message={message}/>
           </Show>
 
-          <LoadingGlobal display="none" id="loading-brand"/>
+          <LoadingGlobal display="none" id="loading-brand" image={_app.icon && _app.icon_images && _app.icon_images.icon_200x200 || '/img/loading_page.png'}/>
 
           <Show condicion={is_render && this.state.loading}>
-            <LoadingGlobal/>
+            <LoadingGlobal image={_app.icon && _app.icon_images && _app.icon_images.icon_200x200 || '/img/loading_page.png'}/>
           </Show>
 
           <Show condicion={!this.state.online}>
