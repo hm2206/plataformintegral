@@ -205,7 +205,7 @@ class MyApp extends App {
   } 
 
   componentDidCatch = (error, info) => {
-    // Router.push({ pathname: "/error", query: { error: error }});
+    history.go('/404');
   }
 
   handleScreen = () => {
@@ -302,10 +302,10 @@ class MyApp extends App {
             <LoaderPage message={message}/>
           </Show>
 
-          <LoadingGlobal display="none" id="loading-brand" image={_app.icon && _app.icon_images && _app.icon_images.icon_200x200 || '/img/loading_page.png'}/>
+          <LoadingGlobal display="none" id="loading-brand"/>
 
           <Show condicion={is_render && this.state.loading}>
-            <LoadingGlobal image={_app.icon && _app.icon_images && _app.icon_images.icon_200x200 || '/img/loading_page.png'}/>
+            <LoadingGlobal/>
           </Show>
 
           <Show condicion={!this.state.online}>

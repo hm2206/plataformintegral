@@ -19,7 +19,7 @@ export default class LoadingGlobal extends Component
                 display: display ? display : 'block'
             }}  id={id ? id : 'id-loading-brand'}>
                 <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <img src={image} alt="loader" className="loading-brand"/>
+                    <img src='/img/loading_page.png' alt="loader" className="loading-brand"/>
                 </div>
             </div>
         )
