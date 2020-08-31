@@ -13,6 +13,7 @@ export default class RecoveryPassword extends Component {
         email: "",
         password: "",
         password_confirmation: "",
+        code: "",
         loading: false,
         redirect: "",
         block: false,
@@ -27,21 +28,6 @@ export default class RecoveryPassword extends Component {
         await GUEST(ctx);
         let { query, pathname } = ctx;
         return { query, pathname }
-    }
-
-    componentDidMount = () => {
-        this.setting(this.props.query);
-        if (typeof location == 'object') {
-            this.setState({ redirect: `${location.origin}/recovery_password` });
-        }
-    }
-
-    setting = (query) => {
-        this.setState({
-            block: query.reset_password ? true : false,
-            email: query.email || "",
-            reset_password: query.reset_password || ""
-        })
     }
 
     handleInput = ({ name, value }) => {
@@ -60,9 +46,13 @@ export default class RecoveryPassword extends Component {
                 }
                 // response
                 clearInterval(this.timer);
-                return { time: 0, send: false };
+                return { time: 0 };
             })
         }, 1000);
+    }
+
+    readyCode = () => {
+        this.setState({ block: true });
     }
 
     send = async () => {
@@ -83,7 +73,6 @@ export default class RecoveryPassword extends Component {
 
     resetPassword = async () => {
         this.setState({ loading: true });
-        this.state.reset_password = this.state.reset_password.replace(" ", "+");
         await authentication.post('reset_password', this.state)
         .then(async res => {
             let { success, message } = res.data;
@@ -105,7 +94,7 @@ export default class RecoveryPassword extends Component {
 
     render() {
 
-        let { errors } = this.state;
+        let { errors, send, time } = this.state;
         let { app } = this.props;
 
         return (
@@ -132,9 +121,6 @@ export default class RecoveryPassword extends Component {
                     <Show condicion={!this.state.block}>
                         <p class="mb-4">Si se olvidó su contraseña, usted puede restablecer enviandonos su correo electrónico o Nombre de usuario.</p>
                     </Show>
-                    <Show condicion={this.state.block}>
-                        <p class="mb-4">Ingrese una nueva contraseña</p>
-                    </Show>
                     <div class="form-group mb-4">
                         <label class="d-block text-left" for="inputUser">Correo electrónico o Nombre de usuario</label> 
                         <input type="text" id="inputUser" class="form-control form-control-lg" required="" autofocus=""
@@ -150,7 +136,16 @@ export default class RecoveryPassword extends Component {
                                     <small>Le enviaremos un enlace para restablecer la contraseña a su correo electrónico.</small>
                                 </Show>
                                 <Show condicion={this.state.send}>
-                                    <small>Volver a reenviar codigo en {this.state.time} seg</small>
+                                    <Show condicion={time}>
+                                        <small>Volver a reenviar codigo en {time} seg</small>
+                                    </Show>
+
+                                    <Show condicion={!time}>
+                                        <a href="#" onClick={(e) => {
+                                            e.preventDefault();
+                                            this.send();
+                                        }}>Reenviar Código</a>
+                                    </Show>
                                 </Show>
                             </p>
                         </Show>
@@ -175,27 +170,39 @@ export default class RecoveryPassword extends Component {
                                 />
                                 <b>{errors && errors.password && errors.password[0]}</b>
                             </span>
+
+                            <span className={errors && errors.code && errors.code[0] ? 'form-error' : ''}>
+                                <label class="d-block text-left mt-3" for="inputUser">Código de Verificación</label> 
+                                <input type="text"  class="form-control form-control-lg" required="" autofocus=""
+                                    name="code"
+                                    value={this.state.code}
+                                    placeholder="Ingrese el código de 8 dígitos"
+                                    onChange={(e) => this.handleInput(e.target)}
+                                />
+                                <b>{errors && errors.code && errors.code[0]}</b>
+                            </span>
                         </Show>
                     </div>
                     {/* <!-- actions --> */}
-                        <div class="d-block d-md-inline-block mb-2">
-                            <Show condicion={!this.state.block}>
-                                <button class="btn btn-lg btn-block btn-primary" 
-                                    onClick={this.send}
-                                    disabled={this.state.loading || !this.state.email || this.state.send}
-                                >
-                                    Restablecer la contraseña
-                                </button>
-                            </Show>
-                            <Show condicion={this.state.block}>
+                        <Show condicion={!this.state.block}>
+                            <button class={`btn btn-lg btn-block ${send ? 'btn-outline-primary' : 'btn-primary'}`} 
+                                onClick={send ? this.readyCode : this.send}
+                                disabled={this.state.loading || !this.state.email}
+                            >
+                                { send ? <span>Ya tengo el código <i className="ml-2 fas fa-arrow-right"></i></span> : 'Restablecer la contraseña' }
+                            </button>
+                        </Show>
+            
+                        <Show condicion={this.state.block}>
+                            <div class="d-block d-md-inline-block mb-2">
                                 <button class="btn btn-lg btn-block btn-primary" 
                                     onClick={this.resetPassword}
                                     disabled={this.state.loading || !this.state.email || !this.state.password || !this.state.password_confirmation}
                                 >
-                                   Cambiar Contraseña
+                                    Cambiar Contraseña
                                 </button>
-                            </Show>
-                        </div>
+                            </div>
+                        </Show>
                         <br/>
                         <div class="d-block d-md-inline-block">
                             <Link href="/login">
