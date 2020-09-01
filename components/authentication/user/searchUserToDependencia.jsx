@@ -52,7 +52,6 @@ export default class SearchUserToDependencia extends Component
     handleAdd = async (obj) => {
         let { getAdd } = this.props;
         if (typeof getAdd == 'function') {
-            let { push, pathname, query } = Router;
             await getAdd(obj);
         }
     }

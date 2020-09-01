@@ -110,6 +110,8 @@ export default class TableTracking extends Component {
         query.dependencia_id = dependencia_id;
         query.query_search = query_search || "";
         push({ pathname, query });
+        // fireSearch
+        if (typeof this.props.onSearch == 'function') this.props.onSearch(dependencia_id);
     }
 
     getOption = (obj, key, index) => {
@@ -314,6 +316,7 @@ export default class TableTracking extends Component {
                 <Show condicion={option.key == 'NEXT'}>
                     <ModalNextTracking tramite={option.tracking}
                         isClose={(e) => this.getOption({}, "")}
+                        entity_id={this.props.entity_id || ""}
                     />
                 </Show>
             </div>

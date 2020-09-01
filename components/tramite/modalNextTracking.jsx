@@ -9,15 +9,18 @@ import Swal from 'sweetalert2';
 import Show from '../show';
 import SearchUserToDependencia from '../authentication/user/searchUserToDependencia';
 
+
 export default class ModalNextTracking extends Component
 {
 
     state = {
         loader: false,
+        add_copy: false,
         form: {
             status: "",
             dependencia_destino_id: "",
-            description: ""
+            description: "",
+            dependencia_copy_id: ""
         },
         file: {
             size: 0,
@@ -27,11 +30,16 @@ export default class ModalNextTracking extends Component
         query_search: "",
         dependencias: [],
         option: "",
-        user: {}
+        user: {},
+        copy: [],
+        copy_current: {
+            user: { key: "", value: "", text: ""},
+            dependencia: { key: "", value: "", text: "" }
+        },
+        copy_show: false
     }
 
     componentDidMount = async () => {
-        let { tramite } = this.props;
         this.getDependencias();
     }
 
@@ -87,12 +95,29 @@ export default class ModalNextTracking extends Component
         await this.getUser(nextPage, this.state);
     }
 
-    handleInput = ({ name, value }) => {
+    handleInput = async ({ name, value }, obj = {}) => {
         this.setState(state => {
             state.form[name] = value;
             state.errors[name] = [];
             return { form: state.form, errors: state.errors };
         });
+        // handle changed
+        await this.handleChangedInput({ name, value }, obj);
+    }
+
+    handleChangedInput = ({ name, value }, obj = {}) => {
+        switch (name) {
+            case 'dependencia_copy_id':
+                for (let opt of obj.options) {
+                    if (opt.value == value) {
+                        this.handleCurrentCopy({ dependencia: opt });
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     handleFiles = ({ files }) => {
@@ -157,9 +182,38 @@ export default class ModalNextTracking extends Component
         this.handleInput({ name: 'user_destino_id', value: obj.id });
     }
 
+    handleCurrentCopy = (config = this.state.copy_current) => {
+        let newConfig = this.state.copy_current;
+        newConfig = Object.assign({}, { dependencia: config.dependencia || newConfig.dependencia, user: config.user || newConfig.user });
+        this.setState({ copy_current: newConfig });
+    }
+
+    handleAddCopy = () => {
+        this.setState(state => {
+            // get datos
+            let { dependencia, user } = state.copy_current;
+            // add copy
+            state.copy.push({
+                dependencia_id: dependencia.value || "",
+                dependencia_text: dependencia.text || "",
+                user_id: user.value || "",
+                user_text: user.text || ""
+            });
+            // response
+            return { copy: state.copy }
+        });
+    }
+
+    handleDeleteCopy = (index) => {
+        this.setState(state => {
+            state.copy.splice(index, 1);
+            return { copy: state.copy };
+        });
+    }
+
     render() {
 
-        let { loader, form, dependencias, errors, user, file } = this.state;
+        let { loader, form, dependencias, errors, user, file, add_copy, copy, copy_show } = this.state;
         let { tramite } = this.props;
 
         return (
@@ -266,6 +320,78 @@ export default class ModalNextTracking extends Component
                             </div>
                         </Show>
 
+                        <div className="col-md-12">
+                            <hr/>
+                                <i className={`far fa-file-alt mr-2`}></i> 
+                                Agregar Copia {copy.length ? `(${copy.length})` : null} 
+                                <button className={`ml-3 btn btn-dark btn-sm`}
+                                    onClick={(e) => this.setState(state => ({ add_copy: !state.add_copy }))}
+                                >
+                                    <i className={`fas fa-${add_copy ? 'minus' : 'plus'}`}></i>
+                                </button>
+                            <hr/>
+                        </div>
+
+                        <Show condicion={add_copy}>
+                            <div className="col-md-6 mt-3">
+                                <Form.Field>
+                                    <label htmlFor="">Dependencía</label>
+                                    <Select
+                                        name="dependencia_copy_id"
+                                        placeholder="Select. Dependencía Destino"
+                                        options={dependencias}
+                                        value={form.dependencia_copy_id || ""}
+                                        onChange={(e, obj) => this.handleInput(obj, obj)}
+                                    />
+                                </Form.Field>
+                            </div>
+
+                            <div className="col-md-6 mt-3">
+                                <Form.Field>
+                                    <label htmlFor="">Acciones</label>
+                                    <div>
+                                        <Button
+                                            disabled={!form.dependencia_copy_id}
+                                            onClick={(e) => this.setState({ copy_show: true })}
+                                        >
+                                            <i className="fas fa-user-cog"></i>
+                                        </Button>
+                                    </div>
+                                </Form.Field>
+                            </div>
+
+                            <Show condicion={copy.length}>
+                                <div className="col-md-12 mt-3">
+                                    <div className="table-responsive">
+                                        <table className="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Dependencia</th>
+                                                    <th>Usuario</th>
+                                                    <th>Eliminar</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {copy.map((c, indexC) => 
+                                                    <tr key={`copy-file-${indexC}`}>
+                                                        <td>{c.dependencia_text || ""}</td>
+                                                        <td>{c.user_text || ""}</td>
+                                                        <td>
+                                                            <button className="btn btn-sm btn-red"
+                                                                onClick={(e) => this.handleDeleteCopy(indexC)}
+                                                            >
+                                                                <i className="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>    
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </Show>
+                        </Show>
+
                         <div className="col-md-12 mt-4">
                             <hr/>
                             <div className="text-right">
@@ -285,6 +411,20 @@ export default class ModalNextTracking extends Component
                         dependencia_id={tramite.dependencia_destino_id}
                         getAdd={this.handleAdd}
                         isClose={(e) => this.setState({ option: '' })}
+                    />
+                </Show>
+
+                {/* user -> dependencia */}
+                <Show condicion={copy_show}>
+                    <SearchUserToDependencia 
+                        entity_id={this.props.entity_id || ""} 
+                        dependencia_id={form.dependencia_copy_id || ""}
+                        isClose={(e) => this.setState({ copy_show: false })}
+                        getAdd={async (e) => {
+                            this.setState({ copy_show: false });
+                            await this.handleCurrentCopy({ user: { key: `key-user-${e.username}`, value: e.id, text: e.fullname } })
+                            this.handleAddCopy();
+                        }}
                     />
                 </Show>
             </Modal>

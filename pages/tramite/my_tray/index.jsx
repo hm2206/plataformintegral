@@ -33,9 +33,9 @@ export default class TrackingIndex extends Component {
         if (query.dependencia_id) await this.getStatus(query.dependencia_id);
     }
 
-    componentWillReceiveProps = (nextProps) => {
-        this.getStatus(nextProps.query.dependencia_id);
-    }
+    // componentWillReceiveProps = (nextProps) => {
+    //     this.getStatus(nextProps.query.dependencia_id);
+    // }
 
     setStatusLoading = async (new_status_count = this.state.status_count) => {
         let status_count = Object.assign(this.state.status_count, new_status_count);
@@ -62,6 +62,7 @@ export default class TrackingIndex extends Component {
                 {...this.props} 
                 titulo="Bandeja de Entrada"
                 status_count={this.state.status_count}
+                onSearch={(e) => this.getStatus(e || "")}
             />
             {/* crear nuevo buzón */}
             <BtnFloat
