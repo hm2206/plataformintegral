@@ -61,7 +61,7 @@ export default class ModalNextTracking extends Component
                 dependencias: [...state.dependencias, ...newData]
             }));
             // validar request
-            if (lastPage > page + 1) await this.getDependencias(page + 1);
+            if (lastPage >= page + 1) await this.getDependencias(page + 1);
         })
         .catch(err => console.log(err.message));
     }
