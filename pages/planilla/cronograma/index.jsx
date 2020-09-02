@@ -63,12 +63,10 @@ export default class Cronograma extends Component {
     }
 
     handleCronograma = async () => {
-        this.props.fireLoading(true);
         let { push, query, pathname } = Router;
         query.year = this.state.year;
         query.mes = this.state.mes;
         await push({ pathname, query });
-        this.props.fireLoading(false);
     }
 
     async getOption(obj, key, index) {
@@ -76,27 +74,44 @@ export default class Cronograma extends Component {
         let id = btoa(obj.id);
         query[key] = id;
         // verificar
-        if (key == 'info') {
-            query = { id, clickb: "Cronograma" };
-            pathname = pathname + "/informacion";
-        } else if (key == 'add') {
-            query = { id };
-            pathname = `${pathname}/add`;
-        }else if (key == 'remove') {
-            query = { id };
-            pathname = `${pathname}/remove`;
-        } else if (key == 'report') {
-            query = { id };
-            pathname = `${pathname}/report`;
-        } else if (key == 'edit') {
-            query = { id };
-            pathname = `${pathname}/edit`;
-        } else if (key == 'send_email') {
-            query = { id };
-            pathname = `${pathname}/email`;
+        switch (key) {
+            case 'info':
+            case 'add':
+            case 'remove':
+            case 'report':
+            case 'edit':
+            case 'send_email':
+            case 'edit':
+                query = { id };
+                pathname = `${pathname}/${key}`;
+                // execute
+                Router.push({pathname, query});
+                break;
+            case 'restore':
+                await this.restore(obj);
+                break;
+            default:
+                break;
         }
-        // execute
-        Router.push({pathname, query});
+    }
+
+    restore = async (obj) => {
+        let answer = await Confirm('warning', `¿Estas Seguro en restaurar le cronograma?`);
+        if (answer) {
+            this.props.fireLoading(true);
+            await unujobs.post(`cronograma/${obj.id}/restore`)
+                .then(async res => {
+                    this.props.fireLoading(false);
+                    let { success, message } = res.data;
+                    if (!success) throw new Error(message);
+                    obj.estado = 1;
+                    await Swal.fire({ icon: 'success', text: message });
+                    this.handleCronograma();
+                }).catch(err => {
+                    this.props.fireLoading(false);
+                    Swal.fire({ icon: 'error', text: err.message })
+                });
+        }
     }
 
     handleExport = async () => {
@@ -160,9 +175,12 @@ export default class Cronograma extends Component {
                                 },
                                 {
                                     key: "estado",
-                                    type: "switch",
-                                    is_true: "En curso",
-                                    is_false: "Cerrada"
+                                    type: "option",
+                                    data: [
+                                        { key: 1, text: "En Curso", className: "badge-success" },
+                                        { key: 0, text: "Cerrada", className: "badge-danger" },
+                                        { key: 2, text: "Anulada", className: "badge-red" }
+                                    ]
                                 }
                             ]
                         }
@@ -225,7 +243,29 @@ export default class Cronograma extends Component {
                                 {
                                     key: "report",
                                     icon: "fas fa-file-alt",
-                                    title: "Reportes"
+                                    title: "Reportes",
+                                    rules: {
+                                        key: "estado",
+                                        value: 0
+                                    }
+                                },
+                                {
+                                    key: "report",
+                                    icon: "fas fa-file-alt",
+                                    title: "Reportes",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
+                                    }
+                                },
+                                {
+                                    key: "restore",
+                                    icon: "fas fa-sync",
+                                    title: "Restaurar Cronograma",
+                                    rules: {
+                                        key: "estado",
+                                        value: 2
+                                    }
                                 }
                             ]
                         }

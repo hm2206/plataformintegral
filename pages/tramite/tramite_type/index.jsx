@@ -100,9 +100,8 @@ export default class TypeDescuento extends Component {
         return (
                 <Form className="col-md-12">
                     <Body>
-                        <Datatable titulo="Lista de Tip. Descuentos"
+                        <Datatable titulo="Lista de Tip. Trámite"
                         isFilter={false}
-                        loading={loading}
                         headers={
                             ["#ID", "Nombre Corto", "Descripción", "Estado"]
                         }

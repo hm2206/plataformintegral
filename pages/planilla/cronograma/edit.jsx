@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl } from '../../../services/utils';
+import { backUrl, Confirm } from '../../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
 import { unujobs } from '../../../services/apis';
 import Router from 'next/router';
@@ -28,14 +28,13 @@ export default class EditCronograma extends Component
     }
 
     handleBack = (e) => {
-        this.setState({ loading: true });
         let { cronograma } = this.state;
         let { pathname, push } = Router;
         push({ pathname: backUrl(pathname), query: { mes: cronograma.mes, year: cronograma.year } });
     }
 
     getCronograma = async () => {
-        this.setState({ loader: true });
+        this.props.fireLoading(true);
         await unujobs.get(`cronograma/${this.state.id}`)
         .then(res => {
             let { cronograma } = res.data;
@@ -44,8 +43,11 @@ export default class EditCronograma extends Component
             // datos
             this.setState({ cronograma })
         })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.setState({ loader: false });
+        .catch(err => {
+            this.props.fireLoading(true);
+            Swal.fire({ icon: 'error', text: err.message })
+        });
+        this.props.fireLoading(false);
     }
 
     handleInput = ({ name, value }) => {
@@ -55,7 +57,7 @@ export default class EditCronograma extends Component
     }
 
     update = async () => {
-        this.setState({ loader: true });
+        this.props.fireLoading(true);
         let form = new FormData;
         form.append('descripcion', this.state.cronograma.descripcion);
         form.append('observacion', this.state.cronograma.observacion);
@@ -63,14 +65,38 @@ export default class EditCronograma extends Component
         form.append('token_verify', this.state.cronograma.token_verify);
         form.append('_method', 'PUT');
         await unujobs.post(`cronograma/${this.state.id}`, form)
-        .then(res => {
+        .then(async res => {
+            this.props.fireLoading(false);
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
-            Swal.fire({ icon, text: message });
+            await Swal.fire({ icon, text: message });
             if (success) this.getCronograma();
         })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.setState({ loader: false });
+        .catch(err => {
+            this.props.fireLoading(false);
+            Swal.fire({ icon: 'error', text: err.message })
+        });
+    }
+
+    destroy = async () => {
+        let answer = await Confirm('warning', `¿Estas seguro en anular el cronograma?`, 'Anular');
+        if (answer) {
+            this.props.fireLoading(true);
+            let form = new FormData;
+            form.append('observacion', this.state.cronograma.observacion);
+            form.append('_method', 'DELETE');
+            await unujobs.post(`cronograma/${this.state.id}`, form)
+                .then(async res => {
+                    this.props.fireLoading(false);
+                    let { success, message } = res.data;
+                    if (!success) throw new Error(message);
+                    await Swal.fire({ icon: 'success', text: message })
+                    this.handleBack({});
+                }).catch(err => {
+                    this.props.fireLoading(false);
+                    Swal.fire({ icon: 'error', text: err.message });
+                });
+        }
     }
 
     render() {
@@ -82,7 +108,7 @@ export default class EditCronograma extends Component
                 <Body>
                     <div className="card-header">
                         <BtnBack onClick={this.handleBack}/> 
-                        <span className="ml-2">Editar Cronograma <b>#</b></span>
+                        <span className="ml-2">Editar Cronograma <b>#{cronograma && cronograma.id}</b></span>
                         <hr/>
                     </div>
                     <Form className="card-body" loading={this.state.loader}>
@@ -194,8 +220,10 @@ export default class EditCronograma extends Component
 
                             <div className="col-md-12 text-right">
                                 <hr/>
-                                <Button color="red">
-                                    <i className="fas fa-trash-alt"></i> Eliminar
+                                <Button color="red"
+                                    onClick={this.destroy}
+                                >
+                                    <i className="fas fa-times"></i> Anular Cronograma
                                 </Button>
 
                                 <Button color="teal"

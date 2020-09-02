@@ -335,7 +335,7 @@ export default class DataTable extends Component {
                                       {attr.data && attr.data.map(da => {
                                         return this.verifyObjects(obj, attr) == da.key 
                                         ? <span className={`badge ${da.className}`}>
-                                            {this.verifyObjects(obj, attr)}
+                                            {da.text || this.verifyObjects(obj, attr)}
                                           </span> 
                                           : null
                                       })}
