@@ -75,7 +75,7 @@ export default class Cronograma extends Component {
         query[key] = id;
         // verificar
         switch (key) {
-            case 'info':
+            case 'informacion':
             case 'add':
             case 'remove':
             case 'report':
@@ -196,7 +196,7 @@ export default class Cronograma extends Component {
                                     }
                                 }, 
                                 {
-                                    key: "info",
+                                    key: "informacion",
                                     icon: "fas fa-info",
                                     title: "Visualizar cronograma detalladamente",
                                     rules: {
