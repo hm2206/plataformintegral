@@ -15,7 +15,7 @@ export default class ModalTracking extends Component
         view_file: {
             show: false,
             origen: [],
-            destino: []
+            tracking: []
         },
         loader: false,
         tracking: {
@@ -25,7 +25,6 @@ export default class ModalTracking extends Component
             data: []
         },
         query_search: ""
-        
     }
 
     componentDidMount = async () => {
@@ -57,9 +56,11 @@ export default class ModalTracking extends Component
         await this.getTracking(tramite && tramite.slug, nextPage, true);
     }
 
-    openFiles = async () => {
-        this.setState(state => {
+    openFiles = async (tracking) => {
+        this.setState((state, props) => {
             state.view_file.show = true;
+            state.view_file.origen = props.tramite.tramite_files;
+            state.view_file.tracking = tracking.files;
             return { view_file: state.view_file }
         }); 
     }
@@ -81,7 +82,7 @@ export default class ModalTracking extends Component
                         <table className="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Procedencia</th>
+                                    <th>Dependencia</th>
                                     <th>Usuario</th>
                                     <th>Fecha</th>
                                     <th>Descripción</th>
@@ -132,7 +133,9 @@ export default class ModalTracking extends Component
                 </Form>
                 {/* visualizar files */}
                 <Show condicion={view_file.show}>
-                    <ModalFiles origen={view_file.origen}
+                    <ModalFiles 
+                        origen={view_file.origen}
+                        tracking={view_file.tracking}
                         isClose={(e) => this.setState(state => {
                             state.view_file.show = false;
                             return { view_file: state.view_file }

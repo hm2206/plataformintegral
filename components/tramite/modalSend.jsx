@@ -5,6 +5,7 @@ import { Button, Form, Dropdown } from 'semantic-ui-react';
 import Router from 'next/router';
 import { tramite } from '../../services/apis';
 import Show from '../show';
+import ModalFiles from './modalFiles';
 
 
 export default class ModalSend extends Component
@@ -19,7 +20,12 @@ export default class ModalSend extends Component
             lastPage: 1,
             data: []
         },
-        query_search: ""
+        query_search: "",
+        view_file: {
+            show: false,
+            origen: [],
+            tracking: []
+        },
         
     }
 
@@ -54,9 +60,18 @@ export default class ModalSend extends Component
             this.setState({ loader: false, block: true });
     }
 
+    openFiles = async (tracking) => {
+        this.setState((state, props) => {
+            state.view_file.show = true;
+            state.view_file.origen = tracking.tramite_files;
+            state.view_file.tracking = tracking.files;
+            return { view_file: state.view_file }
+        }); 
+    }
+
     render() {
 
-        let { loader, tracking } = this.state;
+        let { loader, tracking, view_file } = this.state;
         let { tramite, onAction } = this.props;
 
         return (
@@ -103,6 +118,7 @@ export default class ModalSend extends Component
                                         <th>Tip. Trámite</th>
                                         <th>Remitente</th>
                                         <th>Origen</th>
+                                        <th>Más datos</th>
                                         <th>Archivos</th>
                                         <th>Acción</th>
                                     </tr>
@@ -122,7 +138,12 @@ export default class ModalSend extends Component
                                             <td>{tra.person && tra.person.fullname}</td>
                                             <td>{tra.dependencia_origen && `${tra.dependencia_origen.nombre}`.toUpperCase()}</td>
                                             <td>
-                                                <button className="btn btn-dark" onClick={(e) => typeof onAction == 'function' ? onAction(tra, "NEXT", indexT) : null}>
+                                                <button className="btn btn-orange" onClick={(e) => typeof onAction == 'function' ? onAction(tra, "INFO", indexT) : null}>
+                                                    <i class="fas fa-info"></i>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <button className="btn btn-dark" onClick={(e) => this.openFiles(tra)}>
                                                     <i class="far fa-file-alt"></i>
                                                 </button>
                                             </td>
@@ -153,6 +174,17 @@ export default class ModalSend extends Component
                             </Button>
                         </div>
                     </div>
+
+                    <Show condicion={view_file.show}>
+                        <ModalFiles 
+                            origen={view_file.origen} 
+                            tracking={view_file.tracking}
+                            isClose={(e) => this.setState(state => {
+                                state.view_file.show = false;
+                                return { view_file: state.view_file }
+                            })}
+                        />
+                    </Show>
                 </Form>
             </Modal>
         );

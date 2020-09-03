@@ -77,19 +77,19 @@
 }
 
 
-.badge-purple {
+.badge-purple, .bg-purple {
     background: #5e35b1;
     color: #fff;
 }
 
 
-.badge-orange {
+.badge-orange, .bg-orange, .btn-orange {
     background: #ff5722;
     color: #fff;
 }
 
 
-.badge-red {
+.badge-red, .bg-red {
     background: #c62828;
     color: #fff;
 }

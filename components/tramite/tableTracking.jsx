@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import ModalTracking from '../../components/tramite/modalTracking';
 import ModalNextTracking from '../../components/tramite/modalNextTracking';
 import ModalSend from '../../components/tramite/modalSend';
+import ModalInfo from '../../components/tramite/modalInfo';
 
 
 export default class TableTracking extends Component {
@@ -143,7 +144,7 @@ export default class TableTracking extends Component {
                                 {
                                     key: "document_number",
                                     type: "icon",
-                                    bg: 'dark'
+                                    bg: 'primary'
                                 }, 
                                 {
                                     key: "description",
@@ -156,7 +157,8 @@ export default class TableTracking extends Component {
                                 },
                                 {
                                     key: "dependencia_origen.nombre",
-                                    type: "icon"
+                                    type: "icon",
+                                    bg: "orange"
                                 },
                                 {
                                     key: "status",
@@ -180,7 +182,7 @@ export default class TableTracking extends Component {
                                     title: "Seguimiento del Tramite"
                                 }, 
                                 {
-                                    key: "info",
+                                    key: "INFO",
                                     icon: "fas fa-info",
                                     title: "Más información"
                                 },
@@ -319,6 +321,12 @@ export default class TableTracking extends Component {
                     <ModalNextTracking tramite={option.tracking}
                         isClose={(e) => this.getOption({}, "")}
                         entity_id={this.props.entity_id || ""}
+                    />
+                </Show>
+                {/* options info */}
+                <Show condicion={option.key == 'INFO'}>
+                    <ModalInfo tracking={option.tracking}
+                        isClose={(e) => this.getOption({}, "")}
                     />
                 </Show>
             </div>
