@@ -151,7 +151,7 @@ export default class ModalNextTracking extends Component
         let answer = await Confirm(`warning`, `¿Deseas continuar?`);
         if (answer) {
             let { id, dependencia_destino_id } = this.props.tramite;
-            let { form, file } = this.state;
+            let { form, file, copy } = this.state;
             let datos = new FormData;
             // assing form
             for(let attr in form) {
@@ -159,6 +159,8 @@ export default class ModalNextTracking extends Component
             }
             // add files
             await file.data.map(f => datos.append('files', f));
+            // add copies
+            datos.append('copy', JSON.stringify(copy));
             // send next
             await tramite.post(`tracking/${id}/next`, datos, { headers: { DependenciaId: dependencia_destino_id } })
                 .then(res => {
@@ -348,7 +350,7 @@ export default class ModalNextTracking extends Component
 
                             <div className="col-md-6 mt-3">
                                 <Form.Field>
-                                    <label htmlFor="">Acciones</label>
+                                    <label htmlFor="">Usuario</label>
                                     <div>
                                         <Button
                                             disabled={!form.dependencia_copy_id}

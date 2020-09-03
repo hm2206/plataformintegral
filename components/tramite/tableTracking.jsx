@@ -166,7 +166,8 @@ export default class TableTracking extends Component {
                                         { key: "PENDIENTE", className: 'badge-warning' },
                                         { key: "DERIVADO", className: "badge-purple" },
                                         { key: "FINALIZADO", className: "badge-dark" },
-                                        { key: "ANULADO", className: "badge-red" }
+                                        { key: "ANULADO", className: "badge-red" },
+                                        { key: "COPIA", className: "badge-dark" }
                                     ]
                                 }
                             ]
@@ -276,7 +277,8 @@ export default class TableTracking extends Component {
                                                 {key: 'REGISTRADO', value: "REGISTRADO", text: "REGISTRADO"},
                                                 {key: 'PENDIENTE', value: "PENDIENTE", text: "PENDIENTE"},
                                                 {key: 'DERIVADO', value: "DERIVADO", text: "DERIVADO"},
-                                                {key: 'ANULADO', value: "ANULADO", text: "ANULADO"}
+                                                {key: 'ANULADO', value: "ANULADO", text: "ANULADO"},
+                                                {key: 'COPIA', value: "COPIA", text: "COPIA"}
                                             ]}
                                             placeholder="TODOS" 
                                             name="status"
