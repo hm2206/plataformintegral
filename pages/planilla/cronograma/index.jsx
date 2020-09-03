@@ -80,7 +80,7 @@ export default class Cronograma extends Component {
             case 'remove':
             case 'report':
             case 'edit':
-            case 'send_email':
+            case 'email':
             case 'edit':
                 query = { id };
                 pathname = `${pathname}/${key}`;
@@ -232,7 +232,7 @@ export default class Cronograma extends Component {
                                     }
                                 }, 
                                 {
-                                    key: "send_email",
+                                    key: "email",
                                     icon: "fas fa-paper-plane",
                                     title: "Enviar correo",
                                     rules: {
