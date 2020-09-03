@@ -205,7 +205,7 @@ export default class Cronograma extends Component {
                                     }
                                 }, 
                                 {
-                                    key: "info",
+                                    key: "informacion",
                                     icon: "fas fa-info",
                                     title: "Visualizar cronograma detalladamente",
                                     rules: {
