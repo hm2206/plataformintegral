@@ -163,10 +163,13 @@ export default class ModalNextTracking extends Component
             datos.append('copy', JSON.stringify(copy));
             // send next
             await tramite.post(`tracking/${id}/next`, datos, { headers: { DependenciaId: dependencia_destino_id } })
-                .then(res => {
+                .then(async res => {
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
-                    Swal.fire({ icon: 'success', text: message });
+                    await Swal.fire({ icon: 'success', text: message });
+                    let { push, pathname, query } = Router;
+                    await push({ pathname, query });
+                    this.props.isClose(true);
                 }).catch(err => {
                     try {
                         let response = JSON.parse(err.message);
@@ -398,6 +401,7 @@ export default class ModalNextTracking extends Component
                             <hr/>
                             <div className="text-right">
                                 <Button color="teal"
+                                    disabled={!form.status}
                                     onClick={this.nextTracing}
                                 >
                                     <i className="fas fa-sync"></i> Procesar Trámite

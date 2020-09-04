@@ -6,6 +6,7 @@ import Router from 'next/router';
 import { tramite } from '../../services/apis';
 import Show from '../show';
 import ModalFiles from './modalFiles';
+import ModalNextTracking from './modalNextTracking';
 
 
 export default class ModalSend extends Component
@@ -25,6 +26,10 @@ export default class ModalSend extends Component
             show: false,
             origen: [],
             tracking: []
+        },
+        option: {
+            key: "",
+            tracking: {}
         },
         
     }
@@ -69,9 +74,17 @@ export default class ModalSend extends Component
         }); 
     }
 
+    getOption = (obj, key, index) => {
+        this.setState(state => {
+            state.option.key = key;
+            state.option.tracking = obj;
+            return { option: state.option };
+        });
+    }
+
     render() {
 
-        let { loader, tracking, view_file } = this.state;
+        let { loader, tracking, view_file, option } = this.state;
         let { tramite, onAction } = this.props;
 
         return (
@@ -126,7 +139,7 @@ export default class ModalSend extends Component
                                 <tbody>
                                     <Show condicion={!loader && !tracking.total}>
                                         <tr>
-                                            <td colSpan="7" className="text-center">No hay registros</td>
+                                            <td colSpan="8" className="text-center">No hay registros</td>
                                         </tr>
                                     </Show>
                                     {/* tracking */}
@@ -149,7 +162,7 @@ export default class ModalSend extends Component
                                             </td>
                                             <td>
                                                 <div className="btn-group">
-                                                    <button className="btn btn-dark" onClick={(e) => typeof onAction == 'function' ? onAction(tra, "NEXT", indexT) : null}>
+                                                    <button className="btn btn-dark" onClick={(e) =>  this.getOption(tra, "NEXT", indexT)}>
                                                         <i class="fas fa-arrow-alt-circle-right"></i>
                                                     </button>
                                                 </div>
@@ -174,6 +187,17 @@ export default class ModalSend extends Component
                             </Button>
                         </div>
                     </div>
+
+
+                    <Show condicion={option.key == 'NEXT'}>
+                        <ModalNextTracking tramite={option.tracking}
+                            isClose={(e) => {
+                                this.getOption({}, "");
+                                if (e) this.getSend();
+                            }}
+                            entity_id={this.props.entity_id || ""}
+                        />
+                    </Show>
 
                     <Show condicion={view_file.show}>
                         <ModalFiles 

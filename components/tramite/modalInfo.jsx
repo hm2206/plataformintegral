@@ -122,7 +122,8 @@ export default class ModalInfo extends Component
 {
 
     state = {
-        tramite: {}
+        tramite: {},
+        loading: false
     }
 
     componentDidMount = () => {
@@ -130,6 +131,7 @@ export default class ModalInfo extends Component
     }
 
     getTramite = async () => {
+        this.setState({ loading: true });
         let { tracking } = this.props;
         await tramite.get(`public/tramite/${tracking.slug}`)
             .then(res => {
@@ -138,11 +140,12 @@ export default class ModalInfo extends Component
                 this.setState({ tramite });
             })
             .catch(err => console.log(err.message));
+            this.setState({ loading: false });
     }
  
     render() {
 
-        let { tramite } = this.state;
+        let { tramite, loading } = this.state;
 
         return (
             <Modal
@@ -152,13 +155,15 @@ export default class ModalInfo extends Component
                 titulo={<span>Información del Documento</span>}
                 classClose="text-white opacity-1"
             >
-                <Form className="card-body">
+                <Form className="card-body" loading={loading}>
                     <div className="pl-4 mt-4 pr-4">
-                        <Tab panes={[
-                            { menuItem: 'Información', render: () => <Tab.Pane><Documento tramite={tramite}/></Tab.Pane> },
-                            { menuItem: 'Datos Remitente', render: () => <Tab.Pane><Remitente person={tramite.person}/></Tab.Pane> },
-                            { menuItem: 'Archivos', render: () => <Tab.Pane><FileInfo files={tramite.files}/></Tab.Pane> }
-                        ]}/>
+                        <div className="card">
+                            <Tab panes={[
+                                { menuItem: 'Información', render: () => <Tab.Pane><Documento tramite={tramite}/></Tab.Pane> },
+                                { menuItem: 'Datos Remitente', render: () => <Tab.Pane><Remitente person={tramite.person}/></Tab.Pane> },
+                                { menuItem: 'Archivos', render: () => <Tab.Pane><FileInfo files={tramite.files}/></Tab.Pane> }
+                            ]}/>
+                        </div>
                     </div>
                 </Form>
             </Modal>

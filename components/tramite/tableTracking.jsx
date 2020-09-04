@@ -319,7 +319,10 @@ export default class TableTracking extends Component {
                 {/* options next */}
                 <Show condicion={option.key == 'NEXT'}>
                     <ModalNextTracking tramite={option.tracking}
-                        isClose={(e) => this.getOption({}, "")}
+                        isClose={(e) => {
+                            this.getOption({}, "")
+                            if (e) typeof this.props.updateState == 'function' ? this.props.onSearch() : null;
+                        }}
                         entity_id={this.props.entity_id || ""}
                     />
                 </Show>
