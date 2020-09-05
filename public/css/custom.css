@@ -85,7 +85,7 @@
 
 .badge-orange, .bg-orange, .btn-orange {
     background: #ff5722;
-    color: #fff;
+    color: #fff!important;
 }
 
 
@@ -134,3 +134,11 @@
 
 
 .opacity-1 { opacity: 1; }
+
+.list-group-bordered {
+    border-radius: .25rem;
+}
+
+.list-group-item-active {
+    background: rgba(0, 0, 0, 0.05);
+}

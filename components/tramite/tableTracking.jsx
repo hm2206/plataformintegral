@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import Datatable from '../../components/datatable';
 import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react';
+import { Form, Button, Select, Checkbox } from 'semantic-ui-react';
 import Show from '../../components/show';
-import { Body, Cardinfo } from '../../components/Utils';
+import { Body, Cardinfo, SimpleList } from '../../components/Utils';
 import { authentication } from '../../services/apis';
 import Swal from 'sweetalert2';
 import ModalTracking from '../../components/tramite/modalTracking';
@@ -123,6 +123,11 @@ export default class TableTracking extends Component {
         });
     }
 
+    handleStatus = async (status) => {
+        await this.handleInput({ name: "status", value: status });
+        await this.handleSearch();
+    }
+
     render() {
 
         let { pathname, tracking, titulo, status_count } = this.props;
@@ -164,9 +169,11 @@ export default class TableTracking extends Component {
                                     key: "status",
                                     type: "option",
                                     data: [
-                                        { key: "REGISTRADO" },
-                                        { key: "PENDIENTE", className: 'badge-warning' },
+                                        { key: "REGISTRADO", className: 'badge-dark' },
+                                        { key: "PENDIENTE", className: 'badge-orange' },
                                         { key: "DERIVADO", className: "badge-purple" },
+                                        { key: "ACEPTADO", className: "badge-primary" },
+                                        { key: "RECHAZADO", className: "badge-danger" },
                                         { key: "FINALIZADO", className: "badge-dark" },
                                         { key: "ANULADO", className: "badge-red" },
                                         { key: "COPIA", className: "badge-dark" }
@@ -208,43 +215,102 @@ export default class TableTracking extends Component {
                         }
                         getOption={this.getOption}
                         data={tracking && tracking.data || []}>
-                        
-                        <div className="mt-3">
+
+                        <div className="mt-3 mb-4">
                             <div className="row">
-                                <div className="col-md-3 col-sm-6">
-                                    <Cardinfo
-                                        titulo="N° De Documentos"
-                                        count={status_count && status_count.data && status_count.data.REGISTRADO}
-                                        description="Documentos registrados"
-                                    />
+                                <div className="col-md-3">
+                                    <div className="list-group list-group-bordered">
+                                        <SimpleList 
+                                            icon="fas fa-table" 
+                                            bg="dark" 
+                                            title="Regístrados" 
+                                            count={status_count && status_count.data && status_count.data.REGISTRADO}
+                                            onClick={(e) => this.handleStatus("REGISTRADO")}
+                                            active={form.status == 'REGISTRADO'}
+                                        />
+
+                                        <SimpleList 
+                                            icon="fas fa-hourglass-start" 
+                                            bg="orange" 
+                                            title="Pendientes" 
+                                            count={status_count && status_count.data && status_count.data.PENDIENTE}
+                                            onClick={(e) => this.handleStatus("PENDIENTE")}
+                                            active={form.status == 'PENDIENTE'}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="col-md-3 col-sm-6">
-                                    <Cardinfo
-                                        style={{ background: "#ffca28" }}
-                                        titulo="N° De Documentos"
-                                        count={status_count && status_count.data && status_count.data.PENDIENTE}
-                                        description="Documentos pendientes"
-                                    />
+
+                                <div className="col-md-3">
+                                    <div className="list-group list-group-bordered">
+                                        <SimpleList 
+                                            icon="fas fa-share" 
+                                            bg="purple" 
+                                            title="Derivados" 
+                                            count={status_count && status_count.data && status_count.data.DERIVADO}
+                                            onClick={(e) => this.handleStatus("DERIVADO")}
+                                            active={form.status == 'DERIVADO'}
+                                        />
+
+                                        <SimpleList 
+                                            icon="fas fa-bell" 
+                                            bg="warning" 
+                                            title="Entradas" 
+                                            count={status_count && status_count.data && status_count.data.ENVIADO}
+                                            onClick={(e) => this.handleStatus("ENVIADO")}
+                                            active={form.status == 'ENVIADO'}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="col-md-3 col-sm-6">
-                                    <Cardinfo
-                                        style={{ background: "#673ab7", color: "#fff" }}
-                                        titulo="N° De Documentos"
-                                        count={status_count && status_count.data && status_count.data.DERIVADO}
-                                        description="Documentos derivados"
-                                    />
+
+                                <div className="col-md-3">
+                                    <div className="list-group list-group-bordered">
+                                        <SimpleList 
+                                            icon="fas fa-clipboard-list" 
+                                            bgIcon="secundary" 
+                                            bg="primary" 
+                                            title="Aceptados" 
+                                            count={status_count && status_count.data && status_count.data.ACEPTADO}
+                                            onClick={(e) => this.handleStatus("ACEPTADO")}
+                                            active={form.status == 'ACEPTADO'}
+                                        />
+
+                                        <SimpleList 
+                                            icon="fas fa-exclamation" 
+                                            bgIcon="secundary"
+                                            bg="danger" 
+                                            title="Rechazados" 
+                                            count={status_count && status_count.data && status_count.data.RECHAZADO}
+                                            onClick={(e) => this.handleStatus("RECHAZADO")}
+                                            active={form.status == 'RECHAZADO'}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="col-md-3 col-sm-6">
-                                    <Cardinfo
-                                        style={{ background: "#d32f2f", color: "#fff" }}
-                                        titulo="N° De Documentos"
-                                        count={status_count && status_count.data && status_count.data.ANULADO}
-                                        description="Documentos anulados"
-                                    />
+
+                                <div className="col-md-3">
+                                    <div className="list-group list-group-bordered">
+                                        <SimpleList 
+                                            icon="fas fa-clipboard-list" 
+                                            title="Finalizados" 
+                                            count={status_count && status_count.data && status_count.data.FINALIZADO}
+                                            onClick={(e) => this.handleStatus("FINALIZADO")}
+                                            active={form.status == 'FINALIZADO'}
+                                        />
+
+                                        <SimpleList 
+                                            icon="fas fa-times" 
+                                            bg="red" 
+                                            title="Anulados" 
+                                            count={status_count && status_count.data && status_count.data.ANULADO}
+                                            onClick={(e) => this.handleStatus("ANULADO")}
+                                            active={form.status == 'ANULADO'}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
-                            <hr/>
+                            <div className="col-md-12">
+                                <hr/>
+                            </div>
                         </div>
 
                         <Form className="mb-3">
@@ -274,19 +340,16 @@ export default class TableTracking extends Component {
                                 </div>
                                 <div className="col-md-4 mb-1 col-12 col-sm-6 col-xl-2">
                                     <Form.Field>
-                                        <Select
-                                            options={[
-                                                {key: 'REGISTRADO', value: "REGISTRADO", text: "REGISTRADO"},
-                                                {key: 'PENDIENTE', value: "PENDIENTE", text: "PENDIENTE"},
-                                                {key: 'DERIVADO', value: "DERIVADO", text: "DERIVADO"},
-                                                {key: 'ANULADO', value: "ANULADO", text: "ANULADO"},
-                                                {key: 'COPIA', value: "COPIA", text: "COPIA"}
-                                            ]}
-                                            placeholder="TODOS" 
+                                        <Checkbox 
+                                            className="mt-2" 
+                                            label='Copia'
+                                            toggle
                                             name="status"
-                                            value={form.status || ""}
-                                            disabled={this.props.isLoading}
-                                            onChange={(e, obj) => this.handleInput(obj)}
+                                            checked={form.status == 'COPIA'}
+                                            onChange={(e, obj) => {
+                                                this.handleInput({ name: obj.name, value: obj.checked ? 'COPIA' : 'PENDIENTE' });
+                                                this.handleSearch();
+                                            }}
                                         />
                                     </Form.Field>
                                 </div>
@@ -313,8 +376,12 @@ export default class TableTracking extends Component {
                     />
                 </Show>
                 {/* tramites enviados */}
-                <Show condicion={send && status_count.data && status_count.data.ENVIADO}>
-                    <ModalSend onAction={this.getOption} {...this.props} isClose={(e) => this.setState({ send: false })}/>
+                <Show condicion={(send && status_count.data && status_count.data.ENVIADO) || form.status == 'ENVIADO'}>
+                    <ModalSend onAction={this.getOption} {...this.props} isClose={(e) => {
+                        this.setState({ send: false });
+                        this.handleInput({ name:'status', value: 'PENDIENTE' });
+                        this.handleSearch();
+                    }}/>
                 </Show>
                 {/* options next */}
                 <Show condicion={option.key == 'NEXT'}>

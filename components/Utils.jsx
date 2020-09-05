@@ -538,6 +538,21 @@ const Cardinfo = ({ titulo, count, icon = 'fas fa-file-alt', description, onClic
 );
 
 
+const SimpleList = ({ title, count, icon = "oi oi-chat", bg = "success", onClick = null, obj = {}, bgIcon = "red", active = false }) => {
+  return (
+    <div className={`list-group-item ${active ? 'list-group-item-active' : null}`} style={{ cursor: 'pointer' }} onClick={(e) => typeof onClick == 'function' ? onClick({ e, obj}) : null}>
+      <div className="list-group-item-figure">
+        <a href="#" className={`tile tile-circle bg-${bg}`}><i className={icon}></i></a>
+      </div>
+      <div className="list-group-item-body"><h5>{title}</h5></div>
+      <div className="list-group-item-figure">
+        {count ? <b className={`badge badge-${bgIcon}`}>{count}</b> : null}
+      </div>
+    </div>
+  )
+}
+
+
 export {
   Content,
   Body,
@@ -557,5 +572,6 @@ export {
   InputFile,
   LoadFile,
   Cardinfo,
-  DropZone
+  DropZone,
+  SimpleList
 };
