@@ -384,8 +384,10 @@ export default class TableTracking extends Component {
                     <ModalSend onAction={this.getOption} {...this.props} isClose={(e) => {
                         this.setState({ send: false });
                         this.handleInput({ name:'status', value: 'PENDIENTE' });
-                        this.handleSearch();
-                        if (e) typeof this.props.updateState == 'function' ? this.props.onSearch() : null;
+                        if (e) {
+                            this.handleSearch();
+                            typeof this.props.updateState == 'function' ? this.props.onSearch() : null;
+                        }
                     }}/>
                 </Show>
                 {/* options next */}
@@ -393,7 +395,10 @@ export default class TableTracking extends Component {
                     <ModalNextTracking tramite={option.tracking}
                         isClose={(e) => {
                             this.getOption({}, "")
-                            if (e) typeof this.props.updateState == 'function' ? this.props.onSearch() : null;
+                            if (e) {
+                                this.handleSearch();
+                                typeof this.props.updateState == 'function' ? this.props.onSearch() : null;
+                            }
                         }}
                         entity_id={this.props.entity_id || ""}
                     />

@@ -39,7 +39,7 @@ export default class UserIndex extends Component {
     }
 
     componentWillReceiveProps = async (nextProps) => {
-        await this.setting(nextProps);
+       if (nextProps.query != this.props.query)  await this.setting(nextProps);
     }
 
     setting = ({ query }) => {
@@ -113,7 +113,7 @@ export default class UserIndex extends Component {
                         isFilter={false}
                         loading={loading}
                         headers={
-                            ["#ID", "Username", "Email", "F. Creación", "Estado"]
+                            ["#ID", "Apellidos y Nombres", "Email", "F. Creación", "Estado"]
                         }
                         index={
                             [
@@ -121,7 +121,7 @@ export default class UserIndex extends Component {
                                     key: "id",
                                     type: "text"
                                 }, {
-                                    key: "username",
+                                    key: "fullname",
                                     type: "text"
                                 }, {
                                     key: "email",
