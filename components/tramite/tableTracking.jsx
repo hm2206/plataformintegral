@@ -138,7 +138,7 @@ export default class TableTracking extends Component {
                 <Body>
                     <Datatable titulo={titulo}
                         isFilter={false}
-                        headers={ ["N° Seguimiento", "N° Documento", "Tip. Trámite", "N° Documento Remitente", "origen", "Estado"]}
+                        headers={ ["N° Seguimiento", "N° Documento", "Tip. Trámite", "N° Documento Remitente", "origen", "Fecha", "Estado"]}
                         index={
                             [
                                 {
@@ -164,6 +164,10 @@ export default class TableTracking extends Component {
                                     key: "dependencia_origen.nombre",
                                     type: "icon",
                                     bg: "orange"
+                                },
+                                {
+                                    key: "updated_at",
+                                    type: "date"
                                 },
                                 {
                                     key: "status",
@@ -346,8 +350,8 @@ export default class TableTracking extends Component {
                                             toggle
                                             name="status"
                                             checked={form.status == 'COPIA'}
-                                            onChange={(e, obj) => {
-                                                this.handleInput({ name: obj.name, value: obj.checked ? 'COPIA' : 'PENDIENTE' });
+                                            onChange={async (e, obj) => {
+                                                await this.handleInput({ name: obj.name, value: obj.checked ? 'COPIA' : 'PENDIENTE' });
                                                 this.handleSearch();
                                             }}
                                         />
@@ -381,6 +385,7 @@ export default class TableTracking extends Component {
                         this.setState({ send: false });
                         this.handleInput({ name:'status', value: 'PENDIENTE' });
                         this.handleSearch();
+                        if (e) typeof this.props.updateState == 'function' ? this.props.onSearch() : null;
                     }}/>
                 </Show>
                 {/* options next */}

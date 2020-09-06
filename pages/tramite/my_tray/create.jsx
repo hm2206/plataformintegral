@@ -67,11 +67,12 @@ export default class IndexTramiteInterno extends Component
             size_total += f.size;
             if ((size_total / 1024) <= size_limit) {
                 this.setState(state => {
-                    state.file.size += size_total;
+                    state.file.size = size_total;
                     state.file.data.push(f);
                     return { file: state.file }
                 });
             } else {
+                size_total = size_total - f.size;
                 Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(2)}MB)` });
                 return false;
             }
