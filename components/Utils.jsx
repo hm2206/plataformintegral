@@ -538,6 +538,13 @@ const Cardinfo = ({ titulo, count, icon = 'fas fa-file-alt', description, onClic
 );
 
 
+const SimpleListContent = ({ children = null }) => {
+  return <div className="list-group list-group-bordered">
+    {children}
+  </div>
+}
+
+
 const SimpleList = ({ title, count, icon = "oi oi-chat", bg = "success", onClick = null, obj = {}, bgIcon = "red", active = false }) => {
   return (
     <div className={`list-group-item ${active ? 'list-group-item-active' : null}`} style={{ cursor: 'pointer' }} onClick={(e) => typeof onClick == 'function' ? onClick({ e, obj}) : null}>
@@ -573,5 +580,6 @@ export {
   LoadFile,
   Cardinfo,
   DropZone,
+  SimpleListContent,
   SimpleList
 };

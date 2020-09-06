@@ -63,6 +63,7 @@ export default class UserIndex extends Component {
                 this.setChangeState(obj, 1);
                 break;
             case "block":
+            case "config":
                 let { push, pathname } = Router;
                 let id = btoa(obj.id);
                 push({ pathname: `${pathname}/${key}`, query: { id } });
@@ -164,9 +165,9 @@ export default class UserIndex extends Component {
                                     title: "Restricciones"
                                 },
                                 {
-                                    key: "audit",
-                                    icon: "fas fa-shield-alt",
-                                    title: "Auditoría"
+                                    key: "config",
+                                    icon: "fas fa-cog",
+                                    title: "Configuraciones"
                                 }
                             ]
                         }
