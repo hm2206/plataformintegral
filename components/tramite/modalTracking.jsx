@@ -7,6 +7,15 @@ import { tramite } from '../../services/apis';
 import Show from '../show';
 import moment from 'moment';
 import ModalFiles from './modalFiles';
+import { VerticalTimeline, VerticalTimelineElement }  from 'react-vertical-timeline-component';
+import SendRoundedIcon from '@material-ui/icons/SendRounded';
+import CallMissedOutgoingRoundedIcon from '@material-ui/icons/CallMissedOutgoingRounded';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import CheckCircleOutlineOutlinedIcon from '@material-ui/icons/CheckCircleOutlineOutlined';
+import CloseIcon from '@material-ui/icons/Close';
+import DoneAllIcon from '@material-ui/icons/DoneAll';
+import ChatIcon from '@material-ui/icons/Chat';
+
 
 export default class ModalTracking extends Component
 {
@@ -64,6 +73,20 @@ export default class ModalTracking extends Component
             return { view_file: state.view_file }
         }); 
     }
+
+    getMetadata = (status) => {
+        let icons = {
+            DERIVADO: { icon: <CallMissedOutgoingRoundedIcon style={{ color: '#5e35b1' }} />, message: "La dependencia ha derivado el documento a: " , color: '#5e35b1' },
+            ACEPTADO: { icon: <CheckCircleOutlineOutlinedIcon fontSize="large" style={{ color: '#346cb0' }} />, message: "Fue Aceptado en: ", color: '#346cb0' },
+            RECHAZADO: { icon: <CloseIcon style={{ color: '#b76ba3' }} />, message: "", color: '#b76ba3' },
+            ANULADO: { icon: <DeleteForeverIcon style={{ color: '#ea6759' }} />, message: "", color: '#ea6759' },
+            ENVIADO: { icon: <SendRoundedIcon style={{ color: '#f7c46c' }} />, message: "", color: '#f7c46c' },
+            FINALIZADO: { icon: <DoneAllIcon style={{ color: '#00a28a' }} />, message: "Puede ir a recoger su Documento en: ", color: '#00a28a' },
+            RESPONDIDO: { icon: <ChatIcon style={{ color: '#ec935e' }} />, message: "La Oficina respondió a: ", name: "RESPUESTA", color: '#ec935e' }
+        };
+        // response
+        return icons[status] || {};
+    }
  
     render() {
 
@@ -73,75 +96,68 @@ export default class ModalTracking extends Component
         return (
             <Modal
                 show={true}
-                md="12"
+                md="10"
                 {...this.props}
                 titulo={<span><i className="fas fa-path"></i> Seguimiento del Trámite <span className="badge badge-dark">{tramite && tramite.slug}</span></span>}
             >
-                <Form className="card-body" loading={loader}>
-                    <div className="pl-4 mt-4 pr-4">
-                        <table className="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Dependencia</th>
-                                    <th>Usuario</th>
-                                    <th>Fecha</th>
-                                    <th>Descripción</th>
-                                    <th>Archivo</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <Show condicion={!loader && !tracking.total}>
-                                    <tr>
-                                        <td colSpan="6" className="text-center">No hay registros</td>
-                                    </tr>
-                                </Show>
-                                {/* tracking */}
-                                {tracking.data && tracking.data.map(tra => 
-                                    <tr key={`tracking-show-${tra.id}`}>
-                                        <td>{tra.dependencia_destino && tra.dependencia_destino.nombre}</td>
-                                        <td>{tra.user && tra.user.username}</td>
-                                        <td>{moment(tra.created_at).format('DD/MM/YYYY')}</td>
-                                        <td>{tra.description}</td>
-                                        <td>
-                                            <button className="btn btn-dark"
-                                                onClick={(e) => this.openFiles(tra)}
-                                            >
-                                                <i className="far fa-file-alt"></i>
+                <Form className="h-100" loading={loader}>
+                    <Show condicion={tracking && tracking.data && tracking.data.length}>
+                        <VerticalTimeline className="line-gray h-100">
+                            {   
+                                tracking && tracking.data && tracking.data.map(track => 
+                                    <VerticalTimelineElement
+                                        key={`tracking-timeline-${track.id}`}
+                                        className="vertical-timeline-element--work"
+                                        date={ moment(tramite.created_at).lang('es').format('h:mm a') }
+                                        iconStyle={{ background: '#fff', color: this.getMetadata(track.status).color, border: `2px solid ${this.getMetadata(track.status).color}` }}
+                                        icon={ this.getMetadata(track.status).icon }
+                                        contentArrowStyle={{ borderRight: `10px solid ${this.getMetadata(track.status).color}` }}
+                                        contentStyle={{ border: `4px solid ${this.getMetadata(track.status).color}` }}
+                                    >
+                                        <h3 className="vertical-timeline-element-title text-center mb-3">{this.getMetadata(track.status).name || track.status}</h3>
+                                        <h4 className="vertical-timeline-element-subtitle">Lugar de destino: <span className="badge badge-dark mr-1">{ `${tramite.dependencia_origen && tramite.dependencia_origen.nombre}`.toUpperCase() }</span></h4>
+                                        <p className="text-center">
+                                            { moment(tramite.created_at).lang('es').format('LL') }
+                                        </p>
+                                        <hr/>
+                                        <div className="text-center">
+                                            <button className="btn btn-sm btn-dark" onClick={(e) => this.openFiles(track)}>
+                                                <i className="fas fa-file-alt"></i> Archivos
                                             </button>
-                                        </td>
-                                        <td>{tra.status}</td>
-                                    </tr>    
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div className="row justify-content-center mt-3">
-                        <div className="col-md-12">
-                            <hr/>
-                        </div>
-                        <div className="col-md-12">
-                            <Button fluid
-                                disabled={loader || !(tracking.lastPage > tracking.page + 1)}
-                                onClick={(e) => this.handlePage(tracking.page + 1)}
-                            >
-                                Obtener más registros
-                            </Button>
-                        </div>
-                    </div>
+                                        </div>
+                                    </VerticalTimelineElement>    
+                                )
+                            }
+                        </VerticalTimeline>
+                    </Show>
+
+                    <Show condicion={!(tracking && tracking.data && tracking.data.length)}>
+                        <h4 className="text-center" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                            <div className="mb-2">
+                                <i className="fas fa-file-alt" style={{ fontSize: '5em' }}></i>
+                            </div>
+                            <b style={{ fontSize: '1.5em' }}>No se encontró el recorrido del documento</b>
+                            <div className="mt-3">
+                                <button className="btn btn-sm btn-outline-primary"
+                                    onClick={(e) => this.getTracking(tramite.slug)}
+                                >
+                                    <i className="fas fa-sync"></i> Refrescar
+                                </button>
+                            </div>
+                        </h4> 
+                    </Show>
+
+                    <Show condicion={view_file.show}>
+                        <ModalFiles
+                            origen={view_file.origen}
+                            tracking={view_file.tracking}
+                            isClose={(e) => this.setState(state => {
+                                state.view_file.show = false;
+                                return { view_file: state.view_file }
+                            })}
+                        />
+                    </Show>
                 </Form>
-                {/* visualizar files */}
-                <Show condicion={view_file.show}>
-                    <ModalFiles 
-                        origen={view_file.origen}
-                        tracking={view_file.tracking}
-                        isClose={(e) => this.setState(state => {
-                            state.view_file.show = false;
-                            return { view_file: state.view_file }
-                        })}
-                    />
-                </Show>
             </Modal>
         );
     }

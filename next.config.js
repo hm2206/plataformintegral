@@ -8,5 +8,5 @@ module.exports = withPWA({
 })
 */
 module.exports = {
-
+    /* config options here */
 };

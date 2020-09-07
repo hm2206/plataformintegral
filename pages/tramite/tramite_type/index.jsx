@@ -172,8 +172,8 @@ export default class TypeDescuento extends Component {
                                         value={this.state.estado}
                                         onChange={(e) => this.handleInput(e.target)}
                                     >
-                                        <option value="1">Tip. Descuentos Activos</option>
-                                        <option value="0">Tip. Descuentos Deshabilitado</option>
+                                        <option value="1">Activos</option>
+                                        <option value="0">Deshabilitado</option>
                                     </select>
                                 </div>
 

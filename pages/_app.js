@@ -30,6 +30,10 @@ import SkullContent from '../components/loaders/skullContent';
 import { getAuth } from '../services/requests/auth';
 
 
+// css
+import 'react-vertical-timeline-component/style.min.css';
+
+
 // config router
 Router.onRouteChangeStart = () => {
   let loadingBrand = document.getElementById('loading-brand');
