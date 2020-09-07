@@ -28,7 +28,8 @@ const settingSelect = async ({ data = [], index = { key: "", value: "", text: ""
         newData.push({
             key: `${index.key}-${indexD}`,
             value: getObj(d, index.value),
-            text: `${getObj(d, index.text)}`.toUpperCase()
+            text: `${getObj(d, index.text)}`.toUpperCase(),
+            obj: d
         });
     });
     // response data
@@ -50,45 +51,51 @@ const SelectBase = ({ execute, refresh, url, api, obj, id, value, text, name, on
     const [datos, setDatos] = useState([])
     const [is_error, setIsError] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [nextPage, setNexPage] = useState(1);
 
     const getDatos = async (page = 1) => {
         setLoading(true);
-        let newParams = `${url}`.split('?')[1] || "";
-        let newUrl = `${url}`.split('?')[0] || "";
-        await api.get(`${newUrl}?page=${page}&${newParams}`)
+        let query = `${url}`.split('?');
+        let newParams = query[1] ? `&${query[1]}` : "";
+        let newUrl = query[0] || "";
+        await api.get(`${newUrl}?page=${page}${newParams}`)
             .then(async res => {
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 let { lastPage, data } = res.data[obj];
                 // add entities
                 let tmpDatos = await settingSelect({ data, index: { key: id, value, text } });
-                setDatos(page == 1 ? tmpDatos : [...datos, ...tmpDatos]);
+                let newDatos = page == 1 ? tmpDatos : [...datos, ...tmpDatos];
+                setDatos(newDatos);
                 setIsError(false);
-                // traer la siguiente page
-                if (lastPage >= page + 1) await getDatos(page + 1);
-                else setLoading(false);
+                setLoading(false);
+                // continuar
+                if (lastPage >= page + 1) setNexPage(page + 1);
             }).catch(err => {
                 setIsError(true);
                 setLoading(false);
             });
     }
 
+    const feching = async () => {
+        await getDatos();
+    }
+
     // obtener entities
     useEffect(() => {
         // execute
-        if (execute)  {
-            getDatos();
-            console.log('get execute');
-        }
+        if (execute) feching();
     }, [execute]);
 
     // refrescar datos
     useEffect(() => {
-        if (refresh) {
-            getDatos(1);
-            console.log('get refresh');
-        }
+        if (refresh) feching();
     }, [refresh]);
+
+    // traer la siguiente pagina
+    useEffect(() => {
+        if (nextPage > 1) getDatos(nextPage, true);
+    }, [nextPage]);
 
     // render
     return is_error 

@@ -9,6 +9,7 @@ import { AUTHENTICATE } from '../../../services/auth';
 import atob from 'atob';
 import Show from '../../../components/show';
 import ConfigEntity from '../../../components/authentication/user/configEntity';
+import ConfigEntityDependencia from '../../../components/authentication/user/configEntityDependencia';
 
 
 export default class ConfigUser extends Component
@@ -110,7 +111,7 @@ export default class ConfigUser extends Component
     render() {
 
         let { pathname, query } = this.props;
-        let { form, loading, method, option } = this.state;
+        let { form, loading, option } = this.state;
 
         return (
             <div className="col-md-12">
@@ -182,13 +183,16 @@ export default class ConfigUser extends Component
                                             <div className="col-md-4">
                                                 <SimpleListContent>
                                                     <SimpleList
+                                                        icon="fas fa-briefcase"
                                                         bg="primary"
                                                         title="Entidades"
                                                         onClick={(e) => this.setState({ option: 'CONFIG_ENTITY' })}
                                                     />
                                                     <SimpleList
+                                                        icon="fas fa-building"
                                                         bg="orange"
                                                         title="Dependencias"
+                                                        onClick={(e) => this.setState({ option: 'CONFIG_ENTITY_DEPENDENCIA' })}
                                                     />
                                                 </SimpleListContent>
                                             </div>
@@ -202,6 +206,10 @@ export default class ConfigUser extends Component
 
                 <Show condicion={form && form.id && option == 'CONFIG_ENTITY'}>
                     <ConfigEntity user={form} isClose={(e) => this.setState({ option: "" })}/>
+                </Show>
+
+                <Show condicion={form && form.id && option == 'CONFIG_ENTITY_DEPENDENCIA'}>
+                    <ConfigEntityDependencia user={form} isClose={(e) => this.setState({ option: "" })}/>
                 </Show>
             </div>
         )
