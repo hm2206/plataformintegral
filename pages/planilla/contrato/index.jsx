@@ -133,7 +133,8 @@ export default class Contrato extends Component
                                                     fluid
                                                     options={[
                                                         { key: 'activo', value: "1", text: 'Contratos Activos'},
-                                                        { key: 'deshabilitado', value: "0", text: 'Contratos Terminados'}
+                                                        { key: 'deshabilitado', value: "0", text: 'Contratos Terminados'},
+                                                        { key: 'anulados', value: "2", text: 'Contratos Anulados'}
                                                     ]}
                                                     onChange={(e, obj) => this.handleInput(obj)}
                                                 />
