@@ -241,24 +241,6 @@ export default class Cronograma extends Component {
                                     }
                                 }, 
                                 {
-                                    key: "report",
-                                    icon: "fas fa-file-alt",
-                                    title: "Reportes",
-                                    rules: {
-                                        key: "estado",
-                                        value: 0
-                                    }
-                                },
-                                {
-                                    key: "report",
-                                    icon: "fas fa-file-alt",
-                                    title: "Reportes",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
-                                },
-                                {
                                     key: "restore",
                                     icon: "fas fa-sync",
                                     title: "Restaurar Cronograma",
@@ -266,6 +248,11 @@ export default class Cronograma extends Component {
                                         key: "estado",
                                         value: 2
                                     }
+                                },
+                                {
+                                    key: "report",
+                                    icon: "fas fa-file-alt",
+                                    title: "Reportes"
                                 }
                             ]
                         }
