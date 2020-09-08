@@ -90,8 +90,46 @@ export default class Cronograma extends Component {
             case 'restore':
                 await this.restore(obj);
                 break;
+            case 'error':
+                await this.fixedBug(obj.id);
+                break;
             default:
                 break;
+        }
+    }
+
+    processing = async (id) => {
+        await unujobs.post(`cronograma/${id}/processing`, {}, { headers: { CronogramaId: id } })
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+            })
+    }
+
+    syncConfigs = async (id) => {
+        await unujobs.post(`cronograma/${id}/sync_configs`, {}, { headers: { CronogramaId: id } })
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+            })
+    }
+
+    fixedBug = async (id) => {
+        let response = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
+        if (response) {
+            try {
+                this.props.fireLoading(true);
+                await this.syncConfigs(id);
+                await this.processing(id);
+                // todo correcto
+                this.props.fireLoading(false);
+                await Swal.fire({ icon: 'success', text: 'Los errores se corrigieron correctamente' });
+                let { push, pathname, query } = Router;
+                await push({ pathname, query });
+            } catch (error) {
+                this.props.fireLoading(false);
+                await Swal.fire({ icon: 'error', text: error.message });
+            }
         }
     }
 
@@ -187,12 +225,26 @@ export default class Cronograma extends Component {
                         options={
                             [
                                 {
+                                    key: "error",
+                                    icon: "fas fa-bug",
+                                    className: "bg-red",
+                                    title: "Corregir errores",
+                                    rules: {
+                                        key: "error",
+                                        value: 1
+                                    }
+                                },
+                                {
                                     key: "edit",
                                     icon: "fas fa-pencil-alt",
                                     title: "Editar cronograma",
                                     rules: {
                                         key: "estado",
-                                        value: 1
+                                        value: 1,
+                                        or: {
+                                            key: "error",
+                                            value: 0
+                                        }
                                     }
                                 }, 
                                 {
@@ -201,7 +253,11 @@ export default class Cronograma extends Component {
                                     title: "Visualizar cronograma detalladamente",
                                     rules: {
                                         key: "estado",
-                                        value: 1
+                                        value: 1,
+                                        or: {
+                                            key: "error",
+                                            value: 0
+                                        }
                                     }
                                 }, 
                                 {
@@ -210,7 +266,11 @@ export default class Cronograma extends Component {
                                     title: "Visualizar cronograma detalladamente",
                                     rules: {
                                         key: "estado",
-                                        value: 0
+                                        value: 0,
+                                        or: {
+                                            key: "error",
+                                            value: 0
+                                        }
                                     }
                                 },
                                 {
@@ -219,7 +279,11 @@ export default class Cronograma extends Component {
                                     title: "Agregar trabajadores al cronograma",
                                     rules: {
                                         key: "estado",
-                                        value: 1
+                                        value: 1,
+                                        or: {
+                                            key: "error",
+                                            value: 0
+                                        }
                                     }
                                 }, 
                                 {
@@ -228,7 +292,11 @@ export default class Cronograma extends Component {
                                     title: "Eliminar trabajadores al cronograma",
                                     rules: {
                                         key: "estado",
-                                        value: 1
+                                        value: 1,
+                                        or: {
+                                            key: "error",
+                                            value: 0
+                                        }
                                     }
                                 }, 
                                 {

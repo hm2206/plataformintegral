@@ -374,7 +374,16 @@ export default class DataTable extends Component {
                                   if (rules){
                                     if (typeof rules.value != 'undefined' && typeof rules.key != 'undefined') {
                                       response = rules.value == obj[rules.key];
-                                      if (!response) return null; 
+                                      if (rules.or) {
+                                        let response_or = rules.or;
+                                        if (!response || !(response_or.value == obj[response_or.key])) return null;
+                                      } else if (rules.and) {
+                                        let response_and = rules.and;
+                                        if (!response && !(response_and.value == obj[response_and.key])) return null;
+                                      } else {
+                                        if (!response) return null; 
+                                      }
+                                      
                                     }
                                   }
 
