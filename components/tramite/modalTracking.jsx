@@ -102,22 +102,22 @@ export default class ModalTracking extends Component
             >
                 <Form className="h-100" loading={loader}>
                     <Show condicion={tracking && tracking.data && tracking.data.length}>
-                        <VerticalTimeline className="line-gray h-100">
+                        <VerticalTimeline className="line-gray timeline-h-100">
                             {   
                                 tracking && tracking.data && tracking.data.map(track => 
                                     <VerticalTimelineElement
                                         key={`tracking-timeline-${track.id}`}
-                                        className="vertical-timeline-element--work"
-                                        date={ moment(tramite.created_at).lang('es').format('h:mm a') }
+                                        className="vertical-timeline-element--work mb-3"
+                                        date={ moment(track.created_at).lang('es').format('h:mm a') }
                                         iconStyle={{ background: '#fff', color: this.getMetadata(track.status).color, border: `2px solid ${this.getMetadata(track.status).color}` }}
                                         icon={ this.getMetadata(track.status).icon }
                                         contentArrowStyle={{ borderRight: `10px solid ${this.getMetadata(track.status).color}` }}
                                         contentStyle={{ border: `4px solid ${this.getMetadata(track.status).color}` }}
                                     >
                                         <h3 className="vertical-timeline-element-title text-center mb-3">{this.getMetadata(track.status).name || track.status}</h3>
-                                        <h4 className="vertical-timeline-element-subtitle">Lugar de destino: <span className="badge badge-dark mr-1">{ `${tramite.dependencia_origen && tramite.dependencia_origen.nombre}`.toUpperCase() }</span></h4>
+                                        <h4 className="vertical-timeline-element-subtitle">Lugar de destino: <span className="badge badge-dark mr-1">{ `${track.dependencia_destino && track.dependencia_destino.nombre}`.toUpperCase() }</span></h4>
                                         <p className="text-center">
-                                            { moment(tramite.created_at).lang('es').format('LL') }
+                                            { moment(track.created_at).lang('es').format('LL') }
                                         </p>
                                         <hr/>
                                         <div className="text-center">

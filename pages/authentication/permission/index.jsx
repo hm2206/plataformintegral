@@ -173,6 +173,7 @@ export default class PermissionIndex extends Component {
                         <Pagination defaultActivePage={query.page || 1} 
                             totalPages={page_permission.lastPage || 1}
                             enabled={this.state.loading}
+                            activePage={query.page || 1}
                             onPageChange={this.handlePage}
                         />
                     </div>

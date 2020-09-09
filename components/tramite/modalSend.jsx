@@ -7,6 +7,7 @@ import { tramite } from '../../services/apis';
 import Show from '../show';
 import ModalFiles from './modalFiles';
 import ModalNextTracking from './modalNextTracking';
+import moment from 'moment';
 
 
 export default class ModalSend extends Component
@@ -31,10 +32,11 @@ export default class ModalSend extends Component
             key: "",
             tracking: {}
         },
-        
+        config: {}
     }
 
     componentDidMount = async () => {
+        await this.getConfig();
         this.getSend();
     }
 
@@ -65,6 +67,15 @@ export default class ModalSend extends Component
             this.setState({ loader: false, block: true });
     }
 
+    getConfig = async () => {
+        await tramite.get(`config/ENVIADO?variable=NEXT`)
+            .then(res  => {
+                let { success, message, config } = res.data;
+                if (!success) throw new Error(message);
+                this.setState({ config });
+            }).catch(err => console.log());
+    }
+
     openFiles = async (tracking) => {
         this.setState((state, props) => {
             state.view_file.show = true;
@@ -84,7 +95,7 @@ export default class ModalSend extends Component
 
     render() {
 
-        let { loader, tracking, view_file, option } = this.state;
+        let { loader, tracking, view_file, option, config } = this.state;
         let { tramite, onAction } = this.props;
 
         return (
@@ -92,45 +103,26 @@ export default class ModalSend extends Component
                 show={true}
                 md="12"
                 {...this.props}
+                isClose={(e) => this.props.isClose(true)}
                 titulo={<span><i className="fas fa-path"></i>Buzón de Entrada <span className="badge badge-dark">{tramite && tramite.slug}</span></span>}
             >
                 <Form className="card-body" loading={loader}>
 
                     <div className="col-md-12">
-                        <div className="row">
-                            <div className="col-md-4 mb-2">
-                                <Form.Field>
-                                    <input type="text"
-                                        name="query_search"
-                                        placeholder="Buscar por codígo del trámite"
-                                        onChange={(e) => this.handleInput(e.target)}
-                                        value={this.state.query_search || ""}
-                                    />
-                                </Form.Field>
-                            </div>
-
-                            <div className="col-md-2 mb-2">
-                                <Button fluid
-                                    disabled={this.state.block}
-                                    onClick={(e) => this.getSend(1, false)}
-                                >
-                                    <i className="fas fa-search"></i> Buscar
-                                </Button>
-                            </div>
-                        </div>
+                        <b><i className="fas fa-bell"></i> Entradas <b className="badge badge-warning">{tracking.total}</b></b>
                     </div>
 
-                    <div className="pl-4 mt-4 pr-4">
+                    <div className="pl-4 pr-4">
                         <hr/>
                         <div className="table-res">
                             <table className="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>N° Seguimiento</th>
-                                        <th>N° Documento</th>
                                         <th>Tip. Trámite</th>
-                                        <th>Remitente</th>
+                                        <th>Asunto</th>
                                         <th>Origen</th>
+                                        <th>Fecha</th>
                                         <th>Más datos</th>
                                         <th>Archivos</th>
                                         <th>Acción</th>
@@ -144,25 +136,39 @@ export default class ModalSend extends Component
                                     </Show>
                                     {/* tracking */}
                                     {tracking.data && tracking.data.map((tra, indexT) => 
-                                        <tr key={`tracking-show-enviado-${tra.id}`}>
+                                        <tr key={`tracking-show-enviado-${tra.id}`} 
+                                            className={config && config.value < (indexT + 1) ? 'text-muted bg-disabled' : ''}
+                                        >
                                             <td>{tra.slug}</td>
-                                            <td>{tra.document_number}</td>
                                             <td>{tra.description}</td>
-                                            <td>{tra.person && tra.person.fullname}</td>
+                                            <td>{tra.asunto}</td>
                                             <td>{tra.dependencia_origen && `${tra.dependencia_origen.nombre}`.toUpperCase()}</td>
                                             <td>
-                                                <button className="btn btn-orange" onClick={(e) => typeof onAction == 'function' ? onAction(tra, "INFO", indexT) : null}>
+                                                <b className="badge badge-red">
+                                                    {moment(tra.updated_at).format('DD/MM/YYYY')} <br/>
+                                                    {moment(tra.updated_at).format('h:mm a')}
+                                                </b>
+                                            </td>
+                                            <td>
+                                                <button className="btn btn-dark" 
+                                                    onClick={(e) => typeof onAction == 'function' ? onAction(tra, "INFO", indexT) : null}
+                                                >
                                                     <i class="fas fa-info"></i>
                                                 </button>
                                             </td>
                                             <td>
-                                                <button className="btn btn-dark" onClick={(e) => this.openFiles(tra)}>
+                                                <button className="btn btn-dark" 
+                                                    onClick={(e) => this.openFiles(tra)}
+                                                >
                                                     <i class="far fa-file-alt"></i>
                                                 </button>
                                             </td>
                                             <td>
                                                 <div className="btn-group">
-                                                    <button className="btn btn-dark" onClick={(e) =>  this.getOption(tra, "NEXT", indexT)}>
+                                                    <button className="btn btn-dark" 
+                                                        onClick={(e) =>  this.getOption(tra, "NEXT", indexT)}
+                                                        disabled={config && config.value < (indexT + 1)}
+                                                    >
                                                         <i class="fas fa-arrow-alt-circle-right"></i>
                                                     </button>
                                                 </div>

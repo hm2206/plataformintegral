@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Datatable from '../../components/datatable';
 import Router from 'next/router';
-import { Form, Button, Select, Checkbox } from 'semantic-ui-react';
+import { Form, Button, Select, Checkbox, Pagination } from 'semantic-ui-react';
 import Show from '../../components/show';
 import { Body, Cardinfo, SimpleList } from '../../components/Utils';
 import { authentication } from '../../services/apis';
@@ -130,7 +130,7 @@ export default class TableTracking extends Component {
 
     render() {
 
-        let { pathname, tracking, titulo, status_count } = this.props;
+        let { pathname, tracking, titulo, status_count, query } = this.props;
         let { form, my_dependencias, option, send } = this.state;
 
         return (
@@ -138,7 +138,7 @@ export default class TableTracking extends Component {
                 <Body>
                     <Datatable titulo={titulo}
                         isFilter={false}
-                        headers={ ["N° Seguimiento", "N° Documento", "Tip. Trámite", "N° Documento Remitente", "origen", "Fecha", "Estado"]}
+                        headers={ ["N° Seguimiento", "Tip. Trámite", "Asunto", "origen", "Fecha", "Estado"]}
                         index={
                             [
                                 {
@@ -147,23 +147,17 @@ export default class TableTracking extends Component {
                                     bg: 'dark'
                                 }, 
                                 {
-                                    key: "document_number",
-                                    type: "icon",
-                                    bg: 'primary'
-                                }, 
-                                {
                                     key: "description",
-                                    type: "icon",
-                                    bg: 'dark'
+                                    type: "text"
                                 }, 
                                 {
-                                    key: "person.fullname",
-                                    type: "text"
+                                    key: 'asunto',
+                                    type: 'text'
                                 },
                                 {
                                     key: "dependencia_origen.nombre",
                                     type: "icon",
-                                    bg: "orange"
+                                    bg: "dark"
                                 },
                                 {
                                     key: "updated_at",
@@ -260,8 +254,8 @@ export default class TableTracking extends Component {
                                             bg="warning" 
                                             title="Entradas" 
                                             count={status_count && status_count.data && status_count.data.ENVIADO}
-                                            onClick={(e) => this.handleStatus("ENVIADO")}
-                                            active={form.status == 'ENVIADO'}
+                                            onClick={(e) => this.getOption({}, 'ENVIADO', 0)}
+                                            active={option.key == 'ENVIADO'}
                                         />
                                     </div>
                                 </div>
@@ -338,7 +332,10 @@ export default class TableTracking extends Component {
                                             name="dependencia_id"
                                             value={`${form.dependencia_id}` || ""}
                                             disabled={this.props.isLoading}
-                                            onChange={(e, obj) => this.handleInput(obj)}
+                                            onChange={async (e, obj) => {
+                                                await this.handleInput(obj)
+                                                await this.handleSearch()
+                                            }}
                                         />
                                     </Form.Field>
                                 </div>
@@ -352,7 +349,7 @@ export default class TableTracking extends Component {
                                             checked={form.status == 'COPIA'}
                                             onChange={async (e, obj) => {
                                                 await this.handleInput({ name: obj.name, value: obj.checked ? 'COPIA' : 'PENDIENTE' });
-                                                this.handleSearch();
+                                                await this.handleSearch();
                                             }}
                                         />
                                     </Form.Field>
@@ -372,6 +369,19 @@ export default class TableTracking extends Component {
                             <hr/>
                         </Form>
                     </Datatable>
+                    
+                    <div className="table-response">
+                        <hr/>
+                        <div className="text-center">
+                            <Pagination defaultActivePage={query.page || 1} 
+                                totalPages={tracking && tracking.lastPage || 1}
+                                enabled={this.state.loading}
+                                activePage={query.page || 1}
+                                onPageChange={this.handlePage}
+                            />
+                        </div>
+                    </div>
+                                            
                 </Body>
                 {/* options tracking */}
                 <Show condicion={option.key == 'TRACKING'}>
@@ -380,25 +390,20 @@ export default class TableTracking extends Component {
                     />
                 </Show>
                 {/* tramites enviados */}
-                <Show condicion={(send && status_count.data && status_count.data.ENVIADO) || form.status == 'ENVIADO'}>
-                    <ModalSend onAction={this.getOption} {...this.props} isClose={(e) => {
+                <Show condicion={(send && status_count.data && status_count.data.ENVIADO) || option.key == 'ENVIADO'}>
+                    <ModalSend onAction={this.getOption} {...this.props} isClose={async (e) => {
                         this.setState({ send: false });
-                        this.handleInput({ name:'status', value: 'PENDIENTE' });
-                        if (e) {
-                            this.handleSearch();
-                            typeof this.props.updateState == 'function' ? this.props.onSearch() : null;
-                        }
+                        this.getOption({}, '', 0);
+                        await this.handleInput({ name:'status', value: 'PENDIENTE' });
+                        await this.handleSearch();
                     }}/>
                 </Show>
                 {/* options next */}
                 <Show condicion={option.key == 'NEXT'}>
                     <ModalNextTracking tramite={option.tracking}
-                        isClose={(e) => {
+                        isClose={async (e) => {
                             this.getOption({}, "")
-                            if (e) {
-                                this.handleSearch();
-                                typeof this.props.updateState == 'function' ? this.props.onSearch() : null;
-                            }
+                            await this.handleSearch();
                         }}
                         entity_id={this.props.entity_id || ""}
                     />

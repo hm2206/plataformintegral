@@ -47,6 +47,8 @@ const ConfigEntityDependencia = ({ user, isClose }) => {
                     await Swal.fire({ icon: 'success', text: message });
                     await getDependencias();
                     setConfigEntityId("");
+                    setEntityId("");
+                    setDependenciaId("");
                     setIsRefresh(true);
                 }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
             setIsRefresh(false);
@@ -64,7 +66,6 @@ const ConfigEntityDependencia = ({ user, isClose }) => {
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
                     await getDependencias();
-                    setDependenciaId("");
                     setIsRefresh(true);
                 }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
             setLoading(false);

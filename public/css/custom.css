@@ -143,6 +143,10 @@
     background: rgba(0, 0, 0, 0.05);
 }
 
+.timeline-h-100 {
+    min-height: 100%!important;
+}
+
 .line-gray::before {
     content: '';
     position: absolute;
@@ -151,4 +155,9 @@
     height: 100%;
     width: 4px;
     background: #90a4ae!important;
+}
+
+
+.bg-disabled {
+    background: #ffebee!important;
 }
