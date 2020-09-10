@@ -34,6 +34,7 @@ export const getMyTray = async (ctx, config = {}) => {
                 total: 0,
                 page: 1,
                 lastPage: 1,
+                perPage: 0,
                 data: []
             }
         }));
@@ -50,6 +51,7 @@ export const getTramiteType = async (ctx) => {
                 total: 0,
                 page: 1,
                 lastPage: 1,
+                perPage: 0,
                 data: []
             }
         }));

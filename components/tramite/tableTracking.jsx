@@ -3,7 +3,7 @@ import Datatable from '../../components/datatable';
 import Router from 'next/router';
 import { Form, Button, Select, Checkbox, Pagination } from 'semantic-ui-react';
 import Show from '../../components/show';
-import { Body, Cardinfo, SimpleList } from '../../components/Utils';
+import { Body, SimpleList } from '../../components/Utils';
 import { authentication } from '../../services/apis';
 import Swal from 'sweetalert2';
 import ModalTracking from '../../components/tramite/modalTracking';
@@ -17,6 +17,7 @@ import { tramite } from '../../services/apis';
 export default class TableTracking extends Component {
 
     state = {
+        semaforo: [],
         config: {},
         block: false,
         send: true,
@@ -36,6 +37,7 @@ export default class TableTracking extends Component {
         this.props.fireEntity({ render: true });
         this.props.fireLoading(true);
         await this.getConfig();
+        await this.getSemaforo();
         await this.getMyDependencias(this.props.entity_id, 1, false);
         this.setting(this.props);
         this.props.fireLoading(false);
@@ -54,6 +56,17 @@ export default class TableTracking extends Component {
                 if (!success) throw new Error(message);
                 this.setState({ config });
             }).catch(err => this.setState({ config: {} }));
+    }
+
+    getSemaforo = async (page = 1, add = false) => {
+        await tramite.get(`config?variable=DAY_LIMIT&page=${page || 1}`)
+            .then(async res  => {
+                let { success, message, config } = res.data;
+                if (!success) throw new Error(message);
+                let { data, lastPage } = config;
+                await this.setState(state => ({ semaforo: add ? [...state.semaforo, ...data] : data }));
+                if (lastPage > page + 1) await this.getSemaforo(page + 1, true);
+            }).catch(err => this.setState({ semaforo: [] }));
     }
 
     findDependenciaDefault = async (my_dependencias) => {
@@ -144,6 +157,34 @@ export default class TableTracking extends Component {
         await this.handleSearch();
     }
 
+    getCurrentDay = (_timestamp) => {
+        let current = moment(moment().format('YYYY-MM-DD'));
+        let comparar = moment(moment(_timestamp).format('YYYY-MM-DD'));
+        let dias = current.diff(comparar, 'days');
+        let lag = {
+            VERDE: 'success',
+            AMARILLO: 'warning',
+            ROJO: 'red'
+        };
+        // get semaforo
+        let { semaforo } = this.state;
+        for (let sem of semaforo) {
+            switch (sem.key) {
+                case 'VERDE':
+                case 'AMARILLO':
+                    if (dias <= sem.value) return lag[sem.key];
+                    break;
+                case 'ROJO':
+                    if (dias >= sem.value) return lag[sem.key];
+                    break;
+                default:
+                    return lag['VERDE'];
+            }
+        }
+        // response default
+        return lag['VERDE'];
+    }
+
     getMeta = (status) => {
         let datos = {
             "REGISTRADO":  { className: 'badge-dark', next: true },
@@ -167,8 +208,8 @@ export default class TableTracking extends Component {
 
     render() {
 
-        let { pathname, tracking, titulo, status_count, query } = this.props;
-        let { form, my_dependencias, option, send, config } = this.state;
+        let { pathname, tracking, status_count, query } = this.props;
+        let { form, my_dependencias, option, send, config, semaforo } = this.state;
 
         return (
             <div className="col-md-12">
@@ -279,6 +320,23 @@ export default class TableTracking extends Component {
 
                                 <Form className="mb-3">
                                     <div className="row">
+                                        <div className="col-md-12 mb-4">
+                                            <div className="row">
+                                                {semaforo.map(sem => 
+                                                    <div className="col-md-4 mb-2" key={`semaforo-list-${sem.id}`}>
+                                                        <div className="list-group list-group-bordered">
+                                                            <SimpleList 
+                                                                icon="fas fa-traffic-light" 
+                                                                title={`Dias (${sem.value})`} 
+                                                                bg={sem.key == 'ROJO' ? 'red' : sem.key == 'AMARILLO' ? 'warning' : 'success'}
+                                                            />
+                                                        </div>    
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <hr/>
+                                        </div>
+
                                         <div className="col-md-4 mb-1 col-12 col-sm-5 col-xl-3">
                                             <Form.Field>
                                                 <input
@@ -339,6 +397,7 @@ export default class TableTracking extends Component {
                                     <table className="table">
                                         <thead>
                                             <tr>
+                                                <th>SM</th>
                                                 <th>N° Seguimiento</th>
                                                 <th>Tip. Trámite</th>
                                                 <th>Asunto</th>
@@ -350,7 +409,12 @@ export default class TableTracking extends Component {
                                         </thead>
                                         <tbody>
                                             {tracking && tracking.data && tracking.data.map((tra, indexT) => 
-                                                <tr key={`tracking-${tra.id}-${indexT}`} className={config && config.value && (tracking.page * (tracking.data.length) > config.value || tracking.page > 1) ? 'text-muted bg-disabled' : ''}>
+                                                <tr key={`tracking-${tra.id}-${indexT}`} className={config && config.value && (((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value) ? 'text-muted bg-disabled' : ''}>
+                                                    <td>
+                                                        <span className={`tile tile-circle bg-${this.getCurrentDay(tra.updated_at)}`.toLowerCase()}>
+                                                            <i className="fas fa-traffic-light"></i> 
+                                                        </span>
+                                                    </td>
                                                     <td>
                                                         <b className="badge badge-dark">{tra.slug}</b>
                                                     </td>
@@ -371,21 +435,21 @@ export default class TableTracking extends Component {
                                                                 title="Seguimiento del Tramite"
                                                                 onClick={(e) => this.getOption(tra, 'TRACKING', indexT)}
                                                             >
-                                                                <i class="fas fa-search"></i> 
+                                                                <i className="fas fa-search"></i> 
                                                             </a>
-                                                            <a class="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
+                                                            <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
                                                                 title="Más información"
                                                                 onClick={(e) => this.getOption(tra, 'INFO', indexT)}
                                                             >
-                                                                <i class="fas fa-info"></i> 
+                                                                <i className="fas fa-info"></i> 
                                                             </a>
 
-                                                            <Show condicion={this.getMeta(tra.status).next && (config && config.value && !(tracking.page * (indexT + 1) > config.value || tracking.page > 1))}>
-                                                                <a class="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
+                                                            <Show condicion={this.getMeta(tra.status).next && config && config.value && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value))}>
+                                                                <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
                                                                     title="Continuar Trámite"
                                                                     onClick={(e) => this.getOption(tra, 'NEXT', indexT)}
                                                                 >
-                                                                    <i class="fas fa-arrow-right"></i> 
+                                                                    <i className="fas fa-arrow-right"></i> 
                                                                 </a>
                                                             </Show>
                                                         </div>

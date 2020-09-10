@@ -161,3 +161,25 @@
 .bg-disabled {
     background: #ffebee!important;
 }
+
+.content-semaforo {
+    display: flex;
+    flex-direction: row;
+}
+
+.dia-verde .bg-semaforo {
+    background: #00a28a!important;
+    color: #fff!important;
+}
+
+
+.dia-amarillo .bg-semaforo {
+    background: #f7c46c!important;
+    color: #fff!important;
+}
+
+
+.dia-rojo .bg-semaforo {
+    background: #c62828!important;
+    color: #fff!important;
+}
