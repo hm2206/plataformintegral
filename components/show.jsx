@@ -4,7 +4,7 @@ export default class Show extends Component {
 
     render() {
         let { condicion, children } = this.props;
-        if (condicion) return children;
+        if (condicion) return children || null;
         return null;
     }
 

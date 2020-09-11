@@ -444,13 +444,24 @@ export default class TableTracking extends Component {
                                                                 <i className="fas fa-info"></i> 
                                                             </a>
 
-                                                            <Show condicion={this.getMeta(tra.status).next && config && config.value && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value))}>
-                                                                <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
-                                                                    title="Continuar Trámite"
-                                                                    onClick={(e) => this.getOption(tra, 'NEXT', indexT)}
-                                                                >
-                                                                    <i className="fas fa-arrow-right"></i> 
-                                                                </a>
+                                                            <Show condicion={this.getMeta(tra.status).next}>
+                                                                <Show condicion={config && config.value  && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value))}>
+                                                                    <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
+                                                                        title="Continuar Trámite"
+                                                                        onClick={(e) => this.getOption(tra, 'NEXT', indexT)}
+                                                                    >
+                                                                        <i className="fas fa-arrow-right"></i> 
+                                                                    </a>
+                                                                </Show>
+
+                                                                <Show condicion={!config && config.value}>
+                                                                    <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
+                                                                        title="Continuar Trámite"
+                                                                        onClick={(e) => this.getOption(tra, 'NEXT', indexT)}
+                                                                    >
+                                                                        <i className="fas fa-arrow-right"></i> 
+                                                                    </a>
+                                                                </Show>                                                                
                                                             </Show>
                                                         </div>
                                                     </td>
