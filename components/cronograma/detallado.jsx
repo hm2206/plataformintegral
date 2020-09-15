@@ -50,6 +50,7 @@ export default class Detalle extends Component
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
+            this.setState({ monto: "", type_detalle_id: "" });
             await this.getDetalles(this.props);
             await this.props.updatingHistorial();
             this.props.setEdit(false);
@@ -159,7 +160,7 @@ export default class Detalle extends Component
                                 placeholder="Select. Tipo Detalle"
                                 options={parseOptions(type_detalles, ['sel-type', '', 'Select. Tipo Detalle'], ['id', 'id', 'descripcion'])}
                                 name="type_detalle_id"
-                                value={type_detalle_id}
+                                value={type_detalle_id || ""}
                                 onChange={(e, obj) => this.handleInput(obj)}
                                 disabled={!this.props.edit}
                             />
@@ -170,7 +171,7 @@ export default class Detalle extends Component
                                 <input type="number"
                                     name="monto"
                                     step="any"
-                                    value={monto}
+                                    value={monto || ""}
                                     placeholder="Ingrese un monto"
                                     disabled={!this.props.edit}
                                     onChange={({target}) => this.handleInput(target)}
