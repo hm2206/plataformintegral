@@ -5,9 +5,11 @@ import { backUrl, Confirm } from '../../../services/utils';
 import { Form, Select, Button } from 'semantic-ui-react';
 import { authentication, tramite } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import SearchUserToDependencia from '../../../components/authentication/user/searchUserToDependencia';
+import Show from '../../../components/show';
 
 
-export default class IndexTramiteInterno extends Component
+export default class CreateTramiteInterno extends Component
 {
 
     static getInitialProps = async (ctx) => {
@@ -19,6 +21,7 @@ export default class IndexTramiteInterno extends Component
         my_dependencias: [],
         dependencias: [],
         tramite_types: [],
+        show_user: false,
         errors: {},
         form: {
             dependencia_id: "",
@@ -31,19 +34,33 @@ export default class IndexTramiteInterno extends Component
         file: {
             size: 0,
             data: []
-        }
+        },
+        person: {}
     }
 
     componentDidMount = () => {
         this.props.fireEntity({ render: true });
-        this.getDependencias();
         this.getTramiteType();
         this.getMyDependencias(this.props.entity_id || "", 1, true)
+        this.defaultPerson();
     }
 
     componentWillReceiveProps = (nextProps) => {
         let { entity_id } = this.props;
         if (entity_id != nextProps.entity_id) this.getMyDependencias(nextProps.entity_id, 1, false);
+    }
+
+    defaultPerson = () => {
+        let { auth } = this.props;
+        if (Object.keys(auth).length) {
+            this.setState({
+                person: {
+                    id: auth.person_id,
+                    fullname: auth.person && auth.person.fullname,
+                    document_number: auth.person && auth.person.document_number
+                }
+            })
+        }
     }
 
     handleBack = () => {
@@ -87,29 +104,6 @@ export default class IndexTramiteInterno extends Component
         });
     }
 
-    getDependencias = async (page = 1) => {
-        await authentication.get(`dependencia?page=${page}`)
-        .then(async res => {
-            let { success, message, dependencia } = res.data;
-            if (!success) throw new Error(message);
-            let { lastPage, data } = dependencia;
-            let newData = [];
-            // add data
-            await data.map(async d => await newData.push({
-                key: `dependencia-${d.id}`,
-                value: d.id,
-                text: `${d.nombre}`
-            }));
-            // setting data
-            this.setState(state => ({
-                dependencias: [...state.dependencias, ...newData]
-            }));
-            // validar request
-            if (lastPage > page + 1) await this.getDependencias(page + 1);
-        })
-        .catch(err => console.log(err.message));
-    }
-
     getMyDependencias = async (id, page = 1, up = true) => {
         if (id) {
             await authentication.get(`auth/dependencia/${id}?page=${page}`)
@@ -119,11 +113,15 @@ export default class IndexTramiteInterno extends Component
                 let { lastPage, data } = dependencia;
                 let newData = [];
                 // add data
-                await data.map(async d => await newData.push({
-                    key: `my_dependencia-${d.id}`,
-                    value: d.id,
-                    text: `${d.nombre}`
-                }));
+                await data.map(async (d, indexD) => {
+                    await newData.push({
+                        key: `my_dependencia-${d.id}`,
+                        value: d.id,
+                        text: `${d.nombre}`
+                    })
+                    // assing first
+                    if (page == 1 && indexD == 0) this.handleInput({ name: 'dependencia_id', value: d.id });
+                });
                 // setting data
                 this.setState(state => ({
                     my_dependencias: up ? [...state.my_dependencias, ...newData] : newData
@@ -160,10 +158,12 @@ export default class IndexTramiteInterno extends Component
         let answer = await Confirm('warning', `¿Deseas guardar el tramite?`, 'Guardar');
         if (answer) {
             let datos = new FormData();
-            let { form, file } = this.state;
+            let { form, file, person } = this.state;
             for (let attr in form) {
                 datos.append(attr, form[attr]);
             }
+            // add person id
+            datos.append('person_id', person.id);
             // add files
             file.data.map(f => datos.append('files', f));
             // request
@@ -188,9 +188,21 @@ export default class IndexTramiteInterno extends Component
         }
     }
 
+    handleAdd = (obj) => {
+        this.setState({
+            show_user: false, 
+            person: {
+                id: obj.person_id,
+                fullname: obj.fullname,
+                document_number: obj.document_number
+            }
+        });
+    }
+
     render() {
 
-        let { my_dependencias, form, tramite_types, errors, file } = this.state;
+        let { my_dependencias, form, tramite_types, errors, file, show_user, person } = this.state;
+        let { entity_id } = this.props;
 
         return (
             <div className="col-md-12">
@@ -282,6 +294,31 @@ export default class IndexTramiteInterno extends Component
                                             <label>{errors && errors.observation && errors.observation[0] || ""}</label>
                                         </Form.Field>
                                     </div>
+
+                                    <div className="col-md-12">
+                                        <hr/>
+                                        <i className="fas fa-male"></i> 
+                                        <span className="mr-2">Asignar Remitente</span>
+                                        <hr/>
+                                    </div>
+
+                                    <div className="col-md-12 mb-4 mb-1">
+                                        <div className="row">
+                                            <div className="col-md-3 mb-1">
+                                                <input type="text" disabled value={person && person.document_number}/>
+                                            </div>
+
+                                            <div className="col-md-7 mb-1">
+                                                <input type="text" disabled value={person && person.fullname}/>
+                                            </div>
+
+                                            <div className="col-md-2">
+                                                <button className="btn btn-outline-dark" onClick={(e) => this.setState({ show_user: true })}>
+                                                    <i className="fas fa-sync"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                     
                                     <div className="col-md-12">
                                         <hr/>
@@ -295,8 +332,8 @@ export default class IndexTramiteInterno extends Component
                                             onChange={(e) => this.handleFiles(e)} 
                                             icon="save"
                                             result={file.data}
-                                            title="Select. Archivo (*.docx, *.pdf)"
-                                            accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                            title="Select. Archivo Pdf"
+                                            accept="application/pdf"
                                             onDelete={(e) => this.deleteFile(e.index, e.file)}
                                         />
                                     </div>
@@ -316,6 +353,14 @@ export default class IndexTramiteInterno extends Component
                         </Form>
                     </div>
                 </Body>
+
+                <Show condicion={entity_id && show_user}>
+                    <SearchUserToDependencia entity_id={entity_id} 
+                        dependencia_id={form.dependencia_id}
+                        isClose={(e) => this.setState({ show_user: false })}
+                        getAdd={this.handleAdd}
+                    />
+                </Show>
             </div>
         )
     }

@@ -75,6 +75,7 @@
     "react-html-parser": "^2.0.2",
     "react-iframe": "^1.8.0",
     "react-json-view": "^1.19.1",
+    "react-loading-skeleton": "^2.1.1",
     "react-markdown-reader": "^1.2.0",
     "react-redux": "^7.2.0",
     "react-vertical-timeline-component": "^3.0.2",
