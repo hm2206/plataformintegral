@@ -158,9 +158,35 @@ export default class Pay extends Component
         this.setState({ loading: false });
     }
 
+    updateInfo = async () => {
+        this.props.fireLoading(true)
+        let { info } = this.props;
+        let datos = new FormData;
+        datos.append('fecha_de_ingreso', document.getElementById('fecha_de_ingreso').value)
+        datos.append('fecha_de_cese', document.getElementById('fecha_de_cese').value)
+        datos.append('_method', 'PUT')
+        // actualizar
+        await unujobs.post(`info/${info.id}`, datos)
+            .then(res => {
+                this.props.fireLoading(false)
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                Swal.fire({ icon: 'success', text: message });
+            }).catch(err => {
+                try {
+                    this.props.fireLoading(false)
+                    let { message, errors } = err.response.data;
+                    Swal.fire({ icon: 'warning', text: message });
+                } catch (error) {
+                    this.props.fireLoading(false)
+                    Swal.fire({ icon: 'error', message: err.message });
+                }
+            });
+    }
+
     render() {
 
-        let { work, perfil_laboral, dependencia } = this.state;
+        let { work, perfil_laboral, dependencia, loading, edit } = this.state;
         let { info, query, pathname } = this.props;
 
         return (
@@ -314,14 +340,22 @@ export default class Pay extends Component
                                                 <div className="col-md-4 mt-3">
                                                     <Form.Field>
                                                         <label htmlFor="">Fecha de Ingreso</label>
-                                                        <input type="date" disabled defaultValue={info.fecha_de_ingreso}/>
+                                                        <input type="date" 
+                                                            disabled={loading}
+                                                            defaultValue={info.fecha_de_ingreso || ""} 
+                                                            id="fecha_de_ingreso"
+                                                        />
                                                     </Form.Field>
                                                 </div>
 
                                                 <div className="col-md-4 mt-3">
                                                     <Form.Field>
                                                         <label htmlFor="">Fecha de Cese</label>
-                                                        <input type="date" disabled defaultValue={info.fecha_de_cese}/>
+                                                        <input type="date" 
+                                                            disabled={loading} 
+                                                            defaultValue={info.fecha_de_cese || ""} 
+                                                            id="fecha_de_cese"
+                                                        />
                                                     </Form.Field>
                                                 </div>
 
@@ -334,7 +368,7 @@ export default class Pay extends Component
                                                 </div>
 
                                                 <Show condicion={info.file}>
-                                                    <div className="col-md-4">
+                                                    <div className="col-md-4 mt-3">
                                                         <Form.Field>
                                                             <label htmlFor="">File</label>
                                                             <Button color="red"
@@ -345,6 +379,17 @@ export default class Pay extends Component
                                                         </Form.Field>
                                                     </div>
                                                 </Show>
+
+                                                <div className="col-md-4 mt-3">
+                                                    <Form.Field>
+                                                        <label htmlFor="">Actualizar Información</label>
+                                                        <Button color="teal"
+                                                            onClick={this.updateInfo}
+                                                        >
+                                                            <i className="fas fa-save"></i> Guardar
+                                                        </Button>
+                                                    </Form.Field>
+                                                </div>
                                             </div>
                                         </div>
 

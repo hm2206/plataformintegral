@@ -1,8 +1,11 @@
 import React from 'react';
 import { Button, Form } from 'semantic-ui-react';
 import { Body, BtnBack } from '../../components/Utils';
+import Signer from '../../components/signer';
 
 const Follow = () => {
+
+    return <Signer/>
 
     return <div className="col-md-12">
         <Body>

@@ -96,17 +96,21 @@ export default class CronogramaEmail extends Component
         let { cronograma, errors } = this.state;
         await unujobs.post(`cronograma/${cronograma.id}/send_email`, { errors: JSON.stringify(errors) }, { headers: { CronogramaID: cronograma.id }})
         .then(async res => {
+            this.props.fireLoading(false);
             let { success, message, next } = res.data;
             if (!success) throw new Error(message);
             if (next) await this.send();
             else {
-                await Swal.fire({ icon: 'success', text: "El envio de correos a terminado correctamente" });
+                let message = "El envio de correos a terminado correctamente";
+                await Swal.fire({ icon: 'success', text: message });
                 await this.getSentEmail(false);
             }
         })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        .catch(async err =>{
+            this.props.fireLoading(false);
+            await Swal.fire({ icon: 'error', text: err.message })
+        });
         this.setState({ loading: false });
-        this.props.fireLoading(false);
     }
 
     render() {
