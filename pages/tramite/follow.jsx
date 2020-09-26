@@ -2,10 +2,11 @@ import React from 'react';
 import { Button, Form } from 'semantic-ui-react';
 import { Body, BtnBack } from '../../components/Utils';
 import Signer from '../../components/signer';
+import PdfView from '../../components/pdfView';
 
 const Follow = () => {
 
-    return <Signer/>
+    return <PdfView/>
 
     return <div className="col-md-12">
         <Body>

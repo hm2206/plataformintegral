@@ -7,7 +7,8 @@ import { authentication, tramite } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import SearchUserToDependencia from '../../../components/authentication/user/searchUserToDependencia';
 import Show from '../../../components/show';
-
+import PdfView from '../../../components/pdfView';
+import { PDFDocument } from 'pdf-lib/dist/pdf-lib';
 
 export default class CreateTramiteInterno extends Component
 {
@@ -35,7 +36,13 @@ export default class CreateTramiteInterno extends Component
             size: 0,
             data: []
         },
-        person: {}
+        person: {},
+        signature: [],
+        pdf: {
+            url: "",
+            pdfDoc: PDFDocument,
+            image: ""
+        }
     }
 
     componentDidMount = () => {
@@ -57,7 +64,8 @@ export default class CreateTramiteInterno extends Component
                 person: {
                     id: auth.person_id,
                     fullname: auth.person && auth.person.fullname,
-                    document_number: auth.person && auth.person.document_number
+                    document_number: auth.person && auth.person.document_number,
+                    image: auth.image_images && auth.image_images.image_200x200 || ""
                 }
             })
         }
@@ -76,13 +84,16 @@ export default class CreateTramiteInterno extends Component
         })
     }
 
-    handleFiles = ({ files }) => {
+    handleFiles = async ({ files }) => {
         let { file } = this.state;
         let size_total = file.size;
         let size_limit = 2 * 1024;
         for (let f of files) {
             size_total += f.size;
             if ((size_total / 1024) <= size_limit) {
+                let answer = await Confirm("info", `¿Desea añadir firma digital al archivo "${f.name}"?`, 'Firmar');
+                if (answer) await this.handleSignature(f);
+                // add files
                 this.setState(state => {
                     state.file.size = size_total;
                     state.file.data.push(f);
@@ -93,6 +104,23 @@ export default class CreateTramiteInterno extends Component
                 Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(2)}MB)` });
                 return false;
             }
+        }
+    }
+
+    handleSignature = async (blob) => {
+        let reader = new FileReader();
+        await reader.readAsArrayBuffer(blob);
+        reader.onload = async () => {
+            let { person } = this.state;
+            let pdfDoc = await PDFDocument.load(reader.result);
+            this.setState({
+                pdf: {
+                    url: URL.createObjectURL(blob),
+                    pdfDoc: pdfDoc,
+                    pdfBlob: blob,
+                    image: person.image || ""
+                }
+            });
         }
     }
  
@@ -194,14 +222,15 @@ export default class CreateTramiteInterno extends Component
             person: {
                 id: obj.person_id,
                 fullname: obj.fullname,
-                document_number: obj.document_number
+                document_number: obj.document_number,
+                image: obj.image_images && obj.image_images.image_200x200 || ""
             }
         });
     }
 
     render() {
 
-        let { my_dependencias, form, tramite_types, errors, file, show_user, person } = this.state;
+        let { my_dependencias, form, tramite_types, errors, file, show_user, person, pdf } = this.state;
         let { entity_id } = this.props;
 
         return (
@@ -359,6 +388,23 @@ export default class CreateTramiteInterno extends Component
                         dependencia_id={form.dependencia_id}
                         isClose={(e) => this.setState({ show_user: false })}
                         getAdd={this.handleAdd}
+                    />
+                </Show>
+
+                <Show condicion={pdf.url}>
+                    <PdfView 
+                        pdfUrl={pdf.url} 
+                        pdfDoc={pdf.pdfDoc}
+                        pdfBlob={pdf.pdfBlob}
+                        defaultImage={pdf.image}
+                        disabledMetaInfo={true}
+                        onSignature={(signature) => console.log(signature)}
+                        onClose={(e) => this.setState({ pdf: {
+                            url: "",
+                            pdfDoc: PDFDocument,
+                            pdfBlob: {},
+                            image: ""
+                        } })}
                     />
                 </Show>
             </div>

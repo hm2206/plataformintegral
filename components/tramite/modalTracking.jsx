@@ -87,6 +87,13 @@ export default class ModalTracking extends Component
         // response
         return icons[status] || {};
     }
+
+    getPrint = () => {
+        let html = document.getElementById('print-tracking');
+        let blob = new Blob([html.innerHTML], { type: 'text/html' });
+        let newPrint = window.open(URL.createObjectURL(blob));
+        newPrint.onload = () => newPrint.print();
+    }
  
     render() {
 
@@ -98,9 +105,16 @@ export default class ModalTracking extends Component
                 show={true}
                 md="10"
                 {...this.props}
-                titulo={<span><i className="fas fa-path"></i> Seguimiento del Trámite <span className="badge badge-dark">{tramite && tramite.slug}</span></span>}
+                titulo={
+                    <span>
+                        <button className="mr-5 btn btn-sm btn-primary" onClick={this.getPrint}>
+                            <i className="fas fa-print"></i>
+                        </button>
+                        Seguimiento del Trámite <span className="badge badge-dark">{tramite && tramite.slug}</span>
+                    </span>
+                }
             >
-                <Form className="h-100" loading={loader}>
+                <Form className="h-100" loading={loader} id="print-tracking">
                     <Show condicion={tracking && tracking.data && tracking.data.length}>
                         <VerticalTimeline className="line-gray timeline-h-100">
                             {   
