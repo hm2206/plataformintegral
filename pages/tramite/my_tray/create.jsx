@@ -247,7 +247,8 @@ export default class CreateTramiteInterno extends Component
                 let { success, message, tramite } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
-                this.setState({ form: {}, file: { size: 0, data: [] }, show_signed: false, errors: {} });
+                this.handleClear()
+                this.defaultPerson();
             }).catch(err => {
                 try {
                     this.props.fireLoading(false);
@@ -272,6 +273,17 @@ export default class CreateTramiteInterno extends Component
                 document_number: obj.document_number,
                 image: obj.image_images && obj.image_images.image_200x200 || ""
             }
+        });
+    }
+
+    handleClear = () => {
+        this.setState(state => {
+            state.form.tramite_type_id = "";
+            state.form.document_number = "";
+            state.form.folio_count = "";
+            state.form.asunto = "";
+            state.form.observation = "";
+            return { form: state.form, file: { size: 0, data: [] }, signature: { count: 0, data: [] }, errors: {} };
         });
     }
 
