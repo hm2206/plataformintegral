@@ -3,7 +3,6 @@ import { Form, Checkbox, Button } from 'semantic-ui-react';
 import { InputFile } from './Utils';
 import Show from './show';
 import { Confirm } from '../services/utils';
-import { PDFSignature } from 'pdf-lib';
 
 const PdfView = ({ 
     pdfUrl = "https://www.iaa.csic.es/python/curso-python-para-principiantes", 
@@ -29,47 +28,29 @@ const PdfView = ({
     const [page, setPage] = useState(1);
     const [select_page, setSelectPage] = useState(pdfPages[page - 1]);
     const [positions, setPositions] = useState([]);
-    const [current_position, setCurrentPosition] = useState({ x: 0, y: 0});
+    const [current_position, setCurrentPosition] = useState("");
     const [count_signature, setCountSignature] = useState(0);
 
-    // config page
-    const pageWidth = select_page.getHeight();
-    const pageHeight = select_page.getWidth();
-
     // config rectangulo
-    const rectangulo = { width: 150, height: 50 };
-    const widget = 4;
-    const numPosition = 12;
+    const rectangulo = { width: 150, height: 60 };
+    const widget = 3;
+    const rows = 8;
+    let cube = parseInt(rows * widget);
     
     // generar posiciones
     const generatePositions = async () => {
+        let tmpPosition = [];
         // obtener el margin
-        let marginX = ((pageWidth - (rectangulo.width * widget)) / widget) / 4;
-        let marginY = ((pageHeight - (rectangulo.height * numPosition / widget)) / widget) / 4;
-        // tmp position
-        let positionTmp = [];
-        // config row and column
-        let row = 0;
-        let column = 0;
-        // procesar positiones
-        for (let index = 0; index < numPosition; index++) {
-            // add position
-            positionTmp.unshift({
-                x: marginX + (column * rectangulo.width),
-                y: marginY + (row * rectangulo.height)
-            });
-            // next row
-            if (((index + 1) % widget) == 0) {
-                // next column and row
-                column = 0;
-                row += 1;
-            } else {
-                // next columna
-               column++;
+        for(let i = 0; i < rows; i++) {
+            for(let j = widget; j > 0; j--) {
+                let pos = cube - j;
+                tmpPosition.push(pos);
             }
+            // disminuir
+            cube -= widget;
         }
-        // set position
-        setPositions(positionTmp);
+        // add state
+        setPositions(tmpPosition);
     }
 
     const handleInput = ({ name, value }, callback) => {
@@ -93,10 +74,17 @@ const PdfView = ({
         // assign pdfBlob
         payload.pdfBlob = pdfBlob;
         payload.page = page;
+        payload.visible = false;
         // validar datos
         if (!disabledMetaInfo) {
             payload.reason = reason;
             payload.location = location;
+        }
+        // firma visible
+        if (signature) {
+            payload.rectangulo = rectangulo;
+            payload.position = current_position;
+            payload.visible = true;
         }
         // validar imagen
         if (!disabledImage) payload.image = image;
@@ -116,8 +104,8 @@ const PdfView = ({
     }
 
     useEffect(() => {
-        generatePositions();
         getSignatures();
+        generatePositions();
     }, []);
 
     return (
@@ -244,15 +232,13 @@ const PdfView = ({
                                                         </div>
                                                         <div className="row justify-content-center">
                                                             {positions.map((pos, posIndex) => 
-                                                                <div className={`col-md-${widget} col-${widget} mb-3 text-center`} 
+                                                                <div className={`col-md-4 col-4 mb-3 text-center`} 
                                                                     key={`position-${posIndex}`}
                                                                 >
                                                                     <input type="radio"
-                                                                        value={JSON.stringify(pos)}
-                                                                        checked={pos.x == current_position.x && pos.y == current_position.y}
-                                                                        onChange={({target}) => handleInput(target, (value) => {
-                                                                            setCurrentPosition(JSON.parse(value))
-                                                                        })}
+                                                                        value={pos}
+                                                                        checked={pos == current_position ? true : false}
+                                                                        onChange={({target}) => handleInput(target, setCurrentPosition)}
                                                                     />
                                                                 </div>    
                                                             )}
@@ -268,7 +254,7 @@ const PdfView = ({
                                     <Show condicion={onSignature}>
                                         <Button color="teal"
                                             onClick={handleSignature}
-                                            disabled={signature ? !current_position.x || !current_position.y || !page : !page}
+                                            disabled={signature ? !typeof current_position == 'number' || !page : !page}
                                         >
                                             <i className="fas fa-signature"></i> Firmar
                                         </Button>

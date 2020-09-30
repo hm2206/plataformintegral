@@ -9,6 +9,7 @@ import SearchUserToDependencia from '../../../components/authentication/user/sea
 import Show from '../../../components/show';
 import PdfView from '../../../components/pdfView';
 import { PDFDocument } from 'pdf-lib/dist/pdf-lib';
+import Authorize from '../../../components/authorize';
 
 export default class CreateTramiteInterno extends Component
 {
@@ -30,19 +31,24 @@ export default class CreateTramiteInterno extends Component
             tramite_type_id: "",
             document_number: "",
             folio_count: "",
-            asunto: ""
+            asunto: "",
+            code: ""
         },
         file: {
             size: 0,
             data: []
         },
         person: {},
-        signature: [],
+        signature: {
+            count: 0,
+            data: []
+        },
         pdf: {
             url: "",
             pdfDoc: PDFDocument,
             image: ""
-        }
+        },
+        show_signed: false
     }
 
     componentDidMount = () => {
@@ -82,6 +88,18 @@ export default class CreateTramiteInterno extends Component
             state.errors[name] = [];
             return { form: state.form };
         })
+        // handle
+        this.onHandleInput({ name, value });
+    }
+
+    onHandleInput = ({ name, value }) => {
+        switch(name) {
+            case "dependencia_id":
+                this.defaultPerson();
+                break;
+            default: 
+                
+        }
     }
 
     handleFiles = async ({ files }) => {
@@ -92,7 +110,12 @@ export default class CreateTramiteInterno extends Component
             size_total += f.size;
             if ((size_total / 1024) <= size_limit) {
                 let answer = await Confirm("info", `¿Desea añadir firma digital al archivo "${f.name}"?`, 'Firmar');
-                if (answer) await this.handleSignature(f);
+                if (answer) this.handleSignature(f);
+                // add file
+                await this.setState(state => {
+                    state.signature.data.push({ pdf: f, signed: false, info: {} });
+                    return { signature: state.signature }
+                });
                 // add files
                 this.setState(state => {
                     state.file.size = size_total;
@@ -128,7 +151,15 @@ export default class CreateTramiteInterno extends Component
         this.setState(state => {
             state.file.data.splice(index, 1);
             state.file.size = state.file.size - file.size; 
-            return { file: state.file };
+            // leave signature
+            if (typeof state.signature.data[index] == 'object') {
+                let tmp = state.signature.data[index];
+                state.signature.data.splice(index, 1);
+                // quitar count
+                state.signature.count -= tmp.signed ? 1 : 0;
+            }
+            // return 
+            return { file: state.file, signature: state.signature };
         });
     }
 
@@ -182,18 +213,32 @@ export default class CreateTramiteInterno extends Component
         .catch(err => console.log(err.message));
     }
 
+    prepareSaveTramite = async () => {
+        let { signature, person } = this.state;
+        let { auth } = this.props;
+        if (signature.count > 0) {
+            await Swal.fire({ icon: 'info', text: `Se necesita la autorización para firmar pdf` });
+            this.setState({ show_signed: true }); 
+        } else this.saveTramite();
+    }
+
     saveTramite = async () => {
         let answer = await Confirm('warning', `¿Deseas guardar el tramite?`, 'Guardar');
         if (answer) {
             let datos = new FormData();
-            let { form, file, person } = this.state;
+            let { form, file, person, signature } = this.state;
             for (let attr in form) {
                 datos.append(attr, form[attr]);
             }
             // add person id
             datos.append('person_id', person.id);
             // add files
-            file.data.map(f => datos.append('files', f));
+            let iter = 0;
+            file.data.map(f => {
+                datos.append('files', f);
+                datos.append('info_signature[]', JSON.stringify(signature.data[iter] && signature.data[iter].info || { signed: false}));
+                iter++;
+            });
             // request
             this.props.fireLoading(true);
             await tramite.post('tramite', datos, { headers: { DependenciaId: form.dependencia_id } })
@@ -202,13 +247,15 @@ export default class CreateTramiteInterno extends Component
                 let { success, message, tramite } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
-                this.setState({ form: {}, file: { size: 0, data: [] } })
+                this.setState({ form: {}, file: { size: 0, data: [] }, show_signed: false, errors: {} });
             }).catch(err => {
                 try {
                     this.props.fireLoading(false);
                     let response = JSON.parse(err.message);
                     Swal.fire({ icon: 'warning', text: response.message });
                     this.setState({ errors: response.errors });
+                    // validar error code
+                    if (!response.errors['code']) this.setState({ show_signed: false }); 
                 } catch (error) {
                     Swal.fire({ icon: 'error', text: err.message });
                 }
@@ -228,10 +275,29 @@ export default class CreateTramiteInterno extends Component
         });
     }
 
+    onSignature = async (obj) => {
+        // obtener archivo
+        await this.setState(state => {
+            // quitart blob
+            obj.pdfBlob = "";
+            obj.signed = true;
+            // index signature 
+            let indexS = state.signature.data.length - 1 || 0;
+            let signed = state.signature.data[indexS];
+            signed.signed = true;
+            signed.info = obj;
+            // add signature
+            state.signature.data[indexS] = signed;
+            state.signature.count += 1;
+            // response
+            return { signature: state.signature };
+        });
+    }
+
     render() {
 
-        let { my_dependencias, form, tramite_types, errors, file, show_user, person, pdf } = this.state;
-        let { entity_id } = this.props;
+        let { my_dependencias, form, tramite_types, errors, file, show_user, person, pdf, show_signed } = this.state;
+        let { entity_id, auth } = this.props;
 
         return (
             <div className="col-md-12">
@@ -371,7 +437,7 @@ export default class CreateTramiteInterno extends Component
                                         <hr/>
                                         <div className="text-right">
                                             <Button color="teal"
-                                                onClick={this.saveTramite}
+                                                onClick={this.prepareSaveTramite}
                                             >
                                                 <i className="fas fa-save"></i> Guardar Tramite
                                             </Button>
@@ -398,13 +464,26 @@ export default class CreateTramiteInterno extends Component
                         pdfBlob={pdf.pdfBlob}
                         defaultImage={pdf.image}
                         disabledMetaInfo={true}
-                        onSignature={(signature) => console.log(signature)}
+                        onSignature={this.onSignature}
                         onClose={(e) => this.setState({ pdf: {
                             url: "",
                             pdfDoc: PDFDocument,
                             pdfBlob: {},
                             image: ""
                         } })}
+                    />
+                </Show>
+
+                <Show condicion={show_signed}>
+                    <Authorize 
+                        person_id={person.id}
+                        fullname={person.fullname}
+                        onClose={(e) => this.setState({ show_signed: false })}
+                        codeError={errors && errors.code}
+                        onSend={async (obj) => {
+                            await this.handleInput({ name: 'code', value: obj.code });
+                            await this.saveTramite();
+                        }}
                     />
                 </Show>
             </div>
