@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { unujobs } from '../../services/apis';
 
-export default class AssignTrabajador extends Component
+export default class AssignContrato extends Component
 {
 
     state = {
@@ -24,7 +24,7 @@ export default class AssignTrabajador extends Component
 
     getPeople = async (page = 1, state, update = false) => {
         this.setState({ loader: true });
-        await unujobs.get(`work?page=${page}&query_search=${state.query_search || ""}`)
+        await unujobs.get(`info?page=${page}&query_search=${state.query_search || ""}&estado=1`)
         .then(res => this.setState(state => {
             let { data, last_page, current_page, total } = res.data;
             state.people.data = update ? data : [...state.people.data, ...data];
@@ -60,7 +60,7 @@ export default class AssignTrabajador extends Component
             <Modal
                 show={true}
                 {...this.props}
-                titulo={<span><i className="fas fa-user"></i> Asignar Trabajador</span>}
+                titulo={<span><i className="fas fa-user"></i> Asignar Contrato</span>}
             >
                 <Form className="card-body" loading={loader}>
 
@@ -68,7 +68,7 @@ export default class AssignTrabajador extends Component
                         <div className="col-md-10 mb-2 text-left">
                             <Form.Field>
                                 <input type="text"
-                                    placeholder="Buscar persona por: Apellidos y Nombres"
+                                    placeholder="Buscar por: Apellidos y Nombres"
                                     value={query_search || ""}
                                     name="query_search"
                                     onChange={({ target }) => this.setState({ [target.name]: target.value })}
@@ -101,7 +101,12 @@ export default class AssignTrabajador extends Component
                                     <Image avatar src={obj.person && obj.person.image ? `${obj.person.image && obj.person.image_images && obj.person.image_images.image_50x50}` : '/img/base.png'} 
                                         style={{ objectFit: 'cover' }}
                                     />
-                                    <List.Content><span className="uppercase">{obj.person && obj.person.fullname}</span></List.Content>
+                                    <List.Content>
+                                        <span className="uppercase">{obj.person && obj.person.fullname}</span>
+                                        <div className="w-100">
+                                            <small className="badge badge-dark badge-sm">{obj.cargo && obj.cargo.alias} - {obj.type_categoria && obj.type_categoria.descripcion}</small>
+                                        </div>
+                                    </List.Content>
                                 </List.Item>
                             )}
                         </List>    

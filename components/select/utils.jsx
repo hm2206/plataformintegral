@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { authentication } from '../../services/apis';
 import { Select, Button } from 'semantic-ui-react';
+import uid from 'uid';
 
 /**
  * setting format for select
@@ -26,8 +27,8 @@ const settingSelect = async ({ data = [], index = { key: "", value: "", text: ""
     // add datos
     await data.filter((d, indexD) => {
         newData.push({
-            key: `${index.key}-${indexD}`,
-            value: getObj(d, index.value),
+            key: `${index.key}_${indexD + 1}_${uid(10)}`,
+            value: `${getObj(d, index.value)}`,
             text: `${getObj(d, index.text)}`.toUpperCase(),
             obj: d
         });
@@ -75,6 +76,8 @@ const SelectBase = ({ execute, refresh, url, api, obj, id, value, text, name, on
                 setIsError(true);
                 setLoading(false);
             });
+        // quitar loading
+        setLoading(false);
     }
 
     const feching = async () => {

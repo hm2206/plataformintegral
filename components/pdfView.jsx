@@ -86,8 +86,6 @@ const PdfView = ({
             payload.position = current_position;
             payload.visible = true;
         }
-        // validar imagen
-        if (!disabledImage) payload.image = image;
         // emitir evento
         if (typeof onSignature == 'function') onSignature(payload);
         if (typeof onClose == 'function') onClose(true);
@@ -201,31 +199,11 @@ const PdfView = ({
                                 <Show condicion={signature}>
                                     <div className="card">
                                         <div className="card-header">
-                                            <i className="fas fa-cog"></i> Configurar Firma Digital
+                                            <i className="fas fa-cog"></i> Configurar Posición
                                         </div>
                                         <div className="card-body">
                                             <Form>
-                                                <Show condicion={!disabledImage}>
-                                                    <Form.Field>
-                                                        <label htmlFor="">Imagen</label>
-                                                        <Show condicion={image}>
-                                                            <div className="text-center" style={{ border: "2px solid #eeee", height: "150px" }}>
-                                                                <img src={image} alt="image-sigantured" style={{ objectFit: 'contain', width: '100%', height: '100%' }}/>
-                                                            </div>
-                                                        </Show>
-
-                                                        <InputFile
-                                                            id="image_signature"
-                                                            name="image_signature"
-                                                            title="Seleccionar imagen"
-                                                            accept="image/*"
-                                                            onChange={(e) => handleImage(e)}
-                                                        />
-                                                    </Form.Field>
-                                                </Show>
-
                                                 <Form.Field>
-                                                    <label>Posición</label>
                                                     <div className="card pt-4">
                                                         <div>
 

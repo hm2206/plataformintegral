@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
 import Modal from '../modal';
-import atob from 'atob';
-import { Button, Form, List, Image } from 'semantic-ui-react';
+import { Button, Form, List, Image, Checkbox  } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
-import { unujobs } from '../../services/apis';
+import { escalafon } from '../../services/apis';
 
-export default class AssignTrabajador extends Component
+export default class AssignTrabajadorEntity extends Component
 {
 
     state = {
@@ -24,16 +23,24 @@ export default class AssignTrabajador extends Component
 
     getPeople = async (page = 1, state, update = false) => {
         this.setState({ loader: true });
-        await unujobs.get(`work?page=${page}&query_search=${state.query_search || ""}`)
-        .then(res => this.setState(state => {
-            let { data, last_page, current_page, total } = res.data;
-            state.people.data = update ? data : [...state.people.data, ...data];
-            state.people.lastPage = last_page;
-            state.people.page = current_page;
-            state.people.total = total;
-            return { people: state.people };
-        }))
-        .catch(err => console.log(err.message));
+        await escalafon.get(`work?page=${page}&query_search=${state.query_search || ""}`)
+        .then(res => {
+            let { success, message } = res.data;
+            if (success === false) throw new Error(message);
+            this.setState(state => {
+                let { data, last_page, current_page, total } = res.data;
+                state.people.data = update ? data : [...state.people.data, ...data];
+                state.people.lastPage = last_page;
+                state.people.page = current_page;
+                state.people.total = total;
+                return { people: state.people };
+            })
+        })
+        .catch(err => this.setState(state => {
+            state.people.lastPage = 1;
+            state.people.page = 1;
+            return { people: state.people }
+        }));
         this.setState({ loader: false });
     }
 

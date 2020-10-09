@@ -76,9 +76,86 @@ const SelectEntityDependenciaNotUser = ({ id = "id", user_id, entity_id, name, v
 }
 
 
+const SelectDependencia = ({ id = "id", name, value, onChange, refresh = false }) => {
+    return <SelectBase 
+                api={authentication}
+                url={`dependencia`}
+                id={`select-dependencia-${id}-${name}`}
+                value={id}
+                text="nombre"
+                obj="dependencia"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Dependencia"
+                refresh={refresh}
+                execute={true}
+            />
+}
+
+
+const SelectDependenciaPerfilLaboral = ({ dependencia_id, id = "id", name, value, onChange, refresh = false }) => {
+    return dependencia_id 
+        ?   <SelectBase 
+                api={authentication}
+                url={`dependencia/${dependencia_id}/perfil_laboral`}
+                id={`select-dependencia-perfil-laboral-${id}-${name}`}
+                value={id}
+                text="nombre"
+                obj="perfil_laboral"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Perfil Laboral"
+                refresh={refresh}
+            />
+        :   <Select placeholder="Seleccionar Perfil Laboral" disabled fluid value="" options={[]}/>
+}
+
+
+const SelectPerfilLaboral = ({ id = "id", name, value, onChange, refresh = false }) => {
+    return <SelectBase 
+                api={authentication}
+                url={`perfil_laboral`}
+                id={`select_perfil_laboral-${id}-${name}`}
+                value={id}
+                text="nombre"
+                obj="perfil_laboral"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Perfil Laboral"
+                refresh={refresh}
+                execute={true}
+            />
+}
+
+
+const SelectInstitution = ({ id = "id", name, value, onChange, refresh = false }) => {
+    return <SelectBase 
+                api={authentication}
+                url={`institution`}
+                id={`institution-${id}-${name}`}
+                value={id}
+                text="name"
+                obj="institution"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Institución"
+                refresh={refresh}
+                execute={true}
+            />
+}
+
+
 export { 
+    SelectDependencia,
+    SelectDependenciaPerfilLaboral,
+    SelectPerfilLaboral,
     SelectEntityNotUser,
     SelectEntityUser,
     SelectEntityDependenciaUser,
-    SelectEntityDependenciaNotUser
+    SelectEntityDependenciaNotUser,
+    SelectInstitution,
 };

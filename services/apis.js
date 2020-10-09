@@ -69,6 +69,22 @@ export const unujobs = {
 
 
 /**
+ * api para consumir el sistema de escalafón
+ */
+export const escalafon = {
+    get: async (path, config = { }, ctx) => {
+        return axios.get(`${url.API_ESCALAFON}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    post: async (path, body = { }, config = { }, ctx) => {
+        return axios.post(`${url.API_ESCALAFON}/${path}`, body, await ConfigHeaders(ctx, config));
+    },
+    fetch: async (path, config = { }, ctx) => {
+        return fetch(`${url.API_ESCALAFON}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    path: url.API_ESCALAFON
+};
+
+/**
  * api para consumir el sistema de Recursos humanos
  */
 export const recursoshumanos = {

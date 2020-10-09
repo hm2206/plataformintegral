@@ -213,15 +213,6 @@ export default class CreateTramiteInterno extends Component
         .catch(err => console.log(err.message));
     }
 
-    prepareSaveTramite = async () => {
-        let { signature, person } = this.state;
-        let { auth } = this.props;
-        if (signature.count > 0) {
-            await Swal.fire({ icon: 'info', text: `Se necesita la autorización para firmar pdf` });
-            this.setState({ show_signed: true }); 
-        } else this.saveTramite();
-    }
-
     saveTramite = async () => {
         let answer = await Confirm('warning', `¿Deseas guardar el tramite?`, 'Guardar');
         if (answer) {
@@ -236,7 +227,7 @@ export default class CreateTramiteInterno extends Component
             let iter = 0;
             file.data.map(f => {
                 datos.append('files', f);
-                datos.append('info_signature[]', JSON.stringify(signature.data[iter] && signature.data[iter].info || { signed: false}));
+                datos.append('info_signature[]', JSON.stringify(signature.data[iter] && signature.data[iter].info || { signed: false }));
                 iter++;
             });
             // request
@@ -288,6 +279,7 @@ export default class CreateTramiteInterno extends Component
     }
 
     onSignature = async (obj) => {
+        console.log(obj);
         // obtener archivo
         await this.setState(state => {
             // quitart blob
@@ -309,7 +301,7 @@ export default class CreateTramiteInterno extends Component
     render() {
 
         let { my_dependencias, form, tramite_types, errors, file, show_user, person, pdf, show_signed } = this.state;
-        let { entity_id, auth } = this.props;
+        let { entity_id } = this.props;
 
         return (
             <div className="col-md-12">
@@ -449,7 +441,7 @@ export default class CreateTramiteInterno extends Component
                                         <hr/>
                                         <div className="text-right">
                                             <Button color="teal"
-                                                onClick={this.prepareSaveTramite}
+                                                onClick={this.saveTramite}
                                             >
                                                 <i className="fas fa-save"></i> Guardar Tramite
                                             </Button>
@@ -483,19 +475,6 @@ export default class CreateTramiteInterno extends Component
                             pdfBlob: {},
                             image: ""
                         } })}
-                    />
-                </Show>
-
-                <Show condicion={show_signed}>
-                    <Authorize 
-                        person_id={person.id}
-                        fullname={person.fullname}
-                        onClose={(e) => this.setState({ show_signed: false })}
-                        codeError={errors && errors.code}
-                        onSend={async (obj) => {
-                            await this.handleInput({ name: 'code', value: obj.code });
-                            await this.saveTramite();
-                        }}
                     />
                 </Show>
             </div>
