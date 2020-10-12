@@ -9,12 +9,13 @@ import SearchUserToDependencia from '../../../components/authentication/user/sea
 import Show from '../../../components/show';
 import PdfView from '../../../components/pdfView';
 import { PDFDocument } from 'pdf-lib/dist/pdf-lib';
-import Authorize from '../../../components/authorize';
+import { AUTHENTICATE } from '../../../services/auth';
 
 export default class CreateTramiteInterno extends Component
 {
 
     static getInitialProps = async (ctx) => {
+        await AUTHENTICATE(ctx);
         let { query, pathname } = ctx;
         return { query, pathname }
     } 

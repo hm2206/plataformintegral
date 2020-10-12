@@ -33,13 +33,9 @@ export default class TrackingIndex extends Component {
         if (query.dependencia_id) await this.getStatus(query.dependencia_id);
     }
 
-    // componentWillReceiveProps = (nextProps) => {
-    //     this.getStatus(nextProps.query.dependencia_id);
-    // }
-
     setStatusLoading = async (new_status_count = this.state.status_count) => {
         let status_count = Object.assign(this.state.status_count, new_status_count);
-        this.setState({ status_count });
+        await this.setState({ status_count });
     }
 
     getStatus = async (DependenciaId) => {

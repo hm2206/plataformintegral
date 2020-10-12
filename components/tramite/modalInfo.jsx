@@ -40,7 +40,7 @@ const Remitente = ({ person }) => {
                 <Form.Field className="col-md-12 text-center">
                     <img src={person && person.image_images && person.image_images.image_200x200} 
                         alt="foto de persona"
-                        style={{ width: "150px", height: "150px", borderRadius: '50%' }}
+                        style={{ width: "150px", height: "150px", borderRadius: '50%', objectFit: 'cover' }}
                     />
                 </Form.Field>
 

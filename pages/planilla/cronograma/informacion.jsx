@@ -522,7 +522,7 @@ export default class CronogramaInformacion extends Component
     render() {
 
         let { cronograma, historial, planillas, cargos, type_categorias, loading, cargo_id, type_categoria_id, config_edad, situacion_laborals } = this.state;
-        let { query, isLoading } = this.props;
+        let { isLoading } = this.props;
 
         return (
             <Fragment>
@@ -612,7 +612,7 @@ export default class CronogramaInformacion extends Component
                                                     }}    
                                                 />
                                             </div>
-                                            <div className="col-md-8 col-lg-8 mb-2">
+                                            <div className="col-md-8 col-lg-8 mb-2 uppercase">
                                                 <Show condicion={historial.token_verify}>
                                                     <a href="#" title="Boleta verificada"
                                                         onClick={this.verifyBoleta}

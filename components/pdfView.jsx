@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { Form, Checkbox, Button } from 'semantic-ui-react';
 import { InputFile } from './Utils';
 import Show from './show';
@@ -27,39 +27,35 @@ const PdfView = ({
     const [image, setImage] = useState(defaultImage || "");
     const [page, setPage] = useState(1);
     const [select_page, setSelectPage] = useState(pdfPages[page - 1]);
-    const [positions, setPositions] = useState([]);
     const [current_position, setCurrentPosition] = useState("");
     const [count_signature, setCountSignature] = useState(0);
+    const [positions, setPositions] = useState([]);
 
     // config rectangulo
-    const rectangulo = { width: 150, height: 60 };
-    const widget = 3;
-    const rows = 8;
-    let cube = parseInt(rows * widget);
+    const columns = 5;
+    const rows = 25;
+    let cube = (rows * columns);
     
     // generar posiciones
     const generatePositions = async () => {
         let tmpPosition = [];
         // obtener el margin
         for(let i = 0; i < rows; i++) {
-            for(let j = widget; j > 0; j--) {
+            for(let j = columns; j > 0; j--) {
                 let pos = cube - j;
-                tmpPosition.push(pos);
+                if (i % 2 == 0) {
+                    tmpPosition.push(pos);
+                }
             }
             // disminuir
-            cube -= widget;
+            cube -= columns;
         }
-        // add state
+        // setting position
         setPositions(tmpPosition);
     }
 
     const handleInput = ({ name, value }, callback) => {
         if (typeof callback == 'function') callback(value)
-    }
-
-    const handleImage = ({ name, file }) => {
-        let url = URL.createObjectURL(file);
-        setImage(url);
     }
 
     const handleClose = async (e) => {
@@ -82,7 +78,6 @@ const PdfView = ({
         }
         // firma visible
         if (signature) {
-            payload.rectangulo = rectangulo;
             payload.position = current_position;
             payload.visible = true;
         }
@@ -205,20 +200,21 @@ const PdfView = ({
                                             <Form>
                                                 <Form.Field>
                                                     <div className="card pt-4">
-                                                        <div>
-
-                                                        </div>
                                                         <div className="row justify-content-center">
-                                                            {positions.map((pos, posIndex) => 
-                                                                <div className={`col-md-4 col-4 mb-3 text-center`} 
-                                                                    key={`position-${posIndex}`}
-                                                                >
-                                                                    <input type="radio"
-                                                                        value={pos}
-                                                                        checked={pos == current_position ? true : false}
-                                                                        onChange={({target}) => handleInput(target, setCurrentPosition)}
-                                                                    />
-                                                                </div>    
+                                                            {positions.map((pos, indexPos) => 
+                                                                <Fragment>
+                                                                    <Show condicion={(indexPos) % 5 == 0}>
+                                                                        <div className="col-md-12"></div>
+                                                                    </Show>
+
+                                                                    <div className={`col-md-2 col-2 mb-3 text-center`}>
+                                                                        <input type="radio"
+                                                                            value={pos}
+                                                                            checked={pos == current_position ? true : false}
+                                                                            onChange={({target}) => handleInput(target, setCurrentPosition)}
+                                                                        />
+                                                                    </div>  
+                                                                </Fragment>
                                                             )}
                                                         </div>
                                                     </div>

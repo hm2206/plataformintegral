@@ -34,7 +34,7 @@ export default class TrackingIndex extends Component {
 
     setStatusLoading = async (new_status_count = this.state.status_count) => {
         let status_count = Object.assign(this.state.status_count, new_status_count);
-        this.setState({ status_count });
+        await this.setState({ status_count });
     }
 
     getStatus = async (DependenciaId) => {
@@ -45,7 +45,7 @@ export default class TrackingIndex extends Component {
                 if (!success) throw new Error(message);
                 this.setStatusLoading({ data: status_count }); 
             }).catch(err => console.log(err));
-            this.setStatusLoading({ loading: false });
+        this.setStatusLoading({ loading: false });
     }
 
     render() {
