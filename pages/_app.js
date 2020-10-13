@@ -307,7 +307,7 @@ class MyApp extends App {
           <LoadingGlobal display="none" id="loading-brand" app={_app}/>
 
           <Show condicion={is_render && this.state.loading}>
-            <LoadingGlobal/>
+            <LoadingGlobal app={_app}/>
           </Show>
 
           <Show condicion={!this.state.online}>
