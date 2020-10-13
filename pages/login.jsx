@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import initStore from '../storage/store';
 import { app } from '../env.json';
 import Link from 'next/link';
-import auth from '../storage/reducers/authReducer';
+import DownloadApps from '../components/downloadApps';
 
 
 class Login extends Component
@@ -29,7 +29,8 @@ class Login extends Component
         loading: true,
         errors: {},
         progress: 0,
-        remember: null
+        remember: null,
+        show_app: false
     };
 
     componentDidMount = () => {
@@ -92,7 +93,7 @@ class Login extends Component
                         />
                     </a>
                     
-                    <h4>{my_app.name || "Integración"}</h4>
+                    <h4 style={{ textShadow: "1px 1px #346cb0" }}>{my_app.name || "Integración"}</h4>
 
                     <h1>
                         <span className="sr-only">Iniciar Sesión</span>
@@ -161,17 +162,18 @@ class Login extends Component
                         <br/>
                         <br/>
 
-                        <Link href="/apps">
-                            <a className="link">
-                                <i className="fa fa-box mr-1"></i> Más apps
-                            </a>
-                        </Link>
+                        <a className="link" style={{ cursor: 'pointer' }} onClick={(e) => {
+                            e.preventDefault();
+                            this.setState({ show_app: true })
+                        }}>
+                            <i className="fa fa-box mr-1"></i> Más apps
+                        </a>
                     </div>
                 </form>
 
-                <footer className="auth-footer">
+                <footer className="auth-footer text-center">
                     {" "}
-                    © 2019 {app.name} Todos Los Derechos Reservados <a href="#">Privacidad</a> y
+                    © 2019 - {new Date().getFullYear()} {app.name} | Todos Los Derechos Reservados <a href="#">Privacidad</a> y
                     <a href="#">Terminos</a>
                 </footer>
 
@@ -182,6 +184,10 @@ class Login extends Component
                             style={{ "position": "absolute", top: "0px", left: "0px", width: "100%", height: "100%", objectFit: "cover" }}
                         />
                     </BtnFloat>
+                </Show>
+
+                <Show condicion={this.state.show_app}>
+                    <DownloadApps isClose={(e) => this.setState({ show_app: false })}/>
                 </Show>
             </div>
         )
