@@ -5,7 +5,7 @@ export default class LoadingGlobal extends Component
 
     render() {
 
-        let { display, id, image } = this.props;
+        let { display, id, app } = this.props;
 
         return (
             <div style={{
@@ -19,7 +19,7 @@ export default class LoadingGlobal extends Component
                 display: display ? display : 'block'
             }}  id={id ? id : 'id-loading-brand'}>
                 <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <img src='/img/loading_page.png' alt="loader" className="loading-brand"/>
+                    <img src={app && app.icon && app.icon_images && app.icon_images.icon_200x200 || '/img/loading_page.png'} alt="loader" className="loading-brand"/>
                 </div>
             </div>
         )

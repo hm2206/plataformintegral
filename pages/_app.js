@@ -298,15 +298,13 @@ class MyApp extends App {
           </Head>
 
           {/* precargar imagen */}
-          <img src="/img/loading_page.png" style={{ display: 'none' }}/>  
-
-          <div id="page_change"></div>
+          <img src={"/img/loading_page.png" } style={{ display: 'none' }}/>  
 
           <Show condicion={!is_render}>
             <LoaderPage message={message}/>
           </Show>
 
-          <LoadingGlobal display="none" id="loading-brand"/>
+          <LoadingGlobal display="none" id="loading-brand" app={_app}/>
 
           <Show condicion={is_render && this.state.loading}>
             <LoadingGlobal/>
