@@ -77,10 +77,11 @@ export default class Index extends Component
                     <Form loading={this.state.loading}>
                         <div className="col-md-12">
                             <DataTable titulo={<span>Lista de Personas </span>}
-                                headers={["#ID", "Apellidos y Nombres", "N° Documento", "Fecha de Nac."]}
+                                headers={["#ID", "Foto", "Apellidos y Nombres", "N° Documento", "Fecha de Nac."]}
                                 data={people && people.data}
                                 index={[
                                     { key: "id", type: "text" },
+                                    { key: 'image_images.image_50x50', type: 'cover' },
                                     { key: "fullname", type: "text", className: "uppercase" },
                                     { key: "document_number", type: "icon" },
                                     { key: "date_of_birth", type: "date", bg: 'dark' }

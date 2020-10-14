@@ -326,6 +326,8 @@ export default class DataTable extends Component {
                             ? index.map((attr, i) => (
                                 <td key={`column-datatable-${attr}-${i}-${index}`}>
                                   <div className={`row justify-content-${attr.justify}`}>
+                                    {attr.type == 'json' ? <span>{JSON.stringify(obj)}</span> : null}
+                                    {attr.type == 'cover' ? <img style={{ width: "45px", height: "45px", objectFit: 'cover', borderRadius: '1em' }} src={this.verifyObjects(obj, attr)} alt="cover"/> : null}
                                     {attr.type == "icon" ? <span className={`badge badge-${attr.bg ? attr.bg : 'primary'} ${obj.className}`}>{this.verifyObjects(obj, attr)}</span> : null}
                                     {attr.type == "text" ? <span className={`${attr.className}`}>{this.verifyObjects(obj, attr)}</span> : null}
                                     {attr.type == "switch" ? <span className={`${attr.className} badge badge-${this.verifyObjects(obj, attr) ? `${attr.bg_true ? attr.bg_true : 'success'}` : `${attr.bg_false ? attr.bg_false : 'danger'}`}`}>{this.verifyObjects(obj, attr) ? attr.is_true : attr.is_false}</span> : null}
