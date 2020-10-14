@@ -31,9 +31,10 @@ export default class CreateTypeCategoria extends Component
     }
 
     save = async () => {
-        this.setState({ loading: true });
+        this.props.fireLoading(true);
         await unujobs.post('type_categoria', this.state.form)
         .then(async res => {
+            this.props.fireLoading(false);
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
@@ -41,6 +42,7 @@ export default class CreateTypeCategoria extends Component
         })
         .catch(async err => {
             try {
+                this.props.fireLoading(false);
                 let { data } = err.response
                 let { message, errors } = data;
                 this.setState({ errors });
@@ -53,7 +55,7 @@ export default class CreateTypeCategoria extends Component
 
     render() {
 
-        let { pathname, query } = this.props;
+        let { pathname, isLoading } = this.props;
         let { form, errors } = this.state;
 
         return (
@@ -124,7 +126,7 @@ export default class CreateTypeCategoria extends Component
 
                                     <div className="col-md-2">
                                         <Button color="teal" fluid
-                                            loading={this.state.loading}
+                                            disabled={isLoading}
                                             onClick={this.save}
                                         >
                                             <i className="fas fa-save"></i> Guardar
