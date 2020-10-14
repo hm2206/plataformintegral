@@ -97,7 +97,7 @@ export default class CreateCargo extends Component
                                             <input type="text" 
                                                 name="alias"
                                                 placeholder="Ingrese un alias"
-                                                value={form.alias}
+                                                value={form.alias || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors && errors.alias && errors.alias[0]}</label>
@@ -111,6 +111,7 @@ export default class CreateCargo extends Component
                                                 name="descripcion"
                                                 placeholder="Ingrese una descripción, similar al alias"
                                                 onChange={(e) => this.handleInput(e.target)}
+                                                value={form.descripcion || ""}
                                             />
                                             <label>{errors && errors.descripcion && errors.descripcion[0]}</label>
                                         </Form.Field>
@@ -122,6 +123,7 @@ export default class CreateCargo extends Component
                                             <input type="text"
                                                 placeholder="Ingrese una extensión presupuestal"
                                                 name="ext_pptto"
+                                                value={form.ext_pptto || ""}
                                                 onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors && errors.ext_pptto && errors.ext_pptto[0]}</label>
@@ -135,7 +137,7 @@ export default class CreateCargo extends Component
                                                 placeholder="Select. Planilla"
                                                 options={parseOptions(this.state.planillas, ["sel-pla", "", "Select. Planilla"], ["id", "id", "nombre"])}
                                                 name="planilla_id"
-                                                value={form.planilla_id}
+                                                value={form.planilla_id || ""}
                                                 onChange={(e, obj) => this.handleInput(obj)}
                                             />
                                             <label>{errors && errors.planilla_id && errors.planilla_id[0]}</label>
@@ -148,7 +150,7 @@ export default class CreateCargo extends Component
                                             <Select
                                                 placeholder="Select. Descuento"
                                                 options={parseOptions(this.state.type_cargos, ["sel-pla", "", "Select. Tip. Cargo"], ["id", "id", "nombre"])}
-                                                value={form.type_cargo_id}
+                                                value={form.type_cargo_id || ""}
                                                 name="type_cargo_id"
                                                 onChange={(e, obj) => this.handleInput(obj)}
                                             />
