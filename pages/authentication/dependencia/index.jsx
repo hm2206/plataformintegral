@@ -117,7 +117,7 @@ export default class Dependencia extends Component {
                     <Datatable titulo="Lista de dependencias"
                         isFilter={false}
                         loading={loading}
-                        headers={ ["#ID", "Numero de dependencia", "F. Inicio", "F. Termino", "Estado"]}
+                        headers={ ["#ID", "Nombre", "Descripción", "Tipo", "Estado"]}
                         index={
                             [
                                 {
