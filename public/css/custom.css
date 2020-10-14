@@ -183,3 +183,8 @@
     background: #c62828!important;
     color: #fff!important;
 }
+
+
+.odd:hover {
+    background: #cfd8dc!important;
+}
