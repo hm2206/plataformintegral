@@ -187,5 +187,5 @@
 
 .odd:hover {
     transition: all 0.4s ease-in-out;
-    background:rgba(0, 0, 0, 0.1)!important;
+    background:rgba(0, 0, 0, 0.05)!important;
 }
