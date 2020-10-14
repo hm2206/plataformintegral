@@ -186,5 +186,6 @@
 
 
 .odd:hover {
-    background: #cfd8dc!important;
+    background:rgba(0, 0, 0, 0.3)!important;
+    transition: all 0.3s;
 }
