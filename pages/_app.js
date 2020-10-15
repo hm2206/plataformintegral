@@ -186,7 +186,7 @@ class MyApp extends App {
     let currentTab = await localStorage.getItem('activeTabKey');
     let isOnline = await navigator.onLine;
     let { online } = this.state;
-    if (online != isOnline) this.setState({ online: /*isOnline*/ true });
+    if (online != isOnline) this.setState({ online: isOnline });
     if (currentTab != this.state.activeTabKey) {
       this.setState({ current: false });
       clearInterval(this.intervalo);

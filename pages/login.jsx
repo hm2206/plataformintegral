@@ -10,6 +10,7 @@ import initStore from '../storage/store';
 import { app } from '../env.json';
 import Link from 'next/link';
 import DownloadApps from '../components/downloadApps';
+import VerificarAuthentication from '../components/verificarAuthentication';
 
 
 class Login extends Component
@@ -30,16 +31,25 @@ class Login extends Component
         errors: {},
         progress: 0,
         remember: null,
-        show_app: false
+        show_app: false,
+        show_verification: true
     };
 
     componentDidMount = () => {
         this.setState({ loading: false });
         this.setting();
+        this.settingVerification();
     }
 
     componentWillReceiveProps(nextProps) {
         this.setting();
+    }
+
+    settingVerification = () => {
+        let that = this;
+        setTimeout(() => {
+            that.setState({ show_verification: false });
+        }, 3000);
     }
 
     setting = () => {
@@ -51,7 +61,6 @@ class Login extends Component
         let { name, value } = e.target;
         this.setState({ [name]: value });
     }   
-
 
     handleSubmit = async (e) => {
         this.setState({ loading: true });
@@ -74,8 +83,10 @@ class Login extends Component
 
     render() {
 
-        let { errors, email, password, loading, remember } = this.state;
+        let { errors, email, password, loading, remember, show_verification } = this.state;
         let { my_app } = this.props;
+
+        if (show_verification) return <VerificarAuthentication my_app={my_app}/>
 
         return (
             <div className="auth" style={{ minHeight: "100vh" }}>
