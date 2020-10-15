@@ -305,7 +305,7 @@ export default class EditMeta extends Component
                                                 disabled={this.state.loading}
                                                 onClick={(e) => this.setState(state => ({ edit: false, errors: {}, form: state.old }))}
                                             >
-                                                <i className="fas fa-save"></i> Guardar
+                                                <i className="fas fa-times"></i> Cancelar
                                             </Button>
                                         </Show>
 

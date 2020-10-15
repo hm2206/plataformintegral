@@ -331,7 +331,6 @@ export default class Cronograma extends Component {
                                 <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
                                     <Form.Field>
                                         <input type="number" 
-                                            min="2019" 
                                             placeholder="Año" 
                                             name="year"
                                             value={this.state.year}
