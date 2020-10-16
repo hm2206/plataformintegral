@@ -107,7 +107,7 @@ export default class TypeCategoriaIndex extends Component {
                         isFilter={false}
                         loading={loading}
                         headers={
-                            ["#ID", "Descripción", "Estado"]
+                            ["#ID", "Descripción", "Dedicación", "Estado"]
                         }
                         index={
                             [
@@ -117,6 +117,10 @@ export default class TypeCategoriaIndex extends Component {
                                 }, 
                                 {
                                     key: "descripcion",
+                                    type: "text"
+                                },
+                                {
+                                    key: "dedicacion",
                                     type: "text"
                                 },
                                 {
