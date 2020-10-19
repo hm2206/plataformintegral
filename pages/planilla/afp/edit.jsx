@@ -325,7 +325,7 @@ export default class CreateAfp extends Component
                                                 disabled={this.state.loading}
                                                 onClick={(e) => this.setState(state => ({ form: state.old, errors: {}, edit: false }))}
                                             >
-                                                <i className="fas fa-save"></i> Guardar
+                                                <i className="fas fa-times"></i> Cancelar
                                             </Button>
                                         </Show>
 

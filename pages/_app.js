@@ -310,9 +310,9 @@ class MyApp extends App {
             <LoadingGlobal app={_app}/>
           </Show>
 
-          <Show condicion={!this.state.online}>
+          {/* <Show condicion={!this.state.online}>
             <NotInternet my_app={_app}/>
-          </Show>
+          </Show> */}
 
           <Show condicion={is_render && !current}>
             <NotCurrent my_app={_app}/>

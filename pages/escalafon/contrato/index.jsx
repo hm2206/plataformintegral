@@ -153,7 +153,7 @@ export default class Contrato extends Component
                                 </div>
 
                                 <div className="card-body mt-4">
-                                    <h4>Resultados: {infos && infos.length} de {this.state.total}</h4>
+                                    <h4>Resultados: {infos && infos.data.length * infos.current_page || 0} de {infos && infos.total}</h4>
                                 </div>
 
                             </DataTable>
