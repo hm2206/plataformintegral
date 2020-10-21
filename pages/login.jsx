@@ -184,7 +184,7 @@ class Login extends Component
 
                 <footer className="auth-footer text-center">
                     {" "}
-                    © 2019 - {new Date().getFullYear()} {app.name} | Todos Los Derechos Reservados <a href="#">Privacidad</a> y
+                    © 2019 - {new Date().getFullYear()} {my_app && my_app.name} | Todos Los Derechos Reservados <a href="#">Privacidad</a> y
                     <a href="#">Terminos</a>
                 </footer>
 
