@@ -7,12 +7,14 @@ import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import atob from 'atob';
 import Show from '../../../components/show';
+import { AUTHENTICATE } from '../../../services/auth';
 
 
 export default class EditTypeRemuneracion extends Component
 {
 
-    static getInitialProps = (ctx) => {
+    static getInitialProps = async (ctx) => {
+        await AUTHENTICATE(ctx);
         let { pathname, query } = ctx;
         return { pathname, query };
     }
@@ -148,7 +150,7 @@ export default class EditTypeRemuneracion extends Component
                                                 name="base"
                                                 checked={form.base ? false : true}
                                                 disabled={this.state.loading}
-                                                onChange={(e, obj) => this.handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
+                                                onChange={(e, obj) => this.handleInput({ name: obj.name, value: obj.checked ? 0 : 1 })}
                                             />
                                         </Form.Field>
                                     </div>
@@ -158,7 +160,7 @@ export default class EditTypeRemuneracion extends Component
                                             <label htmlFor="">¿Es una Bonificación/Gratificación?</label>
                                             <Checkbox toggle
                                                 name="bonificacion"
-                                                checked={form.bonificacion || 0}
+                                                checked={form.bonificacion ? true : false}
                                                 disabled={this.state.loading}
                                                 onChange={(e, obj) => this.handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
                                             />
