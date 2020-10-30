@@ -1,204 +1,262 @@
-import React, { Component, Context, Fragment } from 'react';
+import React, { useContext, useEffect, useState, Fragment } from 'react';
 import { unujobs } from '../../services/apis';
 import { Button, Form, Select, Icon, Grid } from 'semantic-ui-react';
-import { parseOptions } from '../../services/utils';
 import Swal from 'sweetalert2';
-import { responsive } from '../../services/storage.json';
+import Show from '../show';
+import Skeleton from 'react-loading-skeleton';
+import { CronogramaContext } from '../../contexts/CronogramaContext';
+import { AppContext } from '../../contexts/AppContext';
+import { SelectTypeDetalle } from '../select/cronograma';
+import { Confirm } from '../../services/utils';
 
-export default class Detalle extends Component
-{
-    state = {
-        type_detalles: [],
-        detalles: [],
-        type_detalle_id: "",
-        monto: "",
-        loader: false,
-        payload: []
-    }
+const PlaceHolderButton = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
-    componentDidMount = async () => {
-        await this.getTypeDetalles();
-        await this.getDetalles(this.props);
-    }
+const PlaceholderDetallado = () => (
+    <Fragment>
+        <div className="col-md-6 col-12 mt-3">
+            <PlaceHolderButton/>
+            <hr/>
+            <div className="row mb-3 mt-3">
+                <div className="col-md-9">
+                    <PlaceHolderButton/>
+                </div>
+                <div className="col-md-3">
+                    <PlaceHolderButton/>
+                </div>
+            </div>
+            <PlaceHolderButton height="100px"/>
+        </div>
 
-    componentWillReceiveProps = async (nextProps) => {
-        if (nextProps.historial && nextProps.historial.id != this.props.historial.id) {
-            this.setState({ detalles: [] });
-            await this.getDetalles(nextProps);
-        }
-        // update
-        if (nextProps.send && nextProps.send != this.props.send) {
-            await this.update();
-        }
-    }
+        <div className="col-md-6 col-12 mt-3">
+            <PlaceHolderButton/>
+            <hr/>
+            <div className="row mb-3 mt-3">
+                <div className="col-md-9">
+                    <PlaceHolderButton/>
+                </div>
+                <div className="col-md-3">
+                    <PlaceHolderButton/>
+                </div>
+            </div>
+            <PlaceHolderButton height="100px"/>
+        </div>
+    </Fragment>
+);
 
-    handleInput = ({ name, value }) => {
-        this.setState({ [name]: value });
-    }
+const Detalle = () => {
 
-    create = async () => {
-        this.props.setLoading(true);
-        let payload = {
-            historial_id: this.props.historial.id,
-            type_detalle_id: this.state.type_detalle_id,
-            monto: this.state.monto
-        };
-        // request
-        await unujobs.post('detalle', payload)
-        .then(async res => {
-            this.props.setLoading(false);
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
-            await Swal.fire({ icon: 'success', text: message });
-            this.setState({ monto: "", type_detalle_id: "" });
-            await this.getDetalles(this.props);
-            await this.props.updatingHistorial();
-            this.props.setEdit(false);
-        })
-        .catch(err => {
-            this.props.setLoading(false);
-            Swal.fire({ icon: 'error', text: err.message })
-        });
-        this.setState({ loader: false });
-        this.props.setSend(false);
-    }
+    // cronograma
+    const { edit, setEdit, loading, send, historial, setBlock, setSend, cronograma, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
+    const [current_loading, setCurrentLoading] = useState(true);
+    const [detalles, setDetalles] = useState([]);
+    const [old, setOld] = useState([]);
+    const [error, setError] = useState(false);
+    const [form, setForm] = useState({});
+    const [payload, setPayload] = useState([]);
 
-    getDetalles = async (props) => {
-        this.props.setLoading(true);
-        let { historial } = props;
+    // app
+    const app_context = useContext(AppContext);
+
+    // obtener descuentos detallados
+    const findDetallado = async () => {
+        setBlock(true);
+        setError(false);
+        setCurrentLoading(true);
         await unujobs.get(`historial/${historial.id}/detalle`)
-        .then(async res => {
-            await this.setState({ detalles: res.data ? res.data : [] });
-        }).catch(err => console.log(err.message));
-        this.props.setLoading(false);
-    }
-
-    getTypeDetalles = async () => {
-        this.props.setLoading(true);
-        await unujobs.get('type_detalle')
-        .then(async res => {
-            let type_detalles = res.data;
-            await type_detalles.map(obj => {
-                obj.descripcion = `${obj.type_descuento && obj.type_descuento.key}.- ${obj.descripcion}`;
-                return obj;
+            .then(async res => {
+                let { data } = res;
+                let { success, message } = data;
+                if (!success) throw new Error(message);
+                await setDetalles(await data.detalles);
+                setOld(JSON.parse(JSON.stringify(data.detalles)));
+                setBlock(false);
             })
-            // set
-            this.setState({ type_detalles })
-        })
-        .catch(err => console.log(err.message));
-        this.props.setLoading(false);
+            .catch(err => {
+                setDetalles([]);
+                setOld([]);
+                setError(true);
+                setBlock(false);
+            });
+        setCurrentLoading(false);
     }
 
-    handleMonto = async ({ name, value }, parent, detalle, index) => {
-        this.setState(state => {
-            detalle[name] = value;
-            detalle.edit = true;
-            state.detalles[parent].detalles[index] = detalle;
-            state.payload[index] = {
-                id: detalle.id,
-                monto: detalle.monto,
-                descripcion: detalle.descripcion
+    // primera carga
+    useEffect(() => {
+        setIsEditable(true);
+        setIsUpdatable(true);
+        if (historial.id) findDetallado();
+        return () => {}
+    }, [historial.id]);
+
+    // cancelar edit
+    useEffect(() => {
+        if (!edit && !send) setDetalles(JSON.parse(JSON.stringify(old)));
+    }, [!edit]);
+
+    // cambios en el form
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, JSON.parse(JSON.stringify(form)));
+        newForm[name] = value;
+        setForm(newForm);
+    }
+
+    // crear nuevo detalle
+    const createDetalle = async () => {
+        let answer = await Confirm("warning", `¿Deseas guardar el detalle?`, 'Guardar');
+        if (answer) {
+            app_context.fireLoading(true);
+            setBlock(true);
+            // setting payload
+            let payload = {
+                historial_id: historial.id,
+                type_detalle_id: form.type_detalle_id || "",
+                monto: form.monto || ""
             };
-            // response
-            return { detalles: state.detalles };
-        });
+            // request
+            await unujobs.post('detalle', payload)
+            .then(async res => {
+                app_context.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                setForm({});
+                setEdit(false);
+                await findDetallado();
+            }).catch(err => {
+                app_context.fireLoading(false);
+                Swal.fire({ icon: 'error', text: err.message });
+            });
+            setBlock(false);
+        }
     }
 
-    update = async () => {
+    // cambio de descuentos detallados
+    const handleMonto = async ({ name, value }, parent, detalle, index) => {
+        let newDetalles = await JSON.parse(JSON.stringify(detalles));
+        let newPayload = Object.assign({}, JSON.parse(JSON.stringify(payload)));
+        detalle[name] = value;
+        detalle.edit = true;
+        newDetalles[parent].detalles[index] = detalle;
+        newPayload[index] = {
+            id: detalle.id,
+            monto: detalle.monto,
+            descripcion: detalle.descripcion
+        };
+        await setDetalles(newDetalles);
+        await setPayload(newPayload);
+    }
+
+    // actualizar detalle
+    const updateDetalle = async () => {
+        app_context.fireLoading(true);
+        setBlock(true);
         let form = new FormData;
-        let { historial } = this.props;
-        form.append('detalles', JSON.stringify(this.state.payload));
+        form.append('detalles', JSON.stringify(payload));
         await unujobs.post(`detalle/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
+            app_context.fireLoading(false);
             let { success, message } = res.data;
             if(!success) throw new Error(message);
-            this.props.setLoading(false);
             await Swal.fire({ icon: 'success', text: message });
-            await this.props.updatingHistorial();
-        })
-        .catch(err => {
-            this.props.setLoading(false);
+            setEdit(false);
+            setBlock(false);
+            setSend(false);
+            setOld(JSON.parse(JSON.stringify(detalles)));
+        }).catch(err => {
+            app_context.fireLoading(false);
+            setBlock(false);
+            setSend(false);
             Swal.fire({ icon: 'error', text: err.message })
         });
-        // setting
-        this.props.setLoading(false);
-        this.props.setSend(false);
     }
 
-    delete = async (id) => {
-        this.props.setLoading(true);
-        await unujobs.post(`detalle/${id}`, { _method: 'DELETE' })
-        .then(async res => {
-            this.props.setLoading(false);
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
-            await Swal.fire({ icon: 'success', text: message })
-            await this.getDetalles(this.props);
-            await this.props.updatingHistorial();
-            this.props.setEdit(false);
-        })
-        .catch(err => {
-            this.props.setLoading(false);
-            Swal.fire({ icon: 'error', text: err.message })
-        });
-        this.props.setLoading(false);
+    // eliminar descuento detallado
+    const deleteDetalle = async (id, parent, index) => {
+        let answer = await Confirm("warning", `¿Deseas eliminar el descuento detallado?`)
+        if (answer) {
+            setCurrentLoading(true);
+            setBlock(true);
+            await unujobs.post(`detalle/${id}`, { _method: 'DELETE' })
+            .then(async res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message })
+                let newDetalles = JSON.parse(JSON.stringify(detalles));
+                newDetalles[parent].detalles.splice(index, 1);
+                setDetalles(newDetalles);
+                setOld(JSON.parse(JSON.stringify(newDetalles)));
+            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            setCurrentLoading(false);
+            setBlock(false);
+            setSend(false);
+        }
     }
+
+    // update detalles
+    useEffect(() => {
+        if (send) updateDetalle();
+    }, [send]);
     
-    render() {
+    return (
+    <Form className="row">
+        <div className="col-md-12">
+            <div className="row">
+                <div className="col-md-4 mb-1 col-12 col-sm-12 col-lg-4">
+                    <SelectTypeDetalle
+                        disabled={loading || current_loading || !edit}
+                        name="type_detalle_id"
+                        value={form.type_detalle_id || ""}
+                        onChange={(e, obj) => handleInput(obj)}
+                    />
+                </div>
 
-        let { detalles, type_detalle_id, monto, type_detalles, loader } = this.state;
-        let { loading } = this.props;
- 
-        return (
-            <Form className="row" loading={!this.props.loading && loader}>
-
-                <div className="col-md-12">
-                    <div className="row">
-                        <div className="col-md-4 mb-1 col-12 col-sm-12 col-lg-4">
-                            <Select
-                                fluid
-                                placeholder="Select. Tipo Detalle"
-                                options={parseOptions(type_detalles, ['sel-type', '', 'Select. Tipo Detalle'], ['id', 'id', 'descripcion'])}
-                                name="type_detalle_id"
-                                value={type_detalle_id || ""}
-                                onChange={(e, obj) => this.handleInput(obj)}
-                                disabled={!this.props.edit}
+                <div className="col-md-4 mb-1 col-10 col-lg-3 col-sm-9">
+                    <Show condicion={!loading && !current_loading}
+                        predeterminado={<PlaceHolderButton/>}
+                    >
+                        <Form.Field>
+                            <input type="number"
+                                name="monto"
+                                step="any"
+                                value={form.monto || ""}
+                                placeholder="Ingrese un monto"
+                                disabled={!edit}
+                                onChange={({target}) => handleInput(target)}
                             />
-                        </div>
-
-                        <div className="col-md-4 mb-1 col-10 col-lg-3 col-sm-9">
-                            <Form.Field>
-                                <input type="number"
-                                    name="monto"
-                                    step="any"
-                                    value={monto || ""}
-                                    placeholder="Ingrese un monto"
-                                    disabled={!this.props.edit}
-                                    onChange={({target}) => this.handleInput(target)}
-                                />
-                            </Form.Field>
-                        </div>
-
-                        <div className="col-xs col-md-4 col-2 col-sm-3 col-lg-3">
-                            <Button color="green"
-                                disabled={!type_detalle_id || !this.props.edit}
-                                onClick={this.create}    
-                                fluid
-                            >
-                                <i className="fas fa-plus"></i> {this.props.screenX > responsive.md ? 'Agregar' : ''}
-                            </Button>
-                        </div>
-                    </div>
+                        </Form.Field>
+                    </Show>
                 </div>
+
+                <div className="col-xs col-md-4 col-2 col-sm-3 col-lg-3">
+                    <Show condicion={!loading && !current_loading}
+                        predeterminado={<PlaceHolderButton/>}
+                    >
+                        <Button color="green"
+                            disabled={!form.type_detalle_id || !edit}
+                            onClick={createDetalle}    
+                            fluid
+                        >
+                            <i className="fas fa-plus"></i>
+                        </Button>
+                    </Show>
+                </div>
+            </div>
+        </div>
                 
-                <div className="col-md-12">
-                    <hr/>
-                </div>
+        <div className="col-md-12">
+            <hr/>
+        </div>
 
-                <div className="col-md-12">
-                    <Grid columns={2} fluid>
-                        {!loading && detalles.map((det, parent) => 
-                            <Grid.Column key={`type_detalle_${det.id}`}>
+        <div className="col-md-12">
+            <Grid columns={2} fluid="true">
+                <Show condicion={!loading && !current_loading}
+                    predeterminado={<PlaceholderDetallado/>}
+                >
+                    {detalles.map((det, parent) => 
+                        <Show key={`type_detalle_${det.id}`} 
+                            condicion={det.detalles && det.detalles.length}
+                        >
+                            <Grid.Column>
                                 <b><span className="text-red mb-2">{det.key}</span>.- <span className="text-primary">{det.descripcion}</span></b>
                                 <hr/>
                                 {det.detalles.map((detalle, index) => 
@@ -211,17 +269,18 @@ export default class Detalle extends Component
                                                         name="monto"
                                                         step="any"
                                                         value={detalle.monto || ""}
-                                                        disabled={!this.props.edit}
-                                                        onChange={({target}) => this.handleMonto(target, parent, detalle, index)}
+                                                        disabled={!edit}
+                                                        onChange={({target}) => handleMonto(target, parent, detalle, index)}
                                                         min="0"
                                                     />
                                                 </div>
+                                                        
                                                 <div className="col-md-2">
                                                     <Button
-                                                        fluid
+                                                        fluid={true}
                                                         color="red"
-                                                        disabled={!this.props.edit}
-                                                        onClick={(e) => this.delete(detalle.id)}
+                                                        disabled={!edit}
+                                                        onClick={(e) => deleteDetalle(detalle.id, index)}
                                                     >
                                                         <i className="fas fa-trash-alt"></i>
                                                     </Button>
@@ -231,20 +290,22 @@ export default class Detalle extends Component
 
                                         <Form.Field>
                                             <textarea 
-                                                disabled={!this.props.edit}
+                                                disabled={!edit}
                                                 name="descripcion"    
-                                                onChange={({ target }) => this.handleMonto(target, parent, detalle, index)}
+                                                onChange={({ target }) => handleMonto(target, parent, detalle, index)}
                                                 value={detalle.descripcion || ""}
                                             />
                                         </Form.Field>
                                     </Fragment> 
                                 )}
                             </Grid.Column>    
-                        )}
-                    </Grid>
-                </div>
-            </Form>
-        )
-    }
-
+                        </Show>
+                    )}
+                </Show>
+            </Grid>
+        </div>
+    </Form>)
 }
+
+
+export default Detalle;

@@ -1,8 +1,9 @@
 import React, { Fragment, useState, Component } from "react";
 import Show from "./show";
-import { Dropdown, Button, Icon, Form, Segment, Header, Progress, Input } from 'semantic-ui-react';
+import { Dropdown, Button, Icon, Form, Header, Progress } from 'semantic-ui-react';
 import Swal from "sweetalert2";
 import Modal from './modal';
+import Skeleton from 'react-loading-skeleton';
 
 
 const InputFile = ({ id, name, onChange, error = false, children = null, title = "Select", accept = "*", icon = 'image', label = null }) => {
@@ -241,9 +242,14 @@ const BtnToolBasic = props => (
   </div>
 );
 
-const BtnFloat = ({ theme, children, onClick, disabled = false, size = 'lg', style = {} }) => {
+const BtnFloat = ({ theme, children, onClick, disabled = false, size = 'lg', style = {}, loading = false }) => {
   
   style.overflow = 'hidden';
+
+  if (loading) return <Skeleton className="btn-floated" 
+      circle height={style.height || "50px"} width={style.width || "50px"}
+      style={style}
+    />
   
   return (<button
     type="button"

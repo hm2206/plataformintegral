@@ -78,6 +78,7 @@ export default class SearchCronograma extends Component
                             <input type="number" 
                                 placeholder="Mes"
                                 name="mes"
+                                max="12"
                                 value={this.state.mes}
                                 onChange={(e) => this.handleInput(e.target)}
                             />

@@ -1,4 +1,4 @@
-import React, { Fragment, createContext } from 'react'
+import React, { Fragment } from 'react'
 import Head from 'next/head'
 import App from 'next/app';
 import LoaderPage from '../components/loaderPage';
@@ -32,6 +32,7 @@ import { getAuth } from '../services/requests/auth';
 
 // css
 import 'react-vertical-timeline-component/style.min.css';
+import { AppContext } from '../contexts';
 
 
 // config router
@@ -94,39 +95,31 @@ class MyApp extends App {
     return { pageProps, store, isLoggin, _app, is_render, message, auth: pageProps.auth, redirect };
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      activeTabKey: "",
-      current: true,
-      loading: false,
-      is_render: false,
-      toggle: false,
-      screenY: 0,
-      screenX: 0,
-      screen_lg: false,
-      refresh: false,
-      online: true,
-      config_entity: {
-        render: false,
-        disabled: false,
-        entity_id: ""
-      },
-      entity_id: "",
-      notification: {
-        data: [],
-        page: 1,
-        total: 0,
-        lastPage: 1
-      },
-      read: 0,
-      no_read: 0
-    }
-    // add context
-    this.LoadingProvider = createContext({
-      loading : this.state.loading,
-      setLoading : (value) => this.setState({ loading: value })
-    });
+  state = {
+    activeTabKey: "",
+    current: true,
+    loading: false,
+    is_render: false,
+    toggle: false,
+    screenY: 0,
+    screenX: 0,
+    screen_lg: false,
+    refresh: false,
+    online: true,
+    config_entity: {
+      render: false,
+      disabled: false,
+      entity_id: ""
+    },
+    entity_id: "",
+    notification: {
+      data: [],
+      page: 1,
+      total: 0,
+      lastPage: 1
+    },
+    read: 0,
+    no_read: 0
   }
 
   componentDidMount = async () => {
@@ -325,6 +318,17 @@ class MyApp extends App {
               {/* logica de page auth */}
               <Show condicion={isLoggin}>
                 <Fragment>
+                  <AppContext.Provider value={{ 
+                      isLoading: loading,
+                      fireLoading: this.fireLoading,
+                      app: _app,
+                      entity_id,
+                      fireEntity: this.fireEntity,
+                      auth,
+                      isLoggin,
+                      logout: this.logout
+                    }}
+                  >
                       <div className="full-layout" id="main">
                         <div className="gx-app-layout ant-layout ant-layout-has-sider">
                           <div className="ant-layout">
@@ -384,7 +388,8 @@ class MyApp extends App {
                         className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
                         onClick={this.handleToggle}
                       />
-                    </Fragment>
+                  </AppContext.Provider>
+                </Fragment>
               </Show>
 
               <Show condicion={!redirect && !isLoggin}>

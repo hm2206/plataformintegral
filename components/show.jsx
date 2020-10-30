@@ -1,11 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-export default class Show extends Component {
-
-    render() {
-        let { condicion, children } = this.props;
-        if (condicion) return children || null;
-        return null;
-    }
-
+const Show = ({ condicion, children, predeterminado }) => {
+    if (condicion) return children || null;
+    else return predeterminado ||  null;
 }
+
+
+export default Show;

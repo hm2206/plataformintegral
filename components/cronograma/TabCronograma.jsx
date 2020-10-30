@@ -1,205 +1,102 @@
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
+import { CronogramaContext } from '../../contexts/CronogramaContext';
+import { Tab } from 'semantic-ui-react'
+import Router from 'next/router';
 import Work from './work';
 import Afectacion from './afectacion';
-import Remuneracion from './_remuneracion';
-import Descuento from './_descuento.jsx';
+import Remuneracion from './remuneracion';
+import Descuento from './descuento.jsx';
 import Aportacion from './aportacion';
-import { Tab } from 'semantic-ui-react'
 import Obligacion from './obligacion';
 import Sindicato from './sindicato';
 import Detallado from './detallado';
 
-export default class TabCronograma extends Component
-{
+const TabCronograma = (props) => {
 
-    constructor(props) {
-        super(props);
+    const { edit, active, block, setActive, loading, setIsEditable } = useContext(CronogramaContext);
+
+    const onTabChange = (e, { activeIndex }) => {
+        setActive(activeIndex);
     }
 
-    render() {
+    let styles = {
+        border: '0px'
+    }
 
-        let { cancel, edit, send, total, ubigeos, bancos, screenX, situacion_laborals } = this.props;
-
-        let styles = {
-            border: '0px'
-        }
-
-        const panes = [
+    const panes = [
             { 
-                menuItem: {key: 'info', icon: 'info circle', content: 'Datos Per.', disabled: edit }, 
+                menuItem: {key: 'info', icon: 'info circle', content: 'Datos Per.', disabled: edit || loading || block }, 
                 render: () => 
                     <Tab.Pane style={styles}>
-                        <Work 
-                            type_documents={this.props.type_documents}
-                            bancos={bancos}
-                            ubigeos={ubigeos}
-                            edit={this.props.edit}
-                            historial={this.props.historial}
-                            send={send}
-                            cancel={cancel}
-                            total={total}
-                            updatingHistorial={this.props.updatingHistorial}
-                            setLoading={this.props.setLoading}
-                            screenX={screenX}
-                        />
+                        <Work/>
                     </Tab.Pane> 
             },
             {
-                menuItem: {key: 'afectacion', icon: 'cogs', content: 'Config. Trab.', disabled: edit },
+                menuItem: {key: 'afectacion', icon: 'cogs', content: 'Config. Trab.', disabled: edit || loading || block },
                 render: () => (
                     <Tab.Pane style={styles}>
-                        <Afectacion
-                            situacion_laborals={situacion_laborals}
-                            bancos={bancos}
-                            ubigeos={ubigeos}
-                            edit={this.props.edit}
-                            historial={this.props.historial}
-                            send={send}
-                            cancel={cancel}
-                            total={total}
-                            setEdit={this.props.setEdit}
-                            setLoading={this.props.setLoading}
-                            setSend={this.props.setSend}
-                            setCancel={this.props.setCancel}
-                            updatingHistorial={this.props.updatingHistorial}
-                            screenX={screenX}
-                        /> 
+                        <Afectacion/>
                     </Tab.Pane>
                 )
             },
             {
-                menuItem: {key: 'remuneracion', icon: 'dollar', content: 'Remuneración', disabled: edit },
+                menuItem: {key: 'remuneracion', icon: 'dollar', content: 'Remuneración', disabled: edit || loading || block },
                 render: () => (
                     <Tab.Pane style={styles}>
-                        <Remuneracion
-                            bancos={bancos}
-                            ubigeos={ubigeos}
-                            edit={this.props.edit}
-                            historial={this.props.historial}
-                            data={this.props.remuneraciones}
-                            send={send}
-                            cancel={cancel}
-                            total={total}
-                            setEdit={this.props.setEdit}
-                            setLoading={this.props.setLoading}
-                            setSend={this.props.setSend}
-                            setCancel={this.props.setCancel}
-                            updatingHistorial={this.props.updatingHistorial}
-                            screenX={screenX}
-                        /> 
+                        <Remuneracion/>
                     </Tab.Pane>
                 )
             },
             {
-                menuItem: {key: 'descuento', icon: 'arrow down cart', content: 'Descuentos', disabled: edit },
+                menuItem: {key: 'descuento', icon: 'arrow down cart', content: 'Descuentos', disabled: edit || loading || block },
                 render: () => (
                     <Tab.Pane style={styles}>
-                        <Descuento
-                            bancos={bancos}
-                            ubigeos={ubigeos}
-                            edit={this.props.edit}
-                            historial={this.props.historial}
-                            data={this.props.descuentos}
-                            send={send}
-                            cancel={cancel}
-                            total={total}
-                            setEdit={this.props.setEdit}
-                            setLoading={this.props.setLoading}
-                            setSend={this.props.setSend}
-                            updatingHistorial={this.props.updatingHistorial}
-                            screenX={screenX}
-                        /> 
+                        <Descuento/>
                     </Tab.Pane>
                 )
             },
             {
-                menuItem: {key: 'detallado', icon: 'briefcase', content: 'Más descuentos', disabled: edit },
+                menuItem: {key: 'detallado', icon: 'briefcase', content: 'Más descuentos', disabled: edit || loading || block },
                 render: () => (
                     <Tab.Pane style={styles}>
-                        <Detallado
-                            bancos={bancos}
-                            ubigeos={ubigeos}
-                            edit={this.props.edit}
-                            historial={this.props.historial}
-                            send={send}
-                            total={total}
-                            setEdit={this.props.setEdit}
-                            setLoading={this.props.setLoading}
-                            setSend={this.props.setSend}
-                            updatingHistorial={this.props.updatingHistorial}
-                            screenX={screenX}
-                        /> 
+                        <Detallado/>
                     </Tab.Pane>
                 )
             },
             {
-                menuItem: {key: 'obligacion', icon: 'balance scale', content: 'Obligaciones', disabled: edit },
+                menuItem: {key: 'obligacion', icon: 'balance scale', content: 'Obligaciones', disabled: edit || loading || block },
                 render: () => (
                     <Tab.Pane style={styles}>
-                        <Obligacion
-                            bancos={bancos}
-                            ubigeos={ubigeos}
-                            edit={this.props.edit}
-                            historial={this.props.historial}
-                            send={send}
-                            cancel={cancel}
-                            total={total}
-                            setEdit={this.props.setEdit}
-                            setLoading={this.props.setLoading}
-                            setSend={this.props.setSend}
-                            updatingHistorial={this.props.updatingHistorial}
-                            screenX={screenX}
-                        /> 
+                        <Obligacion/>
                     </Tab.Pane>
                 )
             },
             {
-                menuItem: {key: 'sindicato', icon: 'users', content: 'Afiliación', disabled: edit },
+                menuItem: {key: 'sindicato', icon: 'users', content: 'Afiliación', disabled: edit || loading || block },
                 render: () => (
                     <Tab.Pane style={styles}>
-                        <Sindicato
-                            bancos={bancos}
-                            ubigeos={ubigeos}
-                            edit={this.props.edit}
-                            historial={this.props.historial}
-                            send={send}
-                            cancel={cancel}
-                            total={total}
-                            setEdit={this.props.setEdit}
-                            setLoading={this.props.setLoading}
-                            setSend={this.props.setSend}
-                            updatingHistorial={this.props.updatingHistorial}
-                            screenX={screenX}
-                        /> 
+                        <Sindicato/>
                     </Tab.Pane>
                 )
             },
             {
-                menuItem: {key: 'aportacion', icon: 'certificate', content: 'Aporte Empleador', disabled: edit },
+                menuItem: {key: 'aportacion', icon: 'certificate', content: 'Aporte Empleador', disabled: edit || loading || block },
                 render: () => (
                     <Tab.Pane style={styles}>
-                        <Aportacion
-                            bancos={bancos}
-                            ubigeos={ubigeos}
-                            edit={this.props.edit}
-                            historial={this.props.historial}
-                            data={this.props.aportaciones}
-                            send={send}
-                            cancel={cancel}
-                            total={total}
-                            setEdit={this.props.setEdit}
-                            setLoading={this.props.setLoading}
-                            setSend={this.props.setSend}
-                            updatingHistorial={this.props.updatingHistorial}
-                            screenX={screenX}
-                        /> 
+                        <Aportacion/>
                     </Tab.Pane>
                 )
             }
-        ];
+    ];
 
-        return <Tab panes={panes} menu={this.props.menu} activeIndex={this.props.activeIndex} onTabChange={this.props.onTabChange} className="w-100 mt-3"/>
-
-    }
-
+    return <Tab panes={panes} 
+                menu={props.menu} 
+                activeIndex={active} 
+                onTabChange={onTabChange} 
+                className="w-100 mt-3"
+            />
 }
+
+
+
+export default TabCronograma;

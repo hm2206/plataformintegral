@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { authentication } from '../../services/apis';
 import { Select, Button } from 'semantic-ui-react';
 import uid from 'uid';
+import Skeleton from 'react-loading-skeleton';
 
 /**
  * setting format for select
@@ -47,7 +48,7 @@ const ButtonRefresh = ({ message, onClick = null }) => {
 }
 
 
-const SelectBase = ({ execute, refresh, url, api, obj, id, value, text, name, onChange, valueChange, placeholder = 'Seleccionar' }) => {
+const SelectBase = ({ execute, refresh, url, api, obj, id, value, text, name, onChange, valueChange, placeholder = 'Seleccionar', disabled = false }) => {
 
     const [datos, setDatos] = useState([])
     const [is_error, setIsError] = useState(false);
@@ -106,14 +107,16 @@ const SelectBase = ({ execute, refresh, url, api, obj, id, value, text, name, on
             onClick={async (e) => await getDatos()}
             message="Volver a obtener los datos"
           /> 
-        : <Select fluid
-            disabled={loading}
-            placeholder={loading ? 'Cargando...' : placeholder}
-            options={datos}
-            name={name}
-            onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-            value={valueChange || ""}
-          />
+        :   loading 
+            ?   <Skeleton height="37px"/>
+            :   <Select fluid
+                    disabled={loading || disabled}
+                    placeholder={loading ? 'Cargando...' : placeholder}
+                    options={datos}
+                    name={name}
+                    onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                    value={valueChange || ""}
+                />
 }
 
 

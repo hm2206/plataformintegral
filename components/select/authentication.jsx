@@ -76,7 +76,7 @@ const SelectEntityDependenciaNotUser = ({ id = "id", user_id, entity_id, name, v
 }
 
 
-const SelectDependencia = ({ id = "id", name, value, onChange, refresh = false }) => {
+const SelectDependencia = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
                 api={authentication}
                 url={`dependencia`}
@@ -85,11 +85,12 @@ const SelectDependencia = ({ id = "id", name, value, onChange, refresh = false }
                 text="nombre"
                 obj="dependencia"
                 name={name}
-                valueChange={value || ""}
+                valueChange={`${value}`|| ""}
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
                 placeholder="Seleccionar Dependencia"
                 refresh={refresh}
                 execute={true}
+                disabled={disabled}
             />
 }
 
