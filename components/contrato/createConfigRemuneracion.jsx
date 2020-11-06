@@ -44,6 +44,8 @@ export default class CreateConfigRemuneracion extends Component
             let { success, message } = res.data;
             let icon = success ? 'success' : 'error';
             await Swal.fire({ icon, text: message });
+            let { onCreate } = this.props;
+            if (typeof onCreate == 'function') onCreate(message);
         })
         .catch(err => Swal.fire({ icon: 'error', text: 'Algo salió más!'}));    
         this.setState({ loading: false });

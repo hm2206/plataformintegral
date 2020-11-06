@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import { BtnBack } from '../Utils';
 import { Form, Select } from 'semantic-ui-react';
-import { CronogramaContext } from '../../contexts/CronogramaContext';
+import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { backUrl } from '../../services/utils';
 import Show from '../show';
 import Router from 'next/router';

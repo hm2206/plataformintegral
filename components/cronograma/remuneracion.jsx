@@ -4,7 +4,7 @@ import { Button, Form, Input } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import Skeleton from 'react-loading-skeleton';
-import { CronogramaContext } from '../../contexts/CronogramaContext';
+import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../contexts/AppContext';
 
 const PlaceHolderButton = ({ count = 1 }) => <Skeleton height="38px" count={count}/>

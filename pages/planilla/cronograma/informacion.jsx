@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Body, DrownSelect } from '../../../components/Utils';
+import { Body, DrownSelect, BtnFloat } from '../../../components/Utils';
 import { Button, Form, Message, Icon } from 'semantic-ui-react';
 import { Row } from 'react-bootstrap';
 import Show from '../../../components/show';
 import dynamic from 'next/dynamic';
 import HeaderCronograma from '../../../components/cronograma/headerCronograma';
-import { CronogramaProvider } from '../../../contexts/CronogramaContext';
+import { CronogramaProvider } from '../../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../../contexts/AppContext';
 import { unujobs } from '../../../services/apis';
 import atob from 'atob';
@@ -22,7 +22,6 @@ import ImpDescuento from '../../../components/cronograma/impDescuento';
 import Open from '../../../components/cronograma/open';
 import Cerrar from '../../../components/cronograma/close';
 import SearchCronograma from '../../../components/cronograma/searchCronograma';
-import { BtnFloat } from '../../../components/Utils';
 import { credencials } from '../../../env.json';
 
 const FooterCronograma = dynamic(() => import('../../../components/cronograma/footerCronograma'), { ssr: false });
@@ -53,6 +52,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
     const [is_editable, setIsEditable] = useState(true); 
     const [is_updatable, setIsUpdatable] = useState(true);
     const [change_page, setChangePage] = useState(false);
+    const [cancel, setCancel] = useState(false);
 
     // validaciones
     const isHistorial = Object.keys(historial).length;
@@ -112,6 +112,16 @@ const InformacionCronograma = ({ cronograma, success }) => {
     useEffect(() => {
         if (success && historial.cronograma_id != cronograma.id) findHistorial();
     }, [cronograma.id]);
+
+    // activar edicion
+    useEffect(() => {
+        if (true) setCancel(false);
+    }, [edit]);
+
+    // activar cancel
+    useEffect(() => {
+        if (cancel) setEdit(false);
+    }, [cancel]);
 
     // configurar cabezeras
     const getHeaders = () => {
@@ -287,10 +297,11 @@ const InformacionCronograma = ({ cronograma, success }) => {
                 setOption(name);
                 break;
             case 'report':
+            case 'email':
                 let newQuery = {};
                 newQuery.id = query.id;
                 newQuery.href = pathname;
-                await push({ pathname: parseUrl(pathname, 'report'), query: newQuery });
+                await push({ pathname: parseUrl(pathname, name), query: newQuery });
                 break;
             case 'sync-remuneracion':
                 await syncRemuneracion();
@@ -340,7 +351,9 @@ const InformacionCronograma = ({ cronograma, success }) => {
                 loading,
                 setLoading,
                 is_updatable, 
-                setIsUpdatable
+                setIsUpdatable,
+                cancel,
+                setCancel,
             }}
         >
             <div className="col-md-12 form ui">

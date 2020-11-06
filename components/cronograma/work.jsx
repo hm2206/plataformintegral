@@ -4,7 +4,7 @@ import { parseOptions } from '../../services/utils';
 import Show from '../show';
 import Swal from 'sweetalert2';
 import moment from 'moment';
-import { CronogramaContext } from '../../contexts/CronogramaContext';
+import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import Skeleton from 'react-loading-skeleton';
 
 const PlaceholderInput = () => <Skeleton height="37px"/> 

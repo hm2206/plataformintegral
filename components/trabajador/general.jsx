@@ -195,7 +195,7 @@ export default class General extends Component
                                     <input type="text" 
                                         value={person.address}
                                         name="address"
-                                        onChange={(e) => this.handleInput(e.target, 'person')}
+                                        readOnly
                                     />
                                 </Form.Field>
                             </div>
@@ -206,7 +206,7 @@ export default class General extends Component
                                     <input type="tel" 
                                         value={person.phone ? person.phone : ''}
                                         name="phone"
-                                        onChange={(e) => this.handleInput(e.target, 'person')}
+                                        readOnly
                                     />
                                 </Form.Field>
                             </div>
@@ -217,31 +217,12 @@ export default class General extends Component
                                     <input type="email" 
                                         value={person.email_contact ? person.email_contact : ''}
                                         name="email_contact"
-                                        onChange={(e) => this.handleInput(e.target, 'person')}
+                                        readOnly
                                     />
                                 </Form.Field>
                             </div>
 
                             <div className="col-md-12 mb-4 mt-4 text-right col-6">
-                                <Show condicion={edit.person}>
-                                    <div className="row">
-                                        <div className="col-6">
-                                            <Button color="red"
-                                                onClick={this.leaveForm}
-                                                fluid
-                                            >
-                                                <i className="fas fa-trash-alt"></i> Cancelar Cambios
-                                            </Button>
-                                        </div>
-
-                                        <div className="col-6">
-                                            <Button color="teal" fluid>
-                                                <i className="fas fa-save"></i> Actualizar Información
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </Show>
-
                                 <hr/>
                             </div>
 

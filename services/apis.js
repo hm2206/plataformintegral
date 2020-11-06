@@ -117,3 +117,19 @@ export const tramite = {
     path: url.API_TRAMITE
 };
 
+
+/**
+ * api para consumir el sistema de project-tracking
+ */
+export const projectTracking = {
+    get: async (path, config = { }, ctx) => {
+        return axios.get(`${url.API_PROJECT_TRACKING}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    post: async (path, body = { }, config = { }, ctx) => {
+        return axios.post(`${url.API_PROJECT_TRACKING}/${path}`, body, await ConfigHeaders(ctx, config));
+    },
+    fetch: async (path, config = { }, ctx) => {
+        return fetch(`${url.API_PROJECT_TRACKING}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    path: url.API_PROJECT_TRACKING
+};

@@ -109,6 +109,7 @@ const SelectDependenciaPerfilLaboral = ({ dependencia_id, id = "id", name, value
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
                 placeholder="Seleccionar Perfil Laboral"
                 refresh={refresh}
+                execute={true}
             />
         :   <Select placeholder="Seleccionar Perfil Laboral" disabled fluid value="" options={[]}/>
 }

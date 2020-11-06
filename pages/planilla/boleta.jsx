@@ -145,7 +145,7 @@ export default class DuplicadoBoleta extends Component {
                         headers={ ["#ID", "Apellidos y Nombres", "Año", "Mes", "Cargo", 'Tip. Categoría']}
                         index={[
                             { key: "id", type: "text" },
-                            { key: "person.fullname", type: "text" },
+                            { key: "person.fullname", type: "text", className: 'uppercase' },
                             { key: "cronograma.year", type: "icon" },
                             { key: "cronograma.mes", type: "icon", bg: "dark" },
                             { key: "cargo.alias", type: "icon", bg: "dark" },
@@ -157,12 +157,7 @@ export default class DuplicadoBoleta extends Component {
                                     key: "report",
                                     icon: "fas fa-file-pdf",
                                     title: "Reporte de Boleta"
-                                }, 
-                                // {
-                                //     key: "download",
-                                //     icon: "fas fa-download",
-                                //     title: "Reporte de Boleta"
-                                // }, 
+                                }
                             ]
                         }
                         getOption={this.getOption}
@@ -198,7 +193,7 @@ export default class DuplicadoBoleta extends Component {
                     </Datatable>
                     <div className="text-center">
                         <hr/>
-                        <Pagination defaultActivePage={query.page || 1} 
+                        <Pagination activePage={query.page || 1} 
                             totalPages={page_historial.last_page || 0}
                             enabled={loading}
                             onPageChange={this.handlePage}

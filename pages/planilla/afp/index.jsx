@@ -1,107 +1,76 @@
-import React, {Component, Fragment} from 'react';
-import {Button, Form} from 'semantic-ui-react';
+import React, {Fragment, useContext} from 'react';
+import {Button, Form, Pagination} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
-import { AUTHENTICATE, AUTH } from '../../../services/auth';
-import { allAfp } from '../../../storage/actions/afpActions';
+import { AUTHENTICATE } from '../../../services/auth';
 import Show from '../../../components/show';
 import { Confirm } from '../../../services/utils';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import { AppContext } from '../../../contexts/AppContext';
 
-export default class Afp extends Component {
+const Afp = ({ query, success, afps }) => {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            page: false,
-            loading: false,
-            estado: "1"
-        }
+    const app_context = useContext(AppContext);
 
-        this.getOption = this.getOption.bind(this);
+    const handleSearch = () => {
+        let { push, query, pathname } = Router;
+        query.page = 1;
+        push({ pathname, query });
     }
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let {query, pathname, store} = ctx;
-        query.page = query.page ? query.page : 1;
-        await store.dispatch(allAfp(ctx));
-        let { afps } = store.getState().afp;
-        return {query, pathname, afps}
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }) => {
-        this.setState({ [name]: value })
-    }
-
-    getOption = async (obj, key, index) => {
+    // opciones
+    const getOption = async (obj, key, index) => {
         let {pathname, push} = Router;
         let id = btoa(obj.id);
-        this.setState({ loading: true });
         switch (key) {
             case 'edit':
                 await push({ pathname: `${pathname}/${key}`, query: { id } });
                 break;
             case 'delete':
-                await this.changedState(obj, 0);
+                await changedState(obj, 0);
                 break;
             case 'restore':
-                await this.changedState(obj, 1);
+                await changedState(obj, 1);
                 break;
             default:
                 break;
         }
-        this.setState({ loading: false });
     }
 
-    handleSearch = () => {
-        this.setState({ loading: true });
-        let { pathname, query, push } = Router;
-        query.estado = this.state.estado;
-        push({ pathname, query });
-    }
-
-    handlePage = async (e, { activePage }) => {
-        this.setState({ loading: true });
+    // cambiar página
+    const handlePage = async (e, { activePage }) => {
         let { pathname, query, push } = Router;
         query.page = activePage;
         await push({ pathname, query });
-        this.setState({ loading: false });
     }
 
-    changedState = async (obj, estado = 1) => {
+    // CAMBIAR ESTADO DEL AFP
+    const changedState = async (obj, estado = 1) => {
         let answer = await Confirm("warning", `¿Deseas ${estado ? 'restaurar' : 'desactivar'} el Ley Social "${obj.descripcion}"?`);
         if (answer) {
-            this.setState({ loading: true });
+            app_context.fireLoading(true);
             await unujobs.post(`afp/${obj.id}/estado`, { estado })
             .then(async res => {
+                app_context.fireLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
-                await this.handleSearch();
-            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
-            this.setState({ loading: false });
+                await handleSearch();
+            }).catch(err => {
+                app_context.fireLoading(false);
+                Swal.fire({ icon: 'error', text: err.message })
+            });
         }
     }
 
-    render() {
-
-        let {loading} = this.state;
-        let { afps, query } = this.props;
-
-        return (
+    return (
                 <Form className="col-md-12">
                     <Body>
                         <Datatable titulo="Lista de Leyes Sociales"
                         isFilter={false}
-                        loading={loading}
                         headers={
                             ["#ID", "Descripcion", "Porcentaje", "Aporte Obligatorio", "Prima Seguro", "Prima Limite", "Privado", "Estado"]
                         }
@@ -187,14 +156,21 @@ export default class Afp extends Component {
                             ]
                         }
                         optionAlign="text-center"
-                        getOption={this.getOption}
-                        data={afps}
+                        getOption={getOption}
+                        data={afps.data || []}
                     />
                 </Body>
 
+                <div className="table-responsive text-center">
+                    <Pagination
+                        activePage={query.page}
+                        onPageChange={handlePage}
+                        totalPages={afps.lastPage || 1}
+                    />
+                </div>
+
                 <BtnFloat
                     onClick={async (e) => {
-                        await this.setState({ loading: true });
                         let { pathname, push } = Router;
                         push({ pathname: `${pathname}/create` });
                     }}
@@ -203,6 +179,20 @@ export default class Afp extends Component {
                 </BtnFloat>
             </Form>
         )
-    }
-
 }
+
+// server rendering
+Afp.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { query } = ctx;
+    query.page = typeof query.page != 'undefined' ? query.page : 1;
+    // get Afp
+    let { success, afps } = await unujobs.get(`afp?page=${query.page}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({ success: false }))
+    return { query, success, afps: afps || {} };
+}
+
+
+// export
+export default Afp;

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import { Icon, Button } from 'semantic-ui-react';
-import { CronogramaContext } from '../../contexts/CronogramaContext';
+import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../contexts/AppContext';
 import { Confirm } from '../../services/utils';
 import Show from '../show';
@@ -20,7 +20,7 @@ const FooterCronograma = () => {
         cronograma, edit, setEdit, send, setSend, total, 
         last_page, block, setBlock, loading, historial, 
         page, setPage, setForm, setRefresh, is_editable,
-        setOption, setChangePage, is_updatable
+        setOption, setChangePage, is_updatable, setCancel,
     } = useContext(CronogramaContext);
 
     const isHistorial = Object.keys(historial).length;
@@ -203,7 +203,7 @@ const FooterCronograma = () => {
                                     >
                                         <Button color={edit ? 'red' : 'teal'}
                                             disabled={loading || block || send}
-                                            onClick={(e) => setEdit(!edit)}
+                                            onClick={(e) => edit ? setCancel(true) : setEdit(true)}
                                             fluid
                                         >
                                             <i title={edit ? 'Cancelar' : 'Editar'} className={edit ? 'fas fa-times mr-1' : 'fas fa-pencil-alt mr-1'}></i> 

@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { responsive } from '../../services/storage.json';
 import {  Confirm } from '../../services/utils';
 import Skeleton from 'react-loading-skeleton';
-import { CronogramaContext } from '../../contexts/CronogramaContext';
+import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../contexts/AppContext';
 
 const PlaceHolderButton = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>

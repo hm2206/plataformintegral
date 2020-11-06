@@ -1,512 +1,469 @@
-import React, { Component, Fragment } from 'react';
+import React, { Fragment, useEffect, useState, useContext } from 'react';
 import { Form, Button, Select, Checkbox } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
 import { Body, BtnFloat, BtnBack } from '../../../components/Utils';
-import { findInfo } from '../../../storage/actions/infoActions';
-import { unujobs, recursoshumanos, authentication } from '../../../services/apis';
+import { unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
 import CreateConfigRemuneracion from '../../../components/contrato/createConfigRemuneracion';
 import Swal from 'sweetalert2';
-import { Confirm, parseOptions, backUrl } from '../../../services/utils'
+import { Confirm, backUrl } from '../../../services/utils'
 import { tipo_documento } from '../../../services/storage.json';
+import atob from 'atob'
+import ContentControl from '../../../components/contentControl';
+import Skeleton from 'react-loading-skeleton';
+import { AppContext } from '../../../contexts/AppContext';
 
-export default class Pay extends Component
-{
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query, store } = ctx;
-        await store.dispatch(findInfo(ctx));
-        let { info } = store.getState().info;
-        return { pathname, query, info }
-    }
+const PlaceholderInput = ({ height = "38px" }) => <Skeleton height={height}/>
 
-    state = {
-        loading: false,
-        work: {},
-        configs: [],
-        situacion_laborals: [],
-        perfil_laboral: {},
-        dependencia: {},
-        edit: false
-    }
+const PlaceholderConfigs = () => {
 
-    componentDidMount = async () => {
-        let { info } = this.props;
-        this.props.fireLoading(true);
-        this.props.fireEntity({ render: true, disabled: true, entity_id: info.entity_id });
-        this.getSituacionLaboral();
-        this.getPerfilLaboral();
-        this.getDependencia();
-        await this.getWork();
-        await this.getConfig();
-        this.props.fireLoading(false);
-    }
+    const array = [1, 2, 3, 4];
 
-    componentWillReceiveProps = (nextProps) => {
-        let { query } = this.props;
-        if (!nextProps.query.create && query.create != nextProps.query.create) {
-            this.getConfig();
-        }
-    }
+    return (
+        <Fragment>
+            {array.map(a => 
+                <div className="col-md-12 mb-2" 
+                    style={{ 
+                        border: "1.5px solid rgba(0, 0, 0, 0.3)", 
+                        paddingTop: "0.4em", 
+                        paddingBottom: "0.8em", 
+                        borderRadius: "0.3em"
+                    }} 
+                    key={`placeholder-config-${a}`}
+                >
+                    <div className="row">
+                        <div className="col-md-6">
+                            <Form.Field>
+                                <b className="mb-2"><PlaceholderInput height={"20px"}/></b>
+                                <PlaceholderInput/>
+                            </Form.Field>
+                        </div>
+        
+                        <div className="col-md-4 col-6">
+                            <b className="mb-2"><PlaceholderInput height={"20px"}/></b>
+                            <div>
+                                <PlaceholderInput/>
+                            </div>
+                        </div>
+                                                                    
+                        <div className="col-md-2 col-6">
+                            <b className="mb-2"><PlaceholderInput height={"20px"}/></b>
+                            <div>
+                                <PlaceholderInput/>
+                            </div>                      
+                        </div>
+                    </div>
+                </div>     
+            )}
+        </Fragment>
+    )
+}
 
-    handleBack = () => {
-        let { push, pathname, query } = Router;
-        let { href } = query;
-        if (href) push({ pathname: href });
-        else push({ pathname: backUrl(pathname), query });
-    }
+// componente principal
+const Pay = ({ success, info, query }) => {
 
-    handleFile = (path) => {
-        let a = document.createElement('a');
-        a.href = `${unujobs.path}/${path}`;
-        a.target = '_blank';
-        a.click();
-    }
+    // app
+    const app_context = useContext(AppContext);
 
-    getPerfilLaboral = async () => {
-        let { info } = this.props;
-        await authentication.get(`perfil_laboral/${info.perfil_laboral_id}`)
-        .then(res => {
-            let { success, message, perfil_laboral } = res.data;
-            if (!success) throw new Error(message);
-            this.setState({ perfil_laboral })
-        })
-        .catch(err => console.log(err.message));
-    }
+    // estados
+    const [configs, setConfigs] = useState([]);
+    const [old, setOld] = useState([]);
+    const [edit, setEdit] = useState(false);
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [option, setOption] = useState("");
 
-    getDependencia = async () => {
-        let { info } = this.props;
-        await authentication.get(`dependencia/${info.dependencia_id}`)
-        .then(res => {
-            let { success, message, dependencia } = res.data;
-            if (!success) throw new Error(message);
-            this.setState({ dependencia })
-        })
-        .catch(err => console.log(err.message));
-    }
-
-    getSituacionLaboral = async (page = 1) => {
-        await unujobs.get(`situacion_laboral?page=${page}`)
-        .then(async res => {
-            let { data, last_page } = res.data;
-            this.setState(state => ({ situacion_laborals: [...state.situacion_laborals, ...data] }));
-            if (last_page > page + 1) await this.getSituacionLaboral(page + 1);
-        }).catch(err => console.log(err.message));
-    }
-
-    getWork = async () => {
-        this.setState({ loading: true })
-        let { info } = this.props;
-        this.setState({ loading: true });
-        await unujobs.get(`work/${info.work_id}`)
-        .then(res => this.setState({ work: res.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false })
-    }
-
-    getConfig = async () => {
-        let { info } = this.props;
-        this.setState({ loading: true, edit: false });
+    // obtener las configuraciones de pago
+    const getConfig = async () => {
+        setCurrentLoading(true);
         await unujobs.get(`info/${info.id}/config`)
-        .then(res => this.setState({ configs: res.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }, index) => {
-        this.setState(state => {
-            let newObj = state.configs[index];
-            newObj[name] = value;
-            state.configs[index] = newObj;
-            return { configs: state.configs, edit: true };
+        .then(res => {
+            setConfigs(res.data);
+            setOld(JSON.parse(JSON.stringify(res.data)));
+        })
+        .catch(err => {
+            setConfigs([]);
+            setOld([]);
         });
+        setCurrentLoading(false);
     }
 
-    delete = async (id) => {
+    // cambiar montos
+    const handleInput = ({ name, value }, index) => {
+        let newConfigs = JSON.parse(JSON.stringify(configs));
+        let newObj = newConfigs[index];
+        newObj[name] = value;
+        newConfigs[index] = newObj;
+        setConfigs(newConfigs);
+    }
+
+    // eliminar configuracion de pago
+    const deleteConfig = async (id) => {
         let value = await Confirm("warning", "¿Desea elimnar la remuneración?", "Confirmar")
         if (value) {
-            let { info } = this.props;
-            this.setState({ loading: true, edit: false });
+            app_context.fireLoading(true);
             await unujobs.post(`info/${info.id}/delete_config`, { _method: 'DELETE', config_id: id })
             .then(async res => {
+                app_context.fireLoading(false);
                 let { success, message } = res.data;
-                let icon = success ? 'success' : 'error';
-                await Swal.fire({ icon, text: message });
-                if (success) this.getConfig();
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await getConfig();
             })
-            .catch(err => Swal.fire({ icon: 'error', text: "Algo salió mal" }));
-            this.setState({ loading: false });
+            .catch(err => {
+                app_context.fireLoading(false);
+                Swal.fire({ icon: 'error', text: err.message });
+            });
         }
     }
 
-    update = async () => {
-        let form = new FormData;
-        form.append('configs', JSON.stringify(this.state.configs));
-        form.append('_method', 'PUT');
-        this.setState({ loading: true });
-        await unujobs.post(`info/${this.props.info.id}/config`, form)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) {
-                this.setState({ edit: false });
-            }
-        }).catch(err => Swal.fire({ icon: 'error', text: 'Algo salió mal :(' }))
-        this.setState({ loading: false });
-    }
-
-    updateInfo = async () => {
-        this.props.fireLoading(true)
-        let { info } = this.props;
-        let datos = new FormData;
-        datos.append('fecha_de_ingreso', document.getElementById('fecha_de_ingreso').value)
-        datos.append('fecha_de_cese', document.getElementById('fecha_de_cese').value)
-        datos.append('_method', 'PUT')
-        // actualizar
-        await unujobs.post(`info/${info.id}`, datos)
-            .then(res => {
-                this.props.fireLoading(false)
+    // actualizar configuraciones de pagos
+    const updateConfig = async () => {
+        let answer = await Confirm('warning', `¿Deseas actualizar la configuración?`, 'Confirmar');
+        if (answer) {
+            app_context.fireLoading(true);
+            let form = new FormData;
+            form.append('configs', JSON.stringify(configs));
+            form.append('_method', 'PUT');
+            await unujobs.post(`info/${info.id}/config`, form)
+            .then(async res => {
+                app_context.fireLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
-                Swal.fire({ icon: 'success', text: message });
+                await Swal.fire({ icon: 'success', text: message });
+                setEdit(false);
             }).catch(err => {
-                try {
-                    this.props.fireLoading(false)
-                    let { message, errors } = err.response.data;
-                    Swal.fire({ icon: 'warning', text: message });
-                } catch (error) {
-                    this.props.fireLoading(false)
-                    Swal.fire({ icon: 'error', message: err.message });
-                }
-            });
+                app_context.fireLoading(false);
+                Swal.fire({ icon: 'error', text: err.message })
+            })
+        }
     }
 
-    render() {
+    // cancelar edición
+    const cancelConfig = async () => {
+        setEdit(false);
+        setConfigs(old);
+    }
 
-        let { work, perfil_laboral, dependencia, loading, edit } = this.state;
-        let { info, query, pathname } = this.props;
+    // primera carga
+    useEffect(() => {
+        if (success) getConfig();
+    }, []);
 
-        return (
-            <Fragment>
-                <div className="col-md-12">
-                    <Body>
-                        <div className="card-">
-                            <div className="card-header">
-                                <BtnBack 
-                                    onClick={this.handleBack} 
-                                    disabled={this.state.loading}
-                                /> <span className="ml-4">Configuración de Boleta de Pago</span>
-                            </div>
+    return (
+    <Fragment>
+        <div className="col-md-12">
+            <Body>
+                <div className="card-">
+                    <div className="card-header">
+                        <BtnBack 
+                            onClick={(e) => Router.push(backUrl(Router.pathname))} 
+                        /> <span className="ml-4">Configuración de Remuneraciones</span>
+                    </div>
 
-                            <div className="card-body">
-                                <Form>
+                    <div className="card-body">
+                        <Form>
+                            <div className="row">
+                                <div className="col-md-4 mt-3 text-center">
+                                    <img src={info && info.person && info.person.image_images && info.person.image_images.image_200x200 || '/img/perfil.jpg'}
+                                        style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "50%" }}
+                                    />
+                                            
                                     <div className="row">
-                                        <div className="col-md-4 mt-3 text-center">
-                                            <img src={work && work.person && work.person.image_images && work.person.image_images.image_200x200 || '/img/perfil.jpg'}
-                                                style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "50%" }}
+                                        <div className="col-md-12 mt-3">
+                                            <h3 className="text-center uppercase">{info && info.person ? info.person.fullname : ''}</h3>
+                                        </div>
+
+                                        <div className="col-md-12 mt-5 text-left">
+                                            <label>Tip. Documento</label>
+                                            <Select
+                                                fluid
+                                                options={tipo_documento}
+                                                value={info && info.person && info.person.document_type || ""}
+                                                disabled
                                             />
-                                            
-                                            <div className="row">
-                                                <div className="col-md-12 mt-3">
-                                                    <h3 className="text-center">{work && work.person ? work.person.fullname : ''}</h3>
-                                                </div>
-
-                                                <div className="col-md-12 mt-5 text-left">
-                                                    <label>Tip. Documento</label>
-                                                    <Select
-                                                        fluid
-                                                        options={tipo_documento}
-                                                        value={work && work.person && work.person.document_type || ""}
-                                                        disabled
-                                                    />
-                                                </div>
-
-                                                <div className="col-md-12 mt-3 text-left">
-                                                    <Form.Field>
-                                                        <label>N° Documento</label>
-                                                        <input type="text"
-                                                            disabled
-                                                            readOnly
-                                                            value={work && work.person && work.person.document_number || ""}
-                                                        />
-                                                    </Form.Field>
-                                                </div>
-                                            </div>
-                                            
                                         </div>
 
-                                        <div className="col-md-8">
-                                            <div className="row">
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Planilla</label>
-                                                        <input type="text" disabled defaultValue={info.planilla && info.planilla.nombre}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Partición Presupuestal</label>
-                                                        <input type="text" disabled defaultValue={info.cargo && info.cargo.descripcion}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Ext. Presupuestal</label>
-                                                        <input type="text" disabled defaultValue={info.cargo && info.cargo.ext_pptto}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">P.A.P</label>
-                                                        <input type="text" disabled defaultValue={info.pap}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Tip. Categoría</label>
-                                                        <input type="text" disabled defaultValue={info.type_categoria && info.type_categoria.descripcion}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">MetaID</label>
-                                                        <input type="text" disabled defaultValue={info.meta && info.meta.metaID}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">ActividadID</label>
-                                                        <input type="text" disabled defaultValue={info.meta && info.meta.actividadID}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Meta</label>
-                                                        <input type="text" disabled defaultValue={info.meta && info.meta.meta}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Dependencia</label>
-                                                        <input type="text" disabled defaultValue={dependencia && dependencia.nombre}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Perfil Laboral</label>
-                                                        <input type="text" disabled defaultValue={perfil_laboral.nombre || ""}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Situación Laboral</label>
-                                                        <Select
-                                                            options={parseOptions(this.state.situacion_laborals, ['sel_sit_lab', '', 'Select. Situación Laboral'], ['id', 'id', 'nombre'])}
-                                                            placeholder="Select. Situación Laboral"
-                                                            value={info.situacion_laboral_id || ""}
-                                                            name="situacion_laboral_id"
-                                                            disabled
-                                                        />
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">{info.is_pay ? 'Remunerada' : 'No Remunerada'}</label>
-                                                        <Checkbox toggle checked={info.is_pay ? true : false} readOnly disabled/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Plaza</label>
-                                                        <input type="text" disabled defaultValue={info.plaza}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Fecha de Ingreso</label>
-                                                        <input type="date" 
-                                                            disabled={info.estado == 1 ? loading : true}
-                                                            defaultValue={info.fecha_de_ingreso || ""} 
-                                                            id="fecha_de_ingreso"
-                                                        />
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Fecha de Cese</label>
-                                                        <input type="date" 
-                                                            disabled={info.estado == 1 ? loading : true} 
-                                                            defaultValue={info.fecha_de_cese || ""} 
-                                                            id="fecha_de_cese"
-                                                        />
-                                                    </Form.Field>
-                                                </div>
-
-
-                                                <div className="col-md-8 mt-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Observación</label>
-                                                        <textarea type="text" disabled defaultValue={info.observacion}/>
-                                                    </Form.Field>
-                                                </div>
-
-                                                <Show condicion={info.file}>
-                                                    <div className="col-md-4 mt-3">
-                                                        <Form.Field>
-                                                            <label htmlFor="">File</label>
-                                                            <Button color="red"
-                                                                onClick={(e) => this.handleFile(info.file)}
-                                                            >
-                                                                <i className="fas fa-file-pdf"></i>
-                                                            </Button>
-                                                        </Form.Field>
-                                                    </div>
-                                                </Show>
-
-                                                <Show condicion={info.estado == 1}>
-                                                    <div className="col-md-4 mt-3">
-                                                        <Form.Field>
-                                                            <label htmlFor="">Actualizar Información</label>
-                                                            <Button color="teal"
-                                                                onClick={this.updateInfo}
-                                                            >
-                                                                <i className="fas fa-save"></i> Guardar
-                                                            </Button>
-                                                        </Form.Field>
-                                                    </div>
-                                                </Show>
-                                            </div>
-                                        </div>
-
-                                        <div className="col-md-12">
-                                            <hr/>
-                                        </div>
-                                    </div>
-                                </Form>
-                            </div>
-
-                            <div className="card-body">
-                                <h4><i className="fas fa-cogs"></i> Configuración Global</h4>
-                                <Form loading={this.state.loading}>
-                                    <div className="row mt-4 justify-content-between">
-                                        {this.state.configs.map((obj, index) => 
-                                            <div className="col-md-12 mb-2" 
-                                                style={{ 
-                                                    border: "1.5px solid rgba(0, 0, 0, 0.3)", 
-                                                    paddingTop: "0.4em", 
-                                                    paddingBottom: "0.8em", 
-                                                    borderRadius: "0.3em"
-                                                }} 
-                                                key={`config-item-${obj.id}`}
-                                            >
-                                                <div className="row">
-                                                    <div className="col-md-6">
-                                                        <Form.Field>
-                                                            <b><span className="text-red">{obj.key}</span>.-<span className="text-primary">{obj.descripcion}</span></b>
-                                                            <input type="number"
-                                                                name="monto"
-                                                                value={obj.monto}
-                                                                onChange={(e) => this.handleInput(e.target, index)}
-                                                                disabled={this.state.loading}
-                                                            />
-                                                        </Form.Field>
-                                                    </div>
-
-                                                    <div className="col-md-4 col-6">
-                                                        <b>Base imponible</b>
-                                                        <div>
-                                                            <Checkbox
-                                                                toggle
-                                                                name="base"
-                                                                checked={obj.base == 0 ? true : false}
-                                                                onChange={(e, o) => this.handleInput({ name: o.name, value: o.value ? 0 : 1 }, index)}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                        
-                                                    <div className="col-md-2 col-6">
-                                                        <b>Opción</b>
-                                                        <Button fluid
-                                                            color="red"
-                                                            onClick={(e) => this.delete(obj.id)}
-                                                        >
-                                                            <i className="fas fa-trash"></i>
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </div>    
-                                        )}
-                                    </div>
-                                </Form>
-                            </div>
-                            <Show condicion={this.state.edit}>
-                                <div className="card-footer">
-                                    <div className="card-body">
-                                        <div className="row">
-                                            <div className="col-md-3 col-6">
-                                                <Button color="red" fluid
-                                                    onClick={this.getConfig}
-                                                >
-                                                    <i className="fas fa-times"></i> Cancelar
-                                                </Button>
-                                            </div>
-
-                                            <div className="col-md-3 col-6">
-                                                <Button color="blue" 
-                                                    fluid
-                                                    onClick={this.update}
-                                                >
-                                                    <i className="fas fa-save"></i> Guardar
-                                                </Button>
-                                            </div>
+                                        <div className="col-md-12 mt-3 text-left">
+                                            <Form.Field>
+                                                <label>N° Documento</label>
+                                                <input type="text"
+                                                    disabled
+                                                    readOnly
+                                                    value={info && info.person && info.person.document_number || ""}
+                                                />
+                                            </Form.Field>
                                         </div>
                                     </div>
                                 </div>
-                            </Show>
-                        </div>
-                    </Body>
+
+                                <div className="col-md-8">
+                                    <div className="row">
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Planilla</label>
+                                                <input type="text" disabled defaultValue={info.planilla || ""}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Partición Presupuestal</label>
+                                                <input type="text" disabled defaultValue={info.cargo || ""}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Ext. Presupuestal</label>
+                                                <input type="text" disabled defaultValue={info.ext_pptto || ""}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">P.A.P</label>
+                                                <input type="text" disabled defaultValue={info.pap}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Tip. Categoría</label>
+                                                <input type="text" disabled defaultValue={info.categoria}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">MetaID</label>
+                                                <input type="text" disabled defaultValue={info.meta}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">ActividadID</label>
+                                                <input type="text" disabled defaultValue={info.actividadID}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Meta</label>
+                                                <input type="text" disabled defaultValue={info.meta}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Dependencia</label>
+                                                <input type="text" disabled defaultValue={info.dependencia && info.dependencia.nombre}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Perfil Laboral</label>
+                                                <input type="text" disabled defaultValue={info.perfil_laboral && info.perfil_laboral.nombre || ""}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Situación Laboral</label>
+                                                <input type="text" disabled defaultValue={info.situacion_laboral || ""}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">{info.is_pay ? 'Remunerada' : 'No Remunerada'}</label>
+                                                <Checkbox toggle checked={info.is_pay ? true : false} readOnly disabled/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Plaza</label>
+                                                <input type="text" disabled defaultValue={info.plaza}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Fecha de Ingreso</label>
+                                                <input type="date" 
+                                                    disabled={true}
+                                                    defaultValue={info.fecha_de_ingreso || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Fecha de Cese</label>
+                                                <input type="date" 
+                                                    disabled={true} 
+                                                    defaultValue={info.fecha_de_cese || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-8 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Observación</label>
+                                                <textarea type="text" disabled defaultValue={info.observacion}/>
+                                            </Form.Field>
+                                        </div>
+
+                                        <Show condicion={info.file}>
+                                            <div className="col-md-4 mt-3">
+                                                <Form.Field>
+                                                    <label htmlFor="">File</label>
+                                                    <Button color="red"
+                                                        onClick={(e) => this.handleFile(info.file)}
+                                                    >
+                                                        <i className="fas fa-file-pdf"></i>
+                                                    </Button>
+                                                </Form.Field>
+                                            </div>
+                                        </Show>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-12">
+                                    <hr/>
+                                </div>
+                            </div>
+                        </Form>
+                    </div>
+
+                    <div className="card-body" id="config">
+                        <h4><i className="fas fa-cogs"></i> Configuración Global</h4>
+                        <Form>
+                            <div className="row mt-4 justify-content-between">
+                                <Show condicion={!current_loading}
+                                    predeterminado={<PlaceholderConfigs/>}
+                                >
+                                    {configs.map((obj, index) => 
+                                        <div className="col-md-12 mb-2" 
+                                            style={{ 
+                                                border: "1.5px solid rgba(0, 0, 0, 0.3)", 
+                                                paddingTop: "0.4em", 
+                                                paddingBottom: "0.8em", 
+                                                borderRadius: "0.3em"
+                                            }} 
+                                            key={`config-item-${obj.id}`}
+                                        >
+                                            <div className="row">
+                                                <div className="col-md-6">
+                                                    <Form.Field>
+                                                        <b><span className="text-red">{obj.key}</span>.-<span className="text-primary">{obj.descripcion}</span></b>
+                                                        <input type="number"
+                                                            name="monto"
+                                                            value={obj.monto}
+                                                            onChange={(e) => handleInput(e.target, index)}
+                                                            disabled={current_loading || !edit}
+                                                        />
+                                                    </Form.Field>
+                                                </div>
+
+                                                <div className="col-md-4 col-6">
+                                                    <b>Base imponible</b>
+                                                    <div>
+                                                        <Checkbox
+                                                            toggle
+                                                            name="base"
+                                                            disabled={current_loading || !edit}
+                                                            checked={obj.base == 0 ? true : false}
+                                                            onChange={(e, o) => handleInput({ name: o.name, value: o.checked ? 0 : 1 }, index)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                            
+                                                <div className="col-md-2 col-6">
+                                                    <b>Opción</b>
+                                                    <Button fluid
+                                                        color="red"
+                                                        disabled={!edit}
+                                                        onClick={(e) => deleteConfig(obj.id)}
+                                                    >
+                                                        <i className="fas fa-trash"></i>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>    
+                                    )}
+                                </Show>
+                            </div>
+                        </Form>
+                    </div>
                 </div>
+            </Body>
+        </div>
 
-                <Show condicion={!this.state.edit}>
-                    <BtnFloat 
-                        onClick={(e) => {
-                            let { query, pathname, push } = Router;
-                            query.create = true;
-                            push({ pathname, query });
-                        }}
-                    >
-                        <i className="fas fa-plus"></i>
-                    </BtnFloat>
-                </Show>
-                {/* Ventanas flotantes */}
-                <Show condicion={query.create}>
-                    <CreateConfigRemuneracion
-                        info={this.props.info}
-                        isClose={(e) => {
-                            query.create = null;
-                            Router.push({ pathname, query })
-                        }}
-                    />
-                </Show>
-            </Fragment>
-        )
-    }
+        <Show condicion={success && info.estado}>
+            <ContentControl>
+                <Show condicion={edit}>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid color="red"onClick={cancelConfig}>
+                            <i className="fas fa-times"></i> Cancelar
+                        </Button>
+                    </div>
 
+                    <div className="col-lg-2 col-6">
+                        <Button fluid color="blue" onClick={updateConfig}>
+                            <i className="fas fa-save"></i> Guardar
+                        </Button>
+                    </div>
+                </Show>
+
+                <Show condicion={!edit}>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid color="teal" onClick={(e) => {
+                            location.href = `${Router.pathname}?id=${query.id}#config`;
+                            setEdit(true);
+                        }}>
+                            <i className="fas fa-pencil-alt"></i> Editar
+                        </Button>
+                    </div>
+                </Show>
+            </ContentControl>
+        </Show>
+
+        <Show condicion={success && !edit}>
+            <BtnFloat 
+                onClick={(e) => setOption("create")}
+                style={{ bottom: "80px" }}
+            >
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
+        </Show>
+        {/* Ventanas flotantes */}
+        <Show condicion={option == 'create'}>
+            <CreateConfigRemuneracion
+                info={info}
+                isClose={(e) => setOption("")}
+                onCreate={(e) => getConfig()}
+            />
+        </Show>
+        
+    </Fragment>)
 }
+
+// server rendering
+Pay.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let id = atob(ctx.query.id || "");
+    // request
+    let { success, info } = await unujobs.get(`info/${id}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({ success: false }));
+    console.log(info);
+    // response
+    return { success, info: info || {}, query: ctx.query };
+}
+
+export default Pay;

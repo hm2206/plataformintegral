@@ -1,47 +1,27 @@
-import React, {Component, Fragment} from 'react';
-import {Button, Form} from 'semantic-ui-react';
+import React, { useState } from 'react';
+import {Button, Form, Select, Pagination} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import { unujobs } from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
-import { pageCargo } from '../../../storage/actions/cargoActions';
 import Swal from 'sweetalert2';
 import { Confirm } from '../../../services/utils';
 
-export default class CargoIndex extends Component {
+const CargoIndex = ({ success, cargos, query }) => {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            page: false,
-            loading: false,
-            estado: "1"
-        }
+    const [form, setForm] = useState({ estado: query.estado });
 
-        this.getOption = this.getOption.bind(this);
+    // cambiar form
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
     }
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let {query, pathname, store} = ctx;
-        query.estado = query.estado ? query.estado : 1;
-        await store.dispatch(pageCargo(ctx));
-        let { page_cargos } = store.getState().cargo;
-        return {query, pathname, page_cargos}
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }) => {
-        this.setState({ [name]: value })
-    }
-
-    getOption = async (obj, key, index) => {
-        this.setState({ loading: true });
+    
+    // obtener opciones
+    const getOption = async (obj, key, index) => {
         let { pathname, push } = Router;
         let id = btoa(`${obj.id || ""}`);
         switch (key) {
@@ -49,26 +29,25 @@ export default class CargoIndex extends Component {
                 await push({ pathname: `${pathname}/edit`, query: { id } });
                 break;
             case 'delete':
-                await this.changedState(obj, 0);
+                await changedState(obj, 0);
                 break;
             case 'restore':
-                this.changedState(obj, 1);
+                changedState(obj, 1);
                 break;
             default:
                 break;
         }
-        // disable option
-        this.setState({ loading: false });
     }
 
-    handleSearch = () => {
-        this.setState({ loading: true });
+    // realizar busqueda
+    const handleSearch = () => {
         let { pathname, query, push } = Router;
-        query.estado = this.state.estado;
+        query.estado = typeof form.estado != 'undefined' ? form.estado : "";
         push({ pathname, query });
     }
 
-    changedState = async (obj, estado = 1) => {
+    // cambiar estado
+    const changedState = async (obj, estado = 1) => {
         let answer = await Confirm("warning", `¿Deseas ${estado ? 'restaurar' : 'desactivar'} la partición "${obj.descripcion}"?`)
         if (answer) {
             this.setState({ loading: true });
@@ -82,116 +61,143 @@ export default class CargoIndex extends Component {
             this.setState({ loading: false });
         }
     }
-
-    render() {
-
-        let {loading} = this.state;
-        let { page_cargos } = this.props;
-
-        return (
-                <Form className="col-md-12">
-                    <Body>
-                        <Datatable titulo="Lista de Particiones Presupuestales"
-                        isFilter={false}
-                        loading={loading}
-                        headers={
-                            ["#ID", "Descripcion", "Planilla", "Ext Presupuestal", "Estado"]
-                        }
-                        index={
-                            [
-                                {
-                                    key: "id",
-                                    type: "text"
-                                }, {
-                                    key: "descripcion",
-                                    type: "text"
-                                }, {
-                                    key: "planilla.nombre",
-                                    type: "icon"
-                                }, {
-                                    key: "ext_pptto",
-                                    type: "icon",
-                                    bg: "dark",
-                                    justify: "center"
-                                }, {
-                                    key: "estado",
-                                    type: "switch",
-                                    justify: "center",
-                                    is_true: "Activo",
-                                    is_false: "Eliminado"
-                                }
-                            ]
-                        }
-                        options={
-                            [
-                                {
-                                    key: "edit",
-                                    icon: "fas fa-pencil-alt",
-                                    title: "Editar Partición Presup.",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
-                                }, {
-                                    key: "restore",
-                                    icon: "fas fa-sync",
-                                    title: "Restaurar Partición Presup.",
-                                    rules: {
-                                        key: "estado",
-                                        value: 0
-                                    }
-                                }, {
-                                    key: "delete",
-                                    icon: "fas fa-times",
-                                    title: "Eliminar Partición Presup.",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
-                                }
-                            ]
-                        }
-                        optionAlign="text-center"
-                        getOption={this.getOption}
-                        data={page_cargos.data}>
-                        <div className="form-group">
-                            <div className="row">
-
-                                <div className="col-md-4 mb-1">
-                                    <select  name="estado"
-                                        value={this.state.estado}
-                                        onChange={(e) => this.handleInput(e.target)}
-                                    >
-                                        <option value="1">Cargos Activos</option>
-                                        <option value="0">Cargos Deshabilitado</option>
-                                    </select>
-                                </div>
-
-                                <div className="col-md-2">
-                                    <Button onClick={this.handleSearch}
-                                        disabled={this.state.loading}
-                                        color="blue"
-                                    >
-                                        <i className="fas fa-search mr-1"></i>
-                                        <span>Buscar</span>
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </Datatable>
-                </Body>
-
-                <BtnFloat
-                    onClick={async (e) => {
-                        await this.setState({ loading: true });
-                        let { pathname, push } = Router;
-                        push({ pathname: `${pathname}/create` });
-                    }}
-                >
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
-            </Form>
-        )
+    
+    // next
+    const onChangePage = (e, { activePage }) => {
+        let { query, pathname, push } = Router;
+        query.page = activePage;
+        push({ pathname, query });
     }
 
+    // render
+    return (
+        <Form className="col-md-12">
+            <Body>
+                <Datatable titulo="Lista de Particiones Presupuestales"
+                    isFilter={false}
+                    headers={
+                        ["#ID", "Descripcion", "Planilla", "Ext Presupuestal", "Estado"]
+                    }
+                    index={
+                        [
+                            {
+                                key: "id",
+                                type: "text"
+                            }, {
+                                key: "descripcion",
+                                type: "text"
+                            }, {
+                                key: "planilla.nombre",
+                                type: "icon"
+                            }, {
+                                key: "ext_pptto",
+                                type: "icon",
+                                bg: "dark",
+                                justify: "center"
+                            }, {
+                                key: "estado",
+                                type: "switch",
+                                justify: "center",
+                                is_true: "Activo",
+                                is_false: "Eliminado"
+                            }
+                        ]
+                    }
+                    options={
+                        [
+                            {
+                                key: "edit",
+                                icon: "fas fa-pencil-alt",
+                                title: "Editar Partición Presup.",
+                                rules: {
+                                    key: "estado",
+                                    value: 1
+                                }
+                            }, {
+                                key: "restore",
+                                icon: "fas fa-sync",
+                                title: "Restaurar Partición Presup.",
+                                rules: {
+                                    key: "estado",
+                                    value: 0
+                                }
+                            }, {
+                                key: "delete",
+                                icon: "fas fa-times",
+                                title: "Eliminar Partición Presup.",
+                                rules: {
+                                    key: "estado",
+                                    value: 1
+                                }
+                            }
+                        ]
+                    }
+                    optionAlign="text-center"
+                    getOption={getOption}
+                    data={cargos.data || []}
+                >
+                    <div className="form-group">
+                        <div className="row">
+                            <div className="col-md-4 mb-1">
+                                <Select  
+                                    name="estado"
+                                    fluid
+                                    placeholder="Todos"
+                                    value={`${form.estado || ""}`}
+                                    options={[
+                                        { key: "ALL", value: "", text: "Todos" },
+                                        { key: "ACTIVO", value: "1", text: "Activos" },
+                                        { key: "DESACTIVO", value: "0", text: "Desactivos" },
+                                    ]}
+                                    onChange={(e, obj) => handleInput(obj)}
+                                />
+                            </div>
+
+                            <div className="col-md-2">
+                                <Button 
+                                    onClick={handleSearch}
+                                    color="blue"
+                                >
+                                    <i className="fas fa-search mr-1"></i>
+                                    <span>Buscar</span>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </Datatable>
+            </Body>
+
+            <div className="table-responsive text-center">
+                <hr/>
+                <Pagination 
+                    totalPages={cargos.last_page || 1}
+                    activePage={cargos.current_page || 1}
+                    onPageChange={onChangePage}
+                />
+            </div>
+
+            <BtnFloat
+                onClick={async (e) => {
+                let { pathname, push } = Router;
+                push({ pathname: `${pathname}/create` });
+            }}
+        >
+            <i className="fas fa-plus"></i>
+        </BtnFloat>
+    </Form>)
 }
+
+// server rendering
+CargoIndex.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { query } = ctx;
+    query.page = typeof query.page != 'undefined' ? query.page : 1;
+    query.estado = typeof query.estado != 'undefined' ? query.estado : "";
+    let { success, cargos } = await unujobs.get(`cargo?page=${query.page}&estado=${query.estado}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({ success: false }));
+    // response
+    return { success, cargos: cargos || {}, query };
+}
+
+export default CargoIndex;

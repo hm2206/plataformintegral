@@ -5,7 +5,7 @@ import { Confirm, parseOptions } from '../../services/utils';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import Skeleton from 'react-loading-skeleton';
-import { CronogramaContext } from '../../contexts/CronogramaContext';
+import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../contexts/AppContext';
 import { SelectTypeAportacion } from '../select/cronograma';
 

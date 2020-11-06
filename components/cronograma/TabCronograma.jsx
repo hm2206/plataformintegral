@@ -1,5 +1,5 @@
 import React, { Component, useContext } from 'react';
-import { CronogramaContext } from '../../contexts/CronogramaContext';
+import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { Tab } from 'semantic-ui-react'
 import Router from 'next/router';
 import Work from './work';

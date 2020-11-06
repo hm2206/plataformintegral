@@ -8,8 +8,12 @@ import Skeleton from 'react-loading-skeleton';
  * setting format for select
  * @param {*} param0 
  */
-const settingSelect = async ({ data = [], index = { key: "", value: "", text: "" } }) => {
-    let newData = [];
+const settingSelect = async ({ data = [], index = { key: "", value: "", text: "" }, placeholder = "Seleccionar" }) => {
+    let newData = [{
+        key: `default-${uid(12)}`,
+        value: "",
+        text: placeholder
+    }];
     // return string of object
     const getObj = (obj = {}, value) => {
         let data_string = `${value}`.split('.');
@@ -26,8 +30,8 @@ const settingSelect = async ({ data = [], index = { key: "", value: "", text: ""
         return response;
     } 
     // add datos
-    await data.filter((d, indexD) => {
-        newData.push({
+    await data.filter(async (d, indexD) => {
+        await newData.push({
             key: `${index.key}_${indexD + 1}_${uid(10)}`,
             value: `${getObj(d, index.value)}`,
             text: `${getObj(d, index.text)}`.toUpperCase(),
@@ -48,12 +52,13 @@ const ButtonRefresh = ({ message, onClick = null }) => {
 }
 
 
-const SelectBase = ({ execute, refresh, url, api, obj, id, value, text, name, onChange, valueChange, placeholder = 'Seleccionar', disabled = false }) => {
+const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, obj, id, value, text, name, onChange, valueChange, placeholder = 'Seleccionar', disabled = false }) => {
 
     const [datos, setDatos] = useState([])
     const [is_error, setIsError] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [nextPage, setNexPage] = useState(1);
+    const [is_ready, setIsReady] = useState(false);
 
     const getDatos = async (page = 1) => {
         setLoading(true);
@@ -71,8 +76,9 @@ const SelectBase = ({ execute, refresh, url, api, obj, id, value, text, name, on
                 setDatos(newDatos);
                 setIsError(false);
                 setLoading(false);
-                // continuar
+                 // continuar
                 if (lastPage >= page + 1) setNexPage(page + 1);
+                else setIsReady(true);
             }).catch(err => {
                 setIsError(true);
                 setLoading(false);
@@ -93,13 +99,21 @@ const SelectBase = ({ execute, refresh, url, api, obj, id, value, text, name, on
 
     // refrescar datos
     useEffect(() => {
-        if (refresh) feching();
+        if (!execute && refresh) feching();
     }, [refresh]);
 
     // traer la siguiente pagina
     useEffect(() => {
         if (nextPage > 1) getDatos(nextPage, true);
     }, [nextPage]);
+
+    // todos los datos están cargados
+    useEffect(() => {
+        if (is_ready) if (typeof onReady == 'function') {
+            onReady(datos);
+            setIsReady(false);
+        }
+    }, [is_ready]);
 
     // render
     return is_error 
@@ -110,12 +124,13 @@ const SelectBase = ({ execute, refresh, url, api, obj, id, value, text, name, on
         :   loading 
             ?   <Skeleton height="37px"/>
             :   <Select fluid
+                    wrapSelection={false}
                     disabled={loading || disabled}
                     placeholder={loading ? 'Cargando...' : placeholder}
-                    options={datos}
+                    options={defaultDatos.length ? defaultDatos : datos}
                     name={name}
                     onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-                    value={valueChange || ""}
+                    value={`${valueChange || ""}`}
                 />
 }
 
