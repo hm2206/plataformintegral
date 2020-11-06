@@ -38,6 +38,24 @@ const SelectCronogramaTypeCategoria = ({ id = "id", cronograma_id, name, value, 
             />
 }
 
+const SelectTypeDescuento = ({ id = "id", name, value, onChange, refresh = false, disabled = false, judicial = "" }) => {
+    return <SelectBase 
+                api={unujobs}
+                url={`type_descuento?judicial=${judicial}`}
+                id={`select-type_detalle-${id}-${name}`}
+                value={id}
+                text="informacion"
+                obj="type_descuentos"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Tip. Descuento"
+                refresh={refresh}
+                execute={true}
+                disabled={disabled}
+            />
+}
+
 const SelectTypeDetalle = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
                 api={unujobs}
@@ -182,7 +200,6 @@ const SelectCargo = ({ id = "id", name, value, onChange, refresh = false, disabl
             />
 } 
 
-
 const SelectCargoTypeCategoria = ({ id = "id", name, value, cargo_id, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
                 api={unujobs}
@@ -201,6 +218,24 @@ const SelectCargoTypeCategoria = ({ id = "id", name, value, cargo_id, onChange, 
             />
 } 
 
+const SelectBanco = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+                api={unujobs}
+                url={`banco`}
+                id={`select-banco-${id}-${name}`}
+                value={id}
+                text="nombre"
+                obj="bancos"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Banco"
+                refresh={refresh}
+                execute={true}
+                disabled={disabled}
+            />
+}
+
 // exportables
 export { 
     SelectCronogramaCargo,
@@ -214,4 +249,6 @@ export {
     SelectSitacionLaboral,
     SelectCargo,
     SelectCargoTypeCategoria,
+    SelectTypeDescuento,
+    SelectBanco,
 };

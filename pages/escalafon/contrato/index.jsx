@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Button, Form, Select, Pagination } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import DataTable from '../../../components/datatable';
@@ -8,14 +8,24 @@ import btoa from 'btoa';
 import { Body } from '../../../components/Utils';
 import { unujobs } from '../../../services/apis';
 import { SelectCargo } from '../../../components/select/cronograma';
+import { AppContext } from '../../../contexts/AppContext';
+import Show from '../../../components/show';
 
 const Contrato = ({ success, infos, query }) => {
 
+    // app
+    const app_context = useContext(AppContext);
+
+    // estados
     const [form, setForm] = useState({ 
         query_search: query.query_search,
         estado: query.estado,
         cargo_id: query.cargo_id
     })
+
+    useEffect(() => {
+        app_context.fireEntity({ render: true });
+    }, []);
 
     // opciones
     const handleOption = (obj, key, index) => {
@@ -136,7 +146,9 @@ const Contrato = ({ success, infos, query }) => {
                             </div>
 
                             <div className="card-body mt-4">
-                                <h4>Resultados: {infos && infos.data.length * infos.current_page || 0} de {infos && infos.total}</h4>
+                                <Show condicion={success}>
+                                    <h4>Resultados: {infos && infos.data && infos.data.length * infos.current_page || 0} de {infos && infos.total}</h4>
+                                </Show>
                             </div>
                         </DataTable>
                     
@@ -171,6 +183,7 @@ Contrato.getInitialProps = async (ctx) => {
     let { success, infos } = await unujobs.get(`info?page=${query.page}&estado=${query.estado}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
     .then(res => res.data)
     .catch(err => ({ success: false }))
+    console.log(success);
     // response
     return { success, infos: infos || {}, query };
 }

@@ -25,11 +25,15 @@ const Afectacion = () => {
 
     // change inputs
     const handleInput = ({ name, value }) => {
-        let newForm = Object.assign({}, JSON.parse(JSON.stringify(historial)));
+        let newForm = Object.assign({}, historial);
         newForm[name] = value;
         setHistorial(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = value;
+        setErrors(newErrors);
     }
 
+    // actualizar historial
     const updateHistorial = async () => {
         app_context.fireLoading(true);
         let form = Object.assign({}, historial);
@@ -41,6 +45,8 @@ const Afectacion = () => {
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 setEdit(false);
+                setErrors({});
+                setOld(JSON.parse(JSON.stringify(historial)))
             }).catch(err => {
                 try {
                     app_context.fireLoading(false);
@@ -70,7 +76,7 @@ const Afectacion = () => {
         if (cancel) setHistorial(old);
     }, [cancel]);
 
-    // update descuentos
+    // update historial
     useEffect(() => {
         if (send) updateHistorial();
     }, [send]);
@@ -422,10 +428,13 @@ const Afectacion = () => {
                         <Show condicion={!loading}
                             predeterminado={<PlaceHolderInput/>}
                         >
-                            <label className="mb-2"><h5>{historial.is_pay ? 'Remunerada' : 'No Remunerada'}</h5></label>
-                            <Radio toggle checked={historial.is_pay ? true : false}
+                            <label className="mb-2"><h5>Dias Lab.</h5></label>
+                            <input type="number"
+                                name="dias"
+                                step="any"
+                                value={historial.dias || ""}
+                                onChange={({target}) => handleInput(target)}
                                 disabled={!edit}
-                                onChange={(e, obj) => handleInput({ name: 'is_pay', value: obj.checked ? 1 : 0 })}
                             />
                         </Show>
                     </Form.Field>
@@ -451,6 +460,18 @@ const Afectacion = () => {
                 </div>
 
                 <div className="col-md-3 mt-3">
+                    <Form.Field>
+                        <Show condicion={!loading}
+                            predeterminado={<PlaceHolderInput/>}
+                        >
+                            <label className="mb-2"><h5>{historial.is_pay ? 'Remunerada' : 'No Remunerada'}</h5></label>
+                            <Radio toggle checked={historial.is_pay ? true : false}
+                                disabled={!edit}
+                                onChange={(e, obj) => handleInput({ name: 'is_pay', value: obj.checked ? 1 : 0 })}
+                            />
+                        </Show>
+                    </Form.Field>
+
                     <Form.Field>
                         <Show condicion={!loading}
                             predeterminado={<PlaceHolderInput/>}

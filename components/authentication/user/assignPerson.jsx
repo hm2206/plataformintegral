@@ -43,12 +43,14 @@ export default class AssignPerson extends Component
     }
 
     handleAdd = async (obj) => {
-        let { getAdd } = this.props;
+        let { getAdd, local } = this.props;
         if (typeof getAdd == 'function') {
             let { push, pathname, query } = Router;
             await getAdd(obj);
-            query.assign = "";
-            push({ pathname, query });
+            if (!local) {
+                query.assign = "";
+                push({ pathname, query });
+            }
         }
     }
 
