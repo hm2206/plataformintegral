@@ -147,7 +147,7 @@ const Obligacion = () => {
         }
     }
 
-    // update descuentos
+    // update obligaciones
     useEffect(() => {
         if (send) updateObligacion();
     }, [send]);
@@ -206,8 +206,9 @@ const Obligacion = () => {
                             <Form.Field>
                                 <label htmlFor="">Beneficiario</label>
                                 <input type="text" 
-                                    defaultValue={obl.beneficiario}
-                                    disabled={true}
+                                    value={obl.person && obl.person.fullname || ""}
+                                    readOnly
+                                    className="uppercase"
                                 />
                             </Form.Field>
                         </div>
@@ -219,7 +220,9 @@ const Obligacion = () => {
                                 placeholder="Select. Tip. Documento"
                                 options={storage.tipo_documento}
                                 value={obl.tipo_documento}
-                                disabled={true}
+                                name="tipo_documento"
+                                disabled={!edit}
+                                onChange={(e, obj) => handleInput(obj, index)}
                             />
                         </div>
 
@@ -227,8 +230,10 @@ const Obligacion = () => {
                             <label htmlFor="">N° de Documento</label>
                             <Form.Field>
                                 <input type="text" 
-                                    defaultValue={obl.numero_de_documento}
-                                    disabled={true}
+                                    name="numero_de_documento"
+                                    value={obl.numero_de_documento || ""}
+                                    disabled={!edit}
+                                    onChange={({target}) => handleInput(target, index)}
                                 />
                             </Form.Field>
                         </div>
@@ -238,7 +243,7 @@ const Obligacion = () => {
                                 <label htmlFor="">N° de Cuenta</label>
                                 <input type="text" 
                                     name="numero_de_cuenta"
-                                    value={obl.numero_de_cuenta}
+                                    value={obl.numero_de_cuenta || ""}
                                     disabled={!edit}
                                     onChange={({ target }) => handleInput(target, index)}
                                 />
@@ -250,7 +255,7 @@ const Obligacion = () => {
                                 <label htmlFor="">Monto</label>
                                 <input type="number" 
                                     name="monto"
-                                    value={obl.monto}
+                                    value={obl.monto || ""}
                                     onChange={({ target }) => handleInput(target, index)}
                                     disabled={obl.is_porcentaje || !edit}
                                 />
@@ -262,7 +267,7 @@ const Obligacion = () => {
                                 <label htmlFor="">Observación</label>
                                 <textarea
                                     rows="4"
-                                    value={obl.observacion}
+                                    value={obl.observacion || ""}
                                     name="observacion"
                                     disabled={!edit}
                                     onChange={({ target }) => handleInput(target, index)}

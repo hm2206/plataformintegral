@@ -95,7 +95,7 @@ const SelectDependencia = ({ id = "id", name, value, onChange, refresh = false, 
 }
 
 
-const SelectDependenciaPerfilLaboral = ({ dependencia_id, id = "id", name, value, onChange, refresh = false }) => {
+const SelectDependenciaPerfilLaboral = ({ dependencia_id, id = "id", name, value, onChange, refresh = false, disabled = false, execute = true }) => {
     return dependencia_id 
         ?   <SelectBase 
                 api={authentication}
@@ -109,7 +109,8 @@ const SelectDependenciaPerfilLaboral = ({ dependencia_id, id = "id", name, value
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
                 placeholder="Seleccionar Perfil Laboral"
                 refresh={refresh}
-                execute={true}
+                execute={execute}
+                disabled={disabled}
             />
         :   <Select placeholder="Seleccionar Perfil Laboral" disabled fluid value="" options={[]}/>
 }

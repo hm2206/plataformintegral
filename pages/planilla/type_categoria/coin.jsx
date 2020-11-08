@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
 import { backUrl, parseOptions, Confirm } from '../../../services/utils';
 import Router from 'next/router';
@@ -6,169 +6,151 @@ import { Form, Button, Select, List } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
+import { SelectPlanilla, SelectTypeCategoriaNotTypeRemuneracion } from '../../../components/select/cronograma'
+import { AUTHENTICATE } from '../../../services/auth';
+import atob from 'atob';
+import Skeleton from 'react-loading-skeleton';
+import { AppContext } from '../../../contexts/AppContext';
 
+const PlaceholderInput = ({ height = '38px' }) => <Skeleton height={height}/>
 
-export default class CoinTypeCategoria extends Component
-{
+const PlaceholderCategorias = () => {
 
-    static getInitialProps = (ctx) => {
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    const array = [1, 2, 3, 4, 5, 6 ,7];
+
+    return <Fragment>
+        {array.map(a => 
+            <div className="col-md-12 mb-2" key={`iter-placeholder-categoria-${a}`}>
+                <div className="row">
+                    <div className="col-md-10">
+                        <PlaceholderInput/>
+                    </div>
+                    <div className="col-md-1">
+                        <PlaceholderInput/>
+                    </div>
+                    <div className="col-md-1">
+                        <PlaceholderInput/>
+                    </div>
+                </div>
+            </div>    
+        )}
+    </Fragment>
+}
+
+const  CoinTypeCategoria = ({ success, query, pathname, type_categoria }) => {
+
+    // app
+    const app_context = useContext(AppContext);
+
+    // estado
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [categorias, setCategorias] = useState([]);
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [block, setBlock] = useState(false);
+    const [edit, setEdit] = useState(false);
+    const [current, setCurrent] = useState({});
+
+    // cambiar form
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors)
     }
 
-    state = {
-        loading: false,
-        block: false,
-        edit: false,
-        type_categoria: {},
-        form: {},
-        categorias: [],
-        type_categorias: [],
-        current: {},
-        errors: {}
+    // obtener categorias 
+    const getCategorias = async () => {
+        setCurrentLoading(true);
+        await unujobs.get(`type_categoria/${type_categoria.id}/categoria?planilla_id=${form.planilla_id}`)
+            .then(res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                setCategorias(res.data.categorias);
+            }).catch(err => setCategorias([]));
+            setCurrentLoading(false);
     }
 
-    componentDidMount = async () => {
-        await this.findTypeCategoria();
-        await this.getCategoria();
-        await this.getTypeCategorias(1);
-        await this.configTypeCategoria();
+    // cambio de planilla
+    useEffect(() => {
+        if (form.planilla_id) getCategorias();
+    }, [form.planilla_id]);
+
+    const handleInputCategoria = ({ value }, obj, index) => {
+        let newCategorias = JSON.parse(JSON.stringify(categorias));
+        obj.monto = value;
+        newCategorias[index] = obj;
+        setCategorias(newCategorias);
     }
 
-    findTypeCategoria = async () => {
-        this.setState({ loading: true });
-        let { query } = this.props;
-        let id = query.id ? atob(query.id) : '__error';
-        await unujobs.get(`type_categoria/${id}`)
-        .then(res => this.setState({ type_categoria: res.data }))
-        .catch(err => this.setState({ type_categoria: {} }));
-        this.setState({ loading: false });
+    const handleEdit = (obj, index, cancel = false) => {
+        obj.edit = obj.edit ? false : true;
+        obj.monto = cancel ? current.monto : obj.monto;
+        let newCategorias = JSON.parse(JSON.stringify(categorias));
+        newCategorias[index] = obj;
+        setCategorias(newCategorias);
+        setCurrent(cancel ? {} : JSON.parse(JSON.stringify(obj)));
+        setEdit(obj.edit);
     }
 
-    getCategoria = async () => {
-        let { type_categoria } = this.state;
-        this.setState({ loading: true });
-        await unujobs.get(`type_categoria/${type_categoria.id}/categoria`)
-        .then(res => this.setState({ categorias: res.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false, edit: false });
-    }
-
-    getTypeCategorias = async (page) => {
-        this.setState({ loading: true });
-        await unujobs.get(`type_remuneracion?page=${page}`)
+    const saveCategoria = async () => {
+        app_context.fireLoading(true);
+        let datos = Object.assign({}, form);
+        datos.type_categoria_id = type_categoria.id;
+        await unujobs.post('categoria', datos)
         .then(async res => {
-            let { data, last_page, current_page } = res.data;
-            await  this.setState(state => ({ type_categorias: [...state.type_categorias, ...data] }));
-            if (last_page > current_page) {
-                await this.getTypeCategorias(current_page + 1);
-            }
-        })
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
-
-    configTypeCategoria = async () => {
-        let payload = [];
-        let newTypeCategoria = [];
-        let { categorias, type_categorias } = this.state;
-        await categorias.filter(cat => payload.push(cat.type_remuneracion_id));
-        for(let type of type_categorias) {
-            let is_exists = await payload.indexOf(type.id);
-            if (is_exists == -1) {
-                await newTypeCategoria.push(type);
-            }
-        }
-        // result
-        this.setState({ type_categorias: newTypeCategoria });
-    }
-
-    handleSelect = ({ name, value }) => {
-        this.setState(state => {
-            state.form[name] = value;
-            state.errors[name] = null;
-            return { form: state.form, errors: state.errors };
-        });
-    }
-
-    handleInput = ({ value }, obj, index) => {
-        this.setState((state, props) => {
-            obj.monto = value;
-            // assign 
-            state.categorias[index] = obj;
-            return { categorias: state.categorias };
-        });
-    }
-
-    handleEdit = (obj, index, cancel = false) => {
-        this.setState(state => {
-            obj.edit = obj.edit ? false : true;
-            obj.monto = cancel ? state.current.monto : obj.monto;
-            state.categorias[index] = obj;
-            state.current = cancel ? {} : JSON.parse(JSON.stringify(obj));
-            return { edit: obj.edit, categorias: state.categorias, current: state.current };
-        });
-    }
-
-    save = async () => {
-        this.setState({ loading: true });
-        let { form, type_categoria } = this.state;
-        form.type_categoria_id = type_categoria.id;
-        await unujobs.post('categoria', form)
-        .then(async res => {
+            app_context.fireLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             Swal.fire({ icon: 'success', text: message });
-            await this.setState({ form: {}, categorias: [] });
-            await this.getCategoria();
-            await this.configTypeCategoria();
+            setForm({});
+            setForm({ planilla_id: datos.planilla_id });
         }).catch(err => {
             try {
+                app_context.fireLoading(false);
                 let { errors, message } = err.response.data;
-                this.setState({ errors });
+                setErrors(errors);
                 Swal.fire({ icon: 'warning', text: 'Datos incorrectos!' });
             } catch (error) {
                 Swal.fire({ icon: "error", text: err.message });
             }
         });
-        this.setState({ loading: false });
     }
 
-    delete = async (id) => {
+    const deleteCategoria = async (id) => {
         let answer = await Confirm("warning", `¿Estas seguro en eliminar la configuración?`, "Eliminar");
         if (answer) {
-            this.setState({ block: true });
+            setBlock(true);
             await unujobs.post(`categoria/${id}`, { _method: 'DELETE' })
             .then(async res => {
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
-                await this.getCategoria();
-                await this.configTypeCategoria();
+                getCategorias()
             }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
-            this.setState({ block: false });
+            setBlock(false)
         }
     }
 
-    update = async (obj) => {
-        this.setState({ loading: true, block: true });
+    const updateCategoria = async (obj) => {
+        setCurrentLoading(true);
+        setBlock(true);
         obj._method = 'PUT';
         await unujobs.post(`categoria/${obj.id}`, obj)
         .then(res => {
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             Swal.fire({ icon: 'success', text: message });
-            this.getCategoria();
+            getCategorias();
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });
-        this.setState({ loading: false, block: false });
+        setCurrentLoading(false);
+        setBlock(false);
+        setEdit(false);
     }
-
-    render() {
-
-        let { pathname, query } = this.props;
-        let { form, errors, categorias, type_categoria, type_categorias, edit, loading, block } = this.state;
 
         return (
             <div className="col-md-12">
@@ -180,15 +162,14 @@ export default class CoinTypeCategoria extends Component
                         <Form className="row justify-content-center">
                             <div className="col-md-10">
                                 <div className="row justify-content-start">
-                                    <div className="col-md-4 mb-3">
+                                    <div className="col-md-8 mb-3">
                                         <Form.Field>
                                             <label htmlFor="">Descripción</label>
                                             <input type="text"
                                                 placeholder="Ingrese una descripción"
                                                 name="descripcion"
                                                 value={type_categoria.descripcion || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                disabled={true}
+                                                readOnly
                                             />
                                         </Form.Field>
                                     </div>
@@ -200,54 +181,43 @@ export default class CoinTypeCategoria extends Component
                                                 placeholder="Ingrese la dedicación"
                                                 name="dedicacion"
                                                 value={type_categoria.dedicacion || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                disabled={true}
+                                                readOnly
                                             />
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-12">
                                         <hr/>
-                                        <i className="fas fa-plus"></i> Agregar Tip. Remuneración
+                                        <div className="mb-4"><i className="fas fa-plus"></i> Agregar Tip. Remuneración</div>
+                                        <SelectPlanilla
+                                            name="planilla_id"
+                                            value={form.planilla_id}
+                                            onChange={(e, obj) => handleInput(obj)}
+                                        />
                                         <hr/>
                                     </div>
 
-                                    <div className="col-md-4 mb-2">
-                                        <Select
-                                            error={errors.type_remuneracion_id && errors.type_remuneracion_id[0] || false}
-                                            options={parseOptions(type_categorias, ["select-type-cat", "", "Select. Clave"], ["id", "id", "key"])}
-                                            fluid
+                                    <div className="col-md-8 mb-2">
+                                        <SelectTypeCategoriaNotTypeRemuneracion
+                                            type_categoria_id={type_categoria.id}
+                                            planilla_id={form.planilla_id}
+                                            refresh={form.planilla_id}
+                                            disabled={!form.planilla_id}
                                             name="type_remuneracion_id"
-                                            value={form.type_remuneracion_id || ""}
-                                            placeholder="Select. Clave"
-                                            onChange={(e, obj) => this.handleSelect(obj)}
-                                            disabled={loading}
+                                            execute={false}
+                                            value={form.type_remuneracion_id}
+                                            onChange={(e, obj) => handleInput(obj)}
                                         />
                                         <label>{errors.type_remuneracion_id && errors.type_remuneracion_id[0]}</label>
                                     </div>
 
                                     <div className="col-md-4 mb-2">
-                                        <Select
-                                            error={errors.type_remuneracion_id && errors.type_remuneracion_id[0] || false}
-                                            options={parseOptions(type_categorias, ["select-type-cat", "", "Select. Clave"], ["id", "id", "alias"])}
-                                            fluid
-                                            name="type_remuneracion_id"
-                                            value={form.type_remuneracion_id || ""}
-                                            placeholder="Select. Tip. Remuneracion"
-                                            onChange={(e, obj) => this.handleSelect(obj)}
-                                            disabled={loading}
-                                        />
-                                        <label>{errors.type_remuneracion_id && errors.type_remuneracion_id[0]}</label>
-                                    </div>
-
-                                    <div className="col-md-4">
                                         <Form.Field error={errors.monto && errors.monto[0] || false}>
                                             <input type="number"
                                                 name="monto"
                                                 value={form.monto || ""}
                                                 placeholder="Ingrese el monto"
-                                                onChange={(e) => this.handleSelect(e.target)}
-                                                disabled={loading}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors.monto && errors.monto[0]}</label>
                                         </Form.Field>
@@ -256,101 +226,127 @@ export default class CoinTypeCategoria extends Component
                                     <div className="col-md-12 mt-3 text-right">
                                         <hr/>
                                         <Button color="teal"
-                                            disabled={loading || !form.type_remuneracion_id}
-                                            loading={form.type_remuneracion_id && loading}
-                                            onClick={this.save}
+                                            disabled={!form.type_remuneracion_id}
+                                            onClick={saveCategoria}
                                         >
                                             <i className="fas fa-save"></i> Guardar
                                         </Button>
                                     </div>
 
-                                    <div className="col-md-12 mt-4">
-                                        <hr/>
-                                        <i className="fas fa-coins"></i> Lista de Tip. Remuneraciones
-                                        <hr/>
-                                    </div>
+                                    <Show condicion={form.planilla_id}>
+                                        <div className="col-md-12 mt-4">
+                                            <hr/>
+                                            <i className="fas fa-coins"></i> Lista de Tip. Remuneraciones
+                                            <hr/>
+                                        </div>
 
-                                    <div className="col-md-12">
-                                        <List divided verticalAlign='middle'>
-                                            {categorias.map((obj, index) => 
-                                                <List.Item key={`list-categoria-${obj.id}`}>
-                                                    <List.Content>
-                                                        <div className="row">
-                                                            <div className="col-md-5 uppercase mb-2">
-                                                                <b>{obj.key} .- {obj.alias}</b>
-                                                            </div>
-                                                            <div className="col-md-3 mb-2">
-                                                                <Show condicion={!obj.edit}>
-                                                                    <span className="badge badge-dark">{obj.monto}</span>
-                                                                </Show>
-                                                                <Show condicion={obj.edit}>
-                                                                    <input type="number"
-                                                                        name="monto"
-                                                                        disabled={block}
-                                                                        value={obj.monto || ""}
-                                                                        placeholder="ingrese un monto"
-                                                                        onChange={(e) => this.handleInput(e.target, obj, index)}
-                                                                    />
-                                                                </Show>
-                                                            </div>
+                                        <div className="col-md-12">
+                                            <Show condicion={!current_loading}
+                                                predeterminado={<PlaceholderCategorias/>}
+                                            >
+                                                <List divided verticalAlign='middle'>
+                                                    {categorias.map((obj, index) => 
+                                                        <List.Item key={`list-categoria-${obj.id}`}>
+                                                            <List.Content>
+                                                                <div className="row">
+                                                                    <div className="col-md-5 uppercase mb-2">
+                                                                        <b>{obj.key} .- {obj.alias}</b>
+                                                                    </div>
+                                                                    <div className="col-md-3 mb-2">
+                                                                        <Show condicion={!obj.edit}>
+                                                                            <span className="badge badge-dark">{obj.monto}</span>
+                                                                        </Show>
+                                                                        <Show condicion={obj.edit}>
+                                                                            <input type="number"
+                                                                                name="monto"
+                                                                                disabled={block}
+                                                                                value={obj.monto || ""}
+                                                                                placeholder="ingrese un monto"
+                                                                                onChange={(e) => handleInputCategoria(e.target, obj, index)}
+                                                                            />
+                                                                        </Show>
+                                                                    </div>
 
-                                                            <div className="col-md-4 text-right mb-2">
-                                                                <Show condicion={!obj.edit}>
-                                                                    <Button 
-                                                                        className="mt-1"
-                                                                        title="Editar"
-                                                                        color='green'
-                                                                        basic
-                                                                        disabled={edit || block}
-                                                                        onClick={(e) => this.handleEdit(obj, index)}
-                                                                    >
-                                                                        <i className={`fas fa-pencil-alt`}></i>
-                                                                    </Button>
+                                                                    <div className="col-md-4 text-right mb-2">
+                                                                        <Show condicion={!obj.edit}>
+                                                                            <Button 
+                                                                                className="mt-1"
+                                                                                title="Editar"
+                                                                                color='green'
+                                                                                basic
+                                                                                disabled={edit || block}
+                                                                                onClick={(e) => handleEdit(obj, index)}
+                                                                            >
+                                                                                <i className={`fas fa-pencil-alt`}></i>
+                                                                            </Button>
 
-                                                                    <Button color={'red'}
-                                                                        className="mt-1"
-                                                                        basic
-                                                                        title="Eliminar"
-                                                                        disabled={edit || block}
-                                                                        onClick={(e) => this.delete(obj.id)}
-                                                                    >
-                                                                        <i className={`fas fa-trash`}></i>
-                                                                    </Button>
-                                                                </Show>
+                                                                            <Button color={'red'}
+                                                                                className="mt-1"
+                                                                                basic
+                                                                                title="Eliminar"
+                                                                                disabled={edit || block}
+                                                                                onClick={(e) => deleteCategoria(obj.id)}
+                                                                            >
+                                                                                <i className={`fas fa-trash`}></i>
+                                                                            </Button>
+                                                                        </Show>
 
-                                                                <Show condicion={obj.edit}>
-                                                                    <Button color={'green'}
-                                                                        className="mt-1"
-                                                                        title="Guardar"
-                                                                        disabled={block}
-                                                                        onClick={(e) => this.update(obj)}
-                                                                    >
-                                                                        <i className={`fas fa-save`}></i>
-                                                                    </Button>
+                                                                        <Show condicion={obj.edit}>
+                                                                            <Button color={'green'}
+                                                                                className="mt-1"
+                                                                                title="Guardar"
+                                                                                disabled={block}
+                                                                                onClick={(e) => updateCategoria(obj)}
+                                                                            >
+                                                                                <i className={`fas fa-save`}></i>
+                                                                            </Button>
 
-                                                                    <Button color={'red'}
-                                                                        className="mt-1"
-                                                                        title="Cancelar"
-                                                                        disabled={block}
-                                                                        onClick={(e) => this.handleEdit(obj, index, true)}
-                                                                    >
-                                                                        <i className={`fas fa-times`}></i>
-                                                                    </Button>
-                                                                </Show>
-                                                            </div>
-                                                        </div>
-                                                    </List.Content>
-                                                </List.Item>
-                                            )}
-                                        </List>    
-                                    </div>
+                                                                            <Button color={'red'}
+                                                                                className="mt-1"
+                                                                                title="Cancelar"
+                                                                                disabled={block}
+                                                                                onClick={(e) => handleEdit(obj, index, true)}
+                                                                            >
+                                                                                <i className={`fas fa-times`}></i>
+                                                                            </Button>
+                                                                        </Show>
+                                                                    </div>
+                                                                </div>
+                                                            </List.Content>
+                                                        </List.Item>
+                                                    )}
+                                                </List>    
+                                            </Show>
+
+                                            {/* no hay registros */}
+                                            <Show condicion={!current_loading && !categorias.length}>
+                                                <div className="text-center">
+                                                    No hay registros disponibles
+                                                </div>
+                                            </Show>
+                                        </div>
+                                    </Show>
                                 </div>
                             </div>
                         </Form>
                     </div>
                 </Body>
             </div>
-        )
-    }
-    
+    )
 }
+
+// server rendering
+CoinTypeCategoria.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { query, pathname } = ctx;
+    // request 
+    let id = atob(query.id) || '__error';
+    let { success, type_categoria } = await unujobs.get(`type_categoria/${id}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({ success: false }));
+    return { query, pathname, success, type_categoria }
+}
+
+// exportar
+export default CoinTypeCategoria;
+

@@ -26,6 +26,7 @@ const CargoIndex = ({ success, cargos, query }) => {
         let id = btoa(`${obj.id || ""}`);
         switch (key) {
             case 'edit':
+            case 'type_categoria':
                 await push({ pathname: `${pathname}/edit`, query: { id } });
                 break;
             case 'delete':
@@ -113,7 +114,17 @@ const CargoIndex = ({ success, cargos, query }) => {
                                     key: "estado",
                                     value: 1
                                 }
-                            }, {
+                            }, 
+                            {
+                                key: "type_categoria",
+                                icon: "fas fa-cogs",
+                                title: "Agregar tip. Categorías",
+                                rules: {
+                                    key: "estado",
+                                    value: 1
+                                }
+                            },
+                            {
                                 key: "restore",
                                 icon: "fas fa-sync",
                                 title: "Restaurar Partición Presup.",

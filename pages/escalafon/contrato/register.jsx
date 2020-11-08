@@ -1,221 +1,106 @@
-import React, { Component, Fragment } from 'react';
+import React, { Fragment, useState, useContext } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
 import ContentControl from '../../../components/contentControl';
 import Show from '../../../components/show';
-import { unujobs, authentication, recursoshumanos } from '../../../services/apis';
+import { unujobs } from '../../../services/apis';
 import { parseUrl, Confirm } from '../../../services/utils';
-import { parseOptions, backUrl } from '../../../services/utils';
+import { backUrl } from '../../../services/utils';
 import { pap } from '../../../services/storage.json';
 import Swal from 'sweetalert2';
 import btoa from 'btoa';
 import Router from 'next/router';
 import AssignTrabajador from '../../../components/contrato/assingTrabajador';   
 import { tipo_documento } from '../../../services/storage.json';
+import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta } from '../../../components/select/cronograma';
+import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
+import { AppContext } from '../../../contexts/AppContext';
 
 
-export default class Register extends Component
-{
+const Register = () => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query, store } = ctx;
-        let work = {};
-        return { pathname, query, work }
-    }
+    // app
+    const app_context = useContext(AppContext);
 
-    state = {
-        loading: false,
-        check: false,
-        planillas: [],
-        person: {},
-        metas: [],
-        dependencias: [],
-        cargos: [],
-        type_categorias: [],
-        perfil_laborales: [],
-        form: {
-            is_aportacion: "1",
-            planilla_id: "",
-            meta_id: "",
-            dependencia_id: "",
-            pap: "",
-            cargo_id: "",
-            type_categoria_id: "",
-            perfil_laboral_id: ""
-        },
-        errors: {}
-    }
+    // estados
+    const [option, setOption] = useState("");
+    const [work, setWork] = useState({});
+    const isWork = Object.keys(work).length;
+    const [form, setForm] = useState({ is_aportacion: 1 });
+    const [errors, setErrors] = useState({});
 
-    componentDidMount = async () => {
-        this.props.fireEntity({ render: true });
-        this.props.fireLoading(true);
-        await this.getPlanilla();
-        await this.getMeta();
-        await this.getDependencias();
-        await this.getCargos();
-        this.props.fireLoading(false);
-    }
-
-    componentDidUpdate = async (nextProps, nextState ) => {
-        let { form } = this.state;
-        if (nextState.form && nextState.form.cargo_id != form.cargo_id) {
-            await this.getTypeCategoria();
-        }
-        if (nextState.form && nextState.form.dependencia_id != form.dependencia_id) {
-            await this.setState({ perfil_laborales: [] });
-            await this.handlePerfilLaborales(form.dependencia_id)
-        }
-    }
-
-    handleBack = () => {
+    // volver atrás
+    const handleBack = () => {
         let { push, pathname } = Router;
         push({ pathname: backUrl(pathname) });
     }
 
-    handleInput = async ({ name, value }) => {
-        let newForm = Object.assign({}, this.state.form);
-        let newErrors = Object.assign({}, this.state.errors);
-        newErrors[name] = [];
+    // cambios del form
+    const handleInput = async ({ name, value }) => {
+        let newForm = Object.assign({}, form);
         newForm[name] = value;
-        this.setState({ form: newForm, errors: newErrors });
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-    handleFile = async ({ name, files }) => {
+    // agregar file
+    const handleFile = async ({ name, files }) => {
         if (files[0]) {
-            this.handleInput({ name, value: files[0] });
+            handleInput({ name, value: files[0] });
         }
     }
 
-    getAdd = async (obj) => {
-        this.setState({
-            person: obj,
-            check: true
-        })
-        // generar usuario
-        this.handleInput({ name: 'username', value: obj.document_number });
+    // agregar trabajador
+    const getAdd = async (obj) => {
+        setWork(obj);
+        setOption("");
     }
 
-    handleAssign = () => {
-        let { push, pathname, query } = Router;
-        query.assign = "true";
-        push({ pathname, query });
-    }
-
-    handlePerfilLaborales = async (dependencia_id = null, page = 1) => {
-        if (dependencia_id) {
-            await authentication.get(`dependencia/${dependencia_id}/perfil_laboral?page=${page}`)
-            .then(async res => {
-                let { success, message, perfil_laboral } = res.data;
-                if (!success) throw new Error(message);
-                this.setState(state => ({ perfil_laborales: [...state.perfil_laborales, ...perfil_laboral.data] }));
-                if (perfil_laboral.lastPage > page) await this.handlePerfilLaborales(dependencia_id, page + 1);
-            }).catch(err => console.log(err.message));
-        } else {
-            this.setState({ perfil_laborales: [] });
-            this.handleInput({ name: 'perfil_laboral_id', value: '' });
-        }
-    } 
-
-
-    getPlanilla = async () => {
-        this.setState({ loading: true });
-        await unujobs.get('planilla')
-        .then(res => this.setState({ planillas: res.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
-
-    getMeta = async () => {
-        this.setState({ loading: true });
-        await unujobs.get('meta')
-        .then(res => this.setState({ metas: res.data.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
-
-    getDependencias = async (page = 1) => {
-        await authentication.get(`dependencia?page=${page}`)
-        .then(async res => {
-            let { dependencia, success, message } = res.data;
-            if (!success) throw new Error(message);
-            await  this.setState(state => ({ 
-                dependencias: [...state.dependencias, ...dependencia.data], 
-                perfil_laborales: [] 
-            }));
-            // validar dependencia
-            if (dependencia.lastPage > page) await this.getDependencias(page + 1)
-            else this.handlePerfilLaborales(this.state.history.dependencia_id);
-        })
-        .catch(err => console.log(err.message));
-    }
-
-    getCargos = async () => {
-        this.setState({ loading: true });
-        await unujobs.get('cargo')
-        .then(res => this.setState({ cargos: res.data.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
-
-    getTypeCategoria = async () => {
-        await this.handleInput({ name: "type_categoria_id", value: "" });
-        this.setState({ loading: true, type_categorias: [] });
-        await unujobs.get(`cargo/${this.state.form.cargo_id}`)
-        .then(res => this.setState({ type_categorias: res.data.type_categorias }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
-
-    create = async () => {
+    // crear contrato
+    const createInfo = async () => {
         let answer = await Confirm("warning", "¿Estas seguro en guardar el contrato?", "Estoy Seguro");
         if (answer) {
-            this.props.fireLoading(true);
-            this.setState({ loading: true });
+            app_context.fireLoading(true);
             let newForm = new FormData;
-            newForm.append('work_id', this.state.person.id);
-            for(let key in this.state.form) {
-                newForm.append(key, this.state.form[key]);
+            newForm.append('work_id', work.id);
+            for(let key in form) {
+                newForm.append(key, form[key]);
             }
             await unujobs.post('info', newForm)
             .then(async res => {
-                this.props.fireLoading(false);
-                let { success, message, body } = res.data;
-                let icon = success ? 'success' : 'error';
-                await Swal.fire({ icon, text: message });
-                if (success) {
-                    let id = btoa(body.id);
-                    let query = {
-                        id,
-                        href: location.pathname
-                    }
-                    Router.push({ pathname: `${parseUrl(location.pathname, 'pay')}`, query });
+                app_context.fireLoading(false);
+                let { success, message, info } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                let id = btoa(info.id);
+                let query = {
+                    id,
+                    href: location.pathname
                 }
+                Router.push({ pathname: `${parseUrl(location.pathname, 'pay')}`, query });
             }).catch(err => {
-                this.props.fireLoading(false);
-                let { status, data } = err.response;
-                if (status == '422') {
-                    this.setState({ errors: data.errors });
+                try {
+                    app_context.fireLoading(false);
+                    let { message, errors } = err.response.data;
+                    setErrors(errors);
+                    Swal.fire({ icon: 'warning', text: 'message' })
+                } catch(error) {
+                    Swal.fire({ icon: 'error', text: err.message })
                 }
             });
-            // leave loading
-            this.setState({ loading: false });
-            this.props.fireLoading(false);
         }
     }
-
-    render() {
-
-        let { query, work } = this.props;
-        let { errors, perfil_laborales, person } = this.state;
-
-        return (
+    
+    // render
+    return (
             <Fragment>
                 <div className="col-md-12">
                     <Body>
                         <div className="card-header">
-                            <BtnBack onClick={this.handleBack}/> <span className="ml-3">Crear contrato de trabajo</span>
+                            <BtnBack onClick={handleBack}/> <span className="ml-3">Crear contrato de trabajo</span>
                         </div>
                     </Body>
                 </div>
@@ -230,25 +115,24 @@ export default class Register extends Component
                                     <hr/>
 
                                     <div className="row">
-                                        <Show condicion={!this.state.check}>
+                                        <Show condicion={!isWork}>
                                             <div className="col-md-4">
                                                 <Button
-                                                    disabled={this.state.loading}
-                                                    onClick={this.handleAssign}
+                                                    onClick={(e) => setOption("assign")}
                                                 >
                                                     <i className="fas fa-plus"></i> Asignar
                                                 </Button>
                                             </div>
                                         </Show>
 
-                                        <Show condicion={this.state.check}>
+                                        <Show condicion={isWork}>
                                             <div className="col-md-4 mb-3">
                                                 <Form.Field>
                                                     <label htmlFor="">Tip. Documento</label>
                                                     <Select fluid
                                                         disabled
                                                         options={tipo_documento}
-                                                        value={person.person && person.person.document_type || '01'}
+                                                        value={work.person && work.person.document_type || '01'}
                                                     />
                                                 </Form.Field>
                                             </div>
@@ -257,7 +141,7 @@ export default class Register extends Component
                                                 <Form.Field>
                                                     <label htmlFor="">N° Documento</label>
                                                     <input type="text"
-                                                        value={person.person && person.person.document_number  || ""}
+                                                        value={work.person && work.person.document_number  || ""}
                                                         disabled
                                                         readOnly
                                                     />
@@ -268,7 +152,7 @@ export default class Register extends Component
                                                 <Form.Field>
                                                     <label htmlFor="">Apellidos y Nombres</label>
                                                     <input type="text"
-                                                        value={person.person && person.person.fullname || ""}
+                                                        value={work.person && work.person.fullname || ""}
                                                         disabled
                                                         readOnly
                                                     />
@@ -277,8 +161,7 @@ export default class Register extends Component
 
                                             <div className="col-md-4">
                                                 <Button
-                                                    onClick={this.handleAssign}
-                                                    disabled={this.state.loading}
+                                                    onClick={(e) => setOption('assign')}
                                                 >
                                                     <i className="fas fa-plus"></i> Cambiar
                                                 </Button>
@@ -296,7 +179,7 @@ export default class Register extends Component
 
                                     <div className="card-body">
                                         <div className="row w-100">
-                                            <div className="col-md-4 mb-2">
+                                            <div className="col-md-4 mb-3">
                                                 <Form.Field>
                                                     <label htmlFor="">ID</label>
                                                     <input type="text"
@@ -306,225 +189,218 @@ export default class Register extends Component
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.planilla_id && errors.planilla_id[0] || ""}>
                                                     <label htmlFor="">Planilla <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={parseOptions(this.state.planillas, ['Sel-plan', '', 'Select. Planilla'], ['id', 'id', 'nombre'])}
-                                                        placeholder="Select. Planilla"
+                                                    <SelectPlanilla
                                                         name="planilla_id"
-                                                        value={this.state.form.planilla_id}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
-                                                        error={errors && errors.planilla_id && errors.planilla_id[0]}
+                                                        value={form.planilla_id}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                     />
-                                                    <b className="text-red">{errors && errors.planilla_id && errors.planilla_id[0]}</b>
+                                                    <label>{errors && errors.planilla_id && errors.planilla_id[0]}</label>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.dependencia_id && errors.dependencia_id[0] || ""}>
                                                     <label htmlFor="">Dependencia/Oficina <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={parseOptions(this.state.dependencias, ['Sel-depen', '', 'Select. Dependencia'], ['id', 'id', 'nombre'])}
-                                                        placeholder="Select. Dependencia"
+                                                    <SelectDependencia
                                                         name="dependencia_id"
-                                                        value={this.state.form.dependencia_id}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
-                                                        error={errors && errors.dependencia_id && errors.dependencia_id[0]}
+                                                        value={form.dependencia_id || ""}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                     />
                                                     <b className="text-red">{errors && errors.dependencia_id && errors.dependencia_id[0]}</b>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
                                                     <label htmlFor="">MetaID <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={parseOptions(this.state.metas, ['Sel-met', '', 'Select. Meta'], ['id', 'id', 'metaID'])}
-                                                        placeholder="Select. MetaID"
+                                                    <SelectMeta
                                                         name="meta_id"
-                                                        value={this.state.form.meta_id}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
-                                                        error={errors && errors.meta_id && errors.meta_id[0]}
+                                                        value={form.meta_id}
+                                                        year={new Date().getFullYear()}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                     />
-                                                    <b className="text-red">{errors && errors.meta_id && errors.meta_id[0]}</b>
+                                                    <label>{errors && errors.meta_id && errors.meta_id[0]}</label>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
                                                     <label htmlFor="">ActividadID <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={parseOptions(this.state.metas, ['Sel-met', '', 'Select. Meta'], ['id', 'id', 'actividadID'])}
-                                                        placeholder="Select. Meta"
+                                                    <SelectMeta
                                                         name="meta_id"
-                                                        value={this.state.form.meta_id}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
+                                                        text="actividadID"
+                                                        value={form.meta_id}
+                                                        year={new Date().getFullYear()}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                     />
+                                                    <label>{errors && errors.meta_id && errors.meta_id[0]}</label>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
                                                     <label htmlFor="">Meta <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={parseOptions(this.state.metas, ['Sel-met', '', 'Select. Meta'], ['id', 'id', 'meta'])}
-                                                        placeholder="Select. Meta"
+                                                    <SelectMeta
                                                         name="meta_id"
-                                                        value={this.state.form.meta_id}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
+                                                        text="meta"
+                                                        value={form.meta_id}
+                                                        year={new Date().getFullYear()}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                     />
+                                                    <label>{errors && errors.meta_id && errors.meta_id[0]}</label>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.cargo_id && errors.cargo_id[0] || ""}>
                                                     <label htmlFor="">Partición Presupuestal. <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={parseOptions(this.state.cargos, ['Sel-car', '', 'Select. Cargo'], ['id', 'id', 'alias'])}
-                                                        placeholder="Select. Cargo"
+                                                    <SelectCargo
                                                         name="cargo_id"
-                                                        value={this.state.form.cargo_id}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
-                                                        error={errors && errors.cargo_id && errors.cargo_id[0]}
+                                                        value={form.cargo_id}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                     />
                                                     <b className="text-red">{errors && errors.cargo_id && errors.cargo_id[0]}</b>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors.cargo_id && errors.cargo_id[0] || ""}>
                                                     <label htmlFor="">Ext pptto <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={parseOptions(this.state.cargos, ['Sel-pptto', '', 'Select. Ext pptto'], ['id', 'id', 'ext_pptto'])}
-                                                        placeholder="Select. Ext pptto"
+                                                    <SelectCargo
                                                         name="cargo_id"
-                                                        value={this.state.form.cargo_id}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
+                                                        text="ext_pptto"
+                                                        value={form.cargo_id}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                     />
+                                                    <label htmlFor="">{errors.cargo_id && errors.cargo_id[0] || ""}</label>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors.type_categoria_id && errors.type_categoria_id[0] || ""}>
                                                     <label htmlFor="">Tip. Categoría <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={parseOptions(this.state.type_categorias, ['Sel-tip-categoria', '', 'Select. Tip. Categoría'], ['id', 'id', 'descripcion'])}
-                                                        placeholder="Select. Tip. Categoría"
+                                                    <SelectCargoTypeCategoria
+                                                        cargo_id={form.cargo_id}
+                                                        execute={false}
+                                                        disabled={!form.cargo_id}
+                                                        refresh={form.cargo_id}
                                                         name="type_categoria_id"
-                                                        value={this.state.form.type_categoria_id}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
-                                                        disabled={!this.state.form.cargo_id}
-                                                        error={errors && errors.type_categoria_id && errors.type_categoria_id[0]}
+                                                        value={form.type_categoria_id}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                     />
                                                     <b className="text-red">{errors && errors.type_categoria_id && errors.type_categoria_id[0]}</b>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
+                                            <div className="col-md-4 mb-3">
                                                 <Form.Field>
                                                     <label htmlFor="">P.A.P <b className="text-red">*</b></label>
                                                     <Select
                                                         options={pap}
                                                         placeholder="Select. P.A.P"
                                                         name="pap"
-                                                        value={this.state.form.pap}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
+                                                        value={form.pap}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                         error={errors && errors.pap && errors.pap[0]}
                                                     />
                                                     <b className="text-red">{errors && errors.pap && errors.pap[0]}</b>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
+                                            <div className="col-md-4 mb-3">
                                                 <Form.Field>
                                                     <label htmlFor="">Plaza</label>
                                                     <input type="text" 
                                                         name="plaza"
-                                                        value={this.state.form.plaza}
+                                                        value={form.plaza}
                                                         placeholder="Plaza"
-                                                        onChange={(e) => this.handleInput(e.target)}
+                                                        onChange={(e) => handleInput(e.target)}
                                                     />
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field err>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.perfil_laboral && errors.perfil_laboral[0] || ""}>
                                                     <label htmlFor="">Perfil Laboral <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={parseOptions(perfil_laborales, ['Sel-per', '', 'Select. Perfil Laboral'], ['id', 'id', 'nombre'])}
-                                                        placeholder="Select. Perfil Laboral"
+                                                    <SelectDependenciaPerfilLaboral
+                                                        disabled={!form.dependencia_id}
+                                                        execute={false}
+                                                        refresh={form.dependencia_id}
+                                                        dependencia_id={form.dependencia_id}
                                                         name="perfil_laboral_id"
-                                                        value={this.state.form.perfil_laboral_id || ""}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
-                                                        error={errors && errors.perfil_laboral_id && errors.perfil_laboral_id[0]}
+                                                        onChange={(e, obj) => handleInput(obj)}
+                                                        value={form.perfil_laboral_id}
                                                     />
                                                     <b className="text-red">{errors && errors.perfil_laboral && errors.perfil_laboral[0]}</b>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] || ""}>
                                                     <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
                                                     <input type="date" 
                                                         name="fecha_de_ingreso"
                                                         placeholder="Fecha de ingreso"
-                                                        value={this.state.form.fecha_de_ingreso}
-                                                        onChange={(e) => this.handleInput(e.target)}
+                                                        value={form.fecha_de_ingreso || ""}
+                                                        onChange={(e) => handleInput(e.target)}
                                                     />
                                                     <b className="text-red">{errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0]}</b>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.fecha_de_cese && errors.fecha_de_cese[0] || ""}>
                                                     <label htmlFor="">Fecha de Cese </label>
                                                     <input type="date" 
                                                         placeholder="Fecha de cese"
                                                         name="fecha_de_cese"
-                                                        value={this.state.form.fecha_de_cese}
-                                                        onChange={(e) => this.handleInput(e.target)}
+                                                        value={form.fecha_de_cese || ""}
+                                                        onChange={(e) => handleInput(e.target)}
                                                     />
+                                                    <label htmlFor="">{errors && errors.fecha_de_cese && errors.fecha_de_cese[0]}</label>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.file && errors.file[0] || ""}>
                                                     <label htmlFor="file">Archivo de Regístro</label>
                                                     <label htmlFor="file" className="btn btn-outline-dark">
                                                         <i className="fas fa-file-alt"></i>
                                                         <input type="file" 
                                                             id="file"
-                                                            onChange={(e) => this.handleFile(e.target)}
+                                                            onChange={(e) => handleFile(e.target)}
                                                             name="file"
                                                             hidden 
                                                             placeholder="Archivo de Regístro"
                                                             accept="application/pdf"
                                                         />
                                                     </label>
-                                                    <b className="text-red">{errors && errors.file && errors.file[0]}</b>
+                                                    <label>{errors && errors.file && errors.file[0]}</label>
                                                 </Form.Field>
                                             </div>
                                             
-                                            <div className="col-md-8 mb-2">
-                                                <Form.Field>
+                                            <div className="col-md-8 mb-3">
+                                                <Form.Field error={errors && errors.observacion && errors.observacion[0] || ""}>
                                                     <label htmlFor="">Observación <b className="text-red">*</b></label>
                                                     <textarea name="observacion" 
-                                                        value={this.state.form.observacion}
-                                                        onChange={(e) => this.handleInput(e.target)}
+                                                        value={form.observacion || ""}
+                                                        onChange={(e) => handleInput(e.target)}
                                                     />
-                                                    <b className="text-red">{errors && errors.observacion && errors.observacion[0]}</b>
+                                                    <label>{errors && errors.observacion && errors.observacion[0]}</label>
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
+                                            <div className="col-md-4 mb-3">
                                                 <Form.Field>
                                                     <label htmlFor="">N° Ruc</label>
                                                     <input type="text" 
                                                         placeholder="N° Ruc"
                                                         name="ruc"
-                                                        value={this.state.form.ruc}
-                                                        onChange={(e) => this.handleInput(e.target)}
+                                                        value={form.ruc || ""}
+                                                        onChange={(e) => handleInput(e.target)}
                                                     />
                                                 </Form.Field>
 
@@ -537,8 +413,8 @@ export default class Register extends Component
                                                             { key: "0", value: "0", text: "No" },
                                                             { key: "1", value: "1", text: "Si" }
                                                         ]}
-                                                        value={this.state.form.is_aportacion}
-                                                        onChange={(e, obj) => this.handleInput(obj)}
+                                                        value={`${form.is_aportacion || ""}`}
+                                                        onChange={(e, obj) => handleInput(obj)}
                                                     />
                                                 </Form.Field>
                                             </div>
@@ -552,33 +428,38 @@ export default class Register extends Component
 
                 <ContentControl>
                     <div className="col-lg-2 col-6">
-                        <Button fluid color="red" disabled={this.state.loading || !this.state.check}>
+                        <Button fluid color="red" disabled={!isWork}>
                             <i className="fas fa-times"></i> Cancelar
                         </Button>
                     </div>
 
                     <div className="col-lg-2 col-6">
                         <Button fluid color="blue" 
-                            disabled={this.state.loading || !this.state.check}
-                            onClick={this.create}
+                            disabled={!isWork}
+                            onClick={createInfo}
                         >
                             <i className="fas fa-save"></i> Guardar
                         </Button>
                     </div>
                 </ContentControl>
 
-                <Show condicion={query && query.assign}>
+                <Show condicion={option == 'assign'}>
                     <AssignTrabajador
-                        getAdd={this.getAdd}
-                        isClose={(e) => {
-                            let { push, pathname, query } = Router;
-                            query.assign = "";      
-                            push({ pathname, query })
-                        }}
+                        getAdd={getAdd}
+                        local={true}
+                        isClose={(e) => setOption('')}
                     />
                 </Show>
-            </Fragment>
-        )
-    }
-
+    </Fragment>)
 }
+
+// server rendering
+Register.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { query, pathname } = ctx;
+    // response
+    return { query, pathname }
+}
+
+// exportar
+export default Register;

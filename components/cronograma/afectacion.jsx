@@ -9,13 +9,13 @@ import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../contexts/AppContext';
 import Skeleton from 'react-loading-skeleton';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../select/authentication';
-import { SelectAfp, SelectMeta, SelectSitacionLaboral, SelectCronogramaCargo } from '../select/cronograma';
+import { SelectAfp, SelectMeta, SelectSitacionLaboral, SelectTypeCategoriaCargo } from '../select/cronograma';
 
 const PlaceHolderInput = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
 const Afectacion = () => {
 
-    const { cronograma, historial, setHistorial, setBlock, edit, setEdit, send, setSend, setIsEditable, setIsUpdatable, loading, cancel } = useContext(CronogramaContext);
+    const { cronograma, historial, setHistorial, setBlock, edit, setEdit, send, setSend, setIsEditable, setIsUpdatable, loading, cancel, setRefresh } = useContext(CronogramaContext);
     const [old, setOld] = useState({});
     const [errors, setErrors] = useState({});
     const [current_cargos, setCurrentCargos] = useState([]);
@@ -29,7 +29,7 @@ const Afectacion = () => {
         newForm[name] = value;
         setHistorial(newForm);
         let newErrors = Object.assign({}, errors);
-        newErrors[name] = value;
+        newErrors[name] = [];
         setErrors(newErrors);
     }
 
@@ -46,7 +46,7 @@ const Afectacion = () => {
                 await Swal.fire({ icon: 'success', text: message });
                 setEdit(false);
                 setErrors({});
-                setOld(JSON.parse(JSON.stringify(historial)))
+                setRefresh(true);
             }).catch(err => {
                 try {
                     app_context.fireLoading(false);
@@ -212,8 +212,9 @@ const Afectacion = () => {
                         >
                             <label><h5>Partición Presup. <b className="text-red">*</b></h5></label>
                             <Show condicion={edit}>
-                                <SelectCronogramaCargo
-                                    value={historial.cargo_id}
+                                <SelectTypeCategoriaCargo
+                                    type_categoria_id={historial.type_categoria_id}
+                                    value={historial.cargo_id || ""}
                                     name="cargo_id"
                                     cronograma_id={cronograma.id}
                                     onChange={(e, obj) => handleInput(obj)}
@@ -299,8 +300,9 @@ const Afectacion = () => {
                         >
                             <label><h5>Ext. Presupuestal</h5></label>
                             <Show condicion={edit}>
-                                <SelectCronogramaCargo
-                                    value={historial.cargo_id}
+                                <SelectTypeCategoriaCargo
+                                    type_categoria_id={historial.type_categoria_id}
+                                    value={historial.cargo_id || ""}
                                     name="cargo_id"
                                     text="ext_pptto"
                                     cronograma_id={cronograma.id}
