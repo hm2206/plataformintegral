@@ -10,7 +10,7 @@ const TabTeam = () => {
     <Fragment>
         <div className="table-responsive">
             <table className="table mb-4">
-                <thead>
+                <thead >
                     <tr>
                         <td><b>Código: </b> {project.code}</td>
                     </tr>
@@ -18,7 +18,7 @@ const TabTeam = () => {
                         <td><b>Entidad Ejecutora: </b> <span className="capitalize">{project.entity && project.entity.name}</span></td>
                     </tr>
                     <tr>
-                        <td><b>Coordinador General: </b> {project.principal && project.principal.fullname}</td>
+                        <td><b>Coordinador General: </b> <span className="capitalize">{project.principal && project.principal.person && project.principal.person.fullname || ""}</span></td>
                     </tr>
                 </thead>
                 <tbody>

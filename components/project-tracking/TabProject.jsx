@@ -5,6 +5,8 @@ import TabDatos from '../../components/project-tracking/tabDatos';
 import TabTeam from '../../components/project-tracking/tabTeam';
 import TabPlanTrabajo from '../../components/project-tracking/tabPlanTrabajo';
 import TabSaldoFinanciero from '../../components/project-tracking/tabSaldoFinanciero';
+import TabComponente from '../../components/project-tracking/tabComponente';
+import TabActivity from './tabActivity';
 
 const TabProject = (props) => {
 
@@ -32,25 +34,31 @@ const TabProject = (props) => {
                     </Tab.Pane> 
             },
             { 
-                menuItem: {key: 'team', icon: 'info circle', content: 'Plan Trabajo', disabled: false }, 
+                menuItem: {key: 'plan_trabajo', icon: 'info circle', content: 'Plan Trabajo', disabled: false }, 
                 render: () => 
                     <Tab.Pane style={styles}>
                         <TabPlanTrabajo/>
                     </Tab.Pane> 
             },
             { 
-                menuItem: {key: 'team', icon: 'info circle', content: 'Saldo Financiero', disabled: false }, 
+                menuItem: {key: 'componentes', icon: 'info circle', content: 'Componentes', disabled: false }, 
                 render: () => 
                     <Tab.Pane style={styles}>
-                        <TabSaldoFinanciero/>
+                        <TabComponente/>
                     </Tab.Pane> 
             },
             { 
-                menuItem: {key: 'team', icon: 'info circle', content: 'Actividades', disabled: false }, 
+                menuItem: {key: 'actividades', icon: 'info circle', content: 'Actividades', disabled: false }, 
                 render: () => 
                     <Tab.Pane style={styles}>
-                        {/* <Work/> */}
-                        Datos generales
+                        <TabActivity/>
+                    </Tab.Pane> 
+            },
+            { 
+                menuItem: {key: 'saldo_financiero', icon: 'info circle', content: 'Saldo Financiero', disabled: false }, 
+                render: () => 
+                    <Tab.Pane style={styles}>
+                        <TabSaldoFinanciero/>
                     </Tab.Pane> 
             },
     ];

@@ -6,6 +6,7 @@ import { Form, Button, Select } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
+import { SelectPlanilla } from '../../../components/select/cronograma';
 
 
 export default class EditCargo extends Component
@@ -30,7 +31,6 @@ export default class EditCargo extends Component
     }
 
     componentDidMount = () => {
-        this.getPlanillas();
         this.getTypeCargos();
     }
 
@@ -51,14 +51,6 @@ export default class EditCargo extends Component
             state.errors[name] = "";
             return { [obj]: newObj, errors: state.errors };
         });
-    }
-
-    getPlanillas = async () => {
-        this.setState({ loading: true });
-        await unujobs.get('planilla')
-        .then(res => this.setState({ planillas: res.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
     }
 
     getTypeCargos = async () => {
@@ -138,7 +130,7 @@ export default class EditCargo extends Component
                                         <Form.Field  error={errors && errors.ext_pptto && errors.ext_pptto[0]}>
                                             <label htmlFor="">Exp Presupuestal</label>
                                             <input type="text"
-                                                disabled
+                                                disabled={this.state.loading}
                                                 value={form.ext_pptto || ""}
                                                 placeholder="Ingrese una extensión presupuestal"
                                                 name="ext_pptto"
@@ -151,13 +143,10 @@ export default class EditCargo extends Component
                                     <div className="col-md-4 mb-3">
                                         <Form.Field error={errors && errors.planilla_id && errors.planilla_id[0]}>
                                             <label htmlFor="">Planilla</label>
-                                            <Select
+                                            <SelectPlanilla
                                                 disabled
-                                                placeholder="Select. Planilla"
-                                                options={parseOptions(this.state.planillas, ["sel-pla", "", "Select. Planilla"], ["id", "id", "nombre"])}
                                                 name="planilla_id"
                                                 value={form.planilla_id || ""}
-                                                onChange={(e, obj) => this.handleInput(obj)}
                                             />
                                             <label>{errors && errors.planilla_id && errors.planilla_id[0]}</label>
                                         </Form.Field>

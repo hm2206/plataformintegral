@@ -9,10 +9,6 @@ import { ProjectProvider } from '../../../contexts/project-tracking/ProjectConte
 import atob from 'atob';
 import Router from 'next/router';
 
-const TabInformation = () => {
-    
-}
-
 //  componente principal
 const InformationProject = ({ success, project }) => {
     
