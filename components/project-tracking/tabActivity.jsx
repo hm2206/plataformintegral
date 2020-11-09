@@ -70,7 +70,7 @@ const TabActivity = (props) => {
         <Show condicion={objective_id}
             predeterminado={
                 <div className="mt-5 text-center">
-                    <h4 style={{ fontSize: '1.5em', color: 'rgba(0,0,0,0.5)' }}>Seleccione un plan de trabajo</h4>
+                    <h4 style={{ fontSize: '1.5em', color: 'rgba(0,0,0,0.5)' }}>Seleccione un componente</h4>
                 </div>
             }
         >

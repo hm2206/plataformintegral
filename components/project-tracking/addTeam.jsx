@@ -56,6 +56,7 @@ const AddTeam = (props) => {
                     Swal.fire({ icon: 'success', text: message });
                     setPerson({});
                     setForm({});
+                    if (typeof props.onCreate == 'function') props.onCreate();
                 }).catch(err => {
                     try {
                         app_context.fireLoading(false);

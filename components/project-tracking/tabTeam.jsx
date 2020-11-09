@@ -105,7 +105,10 @@ const TabTeam = () => {
         </div>
 
         <Show condicion={option == "add_team"}>
-            <AddTeam isClose={(e) => setOption("")}/>
+            <AddTeam 
+                isClose={(e) => setOption("")}
+                onCreate={(e) => getTeam()}
+            />
         </Show>
     </Fragment>)
 }

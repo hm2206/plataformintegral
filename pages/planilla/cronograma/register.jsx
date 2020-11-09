@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
+import { SelectPlanilla } from '../../../components/select/cronograma';
 
 export default class RegisterCronograma extends Component
 {
@@ -40,7 +41,6 @@ export default class RegisterCronograma extends Component
         this.props.fireLoading(true);
         this.props.fireEntity({ render: true });
         let newDate = new Date();
-        await this.getPlanillas();
         this.setState({
             year: newDate.getFullYear(),
             mes: newDate.getMonth() + 1
@@ -50,12 +50,6 @@ export default class RegisterCronograma extends Component
 
     handleInput = ({ name, value }) => {
         this.setState({[name]: value});
-    }
-
-    getPlanillas = async () => {
-        await unujobs.get('planilla')
-        .then(res => this.setState({ planillas: res.data }))
-        .catch(err => console.log(err.message));
     }
 
     readySend = () => {
@@ -119,8 +113,7 @@ export default class RegisterCronograma extends Component
                                     <div className="row justify-content-center">
                                             <Form.Field className="col-md-6">
                                                 <label htmlFor="" className="text-left">Planilla</label>
-                                                <Select placeholder="Select. Planilla"
-                                                    options={parseOptions(this.state.planillas, ["", "", "Select. Planilla"], ["id", "id", "nombre"])}
+                                                <SelectPlanilla
                                                     name="planilla_id"
                                                     value={this.state.planilla_id}
                                                     onChange={(e, obj) => this.handleInput(obj)}

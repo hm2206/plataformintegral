@@ -198,7 +198,8 @@ const InformacionCronograma = ({ cronograma, success }) => {
                 app_context.fireLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
-                await Swal.fire({ icon: 'successs', text: message });
+                await Swal.fire({ icon: 'success', text: message });
+                findHistorial();
             }).catch(err => {
                 app_context.fireLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })

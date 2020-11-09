@@ -82,24 +82,24 @@ export default class EditCronograma extends Component
     destroy = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en eliminar el cronograma permanentemente?`, 'Eliminar');
         if (answer) {
-            let conf = await Confirm('warning', `Todos los contratos del cronograma actual serán anulados`, 'Confirmar');
-            if (conf) {
-                this.props.fireLoading(true);
-                let form = new FormData;
-                form.append('observacion', this.state.cronograma.observacion);
-                form.append('_method', 'DELETE');
-                await unujobs.post(`cronograma/${this.state.id}`, form)
-                    .then(async res => {
-                        this.props.fireLoading(false);
-                        let { success, message } = res.data;
-                        if (!success) throw new Error(message);
-                        await Swal.fire({ icon: 'success', text: message })
-                        this.handleBack({});
-                    }).catch(err => {
-                        this.props.fireLoading(false);
-                        Swal.fire({ icon: 'error', text: err.message });
-                    });
-            }
+            // let conf = await Confirm('warning', `¿Deseas anular los contratos de está planilla?`, 'Confirmar');
+            let anulado = 0;
+            this.props.fireLoading(true);
+            let form = new FormData;
+            form.append('_method', 'DELETE');
+            form.append('anulado', anulado);
+            await unujobs.post(`cronograma/${this.state.id}`, form)
+                .then(async res => {
+                    this.props.fireLoading(false);
+                    let { success, message } = res.data;
+                    if (!success) throw new Error(message);
+                    await Swal.fire({ icon: 'success', text: message })
+                    let { push, pathname } = Router;
+                    push(backUrl(pathname));
+                }).catch(err => {
+                    this.props.fireLoading(false);
+                    Swal.fire({ icon: 'error', text: err.message });
+                });
         }
     }
 
@@ -224,7 +224,7 @@ export default class EditCronograma extends Component
 
                             <div className="col-md-12 text-right">
                                 <hr/>
-                                <Show condicion={cronograma.adicional}>
+                                <Show condicion={cronograma.estado}>
                                     <Button color="red"
                                         onClick={this.destroy}
                                     >
