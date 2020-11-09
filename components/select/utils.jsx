@@ -8,12 +8,15 @@ import Skeleton from 'react-loading-skeleton';
  * setting format for select
  * @param {*} param0 
  */
-const settingSelect = async ({ data = [], index = { key: "", value: "", text: "" }, placeholder = "Seleccionar" }) => {
-    let newData = [{
-        key: `default-${uid(12)}`,
-        value: "",
-        text: placeholder
-    }];
+const settingSelect = async ({ is_new = true, data = [], index = { key: "", value: "", text: "" }, placeholder = "Seleccionar" }) => {
+    let newData = [];
+    if (is_new) {
+        newData.push({
+            key: `default-${uid(12)}`,
+            value: "",
+            text: placeholder
+        });
+    }
     // return string of object
     const getObj = (obj = {}, value) => {
         let data_string = `${value}`.split('.');
@@ -69,15 +72,17 @@ const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, ob
             .then(async res => {
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
-                let { lastPage, data } = res.data[obj];
+                let current_last_page = 0;
+                let { lastPage, last_page, data } = res.data[obj];
+                current_last_page = typeof lastPage != 'undefined' ? lastPage : last_page;
                 // add entities
-                let tmpDatos = await settingSelect({ data, index: { key: id, value, text } });
+                let tmpDatos = await settingSelect({ is_new: page == 1 ? true : false, data, index: { key: id, value, text } });
                 let newDatos = page == 1 ? tmpDatos : [...datos, ...tmpDatos];
                 setDatos(newDatos);
                 setIsError(false);
                 setLoading(false);
                  // continuar
-                if (lastPage >= page + 1) setNexPage(page + 1);
+                if (current_last_page >= page + 1) setNexPage(page + 1);
                 else setIsReady(true);
             }).catch(err => {
                 setIsError(true);
