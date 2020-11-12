@@ -1,6 +1,7 @@
 import React, { Fragment, useContext } from 'react';
 import { Button } from 'semantic-ui-react';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
+import moment from 'moment';
 
 const TabTeam = () => {
 
@@ -12,20 +13,29 @@ const TabTeam = () => {
             <table className="table mb-4">
                 <thead >
                     <tr>
-                        <td><b>Código: </b> {project.code}</td>
+                        <td colSpan="1"><b>Código: </b> {project.code}</td>
                     </tr>
                     <tr>
-                        <td><b>Entidad Ejecutora: </b> <span className="capitalize">{project.entity && project.entity.name}</span></td>
+                        <td colSpan="3"><b>Entidad Ejecutora: </b> <span className="capitalize">{project.entity && project.entity.name}</span></td>
                     </tr>
                     <tr>
-                        <td><b>Coordinador General: </b> <span className="capitalize">{project.principal && project.principal.person && project.principal.person.fullname || ""}</span></td>
+                        <td colSpan="3"><b>Coordinador General: </b> <span className="capitalize">{project.principal && project.principal.person && project.principal.person.fullname || ""}</span></td>
                     </tr>
                 </thead>
                 <tbody>
                     <tr className="text-center">
-                        <th>Inicio del programa</th>
-                        <th>Duración (Meses)</th>
-                        <th>Fin del programa</th>
+                        <td width="26%">
+                            <b>Inicio del programa</b>
+                            <div>{moment(project.date_start).format('DD/MM/YYYY')}</div>
+                        </td>
+                        <td width="26%">
+                            <b>Duración (Meses)</b>
+                            <div>{project.duration}</div>
+                        </td>
+                        <td width="26%">
+                            <b>Fin del programa</b>
+                            <div>{moment(project.date_over).format('DD/MM/YYYY')}</div>
+                        </td>
                     </tr>
                 </tbody>
             </table>

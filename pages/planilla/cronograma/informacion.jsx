@@ -44,7 +44,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
     const [active, setActive] = useState(0);
     const [edit, setEdit] = useState(false);
     const [send, setSend] = useState(false);
-    const [is_export, setIsExport] = useState(true);
+    const [is_filter, setIsFilter] = useState(false);
     const [total, setTotal] = useState(0);
     const [last_page, setLastPage] = useState(0);
     const [block, setBlock] = useState(false);
@@ -57,16 +57,17 @@ const InformacionCronograma = ({ cronograma, success }) => {
     // validaciones
     const isHistorial = Object.keys(historial).length;
 
+    // cambiar el form
     const handleInput = ({ name, value }) => {
         let newForm = Object.assign({}, form);
         newForm[name] = value;
         setForm({ ...newForm });
-        setIsExport(false);
     }
 
     // obtener el historial del cronograma
     const findHistorial = async () => {
         setRefresh(false);
+        setIsFilter(false);
         setLoading(true);
         setBlock(true);
         setHistorial({});
@@ -90,7 +91,6 @@ const InformacionCronograma = ({ cronograma, success }) => {
             });
         // datos cargados
         setLoading(false);
-        setIsExport(true);
     } 
 
     // cambiar historial por page
@@ -122,6 +122,11 @@ const InformacionCronograma = ({ cronograma, success }) => {
     useEffect(() => {
         if (cancel) setEdit(false);
     }, [cancel]);
+
+    // realizar filtro
+    useEffect(() => {
+        if (is_filter) findHistorial();
+    }, [is_filter]);
 
     // configurar cabezeras
     const getHeaders = () => {
@@ -481,8 +486,8 @@ const InformacionCronograma = ({ cronograma, success }) => {
                                     <Row>
                                         <form className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1" onSubmit={async (e) => {
                                                 e.preventDefault();
-                                                await setPage(1);
-                                                await findHistorial();
+                                                setPage(1);
+                                                setIsFilter(true);
                                             }}
                                         >
                                             <Form.Field> 
@@ -500,6 +505,8 @@ const InformacionCronograma = ({ cronograma, success }) => {
                                         <div className="col-md-6 col-12 mb-1 col-sm-6 col-lg-3">
                                             <Form.Field>
                                                 <SelectCronogramaCargo
+                                                    execute={false}
+                                                    refresh={cronograma.id || false}
                                                     name="cargo_id"
                                                     cronograma_id={cronograma.id}
                                                     value={form.cargo_id}
@@ -512,11 +519,14 @@ const InformacionCronograma = ({ cronograma, success }) => {
                                         <div className="col-md-6 col-sm-6 col-lg-3 mb-1 col-12">
                                             <Form.Field>
                                                 <SelectCronogramaTypeCategoria
+                                                    execute={false}
+                                                    refresh={cronograma.id || false}
                                                     name="type_categoria_id"
                                                     cronograma_id={cronograma.id}
                                                     value={form.type_categoria_id}
                                                     onChange={(e, obj) => handleInput(obj)}
                                                     disabled={loading || edit || block}
+                                                    
                                                 />
                                             </Form.Field>
                                         </div>
@@ -524,7 +534,10 @@ const InformacionCronograma = ({ cronograma, success }) => {
                                         <div className="col-md-3 col-lg-2 col-6 mb-1">
                                             <Button color="black"
                                                 fluid
-                                                onClick={findHistorial}
+                                                onClick={(e) => {
+                                                    setPage(1);
+                                                    setIsFilter(true);
+                                                }}
                                                 title="Realizar Búsqueda"
                                                 disabled={loading || edit || block}
                                             >

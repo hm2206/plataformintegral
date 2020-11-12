@@ -1,11 +1,18 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Button } from 'semantic-ui-react';
+import { Button, Accordion, Icon } from 'semantic-ui-react';
 import Show from '../show';
 import { projectTracking } from '../../services/apis';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
-import AddComponente from './addComponente';
+import AddActivity from './addActivity';
 import { SelectProjectPlanTrabajo, SelectPlanTrabajoObjective } from '../select/project_tracking'
 import moment from 'moment';
+
+const defaultPaginate = {
+    total: 0,
+    last_page: 0,
+    page: 1,
+    data: []
+};
 
 const TabActivity = (props) => {
 
@@ -14,12 +21,14 @@ const TabActivity = (props) => {
     let isProject = Object.keys(project).length;
 
     // estados
-    const [componente, setComponente] = useState({ page: 1, total: 0, last_page: 0, data: [] });
+    const [componente, setComponente] = useState(defaultPaginate);
     const isComponent = componente.data.length;
+    const [activity, setActivity] = useState(defaultPaginate);
     const [option, setOption] = useState("");
     const [plan_trabajo_id, setPlanTrabajoID] = useState("");
-    const [objective_id, setObjectiveId] = useState("");
+    const [current_objective, setCurrentObjective] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
+    const [indexActive, setIndexActive] = useState(undefined);
 
     // obtener componentes
     const getComponentes = async (nextPage = 1, up = false) => {
@@ -36,16 +45,43 @@ const TabActivity = (props) => {
         setCurrentLoading(false);
     }
 
+    // obtener activities
+    const getActivities = async (nextPage = 1, up = false) => {
+        setCurrentLoading(true);
+        await projectTracking.get(`objective/${current_objective.id}/activity?page=${nextPage}`)
+            .then(({ data }) => {
+            setActivity({ 
+                    last_page: data.activities.last_page,
+                    total: data.activities.total,
+                    data: up ? [...activity.data, ...data.objectives.data] : data.activities.data,
+                    page: data.activities.page
+                });
+            }).catch(err => console.log(err));
+        setCurrentLoading(false);
+    }
+
+    // seleccionar plan de trabajo
+    const getIndexActive = async ({ index }, obj) => {
+        setActivity(defaultPaginate);
+        setIndexActive(index);
+        setCurrentObjective(obj);
+    }
+
     // primera carga
     useEffect(() => {
-        if (objective_id) getComponentes();
-    }, [objective_id]);
+        if (plan_trabajo_id) getComponentes();
+    }, [plan_trabajo_id]);
+
+    // obtener actividades
+    useEffect(() => {   
+        if (current_objective.id) getActivities();
+    }, [current_objective.id]);
 
     // render
     return (
     <Fragment>
         <div className="row">
-            <div className="col-md-3 mb-3">
+            <div className="col-md-12 mb-3">
                 <SelectProjectPlanTrabajo 
                     project_id={project.id}
                     value={plan_trabajo_id}
@@ -53,81 +89,63 @@ const TabActivity = (props) => {
                 />
             </div>
 
-            <div className="col-md-9 mb-3">
-                <SelectPlanTrabajoObjective
-                    plan_trabajo_id={plan_trabajo_id}
-                    refresh={plan_trabajo_id}
-                    disabled={!plan_trabajo_id}
-                    value={objective_id}
-                    onChange={(e, obj) => {
-                        setObjectiveId(obj.value);
-                        setComponente({ page: 1, total: 0, last_page: 0, data: [] });
-                    }}
-                />
-            </div>
+            <div className="col-md-12 mb-3">
+            <Accordion styled fluid>
+                {componente.data.map((c, indexC) => 
+                    <Fragment key={`acordion-plan_trabajo-${indexC}`}>
+                        <Accordion.Title
+                            active={indexActive == indexC}
+                            index={indexC}
+                            onClick={(e,  data) => indexActive != indexC ? getIndexActive(data, c) : null}
+                        >
+                            <Icon name='dropdown' /> {(indexC + 1)}. {c.title}
+                        </Accordion.Title>
+                        <Accordion.Content active={indexActive == indexC}>
+                            <div className="table-responsive">
+                                <table className="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th className="text-center">Titulo</th>
+                                            <th className="text-center">Fecha Inicio</th>
+                                            <th className="text-center">Fecha Término</th>
+                                            <th width="5%">
+                                                <Button fluid basic color="green" onClick={(e) => setOption("add_activity")}>
+                                                    <i className="fas fa-plus"></i>
+                                                </Button>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {activity.data.map((c, indexA) =>
+                                            <tr key={`team-person-${indexA}`}>
+                                                <td className="text-left uppercase"><b>{(indexC + 1)}. {(indexA + 1)}</b> . {c.title}</td>
+                                                <td className="text-center uppercase">{moment(c.date_start).format('DD/MM/YYYY')}</td>
+                                                <td className="text-center uppercase">{moment(c.date_over).format('DD/MM/YYYY')}</td>
+                                                <td></td>
+                                            </tr>
+                                        )}
+                                        <Show condicion={!current_loading && !isComponent}>
+                                            <tr>
+                                                <td colSpan="5" className="text-center">No hay registros disponibles</td>
+                                            </tr>
+                                        </Show> 
+                                    </tbody>
+                                </table>
+                            </div>
+                        </Accordion.Content>
+                    </Fragment>)}
+            </Accordion>
         </div>
+    </div>
 
-        <Show condicion={objective_id}
-            predeterminado={
-                <div className="mt-5 text-center">
-                    <h4 style={{ fontSize: '1.5em', color: 'rgba(0,0,0,0.5)' }}>Seleccione un componente</h4>
-                </div>
-            }
-        >
-            <div className="table-responsive">
-                <table className="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th className="text-center" width="5%" rowSpan="2">Año</th>
-                            <th className="text-center" colSpan="12">Meses</th>
-                        </tr>
-                        <tr>
-                            <th className="text-center">Ene</th>
-                            <th className="text-center">Feb</th>
-                            <th className="text-center">Mar</th>
-                            <th className="text-center">Jun</th>
-                            <th className="text-center">Jul</th>
-                            <th className="text-center">Ago</th>
-                            <th className="text-center">Set</th>
-                            <th className="text-center">Oct</th>
-                            <th className="text-center">Nov</th>
-                            <th className="text-center">Dic</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {componente.data.map((c, indexC) =>
-                            <tr key={`team-person-${indexC}`}>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                                <th className="text-center"></th>
-                            </tr>
-                        )}
-                        <Show condicion={!current_loading && !isComponent}>
-                            <tr>
-                                <td colSpan="13" className="text-center">No hay registros disponibles</td>
-                            </tr>
-                        </Show>
-                    </tbody>
-                </table>
-            </div>
-        </Show>
-
-        <Show condicion={option == 'add_componente'}>
-            <AddComponente 
-                plan_trabajo_id={plan_trabajo_id}
-                isClose={(e) => setOption("")}
-                onChange={(e) => getComponentes()}
-            />
-        </Show>
-    </Fragment>)
+    <Show condicion={option == 'add_activity'}>
+        <AddActivity 
+            objective={current_objective}
+            isClose={(e) => setOption("")}
+            onCreate={(e) => getActivities()}
+        />
+    </Show>
+</Fragment>)
 }
 
 export default TabActivity;

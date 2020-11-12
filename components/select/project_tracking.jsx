@@ -74,10 +74,29 @@ const SelectRol = ({ id = "id", name, value, onChange, refresh = false, disabled
             />
 }
 
+const SelectPresupuesto = ({ id = "id", principal = 0, year, name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+                api={projectTracking}
+                url={`presupuesto?principal=${principal}&year=${year}`}
+                id={`select-presupuesto-${id}-${name}`}
+                value={id}
+                text="description"
+                obj="presupuestos"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Presupuesto"
+                refresh={refresh}
+                execute={false}
+                disabled={disabled}
+            />
+}
+
 // exportables
 export { 
     SelectProject,
     SelectProjectPlanTrabajo,
     SelectPlanTrabajoObjective,
     SelectRol,
+    SelectPresupuesto,
 };

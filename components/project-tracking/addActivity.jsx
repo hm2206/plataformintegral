@@ -9,7 +9,7 @@ import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import Swal from 'sweetalert2';
 
-const AddComponente = (props) => {
+const AddActivity = (props) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -18,10 +18,9 @@ const AddComponente = (props) => {
     const { project } = useContext(ProjectContext);
 
     // props
-    let { plan_trabajo } = props;  
+    let { objective } = props;  
 
     // estados
-    const [option, setOption] = useState({});
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
 
@@ -35,14 +34,14 @@ const AddComponente = (props) => {
         setErrors(newErrors);
     }
 
-    // crear equipo
-    const createComponente = async () => {
+    // crear actividad
+    const createActivity = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
         if (answer) {
             app_context.fireLoading(true);
             let datos = Object.assign({}, form);
-            datos.plan_trabajo_id = plan_trabajo.id;
-            await projectTracking.post(`objective`, datos)
+            datos.objective_id = objective.id;
+            await projectTracking.post(`activity`, datos)
                 .then(res => {
                     app_context.fireLoading(false);
                     let { success, message } = res.data;
@@ -67,17 +66,17 @@ const AddComponente = (props) => {
     return (
         <Modal
             show={true}
-            titulo={<span><i className="fas fa-plus"></i> Agregar Nuevo Componente</span>}
+            titulo={<span><i className="fas fa-plus"></i> Agregar Actividad</span>}
             {...props}
         >  
             <Form className="card-body">
                 <div className="row">
                     <div className="col-md-6 mb-3">
                         <Form.Field>
-                            <label htmlFor="">Fecha Incio del Plan de Trabajo</label>
+                            <label htmlFor="">Fecha Incio del Componente</label>
                             <input  
                                 type="date"
-                                value={plan_trabajo.date_start || ""}
+                                value={objective.date_start || ""}
                                 readOnly
                             />
                         </Form.Field>
@@ -85,10 +84,10 @@ const AddComponente = (props) => {
 
                     <div className="col-md-6 mb-3">
                         <Form.Field>
-                            <label htmlFor="">Fecha Término del Plan de Trabajo</label>
+                            <label htmlFor="">Fecha Término del Componente</label>
                             <input  
                                 type="date"
-                                value={plan_trabajo.date_over || ""}
+                                value={objective.date_over || ""}
                                 readOnly
                             />
                         </Form.Field>
@@ -100,7 +99,7 @@ const AddComponente = (props) => {
 
                     <div className="col-md-12 mb-3">
                         <Form.Field error={errors.title && errors.title[0] || ""}>
-                            <label htmlFor="">Titulo del Componente</label>
+                            <label htmlFor="">Titulo de la Actividad</label>
                             <input  
                                 type="text"
                                 name="title"
@@ -140,7 +139,7 @@ const AddComponente = (props) => {
                     <div className="col-md-12 text-right">
                         <hr/>
                         <Button color="teal" 
-                            onClick={createComponente}
+                            onClick={createActivity}
                         >
                             <i className="fas fa-save"></i> Guardar
                         </Button>
@@ -151,4 +150,4 @@ const AddComponente = (props) => {
     )
 }
 
-export default AddComponente;
+export default AddActivity;

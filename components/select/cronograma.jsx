@@ -20,7 +20,7 @@ const SelectPlanilla = ({ id = "id", name, value, onChange, refresh = false, dis
             />
 }
 
-const SelectCronogramaCargo = ({ text = 'alias', id = "id", cronograma_id, name, value, onChange, refresh = false, disabled = false, defaultDatos = [] }) => {
+const SelectCronogramaCargo = ({ text = 'alias', id = "id", cronograma_id, name, value, onChange, execute = true, refresh = false, disabled = false, defaultDatos = [] }) => {
     return <SelectBase 
                 api={unujobs}
                 url={`cronograma/${cronograma_id}/cargo`}
@@ -33,12 +33,12 @@ const SelectCronogramaCargo = ({ text = 'alias', id = "id", cronograma_id, name,
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
                 placeholder="Seleccionar Cargo"
                 refresh={refresh}
-                execute={true}
+                execute={execute}
                 disabled={disabled}
             />
 }
 
-const SelectCronogramaTypeCategoria = ({ id = "id", cronograma_id, name, value, onChange, refresh = false, disabled = false }) => {
+const SelectCronogramaTypeCategoria = ({ id = "id", cronograma_id, name, value, onChange, execute = true, refresh = false, disabled = false }) => {
     return <SelectBase 
                 api={unujobs}
                 url={`cronograma/${cronograma_id}/type_categoria`}
@@ -51,7 +51,7 @@ const SelectCronogramaTypeCategoria = ({ id = "id", cronograma_id, name, value, 
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
                 placeholder="Seleccionar Tip. Categoría"
                 refresh={refresh}
-                execute={true}
+                execute={execute}
                 disabled={disabled}
             />
 }
