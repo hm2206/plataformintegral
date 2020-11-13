@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import Swal from 'sweetalert2';
@@ -8,68 +8,82 @@ import { tramite } from '../../../services/apis';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import ModalSend from '../../../components/tramite/modalSend';
+import { AppContext } from '../../../contexts/AppContext';
+import { TrackingProvider } from '../../../contexts/tracking/TrackingContext';
 
 
-export default class TrackingIndex extends Component {
+const IndexMyTray = ({ success, tracking, query }) => {
 
+    // app
+    const app_context = useContext(AppContext);
 
-    static getInitialProps  = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname } = ctx;
-        query.status = query.status || 'PENDIENTE';
-        let { success, tracking } = query.dependencia_id ? await getMyTray(ctx, { headers: { DependenciaId: query.dependencia_id || "" } })  : {};
-        return {query, pathname, success: success || false, tracking: tracking || {} };
-    }
+    // estados
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [refresh, setRefresh] = useState(false);
+    const [current_status, setCurrentStatus] = useState({});
 
-    state = {
-        status_count: {
-            loading: false,
-            data: {}
-        }
-    }
+    // primera carga
+    useEffect(() => {
+        app_context.fireEntity({ render: true });
+    }, []);
 
-    componentDidMount = async () => {
-        let { query } = this.props;
-        if (query.dependencia_id) await this.getStatus(query.dependencia_id);
-    }
+    // vaciar estatus al cambiar la entidad
+    useEffect(() => {
+        setCurrentStatus({});
+    }, [app_context.entity_id]);
 
-    setStatusLoading = async (new_status_count = this.state.status_count) => {
-        let status_count = Object.assign(this.state.status_count, new_status_count);
-        await this.setState({ status_count });
-    }
+    // obtener el estatus
+    useEffect(() => {
+        if (app_context.entity_id && query.dependencia_id && query.status) getStatus(query.dependencia_id);
+        else setCurrentStatus({});
+    }, [query.dependencia_id, app_context.entity_id, query.status, query.query_search, refresh]);
 
-    getStatus = async (DependenciaId) => {
-        this.setStatusLoading({ loading: true });
+    // obtener el estado del traking seleccionado
+    const getStatus = async (DependenciaId) => {
+        app_context.fireLoading(true);
+        setCurrentLoading(true);
         await tramite.get('status/bandeja', { headers: { DependenciaId } })
             .then(res => {
                 let { success, message, status_count } = res.data;
                 if (!success) throw new Error(message);
-                this.setStatusLoading({ data: status_count }); 
+                setCurrentStatus(status_count);
             }).catch(err => console.log(err));
-            this.setStatusLoading({ loading: false });
+        app_context.fireLoading(false);
+        setCurrentLoading(false);
+        setRefresh(false);
     }
 
-    render() {
-
-        let { isLoading, pathname } = this.props;
-
-        return <Fragment>
-            <TableTracking 
-                {...this.props} 
-                titulo="Bandeja de Entrada"
-                status_count={this.state.status_count}
-                onSearch={(e) => this.getStatus(e || "")}
-            />
-            {/* crear nuevo buzón */}
-            <BtnFloat
-                disabled={isLoading}
-                onClick={(e) => {
-                Router.push({ pathname: `${pathname}/create`, query:  { clickb: "my_tray" }});
-            }}
-            >
-                <i className="fas fa-plus"></i>
-            </BtnFloat>
-        </Fragment>
-    }
-
+    // render
+    return <TrackingProvider value={{ 
+        current_loading,
+        current_status,
+        tracking,
+        setRefresh,
+        success,
+    }}>
+        <TableTracking 
+            title="Bandeja de Entrada"
+            query={query}
+            url={"my_tray"}
+        />
+    </TrackingProvider>;
 }
+
+// server rendering
+IndexMyTray.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { query } = ctx;
+    query.dependencia_id = typeof query.dependencia_id != 'undefined' ? query.dependencia_id : "";
+    query.status = typeof query.status != 'undefined' ? query.status : 'REGISTRADO';
+    let success = false;
+    let tracking = {};
+    if (query.dependencia_id) {
+        let datos = await getMyTray(ctx, { headers: { DependenciaId: query.dependencia_id } })
+        success = datos.success || false;
+        tracking = datos.tracking || {};
+    }
+    // response
+    return { query, success, tracking }
+}
+
+export default IndexMyTray;

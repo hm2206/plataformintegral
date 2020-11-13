@@ -49,10 +49,10 @@ export default class ModalSend extends Component
     }
 
     getSend = async (page = 1, up = false) => {
-        let { query } = this.props;
+        let { query, url } = this.props;
         let { query_search } = this.state;
         this.setState({ loader: true });
-        await tramite.get(`tracking?status=ENVIADO&page=${page}&query_search=${query_search}`, { headers: { DependenciaId: query.dependencia_id } })
+        await tramite.get(`${url}?status=ENVIADO&page=${page || 1}&query_search=${query_search}`, { headers: { DependenciaId: query.dependencia_id } })
             .then(res => {
                 let { success, message, tracking } = res.data;
                 if (!success) throw new Error(message);
@@ -131,7 +131,15 @@ export default class ModalSend extends Component
                                 <tbody>
                                     <Show condicion={!loader && !tracking.total}>
                                         <tr>
-                                            <td colSpan="8" className="text-center">No hay registros</td>
+                                            <td colSpan="8" className="text-center">
+                                                No hay registros 
+                                                <button className="ml-2 btn btn-sm btn-outline-primary"
+                                                    onClick={(e) => this.getSend(1, false)}
+                                                    disabled={this.state.loader}
+                                                >
+                                                    <i className="fas fa-sync"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                     </Show>
                                     {/* tracking */}
@@ -153,14 +161,14 @@ export default class ModalSend extends Component
                                                 <button className="btn btn-dark" 
                                                     onClick={(e) => typeof onAction == 'function' ? onAction(tra, "INFO", indexT) : null}
                                                 >
-                                                    <i class="fas fa-info"></i>
+                                                    <i className="fas fa-info"></i>
                                                 </button>
                                             </td>
                                             <td>
                                                 <button className="btn btn-dark" 
                                                     onClick={(e) => this.openFiles(tra)}
                                                 >
-                                                    <i class="far fa-file-alt"></i>
+                                                    <i className="far fa-file-alt"></i>
                                                 </button>
                                             </td>
                                             <td>
@@ -169,7 +177,7 @@ export default class ModalSend extends Component
                                                         onClick={(e) =>  this.getOption(tra, "NEXT", indexT)}
                                                         disabled={config && config.value < (indexT + 1)}
                                                     >
-                                                        <i class="fas fa-arrow-alt-circle-right"></i>
+                                                        <i className="fas fa-arrow-alt-circle-right"></i>
                                                     </button>
                                                 </div>
                                             </td>

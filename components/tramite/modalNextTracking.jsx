@@ -8,10 +8,13 @@ import { Confirm } from '../../services/utils'
 import Swal from 'sweetalert2';
 import Show from '../show';
 import SearchUserToDependencia from '../authentication/user/searchUserToDependencia';
+import { AppContext } from '../../contexts/AppContext';
 
 
 export default class ModalNextTracking extends Component
 {
+
+    static contextType = AppContext;
 
     state = {
         loader: false,
@@ -77,6 +80,11 @@ export default class ModalNextTracking extends Component
             { key: "_REPONDER", value: "RESPONDER", text: "RESPONDER" },
             { key: "_FINALIZAR", value: "FINALIZADO", text: "FINALIZAR" }
         ];
+        // enviado
+        if (status == 'ENVIADO') return [
+            { key: "_ACEPTAR", value: "ACEPTADO", text: "ACEPTAR" },
+            { key: "_RECHAZAR", value: "RECHAZADO", text: "RECHAZAR" }
+        ]
         // parant
         if (parent) return [
             { key: "_DERIVAR", value: "DERIVADO", text: "DERIVAR" },
@@ -150,6 +158,7 @@ export default class ModalNextTracking extends Component
     nextTracing = async () => {
         let answer = await Confirm(`warning`, `¿Deseas continuar?`);
         if (answer) {
+            this.context.fireLoading(true);
             let { id, dependencia_destino_id } = this.props.tramite;
             let { form, file, copy } = this.state;
             let datos = new FormData;
@@ -164,6 +173,7 @@ export default class ModalNextTracking extends Component
             // send next
             await tramite.post(`tracking/${id}/next`, datos, { headers: { DependenciaId: dependencia_destino_id } })
                 .then(async res => {
+                    this.context.fireLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
@@ -172,6 +182,7 @@ export default class ModalNextTracking extends Component
                     this.props.isClose(true);
                 }).catch(err => {
                     try {
+                        this.context.fireLoading(false);
                         let response = JSON.parse(err.message);
                         Swal.fire({ icon: 'warning', text: response.message });
                         this.setState({ errors: response.errors });

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Form, Button, Select } from 'semantic-ui-react';
@@ -7,54 +7,82 @@ import { tramite } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { getTracking } from '../../../services/requests/tramite';
 import TableTracking from '../../../components/tramite/tableTracking';
+import { AppContext } from '../../../contexts/AppContext';
+import { TrackingProvider } from '../../../contexts/tracking/TrackingContext';
 
 
-export default class TrackingIndex extends Component {
+const TrackingIndex = ({ success, tracking, query }) => {
 
+    // app
+    const app_context = useContext(AppContext);
 
-    static getInitialProps  = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname } = ctx;
-        query.status = query.status || 'PENDIENTE';
-        let { success, tracking } = query.dependencia_id ? await getTracking(ctx, { headers: { DependenciaId: query.dependencia_id || "" } }) : { success : false }; 
-        return {query, pathname, success, tracking };
-    }
+    // estados
+    const [refresh, setRefresh] = useState(false);
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [current_status, setCurrentStatus] = useState({});
 
-    state = {
-        status_count: {
-            loading: false,
-            data: {}
-        }
-    }
+    // primera carga
+    useEffect(() => {
+        app_context.fireEntity({ render: true });
+    }, []);
 
-    componentDidMount = async () => {
-        let { query } = this.props;
-        if (query.dependencia_id) await this.getStatus(query.dependencia_id);
-    }
+    // vaciar estatus al cambiar la entidad
+    useEffect(() => {
+        setCurrentStatus({});
+    }, [app_context.entity_id]);
 
-    setStatusLoading = async (new_status_count = this.state.status_count) => {
-        let status_count = Object.assign(this.state.status_count, new_status_count);
-        await this.setState({ status_count });
-    }
+    // refresh
+    useEffect(() => {
+        if (app_context.entity_id && query.dependencia_id && query.status) getStatus(query.dependencia_id);
+        else setCurrentStatus({});
+    }, [refresh]);
 
-    getStatus = async (DependenciaId) => {
-        this.setStatusLoading({ loading: true });
+    // obtener el estado del traking seleccionado
+    const getStatus = async (DependenciaId) => {
+        app_context.fireLoading(true);
+        setCurrentLoading(true);
         await tramite.get('status/tramite_interno', { headers: { DependenciaId } })
             .then(res => {
                 let { success, message, status_count } = res.data;
                 if (!success) throw new Error(message);
-                this.setStatusLoading({ data: status_count }); 
+                setCurrentStatus(status_count);
             }).catch(err => console.log(err));
-        this.setStatusLoading({ loading: false });
+        app_context.fireLoading(false);
+        setCurrentLoading(false);
+        setRefresh(false);
     }
 
-    render() {
-        return <TableTracking 
-            {...this.props} 
-            titulo="Trámite Interno"
-            status_count={this.state.status_count}
-            onSearch={(e) => this.getStatus(e || "")}
+    // render
+    return <TrackingProvider value={{ 
+        current_loading,
+        current_status,
+        tracking,
+        setRefresh,
+        success
+    }}>
+        <TableTracking 
+            title="Trámite Interno"
+            query={query}
+            url={"tracking"}
         />
-    }
-
+    </TrackingProvider>;
 }
+
+// server rendering
+TrackingIndex.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { query } = ctx;
+    query.dependencia_id = typeof query.dependencia_id != 'undefined' ? query.dependencia_id : "";
+    query.status = typeof query.status != 'undefined' ? query.status : 'REGISTRADO';
+    let success = false;
+    let tracking = {};
+    if (query.dependencia_id) {
+        let datos = await getTracking(ctx, { headers: { DependenciaId: query.dependencia_id } })
+        success = datos.success || false;
+        tracking = datos.tracking || {};
+    }
+    // response
+    return { query, success, tracking }
+}
+
+export default TrackingIndex;

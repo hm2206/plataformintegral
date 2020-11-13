@@ -211,3 +211,16 @@
       transform: rotate(360deg);
     }
 }
+
+.list-group-item-active {
+    background: #346cb0!important;
+    color: #fff;
+}
+
+.list-group-item-active a {
+    background: transparent!important;
+}
+
+.list-group-item-active a:focus {
+    background: transparent!important;
+}

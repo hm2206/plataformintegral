@@ -37,7 +37,6 @@ const SelectEntityUser = ({ id = "id", user_id, name, value, onChange, refresh }
     />
 }
 
-
 const SelectEntityDependenciaUser = ({ id = "id", user_id, entity_id, name, value, onChange, refresh }) => {
     return <SelectBase 
         execute={user_id}
@@ -151,6 +150,24 @@ const SelectInstitution = ({ id = "id", name, value, onChange, refresh = false }
             />
 }
 
+const SelectAuthEntityDependencia = ({ entity_id, id = "id", name, value, onChange, onReady, disabled }) => {
+    return <SelectBase 
+                api={authentication}
+                url={`auth/dependencia/${entity_id}`}
+                id={`select_auth_entity_dependencia-${id}-${name}`}
+                value={id}
+                text="nombre"
+                obj="dependencia"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Perfil Laboral"
+                refresh={entity_id}
+                execute={false}
+                onReady={onReady}
+                disabled={disabled}
+            />
+}
 
 export { 
     SelectDependencia,
@@ -161,4 +178,5 @@ export {
     SelectEntityDependenciaUser,
     SelectEntityDependenciaNotUser,
     SelectInstitution,
+    SelectAuthEntityDependencia,
 };

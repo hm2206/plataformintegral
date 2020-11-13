@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import Datatable from '../../components/datatable';
+import React, { useContext, useState, useEffect } from 'react';
 import Router from 'next/router';
 import { Form, Button, Select, Checkbox, Pagination } from 'semantic-ui-react';
 import Show from '../../components/show';
@@ -12,152 +11,121 @@ import ModalSend from '../../components/tramite/modalSend';
 import ModalInfo from '../../components/tramite/modalInfo';
 import moment from 'moment';
 import { tramite } from '../../services/apis';
+import { AppContext } from '../../contexts/AppContext';
+import { TrackingContext } from '../../contexts/tracking/TrackingContext';
+import { SelectAuthEntityDependencia } from '../../components/select/authentication';
 
 
-export default class TableTracking extends Component {
+const TableTracking = ({ title, query, onSearch, url }) => {
 
-    state = {
-        semaforo: [],
-        config: {},
-        block: false,
-        send: true,
-        my_dependencias: [],
-        option: {
-            key: "",
-            tracking: {}
-        },
-        form: {
-            dependencia_id: "",
-            status: "",
-            query_search: ""
+    // app
+    const app_context = useContext(AppContext)
+
+    // obtener tracking
+    const { tracking, current_status, current_loading, setRefresh } = useContext(TrackingContext);
+
+    // estados
+    const [form, setForm] = useState({
+        dependencia_id: query.dependencia_id
+    });
+    const [option, setOption] = useState({});
+    const [config, setConfig] = useState({});
+    const [semaforo, setSemaforo] = useState([]);
+    const [current_config, setCurrentConfig] = useState({});
+    const [send, setSend] = useState(false);
+
+    // vaciar el form
+    useEffect(() => {
+        if (!app_context.entity_id) {
+            query.dependencia_id = "";
         }
-    }
+    }, [app_context.entity_id]);
 
-    componentDidMount = async () => {
-        this.props.fireEntity({ render: true });
-        this.props.fireLoading(true);
-        await this.getConfig();
-        await this.getSemaforo();
-        await this.getMyDependencias(this.props.entity_id, 1, false);
-        this.setting(this.props);
-        this.props.fireLoading(false);
-    }
+    // obtener configuraciones
+    useEffect(() => {
+        if (app_context.entity_id && query.dependencia_id && query.status) {
+            getConfig();
+            getSemaforo();
+        } else {
+            setConfig({});
+            setSemaforo([]);
+        } 
+    }, [app_context.entity_id, query.dependencia_id, query.status]);
 
-    componentWillReceiveProps = (nextProps) => {
-        let { entity_id } = this.props;
-        if (entity_id != nextProps.entity_id) this.getMyDependencias(nextProps.entity_id, 1, false);
-    }
-
-    getConfig = async () => {
-        let { query } = this.props;
+    // obtener configuración para el next paso
+    const getConfig = async () => {
         await tramite.get(`config/${query.status || '__error'}?variable=NEXT`)
             .then(res  => {
                 let { success, message, config } = res.data;
                 if (!success) throw new Error(message);
-                this.setState({ config });
-            }).catch(err => this.setState({ config: {} }));
+                setCurrentConfig(config);
+            }).catch(err => setCurrentConfig({}));
     }
 
-    getSemaforo = async (page = 1, add = false) => {
+    // obtener configuración para el semaforo
+    const getSemaforo = async (page = 1, add = false) => {
         await tramite.get(`config?variable=DAY_LIMIT&page=${page || 1}`)
             .then(async res  => {
                 let { success, message, config } = res.data;
                 if (!success) throw new Error(message);
                 let { data, lastPage } = config;
-                await this.setState(state => ({ semaforo: add ? [...state.semaforo, ...data] : data }));
-                if (lastPage > page + 1) await this.getSemaforo(page + 1, true);
-            }).catch(err => this.setState({ semaforo: [] }));
+                setSemaforo(add ? [...semaforo, ...data] : data);
+                if (lastPage > page + 1) await getSemaforo(page + 1, true);
+            }).catch(err =>  setSemaforo([]));
     }
 
-    findDependenciaDefault = async (my_dependencias) => {
-        let { query } = this.props;
+    // seleccionar la primera dependencia
+    const SelectDependenciaDefault = async (my_dependencias) => {
         if (!query.dependencia_id) {
-            if (my_dependencias.length) {
-                let dep = my_dependencias[0];
-                await this.handleInput({ name: 'dependencia_id', value: dep.value });
-                await this.handleSearch();
+            let count = my_dependencias.length;
+            if (count >= 2) {
+                query.dependencia_id = my_dependencias[1].value;
+                query.query_search = "";
+                query.page = 1;
+                let { pathname, push } = Router;
+                push({ pathname, query });
             }
         }
-        // habilitar send
-        this.setState({ send: true });  
     }
 
-    getMyDependencias = async (id, page = 1, up = true) => {
-        if (id) {
-            await authentication.get(`auth/dependencia/${id}?page=${page}`)
-            .then(async res => {
-                let { success, message, dependencia } = res.data;
-                if (!success) throw new Error(message);
-                let { lastPage, data } = dependencia;
-                let newData = [];
-                // add data
-                await data.map(async d => await newData.push({
-                    key: `my_dependencia-${d.id}`,
-                    value: `${d.id}`,
-                    text: `${d.nombre}`
-                }));
-                // setting data
-                await this.setState(state => ({
-                    my_dependencias: up ? [...state.my_dependencias, ...newData] : newData
-                }));
-                // obtener la primara dependencia
-                let { my_dependencias } = this.state;
-                this.findDependenciaDefault(my_dependencias);
-                // validar request
-                if (lastPage >= page + 1) await this.getMyDependencias(page + 1);
-            })
-            .catch(err => console.log(err.message));
-        } else {
-            this.setState({ my_dependencias: [] });
-            this.handleInput({ name: 'dependencia_id', value: "" })
-        }
+    // cambiar el form
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
     }
 
-    setting = () => {
-        this.setState((state, props) => {
-            state.form.dependencia_id = props.query && props.query.dependencia_id || "";
-            state.form.status = props.query && props.query.status || "PENDIENTE";
-            state.form.query_search = props.query && props.query.query_search || "";
-            return { form: state.form };
-        })
-    }
-
-    handleInput = ({ name, value }) => {
-        this.setState(state => {
-            state.form[name] = value;
-            return { form: state.form }
-        });
-    }
-
-    handleSearch = async () => {
-        let { push, pathname, query } = Router;
-        let { status, dependencia_id, query_search } = this.state.form;
-        // validar send
-        if (query.dependencia_id != dependencia_id) this.setState({ send: true });
-        query.status = status;
-        query.dependencia_id = dependencia_id;
+    // manejador de búsqueda
+    const handleSearch = async () => {
+        let { push, pathname } = Router;
+        let { query_search } = form;
         query.query_search = query_search || "";
         query.page = 1;
-        await push({ pathname, query });
-        await this.getConfig()
+        push({ pathname, query });
+        setRefresh(true);
+        setSend(true);
         // fireSearch
-        if (typeof this.props.onSearch == 'function') this.props.onSearch(dependencia_id);
+        if (typeof onSearch == 'function') onSearch(true);
     }
 
-    getOption = (obj, key, index) => {
-        this.setState(state => {
-            state.option.key = key;
-            state.option.tracking = obj;
-            return { option: state.option };
-        });
+    // cambiar de option
+    const getOption = (obj, key, index) => {
+        let newOption = Object.assign({}, option);
+        newOption.key = key;
+        newOption.tracking = obj;
+        setOption(newOption);
     }
 
-    handleStatus = async (status) => {
-        await this.handleInput({ name: "status", value: status });
-        await this.handleSearch();
+    // cambiar de estado
+    const handleStatus = async (status) => {
+        let { push, pathname } = Router;
+        query.status = status;
+        push({ pathname, query });
+        setRefresh(true);
     }
 
-    getCurrentDay = (_timestamp) => {
+    // dia actual
+    const getCurrentDay = (_timestamp) => {
         let current = moment(moment().format('YYYY-MM-DD'));
         let comparar = moment(moment(_timestamp).format('YYYY-MM-DD'));
         let dias = current.diff(comparar, 'days');
@@ -167,7 +135,6 @@ export default class TableTracking extends Component {
             ROJO: 'red'
         };
         // get semaforo
-        let { semaforo } = this.state;
         for (let sem of semaforo) {
             switch (sem.key) {
                 case 'VERDE':
@@ -185,7 +152,8 @@ export default class TableTracking extends Component {
         return lag['VERDE'];
     }
 
-    getMeta = (status) => {
+    // meta información
+    const getMeta = (status) => {
         let datos = {
             "REGISTRADO":  { className: 'badge-dark', next: true },
             "PENDIENTE":  { className: 'badge-orange', next: true },
@@ -200,123 +168,119 @@ export default class TableTracking extends Component {
         return datos[status];
     }
 
-    handlePage = async (e, { activePage }) => {
+    // manejador de pagina
+    const handlePage = async (e, { activePage }) => {
         let { pathname, query, push } = Router;
         query.page = activePage;
         await push({ pathname, query });
     }
 
-    render() {
+    // render
+    return (
+        <div className="col-md-12">
+            <Body>
+                <div className="car card-fluid">
+                    <div className="card-header">
+                        {title}
+                    </div>
 
-        let { pathname, tracking, status_count, query } = this.props;
-        let { form, my_dependencias, option, send, config, semaforo } = this.state;
+                    <div className="card-body">
+                        <div className="mt-3 mb-4">
+                            <div className="row">
+                                <div className="col-md-3">
+                                    <div className="list-group list-group-bordered">
+                                        <SimpleList 
+                                            icon="fas fa-table" 
+                                            bg="dark" 
+                                            title="Regístrados" 
+                                            count={current_status && current_status.REGISTRADO}
+                                            onClick={(e) => handleStatus("REGISTRADO")}
+                                            active={query.status == 'REGISTRADO'}
+                                        />
 
-        return (
-            <div className="col-md-12">
-                <Body>
-                        <div className="car card-fluid">
-                            <div className="card-header">
-                                Trámite Interno
-                            </div>
-
-                            <div className="card-body">
-
-                                <div className="mt-3 mb-4">
-                                    <div className="row">
-                                        <div className="col-md-3">
-                                            <div className="list-group list-group-bordered">
-                                                <SimpleList 
-                                                    icon="fas fa-table" 
-                                                    bg="dark" 
-                                                    title="Regístrados" 
-                                                    count={status_count && status_count.data && status_count.data.REGISTRADO}
-                                                    onClick={(e) => this.handleStatus("REGISTRADO")}
-                                                    active={form.status == 'REGISTRADO'}
-                                                />
-
-                                                <SimpleList 
-                                                    icon="fas fa-hourglass-start" 
-                                                    bg="orange" 
-                                                    title="Pendientes" 
-                                                    count={status_count && status_count.data && status_count.data.PENDIENTE}
-                                                    onClick={(e) => this.handleStatus("PENDIENTE")}
-                                                    active={form.status == 'PENDIENTE'}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="col-md-3">
-                                            <div className="list-group list-group-bordered">
-                                                <SimpleList 
-                                                    icon="fas fa-share" 
-                                                    bg="purple" 
-                                                    title="Derivados" 
-                                                    count={status_count && status_count.data && status_count.data.DERIVADO}
-                                                    onClick={(e) => this.handleStatus("DERIVADO")}
-                                                    active={form.status == 'DERIVADO'}
-                                                />
-
-                                                <SimpleList 
-                                                    icon="fas fa-bell" 
-                                                    bg="warning" 
-                                                    title="Entradas" 
-                                                    count={status_count && status_count.data && status_count.data.ENVIADO}
-                                                    onClick={(e) => this.getOption({}, 'ENVIADO', 0)}
-                                                    active={option.key == 'ENVIADO'}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="col-md-3">
-                                            <div className="list-group list-group-bordered">
-                                                <SimpleList 
-                                                    icon="fas fa-clipboard-list" 
-                                                    bgIcon="secundary" 
-                                                    bg="primary" 
-                                                    title="Aceptados" 
-                                                    count={status_count && status_count.data && status_count.data.ACEPTADO}
-                                                    onClick={(e) => this.handleStatus("ACEPTADO")}
-                                                    active={form.status == 'ACEPTADO'}
-                                                />
-
-                                                <SimpleList 
-                                                    icon="fas fa-exclamation" 
-                                                    bgIcon="secundary"
-                                                    bg="danger" 
-                                                    title="Rechazados" 
-                                                    count={status_count && status_count.data && status_count.data.RECHAZADO}
-                                                    onClick={(e) => this.handleStatus("RECHAZADO")}
-                                                    active={form.status == 'RECHAZADO'}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="col-md-3">
-                                            <div className="list-group list-group-bordered">
-                                                <SimpleList 
-                                                    icon="fas fa-clipboard-list" 
-                                                    title="Finalizados" 
-                                                    count={status_count && status_count.data && status_count.data.FINALIZADO}
-                                                    onClick={(e) => this.handleStatus("FINALIZADO")}
-                                                    active={form.status == 'FINALIZADO'}
-                                                />
-
-                                                <SimpleList 
-                                                    icon="fas fa-times" 
-                                                    bg="red" 
-                                                    title="Anulados" 
-                                                    count={status_count && status_count.data && status_count.data.ANULADO}
-                                                    onClick={(e) => this.handleStatus("ANULADO")}
-                                                    active={form.status == 'ANULADO'}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
+                                        <SimpleList 
+                                            icon="fas fa-hourglass-start" 
+                                            bg="orange" 
+                                            title="Pendientes" 
+                                            count={current_status && current_status.PENDIENTE}
+                                            onClick={(e) => handleStatus("PENDIENTE")}
+                                            active={query.status == 'PENDIENTE'}
+                                        />
                                     </div>
                                 </div>
+
+                                <div className="col-md-3">
+                                    <div className="list-group list-group-bordered">
+                                        <SimpleList 
+                                            icon="fas fa-share" 
+                                            bg="purple" 
+                                            title="Derivados" 
+                                            count={current_status && current_status.DERIVADO}
+                                            onClick={(e) => handleStatus("DERIVADO")}
+                                            active={query.status == 'DERIVADO'}
+                                        />
+
+                                        <SimpleList 
+                                            icon="fas fa-bell" 
+                                            bg="warning" 
+                                            title="Entradas" 
+                                            count={current_status && current_status.ENVIADO}
+                                            onClick={(e) => getOption({}, 'ENVIADO', 0)}
+                                            active={query.key == 'ENVIADO'}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-3">
+                                    <div className="list-group list-group-bordered">
+                                        <SimpleList 
+                                            icon="fas fa-clipboard-list" 
+                                            bgIcon="secundary" 
+                                            bg="primary" 
+                                            title="Aceptados" 
+                                            count={current_status && current_status.ACEPTADO}
+                                            onClick={(e) => handleStatus("ACEPTADO")}
+                                            active={query.status == 'ACEPTADO'}
+                                        />
+
+                                        <SimpleList 
+                                            icon="fas fa-exclamation" 
+                                            bgIcon="secundary"
+                                            bg="danger" 
+                                            title="Rechazados" 
+                                            count={current_status && current_status.RECHAZADO}
+                                            onClick={(e) => handleStatus("RECHAZADO")}
+                                            active={query.status == 'RECHAZADO'}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-md-3">
+                                    <div className="list-group list-group-bordered">
+                                        <SimpleList 
+                                            icon="fas fa-check" 
+                                            title="Finalizados" 
+                                            count={current_status && current_status.FINALIZADO}
+                                            onClick={(e) => handleStatus("FINALIZADO")}
+                                            active={query.status == 'FINALIZADO'}
+                                        />
+
+                                        <SimpleList 
+                                            icon="fas fa-times" 
+                                            bg="red" 
+                                            title="Anulados" 
+                                            count={current_status && current_status.ANULADO}
+                                            onClick={(e) => handleStatus("ANULADO")}
+                                            active={query.status == 'ANULADO'}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="col-md-12">
+                                <hr/>
+                            </div>
+                        </div>
 
                                 <Form className="mb-3">
                                     <div className="row">
@@ -342,23 +306,26 @@ export default class TableTracking extends Component {
                                                 <input
                                                     placeholder="Ingres el código del trámite" 
                                                     name="query_search"
-                                                    value={`${form.query_search}` || ""}
-                                                    disabled={this.props.isLoading}
-                                                    onChange={(e) => this.handleInput(e.target)}
+                                                    defaultValue={`${form.query_search || ""}`}
+                                                    disabled={current_loading || !query.dependencia_id}
+                                                    onChange={(e) => handleInput(e.target)}
                                                 />
                                             </Form.Field>
                                         </div>
                                         <div className="col-md-5 mb-1 col-12 col-sm-6 col-xl-4">
                                             <Form.Field>
-                                                <Select
-                                                    options={my_dependencias}
-                                                    placeholder="Select. Dependencia" 
+                                                <SelectAuthEntityDependencia
                                                     name="dependencia_id"
-                                                    value={`${form.dependencia_id}` || ""}
-                                                    disabled={this.props.isLoading}
-                                                    onChange={async (e, obj) => {
-                                                        await this.handleInput(obj)
-                                                        await this.handleSearch()
+                                                    entity_id={app_context.entity_id}
+                                                    value={query.dependencia_id}
+                                                    disabled={current_loading || !app_context.entity_id}
+                                                    onReady={SelectDependenciaDefault}
+                                                    onChange={(e, obj) => {
+                                                        let { push, pathname } = Router;
+                                                        query.dependencia_id = obj.value;
+                                                        push({ pathname, query });
+                                                        setRefresh(true);
+                                                        setSend(true);
                                                     }}
                                                 />
                                             </Form.Field>
@@ -369,11 +336,14 @@ export default class TableTracking extends Component {
                                                     className="mt-2" 
                                                     label='Copia'
                                                     toggle
+                                                    disabled={current_loading || !query.dependencia_id}
                                                     name="status"
-                                                    checked={form.status == 'COPIA'}
+                                                    checked={query.status == 'COPIA'}
                                                     onChange={async (e, obj) => {
-                                                        await this.handleInput({ name: obj.name, value: obj.checked ? 'COPIA' : 'PENDIENTE' });
-                                                        await this.handleSearch();
+                                                        let { push, pathname } = Router;
+                                                        query.status = obj.checked ? 'COPIA' : 'REGISTRADO';
+                                                        push({ pathname, query });
+                                                        setRefresh(true);
                                                     }}
                                                 />
                                             </Form.Field>
@@ -381,8 +351,8 @@ export default class TableTracking extends Component {
                                         <div className="col-md-3 col-12 col-sm-12 col-xl-2 mb-1">
                                             <Button 
                                                 fluid
-                                                onClick={this.handleSearch}
-                                                disabled={this.props.isLoading}
+                                                onClick={handleSearch}
+                                                disabled={current_loading || !query.dependencia_id}
                                                 color="blue"
                                             >
                                                 <i className="fas fa-search mr-1"></i>
@@ -411,7 +381,7 @@ export default class TableTracking extends Component {
                                             {tracking && tracking.data && tracking.data.map((tra, indexT) => 
                                                 <tr key={`tracking-${tra.id}-${indexT}`} className={config && config.value && (((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value) ? 'text-muted bg-disabled' : ''}>
                                                     <td>
-                                                        <span className={`tile tile-circle bg-${this.getCurrentDay(tra.updated_at)}`.toLowerCase()}>
+                                                        <span className={`tile tile-circle bg-${getCurrentDay(tra.updated_at)}`.toLowerCase()}>
                                                             <i className="fas fa-traffic-light"></i> 
                                                         </span>
                                                     </td>
@@ -427,37 +397,37 @@ export default class TableTracking extends Component {
                                                         <b className="badge badge-red">{moment(tra.updated_at).format('DD/MM/YYYY h:mm a')}</b>
                                                     </td>
                                                     <td>
-                                                        <b className={`badge ${this.getMeta(tra.status).className}`}>{tra.status}</b>
+                                                        <b className={`badge ${getMeta(tra.status).className}`}>{tra.status}</b>
                                                     </td>
                                                     <td>
                                                         <div className="row justify-content-center">
                                                             <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#" 
                                                                 title="Seguimiento del Tramite"
-                                                                onClick={(e) => this.getOption(tra, 'TRACKING', indexT)}
+                                                                onClick={(e) => getOption(tra, 'TRACKING', indexT)}
                                                             >
                                                                 <i className="fas fa-search"></i> 
                                                             </a>
                                                             <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
                                                                 title="Más información"
-                                                                onClick={(e) => this.getOption(tra, 'INFO', indexT)}
+                                                                onClick={(e) => getOption(tra, 'INFO', indexT)}
                                                             >
                                                                 <i className="fas fa-info"></i> 
                                                             </a>
 
-                                                            <Show condicion={this.getMeta(tra.status).next}>
-                                                                <Show condicion={config && config.value  && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value))}>
+                                                            <Show condicion={getMeta(tra.status).next}>
+                                                                <Show condicion={current_config && current_config.value  && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > current_config.value))}>
                                                                     <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
                                                                         title="Continuar Trámite"
-                                                                        onClick={(e) => this.getOption(tra, 'NEXT', indexT)}
+                                                                        onClick={(e) => getOption(tra, 'NEXT', indexT)}
                                                                     >
                                                                         <i className="fas fa-arrow-right"></i> 
                                                                     </a>
                                                                 </Show>
 
-                                                                <Show condicion={!config && config.value}>
+                                                                <Show condicion={!Object.keys(current_config || {}).length}>
                                                                     <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
                                                                         title="Continuar Trámite"
-                                                                        onClick={(e) => this.getOption(tra, 'NEXT', indexT)}
+                                                                        onClick={(e) => getOption(tra, 'NEXT', indexT)}
                                                                     >
                                                                         <i className="fas fa-arrow-right"></i> 
                                                                     </a>
@@ -468,7 +438,7 @@ export default class TableTracking extends Component {
                                                 </tr>    
                                             )}
 
-                                            <Show condicion={!(tracking && tracking.data && tracking.data.length)}>
+                                            <Show condicion={!current_loading && !(tracking && tracking.data && tracking.data.length)}>
                                                 <tr>
                                                     <td colSpan="7" className="text-center">No hay registros disponibles</td>
                                                 </tr>
@@ -479,11 +449,10 @@ export default class TableTracking extends Component {
                                     <hr/>
 
                                     <div className="text-center">
-                                        <Pagination defaultActivePage={query.page || 1} 
+                                        <Pagination
                                             totalPages={tracking && tracking.lastPage || 1}
-                                            enabled={this.state.loading}
                                             activePage={query.page || 1}
-                                            onPageChange={this.handlePage}
+                                            onPageChange={handlePage}
                                         />
                                     </div>
                                 </div>
@@ -493,36 +462,46 @@ export default class TableTracking extends Component {
                 {/* options tracking */}
                 <Show condicion={option.key == 'TRACKING'}>
                     <ModalTracking tramite={option.tracking}
-                        isClose={(e) => this.getOption({}, "")}
+                        isClose={(e) => getOption({}, "")}
                     />
                 </Show>
                 {/* tramites enviados */}
-                <Show condicion={(send && status_count.data && status_count.data.ENVIADO) || option.key == 'ENVIADO'}>
-                    <ModalSend onAction={this.getOption} {...this.props} isClose={async (e) => {
-                        this.setState({ send: false });
-                        this.getOption({}, '', 0);
-                        await this.handleInput({ name:'status', value: 'PENDIENTE' });
-                        await this.handleSearch();
-                    }}/>
+                <Show condicion={(send && current_status.ENVIADO) || option.key == 'ENVIADO'}>
+                    <ModalSend 
+                        url={url}
+                        query={query}
+                        onAction={getOption} isClose={async (e) => {
+                            setSend(false);
+                            getOption({}, '', 0);
+                            let { pathname, push } = Router;
+                            query.status = 'PENDIENTE';
+                            push({ pathname, query });
+                            setRefresh(true);
+                        }}
+                    />
                 </Show>
                 {/* options next */}
                 <Show condicion={option.key == 'NEXT'}>
                     <ModalNextTracking tramite={option.tracking}
+                        query={query}
                         isClose={async (e) => {
-                            this.getOption({}, "")
-                            await this.handleSearch();
+                            getOption({}, "");
+                            let { push, pathname } = Router;
+                            push({ pathname, query });
+                            setRefresh(true);
                         }}
-                        entity_id={this.props.entity_id || ""}
+                        entity_id={app_context.entity_id || ""}
                     />
                 </Show>
                 {/* options info */}
                 <Show condicion={option.key == 'INFO'}>
                     <ModalInfo tracking={option.tracking}
-                        isClose={(e) => this.getOption({}, "")}
+                        query={query}
+                        isClose={(e) => getOption({}, "")}
                     />
                 </Show>
             </div>
         )
-    }
-
 }
+
+export default TableTracking;
