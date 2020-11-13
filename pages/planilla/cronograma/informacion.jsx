@@ -241,6 +241,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
                 let { success, message } = res.data;
                 if (!success) throw new Error(messsage);
                 await Swal.fire({ icon: 'success', text: message });
+                await findHistorial();
             }).catch(err => {
                 app_context.fireLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
@@ -600,6 +601,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
 
             <Show condicion={option == 'open'}>
                 <Open cronograma={cronograma}
+                    onSave={findHistorial}
                     isClose={(e) => setOption("")}
                 />
             </Show>

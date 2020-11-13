@@ -24,6 +24,7 @@ export default class Open extends Component
             let { pathname, query, push } = Router;
             this.props.isClose();
             if (success) await push({ pathname, query });
+            if (typeof this.props.onSave == 'function') this.props.onSave(true);
         })
         .catch(err => Swal.fire({ icon: 'error', text: err.message }));
         this.setState({ loader: false });
