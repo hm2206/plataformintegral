@@ -161,7 +161,7 @@ const SelectAuthEntityDependencia = ({ entity_id, id = "id", name, value, onChan
                 name={name}
                 valueChange={value || ""}
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-                placeholder="Seleccionar Perfil Laboral"
+                placeholder="Seleccionar Dependencia"
                 refresh={entity_id}
                 execute={false}
                 onReady={onReady}

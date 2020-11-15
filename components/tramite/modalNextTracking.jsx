@@ -1,75 +1,46 @@
-import React, { Component } from 'react'
+import React, { useContext, useState } from 'react'
 import Modal from '../modal';
 import { Form, Select, Button } from 'semantic-ui-react';
 import Router from 'next/router';
-import { tramite, authentication } from '../../services/apis';
+import { tramite, signature } from '../../services/apis';
 import { DropZone } from '../../components/Utils';
 import { Confirm } from '../../services/utils'
 import Swal from 'sweetalert2';
 import Show from '../show';
 import SearchUserToDependencia from '../authentication/user/searchUserToDependencia';
 import { AppContext } from '../../contexts/AppContext';
+import { SelectDependencia } from '../../components/select/authentication';
+import PdfView from '../pdfView';
+import { PDFDocument } from 'pdf-lib';
 
 
-export default class ModalNextTracking extends Component
-{
+const ModalNextTracking = (props) =>{
 
-    static contextType = AppContext;
+    // app
+    const app_context = useContext(AppContext);
 
-    state = {
-        loader: false,
-        add_copy: false,
-        form: {
-            status: "",
-            dependencia_destino_id: "",
-            description: "",
-            dependencia_copy_id: ""
-        },
-        file: {
-            size: 0,
-            data: []
-        },
-        errors: {},
-        query_search: "",
-        dependencias: [],
-        option: "",
-        user: {},
-        copy: [],
-        copy_current: {
-            user: { key: "", value: "", text: ""},
-            dependencia: { key: "", value: "", text: "" }
-        },
-        copy_show: false
-    }
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [option, setOption] = useState("");
+    const [add_copy, setAddCopy] = useState(false);
+    const [copy, setCopy] = useState([]);
+    const [copy_current, setCopyCurrent] = useState({
+        user: { key: "", value: "", text: ""},
+        dependencia: { key: "", value: "", text: "" }
+    });
+    const [copy_show, setCopyShow] = useState(false);
+    const [current_files, setCurrentFiles] = useState([]);
+    const [size_files, setSizeFiles] = useState(0);
+    const [user, setUser] = useState({});
 
-    componentDidMount = async () => {
-        this.getDependencias();
-    }
+    // estado del pdf
+    const [pdf_url, setPdfUrl] = useState("");
+    const [pdf_doc, setPdfDoc] = useState(undefined);
+    const [pdf_blob, setPdfBlob] = useState(undefined);
 
-    getDependencias = async (page = 1) => {
-        await authentication.get(`dependencia?page=${page}`)
-        .then(async res => {
-            let { success, message, dependencia } = res.data;
-            if (!success) throw new Error(message);
-            let { lastPage, data } = dependencia;
-            let newData = [];
-            // add data
-            await data.map(async d => await newData.push({
-                key: `dependencia-${d.id}`,
-                value: d.id,
-                text: `${d.nombre}`
-            }));
-            // setting data
-            this.setState(state => ({
-                dependencias: [...state.dependencias, ...newData]
-            }));
-            // validar request
-            if (lastPage >= page + 1) await this.getDependencias(page + 1);
-        })
-        .catch(err => console.log(err.message));
-    }
-
-    getAction = (status, parent = 1) => {
+    // acciones
+    const getAction = (status, parent = 1) => {
         if (status == 'REGISTRADO') return [
             { key: "_DERIVAR", value: "DERIVADO", text: "DERIVAR" },
             { key: "_ANULAR", value: "ANULADO", text: "ANULAR" }
@@ -98,94 +69,85 @@ export default class ModalNextTracking extends Component
         ]
     }
 
-    handlePage = async (nextPage) => {
-        this.setState({ loader: true });
-        await this.getUser(nextPage, this.state);
+    // cambiar form
+    const handleInput = async ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-    handleInput = async ({ name, value }, obj = {}) => {
-        this.setState(state => {
-            state.form[name] = value;
-            state.errors[name] = [];
-            return { form: state.form, errors: state.errors };
-        });
-        // handle changed
-        await this.handleChangedInput({ name, value }, obj);
-    }
-
-    handleChangedInput = ({ name, value }, obj = {}) => {
-        switch (name) {
-            case 'dependencia_copy_id':
-                for (let opt of obj.options) {
-                    if (opt.value == value) {
-                        this.handleCurrentCopy({ dependencia: opt });
-                        break;
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    handleFiles = ({ files }) => {
-        let { file } = this.state;
-        let size_total = file.size;
-        let size_limit = 2 * 1024;
+    // manejar archivos
+    const handleFiles = async ({ files }) => {
+        let size_total = size_files;
+        let size_limit = 6 * 1024;
         for (let f of files) {
             size_total += f.size;
             if ((size_total / 1024) <= size_limit) {
-                this.setState(state => {
-                    state.file.size += size_total;
-                    state.file.data.push(f);
-                    return { file: state.file }
-                });
+                let answer = await Confirm("info", `¿Desea añadir firma digital al archivo "${f.name}"?`, 'Firmar');
+                if (answer) addSignature(f);
+                else {
+                    setCurrentFiles([...current_files, f]);
+                }
             } else {
-                Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(2)}MB)` });
+                size_total = size_total - f.size;
+                Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(6)}MB)` });
                 return false;
             }
         }
     }
+
+    // agregar pdf para firmar
+    const addSignature = async (blob) => {
+        let reader = new FileReader();
+        await reader.readAsArrayBuffer(blob);
+        reader.onload = async () => {
+            let pdfDoc = await PDFDocument.load(reader.result);
+            let url = URL.createObjectURL(blob);
+            setPdfDoc(pdfDoc);
+            setPdfBlob(blob);
+            setPdfUrl(url);
+            setOption("signer");
+        }
+    }
  
-    deleteFile = (index, file) => {
-        this.setState(state => {
-            state.file.data.splice(index, 1);
-            state.file.size = state.file.size - file.size; 
-            return { file: state.file };
-        });
+    // eliminar pdf
+    const deleteFile = (index, file) => {
+        let newFiles = current_files;
+        newFiles.splice(index, 1);
+        let size = current_files - file.size;
+        setCurrentFiles(newFiles);
+        setSizeFiles(size);
     }
 
-    nextTracing = async () => {
-        let answer = await Confirm(`warning`, `¿Deseas continuar?`);
+     // realizar firma
+    const onSignature = async (obj) => {
+        let answer = await Confirm("warning", `¿Estás seguro en firmar el PDF?`, 'Firmar');
         if (answer) {
-            this.context.fireLoading(true);
-            let { id, dependencia_destino_id } = this.props.tramite;
-            let { form, file, copy } = this.state;
-            let datos = new FormData;
-            // assing form
-            for(let attr in form) {
-                datos.append(attr, form[attr]);
-            }
-            // add files
-            await file.data.map(f => datos.append('files', f));
-            // add copies
-            datos.append('copy', JSON.stringify(copy));
-            // send next
-            await tramite.post(`tracking/${id}/next`, datos, { headers: { DependenciaId: dependencia_destino_id } })
-                .then(async res => {
-                    this.context.fireLoading(false);
-                    let { success, message } = res.data;
-                    if (!success) throw new Error(message);
-                    await Swal.fire({ icon: 'success', text: message });
-                    let { push, pathname, query } = Router;
-                    await push({ pathname, query });
-                    this.props.isClose(true);
+            app_context.fireLoading(true);
+            let datos = new FormData();
+            datos.append('location', obj.location)
+            datos.append('page', obj.page)
+            datos.append('reason', obj.reason)
+            datos.append('visible', obj.visible)
+            datos.append('file', obj.pdfBlob)
+            if (obj.position) datos.append('position', obj.position)
+            // firmar pdf
+            await signature.post(`auth/signer`, datos, { responseType: 'blob' })
+                .then(res => {
+                    app_context.fireLoading(false);
+                    let { data } = res;
+                    data.lastModifiedDate = new Date();
+                    let file = new File([data], obj.pdfBlob.name);
+                    setCurrentFiles([...current_files, file]);
+                    Swal.fire({ icon: 'success', text: 'El pdf se firmó correctamente!' });
                 }).catch(err => {
                     try {
-                        this.context.fireLoading(false);
-                        let response = JSON.parse(err.message);
-                        Swal.fire({ icon: 'warning', text: response.message });
-                        this.setState({ errors: response.errors });
+                        app_context.fireLoading(false);
+                        let { message } = err.response.data;
+                        Swal.fire({ icon: 'error', text: message });
                     } catch (error) {
                         Swal.fire({ icon: 'error', text: err.message });
                     }
@@ -193,58 +155,93 @@ export default class ModalNextTracking extends Component
         }
     }
 
-    handleAdd = (obj) => {
-        this.setState({ option: '', user: obj });
-        this.handleInput({ name: 'user_destino_id', value: obj.id });
+    // procesar trámite
+    const nextTracing = async () => {
+        let answer = await Confirm(`warning`, `¿Deseas continuar?`);
+        if (answer) {
+            app_context.fireLoading(true);
+            let { id, dependencia_destino_id } = props.tramite;
+            let datos = new FormData;
+            // assing form
+            for(let attr in form) {
+                datos.append(attr, form[attr]);
+            }
+            // add files
+            await current_files.map(f => datos.append('files', f));
+            // add copies
+            datos.append('copy', JSON.stringify(copy));
+            // send next
+            await tramite.post(`tracking/${id}/next`, datos, { headers: { DependenciaId: dependencia_destino_id } })
+                .then(async res => {
+                    app_context.fireLoading(false);
+                    let { success, message } = res.data;
+                    if (!success) throw new Error(message);
+                    await Swal.fire({ icon: 'success', text: message });
+                    let { push, pathname, query } = Router;
+                    await push({ pathname, query });
+                    props.isClose(true);
+                }).catch(err => {
+                    try {
+                        app_context.fireLoading(false);
+                        let response = JSON.parse(err.message);
+                        Swal.fire({ icon: 'warning', text: response.message });
+                        setErrors(response.errors);
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: err.message });
+                    }
+                });
+        }
     }
 
-    handleCurrentCopy = (config = this.state.copy_current) => {
-        let newConfig = this.state.copy_current;
-        newConfig = Object.assign({}, { dependencia: config.dependencia || newConfig.dependencia, user: config.user || newConfig.user });
-        this.setState({ copy_current: newConfig });
+    // agregar usuario
+    const handleAdd = (obj) => {
+        setOption("");
+        setUser(obj);
+        handleInput({ name: 'user_destino_id', value: obj.id });
     }
 
-    handleAddCopy = () => {
-        this.setState(state => {
-            // get datos
-            let { dependencia, user } = state.copy_current;
-            // add copy
-            state.copy.push({
-                dependencia_id: dependencia.value || "",
-                dependencia_text: dependencia.text || "",
-                user_id: user.value || "",
-                user_text: user.text || ""
-            });
-            // response
-            return { copy: state.copy }
+    // copia actual
+    const handleCurrentCopy = (config = copy_current) => {
+        let newConfig = Object.assign({}, { dependencia: config.dependencia, user: config.user });
+        setCopyCurrent(newConfig);
+    }
+
+    // agregar copia
+    const handleAddCopy = () => {
+        let { dependencia, user } = copy_current;
+        // add copy
+        let newCopy = copy;
+        newCopy.push({
+            dependencia_id: dependencia.value || "",
+            dependencia_text: dependencia.text || "",
+            user_id: user.value || "",
+            user_text: user.text || ""
         });
+        // agregar
+        setCopy(newCopy);
     }
 
-    handleDeleteCopy = (index) => {
-        this.setState(state => {
-            state.copy.splice(index, 1);
-            return { copy: state.copy };
-        });
+    // quitar copia
+    const handleDeleteCopy = (index) => {
+        let newCopy = copy;
+        newCopy.splice(index, 1);
+        setCopy(newCopy);
     }
 
-    render() {
-
-        let { loader, form, dependencias, errors, user, file, add_copy, copy, copy_show } = this.state;
-        let { tramite } = this.props;
-
-        return (
+    // render 
+    return (
             <Modal
                 md="7"
                 show={true}
-                {...this.props}
-                titulo={<span><i className="fas fa-path"></i> Proceso del trámite: <span className="badge badge-dark">{tramite && tramite.slug}</span></span>}
+                {...props}
+                titulo={<span><i className="fas fa-path"></i> Proceso del trámite: <span className="badge badge-dark">{props.tramite && props.tramite.slug}</span></span>}
             >
-                <Form className="card-body" loading={loader}>
+                <Form className="card-body">
                     <div className="row">
                         <div className="col-md-6 mt-3">
                             <Form.Field>
                                 <label htmlFor="">Fecha Registro</label>
-                                <input type="date" readOnly value={tramite && tramite.created_at && `${tramite.created_at}`.split(' ')[0] || ""}/>
+                                <input type="date" readOnly value={props.tramite && props.tramite.created_at && `${props.tramite.created_at}`.split(' ')[0] || ""}/>
                             </Form.Field>
                         </div>
 
@@ -253,10 +250,10 @@ export default class ModalNextTracking extends Component
                                 <label htmlFor="">Acción <b className="text-red">*</b></label>
                                 <Select
                                     placeholder="Select. Acción"
-                                    options={this.getAction(tramite.status, tramite.parent || 0)}
+                                    options={getAction(props.tramite.status, props.tramite.parent || 0)}
                                     name="status"
                                     value={form.status || ""}
-                                    onChange={(e, obj) => this.handleInput(obj)}
+                                    onChange={(e, obj) => handleInput(obj)}
                                 />
                                 <label htmlFor="">{errors.status && errors.status[0] || ""}</label>
                             </Form.Field>
@@ -265,33 +262,31 @@ export default class ModalNextTracking extends Component
                         <div className="col-md-6 mt-3">
                             <Form.Field>
                                 <label htmlFor="">Dependencía Origen</label>
-                                <input type="text" readOnly value={tramite && tramite.dependencia_origen && tramite.dependencia_origen.nombre}/>
+                                <input type="text" readOnly value={props.tramite && props.tramite.dependencia_origen && props.tramite.dependencia_origen.nombre}/>
                             </Form.Field>
                         </div>
 
-                        <Show condicion={tramite.parent && form.status == 'DERIVADO'}>
+                        <Show condicion={props.tramite.parent && form.status == 'DERIVADO'}>
                             <div className="col-md-6 mt-3">
                                 <Form.Field error={errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}>
                                     <label htmlFor="">Dependencía Destino <b className="text-red">*</b></label>
-                                    <Select
+                                    <SelectDependencia
                                         name="dependencia_destino_id"
-                                        placeholder="Select. Dependencía Destino"
-                                        options={dependencias}
-                                        value={form.dependencia_destino_id || ""}
-                                        onChange={(e, obj) => this.handleInput(obj)}
+                                        value={form.dependencia_destino_id}
+                                        onChange={(e, obj) => handleInput(obj)}
                                     />
                                     <label htmlFor="">{errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}</label>
                                 </Form.Field>
                             </div>
                         </Show>
 
-                        <Show condicion={tramite.parent && form.status == 'DERIVADO' && tramite.dependencia_destino_id == form.dependencia_destino_id}>
+                        <Show condicion={props.tramite.parent && form.status == 'DERIVADO' && props.tramite.dependencia_destino_id == form.dependencia_destino_id}>
                             <div className="col-md-12">
                                 <hr/>
                                     <Form.Field error={errors.user_destino_id && errors.user_destino_id[0] || ""}>
                                         <i className="fas fa-user"></i> Agregar usuario 
                                         <button className="btn btn-sm btn-dark ml-2"
-                                            onClick={(e) => this.setState({ option: 'assign-user' })}
+                                            onClick={(e) => setOption('assign-user')}
                                         >
                                             <i className={`fas fa-${user.fullname ? 'sync' : 'plus'}`}></i>
                                         </button>
@@ -306,30 +301,30 @@ export default class ModalNextTracking extends Component
                         </Show>
 
                         <div className="col-md-12 mt-3">
-                            <Form.Field  error={errors.description && errors.description[0] || ""}>
+                            <Form.Field  error={errors && errors.description && errors.description[0] || ""}>
                                 <label htmlFor="">Descripción <b className="text-red">*</b></label>
                                 <textarea 
                                     name="description" 
                                     rows="4"
                                     value={form.description || ""}
-                                    onChange={(e) => this.handleInput(e.target)}
+                                    onChange={(e) => handleInput(e.target)}
                                 />
-                                <label htmlFor="">{errors.description && errors.description[0] || ""}</label>
+                                <label htmlFor="">{errors && errors.description && errors.description[0] || ""}</label>
                             </Form.Field>
                         </div>
 
-                        <Show condicion={tramite.parent}>
+                        <Show condicion={props.tramite.parent}>
                             <div className="col-md-12 mt-3">
                                 <Form.Field error={errors.files && errors.files[0] || ""}>
                                     <label htmlFor="">Adjuntar Archivo</label>
                                     <DropZone id="files" 
                                         name="files"
-                                        onChange={(e) => this.handleFiles(e)} 
+                                        onChange={(e) => handleFiles(e)} 
                                         icon="save"
-                                        result={file.data}
+                                        result={current_files}
                                         title="Select. Archivo (*.docx, *.pdf)"
                                         accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                        onDelete={(e) => this.deleteFile(e.index, e.file)}
+                                        onDelete={(e) => deleteFile(e.index, e.file)}
                                     />
                                     <label htmlFor="">{errors.files && errors.files[0] || ""}</label>
                                 </Form.Field>
@@ -341,7 +336,7 @@ export default class ModalNextTracking extends Component
                                 <i className={`far fa-file-alt mr-2`}></i> 
                                 Agregar Copia {copy.length ? `(${copy.length})` : null} 
                                 <button className={`ml-3 btn btn-dark btn-sm`}
-                                    onClick={(e) => this.setState(state => ({ add_copy: !state.add_copy }))}
+                                    onClick={(e) => setAddCopy(!add_copy)}
                                 >
                                     <i className={`fas fa-${add_copy ? 'minus' : 'plus'}`}></i>
                                 </button>
@@ -352,12 +347,10 @@ export default class ModalNextTracking extends Component
                             <div className="col-md-6 mt-3">
                                 <Form.Field>
                                     <label htmlFor="">Dependencía</label>
-                                    <Select
+                                    <SelectDependencia
                                         name="dependencia_copy_id"
-                                        placeholder="Select. Dependencía Destino"
-                                        options={dependencias}
-                                        value={form.dependencia_copy_id || ""}
-                                        onChange={(e, obj) => this.handleInput(obj, obj)}
+                                        value={form.dependencia_copy_id}
+                                        onChange={(e, obj) => handleInput(obj)}
                                     />
                                 </Form.Field>
                             </div>
@@ -368,7 +361,7 @@ export default class ModalNextTracking extends Component
                                     <div>
                                         <Button
                                             disabled={!form.dependencia_copy_id}
-                                            onClick={(e) => this.setState({ copy_show: true })}
+                                            onClick={(e) => setCopyShow(true)}
                                         >
                                             <i className="fas fa-user-cog"></i>
                                         </Button>
@@ -394,7 +387,7 @@ export default class ModalNextTracking extends Component
                                                         <td>{c.user_text || ""}</td>
                                                         <td>
                                                             <button className="btn btn-sm btn-red"
-                                                                onClick={(e) => this.handleDeleteCopy(indexC)}
+                                                                onClick={(e) => handleDeleteCopy(indexC)}
                                                             >
                                                                 <i className="fas fa-trash-alt"></i>
                                                             </button>
@@ -413,7 +406,7 @@ export default class ModalNextTracking extends Component
                             <div className="text-right">
                                 <Button color="teal"
                                     disabled={!form.status}
-                                    onClick={this.nextTracing}
+                                    onClick={nextTracing}
                                 >
                                     <i className="fas fa-sync"></i> Procesar Trámite
                                 </Button>
@@ -422,30 +415,41 @@ export default class ModalNextTracking extends Component
                     </div>
                 </Form>
 
-                <Show condicion={this.state.option == 'assign-user'}>
+                <Show condicion={option == 'assign-user'}>
                     <SearchUserToDependencia
-                        entity_id={tramite.entity_id}
-                        dependencia_id={tramite.dependencia_destino_id}
-                        getAdd={this.handleAdd}
-                        isClose={(e) => this.setState({ option: '' })}
+                        entity_id={props.tramite.entity_id}
+                        dependencia_id={props.tramite.dependencia_destino_id}
+                        getAdd={handleAdd}
+                        isClose={(e) => setOption("")}
                     />
                 </Show>
 
                 {/* user -> dependencia */}
                 <Show condicion={copy_show}>
                     <SearchUserToDependencia 
-                        entity_id={this.props.entity_id || ""} 
+                        entity_id={app_context.entity_id || ""} 
                         dependencia_id={form.dependencia_copy_id || ""}
-                        isClose={(e) => this.setState({ copy_show: false })}
+                        isClose={(e) => setCopyShow(false)}
                         getAdd={async (e) => {
-                            this.setState({ copy_show: false });
-                            await this.handleCurrentCopy({ user: { key: `key-user-${e.username}`, value: e.id, text: e.fullname } })
-                            this.handleAddCopy();
+                            setCopyShow(false);
+                            // handleCurrentCopy({ user: { key: `key-user-${e.username}`, value: e.id, text: e.fullname } })
+                            // handleAddCopy();
                         }}
+                    />
+                </Show>
+
+                {/* firmar pdf  */}
+                <Show condicion={option == "signer"}>
+                    <PdfView 
+                        pdfUrl={pdf_url} 
+                        pdfDoc={pdf_doc}
+                        pdfBlob={pdf_blob}
+                        onSignature={onSignature}
+                        onClose={(e) => setOption("")}
                     />
                 </Show>
             </Modal>
         );
-    }
-
 }
+
+export default ModalNextTracking;

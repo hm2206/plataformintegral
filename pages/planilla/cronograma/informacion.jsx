@@ -23,6 +23,7 @@ import Open from '../../../components/cronograma/open';
 import Cerrar from '../../../components/cronograma/close';
 import SearchCronograma from '../../../components/cronograma/searchCronograma';
 import { credencials } from '../../../env.json';
+import ModalReport from '../../../components/cronograma/modalReport';
 
 const FooterCronograma = dynamic(() => import('../../../components/cronograma/footerCronograma'), { ssr: false });
 
@@ -301,9 +302,9 @@ const InformacionCronograma = ({ cronograma, success }) => {
             case 'desc-massive':
             case 'remu-massive':
             case 'imp-descuento':
+            case 'report':
                 setOption(name);
                 break;
-            case 'report':
             case 'email':
                 let newQuery = {};
                 newQuery.id = query.id;
@@ -615,6 +616,13 @@ const InformacionCronograma = ({ cronograma, success }) => {
             <Show condicion={option == 'search_cronograma'}> 
                 <SearchCronograma cronograma={cronograma}
                     isClose={e => setOption("")}
+                />
+            </Show>
+
+            <Show condicion={option == 'report'}>
+                <ModalReport
+                    cronograma={cronograma}
+                    isClose={(e) => setOption("")}
                 />
             </Show>
     </CronogramaProvider>

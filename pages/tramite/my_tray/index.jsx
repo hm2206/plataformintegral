@@ -66,6 +66,12 @@ const IndexMyTray = ({ success, tracking, query }) => {
             query={query}
             url={"my_tray"}
         />
+        <BtnFloat onClick={(e) => {
+            let { push, pathname } = Router;
+            push({ pathname: `${pathname}/create` });
+        }}>
+            <i className="fas fa-plus"></i>
+        </BtnFloat>
     </TrackingProvider>;
 }
 

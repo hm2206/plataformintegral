@@ -32,7 +32,7 @@ const InputFile = ({ id, name, onChange, error = false, children = null, title =
 }
 
 
-const DropZone = ({ id, name, onChange, error = false, children = null, title = "Select", accept = "*", icon = 'image', label = null, result = [], onDelete = null }) => {
+const DropZone = ({ id, name, onChange, error = false, multiple = true, children = null, title = "Select", accept = "*", icon = 'image', label = null, result = [], onDelete = null }) => {
 
   const metaDatos = (name) => {
     let items = {
@@ -58,10 +58,10 @@ const DropZone = ({ id, name, onChange, error = false, children = null, title = 
             id={id} 
             accept={accept}
             name={name}
-            multiple
-            onChange={(e) => {
+            multiple={multiple}
+            onChange={async (e) => {
               let { name, files } = e.target;
-              if (typeof onChange == 'function') onChange({ name, files });
+              if (typeof onChange == 'function') await onChange({ name, files });
               document.getElementById(id).value = null;
             }}
             hidden
@@ -147,7 +147,7 @@ class BtnSelect extends Component {
     let { color, text, object } = this.state;
 
     return (
-      <Button.Group fluid  color={object.color ? object.color : color}>
+      <Button.Group fluid  color={object.color ? object.color : color} style={{ position: 'relative' }}>
         <Button disabled={this.props.disabled}
           onClick={this.handleClick}
         >
@@ -158,6 +158,8 @@ class BtnSelect extends Component {
           onChange={this.handleChange}
           className="button icon"
           floating
+          compact
+          labeled
           options={this.props.options}
           trigger={<Fragment/>}
         />

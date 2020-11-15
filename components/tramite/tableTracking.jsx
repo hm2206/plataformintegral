@@ -482,7 +482,8 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                 </Show>
                 {/* options next */}
                 <Show condicion={option.key == 'NEXT'}>
-                    <ModalNextTracking tramite={option.tracking}
+                    <ModalNextTracking 
+                        tramite={option.tracking}
                         query={query}
                         isClose={async (e) => {
                             getOption({}, "");

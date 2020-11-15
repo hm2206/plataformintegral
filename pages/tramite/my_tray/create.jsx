@@ -1,314 +1,208 @@
-import React, { Component } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Body, BtnBack, DropZone } from '../../../components/Utils';
 import Router from 'next/router';
 import { backUrl, Confirm } from '../../../services/utils';
-import { Form, Select, Button } from 'semantic-ui-react';
-import { authentication, tramite } from '../../../services/apis';
+import { Form, Button } from 'semantic-ui-react';
+import { signature, tramite } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import SearchUserToDependencia from '../../../components/authentication/user/searchUserToDependencia';
 import Show from '../../../components/show';
 import PdfView from '../../../components/pdfView';
 import { PDFDocument } from 'pdf-lib/dist/pdf-lib';
 import { AUTHENTICATE } from '../../../services/auth';
+import { AppContext } from '../../../contexts/AppContext';
+import { SelectAuthEntityDependencia } from '../../../components/select/authentication';
+import { SelectTramiteType } from '../../../components/select/tramite';
 
-export default class CreateTramiteInterno extends Component
-{
+const CreateTramiteInterno = () => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname } = ctx;
-        return { query, pathname }
-    } 
+    // app
+    const app_context = useContext(AppContext);
 
-    state = {
-        my_dependencias: [],
-        dependencias: [],
-        tramite_types: [],
-        show_user: false,
-        errors: {},
-        form: {
-            dependencia_id: "",
-            dependencia_origen_id: "",
-            tramite_type_id: "",
-            document_number: "",
-            folio_count: "",
-            asunto: "",
-            code: ""
-        },
-        file: {
-            size: 0,
-            data: []
-        },
-        person: {},
-        signature: {
-            count: 0,
-            data: []
-        },
-        pdf: {
-            url: "",
-            pdfDoc: PDFDocument,
-            image: ""
-        },
-        show_signed: false
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [option, setOption] = useState("");
+    const [person, setPerson] = useState({});
+    const [current_files, setCurrentFiles] = useState([]);
+    const [size_files, setSizeFiles] = useState(0);
+    const isPerson = Object.keys(person).length;
+
+    // estado del pdf
+    const [pdf_url, setPdfUrl] = useState("");
+    const [pdf_doc, setPdfDoc] = useState(undefined);
+    const [pdf_blob, setPdfBlob] = useState(undefined);
+
+    // primera carga
+    useEffect(() => {
+        app_context.fireEntity({ render: true });
+    }, []);
+
+    // persona predeterminada
+    useEffect(() => {
+        if (form.dependencia_id) defaultPerson();
+    }, [form.dependencia_id]);
+
+    // traer pordefecto al usuario autenticado
+    const defaultPerson = () => {
+        setPerson(app_context.auth && app_context.auth.person || {});
     }
 
-    componentDidMount = () => {
-        this.props.fireEntity({ render: true });
-        this.getTramiteType();
-        this.getMyDependencias(this.props.entity_id || "", 1, true)
-        this.defaultPerson();
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        let { entity_id } = this.props;
-        if (entity_id != nextProps.entity_id) this.getMyDependencias(nextProps.entity_id, 1, false);
-    }
-
-    defaultPerson = () => {
-        let { auth } = this.props;
-        if (Object.keys(auth).length) {
-            this.setState({
-                person: {
-                    id: auth.person_id,
-                    fullname: auth.person && auth.person.fullname,
-                    document_number: auth.person && auth.person.document_number,
-                    image: auth.image_images && auth.image_images.image_200x200 || ""
-                }
-            })
-        }
-    }
-
-    handleBack = () => {
+    // volver atrás
+    const handleBack = () => {
         let { pathname, push } = Router;
         push({ pathname: backUrl(pathname) });
     }
     
-    handleInput = ({ name, value }) => {
-        this.setState(state => {
-            state.form[name] = value || "";
-            state.errors[name] = [];
-            return { form: state.form };
-        })
-        // handle
-        this.onHandleInput({ name, value });
+    // cambiar el form
+    const handleInput = ({ name, value }) => {
+        const newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        const newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-    onHandleInput = ({ name, value }) => {
-        switch(name) {
-            case "dependencia_id":
-                this.defaultPerson();
-                break;
-            default: 
-                
+    // dependencia predeterminada
+    const defaultDependencia = (datos = []) => {
+        if (datos.length > 2) {
+            let current_dependencia = datos[1];
+            let newForm = Object.assign({}, form);
+            newForm['dependencia_id'] = current_dependencia.value;
+            setForm(newForm);
         }
     }
 
-    handleFiles = async ({ files }) => {
-        let { file } = this.state;
-        let size_total = file.size;
-        let size_limit = 2 * 1024;
+    // manejar archivos
+    const handleFiles = async ({ files }) => {
+        let size_total = size_files;
+        let size_limit = 6 * 1024;
         for (let f of files) {
             size_total += f.size;
             if ((size_total / 1024) <= size_limit) {
                 let answer = await Confirm("info", `¿Desea añadir firma digital al archivo "${f.name}"?`, 'Firmar');
-                if (answer) this.handleSignature(f);
-                // add file
-                await this.setState(state => {
-                    state.signature.data.push({ pdf: f, signed: false, info: {} });
-                    return { signature: state.signature }
-                });
-                // add files
-                this.setState(state => {
-                    state.file.size = size_total;
-                    state.file.data.push(f);
-                    return { file: state.file }
-                });
+                if (answer) addSignature(f);
+                else {
+                    setCurrentFiles([...current_files, f]);
+                }
             } else {
                 size_total = size_total - f.size;
-                Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(2)}MB)` });
+                Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(6)}MB)` });
                 return false;
             }
         }
     }
 
-    handleSignature = async (blob) => {
+    // agregar pdf para firmar
+    const addSignature = async (blob) => {
         let reader = new FileReader();
         await reader.readAsArrayBuffer(blob);
         reader.onload = async () => {
-            let { person } = this.state;
             let pdfDoc = await PDFDocument.load(reader.result);
-            this.setState({
-                pdf: {
-                    url: URL.createObjectURL(blob),
-                    pdfDoc: pdfDoc,
-                    pdfBlob: blob,
-                    image: person.image || ""
-                }
-            });
+            let url = URL.createObjectURL(blob);
+            setPdfDoc(pdfDoc);
+            setPdfBlob(blob);
+            setPdfUrl(url);
+            setOption("signer");
         }
     }
  
-    deleteFile = (index, file) => {
-        this.setState(state => {
-            state.file.data.splice(index, 1);
-            state.file.size = state.file.size - file.size; 
-            // leave signature
-            if (typeof state.signature.data[index] == 'object') {
-                let tmp = state.signature.data[index];
-                state.signature.data.splice(index, 1);
-                // quitar count
-                state.signature.count -= tmp.signed ? 1 : 0;
-            }
-            // return 
-            return { file: state.file, signature: state.signature };
-        });
+    // eliminar pdf
+    const deleteFile = (index, file) => {
+        let newFiles = current_files;
+        newFiles.splice(index, 1);
+        let size = current_files - file.size;
+        setCurrentFiles(newFiles);
+        setSizeFiles(size);
     }
 
-    getMyDependencias = async (id, page = 1, up = true) => {
-        if (id) {
-            await authentication.get(`auth/dependencia/${id}?page=${page}`)
-            .then(async res => {
-                let { success, message, dependencia } = res.data;
-                if (!success) throw new Error(message);
-                let { lastPage, data } = dependencia;
-                let newData = [];
-                // add data
-                await data.map(async (d, indexD) => {
-                    await newData.push({
-                        key: `my_dependencia-${d.id}`,
-                        value: d.id,
-                        text: `${d.nombre}`
-                    })
-                    // assing first
-                    if (page == 1 && indexD == 0) this.handleInput({ name: 'dependencia_id', value: d.id });
-                });
-                // setting data
-                this.setState(state => ({
-                    my_dependencias: up ? [...state.my_dependencias, ...newData] : newData
-                }));
-                // validar request
-                if (lastPage > page + 1) await this.getMyDependencias(page + 1);
-            })
-            .catch(err => console.log(err.message));
-        } else {
-            this.setState({ my_dependencias: [] });
-            this.handleInput({ name: 'dependencia_id', value: "" })
-        }
-    }
-
-    getTramiteType = async (page = 1) => {
-        await tramite.get(`tramite_type?page=${page}`)
-        .then(async res => {
-            let { tramite_type, success, message } = res.data;
-            if (!success) throw new Error(message);
-            let { lastPage, data } = tramite_type;
-            let newData = [];
-            await data.map(async d => await newData.push({
-                key: `tramite_type_${d.id}`,
-                value: d.id,
-                text: d.description
-            }));
-            // add
-            this.setState(state => ({ tramite_types: [...state.tramite_types, ...newData] }))
-        })
-        .catch(err => console.log(err.message));
-    }
-
-    saveTramite = async () => {
+    // guardar tramite
+    const saveTramite = async () => {
         let answer = await Confirm('warning', `¿Deseas guardar el tramite?`, 'Guardar');
         if (answer) {
             let datos = new FormData();
-            let { form, file, person, signature } = this.state;
-            for (let attr in form) {
-                datos.append(attr, form[attr]);
-            }
-            // add person id
+            datos.append('tramite_type_id', form.tramite_type_id || "");
+            datos.append('document_number', form.document_number || "");
+            datos.append('folio_count', form.folio_count || "");
+            datos.append('asunto', form.asunto || "");
             datos.append('person_id', person.id);
             // add files
-            let iter = 0;
-            file.data.map(f => {
-                datos.append('files', f);
-                datos.append('info_signature[]', JSON.stringify(signature.data[iter] && signature.data[iter].info || { signed: false }));
-                iter++;
+            current_files.map(async f => {
+                console.log(f);
+                await datos.append('files', f)
             });
             // request
-            this.props.fireLoading(true);
+            app_context.fireLoading(true);
             await tramite.post('tramite', datos, { headers: { DependenciaId: form.dependencia_id } })
             .then(res => {
-                this.props.fireLoading(false);
+                app_context.fireLoading(false);
                 let { success, message, tramite } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
-                this.handleClear()
-                this.defaultPerson();
+                setForm({});
+                setCurrentFiles([]);
+                setErrors({})
+                setSizeFiles(0);
+                defaultPerson();
             }).catch(err => {
                 try {
-                    this.props.fireLoading(false);
+                    app_context.fireLoading(false);
                     let response = JSON.parse(err.message);
                     Swal.fire({ icon: 'warning', text: response.message });
-                    this.setState({ errors: response.errors });
-                    // validar error code
-                    if (!response.errors['code']) this.setState({ show_signed: false }); 
+                    setErrors(response.errors);
                 } catch (error) {
                     Swal.fire({ icon: 'error', text: err.message });
                 }
             })
         }
     }
-
-    handleAdd = (obj) => {
-        this.setState({
-            show_user: false, 
-            person: {
-                id: obj.person_id,
-                fullname: obj.fullname,
-                document_number: obj.document_number,
-                image: obj.image_images && obj.image_images.image_200x200 || ""
-            }
-        });
+    
+    // obtener persona
+    const handleAdd = (obj) => {
+        setOption("");
+        setPerson(obj);
     }
 
-    handleClear = () => {
-        this.setState(state => {
-            state.form.tramite_type_id = "";
-            state.form.document_number = "";
-            state.form.folio_count = "";
-            state.form.asunto = "";
-            state.form.observation = "";
-            return { form: state.form, file: { size: 0, data: [] }, signature: { count: 0, data: [] }, errors: {} };
-        });
+    // realizar firma
+    const onSignature = async (obj) => {
+        let answer = await Confirm("warning", `¿Estás seguro en firmar el PDF?`, 'Firmar');
+        if (answer) {
+            app_context.fireLoading(true);
+            let datos = new FormData();
+            datos.append('location', obj.location)
+            datos.append('page', obj.page)
+            datos.append('reason', obj.reason)
+            datos.append('visible', obj.visible)
+            datos.append('file', obj.pdfBlob)
+            if (obj.position) datos.append('position', obj.position)
+            // firmar pdf
+            await signature.post(`auth/signer`, datos, { responseType: 'blob' })
+                .then(res => {
+                    app_context.fireLoading(false);
+                    let { data } = res;
+                    data.lastModifiedDate = new Date();
+                    let file = new File([data], obj.pdfBlob.name);
+                    setCurrentFiles([...current_files, file]);
+                    Swal.fire({ icon: 'success', text: 'El pdf se firmó correctamente!' });
+                }).catch(err => {
+                    try {
+                        app_context.fireLoading(false);
+                        let { message } = err.response.data;
+                        Swal.fire({ icon: 'error', text: message });
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: error.message });
+                    }
+                });
+        }
     }
 
-    onSignature = async (obj) => {
-        console.log(obj);
-        // obtener archivo
-        await this.setState(state => {
-            // quitart blob
-            obj.pdfBlob = "";
-            obj.signed = true;
-            // index signature 
-            let indexS = state.signature.data.length - 1 || 0;
-            let signed = state.signature.data[indexS];
-            signed.signed = true;
-            signed.info = obj;
-            // add signature
-            state.signature.data[indexS] = signed;
-            state.signature.count += 1;
-            // response
-            return { signature: state.signature };
-        });
-    }
-
-    render() {
-
-        let { my_dependencias, form, tramite_types, errors, file, show_user, person, pdf, show_signed } = this.state;
-        let { entity_id } = this.props;
-
-        return (
+    // render
+    return (
             <div className="col-md-12">
                 <Body>
                     <div className="card-header">
-                        <BtnBack onClick={this.handleBack}/>
+                        <BtnBack onClick={handleBack}/>
                         <span className="ml-2">Crear Tramite Interno</span>
                     </div>
                     <div className="card-body">
@@ -318,12 +212,12 @@ export default class CreateTramiteInterno extends Component
                                     <div className="col-md-6 mt-3">
                                         <Form.Field error={errors && errors.dependencia_id && errors.dependencia_id[0] || ""}>
                                             <label htmlFor="">Mi Dependencia <b className="text-red">*</b></label>
-                                            <Select
-                                                value={form.dependencia_id || ""}
+                                            <SelectAuthEntityDependencia
+                                                value={form.dependencia_id}
                                                 name="dependencia_id"
-                                                options={my_dependencias}
-                                                placeholder="Select. Mi Dependencia"
-                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                entity_id={app_context.entity_id || ""}
+                                                onChange={(e, obj) => handleInput(obj)}
+                                                onReady={defaultDependencia}
                                             />
                                             <label>{errors && errors.dependencia_id && errors.dependencia_id[0] || ""}</label>
                                         </Form.Field>
@@ -332,12 +226,10 @@ export default class CreateTramiteInterno extends Component
                                     <div className="col-md-6 mt-3">
                                         <Form.Field error={errors && errors.tramite_type_id && errors.tramite_type_id[0] || ""}>
                                             <label htmlFor="">Tipo de Tramite<b className="text-red">*</b></label>
-                                            <Select
-                                                placeholder="Select. Tipo de Tramite"
-                                                value={form.tramite_type_id || ""}
+                                            <SelectTramiteType
+                                                value={form.tramite_type_id}
                                                 name="tramite_type_id"
-                                                options={tramite_types}
-                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                onChange={(e, obj) => handleInput(obj)}
                                             />
                                             <label>{errors && errors.tramite_type_id && errors.tramite_type_id[0] || ""}</label>
                                         </Form.Field>
@@ -350,7 +242,7 @@ export default class CreateTramiteInterno extends Component
                                                 placeholder="Ingrese el N° documento"
                                                 name="document_number"
                                                 value={form.document_number || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.document_number && errors.document_number[0] || ""}</label>
                                         </Form.Field>
@@ -363,7 +255,7 @@ export default class CreateTramiteInterno extends Component
                                                 placeholder="Ingrese el N° Folio"
                                                 name="folio_count"
                                                 value={form.folio_count || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.folio_count && errors.folio_count[0] || ""}</label>
                                         </Form.Field>
@@ -376,7 +268,7 @@ export default class CreateTramiteInterno extends Component
                                                 placeholder="Ingrese el asunto del trámite"
                                                 name="asunto"
                                                 value={form.asunto || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.asunto && errors.asunto[0] || ""}</label>
                                         </Form.Field>
@@ -389,7 +281,7 @@ export default class CreateTramiteInterno extends Component
                                                 placeholder="Ingrese un observación"
                                                 name="observation"
                                                 value={form.observation || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.observation && errors.observation[0] || ""}</label>
                                         </Form.Field>
@@ -405,15 +297,15 @@ export default class CreateTramiteInterno extends Component
                                     <div className="col-md-12 mb-4 mb-1">
                                         <div className="row">
                                             <div className="col-md-3 mb-1">
-                                                <input type="text" disabled value={person && person.document_number}/>
+                                                <input type="text" readOnly disabled value={person && person.document_number}/>
                                             </div>
 
                                             <div className="col-md-7 mb-1">
-                                                <input type="text" disabled value={person && person.fullname}/>
+                                                <input type="text" readOnly disabled value={person && person.fullname}/>
                                             </div>
 
                                             <div className="col-md-2">
-                                                <button className="btn btn-outline-dark" onClick={(e) => this.setState({ show_user: true })}>
+                                                <button className="btn btn-outline-dark" onClick={(e) => setOption("search_user")}>
                                                     <i className="fas fa-sync"></i>
                                                 </button>
                                             </div>
@@ -427,14 +319,17 @@ export default class CreateTramiteInterno extends Component
                                     </div>
 
                                     <div className="col-md-12 mt-3">
-                                        <DropZone id="files" 
+                                        <DropZone 
+                                            id="files" 
                                             name="files"
-                                            onChange={(e) => this.handleFiles(e)} 
+                                            onChange={(e) => handleFiles(e)} 
                                             icon="save"
-                                            result={file.data}
+                                            result={current_files}
+                                            multiple={false}
                                             title="Select. Archivo Pdf"
                                             accept="application/pdf"
-                                            onDelete={(e) => this.deleteFile(e.index, e.file)}
+                                            onDelete={(e) => deleteFile(e.index, e.file)}
+
                                         />
                                     </div>
 
@@ -442,7 +337,7 @@ export default class CreateTramiteInterno extends Component
                                         <hr/>
                                         <div className="text-right">
                                             <Button color="teal"
-                                                onClick={this.saveTramite}
+                                                onClick={saveTramite}
                                             >
                                                 <i className="fas fa-save"></i> Guardar Tramite
                                             </Button>
@@ -454,32 +349,33 @@ export default class CreateTramiteInterno extends Component
                     </div>
                 </Body>
 
-                <Show condicion={entity_id && show_user}>
-                    <SearchUserToDependencia entity_id={entity_id} 
+                <Show condicion={app_context.entity_id && option == 'search_user'}>
+                    <SearchUserToDependencia entity_id={app_context.entity_id} 
                         dependencia_id={form.dependencia_id}
-                        isClose={(e) => this.setState({ show_user: false })}
-                        getAdd={this.handleAdd}
+                        isClose={(e) => setOption("")}
+                        getAdd={handleAdd}
                     />
                 </Show>
 
-                <Show condicion={pdf.url}>
+                <Show condicion={option == "signer"}>
                     <PdfView 
-                        pdfUrl={pdf.url} 
-                        pdfDoc={pdf.pdfDoc}
-                        pdfBlob={pdf.pdfBlob}
-                        defaultImage={pdf.image}
-                        disabledMetaInfo={true}
-                        onSignature={this.onSignature}
-                        onClose={(e) => this.setState({ pdf: {
-                            url: "",
-                            pdfDoc: PDFDocument,
-                            pdfBlob: {},
-                            image: ""
-                        } })}
+                        pdfUrl={pdf_url} 
+                        pdfDoc={pdf_doc}
+                        pdfBlob={pdf_blob}
+                        onSignature={onSignature}
+                        onClose={(e) => setOption("")}
                     />
                 </Show>
             </div>
         )
-    }
-
 }
+
+// server rendering
+CreateTramiteInterno.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { query } = ctx;
+    // response
+    return { query };
+}
+
+export default CreateTramiteInterno;

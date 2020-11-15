@@ -308,10 +308,10 @@ const SelectCronogramaTypeRemuneracion = ({ text = 'descripcion', id = "id", cro
             />
 }
 
-const SelectCronogramaTypeDescuento = ({ text = 'alias', id = "id", cronograma_id, name, value, onChange, refresh = false, disabled = false }) => {
+const SelectCronogramaTypeDescuento = ({ text = 'alias', id = "id", cronograma_id, name, value, onChange, refresh = false, disabled = false, query = "" }) => {
     return <SelectBase 
                 api={unujobs}
-                url={`cronograma/${cronograma_id}/type_descuento`}
+                url={`cronograma/${cronograma_id}/type_descuento${query}`}
                 id={`select-cronograma-type_descuentos-${id}-${name}`}
                 value={id}
                 text={text}

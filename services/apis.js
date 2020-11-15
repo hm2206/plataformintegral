@@ -119,6 +119,23 @@ export const tramite = {
 
 
 /**
+ * api para consumir el sistema de signature
+ */
+export const signature = {
+    get: async (path, config = { }, ctx) => {
+        return axios.get(`${url.API_SIGNATURE}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    post: async (path, body = { }, config = { }, ctx) => {
+        return axios.post(`${url.API_SIGNATURE}/${path}`, body, await ConfigHeaders(ctx, config));
+    },
+    fetch: async (path, config = { }, ctx) => {
+        return fetch(`${url.API_SIGNATURE}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    path: url.API_SIGNATURE
+};
+
+
+/**
  * api para consumir el sistema de project-tracking
  */
 export const projectTracking = {

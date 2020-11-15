@@ -1,6 +1,5 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import { Form, Checkbox, Button } from 'semantic-ui-react';
-import { InputFile } from './Utils';
 import Show from './show';
 import { Confirm } from '../services/utils';
 

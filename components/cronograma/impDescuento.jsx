@@ -8,6 +8,7 @@ import { parseOptions, Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 import Show from '../../components/show';
 import { url } from '../../env.json';
+import { SelectCronogramaTypeDescuento} from '../select/cronograma';
 
 export default class ImpDescuento extends Component
 {
@@ -26,23 +27,11 @@ export default class ImpDescuento extends Component
 
     componentDidMount = async () => {
         await this.setting();
-        await this.getTypeDescuento();
     }
 
     setting = async () => {
         let { query } = Router;
         await this.setState({ id: query.id ? atob(query.id) : "error" });
-    }
-    
-    getTypeDescuento = async () => {
-        this.setState({ loading: true });
-        await unujobs.get(`cronograma/${this.state.id}/type_descuento`)
-        .then(async res => {
-            let newType = await res.data.filter(obj => obj.edit == 1);
-            this.setState({ type_descuentos: newType });
-        })
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
     }
 
     handleInput = ({ name, value }) => {
@@ -122,25 +111,11 @@ export default class ImpDescuento extends Component
                 <div className="card-body">
                     <Form loading={this.state.loading}>
                         <div className="row justify-content-center">
-                            <div className="col-md-4 mb-1">
+                            <div className="col-md-12 mb-1">
                                 <Form.Field>
-                                    <Select
-                                        options={parseOptions(this.state.type_descuentos, ["select-desct", "", "Select. por clave"], ["id", "id", "key"])}
-                                        placeholder="Select por clave"
+                                    <SelectCronogramaTypeDescuento
                                         name="type_descuento_id"
-                                        value={this.state.type_descuento_id}
-                                        onChange={(e, obj) => this.handleInput(obj)}
-                                        disabled={this.state.block}
-                                    />
-                                </Form.Field>
-                            </div>
-
-                            <div className="col-md-8 mb-1">
-                                <Form.Field>
-                                    <Select
-                                        options={parseOptions(this.state.type_descuentos, ["select-desct", "", "Select. por descripción"], ["id", "id", "descripcion"])}
-                                        placeholder="Select por descripción"
-                                        name="type_descuento_id"
+                                        cronograma_id={this.state.id}
                                         value={this.state.type_descuento_id}
                                         onChange={(e, obj) => this.handleInput(obj)}
                                         disabled={this.state.block}
