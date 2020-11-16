@@ -127,7 +127,7 @@ const BtnSelect = ({ onClick, disabled = false, options = [], refresh = "" }) =>
   // disparar al hacer click 
   const handleClick = (e) => {
     if (typeof onClick == 'function') {
-      if (Object.keys(this.state.object).length > 0)  onClick(e, object)
+      if (Object.keys(object).length > 0)  onClick(e, object)
       else Swal.fire({ icon: "info", text: "Porfavor seleccioné una opción" });
     }
   }
