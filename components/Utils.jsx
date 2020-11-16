@@ -1,4 +1,4 @@
-import React, { Fragment, useState, Component } from "react";
+import React, { Fragment, useState, Component, useEffect } from "react";
 import Show from "./show";
 import { Dropdown, Button, Icon, Form, Header, Progress } from 'semantic-ui-react';
 import Swal from "sweetalert2";
@@ -109,63 +109,59 @@ const Body = props => (
   </Fragment>
 );
 
-class BtnSelect extends Component {
+const BtnSelect = ({ onClick, disabled = false, options = [], refresh = "" }) => {
 
-  state = {
-    color: "black",
-    text: "Seleccionar",
-    object: {},
-    isPermission: false
-  }
+  // estados
+  const [color, setColor] = useState("black");
+  const [text, setText] = useState("Seleccionar");
+  const [object, setObject] = useState({});
+  const [isPermission, setIsPermission] = useState(false);
 
-  componentWillReceiveProps = (nextProps) => {
-    if (nextProps.options != this.props.options) {
-      this.setState({ 
-        object: {}
-      });
+  // actualizar cada vez que se cambia el refresh
+  useEffect(() => {
+    setObject({});
+    setText("Seleccionar");
+    setColor("black");
+  }, [refresh])
+
+  // disparar al hacer click 
+  const handleClick = (e) => {
+    if (typeof onClick == 'function') {
+      if (Object.keys(this.state.object).length > 0)  onClick(e, object)
+      else Swal.fire({ icon: "info", text: "Porfavor seleccioné una opción" });
     }
   }
 
-  handleClick = (e) => {
-    if (typeof this.props.onClick == 'function') {
-      if (Object.keys(this.state.object).length > 0) {
-        this.props.onClick(e, this.state.object);
-      } else {
-        Swal.fire({ icon: "info", text: "Porfavor seleccioné una opción" });
-      }
-    }
-  }
-
-  handleChange = async (e, obj) => {
+  // disparar al cambio del selector
+  const handleChange = async (e, obj) => {
     let newObj = {};
     await obj.options.filter(opt => opt.value == obj.value ? newObj = opt : null);
-    this.setState({ object: newObj });
+    setObject(newObj);
   }
 
-  render () {
-
-    let { color, text, object } = this.state;
-
+  // render
     return (
-      <Button.Group fluid  color={object.color ? object.color : color} style={{ position: 'relative' }}>
-        <Button disabled={this.props.disabled}
-          onClick={this.handleClick}
+      <Button.Group fluid  
+        color={object.color ? object.color : color} 
+        style={{ position: 'relative' }}
+      >
+        <Button disabled={disabled}
+          onClick={handleClick}
         >
         <Icon name={object.icon ? object.icon : ""}/>  {object.text ? object.text : text}
         </Button>
         <Dropdown
-          disabled={this.props.disabled}
-          onChange={this.handleChange}
+          value={object}
+          disabled={disabled}
+          onChange={handleChange}
           className="button icon"
           floating
-          compact
           labeled
-          options={this.props.options}
+          options={options}
           trigger={<Fragment/>}
         />
       </Button.Group>
     )
-  }
 }
 
 const DropdownSimple = props => (

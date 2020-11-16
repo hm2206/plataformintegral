@@ -282,6 +282,7 @@ const BasicReport = ({ cronograma, basic }) => {
                                     options={current_buttons || []}
                                     onClick={handleClick}
                                     disabled={!report_id}
+                                    refresh={report_id}
                                 />
                             </div>
                         </ContentControl>
@@ -297,6 +298,7 @@ const BasicReport = ({ cronograma, basic }) => {
                                         options={current_buttons || []}
                                         onClick={handleClick}
                                         disabled={!report_id}
+                                        refresh={report_id}
                                     />
                                 </div>
                             </div>
