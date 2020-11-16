@@ -96,6 +96,7 @@ export default class ImpDescuento extends Component
                     a.target = '_blank';
                     await a.click();
                     await this.setState({ paso: 'VALIDAR', block: false });
+                    if (typeof this.props.onSave == 'function') this.props.onSave();
                 }
             })
             .catch(err => Swal.fire({ icon: 'error', text: "Algo salió mal!" }));
@@ -119,6 +120,7 @@ export default class ImpDescuento extends Component
                                         value={this.state.type_descuento_id}
                                         onChange={(e, obj) => this.handleInput(obj)}
                                         disabled={this.state.block}
+                                        query={`?edit=1`}
                                     />
                                 </Form.Field>
                             </div>

@@ -597,7 +597,10 @@ const InformacionCronograma = ({ cronograma, success }) => {
             </Show>
 
             <Show condicion={option == 'imp-descuento'}>
-                <ImpDescuento isClose={(e) => setOption("")}/>
+                <ImpDescuento 
+                    isClose={(e) => setOption("")}
+                    onSave={(e) => setRefresh(true)}
+                />
             </Show>
 
             <Show condicion={option == 'open'}>
