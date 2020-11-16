@@ -29,6 +29,7 @@ const Work = () => {
                             <label>Apellido Paterno</label>
                             <input type="text" 
                                 name="ape_pat"
+                                className="uppercase"
                                 value={historial && historial.person && historial.person.ape_pat}
                                 readOnly
                             />
@@ -43,6 +44,7 @@ const Work = () => {
                         >
                             <label>Apellido Materno</label>
                             <input type="text" 
+                                className="uppercase"
                                 name="ape_mat"
                                 value={historial && historial.person && historial.person.ape_mat}
                                 readOnly
@@ -58,6 +60,7 @@ const Work = () => {
                         <Form.Field>
                             <label>Nombres</label>
                             <input type="text" 
+                                className="uppercase"
                                 name="name"
                                 value={historial && historial.person && historial.person.name}
                                 readOnly
@@ -154,6 +157,7 @@ const Work = () => {
                         <Form.Field>
                             <label>Profesión Abrev.</label>
                             <input type="text"
+                                className="uppercase"
                                 name="profession"
                                 value={historial && historial.person && historial.person.profession || ''}
                                 readOnly
@@ -184,6 +188,7 @@ const Work = () => {
                             <Form.Field>
                                 <label>Provincia</label>
                                 <input type="text"
+                                    className="uppercase"
                                     name="cod_pro"
                                     readOnly
                                     value={historial && historial.person && historial.person.cod_pro || ""}
@@ -200,6 +205,7 @@ const Work = () => {
                                 <label>Distrito</label>
                                 <input type="text" 
                                     name="cod_dis"
+                                    className="uppercase"
                                     readOnly
                                     value={historial && historial.person && historial.person.cod_dis || ""}
                                 />
@@ -215,6 +221,7 @@ const Work = () => {
                                 <label>Dirección</label>
                                 <input type="text" 
                                     name="address"
+                                    className="uppercase"
                                     value={historial && historial.person && historial.person.address || ''}
                                     readOnly
                                 />
