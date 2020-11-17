@@ -24,6 +24,7 @@ import Cerrar from '../../../components/cronograma/close';
 import SearchCronograma from '../../../components/cronograma/searchCronograma';
 import { credencials } from '../../../env.json';
 import ModalReport from '../../../components/cronograma/modalReport';
+import ChangeMeta from '../../../components/cronograma/changeMeta';
 
 const FooterCronograma = dynamic(() => import('../../../components/cronograma/footerCronograma'), { ssr: false });
 
@@ -302,6 +303,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
             case 'desc-massive':
             case 'remu-massive':
             case 'imp-descuento':
+            case 'change-meta':
             case 'report':
                 setOption(name);
                 break;
@@ -459,6 +461,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
                                                         { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
                                                         { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
                                                         { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
+                                                        { key: "change-meta", text: "Cambio de Metas", icon: "exchange" },
                                                         { key: "processing", text: "Procesar Cronograma", icon: "database" },
                                                         { key: "report", text: "Reportes", icon: "file text outline" },
                                                     ]}
@@ -624,6 +627,13 @@ const InformacionCronograma = ({ cronograma, success }) => {
 
             <Show condicion={option == 'report'}>
                 <ModalReport
+                    cronograma={cronograma}
+                    isClose={(e) => setOption("")}
+                />
+            </Show>
+
+            <Show condicion={option == 'change-meta'}>
+                <ChangeMeta
                     cronograma={cronograma}
                     isClose={(e) => setOption("")}
                 />

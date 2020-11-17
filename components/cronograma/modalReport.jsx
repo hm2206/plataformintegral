@@ -1,6 +1,5 @@
 import React from 'react'
 import Modal from '../modal';
-import { Button, Form } from 'semantic-ui-react';
 import BasicReport from './basicReport';
 
 const ModalReport = ({ cronograma, isClose }) => {

@@ -177,7 +177,7 @@ const SelectCronogramaMeta = ({ id = "id", cronograma_id, name, value, onChange,
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
                 placeholder="Seleccionar Meta Pres."
                 refresh={refresh}
-                execute={true}
+                execute={refresh || cronograma_id}
                 disabled={disabled}
             />
 }

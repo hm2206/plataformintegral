@@ -1,5 +1,6 @@
 import NextCookie from 'next-cookies';
 import { setCookie, destroyCookie } from 'nookies';
+import Router from 'next/router';
 
 export const AUTH =  (ctx) => {
     return NextCookie(ctx)['auth_token'] || false;
@@ -12,9 +13,8 @@ export const AUTHENTICATE = (ctx) => {
     if (ctx.isServer) {
         ctx.res.writeHead(301, { Location: '/login' })
         ctx.res.end();
-        ctx.res.finished = true;
     } else {
-        history.go('/login');
+        Router.replace("/login");
     }
 };
 
@@ -26,9 +26,8 @@ export const GUEST = (ctx) => {
     if (ctx.isServer) {
         ctx.res.writeHead(301, { Location: '/' });
         ctx.res.end();
-        ctx.res.finished = true;
     } else {
-        history.go('/');
+        Router.replace("/login");
     }
 };
 

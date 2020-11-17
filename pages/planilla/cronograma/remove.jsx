@@ -120,7 +120,6 @@ const RemoveCronograma = ({ query, pathname, success, cronograma }) => {
         let condicion = 0;
         let value = await Confirm("info", `¿Desea confirmar al eliminación de los trabajadores(${rows.length})?`, "Continuar");
         if (value) {
-            condicion = await Confirm("info", `¿Desea terminar contrato de los trabajadores(${rows.length})?`, "Terminar") ? 1 : 0;
             if (!await Confirm("warning", `Se está eliminado a los trabajadores(${rows.length}) del cronograma ${condicion? ', y se está quitando el contrato. El sistema no agregará a estos trabajadores en los proximos cronogramas' : ''}`, "Estoy de acuerdo")) return false;
             // eliminar
             app_context.fireLoading(true);
