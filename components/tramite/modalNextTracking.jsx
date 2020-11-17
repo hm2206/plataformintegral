@@ -228,6 +228,11 @@ const ModalNextTracking = (props) =>{
         setCopy(newCopy);
     }
 
+    // seleccionar la mísma oficina de origen
+    const selectSelfOffice = () => {
+        handleInput({ name: 'dependencia_destino_id', value: props.tramite.dependencia_origen_id })
+    }
+
     // render 
     return (
             <Modal
@@ -262,7 +267,13 @@ const ModalNextTracking = (props) =>{
                         <div className="col-md-6 mt-3">
                             <Form.Field>
                                 <label htmlFor="">Dependencía Origen</label>
-                                <input type="text" readOnly value={props.tramite && props.tramite.dependencia_origen && props.tramite.dependencia_origen.nombre}/>
+                                <input type="text" 
+                                    className="uppercase" 
+                                    readOnly
+                                    style={{ cursor: 'pointer' }}
+                                    value={props.tramite && props.tramite.dependencia_origen && props.tramite.dependencia_origen.nombre}
+                                    onClick={selectSelfOffice}
+                                />
                             </Form.Field>
                         </div>
 
@@ -291,7 +302,7 @@ const ModalNextTracking = (props) =>{
                                             <i className={`fas fa-${user.fullname ? 'sync' : 'plus'}`}></i>
                                         </button>
                                         <Show condicion={user && user.fullname}>
-                                            <span className="badge badge-warning ml-2">{user.fullname}</span>
+                                            <span className="badge badge-warning ml-2 uppercase">{user.fullname}</span>
                                         </Show>
 
                                         <label className="text-center">{errors.user_destino_id && errors.user_destino_id[0] || ""}</label>
@@ -331,7 +342,7 @@ const ModalNextTracking = (props) =>{
                             </div>
                         </Show>
 
-                        <div className="col-md-12">
+                        {/* <div className="col-md-12">
                             <hr/>
                                 <i className={`far fa-file-alt mr-2`}></i> 
                                 Agregar Copia {copy.length ? `(${copy.length})` : null} 
@@ -341,9 +352,9 @@ const ModalNextTracking = (props) =>{
                                     <i className={`fas fa-${add_copy ? 'minus' : 'plus'}`}></i>
                                 </button>
                             <hr/>
-                        </div>
+                        </div> */}
 
-                        <Show condicion={add_copy}>
+                        {/* <Show condicion={add_copy}>
                             <div className="col-md-6 mt-3">
                                 <Form.Field>
                                     <label htmlFor="">Dependencía</label>
@@ -399,7 +410,7 @@ const ModalNextTracking = (props) =>{
                                     </div>
                                 </div>
                             </Show>
-                        </Show>
+                        </Show> */}
 
                         <div className="col-md-12 mt-4">
                             <hr/>

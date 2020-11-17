@@ -45,7 +45,9 @@ const CreateTramiteInterno = () => {
 
     // traer pordefecto al usuario autenticado
     const defaultPerson = () => {
-        setPerson(app_context.auth && app_context.auth.person || {});
+        let newPerson = app_context.auth && app_context.auth.person || {};
+        newPerson.person_id = newPerson.id;
+        setPerson(newPerson);
     }
 
     // volver atrás
@@ -65,12 +67,12 @@ const CreateTramiteInterno = () => {
     }
 
     // dependencia predeterminada
-    const defaultDependencia = (datos = []) => {
-        if (datos.length > 2) {
+    const defaultDependencia = async (datos = []) => {
+        if (datos.length >= 2) {
             let current_dependencia = datos[1];
             let newForm = Object.assign({}, form);
             newForm['dependencia_id'] = current_dependencia.value;
-            setForm(newForm);
+            await setForm(newForm);
         }
     }
 
@@ -126,12 +128,9 @@ const CreateTramiteInterno = () => {
             datos.append('document_number', form.document_number || "");
             datos.append('folio_count', form.folio_count || "");
             datos.append('asunto', form.asunto || "");
-            datos.append('person_id', person.id);
+            datos.append('person_id', person.person_id);
             // add files
-            current_files.map(async f => {
-                console.log(f);
-                await datos.append('files', f)
-            });
+            current_files.map(async f => await datos.append('files', f));
             // request
             app_context.fireLoading(true);
             await tramite.post('tramite', datos, { headers: { DependenciaId: form.dependencia_id } })
@@ -203,7 +202,7 @@ const CreateTramiteInterno = () => {
                 <Body>
                     <div className="card-header">
                         <BtnBack onClick={handleBack}/>
-                        <span className="ml-2">Crear Tramite Interno</span>
+                        <span className="ml-2">Crear nuevo trámite</span>
                     </div>
                     <div className="card-body">
                         <Form className="row justify-content-center">
@@ -301,7 +300,7 @@ const CreateTramiteInterno = () => {
                                             </div>
 
                                             <div className="col-md-7 mb-1">
-                                                <input type="text" readOnly disabled value={person && person.fullname}/>
+                                                <input type="text" className="uppercase" readOnly disabled value={person && person.fullname}/>
                                             </div>
 
                                             <div className="col-md-2">
