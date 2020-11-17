@@ -25,6 +25,7 @@ import SearchCronograma from '../../../components/cronograma/searchCronograma';
 import { credencials } from '../../../env.json';
 import ModalReport from '../../../components/cronograma/modalReport';
 import ChangeMeta from '../../../components/cronograma/changeMeta';
+import { AUTHENTICATE } from '../../../services/auth';
 
 const FooterCronograma = dynamic(() => import('../../../components/cronograma/footerCronograma'), { ssr: false });
 
@@ -642,6 +643,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
 }
 
 InformacionCronograma.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
     let { query, pathname } = ctx;
     // procesos
     let id = atob(query.id) || '_error';
