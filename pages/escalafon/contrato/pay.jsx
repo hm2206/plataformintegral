@@ -177,9 +177,9 @@ const Pay = ({ success, info, query }) => {
 
                                         <div className="col-md-12 mt-5 text-left">
                                             <label>Tip. Documento</label>
-                                            <Select
-                                                fluid
-                                                options={tipo_documento}
+                                            <input type="text"
+                                                disabled
+                                                readOnly
                                                 value={info && info.person && info.person.document_type || ""}
                                                 disabled
                                             />

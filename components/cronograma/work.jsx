@@ -174,8 +174,9 @@ const Work = () => {
                                 <label>Departamento</label>
                                 <input type="text"
                                     name="cod_dep"
+                                    className="uppercase"
                                     readOnly
-                                    value={historial && historial.person && historial.person.cod_dep || ""}
+                                    value={historial && historial.person && historial.person.departamento || ""}
                                 />
                             </Form.Field>
                         </Show>
@@ -191,7 +192,7 @@ const Work = () => {
                                     className="uppercase"
                                     name="cod_pro"
                                     readOnly
-                                    value={historial && historial.person && historial.person.cod_pro || ""}
+                                    value={historial && historial.person && historial.person.provincia || ""}
                                 />
                             </Form.Field>
                         </Show>
@@ -207,7 +208,7 @@ const Work = () => {
                                     name="cod_dis"
                                     className="uppercase"
                                     readOnly
-                                    value={historial && historial.person && historial.person.cod_dis || ""}
+                                    value={historial && historial.person && historial.person.distrito || ""}
                                 />
                             </Form.Field>
                         </Show>

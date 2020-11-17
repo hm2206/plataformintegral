@@ -26,7 +26,7 @@ export default class EditTrabajador extends Component
             name: "",
             ape_pat: "",
             ape_mat: "",
-            document_type: "",
+            document_type_id: "",
             document_number: "",
             gender: "",
             date_of_birth: "",
@@ -237,10 +237,10 @@ export default class EditTrabajador extends Component
                                                         <label>Tipo Documento <b className="text-red">*</b></label>
                                                         <Select
                                                             placeholder="Select. Tipo Documento"
-                                                            name="document_type"
+                                                            name="document_type_id"
                                                             options={this.state.document_types}
                                                             onChange={(e, obj) => this.handleInput(obj)}
-                                                            value={form.document_type || ''}
+                                                            value={form.document_type_id || ''}
                                                         />
                                                         <label htmlFor="">{errors && errors.document_type && errors.document_type[0]}</label>
                                                     </Form.Field>
@@ -264,6 +264,7 @@ export default class EditTrabajador extends Component
                                                         <input type="text"
                                                             disabled={this.state.block}
                                                             name="ape_pat"
+                                                            className="capitalize"
                                                             value={form.ape_pat || ''}
                                                             onChange={(e) => this.handleInput(e.target)}
                                                         />
@@ -275,6 +276,7 @@ export default class EditTrabajador extends Component
                                                     <Form.Field error={errors && errors.ape_mat && errors.ape_mat[0]}>
                                                         <label htmlFor="">Apellido Materno <b className="text-red">*</b></label>
                                                         <input type="text"
+                                                            className="capitalize"
                                                             disabled={this.state.block}
                                                             name="ape_mat"
                                                             value={form.ape_mat || ''}
@@ -290,6 +292,7 @@ export default class EditTrabajador extends Component
                                                         <input type="text"
                                                             disabled={this.state.block}
                                                             name="name"
+                                                            className="capitalize"
                                                             value={form.name || ''}
                                                             onChange={(e) => this.handleInput(e.target)}
                                                         />

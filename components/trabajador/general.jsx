@@ -144,11 +144,7 @@ export default class General extends Component
                             <div className="col-md-6 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Tipo. Documento</label>
-                                    <Select placeholder="Select. Tip. Documento"
-                                        value={person.document_type}
-                                        options={tipo_documento}
-                                        disabled={true}
-                                    />
+                                    <input type="text" value={person.document_type} disabled={true}/>
                                 </Form.Field>
                             </div>
 

@@ -24,7 +24,7 @@ export default class CreateTrabajador extends Component
             name: "",
             ape_pat: "",
             ape_mat: "",
-            document_type: "",
+            document_type_id: "",
             document_number: "",
             gender: "",
             date_of_birth: "",
@@ -218,10 +218,10 @@ export default class CreateTrabajador extends Component
                                                         <label>Tipo Documento <b className="text-red">*</b></label>
                                                         <Select
                                                             placeholder="Select. Tipo Documento"
-                                                            name="document_type"
+                                                            name="document_type_id"
                                                             options={this.state.document_types}
                                                             onChange={(e, obj) => this.handleInput(obj)}
-                                                            value={form.document_type || ''}
+                                                            value={form.document_type_id || ''}
                                                         />
                                                         <label htmlFor="">{errors && errors.document_type && errors.document_type[0]}</label>
                                                     </Form.Field>

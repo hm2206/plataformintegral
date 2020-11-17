@@ -139,11 +139,7 @@ export default class CreateUser extends Component
                                                 <div className="col-md-4 mb-3">
                                                     <Form.Field>
                                                         <label htmlFor="">Tip. Documento</label>
-                                                        <Select fluid
-                                                            disabled
-                                                            options={tipo_documento}
-                                                            value={person.document_type || '01'}
-                                                        />
+                                                        <input value={person.document_type} readOnly/>
                                                     </Form.Field>
                                                 </div>
 
@@ -152,7 +148,6 @@ export default class CreateUser extends Component
                                                         <label htmlFor="">N° Documento</label>
                                                         <input type="text"
                                                             value={person.document_number || ""}
-                                                            disabled
                                                             readOnly
                                                         />
                                                     </Form.Field>
@@ -163,7 +158,6 @@ export default class CreateUser extends Component
                                                         <label htmlFor="">Apellidos y Nombres</label>
                                                         <input type="text"
                                                             value={person.fullname || ""}
-                                                            disabled
                                                             readOnly
                                                         />
                                                     </Form.Field>

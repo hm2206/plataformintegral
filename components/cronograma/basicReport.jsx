@@ -120,7 +120,7 @@ const reports = [
     {key: "obligacion", value: "obligacion", text: "Reporte de Obl. Judiciales", icon: "file text outline", filtros: ['pago_id', 'type_categoria_id'], buttons: ['judicial', 'judicial-pay', 'judicial-pay-txt']},
     {key: "detallado", value: "detallado", text: "Reporte de Descuentos Detallados", icon: "file text outline", filtros: ['type_detalle_id'], buttons: ['detalle']},
     {key: "aportacion", value: "aportacion", text: "Reporte de Aportaciones", icon: "file text outline", filtros: ['type_aportacion_id'], buttons: ['aportacion']},
-    {key: "personal", value: "personal", text: "Reporte de Personal", icon: "file text outline", filtros: ['negativo', 'cargo_id', 'type_categoria_id'], buttons: ['personal']},
+    {key: "personal", value: "personal", text: "Reporte de Personal", icon: "file text outline", filtros: ['negativo', 'cargo_id', 'type_categoria_id', 'meta_id'], buttons: ['personal']},
     {key: "ejecucion", value: "ejecucion", text: "Reporte de Ejecucion de Planilla", icon: "file text outline", filtros: ['neto'], buttons: ['ejecucion', 'ejecucion-pay', 'ejecucion-total']},
     {key: "compromiso", value: "compromiso", text: "Reporte Compromiso Siaf", icon: "file text outline", filtros: [], buttons: ['compromiso-siaf']}
 ];

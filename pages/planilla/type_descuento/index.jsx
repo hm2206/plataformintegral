@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component, Fragment, useState, useContext} from 'react';
 import {Button, Form, Select} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
@@ -11,99 +11,73 @@ import Show from '../../../components/show';
 import { Confirm } from '../../../services/utils';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import { AppContext } from '../../../contexts/AppContext';
 
-export default class TypeDescuento extends Component {
+const TypeDescuento = ({ success, type_descuentos, query }) => {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            page: false,
-            loading: false,
-            estado: "1"
-        }
+    // estado
+    const [estado, setEstado] = useState(query.estado);
 
-        this.getOption = this.getOption.bind(this);
-    }
+    // app
+    const app_context = useContext(AppContext);
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let {query, pathname, store} = ctx;
-        query.page = query.page ? query.page : 1;
-        query.estado = query.estado || 1;
-        await store.dispatch(pageTypeDescuento(ctx));
-        let { page_type_descuento } = store.getState().type_descuento;
-        return {query, pathname, page_type_descuento}
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }) => {
-        this.setState({ [name]: value })
-    }
-
-    getOption = async (obj, key, index) => {
+    // cambio de opción
+    const getOption = async (obj, key, index) => {
         let {pathname, push} = Router;
         let id = btoa(obj.id);
-        this.setState({ loading: true });
         switch (key) {
             case 'edit':
                 await push({ pathname: `${pathname}/${key}`, query: {id} });
                 break;
             case 'delete':
-                await this.changedState(obj, 0);
+                await changedState(obj, 0);
                 break;
             case 'restore':
-                await this.changedState(obj, 1);
+                await changedState(obj, 1);
                 break;
             default:
                 break;
         }
-        this.setState({ loading: false });
     }
 
-    handleSearch = () => {
-        this.setState({ loading: true });
-        let { pathname, query, push } = Router;
-        query.estado = this.state.estado;
+    // buscar
+    const handleSearch = () => {
+        let { pathname, push } = Router;
+        query.estado = estado;
         push({ pathname, query });
     }
 
-    handlePage = async (e, { activePage }) => {
-        this.setState({ loading: true });
-        let { pathname, query, push } = Router;
+    // cambio de página
+    const handlePage = async (e, { activePage }) => {
+        let { pathname, push } = Router;
         query.page = activePage;
         await push({ pathname, query });
-        this.setState({ loading: false });
     }
 
-    changedState = async (obj, estado = 1) => {
+    // cambiar estado
+    const changedState = async (obj, estado = 1) => {
         let answer = await Confirm("warning", `¿Deseas ${estado ? 'restaurar' : 'desactivar'} el Tip. Descuento "${obj.descripcion}"?`);
         if (answer) {
-            this.setState({ loading: true });
+            app_context.fireLoading(true);
             await unujobs.post(`type_descuento/${obj.id}/estado`, { estado })
             .then(async res => {
+                app_context.fireLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
-                await this.handleSearch();
-            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
-            this.setState({ loading: false });
+                await handleSearch();
+            }).catch(err => {
+                app_context.fireLoading(false);
+                Swal.fire({ icon: 'error', text: err.message })
+            });
         }
     }
 
-    render() {
-
-        let {loading} = this.state;
-        let { page_type_descuento, query } = this.props;
-
-        return (
-                <Form className="col-md-12">
+    // render
+    return (<Form className="col-md-12">
                     <Body>
                         <Datatable titulo="Lista de Tip. Descuentos"
                         isFilter={false}
-                        loading={loading}
                         headers={
                             ["#ID", "Descripción", "Edición", "Estado"]
                         }
@@ -167,16 +141,16 @@ export default class TypeDescuento extends Component {
                             ]
                         }
                         optionAlign="text-center"
-                        getOption={this.getOption}
-                        data={page_type_descuento.data}
+                        getOption={getOption}
+                        data={type_descuentos.data || []}
                     >
                         <div className="form-group">
                             <div className="row">
 
                                 <div className="col-md-4 mb-1">
                                     <select  name="estado"
-                                        value={this.state.estado}
-                                        onChange={(e) => this.handleInput(e.target)}
+                                        value={`${estado}`}
+                                        onChange={({target}) => setEstado(target.value)}
                                     >
                                         <option value="1">Tip. Descuentos Activos</option>
                                         <option value="0">Tip. Descuentos Deshabilitado</option>
@@ -184,8 +158,8 @@ export default class TypeDescuento extends Component {
                                 </div>
 
                                 <div className="col-md-2">
-                                    <Button onClick={this.handleSearch}
-                                        disabled={this.state.loading}
+                                    <Button 
+                                        onClick={handleSearch}
                                         color="blue"
                                     >
                                         <i className="fas fa-search mr-1"></i>
@@ -197,20 +171,17 @@ export default class TypeDescuento extends Component {
                     </Datatable>
                         
                     <div className="text-center">
-                        <Show condicion={page_type_descuento && page_type_descuento.data.length > 0}>
-                            <hr/>
-                            <Pagination defaultActivePage={query.page} 
-                                totalPages={page_type_descuento.last_page}
-                                enabled={loading}
-                                onPageChange={this.handlePage}
-                            />
-                        </Show>
+                        <hr/>
+                        <Pagination 
+                            activePage={query.page || 1}
+                            totalPages={type_descuentos.last_page || 1}
+                            onPageChange={handlePage}
+                        />
                     </div>
                 </Body>
 
                 <BtnFloat
                     onClick={async (e) => {
-                        await this.setState({ loading: true });
                         let { pathname, push } = Router;
                         push({ pathname: `${pathname}/create` });
                     }}
@@ -218,7 +189,20 @@ export default class TypeDescuento extends Component {
                     <i className="fas fa-plus"></i>
                 </BtnFloat>
             </Form>
-        )
-    }
-
+    )
 }
+
+// server rendering
+TypeDescuento.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { query } = ctx;
+    query.page = typeof query.page != 'undefined' ? query.page : 1;
+    query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
+    let { success, type_descuentos } = await unujobs.get(`type_descuento?page=${query.page}&estado=${query.estado}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({ success: false }));
+    // response
+    return { query, success, type_descuentos }
+}
+
+export default TypeDescuento;
