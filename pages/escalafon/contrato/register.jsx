@@ -129,10 +129,10 @@ const Register = () => {
                                             <div className="col-md-4 mb-3">
                                                 <Form.Field>
                                                     <label htmlFor="">Tip. Documento</label>
-                                                    <Select fluid
+                                                    <input type="text"
+                                                        value={work.person && work.person.document_type  || ""}
                                                         disabled
-                                                        options={tipo_documento}
-                                                        value={work.person && work.person.document_type || '01'}
+                                                        readOnly
                                                     />
                                                 </Form.Field>
                                             </div>
