@@ -34,7 +34,7 @@ const ConfigEntity = ({ user, isClose }) => {
     }
 
     const createEntity = async () => {
-        let answer = await Confirm('warning', `¿Deseas guardar al entidad?`, 'Eliminar');
+        let answer = await Confirm('warning', `¿Deseas guardar al entidad?`, 'Agregar');
         if (answer) {
             setLoading(true);
             await authentication.post(`config_entity`, { entity_id, user_id: user.id })

@@ -132,6 +132,7 @@ export default class ConfigUser extends Component
                                         <Form.Field>
                                             <label htmlFor="">Apellidos y Nombres</label>
                                             <input type="text" 
+                                                className="uppercase"
                                                 placeholder="Ingrese un nombre"
                                                 value={form.person && form.person.fullname || ""}
                                                 readOnly

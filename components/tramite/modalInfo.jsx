@@ -46,7 +46,7 @@ const Remitente = ({ person }) => {
 
                 <Form.Field className="col-md-6">
                     <label htmlFor="">Tipo Documento</label>
-                    <input type="text" value={person && person.document_type_text} readOnly/>
+                    <input type="text" value={person && person.document_type} readOnly/>
                 </Form.Field>
 
                 <Form.Field className="col-md-6">

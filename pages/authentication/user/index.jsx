@@ -123,7 +123,8 @@ export default class UserIndex extends Component {
                                     type: "text"
                                 }, {
                                     key: "fullname",
-                                    type: "text"
+                                    type: "text",
+                                    className: "uppercase"
                                 }, {
                                     key: "email",
                                     type: "icon"

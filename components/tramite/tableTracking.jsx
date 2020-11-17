@@ -330,7 +330,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                 />
                                             </Form.Field>
                                         </div>
-                                        <div className="col-md-4 mb-1 col-12 col-sm-6 col-xl-2">
+                                        {/* <div className="col-md-4 mb-1 col-12 col-sm-6 col-xl-2">
                                             <Form.Field>
                                                 <Checkbox 
                                                     className="mt-2" 
@@ -347,7 +347,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                     }}
                                                 />
                                             </Form.Field>
-                                        </div>
+                                        </div> */}
                                         <div className="col-md-3 col-12 col-sm-12 col-xl-2 mb-1">
                                             <Button 
                                                 fluid
