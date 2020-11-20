@@ -41,8 +41,8 @@ const Edit = ({ success, info }) => {
     }
     
     // cambiar form
-    const handleInput = async ({ name, value}) => {
-        let newForm = await Object.assign({}, JSON.parse(JSON.stringify(form)));
+    const handleInput = ({ name, value}) => {
+        let newForm = Object.assign({}, form);
         newForm[name] = value;
         setForm(newForm);
     }
@@ -53,18 +53,18 @@ const Edit = ({ success, info }) => {
         if (answer) {
             app_context.fireLoading(true)
             let datos = new FormData;
-            datos.append('cargo_id', form.cargo_id);
-            datos.append('type_categoria_id', form.type_categoria_id);
-            datos.append('pap', form.pap);
-            datos.append('meta_id', form.meta_id);
-            datos.append('dependencia_id', form.dependencia_id);
-            datos.append('perfil_laboral_id', form.perfil_laboral_id);
-            datos.append('situacion_laboral_id', form.situacion_laboral_id);
-            datos.append('is_pay', form.is_pay);
-            datos.append('plaza', form.plaza);
-            datos.append('fecha_de_ingreso', form.fecha_de_ingreso)
-            datos.append('fecha_de_cese', form.fecha_de_cese)
-            datos.append('observacion', form.observacion);
+            datos.append('cargo_id', form.cargo_id || "");
+            datos.append('type_categoria_id', form.type_categoria_id || "");
+            datos.append('pap', form.pap || "");
+            datos.append('meta_id', form.meta_id || "");
+            datos.append('dependencia_id', form.dependencia_id || "");
+            datos.append('perfil_laboral_id', form.perfil_laboral_id || "");
+            datos.append('situacion_laboral_id', form.situacion_laboral_id || "");
+            datos.append('is_pay', form.is_pay || "");
+            datos.append('plaza', form.plaza || "");
+            datos.append('fecha_de_ingreso', form.fecha_de_ingreso || "")
+            datos.append('fecha_de_cese', form.fecha_de_cese || "")
+            datos.append('observacion', form.observacion || "");
             datos.append('_method', 'PUT')
             // actualizar
             await unujobs.post(`info/${info.id}`, datos)

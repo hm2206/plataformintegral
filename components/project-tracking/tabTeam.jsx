@@ -73,7 +73,12 @@ const TabTeam = () => {
                         <th className="text-center">Rol</th>
                         <th className="text-center">Profesión</th>
                         <th width="5%">
-                            <Button fluid basic color="green" onClick={(e) => setOption("add_team")}>
+                            <Button fluid 
+                                basic 
+                                size="mini"
+                                color="green" 
+                                onClick={(e) => setOption("add_team")}
+                            >
                                 <i className="fas fa-plus"></i>
                             </Button>
                         </th>
@@ -88,6 +93,7 @@ const TabTeam = () => {
                             <td className="text-center uppercase">{t.person && t.person.profession}</td>
                             <td>
                                 <Button color="red" basic
+                                    size="mini"
                                     onClick={(e) => deleteTeam(t.id)}
                                 >
                                     <i className="fas fa-times"></i>

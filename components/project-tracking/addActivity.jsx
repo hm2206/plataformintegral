@@ -1,15 +1,131 @@
-import React, { useContext, useState } from 'react';
-import { Button, Form, Select } from 'semantic-ui-react';
+import React, { useContext, useState, useEffect } from 'react';
+import { Button, Form, Checkbox } from 'semantic-ui-react';
 import Modal from '../modal'
-import { SelectRol } from '../select/project_tracking'
-import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import Swal from 'sweetalert2';
+import Show from '../show';
+import moment from 'moment';
 
-const AddActivity = (props) => {
+// componente de tabla de meses seún duración
+const TableMeses = ({ rows = 1, onChecked, isHeader = true, refresh = false, defaultPosition = {}, onReady, dateInitial = moment().format('YYYY-MM-DD') }) => {
+
+    const isDefault = Object.keys(defaultPosition).length;
+    
+    // estados
+    const [current_rows, setCurrentRows] = useState([]);
+
+    // generar filas
+    const generateRows = async () => {
+        let newRows = [];
+        for(let i = 0; i < rows; i++) {
+            if (isDefault) {
+                let p_start = defaultPosition.start;
+                let p_over = defaultPosition.over;
+                let value = i + 1;
+                // add
+                await  newRows.push({
+                    index: i,
+                    value,
+                    checked: value >= p_start && value <= p_over ? true : false
+                });
+            } else {
+                await  newRows.push({
+                    index: i,
+                    value: i + 1,
+                    checked: false
+                });
+            }
+        }
+        // assignar
+        setCurrentRows(newRows);
+        // listo
+        if (typeof onReady == 'function') onReady(newRows);
+    }
+
+    // seleccionar casillero
+    const handleCheck = async (index, checked) => {
+        let newCurrentRows = JSON.parse(JSON.stringify(current_rows));
+        let newObj = newCurrentRows[index];
+        newObj.checked = checked;
+        newCurrentRows[index] = newObj;
+        let range_start = {};
+        let range_over = {};
+        // filtrar solo checked
+        let obj_checked = await newCurrentRows.filter(e => e.checked);
+        let is_checked = obj_checked.length
+        // validar rango de selección
+        if (is_checked) {
+            // rangos de selección
+            range_start = obj_checked[0];
+            range_over = obj_checked[is_checked - 1];
+            // validar selección masiva
+            if (range_start.index < newObj.index && range_over.index > newObj.index) {
+                // deseleccionar
+                for(let initial = newObj.index; initial <= range_over.index; initial++) {
+                    obj_checked.splice(initial, 1);
+                    newCurrentRows[initial].checked = false;
+                }
+                // validar ultimo valor
+                obj_checked.pop();
+                // nuevo ultimo valor
+                range_over = obj_checked[obj_checked.length - 1];
+            } else {
+                // seleccionar masivamente
+                if (range_start.index + 1 < range_over.index) {
+                    for(let initial = range_start.index; initial < range_over.index; initial++) {
+                        newCurrentRows[initial].checked = true;
+                    }
+                }
+            }
+        }
+        // disparar checked
+        if (typeof onChecked == 'function') onChecked({ count: is_checked, data: obj_checked, start: range_start.value, over: range_over.value });
+        setCurrentRows(newCurrentRows);
+    }
+
+    // generar filas cada vez que se modifique el row
+    useEffect(() => {
+        if (rows) generateRows();
+    }, [rows]);
+
+    // refrescar el generador de filas
+    useEffect(() => {
+        if (refresh) generateRows();
+    }, [refresh]);
+
+    // render
+    return <div className="table-responsive">
+        <table className="w-100">
+            <tbody>
+                <Show condicion={isHeader}>
+                    <tr>
+                        {current_rows.map(r => 
+                            <th key={`table-rows-select-header-${r.index}`} width="5%">{`${moment(dateInitial).add(r.index, "month").format("LL")}`.substr(0, 3)}</th>    
+                        )}
+                    </tr>
+                    <tr>
+                        {current_rows.map(r => 
+                            <th key={`table-rows-select-header-${r.index}`} width="5%">{r.value}</th>    
+                        )}
+                    </tr>
+                </Show>
+                <tr>
+                    {current_rows.map(r => 
+                        <td key={`table-rows-select-body-${r.index}`} width="5%" className={r.checked ? 'bg-primary' : ''}>
+                            <Checkbox checked={r.checked} onChange={(e, obj) => handleCheck(r.index, obj.checked)}/>
+                        </td>    
+                    )}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+// agregar actividad
+const AddActivity = ({ objective, isClose, onCreate }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -17,13 +133,18 @@ const AddActivity = (props) => {
     // project
     const { project } = useContext(ProjectContext);
 
-    // props
-    let { objective } = props;  
-
     // estados
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
-
+    const [next, setNext] = useState(false);   
+    const [refresh_table, setRefreshTable] = useState(false); 
+    const [activity, setActivity] = useState({ page: 1, last_page: 0, total: 0, data: [] });
+    const [old, setOld] = useState({ page: 1, last_page: 0, total: 0, data: [] });
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [cancel, setCancel] = useState(false);
+    const [cancel_table, setCancelTable] = useState(false);
+    const [edit, setEdit] = useState(false);
+ 
     // cambiar form
     const handleInput = ({ name, value }) => {
         let newForm = Object.assign({}, form);
@@ -32,6 +153,32 @@ const AddActivity = (props) => {
         let newErrors = Object.assign({}, errors);
         newErrors[name] = [];
         setErrors(newErrors);
+    }
+
+    // obtener el checked
+    const onChecked = async ({ count, data, start, over }) => {
+        setNext(count ? true : false);
+        let newForm = Object.assign({}, form);
+        newForm.start = start;
+        newForm.over = over;
+        setForm(newForm);
+    }
+
+    // obtener activities
+    const getActivities = async (nextPage = 1, up = false) => {
+        setCurrentLoading(true);
+        await projectTracking.get(`objective/${objective.id}/activity?page=${nextPage}`)
+            .then(({ data }) => {
+                let payload = { 
+                    last_page: data.activities.last_page,
+                    total: data.activities.total,
+                    data: up ? [...activity.data, ...data.objectives.data] : data.activities.data,
+                    page: data.activities.page
+                };
+                setActivity(payload);
+                setOld(JSON.parse(JSON.stringify(payload)));
+            }).catch(err => console.log(err));
+        setCurrentLoading(false);
     }
 
     // crear actividad
@@ -48,7 +195,9 @@ const AddActivity = (props) => {
                     Swal.fire({ icon: 'success', text: message });
                     setForm({});
                     setErrors({});
-                    if (typeof props.onCreate == 'function') props.onCreate();
+                    setRefreshTable(true);
+                    getActivities();
+                    if (typeof onCreate == 'function') onCreate();
                 }).catch(err => {
                     try {
                         app_context.fireLoading(false);
@@ -59,91 +208,170 @@ const AddActivity = (props) => {
                         Swal.fire({ icon: 'error', text: err.message });
                     }
                 });
+            setRefreshTable(false);
         }
     }
+
+    // editar acvtividades
+    const handleActivity = async (index, { name, value }) => {
+        let newActivity = Object.assign({}, activity);
+        let newData = JSON.parse(JSON.stringify(activity.data));
+        newData[index][name] = value;
+        newActivity.data = newData;
+        setActivity(newActivity);
+        setEdit(true);
+    }
+
+    // seleccionar check de las actividades
+    const handleCheckActivity = async (index, { count, data, start, over }) => {
+        let newActivity = Object.assign({}, activity);
+        let newData = JSON.parse(JSON.stringify(newActivity.data));
+        newData[index].start = start;
+        newData[index].over = over;
+        newActivity.data = newData;
+        setActivity(newActivity);
+        setEdit(true);
+    }
+
+    // actualizar activities
+    const updateActivities = async () => {
+        let answer = await Confirm("warning", `¿Deseas guardar los datos?`, 'Guardar');
+        if (answer) {
+            let activities = JSON.stringify(activity.data);
+            await projectTracking.post(`activity/${objective.id}/update_all`, { activities })
+                .then(res => {
+                    let { message } = res.data;
+                    Swal.fire({ icon: 'success', text: message });
+                    setOld(JSON.parse(JSON.stringify(activity)));
+                    setEdit(false);
+                })
+                .catch(err => {
+                    try {
+                        let { message } = err.response.data;
+                        Swal.fire({ icon: 'error', text: message });
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: error.message });
+                    }
+                });
+        }
+    }
+
+    // cancelar edicion
+    useEffect(() => {
+        if (cancel) {
+            setActivity(JSON.parse(JSON.stringify(old)))
+            setCancel(false);
+            setEdit(false);
+            setCancelTable(true);
+        }
+    }, [cancel]);
+
+    // obtener actividades
+    useEffect(() => {
+        getActivities();
+    }, []);
 
     // render
     return (
         <Modal
             show={true}
             titulo={<span><i className="fas fa-plus"></i> Agregar Actividad</span>}
-            {...props}
+            isClose={isClose}
+            md="12"
         >  
             <Form className="card-body">
                 <div className="row">
-                    <div className="col-md-6 mb-3">
-                        <Form.Field>
-                            <label htmlFor="">Fecha Incio del Componente</label>
-                            <input  
-                                type="date"
-                                value={objective.date_start || ""}
-                                readOnly
-                            />
-                        </Form.Field>
+                    <div className="col-md-12">
+
                     </div>
 
-                    <div className="col-md-6 mb-3">
-                        <Form.Field>
-                            <label htmlFor="">Fecha Término del Componente</label>
-                            <input  
-                                type="date"
-                                value={objective.date_over || ""}
-                                readOnly
-                            />
-                        </Form.Field>
+                    <div className="col-md-12">
+                        <div className="table-responsive">
+                            <table className="table table-bordered font-12">
+                                <thead className="text-center font-12" style={{ background: 'rgba(0, 0, 0, 0.05)' }}>
+                                    <tr>
+                                        <th width="35%">Actividad</th>
+                                        <th>Duración <b className="badge badge-warning font-13">{moment(project.date_start).format('YYYY/MM/DD')}</b> al <b className="badge badge-warning font-13">{moment(project.date_over).format('YYYY/MM/DD')}</b></th>
+                                        <th width="5%">Agregar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <textarea
+                                                placeholder="Titulo de la actividad"
+                                                name="title"
+                                                value={form.title || ""}
+                                                rows="3"
+                                                onChange={(e) => handleInput(e.target)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <TableMeses 
+                                                dateInitial={project.date_start}
+                                                refresh={refresh_table}
+                                                rows={project.duration}
+                                                onChecked={onChecked}
+                                            />
+                                        </td>
+                                        <td>
+                                            <Button color="green"
+                                                basic
+                                                disabled={!next}
+                                                onClick={createActivity}
+                                            >
+                                                <i className="fas fa-plus"></i>
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                    {activity.data.map((act, indexA) => 
+                                        <tr key={`result-activity-${indexA}`}>
+                                            <td>
+                                                <textarea
+                                                    placeholder="Titulo de la actividad"
+                                                    name="title"
+                                                    value={act.title || ""}
+                                                    rows="2"
+                                                    onChange={(e) => handleActivity(indexA, e.target)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <TableMeses 
+                                                    refresh={cancel_table}
+                                                    rows={project.duration}
+                                                    isHeader={false}
+                                                    defaultPosition={{ start: act.start, over: act.over }}
+                                                    onChecked={(obj) => handleCheckActivity(indexA, obj)}
+                                                    onReady={(e) => setCancelTable(false)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <Button color="red"
+                                                    disabled={edit}
+                                                    // onClick={createActivity}
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <div className="col-md-12 mb-5">
-                        <hr/>
-                    </div>
+                    <Show condicion={edit}>
+                        <div className="col-md-12 text-right">
+                            <hr/>
+                            <Button color="red" onClick={(e) => setCancel(true)}>
+                                <i className="fas fa-times"></i> Cancelar
+                            </Button>
 
-                    <div className="col-md-12 mb-3">
-                        <Form.Field error={errors.title && errors.title[0] || ""}>
-                            <label htmlFor="">Titulo de la Actividad</label>
-                            <input  
-                                type="text"
-                                name="title"
-                                value={form.title || ""}
-                                onChange={({target}) => handleInput(target)}
-                            />
-                            <label htmlFor="">{errors.title && errors.title[0] || ""}</label>
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-6 mb-3">
-                        <Form.Field error={errors.date_start && errors.date_start[0] || ""}>
-                            <label htmlFor="">Fecha de Inicio</label>
-                            <input  
-                                type="date"
-                                name="date_start"
-                                value={form.date_start || ""}
-                                onChange={({target}) => handleInput(target)}
-                            />
-                            <label htmlFor="">{errors.date_start && errors.date_start[0] || ""}</label>
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-6 mb-3">
-                        <Form.Field error={errors.date_over && errors.date_over[0] || ""}>
-                            <label htmlFor="">Fecha de Término</label>
-                            <input  
-                                type="date"
-                                name="date_over"
-                                value={form.date_over || ""}
-                                onChange={({target}) => handleInput(target)}
-                            />
-                            <label htmlFor="">{errors.date_over && errors.date_over[0] || ""}</label>
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-12 text-right">
-                        <hr/>
-                        <Button color="teal" 
-                            onClick={createActivity}
-                        >
-                            <i className="fas fa-save"></i> Guardar
-                        </Button>
-                    </div>
+                            <Button color="teal" onClick={updateActivities}>
+                                <i className="fas fa-save"></i> Guardar Cambios
+                            </Button>
+                        </div>
+                    </Show>
                 </div>
             </Form>
         </Modal>

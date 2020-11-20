@@ -4,7 +4,7 @@ import { projectTracking } from '../../../services/apis';
 import { AppContext } from '../../../contexts/AppContext';
 import { backUrl } from '../../../services/utils';
 import TabProject from '../../../components/project-tracking/TabProject';
-import { Body, BtnBack } from '../../../components/Utils';
+import { Body, BtnBack, DrownSelect } from '../../../components/Utils';
 import { ProjectProvider } from '../../../contexts/project-tracking/ProjectContext';
 import atob from 'atob';
 import Router from 'next/router';
@@ -24,11 +24,30 @@ const InformationProject = ({ success, project }) => {
     return (
         <div className="col-md-12">
             <Body>
-                <div className="card-">
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push({ pathname: backUrl(Router.pathname) })}/> Información del Proyecto: <b className="capitalize text-primary"><u>"{project && project.title}"</u></b>
+                <div className="card">
+                    <div className="card-header bg-primary">
+                        <BtnBack onClick={(e) => Router.push({ pathname: backUrl(Router.pathname) })}/> <b className="capitalize text-white">{project && project.title}</b>
                     </div>
                     <div className="card-body">
+                        {/* <div className="mt-5 mb-5">
+                            <DrownSelect text="Opciones"
+                                button
+                                icon="options"
+                                labeled
+                                options={[
+                                    { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
+                                    { key: "remu-massive", text: "Remuneración Masiva", icon: "cart arrow down" },
+                                    { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
+                                    { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
+                                    { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
+                                    { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
+                                    { key: "change-meta", text: "Cambio de Metas", icon: "exchange" },
+                                    { key: "processing", text: "Procesar Cronograma", icon: "database" },
+                                    { key: "report", text: "Reportes", icon: "file text outline" },
+                                ]}
+                                // onSelect={handleOnSelect}
+                            />
+                        </div> */}
                         <ProjectProvider value={{ project }}>
                             <TabProject/>
                         </ProjectProvider>

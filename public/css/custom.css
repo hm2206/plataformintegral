@@ -224,3 +224,43 @@
 .list-group-item-active a:focus {
     background: transparent!important;
 }
+
+
+/* fonts */
+.font-10 {
+    font-size: 10px!important;
+}
+
+.font-11 {
+    font-size: 11px!important;
+}
+
+.font-12 {
+    font-size: 12px!important;
+}
+
+.font-13 {
+    font-size: 13px!important;
+}
+
+.font-14 {
+    font-size: 14px!important;
+}
+
+.font-15 {
+    font-size: 15px!important;
+}
+
+
+/* hover */
+.hover-basic:hover {
+    text-decoration: underline;
+    color: #1976d2;
+    cursor: pointer;
+}
+
+/* focus */
+.focus-basic {
+    text-decoration: underline;
+    color: #1976d2;
+}

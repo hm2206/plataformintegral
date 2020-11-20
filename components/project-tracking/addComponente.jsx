@@ -17,11 +17,7 @@ const AddComponente = (props) => {
     // project
     const { project } = useContext(ProjectContext);
 
-    // props
-    let { plan_trabajo } = props;  
-
     // estados
-    const [option, setOption] = useState({});
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
 
@@ -41,7 +37,7 @@ const AddComponente = (props) => {
         if (answer) {
             app_context.fireLoading(true);
             let datos = Object.assign({}, form);
-            datos.plan_trabajo_id = plan_trabajo.id;
+            datos.project_id = project.id;
             await projectTracking.post(`objective`, datos)
                 .then(res => {
                     app_context.fireLoading(false);
@@ -53,9 +49,9 @@ const AddComponente = (props) => {
                 }).catch(err => {
                     try {
                         app_context.fireLoading(false);
-                        let { errors, message } = err.response.data;
-                        Swal.fire({ icon: 'warning', text: message });
-                        setErrors(errors);
+                        let { errors, message, status } = err.response.data;
+                        Swal.fire({ icon: status == 402 ? 'warning' : 'error', text: message });
+                        if (status == 402) setErrors(errors);
                     } catch (error) {
                         Swal.fire({ icon: 'error', text: err.message });
                     }
@@ -74,10 +70,10 @@ const AddComponente = (props) => {
                 <div className="row">
                     <div className="col-md-6 mb-3">
                         <Form.Field>
-                            <label htmlFor="">Fecha Incio del Plan de Trabajo</label>
+                            <label htmlFor="">Fecha Incio del Proyecto</label>
                             <input  
                                 type="date"
-                                value={plan_trabajo.date_start || ""}
+                                value={project.date_start || ""}
                                 readOnly
                             />
                         </Form.Field>
@@ -85,10 +81,10 @@ const AddComponente = (props) => {
 
                     <div className="col-md-6 mb-3">
                         <Form.Field>
-                            <label htmlFor="">Fecha Término del Plan de Trabajo</label>
+                            <label htmlFor="">Fecha Término del Proyecto</label>
                             <input  
                                 type="date"
-                                value={plan_trabajo.date_over || ""}
+                                value={project.date_over || ""}
                                 readOnly
                             />
                         </Form.Field>
@@ -108,32 +104,6 @@ const AddComponente = (props) => {
                                 onChange={({target}) => handleInput(target)}
                             />
                             <label htmlFor="">{errors.title && errors.title[0] || ""}</label>
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-6 mb-3">
-                        <Form.Field error={errors.date_start && errors.date_start[0] || ""}>
-                            <label htmlFor="">Fecha de Inicio</label>
-                            <input  
-                                type="date"
-                                name="date_start"
-                                value={form.date_start || ""}
-                                onChange={({target}) => handleInput(target)}
-                            />
-                            <label htmlFor="">{errors.date_start && errors.date_start[0] || ""}</label>
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-6 mb-3">
-                        <Form.Field error={errors.date_over && errors.date_over[0] || ""}>
-                            <label htmlFor="">Fecha de Término</label>
-                            <input  
-                                type="date"
-                                name="date_over"
-                                value={form.date_over || ""}
-                                onChange={({target}) => handleInput(target)}
-                            />
-                            <label htmlFor="">{errors.date_over && errors.date_over[0] || ""}</label>
                         </Form.Field>
                     </div>
 

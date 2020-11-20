@@ -7,6 +7,7 @@ import TabPlanTrabajo from '../../components/project-tracking/tabPlanTrabajo';
 import TabSaldoFinanciero from '../../components/project-tracking/tabSaldoFinanciero';
 import TabComponente from '../../components/project-tracking/tabComponente';
 import TabActivity from './tabActivity';
+import TabProjectInitial from './tabProjectInitial';
 
 const TabProject = (props) => {
 
@@ -27,6 +28,13 @@ const TabProject = (props) => {
                     </Tab.Pane> 
             },
             { 
+                menuItem: {key: 'team', icon: 'info circle', content: 'Proyecto Inicial', disabled: false }, 
+                render: () => 
+                    <Tab.Pane style={styles}>
+                        <TabProjectInitial/>
+                    </Tab.Pane> 
+            },
+            { 
                 menuItem: {key: 'team', icon: 'info circle', content: 'Equipo Técnico', disabled: false }, 
                 render: () => 
                     <Tab.Pane style={styles}>
@@ -38,20 +46,6 @@ const TabProject = (props) => {
                 render: () => 
                     <Tab.Pane style={styles}>
                         <TabPlanTrabajo/>
-                    </Tab.Pane> 
-            },
-            { 
-                menuItem: {key: 'componentes', icon: 'info circle', content: 'Componentes', disabled: false }, 
-                render: () => 
-                    <Tab.Pane style={styles}>
-                        <TabComponente/>
-                    </Tab.Pane> 
-            },
-            { 
-                menuItem: {key: 'actividades', icon: 'info circle', content: 'Actividades', disabled: false }, 
-                render: () => 
-                    <Tab.Pane style={styles}>
-                        <TabActivity/>
                     </Tab.Pane> 
             },
             { 

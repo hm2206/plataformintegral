@@ -1,25 +1,54 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useState, useEffect } from 'react';
 import { Button } from 'semantic-ui-react';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import moment from 'moment';
+import { projectTracking } from '../../services/apis';
 
 const TabTeam = () => {
 
     const { project } = useContext(ProjectContext);
 
+    // estados
+    const [financiamiento, setFinanciamiento] = useState([]);
+    const [total_monetario, setTotalMonetario] = useState(0);
+    const [total_no_monetario, setTotalNoMonetario] = useState(0);
+    const [total_porcentaje_monetario, setTotalPorcentajeMonetario] = useState(0);
+    const [total_porcentaje_no_monetario, setTotalPorcentajeNoMonetario] = useState(0);
+    const [total, setTotal] = useState(0);
+
+    // obtener financiamiento
+    const getFinanciamiento = async () => {
+        await projectTracking.get(`project/${project.id}/financiamiento`)
+            .then(res => {
+                let { data } = res;
+                setFinanciamiento(data.financiamiento);
+                setTotalMonetario(data.total_monetario);
+                setTotalNoMonetario(data.total_no_monetario);
+                setTotalPorcentajeMonetario(data.total_porcentaje_monetario);
+                setTotalPorcentajeNoMonetario(data.total_porcentaje_no_monetario);
+                setTotal(data.total);
+            }).catch(err => console.log(err));
+    }
+
+    // primera carga
+    useEffect(() => {
+        if (project.id) getFinanciamiento();
+    }, []);
+
+    // render
     return (
     <Fragment>
         <div className="table-responsive">
             <table className="table mb-4">
                 <thead >
                     <tr>
-                        <td colSpan="1"><b>Código: </b> {project.code}</td>
+                        <td colSpan="1" className="uppercase"><b>Código: </b> {project.code}</td>
                     </tr>
                     <tr>
-                        <td colSpan="3"><b>Entidad Ejecutora: </b> <span className="capitalize">{project.entity && project.entity.name}</span></td>
+                        <td colSpan="3" className="uppercase"><b>Entidad Ejecutora: </b> <span className="uppercase">{project.entity && project.entity.name}</span></td>
                     </tr>
                     <tr>
-                        <td colSpan="3"><b>Coordinador General: </b> <span className="capitalize">{project.principal && project.principal.person && project.principal.person.fullname || ""}</span></td>
+                        <td colSpan="3" className="uppercase"><b>Coordinador General: </b> <span className="uppercase">{project.principal && project.principal.person && project.principal.person.fullname || ""}</span></td>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,7 +69,7 @@ const TabTeam = () => {
                 </tbody>
             </table>
             <div><hr/></div>
-            <h4>Financiamiento <button className="btn btn-sm btn-outline-success"><i className="fas fa-plus"></i></button></h4>
+            <h4>Financiamiento</h4>
             <div className="table-responsive">
                 <table className="table table-bordered table-striped">
                     <thead className="text-center">
@@ -58,13 +87,23 @@ const TabTeam = () => {
                         </tr>
                     </thead>
                     <tbody>
+                        {financiamiento.map((f, indexF) => 
+                            <tr key={`financiamiento-${indexF}`}>
+                                <th className="text-center" title={f.name}>{f.ext_pptto}</th>
+                                <th className="text-right">{f.monetario}</th>
+                                <th className="text-right">{f.no_monetario}</th>
+                                <th className="text-right">{f.total}</th>
+                                <th className="text-right">{f.porcentaje_monetario}%</th>
+                                <th className="text-right">{f.porcentaje_no_monetario}%</th>
+                            </tr>
+                        )}
                         <tr>
                             <th className="text-center">Total</th>
-                            <th className="text-right">0.00</th>
-                            <th className="text-right">0.00</th>
-                            <th className="text-right">0.00</th>
-                            <th className="text-right">0.00%</th>
-                            <th className="text-right">0.00%</th>
+                            <th className="text-right">{total_monetario}</th>
+                            <th className="text-right">{total_no_monetario}</th>
+                            <th className="text-right">{total}</th>
+                            <th className="text-right">{total_porcentaje_monetario}%</th>
+                            <th className="text-right">{total_porcentaje_no_monetario}%</th>
                         </tr>
                     </tbody>
                 </table>

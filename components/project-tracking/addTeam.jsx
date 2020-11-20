@@ -89,12 +89,7 @@ const AddTeam = (props) => {
                     <Show condicion={isPerson}>
                         <div className="col-md-6 mb-3">
                             <label htmlFor="">Tip. Documento</label>
-                            <Select
-                                fluid
-                                options={storage.tipo_documento}
-                                value={person.document_type}
-                                disabled
-                            />
+                            <input type="text" value={person.document_type} readOnly/>
                         </div>
 
                         <div className="col-md-6 mb-3">
