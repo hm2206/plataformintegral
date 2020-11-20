@@ -25,14 +25,17 @@ const TableTracking = ({ title, query, onSearch, url }) => {
     const { tracking, current_status, current_loading, setRefresh } = useContext(TrackingContext);
 
     // estados
-    const [form, setForm] = useState({
-        dependencia_id: query.dependencia_id
-    });
+    const [form, setForm] = useState({});
     const [option, setOption] = useState({});
     const [config, setConfig] = useState({});
     const [semaforo, setSemaforo] = useState([]);
     const [current_config, setCurrentConfig] = useState({});
     const [send, setSend] = useState(false);
+
+    // dependencia predeterminada
+    useEffect(() => {
+        if (query.dependencia_id) setForm({ ...form, dependencia_id: query.dependencia_id });
+    }, []);
 
     // vaciar el form
     useEffect(() => {
@@ -326,6 +329,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                         push({ pathname, query });
                                                         setRefresh(true);
                                                         setSend(true);
+                                                        handleInput(obj);
                                                     }}
                                                 />
                                             </Form.Field>

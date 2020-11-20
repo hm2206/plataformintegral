@@ -31,10 +31,15 @@ const TrackingIndex = ({ success, tracking, query }) => {
         setCurrentStatus({});
     }, [app_context.entity_id]);
 
+    // obtener el estatus
+    useEffect(() => {
+        if (app_context.entity_id && query.dependencia_id && query.status && !refresh) getStatus(query.dependencia_id);
+        else setCurrentStatus({});
+    }, [query.dependencia_id, app_context.entity_id, query.status, query.query_search]);
+
     // refresh
     useEffect(() => {
-        if (app_context.entity_id && query.dependencia_id && query.status) getStatus(query.dependencia_id);
-        else setCurrentStatus({});
+        if (refresh) getStatus(query.dependencia_id);
     }, [refresh]);
 
     // obtener el estado del traking seleccionado
