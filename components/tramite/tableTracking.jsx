@@ -14,6 +14,7 @@ import { tramite } from '../../services/apis';
 import { AppContext } from '../../contexts/AppContext';
 import { TrackingContext } from '../../contexts/tracking/TrackingContext';
 import { SelectAuthEntityDependencia } from '../../components/select/authentication';
+import ModalVerify from './modalVerify';
 
 
 const TableTracking = ({ title, query, onSearch, url }) => {
@@ -383,7 +384,11 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                         </thead>
                                         <tbody>
                                             {tracking && tracking.data && tracking.data.map((tra, indexT) => 
-                                                <tr key={`tracking-${tra.id}-${indexT}`} className={config && config.value && (((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value) ? 'text-muted bg-disabled' : ''}>
+                                                <tr key={`tracking-${tra.id}-${indexT}`} 
+                                                    className={`
+                                                        ${config && config.value && (((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value) ? 'text-muted bg-disabled' : ''}
+                                                        ${!tra.verify ? ' bg-warning' : ''}
+                                                    `}>
                                                     <td>
                                                         <span className={`tile tile-circle bg-${getCurrentDay(tra.updated_at)}`.toLowerCase()}>
                                                             <i className="fas fa-traffic-light"></i> 
@@ -418,24 +423,35 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                                 <i className="fas fa-info"></i> 
                                                             </a>
 
-                                                            <Show condicion={getMeta(tra.status).next}>
-                                                                <Show condicion={current_config && current_config.value  && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > current_config.value))}>
-                                                                    <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
-                                                                        title="Continuar Trámite"
-                                                                        onClick={(e) => getOption(tra, 'NEXT', indexT)}
-                                                                    >
-                                                                        <i className="fas fa-arrow-right"></i> 
-                                                                    </a>
-                                                                </Show>
+                                                            <Show condicion={tra.verify}>
+                                                                <Show condicion={getMeta(tra.status).next}>
+                                                                    <Show condicion={current_config && current_config.value  && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > current_config.value))}>
+                                                                        <a className="mr-1 btn btn-sm btn-icon btn-secondary" href={`#${tra.id}`} 
+                                                                            title="Continuar Trámite"
+                                                                            onClick={(e) => getOption(tra, 'NEXT', indexT)}
+                                                                        >
+                                                                            <i className="fas fa-arrow-right"></i> 
+                                                                        </a>
+                                                                    </Show>
 
-                                                                <Show condicion={!Object.keys(current_config || {}).length}>
-                                                                    <a className="mr-1 btn btn-sm btn-icon btn-secondary" href="#598" 
-                                                                        title="Continuar Trámite"
-                                                                        onClick={(e) => getOption(tra, 'NEXT', indexT)}
-                                                                    >
-                                                                        <i className="fas fa-arrow-right"></i> 
-                                                                    </a>
-                                                                </Show>                                                                
+                                                                    <Show condicion={!Object.keys(current_config || {}).length}>
+                                                                        <a className="mr-1 btn btn-sm btn-icon btn-secondary" href={`#${tra.id}`} 
+                                                                            title="Continuar Trámite"
+                                                                            onClick={(e) => getOption(tra, 'NEXT', indexT)}
+                                                                        >
+                                                                            <i className="fas fa-arrow-right"></i> 
+                                                                        </a>
+                                                                    </Show>                                                                
+                                                                </Show>
+                                                            </Show>
+
+                                                            <Show condicion={!tra.verify && tra.person_id == app_context.auth.person_id}>
+                                                                <a className="mr-1 btn btn-sm btn-icon btn-secondary" href={`#${tra.id}`} 
+                                                                    title="Verificar trámite"
+                                                                    onClick={(e) => getOption(tra, 'VERIFY', indexT)}
+                                                                >
+                                                                    <i className="fas fa-check"></i> 
+                                                                </a>
                                                             </Show>
                                                         </div>
                                                     </td>
@@ -501,6 +517,14 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                 {/* options info */}
                 <Show condicion={option.key == 'INFO'}>
                     <ModalInfo tracking={option.tracking}
+                        query={query}
+                        isClose={(e) => getOption({}, "")}
+                    />
+                </Show>
+                {/* option verify */}
+                <Show condicion={option.key == 'VERIFY'}>
+                    <ModalVerify 
+                        tramite={option.tracking}
                         query={query}
                         isClose={(e) => getOption({}, "")}
                     />

@@ -90,7 +90,7 @@ const PdfView = ({
         let fields = form.getFields();
         let iter = 1;
         await fields.map(field => {
-            let name = /^Signature[0-9]+$/;
+            let name = /Signature[0-9]+$/;
             if (name.test(field.getName())) setCountSignature(iter++);
         });
     }

@@ -105,14 +105,14 @@ export const recursoshumanos = {
  * api para consumir el sistema de tramite
  */
 export const tramite = {
-    get: async (path, config = { }, ctx) => {
-        return axios.get(`${url.API_TRAMITE}/${path}`, await ConfigHeaders(ctx, config));
+    get: async (path, config = { }, ctx, realPath = false) => {
+        return axios.get(realPath ? path : `${url.API_TRAMITE}/${path}`, await ConfigHeaders(ctx, config));
     },
-    post: async (path, body = { }, config = { }, ctx) => {
-        return axios.post(`${url.API_TRAMITE}/${path}`, body, await ConfigHeaders(ctx, config));
+    post: async (path, body = { }, config = { }, ctx, realPath = false) => {
+        return axios.post(realPath ? path : `${url.API_TRAMITE}/${path}`, body, await ConfigHeaders(ctx, config));
     },
-    fetch: async (path, config = { }, ctx) => {
-        return fetch(`${url.API_TRAMITE}/${path}`, await ConfigHeaders(ctx, config));
+    fetch: async (path, config = { }, ctx, realPath = false) => {
+        return fetch(realPath ? path : `${url.API_TRAMITE}/${path}`, await ConfigHeaders(ctx, config));
     },
     path: url.API_TRAMITE
 };
