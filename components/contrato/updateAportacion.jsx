@@ -129,66 +129,81 @@ const UpdateAportacion = ({ info, edit }) => {
     // render
     return (
         <Form>
-            <div className="row mt-4 justify-content-between">
-                <div className="col-md-12 mb-3">
-                    <div className="row">
-                        <div className="col-md-4 mb-2">
-                            <SelectInfoTypeAportacion
-                                refresh={reload}
-                                info_id={info.id}
-                                name="type_aportacion_id"
-                                value={form.type_aportacion_id}
-                                except={1}
-                                onChange={(e, obj) => handleInput(obj)}
-                                onReady={(e) => setReload(false)}
-                                disabled={edit}
-                            />
-                        </div>
-
-                        <div className="col-md-4 mb-2">
-                            <Button color="green" 
-                                basic 
-                                onClick={assignTypeAportacion}
-                                disabled={edit || !form.type_aportacion_id}
-                            >
-                                <i className="fas fa-plus"></i> Agregar Aportación
-                            </Button>
-                        </div>
-                    </div>
+            <div className="card">
+                <div className="card-header">
+                    <i className="fas fa-cogs"></i> Configurar Aporte Empleador
                 </div>
 
-                <div className="col-md-12">
-                    <div className="row">
-                        {configs.map((c, indexC) => 
-                                <div className="col-md-4" key={`index-aportacion-${indexC}`}>
-                                    <div className="card">
-                                        <div className="card-body">
-                                            <div className="row">
-                                                <div className="col-md-10">
-                                                    {c.descripcion} <small className="badge badge-xs badge-dark">{c.porcentaje}%</small>
-                                                </div>
-                                                <div className="col-md-2 text-right">
-                                                    <Button color="red"
-                                                        size="mini"
-                                                        onClick={(e) => deleteConfig(c.id)}
-                                                        disabled={current_loading || !edit}
-                                                    >
-                                                        <i className="fas fa-trash"></i>
-                                                    </Button>
+                <div className="card-body">
+                    <div className="row mt-4 justify-content-between">
+                        <Show condicion={!edit}>
+                            <div className="col-md-12 mb-3">
+                                <div className="row">
+                                    <div className="col-md-4 mb-2">
+                                        <SelectInfoTypeAportacion
+                                            refresh={reload}
+                                            info_id={info.id}
+                                            name="type_aportacion_id"
+                                            value={form.type_aportacion_id}
+                                            except={1}
+                                            onChange={(e, obj) => handleInput(obj)}
+                                            onReady={(e) => setReload(false)}
+                                            disabled={edit}
+                                        />
+                                    </div>
+
+                                    <div className="col-md-4 mb-2">
+                                        <Button color="green" 
+                                            basic 
+                                            onClick={assignTypeAportacion}
+                                            disabled={edit || !form.type_aportacion_id}
+                                        >
+                                            <i className="fas fa-plus"></i> Agregar Aportación
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="col-md-12">
+                                <hr/>
+                            </div>
+                        </Show>
+
+                        <div className="col-md-12">
+                            <div className="row">
+                                {configs.map((c, indexC) => 
+                                        <div className="col-md-4" key={`index-aportacion-${indexC}`}>
+                                            <div className="card">
+                                                <div className="card-body">
+                                                    <div className="row">
+                                                        <div className="col-md-10">
+                                                            {c.descripcion} <small className="badge badge-xs badge-dark">{c.porcentaje}%</small>
+                                                        </div>
+                                                        <div className="col-md-2 text-right">
+                                                            <Button color="red"
+                                                                size="mini"
+                                                                onClick={(e) => deleteConfig(c.id)}
+                                                                disabled={current_loading || !edit}
+                                                                basic
+                                                            >
+                                                                <i className="fas fa-trash"></i>
+                                                            </Button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                        )}
+                                )}
 
-                        <Show condicion={!configs.length && !current_loading}>
-                            <div className="col-md-12">
-                                <div className="text-center mt-4 mb-4">
-                                    <b className="text-muted">No hay registros disponibles</b>
-                                </div>
+                                <Show condicion={!configs.length && !current_loading}>
+                                    <div className="col-md-12">
+                                        <div className="text-center mt-4 mb-4">
+                                            <b className="text-muted">No hay registros disponibles</b>
+                                        </div>
+                                    </div>
+                                </Show>
                             </div>
-                        </Show>
+                        </div>
                     </div>
                 </div>
 

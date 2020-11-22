@@ -403,7 +403,7 @@ const SelectInfoTypeAportacion = ({ id = "id", info_id, except = 0, name, value,
     return <SelectBase 
                 api={unujobs}
                 url={`info/${info_id}/type_aportacion?except=${except}`}
-                id={`select-type_aportacion_planilla-${id}-${name}`}
+                id={`select-type_aportacion-${id}-${name}`}
                 value={id}
                 text="descripcion"
                 obj="type_aportaciones"
@@ -411,6 +411,25 @@ const SelectInfoTypeAportacion = ({ id = "id", info_id, except = 0, name, value,
                 valueChange={value || ""}
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
                 placeholder="Seleccionar Tip. Aportación"
+                refresh={refresh}
+                execute={true}
+                disabled={disabled}
+                onReady={onReady}
+            />
+}
+
+const SelectInfoTypeDescuento = ({ id = "id", info_id, except = 0, name, value, onChange, refresh = false, disabled = false, onReady }) => {
+    return <SelectBase 
+                api={unujobs}
+                url={`info/${info_id}/type_descuento?except=${except}`}
+                id={`select-type_descuento-${id}-${name}`}
+                value={id}
+                text="informacion"
+                obj="type_descuentos"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Tip. Descuento"
                 refresh={refresh}
                 execute={true}
                 disabled={disabled}
@@ -443,4 +462,5 @@ export {
     SelectTypeCategoriaNotTypeRemuneracion,
     SelectTypeDescuentoPlanilla,
     SelectInfoTypeAportacion,
+    SelectInfoTypeDescuento,
 };

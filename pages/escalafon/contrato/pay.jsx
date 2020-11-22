@@ -220,15 +220,10 @@ const Pay = ({ success, info, query }) => {
 
                     <Show condicion={success}>
                         <div className="card-body" id="config">
-                            <h4><i className="fas fa-cogs"></i> Configurar Remuneraciones</h4>
                             <UpdateRemuneracion info={info} edit={edit} send={send}/>
-                            <hr/>
-
-                            <h4><i className="fas fa-cogs"></i> Configurar Aporte Empleador</h4>
+                            <div className="mt-5 mb-5"></div>
                             <UpdateAportacion info={info} edit={edit} send={send}/>
-                            <hr/>
-                            
-                            <h4><i className="fas fa-cogs"></i> Configurar Descuentos</h4>
+                            <div className="mt-5 mb-5"></div>
                             <UpdateDescuento info={info} edit={edit} send={send}/>
                         </div>
                     </Show>

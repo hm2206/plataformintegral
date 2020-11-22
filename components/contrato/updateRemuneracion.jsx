@@ -149,74 +149,88 @@ const UpdateRemuneracion = ({ info, edit, send }) => {
     // render
     return (
         <Form>
-            <div className="row mt-4 justify-content-between">
-
-                <div className="col-md-12 mb-3">
-                    <Button color="green" 
-                        basic 
-                        onClick={(e) => setOption("create")}
-                        disabled={edit}
-                    >
-                        <i className="fas fa-plus"></i> Agregar Remuneración
-                    </Button>
+            <div className="card">
+                <div className="card-header">
+                    <i className="fas fa-cogs"></i> Configurar Remuneraciones
                 </div>
-
-                <Show condicion={!current_loading}>
-                    {configs.map((obj, index) => 
-                        <div className="col-md-12 mb-2" 
-                            style={{ 
-                                border: "1.5px solid rgba(0, 0, 0, 0.3)", 
-                                paddingTop: "0.4em", 
-                                paddingBottom: "0.8em", 
-                                borderRadius: "0.3em"
-                            }} 
-                            key={`config-item-${obj.id}`}
-                        >
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <Form.Field>
-                                        <b><span className="text-red">{obj.key}</span>.-<span className="text-primary">{obj.descripcion}</span></b>
-                                        <input type="number"
-                                            name="monto"
-                                            value={obj.monto}
-                                            onChange={(e) => handleInput(e.target, index)}
-                                            disabled={current_loading || !edit}
-                                            step="any"
-                                        />
-                                    </Form.Field>
-                                </div>
-
-                                <div className="col-md-4 col-6">
-                                    <b>Base imponible</b>
-                                    <div>
-                                        <Checkbox
-                                            toggle
-                                            name="base"
-                                            disabled={current_loading || !edit}
-                                            checked={obj.base == 0 ? true : false}
-                                            onChange={(e, o) => handleInput({ name: o.name, value: o.checked ? 0 : 1 }, index)}
-                                        />
-                                    </div>
-                                </div>
-                                                            
-                                <div className="col-md-2 col-6">
-                                    <b>Opción</b>
-                                    <Button fluid
-                                        color="red"
-                                        disabled={!edit}
-                                        onClick={(e) => deleteConfig(obj.id)}
-                                    >
-                                        <i className="fas fa-trash"></i>
-                                    </Button>
-                                </div>
+                
+                <div className="card-body">
+                    <div className="row mt-4 justify-content-between">
+                        <Show condicion={!edit}>
+                            <div className="col-md-12 mb-4">
+                                <Button color="green" 
+                                    basic 
+                                    onClick={(e) => setOption("create")}
+                                    disabled={edit}
+                                >
+                                    <i className="fas fa-plus"></i> Agregar Remuneración
+                                </Button>
                             </div>
-                        </div>    
-                    )}
-                </Show>
 
-                <Show condicion={current_loading}>
-                    <PlaceholderConfigs/>
-                </Show>
+                            <div className="col-md-12">
+                                <hr/>
+                            </div>
+                        </Show>
+
+                        <Show condicion={!current_loading}>
+                            {configs.map((obj, index) => 
+                                <div className="col-md-12 mb-2" 
+                                    key={`config-item-${obj.id}`}
+                                >
+                                    <div className="card-body">
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <Form.Field>
+                                                    <b><span className="text-red">{obj.key}</span>.-<span className="text-primary">{obj.descripcion}</span></b>
+                                                    <input type="number"
+                                                        name="monto"
+                                                        value={obj.monto}
+                                                        onChange={(e) => handleInput(e.target, index)}
+                                                        disabled={current_loading || !edit}
+                                                        step="any"
+                                                    />
+                                                </Form.Field>
+                                            </div>
+
+                                            <div className="col-md-4 col-6">
+                                                <b>Base imponible</b>
+                                                <div>
+                                                    <Checkbox
+                                                        toggle
+                                                        name="base"
+                                                        disabled={current_loading || !edit}
+                                                        checked={obj.base == 0 ? true : false}
+                                                        onChange={(e, o) => handleInput({ name: o.name, value: o.checked ? 0 : 1 }, index)}
+                                                    />
+                                                </div>
+                                            </div>
+                                                                        
+                                            <div className="col-md-2 col- text-center">
+                                                <b>Opción</b>
+                                                <Button fluid
+                                                    color="red"
+                                                    basic
+                                                    disabled={!edit}
+                                                    onClick={(e) => deleteConfig(obj.id)}
+                                                >
+                                                    <i className="fas fa-trash"></i>
+                                                </Button>
+                                            </div>
+
+                                            <div className="col-md-12">
+                                                <hr/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>    
+                            )}
+                        </Show>
+
+                        <Show condicion={current_loading}>
+                            <PlaceholderConfigs/>
+                        </Show>
+                    </div>
+                </div>
             </div>
 
             <Show condicion={option == 'create'}>
