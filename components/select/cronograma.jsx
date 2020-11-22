@@ -380,6 +380,44 @@ const SelectTypeCategoriaNotTypeRemuneracion = ({ id = "id", type_categoria_id, 
             />
 }
 
+const SelectTypeDescuentoPlanilla = ({ id = "id", type_descuento_id, except = 0, name, value, onChange, refresh = false, disabled = false, execute = true, onReady }) => {
+    return <SelectBase 
+                api={unujobs}
+                url={`type_descuento/${type_descuento_id}/planilla?except=${except}`}
+                id={`select-type_descuento_planilla-${id}-${name}`}
+                value={id}
+                text="nombre"
+                obj="planillas"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Planilla"
+                refresh={refresh}
+                execute={execute}
+                disabled={disabled}
+                onReady={onReady}
+            />
+}
+
+const SelectInfoTypeAportacion = ({ id = "id", info_id, except = 0, name, value, onChange, refresh = false, disabled = false, onReady }) => {
+    return <SelectBase 
+                api={unujobs}
+                url={`info/${info_id}/type_aportacion?except=${except}`}
+                id={`select-type_aportacion_planilla-${id}-${name}`}
+                value={id}
+                text="descripcion"
+                obj="type_aportaciones"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Tip. Aportación"
+                refresh={refresh}
+                execute={true}
+                disabled={disabled}
+                onReady={onReady}
+            />
+}
+
 // exportables
 export { 
     SelectPlanilla,
@@ -403,4 +441,6 @@ export {
     SelectCronogramaTypeDetalle,
     SelectCronogramaTypeAportacion,
     SelectTypeCategoriaNotTypeRemuneracion,
+    SelectTypeDescuentoPlanilla,
+    SelectInfoTypeAportacion,
 };

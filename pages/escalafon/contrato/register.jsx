@@ -5,14 +5,11 @@ import { Body, BtnBack } from '../../../components/Utils';
 import ContentControl from '../../../components/contentControl';
 import Show from '../../../components/show';
 import { unujobs } from '../../../services/apis';
-import { parseUrl, Confirm } from '../../../services/utils';
-import { backUrl } from '../../../services/utils';
+import { backUrl, Confirm } from '../../../services/utils';
 import { pap } from '../../../services/storage.json';
 import Swal from 'sweetalert2';
-import btoa from 'btoa';
 import Router from 'next/router';
 import AssignTrabajador from '../../../components/contrato/assingTrabajador';   
-import { tipo_documento } from '../../../services/storage.json';
 import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
 import { AppContext } from '../../../contexts/AppContext';
@@ -37,7 +34,7 @@ const Register = () => {
     }
 
     // cambios del form
-    const handleInput = async ({ name, value }) => {
+    const handleInput = ({ name, value }) => {
         let newForm = Object.assign({}, form);
         newForm[name] = value;
         setForm(newForm);
@@ -75,12 +72,13 @@ const Register = () => {
                 let { success, message, info } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
-                let id = btoa(info.id);
+                let id = btoa(info.id) || '__error';
+                // query
                 let query = {
                     id,
                     href: location.pathname
                 }
-                Router.push({ pathname: `${parseUrl(location.pathname, 'pay')}`, query });
+                Router.push({ pathname: `${backUrl(Router.pathname)}/edit`, query });
             }).catch(err => {
                 try {
                     app_context.fireLoading(false);
@@ -428,7 +426,12 @@ const Register = () => {
 
                 <ContentControl>
                     <div className="col-lg-2 col-6">
-                        <Button fluid color="red" disabled={!isWork}>
+                        <Button fluid color="red" disabled={!isWork}
+                            onClick={(e) => {
+                                setWork({});
+                                setForm({});
+                            }}
+                        >
                             <i className="fas fa-times"></i> Cancelar
                         </Button>
                     </div>

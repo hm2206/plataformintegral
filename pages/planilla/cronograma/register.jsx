@@ -191,24 +191,7 @@ export default class RegisterCronograma extends Component
                                                     onChange={(e, obj) => this.handleInput(obj)}
                                                 />
                                             </Form.Field>
-
-                                            <div className="col-md-6"></div>
-                                        </Show>
-
-                                        <Show condicion={this.state.mes != 12}>
-                                            <Form.Field className="col-md-6">
-                                                <label htmlFor="">¿Es una planilla adicional?</label>
-                                                <Select
-                                                    name="adicional"
-                                                    value={this.state.adicional}
-                                                    placeholder="Select. Planilla Adicional"
-                                                    options={[
-                                                        {key: "si", value: 1, text: "Si"},
-                                                        {key: "no", value: 0, text: "No"}
-                                                    ]}
-                                                    onChange={(e, obj) => this.handleInput(obj)}
-                                                />
-                                            </Form.Field>
+                                            
                                             <div className="col-md-6"></div>
                                         </Show>
 
@@ -226,8 +209,27 @@ export default class RegisterCronograma extends Component
                                                     ]}
                                                 />
                                             </Form.Field>
+
+                                            <div className="col-md-6"></div>
                                         </Show>
 
+                                        <Show condicion={!this.state.remanente}
+                                            predeterminado={<div className="col-md-6"></div>}
+                                        >
+                                            <Form.Field className="col-md-6">
+                                                <label htmlFor="">¿Es una planilla adicional?</label>
+                                                <Select
+                                                    name="adicional"
+                                                    value={this.state.adicional}
+                                                    placeholder="Select. Planilla Adicional"
+                                                    options={[
+                                                        {key: "si", value: 1, text: "Si"},
+                                                        {key: "no", value: 0, text: "No"}
+                                                    ]}
+                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                />
+                                            </Form.Field>
+                                        </Show>
                                     
                                         <Form.Field className="col-md-12">
                                             <label htmlFor="" className="text-left">Observación</label>

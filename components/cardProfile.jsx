@@ -276,7 +276,7 @@ export default class CardProfile extends Component {
                                     options={tipo_documento}
                                     placeholder="Select. Tip. Documento"
                                     name="document_type"
-                                    value={person.document_type || ""}
+                                    value={person.document_type_id || ""}
                                     disabled
                                   />
                                 </div>

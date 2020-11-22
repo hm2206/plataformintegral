@@ -7,9 +7,9 @@ import { unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import { Confirm, backUrl } from '../../../services/utils'
-import { tipo_documento } from '../../../services/storage.json';
 import ContentControl from '../../../components/contentControl';
-import atob from 'atob'
+import atob from 'atob';
+import btoa from 'btoa';
 import { AppContext } from '../../../contexts/AppContext';
 import { SelectCargo, SelectCargoTypeCategoria, SelectMeta, SelectSitacionLaboral } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
@@ -91,6 +91,27 @@ const Edit = ({ success, info }) => {
         }
     }
 
+    // restaurar contrato
+    const restaurar = async () => {
+        let answer = await Confirm("warning", `¿Deseas restaurar el contrato?`, 'Restaurar');
+        if (answer) {
+            app_context.fireLoading(true);
+            await unujobs.post(`info/${info.id}/restore`)
+                .then(async res => {
+                    app_context.fireLoading(false);
+                    let { success, message, restore } = res.data; 
+                    if (!success) throw new Error(message);
+                    await Swal.fire({ icon: 'success', text: message });
+                    let { push, pathname } = Router;
+                    query.id = btoa(restore.id);
+                    push({ pathname, query });
+                }).catch(err => {
+                    app_context.fireLoading(false);
+                    Swal.fire({ icon: 'error', text: err.message });
+                });
+        }
+    }
+
     return (
     <Fragment>
         <div className="col-md-12">
@@ -98,7 +119,7 @@ const Edit = ({ success, info }) => {
                 <div className="card-">
                     <div className="card-header">
                         <BtnBack 
-                            onClick={(e) => Router.push(backUrl(Router.pathname))} 
+                            onClick={(e) => Router.push({ pathname: backUrl(Router.pathname), query: { query_search: `${success ? info.person.fullname : ''}` }})}
                         /> <span className="ml-4">Editar Contrato</span>
                     </div>
 
@@ -342,10 +363,6 @@ const Edit = ({ success, info }) => {
                                         </Show>
                                     </div>
                                 </div>
-
-                                <div className="col-md-12">
-                                    <hr/>
-                                </div>
                             </div>
                         </Form>
                     </div>
@@ -353,9 +370,9 @@ const Edit = ({ success, info }) => {
             </Body>
         </div>
 
-        <Show condicion={success && info.estado}>
+        <Show condicion={success}>
             <ContentControl>
-                <Show condicion={edit}>
+                <Show condicion={info.estado && edit}>
                     <div className="col-lg-2 col-6">
                         <Button fluid color="red" onClick={cancelInfo}>
                             <i className="fas fa-times"></i> Cancelar
@@ -369,10 +386,18 @@ const Edit = ({ success, info }) => {
                     </div>
                 </Show>
 
-                <Show condicion={!edit}>
+                <Show condicion={info.estado && !edit}>
                     <div className="col-lg-2 col-6">
                         <Button fluid color="teal" onClick={(e) => setEdit(true)}>
                             <i className="fas fa-pencil-alt"></i> Editar
+                        </Button>
+                    </div>
+                </Show>
+
+                <Show condicion={!info.estado}>
+                    <div className="col-lg-2">
+                        <Button fluid color="blue" onClick={restaurar}>
+                            <i className="fas fa-sync"></i> Restaurar
                         </Button>
                     </div>
                 </Show>
@@ -389,7 +414,6 @@ Edit.getInitialProps = async (ctx) => {
     let { success, info } = await unujobs.get(`info/${id}`, {}, ctx)
     .then(res => res.data)
     .catch(err => ({ success: false }));
-    console.log(info);
     // response
     return { success, info: info || {}, query: ctx.query };
 }

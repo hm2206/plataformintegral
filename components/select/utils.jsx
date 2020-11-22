@@ -62,6 +62,7 @@ const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, ob
     const [loading, setLoading] = useState(false);
     const [nextPage, setNexPage] = useState(1);
     const [is_ready, setIsReady] = useState(false);
+    const [current_execute, setCurrentExecute] = useState(execute);
 
     const getDatos = async (page = 1) => {
         setLoading(true);
@@ -83,7 +84,10 @@ const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, ob
                 setLoading(false);
                  // continuar
                 if (current_last_page >= page + 1) setNexPage(page + 1);
-                else setIsReady(true);
+                else {
+                    setIsReady(true);
+                    setCurrentExecute(false);
+                }
             }).catch(err => {
                 setIsError(true);
                 setLoading(false);
@@ -104,7 +108,7 @@ const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, ob
 
     // refrescar datos
     useEffect(() => {
-        if (!execute && refresh) feching();
+        if (!current_execute && refresh) feching();
     }, [refresh]);
 
     // traer la siguiente pagina
@@ -122,10 +126,12 @@ const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, ob
 
     // render
     return is_error 
-        ? <ButtonRefresh 
-            onClick={async (e) => await getDatos()}
-            message="Volver a obtener los datos"
-          /> 
+        ?   <div>
+                <ButtonRefresh 
+                    onClick={async (e) => await getDatos()}
+                    message="Volver a obtener los datos"
+                /> 
+            </div>
         :   loading 
             ?   <Skeleton height="37px"/>
             :   <Select fluid
