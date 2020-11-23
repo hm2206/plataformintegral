@@ -18,34 +18,19 @@ const PlaceholderConfigs = () => {
         <Fragment>
             {array.map(a => 
                 <div className="col-md-12 mb-2" 
-                    style={{ 
-                        border: "1.5px solid rgba(0, 0, 0, 0.3)", 
-                        paddingTop: "0.4em", 
-                        paddingBottom: "0.8em", 
-                        borderRadius: "0.3em"
-                    }} 
-                    key={`placeholder-config-${a}`}
+                    key={`placeholder-config-remuneracion-${a}`}
                 >
                     <div className="row">
                         <div className="col-md-6">
-                            <Form.Field>
-                                <b className="mb-2"><PlaceholderInput height={"20px"}/></b>
-                                <PlaceholderInput/>
-                            </Form.Field>
+                            <PlaceholderInput/>
                         </div>
         
                         <div className="col-md-4 col-6">
-                            <b className="mb-2"><PlaceholderInput height={"20px"}/></b>
-                            <div>
-                                <PlaceholderInput/>
-                            </div>
+                            <PlaceholderInput/>
                         </div>
                                                                     
                         <div className="col-md-2 col-6">
-                            <b className="mb-2"><PlaceholderInput height={"20px"}/></b>
-                            <div>
-                                <PlaceholderInput/>
-                            </div>                      
+                            <PlaceholderInput/>                  
                         </div>
                     </div>
                 </div>     
@@ -55,7 +40,7 @@ const PlaceholderConfigs = () => {
 }
 
 // principal
-const UpdateRemuneracion = ({ info, edit, send }) => {
+const UpdateRemuneracion = ({ info, edit, onUpdate }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -123,7 +108,8 @@ const UpdateRemuneracion = ({ info, edit, send }) => {
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
-                    setEdit(false);
+                    setOld(configs);
+                    if (typeof onUpdate == 'function') onUpdate();
                 }).catch(err => {
                     app_context.fireLoading(false);
                     Swal.fire({ icon: 'error', text: err.message })
@@ -141,11 +127,6 @@ const UpdateRemuneracion = ({ info, edit, send }) => {
         getConfig();
     }, []);
 
-    // actualizar
-    useEffect(() => {
-        if (send) updateConfig();
-    }, [send]);
-
     // render
     return (
         <Form>
@@ -156,7 +137,7 @@ const UpdateRemuneracion = ({ info, edit, send }) => {
                 
                 <div className="card-body">
                     <div className="row mt-4 justify-content-between">
-                        <Show condicion={!edit}>
+                        <Show condicion={info.estado && !edit}>
                             <div className="col-md-12 mb-4">
                                 <Button color="green" 
                                     basic 
@@ -229,6 +210,25 @@ const UpdateRemuneracion = ({ info, edit, send }) => {
                         <Show condicion={current_loading}>
                             <PlaceholderConfigs/>
                         </Show>
+
+                        <Show condicion={!configs.length && !current_loading}>
+                            <div className="col-md-12">
+                                <div className="text-center mt-4 mb-4">
+                                    <b className="text-muted">No hay registros disponibles</b>
+                                </div>
+                            </div>
+                        </Show>
+                    </div>
+                </div>
+
+                <div className="card-footer text-right">
+                    <div className="card-body">
+                        <Button color="teal" 
+                            onClick={updateConfig} 
+                            disabled={!edit || current_loading}
+                        >
+                            <i className="fas fa-save"></i> Guardar
+                        </Button>
                     </div>
                 </div>
             </div>

@@ -220,11 +220,22 @@ const Pay = ({ success, info, query }) => {
 
                     <Show condicion={success}>
                         <div className="card-body" id="config">
-                            <UpdateRemuneracion info={info} edit={edit} send={send}/>
+                            <UpdateRemuneracion 
+                                info={info} 
+                                edit={edit}
+                                onUpdate={(e) => setEdit(false)}
+                            />
                             <div className="mt-5 mb-5"></div>
-                            <UpdateAportacion info={info} edit={edit} send={send}/>
+                            <UpdateAportacion 
+                                info={info} 
+                                edit={edit}
+                            />
                             <div className="mt-5 mb-5"></div>
-                            <UpdateDescuento info={info} edit={edit} send={send}/>
+                            <UpdateDescuento 
+                                info={info} 
+                                edit={edit} 
+                                onUpdate={(e) => setEdit(false)}
+                            />
                         </div>
                     </Show>
                 </div>
@@ -235,13 +246,8 @@ const Pay = ({ success, info, query }) => {
             <ContentControl>
                 <Show condicion={edit}>
                     <div className="col-lg-2 col-6">
-                        <Button fluid color="blue" onClick={(e) => setSend(true)}>
-                            <i className="fas fa-sync"></i> Actualizar
-                        </Button>
-                    </div>
-
-                    <div className="col-lg-2 col-6">
-                        <Button fluid color="red"onClick={cancelConfig}>
+                        <Button fluid color="red"
+                            onClick={cancelConfig}>
                             <i className="fas fa-times"></i> Cancelar
                         </Button>
                     </div>
@@ -249,7 +255,9 @@ const Pay = ({ success, info, query }) => {
 
                 <Show condicion={!edit}>
                     <div className="col-lg-2 col-6">
-                        <Button fluid color="teal" onClick={(e) => setEdit(true)}>
+                        <Button fluid 
+                            color="orange" 
+                            onClick={(e) => setEdit(true)}>
                             <i className="fas fa-pencil-alt"></i> Editar
                         </Button>
                     </div>

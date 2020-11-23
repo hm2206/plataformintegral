@@ -98,8 +98,8 @@ const UpdateAportacion = ({ info, edit }) => {
     }
     
     // eliminar configuracion de pago
-    const deleteConfig = async (id) => {
-        let value = await Confirm("warning", "¿Desea elimnar la remuneración?", "Confirmar")
+    const deleteConfig = async (id) => {    
+        let value = await Confirm("warning", "¿Desea eliminar la aportación?", "Confirmar")
         if (value) {
             app_context.fireLoading(true);
             await unujobs.post(`info_type_aportacion/${id}`, { _method: 'DELETE' })
@@ -136,7 +136,7 @@ const UpdateAportacion = ({ info, edit }) => {
 
                 <div className="card-body">
                     <div className="row mt-4 justify-content-between">
-                        <Show condicion={!edit}>
+                        <Show condicion={info.estado && !edit}>
                             <div className="col-md-12 mb-3">
                                 <div className="row">
                                     <div className="col-md-4 mb-2">
@@ -195,6 +195,10 @@ const UpdateAportacion = ({ info, edit }) => {
                                         </div>
                                 )}
 
+                                <Show condicion={current_loading}>
+                                    <PlaceholderConfigs/>
+                                </Show>
+
                                 <Show condicion={!configs.length && !current_loading}>
                                     <div className="col-md-12">
                                         <div className="text-center mt-4 mb-4">
@@ -206,10 +210,6 @@ const UpdateAportacion = ({ info, edit }) => {
                         </div>
                     </div>
                 </div>
-
-                <Show condicion={current_loading}>
-                    <PlaceholderConfigs/>
-                </Show>
             </div>
         </Form>
     )
