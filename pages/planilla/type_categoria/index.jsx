@@ -51,6 +51,7 @@ export default class TypeCategoriaIndex extends Component {
                 await push({ pathname: `${pathname}/${key}`, query: { id } });
                 break;
             case 'coin' :
+            case 'discount':
                 await push({ pathname: `${pathname}/${key}`, query: { id } });
                 break;
             case 'delete':
@@ -147,6 +148,15 @@ export default class TypeCategoriaIndex extends Component {
                                     key: "coin",
                                     icon: "fas fa-coins",
                                     title: "Config Monto de Tip. Categoría",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
+                                    }
+                                },
+                                {
+                                    key: "discount",
+                                    icon: "fas fa-tags",
+                                    title: "Config Descuento del Tip. Categoría",
                                     rules: {
                                         key: "estado",
                                         value: 1

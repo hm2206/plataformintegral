@@ -380,14 +380,14 @@ const SelectTypeCategoriaNotTypeRemuneracion = ({ id = "id", type_categoria_id, 
             />
 }
 
-const SelectTypeDescuentoPlanilla = ({ id = "id", type_descuento_id, except = 0, name, value, onChange, refresh = false, disabled = false, execute = true, onReady }) => {
+const SelectTypeCategoriaTypeDescuento = ({ id = "id", type_categoria_id, planilla_id, except = 0, name, value, onChange, refresh = false, disabled = false, execute = true, onReady }) => {
     return <SelectBase 
                 api={unujobs}
-                url={`type_descuento/${type_descuento_id}/planilla?except=${except}`}
+                url={`type_categoria/${type_categoria_id}/type_descuento/${planilla_id}?except=${except}`}
                 id={`select-type_descuento_planilla-${id}-${name}`}
                 value={id}
-                text="nombre"
-                obj="planillas"
+                text="informacion"
+                obj="type_descuentos"
                 name={name}
                 valueChange={value || ""}
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
@@ -460,7 +460,7 @@ export {
     SelectCronogramaTypeDetalle,
     SelectCronogramaTypeAportacion,
     SelectTypeCategoriaNotTypeRemuneracion,
-    SelectTypeDescuentoPlanilla,
     SelectInfoTypeAportacion,
     SelectInfoTypeDescuento,
+    SelectTypeCategoriaTypeDescuento,
 };

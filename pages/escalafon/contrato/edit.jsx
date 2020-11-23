@@ -15,7 +15,7 @@ import { SelectCargo, SelectCargoTypeCategoria, SelectMeta, SelectSitacionLabora
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
 import storage from '../../../services/storage.json';
 
-const Edit = ({ success, info }) => {
+const Edit = ({ success, info, query }) => {
 
     // app
     const app_context = useContext(AppContext);

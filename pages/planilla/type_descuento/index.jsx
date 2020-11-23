@@ -130,15 +130,6 @@ const TypeDescuento = ({ success, type_descuentos, query }) => {
                                     }
                                 }, 
                                 {
-                                    key: "config",
-                                    icon: "fas fa-cogs",
-                                    title: "Configurar descuentos",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
-                                },
-                                {
                                     key: "delete",
                                     icon: "fas fa-times",
                                     title: "Desactivar Tip Descuento",
