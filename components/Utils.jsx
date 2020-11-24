@@ -549,7 +549,10 @@ const SimpleListContent = ({ children = null }) => {
 }
 
 
-const SimpleList = ({ title, count, icon = "oi oi-chat", bg = "success", onClick = null, obj = {}, bgIcon = "red", active = false }) => {
+const SimpleList = ({ title, count, icon = "oi oi-chat", bg = "success", onClick = null, obj = {}, bgIcon = "red", active = false, loading = false }) => {
+
+  if (loading) return <Skeleton height="47px"/>
+
   return (
     <div className={`list-group-item ${active ? 'list-group-item-active' : null}`} style={{ cursor: 'pointer' }} onClick={(e) => typeof onClick == 'function' ? onClick({ e, obj}) : null}>
       <div className="list-group-item-figure">

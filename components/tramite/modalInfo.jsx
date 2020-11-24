@@ -1,8 +1,10 @@
-import React, { Component } from 'react'
+import React, { Component, useState, useEffect } from 'react'
 import Modal from '../modal';
 import { Button, Form, Dropdown, Tab } from 'semantic-ui-react';
 import Router from 'next/router';
-import { tramite } from '../../services/apis';
+import Show from '../show';
+import apis from '../../services/apis';
+const api_tramite = apis.tramite;
 
 const Documento = ({ tramite }) => {
     return (
@@ -117,6 +119,34 @@ const FileInfo = ({ files = [] }) => {
     )
 }
 
+const CodeQr = ({ tramite }) => {
+
+    // estado
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [code_qr, setCodeQr] = useState("");
+
+    const getCodeQr = async () => {
+        setCurrentLoading(true);
+        await api_tramite.get(`tramite/${tramite.id}/code_qr`, { responseType: 'blob' })
+        .then(res => setCodeQr(URL.createObjectURL(res.data)))
+        .catch(err => console.log(err));
+        setCurrentLoading(false);
+    }
+
+    useEffect(() => {
+        getCodeQr();
+    }, []);
+
+    return <div className="mt-5 mb-5">
+        <div className="row justify-content-center">
+            <Show condicion={code_qr}>
+                <div style={{ width: "200px", height: "200px" }}>
+                    <img src={code_qr} alt={`code_qr_${tramite.id}`} style={{ width: "100%", height: "100%", objectFit: "contain" }}/>
+                </div>
+            </Show>
+        </div>
+    </div>
+}
 
 export default class ModalInfo extends Component
 {
@@ -133,7 +163,7 @@ export default class ModalInfo extends Component
     getTramite = async () => {
         this.setState({ loading: true });
         let { tracking } = this.props;
-        await tramite.get(`public/tramite/${tracking.slug}`)
+        await api_tramite.get(`public/tramite/${tracking.slug}`)
             .then(res => {
                 let { success, tramite, message } = res.data;
                 if (!success) throw new Error(message);
@@ -152,7 +182,7 @@ export default class ModalInfo extends Component
                 show={true}
                 md="6"
                 {...this.props}
-                titulo={<span>Información del Documento</span>}
+                titulo={<span>Información del Documento <small className="badge badge-dark">{tramite.slug}</small></span>}
                 classClose="text-white opacity-1"
             >
                 <Form className="card-body" loading={loading}>
@@ -161,7 +191,8 @@ export default class ModalInfo extends Component
                             <Tab panes={[
                                 { menuItem: 'Información', render: () => <Tab.Pane><Documento tramite={tramite}/></Tab.Pane> },
                                 { menuItem: 'Datos Remitente', render: () => <Tab.Pane><Remitente person={tramite.person}/></Tab.Pane> },
-                                { menuItem: 'Archivos', render: () => <Tab.Pane><FileInfo files={tramite.files}/></Tab.Pane> }
+                                { menuItem: 'Archivos', render: () => <Tab.Pane><FileInfo files={tramite.files}/></Tab.Pane> },
+                                { menuItem: 'Code QR', render: () => <Tab.Pane><CodeQr tramite={tramite}/></Tab.Pane> }
                             ]}/>
                         </div>
                     </div>

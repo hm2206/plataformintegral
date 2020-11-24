@@ -45,7 +45,6 @@ const IndexMyTray = ({ success, tracking, query }) => {
 
     // obtener el estado del traking seleccionado
     const getStatus = async (DependenciaId) => {
-        app_context.fireLoading(true);
         setCurrentLoading(true);
         await tramite.get('status/bandeja', { headers: { DependenciaId } })
             .then(res => {
@@ -53,7 +52,6 @@ const IndexMyTray = ({ success, tracking, query }) => {
                 if (!success) throw new Error(message);
                 setCurrentStatus(status_count);
             }).catch(err => console.log(err));
-        app_context.fireLoading(false);
         setCurrentLoading(false);
         setRefresh(false);
     }

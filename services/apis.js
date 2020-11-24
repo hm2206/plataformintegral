@@ -150,3 +150,14 @@ export const projectTracking = {
     },
     path: url.API_PROJECT_TRACKING
 };
+
+
+export default {
+    authentication,
+    unujobs,
+    escalafon,
+    recursoshumanos,
+    tramite,
+    signature,
+    projectTracking,
+}

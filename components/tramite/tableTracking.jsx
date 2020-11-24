@@ -192,7 +192,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                         <div className="mt-3 mb-4">
                             <div className="row">
                                 <div className="col-md-3">
-                                    <div className="list-group list-group-bordered">
+                                    <div className={`list-group ${current_loading ? '' : 'list-group-bordered'}`}>
                                         <SimpleList 
                                             icon="fas fa-table" 
                                             bg="dark" 
@@ -200,6 +200,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                             count={current_status && current_status.REGISTRADO}
                                             onClick={(e) => handleStatus("REGISTRADO")}
                                             active={query.status == 'REGISTRADO'}
+                                            loading={current_loading}
                                         />
 
                                         <SimpleList 
@@ -209,6 +210,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                             count={current_status && current_status.PENDIENTE}
                                             onClick={(e) => handleStatus("PENDIENTE")}
                                             active={query.status == 'PENDIENTE'}
+                                            loading={current_loading}
                                         />
                                     </div>
                                 </div>
@@ -218,10 +220,12 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                         <SimpleList 
                                             icon="fas fa-share" 
                                             bg="purple" 
+                                            bgIcon="secundary"
                                             title="Derivados" 
                                             count={current_status && current_status.DERIVADO}
                                             onClick={(e) => handleStatus("DERIVADO")}
                                             active={query.status == 'DERIVADO'}
+                                            loading={current_loading}
                                         />
 
                                         <SimpleList 
@@ -231,6 +235,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                             count={current_status && current_status.ENVIADO}
                                             onClick={(e) => getOption({}, 'ENVIADO', 0)}
                                             active={query.key == 'ENVIADO'}
+                                            loading={current_loading}
                                         />
                                     </div>
                                 </div>
@@ -245,6 +250,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                             count={current_status && current_status.ACEPTADO}
                                             onClick={(e) => handleStatus("ACEPTADO")}
                                             active={query.status == 'ACEPTADO'}
+                                            loading={current_loading}
                                         />
 
                                         <SimpleList 
@@ -255,6 +261,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                             count={current_status && current_status.RECHAZADO}
                                             onClick={(e) => handleStatus("RECHAZADO")}
                                             active={query.status == 'RECHAZADO'}
+                                            loading={current_loading}
                                         />
                                     </div>
                                 </div>
@@ -267,6 +274,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                             count={current_status && current_status.FINALIZADO}
                                             onClick={(e) => handleStatus("FINALIZADO")}
                                             active={query.status == 'FINALIZADO'}
+                                            loading={current_loading}
                                         />
 
                                         <SimpleList 
@@ -276,6 +284,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                             count={current_status && current_status.ANULADO}
                                             onClick={(e) => handleStatus("ANULADO")}
                                             active={query.status == 'ANULADO'}
+                                            loading={current_loading}
                                         />
                                     </div>
                                 </div>
