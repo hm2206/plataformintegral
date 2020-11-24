@@ -88,11 +88,18 @@ export default class ModalTracking extends Component
         return icons[status] || {};
     }
 
-    getPrint = () => {
-        let html = document.getElementById('print-tracking');
-        let blob = new Blob([html.innerHTML], { type: 'text/html' });
-        let newPrint = window.open(URL.createObjectURL(blob));
-        newPrint.onload = () => newPrint.print();
+    getPrint = async () => {
+        this.setState({ loader: true })
+        await tramite.get(`report/tracking/${this.props.tramite.id}`, { responseType: 'blob' })
+            .then(({data}) => {
+                let a = document.createElement('a');
+                a.target = '_blank';
+                a.href = URL.createObjectURL(data);
+                a.click();
+            }).catch(err => {
+                Swal.fire({ icon: 'error', text: err.message });
+            });
+        this.setState({ loader: false })
     }
  
     render() {

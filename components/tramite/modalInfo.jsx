@@ -1,12 +1,34 @@
-import React, { Component, useState, useEffect } from 'react'
+import React, { Component, useState, useEffect, useContext } from 'react'
 import Modal from '../modal';
 import { Button, Form, Dropdown, Tab } from 'semantic-ui-react';
 import Router from 'next/router';
 import Show from '../show';
+import { AppContext } from '../../contexts/AppContext';
 import apis from '../../services/apis';
 const api_tramite = apis.tramite;
 
 const Documento = ({ tramite }) => {
+
+    // app
+    const app_context = useContext(AppContext);
+
+    // imprimir
+    const getPrint = async () => {
+        app_context.fireLoading(true);
+        await api_tramite.get(`report/tracking/${tramite.id}`, { responseType: 'blob' })
+            .then(({data}) => {
+                app_context.fireLoading(false);
+                let a = document.createElement('a');
+                a.target = '_blank';
+                a.href = URL.createObjectURL(data);
+                a.click();
+            }).catch(err => {
+                app_context.fireLoading(false);
+                Swal.fire({ icon: 'error', text: err.message });
+            });
+    }
+
+    // render
     return (
         <Form>
             <div className="row">
@@ -29,6 +51,14 @@ const Documento = ({ tramite }) => {
                     <label htmlFor="">Asunto</label>
                     <textarea  value={tramite.asunto} readOnly/>
                 </Form.Field>
+
+                <div className="col-md-12 mt-3">
+                    <Button color="red"
+                        onClick={getPrint}
+                    >
+                        <i className="fas fa-file-pdf"></i> Reporte
+                    </Button>
+                </div>
             </div>
         </Form>
     )
