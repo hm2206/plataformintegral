@@ -6,6 +6,7 @@ import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
 import apis from '../../services/apis';
 const api_tramite = apis.tramite;
+import Swal from 'sweetalert2';
 
 const Documento = ({ tramite }) => {
 
