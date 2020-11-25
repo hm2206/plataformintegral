@@ -7,7 +7,7 @@ import Router from 'next/router';
 import Navbar from '../components/navbar';
 import { Content } from '../components/Utils';
 import { AUTH, LOGOUT } from '../services/auth';
-import { app } from '../env.json';
+import { app, headers } from '../env.json';
 import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
 import { clearStorage } from '../storage/clear';
@@ -258,6 +258,11 @@ class MyApp extends App {
           <Head>
             <meta charSet="utf-8"></meta>
             <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></meta>
+            {/* headers metas */}
+            {headers && headers.map((h, indexH) => 
+               <meta key={`meta-headers-custom-${indexH}`} {...h}/>
+            )}
+            {/* titulo */}
             <title>{_app.name || "Integración"}</title>
             <link rel="shortcut icon" href={_app.icon_images && _app.icon_images.icon_50x50}></link>
             <meta name="theme-color" content="#3063A0"></meta>
