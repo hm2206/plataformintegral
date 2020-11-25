@@ -291,7 +291,7 @@ const ModalNextTracking = (props) =>{
                             </div>
                         </Show>
 
-                        <Show condicion={props.tramite.parent && form.status == 'DERIVADO' && props.tramite.dependencia_destino_id == form.dependencia_destino_id}>
+                        <Show condicion={form.status == 'DERIVADO' && props.tramite.dependencia_destino_id == form.dependencia_destino_id}>
                             <div className="col-md-12">
                                 <hr/>
                                     <Form.Field error={errors.user_destino_id && errors.user_destino_id[0] || ""}>
