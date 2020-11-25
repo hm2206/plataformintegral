@@ -397,6 +397,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                     className={`
                                                         ${config && config.value && (((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value) ? 'text-muted bg-disabled' : ''}
                                                         ${!tra.verify ? ' bg-warning' : ''}
+                                                        ${tra.alert ? 'bg-red' : '' }
                                                     `}>
                                                     <td>
                                                         <span className={`tile tile-circle bg-${getCurrentDay(tra.updated_at)}`.toLowerCase()}>
@@ -461,6 +462,26 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                                 >
                                                                     <i className="fas fa-check"></i> 
                                                                 </a>
+
+                                                                <Show condicion={getMeta(tra.status).next}>
+                                                                    <Show condicion={current_config && current_config.value  && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > current_config.value))}>
+                                                                        <a className="mr-1 btn btn-sm btn-icon btn-secondary" href={`#${tra.id}`} 
+                                                                            title="Continuar Trámite"
+                                                                            onClick={(e) => getOption(tra, 'NEXT', indexT)}
+                                                                        >
+                                                                            <i className="fas fa-arrow-right"></i> 
+                                                                        </a>
+                                                                    </Show>
+
+                                                                    <Show condicion={!Object.keys(current_config || {}).length}>
+                                                                        <a className="mr-1 btn btn-sm btn-icon btn-secondary" href={`#${tra.id}`} 
+                                                                            title="Continuar Trámite"
+                                                                            onClick={(e) => getOption(tra, 'NEXT', indexT)}
+                                                                        >
+                                                                            <i className="fas fa-arrow-right"></i> 
+                                                                        </a>
+                                                                    </Show>                                                                
+                                                                </Show>
                                                             </Show>
                                                         </div>
                                                     </td>
