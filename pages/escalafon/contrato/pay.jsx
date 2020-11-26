@@ -165,7 +165,7 @@ const Pay = ({ success, info, query }) => {
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">Plaza</label>
-                                                <input type="text" disabled defaultValue={info.plaza}/>
+                                                <input type="text" disabled value={info.plaza}/>
                                             </Form.Field>
                                         </div>
 
@@ -186,6 +186,73 @@ const Pay = ({ success, info, query }) => {
                                                     disabled={true} 
                                                     defaultValue={info.fecha_de_cese || ""} 
                                                 />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Ley Social</label>
+                                                <input type="text" 
+                                                    disabled={true}
+                                                    defaultValue={info.afp || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Fecha de Afiliación</label>
+                                                <input type="date" 
+                                                    disabled={true} 
+                                                    defaultValue={info.fecha_de_afiliacion || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">N° CUSSP</label>
+                                                <input type="text" 
+                                                    disabled={true} 
+                                                    defaultValue={info.numero_de_cussp || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">N° Essalud</label>
+                                                <input type="text" 
+                                                    disabled={true} 
+                                                    defaultValue={info.numero_de_essalud || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Banco</label>
+                                                <input type="text" 
+                                                    disabled={true} 
+                                                    defaultValue={info.banco || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">N° Cuenta</label>
+                                                <input type="text" 
+                                                    disabled={true} 
+                                                    defaultValue={info.numero_de_cuenta || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Prima Seguro</label>
+                                                <Checkbox toggle checked={info.prima_seguro ? true : false} readOnly disabled/>
                                             </Form.Field>
                                         </div>
 
