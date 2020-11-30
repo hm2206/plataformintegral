@@ -113,7 +113,7 @@ const Remitente = ({ person }) => {
 }
 
 
-const FileInfo = ({ tracking, tramite, files = [], dependencia_id }) => {
+const FileInfo = ({ tracking, tramite, files = [], dependencia_id, onRefresh, isReady }) => {
 
     // estados
     const [current_files, setCurrentFiles] = useState(files);
@@ -134,9 +134,7 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id }) => {
                 let { message, success } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
-                let newFiles = JSON.parse(JSON.stringify(files));
-                newFiles.splice(index, 1);
-                setCurrentFiles(newFiles);
+                if (typeof onRefresh == 'function') onRefresh();
             }).catch(err => {
                 app_context.fireLoading(false);
                 Swal.fire({ icon: 'error', text: err.message });
@@ -154,14 +152,12 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id }) => {
             datos.append('index', index)
             await api_tramite.post(`tramite/${tramite.id}/update_file`, datos, {
                 headers:  { DependenciaId: tracking.dependencia_id }
-            }).then(res => {
+            }).then(async res => {
                 app_context.fireLoading(false);
-                let { message, success } = res.data;
+                let { message, success, file } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
-                let newFiles = JSON.parse(JSON.stringify(files));
-                newFiles.splice(index, 1);
-                setCurrentFiles(newFiles);
+                if (typeof onRefresh == 'function') onRefresh();
             }).catch(err => {
                 app_context.fireLoading(false);
                 Swal.fire({ icon: 'error', text: err.message });
@@ -169,7 +165,7 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id }) => {
         }
         // vaciar file
         let nodeInput = document.getElementById(`index-file-${index}`);
-        nodeInput.value = null;
+        if (nodeInput)  nodeInput.value = null;
     }
 
     // agregar archivos
@@ -186,9 +182,7 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id }) => {
                 let { message, success, file } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
-                let newFiles = JSON.parse(JSON.stringify(files));
-                newFiles.push(file);
-                setCurrentFiles(newFiles);
+                if (typeof onRefresh == 'function') onRefresh();
             }).catch(err => {
                 app_context.fireLoading(false);
                 Swal.fire({ icon: 'error', text: err.message });
@@ -208,6 +202,11 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id }) => {
         // response
         return metas[key];
     }
+
+    // actualizar files
+    useEffect(() => {
+        if (!isReady) setCurrentFiles(files);
+    }, [isReady]);
 
     return (
         <table className="table table-bordered">
@@ -267,7 +266,7 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id }) => {
                     <tr>
                         <th colSpan="2" className="text-right">
                             <label className="ui button green basic" style={{ cursor: 'pointer' }}>
-                                <input type="file" id="new_file" hidden onChange={attachFile}/>
+                                <input type="file" id="new_file" hidden onChange={(e) => attachFile(e.target)}/>
                                 <i className="fas fa-plus"></i>
                             </label>
                         </th>
@@ -351,7 +350,7 @@ export default class ModalInfo extends Component
                             <Tab panes={[
                                 { menuItem: 'Información', render: () => <Tab.Pane><Documento tramite={tramite}/></Tab.Pane> },
                                 { menuItem: 'Datos Remitente', render: () => <Tab.Pane><Remitente person={tramite.person}/></Tab.Pane> },
-                                { menuItem: 'Archivos', render: () => <Tab.Pane><FileInfo dependencia_id={dependencia_id} tramite={tramite} tracking={tracking} files={tramite.files}/></Tab.Pane> },
+                                { menuItem: 'Archivos', render: () => <Tab.Pane><FileInfo dependencia_id={dependencia_id} isReady={loading} onRefresh={this.getTramite} tramite={tramite} tracking={tracking} files={tramite.files}/></Tab.Pane> },
                                 { menuItem: 'Code QR', render: () => <Tab.Pane><CodeQr tramite={tramite}/></Tab.Pane> }
                             ]}/>
                         </div>

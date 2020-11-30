@@ -220,6 +220,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     Swal.fire({ icon: 'success', text: message });
+                    handleSearch();
                 }).catch(err => {
                     app_context.fireLoading(false);
                     Swal.fire({ icon: 'error', text: err.message });
@@ -234,12 +235,14 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                 <div className="car card-fluid">
                     <div className="card-header">
                         {title} 
-                        <Show condicion={isRole}>
-                            <i className="fas fa-arrow-right ml-2 mr-2"></i> 
-                            <span className={role && role.level && roles[role.level].className || ""}>
+                        <i className="fas fa-arrow-right ml-2 mr-2"></i> 
+                        <span className={role && role.level && roles[role.level].className || "badge badge-dark"}>
+                            <Show condicion={isRole}
+                                predeterminado="TRABAJADOR"
+                            >
                                 {role && role.level && role.level && roles[role.level].text || ""}
-                            </span>
-                        </Show>
+                            </Show>
+                        </span>
                     </div>
 
                     <div className="card-body">
@@ -450,7 +453,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                 <tr key={`tracking-${tra.id}-${indexT}`} 
                                                     className={`
                                                         ${config && config.value && (((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value) ? 'text-muted bg-disabled' : ''}
-                                                        ${!tra.next ? ' bg-warning' : ''}
+                                                        ${tra.user_verify_id != app_context.auth.id && !tra.next ? ' bg-warning' : ''}
                                                         ${tra.alert ? 'bg-red' : '' }
                                                     `}>
                                                     <td>
