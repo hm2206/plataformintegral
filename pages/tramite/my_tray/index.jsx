@@ -21,6 +21,7 @@ const IndexMyTray = ({ success, tracking, query }) => {
     const [current_loading, setCurrentLoading] = useState(false);
     const [refresh, setRefresh] = useState(false);
     const [current_status, setCurrentStatus] = useState({});
+    const [role, setRole] = useState({});
 
     // primera carga
     useEffect(() => {
@@ -63,9 +64,11 @@ const IndexMyTray = ({ success, tracking, query }) => {
         tracking,
         setRefresh,
         success,
+        role, 
+        setRole
     }}>
         <TableTracking 
-            title="Bandeja de Entrada"
+            title="Mi tramite"
             query={query}
             url={"my_tray"}
         />

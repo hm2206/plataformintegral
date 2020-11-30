@@ -19,11 +19,11 @@ const CreateTramiteInterno = () => {
             <Body>
                 <div className="card-header">
                     <BtnBack onClick={handleBack}/>
-                    <span className="ml-2">Crear mi trámite</span>
+                    <span className="ml-2">Crear nueva bandeja</span>
                 </div>
         
                 <div className="card-body">
-                    <CreateTramite/>
+                    <CreateTramite verify={1}/>
                 </div>
             </Body>
         </div>

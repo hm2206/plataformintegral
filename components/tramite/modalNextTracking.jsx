@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import Show from '../show';
 import SearchUserToDependencia from '../authentication/user/searchUserToDependencia';
 import { AppContext } from '../../contexts/AppContext';
+import { TrackingContext } from '../../contexts/tracking/TrackingContext';
 import { SelectDependencia } from '../../components/select/authentication';
 import PdfView from '../pdfView';
 import { PDFDocument } from 'pdf-lib';
@@ -18,6 +19,9 @@ const ModalNextTracking = (props) =>{
 
     // app
     const app_context = useContext(AppContext);
+
+    // tracking
+    let { role } = useContext(TrackingContext);
 
     // estados
     const [form, setForm] = useState({});
@@ -38,6 +42,9 @@ const ModalNextTracking = (props) =>{
     const [pdf_url, setPdfUrl] = useState("");
     const [pdf_doc, setPdfDoc] = useState(undefined);
     const [pdf_blob, setPdfBlob] = useState(undefined);
+
+    // validar role
+    let isRole = Object.keys(role || {}).length;
 
     // acciones
     const getAction = (status, parent = 1) => {
@@ -268,6 +275,7 @@ const ModalNextTracking = (props) =>{
                             <Form.Field>
                                 <label htmlFor="">Dependencía Origen</label>
                                 <input type="text" 
+                                    disabled={!isRole}
                                     className="uppercase" 
                                     readOnly
                                     style={{ cursor: 'pointer' }}
@@ -277,21 +285,58 @@ const ModalNextTracking = (props) =>{
                             </Form.Field>
                         </div>
 
-                        <Show condicion={props.tramite.parent && form.status == 'DERIVADO'}>
+                        <Show condicion={isRole && props.tramite.parent && form.status == 'DERIVADO'}>
+                            <Show condicion={(role && role.level == 'BOSS') || (props.tramite.next && role && role.level == 'SECRETARY')}
+                                predeterminado={
+                                    <div className="col-md-6 mt-3">
+                                        <Form.Field>
+                                            <label htmlFor="">Dependencía Destino</label>
+                                            <input type="text" 
+                                                disabled={!isRole}
+                                                className="uppercase" 
+                                                readOnly
+                                                style={{ cursor: 'pointer' }}
+                                                value={props.tramite && props.tramite.dependencia_origen && props.tramite.dependencia_origen.nombre}
+                                            />
+                                        </Form.Field>
+                                    </div>
+                                }
+                            >
+                                <div className="col-md-6 mt-3">
+                                    <Form.Field error={errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}>
+                                        <label htmlFor="">Dependencía Destino <b className="text-red">*</b></label>
+                                        <SelectDependencia
+                                            name="dependencia_destino_id"
+                                            value={form.dependencia_destino_id}
+                                            onChange={(e, obj) => handleInput(obj)}
+                                        />
+                                        <label htmlFor="">{errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}</label>
+                                    </Form.Field>
+                                </div>
+                            </Show>
+                        </Show>
+
+                        <Show condicion={!isRole && props.tramite.parent && form.status == 'DERIVADO'}>
                             <div className="col-md-6 mt-3">
-                                <Form.Field error={errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}>
-                                    <label htmlFor="">Dependencía Destino <b className="text-red">*</b></label>
-                                    <SelectDependencia
-                                        name="dependencia_destino_id"
-                                        value={form.dependencia_destino_id}
-                                        onChange={(e, obj) => handleInput(obj)}
+                                <Form.Field>
+                                    <label htmlFor="">Dependencía Destino</label>
+                                    <input type="text" 
+                                        disabled={!isRole}
+                                        className="uppercase" 
+                                        readOnly
+                                        style={{ cursor: 'pointer' }}
+                                        value={props.tramite && props.tramite.dependencia_origen && props.tramite.dependencia_origen.nombre}
                                     />
-                                    <label htmlFor="">{errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}</label>
                                 </Form.Field>
                             </div>
                         </Show>
 
-                        <Show condicion={form.status == 'DERIVADO' && props.tramite.dependencia_destino_id == form.dependencia_destino_id}>
+                        <Show condicion={form.status == 'DERIVADO' && 
+                            (  
+                                props.tramite.dependencia_destino_id == form.dependencia_destino_id  || 
+                                !props.tramite.next && role.level != 'BOSS'
+                            )
+                        }>
                             <div className="col-md-12">
                                 <hr/>
                                     <Form.Field error={errors.user_destino_id && errors.user_destino_id[0] || ""}>

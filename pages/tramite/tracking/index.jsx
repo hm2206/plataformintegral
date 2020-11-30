@@ -9,6 +9,7 @@ import { getTracking } from '../../../services/requests/tramite';
 import TableTracking from '../../../components/tramite/tableTracking';
 import { AppContext } from '../../../contexts/AppContext';
 import { TrackingProvider } from '../../../contexts/tracking/TrackingContext';
+import { BtnFloat } from '../../../components/Utils';
 
 
 const TrackingIndex = ({ success, tracking, query }) => {
@@ -20,6 +21,7 @@ const TrackingIndex = ({ success, tracking, query }) => {
     const [refresh, setRefresh] = useState(false);
     const [current_loading, setCurrentLoading] = useState(false);
     const [current_status, setCurrentStatus] = useState({});
+    const [role, setRole] = useState({});
 
     // primera carga
     useEffect(() => {
@@ -63,13 +65,21 @@ const TrackingIndex = ({ success, tracking, query }) => {
         current_status,
         tracking,
         setRefresh,
-        success
+        success,
+        role, 
+        setRole
     }}>
         <TableTracking 
-            title="Trámite Interno"
+            title="Bandeja de Entrada"
             query={query}
             url={"tracking"}
         />
+        <BtnFloat onClick={(e) => {
+            let { push, pathname } = Router;
+            push({ pathname: `${pathname}/create` });
+        }}>
+            <i className="fas fa-plus"></i>
+        </BtnFloat>
     </TrackingProvider>;
 }
 

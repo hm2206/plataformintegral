@@ -3,7 +3,7 @@ import Router from 'next/router';
 import { Form, Button, Select, Checkbox, Pagination } from 'semantic-ui-react';
 import Show from '../../components/show';
 import { Body, SimpleList } from '../../components/Utils';
-import { authentication } from '../../services/apis';
+import apis from '../../services/apis';
 import Swal from 'sweetalert2';
 import ModalTracking from '../../components/tramite/modalTracking';
 import ModalNextTracking from '../../components/tramite/modalNextTracking';
@@ -15,6 +15,20 @@ import { AppContext } from '../../contexts/AppContext';
 import { TrackingContext } from '../../contexts/tracking/TrackingContext';
 import { SelectAuthEntityDependencia } from '../../components/select/authentication';
 import ModalVerify from './modalVerify';
+import { Confirm } from '../../services/utils';
+
+const api_tramite = apis.tramite;
+
+const roles = {
+    BOSS: {
+        text: "JEFE",
+        className: "badge badge-primary"
+    },
+    SECRETARY: {
+        text: "SECRETARIA",
+        className: "badge badge-warning"
+    }
+};
 
 
 const TableTracking = ({ title, query, onSearch, url }) => {
@@ -23,7 +37,8 @@ const TableTracking = ({ title, query, onSearch, url }) => {
     const app_context = useContext(AppContext)
 
     // obtener tracking
-    const { tracking, current_status, current_loading, setRefresh } = useContext(TrackingContext);
+    const { tracking, current_status, current_loading, setRefresh, role, setRole } = useContext(TrackingContext);
+    const isRole = Object.keys(role || {}).length;
 
     // estados
     const [form, setForm] = useState({});
@@ -35,7 +50,10 @@ const TableTracking = ({ title, query, onSearch, url }) => {
 
     // dependencia predeterminada
     useEffect(() => {
-        if (query.dependencia_id) setForm({ ...form, dependencia_id: query.dependencia_id });
+        if (query.dependencia_id) {
+            getRole();  
+            setForm({ ...form, dependencia_id: query.dependencia_id });
+        }
     }, []);
 
     // vaciar el form
@@ -50,9 +68,11 @@ const TableTracking = ({ title, query, onSearch, url }) => {
         if (app_context.entity_id && query.dependencia_id && query.status) {
             getConfig();
             getSemaforo();
+            getRole();
         } else {
             setConfig({});
             setSemaforo([]);
+            setRole({});
         } 
     }, [app_context.entity_id, query.dependencia_id, query.status]);
 
@@ -179,13 +199,47 @@ const TableTracking = ({ title, query, onSearch, url }) => {
         await push({ pathname, query });
     }
 
+    // obtener role
+    const getRole = async () => {
+        await api_tramite.get('auth/role', { headers: { DependenciaId: query.dependencia_id } })
+            .then(res => {
+                let { role } = res.data;
+                setRole(role);
+            }).catch(err => setRole({}));
+    }
+
+    // activar el trámite
+    const enableNext = async (obj) => {
+        let answer = await Confirm('warning', `¿Deseas continuar con la operación?`, 'Continuar');
+        if (answer) {
+            app_context.fireLoading(true);
+            console.log(tracking);
+            await api_tramite.post(`tracking/${obj.id}/enable`, {}, { headers: { DependenciaId: query.dependencia_id } })
+                .then(res => {
+                    app_context.fireLoading(false);
+                    let { success, message } = res.data;
+                    if (!success) throw new Error(message);
+                    Swal.fire({ icon: 'success', text: message });
+                }).catch(err => {
+                    app_context.fireLoading(false);
+                    Swal.fire({ icon: 'error', text: err.message });
+                })
+        }
+    }
+    
     // render
     return (
         <div className="col-md-12">
             <Body>
                 <div className="car card-fluid">
                     <div className="card-header">
-                        {title}
+                        {title} 
+                        <Show condicion={isRole}>
+                            <i className="fas fa-arrow-right ml-2 mr-2"></i> 
+                            <span className={role && role.level && roles[role.level].className || ""}>
+                                {role && role.level && role.level && roles[role.level].text || ""}
+                            </span>
+                        </Show>
                     </div>
 
                     <div className="card-body">
@@ -396,7 +450,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                 <tr key={`tracking-${tra.id}-${indexT}`} 
                                                     className={`
                                                         ${config && config.value && (((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value) ? 'text-muted bg-disabled' : ''}
-                                                        ${!tra.verify ? ' bg-warning' : ''}
+                                                        ${!tra.next ? ' bg-warning' : ''}
                                                         ${tra.alert ? 'bg-red' : '' }
                                                     `}>
                                                     <td>
@@ -433,37 +487,20 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                                 <i className="fas fa-info"></i> 
                                                             </a>
 
-                                                            <Show condicion={tra.verify}>
-                                                                <Show condicion={getMeta(tra.status).next}>
-                                                                    <Show condicion={current_config && current_config.value  && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > current_config.value))}>
-                                                                        <a className="mr-1 btn btn-sm btn-icon btn-secondary" href={`#${tra.id}`} 
-                                                                            title="Continuar Trámite"
-                                                                            onClick={(e) => getOption(tra, 'NEXT', indexT)}
-                                                                        >
-                                                                            <i className="fas fa-arrow-right"></i> 
-                                                                        </a>
-                                                                    </Show>
-
-                                                                    <Show condicion={!Object.keys(current_config || {}).length}>
-                                                                        <a className="mr-1 btn btn-sm btn-icon btn-secondary" href={`#${tra.id}`} 
-                                                                            title="Continuar Trámite"
-                                                                            onClick={(e) => getOption(tra, 'NEXT', indexT)}
-                                                                        >
-                                                                            <i className="fas fa-arrow-right"></i> 
-                                                                        </a>
-                                                                    </Show>                                                                
-                                                                </Show>
-                                                            </Show>
-
-                                                            <Show condicion={!tra.verify && tra.person_id == app_context.auth.person_id}>
+                                                            <Show condicion={!tra.next && role && role.level == 'BOSS'}>
                                                                 <a className="mr-1 btn btn-sm btn-icon btn-secondary" href={`#${tra.id}`} 
                                                                     title="Verificar trámite"
-                                                                    onClick={(e) => getOption(tra, 'VERIFY', indexT)}
+                                                                    onClick={(e) => enableNext(tra)}
                                                                 >
                                                                     <i className="fas fa-check"></i> 
                                                                 </a>
+                                                            </Show>
 
-                                                                <Show condicion={getMeta(tra.status).next}>
+                                                            <Show condicion={getMeta(tra.status).next}>
+                                                                <Show  condicion={(isRole && role.level == 'BOSS') || 
+                                                                    (isRole && tra.next && role.level == 'SECRETARY') || 
+                                                                    (tra.user_verify_id == app_context.auth.id)
+                                                                }>
                                                                     <Show condicion={current_config && current_config.value  && !((((tracking.page - 1) * tracking.perPage) + (indexT + 1) > current_config.value))}>
                                                                         <a className="mr-1 btn btn-sm btn-icon btn-secondary" href={`#${tra.id}`} 
                                                                             title="Continuar Trámite"
@@ -480,8 +517,8 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                                         >
                                                                             <i className="fas fa-arrow-right"></i> 
                                                                         </a>
-                                                                    </Show>                                                                
-                                                                </Show>
+                                                                    </Show>
+                                                                </Show>                                                                
                                                             </Show>
                                                         </div>
                                                     </td>
@@ -546,7 +583,9 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                 </Show>
                 {/* options info */}
                 <Show condicion={option.key == 'INFO'}>
-                    <ModalInfo tracking={option.tracking}
+                    <ModalInfo 
+                        dependencia_id={query.dependencia_id}
+                        tracking={option.tracking}
                         query={query}
                         isClose={(e) => getOption({}, "")}
                     />
