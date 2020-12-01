@@ -233,6 +233,24 @@ const AddObligacion = (props) => {
                     </Form.Field>
                 </div>
 
+                <Show condicion={form.is_porcentaje}>
+                    <Form.Field error={errors.modo && errors.modo[0] || ""} className="col-md-6 mb-3">
+                        <label htmlFor="">Modo de Descuento</label>
+                        <Select
+                            fluid
+                            placeholder="Seleccionar modo"
+                            name="modo"
+                            value={form.modo || ""}
+                            onChange={(e, obj) => handleInput(obj)}
+                            options={[
+                                {key: "select-bruto", value: 'BRUTO', text: 'Bruto'},
+                                {key: "select-neto", value: 'NETO', text: 'Neto'}
+                            ]}
+                        />
+                        <label htmlFor="">{errors.modo && errors.modo[0] || ""}</label>
+                    </Form.Field>
+                </Show>
+
                 <div className="col-md-6 mb-3">
                     <Form.Field>
                         <label htmlFor="">{form.is_porcentaje ? 'Porcentaje %' : 'Monto'}</label>

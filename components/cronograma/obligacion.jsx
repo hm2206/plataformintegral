@@ -4,7 +4,6 @@ import { Button, Form, Select, Icon, Checkbox } from 'semantic-ui-react';
 import Show from '../show';
 import storage from '../../services/storage.json';
 import Swal from 'sweetalert2';
-import { responsive } from '../../services/storage.json';
 import {  Confirm } from '../../services/utils';
 import Skeleton from 'react-loading-skeleton';
 import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
@@ -291,6 +290,23 @@ const Obligacion = () => {
                                     disabled={!edit}
                                 />
                             </Form.Field>
+
+                            <Show condicion={obl.is_porcentaje}>
+                                <Form.Field className="mb-2">
+                                    <label htmlFor="">Modo de Descuento</label>
+                                    <Select
+                                        name="modo"
+                                        value={obl.modo}
+                                        placeholder="Selecionar Modo"
+                                        disabled={!edit}
+                                        onChange={(e, target) => handleInput(target, index)}
+                                        options={[
+                                            {key: 'monto-bruto', value: 'BRUTO', text: 'Bruto'},
+                                            {key: 'monto-neto', value: 'NETO', text: 'Neto'}
+                                        ]}
+                                    />
+                                </Form.Field>
+                            </Show>
                         </div>
 
                         <Show condicion={obl.is_porcentaje}>
@@ -305,22 +321,21 @@ const Obligacion = () => {
                                         onChange={({ target }) => handleInput(target, index)}
                                     />
                                 </Form.Field>
+
+                                <Show condicion={edit}>
+                                    <Form.Field>
+                                        <label htmlFor="">Opción</label>
+                                        <Button color="red"
+                                            fluid
+                                            onClick={(e) => deleteObligacion(obl.id)}
+                                        >
+                                            <i className="fas fa-trash-alt"></i> Eliminar
+                                        </Button>
+                                    </Form.Field>
+                                </Show>
                             </div>
                         </Show>
                                 
-                        <div className="col-md-10"></div>
-
-                        <Show condicion={edit}>
-                            <div className="col-md-2 col-12 text-right">
-                                <Button color="red"
-                                    fluid
-                                    onClick={(e) => deleteObligacion(obl.id)}
-                                >
-                                    <i className="fas fa-trash-alt"></i> Eliminar
-                                </Button>
-                            </div>
-                        </Show>
-
                         <div className="col-md-12">
                             <hr/>
                         </div>
