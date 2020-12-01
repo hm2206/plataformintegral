@@ -196,6 +196,24 @@ const InformacionCronograma = ({ cronograma, success }) => {
         }
     }
 
+    // sincronizar obligaciones
+    const syncObligaciones = async () => {
+        let response = await Confirm("warning", "¿Desea agregar las obligaciones judiciales a los trabajadores?", "Confirmar");
+        if (response) {
+            app_context.fireLoading(true);
+            await unujobs.post(`cronograma/${cronograma.id}/add_obligacion`, {}, { headers: getHeaders() })
+            .then(async res => {
+                app_context.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+            }).catch(err => {
+                app_context.fireLoading(false);
+                Swal.fire({ icon: 'error', text: err.message })
+            })
+        }
+    }
+
     // procesar cronograma
     const processing = async () => {
         let response = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
@@ -329,6 +347,9 @@ const InformacionCronograma = ({ cronograma, success }) => {
             case 'generate-token':
                 await generateToken();
                 break;
+            case 'obl-massive':
+                await syncObligaciones();
+                break;
             default:
                 break;
         }
@@ -458,6 +479,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
                                                     options={[
                                                         { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
                                                         { key: "remu-massive", text: "Remuneración Masiva", icon: "cart arrow down" },
+                                                        { key: 'obl-massive', text: "Obl. Judiciales Masiva", icon: "cart arrow down" },
                                                         { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
                                                         { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
                                                         { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
