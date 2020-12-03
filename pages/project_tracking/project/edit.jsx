@@ -8,6 +8,7 @@ import atob from 'atob';
 import Router from 'next/router';
 import { Form, Button } from 'semantic-ui-react';
 import Show from '../../../components/show'
+import Swal from 'sweetalert2';
 
 //  componente principal
 const EditProject = ({ success, project }) => {

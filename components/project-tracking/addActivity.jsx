@@ -57,30 +57,30 @@ const TableMeses = ({ rows = 1, onChecked, isHeader = true, refresh = false, def
         let obj_checked = await newCurrentRows.filter(e => e.checked);
         let is_checked = obj_checked.length
         // validar rango de selección
-        if (is_checked) {
-            // rangos de selección
-            range_start = obj_checked[0];
-            range_over = obj_checked[is_checked - 1];
-            // validar selección masiva
-            if (range_start.index < newObj.index && range_over.index > newObj.index) {
-                // deseleccionar
-                for(let initial = newObj.index; initial <= range_over.index; initial++) {
-                    obj_checked.splice(initial, 1);
-                    newCurrentRows[initial].checked = false;
-                }
-                // validar ultimo valor
-                obj_checked.pop();
-                // nuevo ultimo valor
-                range_over = obj_checked[obj_checked.length - 1];
-            } else {
-                // seleccionar masivamente
-                if (range_start.index + 1 < range_over.index) {
-                    for(let initial = range_start.index; initial < range_over.index; initial++) {
-                        newCurrentRows[initial].checked = true;
-                    }
-                }
-            }
-        }
+        // if (is_checked) {
+        //     // rangos de selección
+        //     range_start = obj_checked[0];
+        //     range_over = obj_checked[is_checked - 1];
+        //     // validar selección masiva
+        //     if (range_start.index < newObj.index && range_over.index > newObj.index) {
+        //         // deseleccionar
+        //         for(let initial = newObj.index; initial <= range_over.index; initial++) {
+        //             obj_checked.splice(initial, 1);
+        //             newCurrentRows[initial].checked = false;
+        //         }
+        //         // validar ultimo valor
+        //         obj_checked.pop();
+        //         // nuevo ultimo valor
+        //         range_over = obj_checked[obj_checked.length - 1];
+        //     } else {
+        //         // seleccionar masivamente
+        //         if (range_start.index + 1 < range_over.index) {
+        //             for(let initial = range_start.index; initial < range_over.index; initial++) {
+        //                 newCurrentRows[initial].checked = true;
+        //             }
+        //         }
+        //     }
+        // }
         // disparar checked
         if (typeof onChecked == 'function') onChecked({ count: is_checked, data: obj_checked, start: range_start.value, over: range_over.value });
         setCurrentRows(newCurrentRows);

@@ -213,13 +213,12 @@ const TableTracking = ({ title, query, onSearch, url }) => {
         let answer = await Confirm('warning', `¿Deseas continuar con la operación?`, 'Continuar');
         if (answer) {
             app_context.fireLoading(true);
-            console.log(tracking);
             await api_tramite.post(`tracking/${obj.id}/enable`, {}, { headers: { DependenciaId: query.dependencia_id } })
-                .then(res => {
+                .then(async res => {
                     app_context.fireLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
-                    Swal.fire({ icon: 'success', text: message });
+                    await Swal.fire({ icon: 'success', text: message });
                     handleSearch();
                 }).catch(err => {
                     app_context.fireLoading(false);

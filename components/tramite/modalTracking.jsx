@@ -15,6 +15,7 @@ import CheckCircleOutlineOutlinedIcon from '@material-ui/icons/CheckCircleOutlin
 import CloseIcon from '@material-ui/icons/Close';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import ChatIcon from '@material-ui/icons/Chat';
+import Swal from 'sweetalert2';
 
 
 export default class ModalTracking extends Component
@@ -90,7 +91,8 @@ export default class ModalTracking extends Component
 
     getPrint = async () => {
         this.setState({ loader: true })
-        await tramite.get(`report/tracking/${this.props.tramite.id}`, { responseType: 'blob' })
+        console.log(this.props.tramite);
+        await tramite.get(`report/tracking/${this.props.tramite.tramite_id}`, { responseType: 'blob' })
             .then(({data}) => {
                 let a = document.createElement('a');
                 a.target = '_blank';

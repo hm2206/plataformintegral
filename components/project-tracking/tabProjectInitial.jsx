@@ -25,6 +25,7 @@ const TabActivity = (props) => {
     const [componente, setComponente] = useState(defaultPaginate);
     const isComponent = componente.data.length;
     const [activity, setActivity] = useState(defaultPaginate);
+    const [area, setArea] = useState(defaultPaginate);
     const [option, setOption] = useState("");
     const [current_objective, setCurrentObjective] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
@@ -44,6 +45,21 @@ const TabActivity = (props) => {
             }).catch(err => console.log(err));
         setCurrentLoading(false);
     }
+
+    // obtener areas
+    const getAreas = async (nextPage = 1, up = false) => {
+        setCurrentLoading(true);
+        await projectTracking.get(`project/${project.id}/area?page=${nextPage}`)
+            .then(({ data }) => {
+                setArea({ 
+                    last_page: data.areas.last_page,
+                    total: data.areas.total,
+                    data: up ? [...area.data, ...data.areas.data] : data.areas.data,
+                    page: data.areas.page
+                });
+            }).catch(err => console.log(err));
+        setCurrentLoading(false);
+    }
     
     // seleccionar objectivo
     const selectObjective = async (obj, index, option) => {
@@ -54,7 +70,10 @@ const TabActivity = (props) => {
 
     // primera carga
     useEffect(() => {
-        if (project.id) getComponentes();
+        if (project.id) {
+            getComponentes();
+            getAreas();
+        }
     }, []);
 
     // render
@@ -74,9 +93,19 @@ const TabActivity = (props) => {
                     </tr>
                     <tr>
                         <th width="20%">Palabras claves: </th>
-                        <td>{project.keywords && project.keywords.length && project.keywords.map((k, indexK) => 
-                            <small className="ml-2 badge badge-dark" key={`keyworks-${indexK}`}>{k}</small>    
-                        )}</td>
+                        <td>
+                            {project.keywords && project.keywords.length && project.keywords.map((k, indexK) => 
+                                <small className="ml-2 badge badge-dark" key={`keyworks-${indexK}`}>{k}</small>    
+                            )}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="20%">Línea de Investigación: </th>
+                        <td>
+                            {area && area.data.length && area.data.map((a, indexA) => 
+                                <small className="ml-2 badge badge-warning" key={`linea-de-investigacion-${indexA}`}>{a.description}</small>    
+                            )}
+                        </td>
                     </tr>
                 </table>
                 <hr/>
