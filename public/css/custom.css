@@ -274,3 +274,9 @@
 .opacity-05 {
     opacity: 0.5;
 }
+
+
+/* borders de color*/
+.bt-red {
+    border-top: 4px solid #c62828;
+}

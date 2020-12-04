@@ -453,7 +453,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                                                     className={`
                                                         ${config && config.value && (((tracking.page - 1) * tracking.perPage) + (indexT + 1) > config.value) ? 'text-muted bg-disabled' : ''}
                                                         ${tra.user_verify_id != app_context.auth.id && !tra.next ? ' bg-warning' : ''}
-                                                        ${tra.alert ? 'bg-red' : '' }
+                                                        ${tra.alert ? 'bt-red' : '' }
                                                     `}>
                                                     <td>
                                                         <span className={`tile tile-circle bg-${getCurrentDay(tra.updated_at)}`.toLowerCase()}>
