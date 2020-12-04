@@ -236,6 +236,25 @@ const SelectCargo = ({ id = "id", text = "descripcion", name, value, onChange, r
             />
 } 
 
+
+const SelectTypeCategoria = ({ id = "id", text = "descripcion", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+                api={unujobs}
+                url={`type_categoria`}
+                id={`select-type_categoria-${id}-${name}`}
+                value={id}
+                text={text}
+                obj="type_categorias"
+                name={name}
+                valueChange={`${value || ""}`}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Tip. Categoría"
+                refresh={refresh}
+                execute={true}
+                disabled={disabled}
+            />
+} 
+
 const SelectTypeCategoriaCargo = ({ id = "id", type_categoria_id, text = "descripcion", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
                 api={unujobs}
@@ -463,4 +482,5 @@ export {
     SelectInfoTypeAportacion,
     SelectInfoTypeDescuento,
     SelectTypeCategoriaTypeDescuento,
+    SelectTypeCategoria
 };

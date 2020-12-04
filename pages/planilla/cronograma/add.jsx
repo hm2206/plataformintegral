@@ -7,7 +7,7 @@ import Router from 'next/router';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import atob from 'atob';
-import { SelectCronogramaCargo, SelectCronogramaTypeCategoria } from '../../../components/select/cronograma';
+import { SelectCargo, SelectCargoTypeCategoria } from '../../../components/select/cronograma';
 import { AUTHENTICATE } from '../../../services/auth';
 import { AppContext } from '../../../contexts/AppContext';
 import Skeletor from 'react-loading-skeleton';
@@ -191,8 +191,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
 
                                 <div className="col-md-3 mb-1">
                                     <Form.Field>
-                                        <SelectCronogramaCargo
-                                            cronograma_id={cronograma.id}
+                                        <SelectCargo
                                             name="cargo_id"
                                             onChange={(e, obj) => handleInput(obj)}
                                             value={form.cargo_id || ""}
@@ -203,12 +202,15 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
 
                                 <div className="col-md-3 mb-1">
                                     <Form.Field>
-                                        <SelectCronogramaTypeCategoria
+                                        <SelectCargoTypeCategoria
+                                            execute={false}
+                                            cargo_id={form.cargo_id}
+                                            refresh={form.cargo_id}
                                             name="type_categoria_id"
                                             cronograma_id={cronograma.id}
                                             onChange={(e, obj) => handleInput(obj)}
                                             value={form.type_categoria_id || ""}
-                                            disabled={current_loading}
+                                            disabled={current_loading || !form.cargo_id}
                                         />
                                     </Form.Field>
                                 </div>

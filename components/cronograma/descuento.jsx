@@ -33,7 +33,7 @@ const PlaceholderDescuento = () => (
 const Descuento = () => {
 
     // cronograma
-    const { edit, setEdit, loading, send, historial, setBlock, setSend, cronograma, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
+    const { edit, setEdit, loading, send, historial, setBlock, setSend, cronograma, setIsEditable, setIsUpdatable, setRefresh } = useContext(CronogramaContext);
     const [total_bruto, setTotalBruto] = useState(0);
     const [total_desct, setTotalDesct] = useState(0);
     const [base, setBase] = useState(0);
@@ -139,6 +139,7 @@ const Descuento = () => {
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 setEdit(false);
+                setRefresh(true);
             }).catch(err => {
                 app_context.fireLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })

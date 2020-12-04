@@ -200,7 +200,7 @@ const Remuneracion = () => {
                             <input type="number"
                                 step="any" 
                                 value={obj.monto || ""}
-                                disabled={!obj.edit || !historial.is_pay ? true : !edit}
+                                disabled={!obj.edit || !edit}
                                 onChange={({target}) => handleMonto(index, target.value, obj)}
                                 min="0"
                             />
