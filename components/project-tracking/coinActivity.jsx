@@ -8,6 +8,7 @@ import { projectTracking } from '../../services/apis';
 import AddGasto from './addGasto';
 import Swal from 'sweetalert2';
 import Show from '../show';
+import currencyFormatter from 'currency-formatter';
 
 
 // agregar actividad
@@ -131,7 +132,7 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                                     Actividad {objective.index + 1}.{indexA + 1} : {act.title}
                                                 </th>
                                                 <td className="text-right">
-                                                    {act.total}
+                                                    {currencyFormatter.format(act.total, { code: 'PEN' })}
                                                 </td>
                                                 <td width="5%" className="text-center">
                                                     <Button size="mini"
@@ -154,9 +155,9 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                                         <th>{gas.description}</th>
                                                         <th className="text-center">{gas && gas.presupuesto && gas.presupuesto.ext_pptto || ""}</th>
                                                         <th className="text-center">{gas && gas.medida && gas.medida.name_short || ""}</th>
-                                                        <th className="text-right">{gas.monto}</th>
+                                                        <th className="text-right">{currencyFormatter.format(gas.monto, { code: 'PEN' })}</th>
                                                         <th className="text-center">{gas.cantidad}</th>
-                                                        <th className="text-right">{gas.total}</th>
+                                                        <th className="text-right">{currencyFormatter.format(gas.total, { code: 'PEN' })}</th>
                                                         <td width="5%" className="text-center">
                                                         </td>
                                                     </tr>     

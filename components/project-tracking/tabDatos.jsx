@@ -3,6 +3,7 @@ import { Button } from 'semantic-ui-react';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import moment from 'moment';
 import { projectTracking } from '../../services/apis';
+import currencyFormatter from 'currency-formatter';
 
 const TabTeam = () => {
 
@@ -38,7 +39,7 @@ const TabTeam = () => {
     // render
     return (
     <Fragment>
-        <div className="table-responsive">
+        <div className="table-responsive font-13">
             <table className="table mb-4">
                 <thead >
                     <tr>
@@ -90,18 +91,18 @@ const TabTeam = () => {
                         {financiamiento.map((f, indexF) => 
                             <tr key={`financiamiento-${indexF}`}>
                                 <th className="text-center" title={f.name}>{f.ext_pptto}</th>
-                                <th className="text-right">{f.monetario}</th>
-                                <th className="text-right">{f.no_monetario}</th>
-                                <th className="text-right">{f.total}</th>
+                                <th className="text-right">{currencyFormatter.format(f.monetario, { code: 'PEN' })}</th>
+                                <th className="text-right">{currencyFormatter.format(f.no_monetario, { code: 'PEN' })}</th>
+                                <th className="text-right">{currencyFormatter.format(f.total, { code: 'PEN' })}</th>
                                 <th className="text-right">{f.porcentaje_monetario}%</th>
                                 <th className="text-right">{f.porcentaje_no_monetario}%</th>
                             </tr>
                         )}
                         <tr>
                             <th className="text-center">Total</th>
-                            <th className="text-right">{total_monetario}</th>
-                            <th className="text-right">{total_no_monetario}</th>
-                            <th className="text-right">{total}</th>
+                            <th className="text-right">{currencyFormatter.format(total_monetario, { code: 'PEN' })}</th>
+                            <th className="text-right">{currencyFormatter.format(total_no_monetario, { code: 'PEN' })}</th>
+                            <th className="text-right">{currencyFormatter.format(total, { code: 'PEN' })}</th>
                             <th className="text-right">{total_porcentaje_monetario}%</th>
                             <th className="text-right">{total_porcentaje_no_monetario}%</th>
                         </tr>

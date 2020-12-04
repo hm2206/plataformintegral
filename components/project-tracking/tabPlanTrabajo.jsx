@@ -4,6 +4,33 @@ import { projectTracking } from '../../services/apis';
 import moment from 'moment';
 import Show from '../show';
 
+const situacions = {
+    PENDIENTE: {
+        text: "Pendiente/Registrado",
+        color: "#263238"
+    },
+    ENVIADO: {
+        text: "Enviado para revisión",
+        color: "#0d47a1"
+    },
+    OBSERVADO: {
+        text: "Observado",
+        color: "#ff9800"
+    },
+    APROBADO: {
+        text: "Aprobado",
+        color: "#66bb6a"
+    },
+    RESERVA: {
+        text: "Aprobado con Reservas",
+        color: "#26c6da"
+    },
+    DESAPROBADO: {
+        text: "Desaprobado",
+        color: "#d50000"
+    }
+}
+
 const TabPlanTrabajo = () => {
 
     const { project } = useContext(ProjectContext);
@@ -36,7 +63,7 @@ const TabPlanTrabajo = () => {
     // render
     return (
     <Fragment>
-        <div className="table-responsive">
+        <div className="table-responsive font-13">
             <table className="table table-bordered table-striped">
                 <thead>
                     <tr>
@@ -62,7 +89,7 @@ const TabPlanTrabajo = () => {
                             <td className="text-center">{moment(pla.date_start).format('DD/MM/YYYY')}</td>  
                             <td className="text-center">{moment(pla.date_over).format('DD/MM/YYYY')}</td> 
                             <td className="text-center"></td> 
-                            <td className="text-center"></td> 
+                            <td className="text-center">{pla.state}</td> 
                             <td className="text-center"></td> 
                             <td className="text-center"></td> 
                             <td className="text-center"></td> 
@@ -75,6 +102,18 @@ const TabPlanTrabajo = () => {
                     </Show>
                 </tbody>
             </table>
+        </div>
+
+        <div className="mt-5">
+            <b className="font-13"><u>Situación del Informe</u></b>
+            <div className="font-12">
+                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['PENDIENTE'].color }}></div> {situacions['PENDIENTE'].text}</div>
+                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['ENVIADO'].color }}></div> {situacions['ENVIADO'].text}</div>
+                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['OBSERVADO'].color }}></div> {situacions['OBSERVADO'].text}</div>
+                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['APROBADO'].color }}></div> {situacions['APROBADO'].text}</div>
+                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['RESERVA'].color }}></div> {situacions['RESERVA'].text}</div>
+                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['DESAPROBADO'].color }}></div> {situacions['DESAPROBADO'].text}</div>
+            </div>
         </div>
     </Fragment>)
 }

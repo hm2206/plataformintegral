@@ -6,6 +6,7 @@ import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import AddActivity from './addActivity';
 import CoinActivity from './coinActivity';
 import AddComponente from './addComponente';
+import currencyFormatter from 'currency-formatter';
 
 
 const defaultPaginate = {
@@ -89,12 +90,12 @@ const TabActivity = (props) => {
                     </tr>
                     <tr>
                         <th width="20%">Monto Inicial: </th>
-                        <td>{project.monto}</td>
+                        <td>{currencyFormatter.format(project.monto, { code: 'PEN' })}</td>
                     </tr>
                     <tr>
                         <th width="20%">Palabras claves: </th>
                         <td>
-                            {project.keywords && project.keywords.length && project.keywords.map((k, indexK) => 
+                            {project.keywords && project.keywords.length && project.keywords.map((k, indexK) =>    
                                 <small className="ml-2 badge badge-dark" key={`keyworks-${indexK}`}>{k}</small>    
                             )}
                         </td>
@@ -136,7 +137,7 @@ const TabActivity = (props) => {
                                 <b>{indexC + 1}.</b> {c.title}
                                 </td>
                                 <td>
-                                    {c.total}
+                                    {currencyFormatter.format(c.total, { code: 'PEN' })}
                                 </td>
                                 <td>
                                     <Button size="mini"
