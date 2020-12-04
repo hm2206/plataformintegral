@@ -9,6 +9,7 @@ import Show from '../../../components/show';
 import AssignPerson from '../../../components/authentication/user/assignPerson';
 import { tipo_documento } from '../../../services/storage.json';
 import {  AUTHENTICATE } from '../../../services/auth';
+import { SelectAfp, SelectBanco } from '../../../components/select/cronograma';
 
 
 export default class CreateWork extends Component
@@ -198,8 +199,7 @@ export default class CreateWork extends Component
                                     <div className="col-md-6 mb-2">
                                         <Form.Field>
                                             <label htmlFor="">Tip. Banco <b className="text-red">*</b></label>
-                                                <Select
-                                                    options={parseOptions(this.state.bancos, ['sel-banco', "", 'Select. Tip. Banco'], ['id', 'id', 'nombre'])}
+                                                <SelectBanco
                                                     name="banco_id"
                                                     value={form.banco_id || ""}
                                                     onChange={(e, obj) => this.handleInput(obj)}
@@ -222,8 +222,7 @@ export default class CreateWork extends Component
                                     <div className="col-md-6 mb-2">
                                         <Form.Field>
                                             <label htmlFor="">Tip. AFP <b className="text-red">*</b></label>
-                                            <Select
-                                                options={parseOptions(this.state.afps, ['sel-afp', "", 'Select. Tip. AFP'], ['id', 'id', 'descripcion'])}
+                                            <SelectAfp
                                                 name="afp_id"
                                                 value={form.afp_id}
                                                 onChange={(e, obj) => this.handleInput(obj)}
