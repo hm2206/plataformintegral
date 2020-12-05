@@ -9,6 +9,7 @@ import AddGasto from './addGasto';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import currencyFormatter from 'currency-formatter';
+import { SelectPresupuesto, SelectMedida } from '../select/project_tracking';
 
 
 // agregar actividad
@@ -69,6 +70,91 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
         newObj.total += gasto.total;
         newActivity.data = newData;
         setActivity(newActivity);
+    }
+
+    // habilitar edicion
+    const toggleEdit = (index, obj) => {
+        let newGastos = JSON.parse(JSON.stringify(gastos));
+        obj.edit = obj.edit ? false : true;
+        // validar datos
+        if (obj.edit) {
+            obj.current_monto = obj.monto;
+            obj.current_cantidad = obj.cantidad;
+            obj.current_total = obj.total;
+        } else {
+            obj.monto = obj.current_monto;
+            obj.cantidad = obj.current_cantidad;
+            obj.total = obj.current_total;
+        }
+        // setting gastos
+        newGastos[index] = obj;
+        setGastos(newGastos);
+    }
+
+    // modificar gasto
+    const handleEditGasto = (index, obj, { name, value }) => {
+        obj[name] = value;
+        let newGasto = JSON.parse(JSON.stringify(gastos));
+        newGasto[index] = obj;
+        setGastos(newGasto);
+    }
+
+    // eliminar gasto
+    const handleDeleteGasto = async (index, obj, indexParent, parent) => {
+        let answer = await Confirm('warning', '¿Estas seguro en eliminar el gasto?');
+        if (answer) {
+            app_context.fireLoading(true);
+            await projectTracking.post(`gasto/${obj.id}/delete`, obj)
+                .then(res => {
+                    app_context.fireLoading(false);
+                    let { message } = res.data;
+                    Swal.fire({ icon: 'success', text: message });
+                    let newGastos = JSON.parse(JSON.stringify(gastos));
+                    newGastos.splice(index, 1);
+                    setGastos(newGastos);
+                    // actualizar actividad
+                    let newActividad = JSON.parse(JSON.stringify(activity));
+                    parent.total = parseFloat(parent.total) - parseFloat(obj.total);
+                    newActividad.data[indexParent] = parent;
+                    setActivity(newActividad);
+                }).catch(err => {
+                    try {
+                        app_context.fireLoading(false);
+                        let { message, errors } = err.response.data;
+                        if (!errors) throw new Error(message);
+                        Swal.fire({ icon: 'warning', text: message });
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: error.message });
+                    }
+                });
+        }
+    }
+
+    // actuliazar gasto
+    const updateGasto = async (index, obj) => {
+        let answer = await Confirm('warning', '¿Estas seguro en actualizar el gasto?')
+        if (answer) {
+            app_context.fireLoading(true);
+            await projectTracking.post(`gasto/${obj.id}/update`, obj)
+                .then(res => {
+                    app_context.fireLoading(false);
+                    let { message, gasto } = res.data;
+                    Swal.fire({ icon: 'success', text: message });
+                    obj = gasto;
+                    let newGastos = JSON.parse(JSON.stringify(gastos));
+                    newGastos[index] = obj;
+                    setGastos(newGastos);
+                }).catch(err => {
+                    try {
+                        app_context.fireLoading(false);
+                        let { message, errors } = err.response.data;
+                        if (!errors) throw new Error(message);
+                        Swal.fire({ icon: 'warning', text: message });
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: error.message });
+                    }
+                });
+        }
     }
 
     // cancelar edicion
@@ -151,14 +237,96 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                             {/* body */}
                                             <Show condicion={act.id == current_activity.id}>
                                                 {gastos.map((gas, indexG) => 
-                                                    <tr key={`gastos-${gas.id}-activity-${act.id}-index-${indexG}`} className="font-12">
+                                                    <tr key={`gastos-${gas.id}-activity-${act.id}-index-${indexG}`} 
+                                                        className={`font-12 ${gas.detalle ? 'text-success' : ''}`}
+                                                    >
                                                         <th>{gas.description}</th>
-                                                        <th className="text-center">{gas && gas.presupuesto && gas.presupuesto.ext_pptto || ""}</th>
-                                                        <th className="text-center">{gas && gas.medida && gas.medida.name_short || ""}</th>
-                                                        <th className="text-right">{currencyFormatter.format(gas.monto, { code: 'PEN' })}</th>
-                                                        <th className="text-center">{gas.cantidad}</th>
+                                                        <th className="text-center">
+                                                            <Show condicion={gas.edit}
+                                                                predeterminado={gas && gas.presupuesto && gas.presupuesto.ext_pptto || ""}
+                                                            >
+                                                                <SelectPresupuesto
+                                                                    text="ext_pptto"
+                                                                    execute={true}
+                                                                    name="presupuesto_id"
+                                                                    value={gas.presupuesto_id}
+                                                                    onChange={(e, obj) => handleEditGasto(indexG, gas, obj)}
+                                                                />
+                                                            </Show>
+                                                        </th>
+                                                        <th className="text-center">
+                                                            <Show condicion={gas.edit}
+                                                                predeterminado={gas && gas.medida && gas.medida.name_short || ""}
+                                                            >
+                                                                <SelectMedida
+                                                                    execute={true}
+                                                                    name="medida_id"
+                                                                    value={gas.medida_id}
+                                                                    onChange={(e, obj) => handleEditGasto(indexG, gas, obj)}
+                                                                />
+                                                            </Show>
+                                                        </th>
+                                                        <th className="text-right">
+                                                            <Show condicion={gas.edit}
+                                                                predeterminado={currencyFormatter.format(gas.monto, { code: 'PEN' })}
+                                                            >
+                                                                <input type="number"
+                                                                    name="monto"
+                                                                    step="any"
+                                                                    value={gas.monto || ""}
+                                                                    onChange={(e) => handleEditGasto(indexG, gas, e.target)}
+                                                                />
+                                                            </Show>
+                                                        </th>
+                                                        <th className="text-center">
+                                                            <Show condicion={gas.edit}
+                                                                predeterminado={gas.cantidad}
+                                                            >
+                                                                <input type="number"
+                                                                    name="cantidad"
+                                                                    step="any"
+                                                                    value={gas.cantidad || ""}
+                                                                    onChange={(e) => handleEditGasto(indexG, gas, e.target)}
+                                                                />
+                                                            </Show>
+                                                        </th>
                                                         <th className="text-right">{currencyFormatter.format(gas.total, { code: 'PEN' })}</th>
                                                         <td width="5%" className="text-center">
+                                                            <div className="btn-group">
+                                                                <Show condicion={!gas.detalle}
+                                                                    predeterminado={
+                                                                        <button className="btn btn-sm btn-outline-dark">
+                                                                            <i className="fas fa-file-alt"></i>
+                                                                        </button>
+                                                                    }
+                                                                >
+                                                                    <button className={`btn btn-sm btn-outline-${gas.edit ? 'red' : 'primary'}`}
+                                                                        onClick={(e) => toggleEdit(indexG, gas)}
+                                                                    >
+                                                                        <i className={`fas fa-${gas.edit ? 'times' : 'edit'}`}></i>
+                                                                    </button>
+
+                                                                    <Show condicion={!gas.edit} 
+                                                                        predeterminado={
+                                                                            <button className="btn btn-sm btn-outline-success"
+                                                                                onClick={(e) => updateGasto(indexG, gas)}
+                                                                            >
+                                                                                <i className="fas fa-save"></i>
+                                                                            </button>
+                                                                        }
+                                                                    >
+                                                                        <button className="btn btn-sm btn-outline-dark">
+                                                                            <i className="fas fa-upload"></i>
+                                                                        </button>
+
+                                                                        <button className="btn btn-sm btn-outline-red"
+                                                                            onClick={(e) => handleDeleteGasto(indexG, gas, indexA, act)}
+                                                                        >
+                                                                            <i className="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </Show>
+                                                                </Show>
+                                                            </div>
                                                         </td>
                                                     </tr>     
                                                 )}

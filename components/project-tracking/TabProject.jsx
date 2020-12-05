@@ -61,6 +61,13 @@ const TabProject = (props) => {
                         <TabMeta/>
                     </Tab.Pane> 
             },
+            { 
+                menuItem: {key: 'meta_project', icon: 'info circle', content: 'Seguimiento', disabled: false }, 
+                render: () => 
+                    <Tab.Pane style={styles}>
+                        <TabMeta/>
+                    </Tab.Pane> 
+            },
     ];
 
     return <Tab panes={panes} 

@@ -280,3 +280,11 @@
 .bt-red {
     border-top: 4px solid #c62828;
 }
+
+
+/* btn outline */
+
+.btn-outline-red {
+    color:#DB2828!important;
+    border-color:#DB2828!important;
+}

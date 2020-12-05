@@ -74,13 +74,13 @@ const SelectRol = ({ id = "id", name, value, onChange, refresh = false, disabled
             />
 }
 
-const SelectPresupuesto = ({ id = "id", principal = 0, name, value, onChange, refresh = false, disabled = false, execute = false }) => {
+const SelectPresupuesto = ({ id = "id", principal = 0, name, value, onChange, refresh = false, disabled = false, execute = false, text = "description" }) => {
     return <SelectBase 
                 api={projectTracking}
                 url={`presupuesto?principal=${principal}`}
                 id={`select-presupuesto-${id}-${name}`}
                 value={id}
-                text="description"
+                text={text}
                 obj="presupuestos"
                 name={name}
                 valueChange={value || ""}
