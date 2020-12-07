@@ -6,6 +6,8 @@ import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import AddGasto from './addGasto';
+import AddDetalle from './addDetalle';
+import ListDetalle from './listDetalle';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import currencyFormatter from 'currency-formatter';
@@ -24,6 +26,7 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
     // estados
     const [activity, setActivity] = useState({ page: 1, last_page: 0, total: 0, data: [] });
     const [current_activity, setCurrentActivity] = useState({});
+    const [current_gasto, setCurrentGasto] = useState({});
     const [old, setOld] = useState({ page: 1, last_page: 0, total: 0, data: [] });
     const [cancel, setCancel] = useState(false);
     const [edit, setEdit] = useState(false);
@@ -157,6 +160,12 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
         }
     }
 
+    // actualizar los detalles del gasto
+    const onUpdateGasto = async (detalle) => {
+        setOption("");
+        getGastos();
+    }
+
     // cancelar edicion
     useEffect(() => {
         if (cancel) {
@@ -238,9 +247,14 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                             <Show condicion={act.id == current_activity.id}>
                                                 {gastos.map((gas, indexG) => 
                                                     <tr key={`gastos-${gas.id}-activity-${act.id}-index-${indexG}`} 
-                                                        className={`font-12 ${gas.detalle ? 'text-success' : ''}`}
+                                                        className={`font-12 ${gas.detalles && gas.detalles.length ? 'text-success' : ''}`}
                                                     >
-                                                        <th>{gas.description}</th>
+                                                        <th>
+                                                            {gas.description}
+                                                            <Show condicion={gas.detalles && gas.detalles.length}>
+                                                                <small title="comprobantes" className="badge badge-sm badge-warning ml-2">{gas.detalles && gas.detalles.length}</small>
+                                                            </Show>
+                                                        </th>
                                                         <th className="text-center">
                                                             <Show condicion={gas.edit}
                                                                 predeterminado={gas && gas.presupuesto && gas.presupuesto.ext_pptto || ""}
@@ -293,38 +307,49 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                                         <th className="text-right">{currencyFormatter.format(gas.total, { code: 'PEN' })}</th>
                                                         <td width="5%" className="text-center">
                                                             <div className="btn-group">
-                                                                <Show condicion={!gas.detalle}
+                                                                <Show condicion={gas.detalles && gas.detalles.length}
                                                                     predeterminado={
-                                                                        <button className="btn btn-sm btn-outline-dark">
-                                                                            <i className="fas fa-file-alt"></i>
+                                                                        <button className={`btn btn-sm btn-outline-${gas.edit ? 'red' : 'primary'}`}
+                                                                            onClick={(e) => toggleEdit(indexG, gas)}
+                                                                        >
+                                                                            <i className={`fas fa-${gas.edit ? 'times' : 'edit'}`}></i>
                                                                         </button>
                                                                     }
                                                                 >
-                                                                    <button className={`btn btn-sm btn-outline-${gas.edit ? 'red' : 'primary'}`}
-                                                                        onClick={(e) => toggleEdit(indexG, gas)}
+                                                                    <button className="btn btn-sm btn-primary"
+                                                                        title="Mostrar comprobantes"
+                                                                        onClick={(e) => {
+                                                                            setOption("list_detalle")
+                                                                            setCurrentGasto(gas)
+                                                                        }}
                                                                     >
-                                                                        <i className={`fas fa-${gas.edit ? 'times' : 'edit'}`}></i>
+                                                                        <i className="far fa-file-pdf"></i>
+                                                                    </button>
+                                                                </Show>
+
+                                                                <Show condicion={!gas.edit} 
+                                                                    predeterminado={
+                                                                        <button className="btn btn-sm btn-outline-success"
+                                                                            onClick={(e) => updateGasto(indexG, gas)}
+                                                                        >
+                                                                            <i className="fas fa-save"></i>
+                                                                        </button>
+                                                                    }
+                                                                >
+                                                                    <button className="btn btn-sm btn-outline-dark"
+                                                                        onClick={(e) => {
+                                                                            setOption("add_detalle");
+                                                                            setCurrentGasto(gas)
+                                                                        }}
+                                                                    >
+                                                                        <i className="fas fa-upload"></i>
                                                                     </button>
 
-                                                                    <Show condicion={!gas.edit} 
-                                                                        predeterminado={
-                                                                            <button className="btn btn-sm btn-outline-success"
-                                                                                onClick={(e) => updateGasto(indexG, gas)}
-                                                                            >
-                                                                                <i className="fas fa-save"></i>
-                                                                            </button>
-                                                                        }
+                                                                    <button className="btn btn-sm btn-outline-red"
+                                                                        onClick={(e) => handleDeleteGasto(indexG, gas, indexA, act)}
                                                                     >
-                                                                        <button className="btn btn-sm btn-outline-dark">
-                                                                            <i className="fas fa-upload"></i>
-                                                                        </button>
-
-                                                                        <button className="btn btn-sm btn-outline-red"
-                                                                            onClick={(e) => handleDeleteGasto(indexG, gas, indexA, act)}
-                                                                        >
-                                                                            <i className="fas fa-trash"></i>
-                                                                        </button>
-                                                                    </Show>
+                                                                        <i className="fas fa-trash"></i>
+                                                                    </button>
                                                                 </Show>
                                                             </div>
                                                         </td>
@@ -358,6 +383,21 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                     activity={current_activity}
                     isClose={() => setOption("")}
                     onCreate={onCreateGasto}
+                />
+            </Show>
+
+            <Show condicion={option == 'add_detalle'}>
+                <AddDetalle
+                    gasto={current_gasto}
+                    isClose={() => setOption("")}
+                    onCreate={onUpdateGasto}
+                />
+            </Show>
+
+            <Show condicion={option == 'list_detalle'}>
+                <ListDetalle
+                    gasto={current_gasto}
+                    isClose={() => setOption("")}
                 />
             </Show>
         </Modal>

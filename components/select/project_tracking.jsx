@@ -110,6 +110,42 @@ const SelectMedida = ({ id = "id", name, value, onChange, refresh = false, disab
             />
 }
 
+const SelectDocumentType = ({ id = "id", name, value, onChange, refresh = false, disabled = false, execute = true }) => {
+    return <SelectBase 
+                api={projectTracking}
+                url={`document_type`}
+                id={`select-document_type-${id}-${name}`}
+                value={id}
+                text="informacion"
+                obj="document_types"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Tip. Documento"
+                refresh={refresh}
+                execute={execute}
+                disabled={disabled}
+            />
+}
+
+const SelectMedioPago = ({ id = "id", name, value, onChange, refresh = false, disabled = false, execute = true }) => {
+    return <SelectBase 
+                api={projectTracking}
+                url={`medio_pago`}
+                id={`select-medio_pago-${id}-${name}`}
+                value={id}
+                text="name"
+                obj="medio_pagos"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Medio de Pago"
+                refresh={refresh}
+                execute={execute}
+                disabled={disabled}
+            />
+}
+
 // exportables
 export { 
     SelectProject,
@@ -118,4 +154,6 @@ export {
     SelectRol,
     SelectPresupuesto,
     SelectMedida,
+    SelectDocumentType,
+    SelectMedioPago
 };

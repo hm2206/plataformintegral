@@ -8,6 +8,7 @@ import { projectTracking } from '../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import moment from 'moment';
+import AddMetaToActivity from './addMetaToActivity';
 
 // componente de tabla de meses seún duración
 const TableMeses = ({ rows = 1, onChecked, isHeader = true, refresh = false, defaultPosition = {}, onReady, dateInitial = moment().format('YYYY-MM-DD') }) => {
@@ -358,6 +359,16 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+
+                    <div className="col-md-12">
+                        <hr/>
+                    </div>
+
+                    <div className="col-md-12">
+                        <AddMetaToActivity
+                            objective={objective}
+                        />
                     </div>
 
                     <Show condicion={edit}>

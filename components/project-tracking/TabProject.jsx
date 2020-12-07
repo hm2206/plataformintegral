@@ -7,6 +7,7 @@ import TabPlanTrabajo from './tabPlanTrabajo';
 import TabSaldoFinanciero from './tabSaldoFinanciero';
 import TabMeta from './tabMetas';
 import TabProjectInitial from './tabProjectInitial';
+import TabTracking from './tabTracking';
 
 const TabProject = (props) => {
 
@@ -54,18 +55,18 @@ const TabProject = (props) => {
                         <TabSaldoFinanciero/>
                     </Tab.Pane> 
             },
+            // { 
+            //     menuItem: {key: 'meta_project', icon: 'info circle', content: 'Metas de Proyecto', disabled: false }, 
+            //     render: () => 
+            //         <Tab.Pane style={styles}>
+            //             <TabMeta/>
+            //         </Tab.Pane> 
+            // },
             { 
-                menuItem: {key: 'meta_project', icon: 'info circle', content: 'Metas de Proyecto', disabled: false }, 
+                menuItem: {key: 'tracking_project', icon: 'info circle', content: 'Seguimiento', disabled: false }, 
                 render: () => 
                     <Tab.Pane style={styles}>
-                        <TabMeta/>
-                    </Tab.Pane> 
-            },
-            { 
-                menuItem: {key: 'meta_project', icon: 'info circle', content: 'Seguimiento', disabled: false }, 
-                render: () => 
-                    <Tab.Pane style={styles}>
-                        <TabMeta/>
+                        <TabTracking/>
                     </Tab.Pane> 
             },
     ];

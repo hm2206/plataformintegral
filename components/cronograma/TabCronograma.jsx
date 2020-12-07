@@ -13,7 +13,7 @@ import Detallado from './detallado';
 
 const TabCronograma = (props) => {
 
-    const { edit, active, block, setActive, loading, setIsEditable } = useContext(CronogramaContext);
+    const { edit, active, block, setActive, loading, setIsEditable, cronograma } = useContext(CronogramaContext);
 
     const onTabChange = (e, { activeIndex }) => {
         setActive(activeIndex);
@@ -47,49 +47,52 @@ const TabCronograma = (props) => {
                     </Tab.Pane>
                 )
             },
-            {
-                menuItem: {key: 'descuento', icon: 'arrow down cart', content: 'Descuentos', disabled: edit || loading || block },
-                render: () => (
-                    <Tab.Pane style={styles}>
-                        <Descuento/>
-                    </Tab.Pane>
-                )
-            },
-            {
-                menuItem: {key: 'detallado', icon: 'briefcase', content: 'Más descuentos', disabled: edit || loading || block },
-                render: () => (
-                    <Tab.Pane style={styles}>
-                        <Detallado/>
-                    </Tab.Pane>
-                )
-            },
-            {
-                menuItem: {key: 'obligacion', icon: 'balance scale', content: 'Obligaciones', disabled: edit || loading || block },
-                render: () => (
-                    <Tab.Pane style={styles}>
-                        <Obligacion/>
-                    </Tab.Pane>
-                )
-            },
-            {
-                menuItem: {key: 'sindicato', icon: 'users', content: 'Afiliación', disabled: edit || loading || block },
-                render: () => (
-                    <Tab.Pane style={styles}>
-                        <Sindicato/>
-                    </Tab.Pane>
-                )
-            },
-            {
-                menuItem: {key: 'aportacion', icon: 'certificate', content: 'Aporte Empleador', disabled: edit || loading || block },
-                render: () => (
-                    <Tab.Pane style={styles}>
-                        <Aportacion/>
-                    </Tab.Pane>
-                )
-            }
     ];
 
-    return <Tab panes={panes} 
+    const otherPanes = [
+        {
+            menuItem: {key: 'descuento', icon: 'arrow down cart', content: 'Descuentos', disabled: edit || loading || block },
+            render: () => (
+                <Tab.Pane style={styles}>
+                    <Descuento/>
+                </Tab.Pane>
+            )
+        },
+        {
+            menuItem: {key: 'detallado', icon: 'briefcase', content: 'Más descuentos', disabled: edit || loading || block },
+            render: () => (
+                <Tab.Pane style={styles}>
+                    <Detallado/>
+                </Tab.Pane>
+            )
+        },
+        {
+            menuItem: {key: 'obligacion', icon: 'balance scale', content: 'Obligaciones', disabled: edit || loading || block },
+            render: () => (
+                <Tab.Pane style={styles}>
+                    <Obligacion/>
+                </Tab.Pane>
+            )
+        },
+        {
+            menuItem: {key: 'sindicato', icon: 'users', content: 'Afiliación', disabled: edit || loading || block },
+            render: () => (
+                <Tab.Pane style={styles}>
+                    <Sindicato/>
+                </Tab.Pane>
+            )
+        },
+        {
+            menuItem: {key: 'aportacion', icon: 'certificate', content: 'Aporte Empleador', disabled: edit || loading || block },
+            render: () => (
+                <Tab.Pane style={styles}>
+                    <Aportacion/>
+                </Tab.Pane>
+            )
+        }
+    ]
+
+    return <Tab panes={cronograma.remanente ? panes : [...panes, ...otherPanes]} 
                 menu={props.menu} 
                 activeIndex={active} 
                 onTabChange={onTabChange} 
