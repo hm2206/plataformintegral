@@ -38,20 +38,20 @@ const SelectProjectPlanTrabajo = ({ id = "id", project_id, name, value, onChange
             />
 }
 
-const SelectPlanTrabajoObjective = ({ id = "id", plan_trabajo_id, name, value, onChange, refresh = false, disabled = false }) => {
+const SelectProjectObjective = ({ id = "id", project_id, name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
                 api={projectTracking}
-                url={`plan_trabajo/${plan_trabajo_id}/objective`}
-                id={`select-plan_trabajo-objective-${id}-${name}`}
+                url={`project/${project_id}/objective`}
+                id={`select-project-objective-${id}-${name}`}
                 value={id}
                 text="title"
                 obj="objectives"
                 name={name}
                 valueChange={value || ""}
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-                placeholder="Seleccionar Componente"
+                placeholder="Seleccionar Objectivo"
                 refresh={refresh}
-                execute={false}
+                execute={true}
                 disabled={disabled}
             />
 }
@@ -146,14 +146,34 @@ const SelectMedioPago = ({ id = "id", name, value, onChange, refresh = false, di
             />
 }
 
+const SelectPlanTrabajoActivity = ({ id = "id", name, value, plan_trabajo_id, onChange, refresh = false, disabled = false, execute = true, except = 0, verify = 0, objective_id = "" }) => {
+    return <SelectBase 
+                api={projectTracking}
+                url={`plan_trabajo/${plan_trabajo_id}/activity?except=${except}&verify=${verify}&objective_id=${objective_id}`}
+                id={`select-medio_pago-${id}-${name}`}
+                value={id}
+                text="title"
+                obj="actividades"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Medio de Pago"
+                refresh={refresh}
+                execute={execute}
+                disabled={disabled}
+            />
+}
+
+
 // exportables
 export { 
     SelectProject,
     SelectProjectPlanTrabajo,
-    SelectPlanTrabajoObjective,
+    SelectProjectObjective,
     SelectRol,
     SelectPresupuesto,
     SelectMedida,
     SelectDocumentType,
-    SelectMedioPago
+    SelectMedioPago,
+    SelectPlanTrabajoActivity
 };

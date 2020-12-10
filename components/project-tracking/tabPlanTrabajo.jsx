@@ -3,6 +3,7 @@ import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import { projectTracking } from '../../services/apis';
 import moment from 'moment';
 import Show from '../show';
+import InfoPlanTrabajo from './infoPlanTrabajo';
 
 const situacions = {
     PENDIENTE: {
@@ -38,6 +39,8 @@ const TabPlanTrabajo = () => {
     // stados
     const [current_loading, setCurrentLoading] = useState(true);
     const [plan_trabajo, setPlanTrabajo] = useState({ page: 1, lastPage: 0, data: [] });
+    const [option, setOption] = useState("");
+    const [current_plan_trabajo, setCurrentPlanTrabajo] = useState({});
 
     // obtener plan de trabajo
     const getPlanTrabajo = async () => {
@@ -71,6 +74,7 @@ const TabPlanTrabajo = () => {
                         <th className="text-center" colSpan="2">Fechas</th>
                         <th className="text-center" colSpan="3">Informe</th>
                         <th className="text-center" colSpan="2">Reporte</th>
+                        <th className="text-center" rowSpan="2">Ver</th>
                     </tr>
                     <tr>
                         <th className="text-center">Inicio</th>
@@ -93,6 +97,16 @@ const TabPlanTrabajo = () => {
                             <td className="text-center"></td> 
                             <td className="text-center"></td> 
                             <td className="text-center"></td> 
+                            <td className="text-center">
+                                <button className="btn btn-sm btn-outline-primary"
+                                    onClick={(e) => {
+                                        setOption('info')
+                                        setCurrentPlanTrabajo(pla)
+                                    }}
+                                >
+                                    <i className="fas fa-eye"></i>
+                                </button>
+                            </td> 
                         </tr>
                     )}
                     <Show condicion={!current_loading && plan_trabajo.data && !plan_trabajo.data.length}>
@@ -115,6 +129,13 @@ const TabPlanTrabajo = () => {
                 <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['DESAPROBADO'].color }}></div> {situacions['DESAPROBADO'].text}</div>
             </div>
         </div>
+
+        <Show condicion={option == 'info'}>
+            <InfoPlanTrabajo
+                plan_trabajo={current_plan_trabajo}
+                isClose={(e) => setOption("")}
+            />
+        </Show>
     </Fragment>)
 }
 

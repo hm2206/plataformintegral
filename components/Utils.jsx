@@ -62,7 +62,8 @@ const DropZone = ({ id, name, onChange, error = false, multiple = true, children
             onChange={async (e) => {
               let { name, files } = e.target;
               if (typeof onChange == 'function') await onChange({ name, files });
-              document.getElementById(id).value = null;
+              let inputNode = document.getElementById(id)
+              if(inputNode) inputNode.value = null;
             }}
             hidden
         />

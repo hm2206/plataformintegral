@@ -112,7 +112,7 @@ const ListDetalle = (props) => {
                             <input type="text" 
                                 className="uppercase"
                                 readOnly 
-                                value={`${gasto && gasto.presupuesto && gasto.presupuesto.name} - ${gasto && gasto.presupuesto && gasto.presupuesto.ext_pptto}`}
+                                value={`${gasto && gasto.presupuesto} - ${gasto && gasto.ext_pptto}`}
                             />
                         </Form.Field>
                     </div>
@@ -134,7 +134,7 @@ const ListDetalle = (props) => {
                             <input type="text" 
                                 className="uppercase"
                                 readOnly 
-                                value={`${gasto && gasto.medida && gasto.medida.name}`}
+                                value={`${gasto && gasto.medida || ""}`}
                             />
                         </Form.Field>
                     </div>
@@ -211,15 +211,19 @@ const ListDetalle = (props) => {
                                         <div>
                                             <b>Monto: </b> {currencyFormatter.format(det.monto, { code: 'PEN' })}
                                         </div>
+
+                                        <div>
+                                            <b>Descripción: </b> {det.description}
+                                        </div>
                                     </div>
                                     <div className="col-md-2 text-right">
                                         <div className="btn-group">
-                                            {/* <button className="btn btn-sm btn-outline-primary">
-                                                <i className="fas fa-eye"></i>
-                                            </button> */}
-                                            <button className="btn btn-sm btn-outline-red">
+                                            <a className="btn btn-sm btn-outline-red"
+                                                href={det.file && det.file.url || ""}
+                                                target="_blank"
+                                            >
                                                 <i className="fas fa-file-pdf"></i>
-                                            </button>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>

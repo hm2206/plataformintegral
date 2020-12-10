@@ -4,8 +4,6 @@ import Router from 'next/router';
 import TabDatos from './tabDatos';
 import TabTeam from './tabTeam';
 import TabPlanTrabajo from './tabPlanTrabajo';
-import TabSaldoFinanciero from './tabSaldoFinanciero';
-import TabMeta from './tabMetas';
 import TabProjectInitial from './tabProjectInitial';
 import TabTracking from './tabTracking';
 
@@ -48,20 +46,6 @@ const TabProject = (props) => {
                         <TabPlanTrabajo/>
                     </Tab.Pane> 
             },
-            { 
-                menuItem: {key: 'saldo_financiero', icon: 'info circle', content: 'Saldo Financiero', disabled: false }, 
-                render: () => 
-                    <Tab.Pane style={styles}>
-                        <TabSaldoFinanciero/>
-                    </Tab.Pane> 
-            },
-            // { 
-            //     menuItem: {key: 'meta_project', icon: 'info circle', content: 'Metas de Proyecto', disabled: false }, 
-            //     render: () => 
-            //         <Tab.Pane style={styles}>
-            //             <TabMeta/>
-            //         </Tab.Pane> 
-            // },
             { 
                 menuItem: {key: 'tracking_project', icon: 'info circle', content: 'Seguimiento', disabled: false }, 
                 render: () => 

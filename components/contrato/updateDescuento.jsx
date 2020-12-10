@@ -32,6 +32,14 @@ const PlaceholderConfigs = () => {
     )
 }
 
+
+const defaultData = {
+    page: 0,
+    total: 0,
+    lastPage: 1,
+    data: []
+};
+
 // principal
 const UpdateDescuento = ({ info, edit, onUpdate }) => {
 
@@ -41,7 +49,7 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
     const [option, setOption] = useState("");
-    const [configs, setConfigs] = useState([]);
+    const [configs, setConfigs] = useState(defaultData);
     const [old, setOld] = useState([]);
     const [form, setForm] = useState({});
     const [reload, setReload] = useState(false);
@@ -52,15 +60,17 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
         await unujobs.get(`info/${info.id}/type_descuento?page=${nextPage}`)
             .then(async res => {
                 let { type_descuentos } = res.data;
-                setConfigs(add ? [...configs, ...type_descuentos.data] : type_descuentos.data);
-                setOld(JSON.parse(JSON.stringify(add ? [...configs, ...type_descuentos.data] : type_descuentos.data)));
-                // validar más peticiones
-                if (type_descuentos.last_page >= nextPage + 1) await getConfig(nextPage + 1, true);
+                let payload = {
+                    ...type_descuentos,
+                    lastPage: type_descuentos.last_page,
+                    page: type_descuentos.current_page,
+                    data: add ? [...configs.data, ...type_descuentos.data] : type_descuentos.data
+                }
+                // setting datos
+                setConfigs(payload);
+                setOld(JSON.parse(JSON.stringify(payload)));
             })
-            .catch(err => {
-                setConfigs([]);
-                setOld([]);
-            });
+            .catch(err => console.log(err));
         setCurrentLoading(false);
     }
 
@@ -154,7 +164,7 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
 
     // cacelar edición
     useEffect(() => {
-        if (!edit) setConfigs(JSON.parse(JSON.stringify(old)))
+        // if (!edit) setConfigs(JSON.parse(JSON.stringify(old)))
     }, [edit]);
 
     // primera carga
@@ -215,9 +225,9 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
                             </div>
                         </Show>
 
-                        {configs.map((obj, index) => 
+                        {configs && configs.data.map((obj, index) => 
                                 <div className="col-md-6 mb-2" 
-                                    key={`config-item-descuento-${obj.id}`}
+                                    key={`config-item-descuento-${index}`}
                                 >
                                     <div className="card-body">
                                         <div className="row">
@@ -258,13 +268,28 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
                             <PlaceholderConfigs/>
                         </Show>
 
-                        <Show condicion={!configs.length && !current_loading}>
+                        <Show condicion={!configs.data.length && !current_loading}>
                             <div className="col-md-12">
                                 <div className="text-center mt-4 mb-4">
                                     <b className="text-muted">No hay registros disponibles</b>
                                 </div>
                             </div>
                         </Show>
+
+                        <div className="col-md-12">
+                            <div className="row justify-content-center">
+                                <div className="col-md-12">
+                                    <div className="text-center">
+                                        <Button
+                                            disabled={current_loading || !(configs.lastPage >= configs.page + 1)}
+                                            onClick={(e) => getConfig(configs.page + 1, true)}
+                                        >
+                                            <i className="fas fa-arrow-down"></i> Obtener más datos
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

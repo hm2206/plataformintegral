@@ -46,6 +46,7 @@ const  DiscountTypeCategoria = ({ success, query, pathname, type_categoria }) =>
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const [categorias, setCategorias] = useState([]);
+    const [current_page, setCurrentPage] = useState(1);
     const [current_loading, setCurrentLoading] = useState(false);
     const [block, setBlock] = useState(false);
     const [edit, setEdit] = useState(false);
@@ -62,22 +63,30 @@ const  DiscountTypeCategoria = ({ success, query, pathname, type_categoria }) =>
     }
 
     // obtener categorias 
-    const getCategorias = async (nextPage = 1, add = false) => {
+    const getCategorias = async (add = false) => {
         setCurrentLoading(true);
-        await unujobs.get(`type_categoria/${type_categoria.id}/type_descuento/${form.planilla_id}`)
+        await unujobs.get(`type_categoria/${type_categoria.id}/type_descuento/${form.planilla_id}?page=${current_page}`)
             .then(async res => {
                 let { success, message, type_descuentos } = res.data;
                 if (!success) throw new Error(message);
                 setCategorias(add ? [...categorias, ...type_descuentos.data] : type_descuentos.data);
-                if (type_descuentos.last_page >= nextPage + 1) await getCategorias(nextPage + 1, true);
+                if (type_descuentos.last_page >= current_page + 1) setCurrentPage(current_page + 1);
             }).catch(err => console.log(err.message));
             setCurrentLoading(false);
     }
 
     // cambio de planilla
     useEffect(() => {
-        if (form.planilla_id) getCategorias();
+        if (form.planilla_id) {
+            setCategorias([]);
+            getCategorias();
+        }
     }, [form.planilla_id]);
+
+    // obtener categorias al cambiar de page
+    useEffect(() => {
+        if (current_page > 1) getCategorias(true);
+    }, [current_page]);
 
     const handleInputCategoria = ({ value }, obj, index) => {
         let newCategorias = JSON.parse(JSON.stringify(categorias));

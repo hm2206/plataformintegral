@@ -9,6 +9,7 @@ import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import Swal from 'sweetalert2';
 import currencyFormatter from 'currency-formatter';
+import { DropZone } from '../Utils';
 
 const AddDetalle = (props) => {
 
@@ -38,8 +39,13 @@ const AddDetalle = (props) => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
         if (answer) {
             app_context.fireLoading(true);
-            let datos = Object.assign({}, form);
-            datos.gasto_id = gasto.id;
+            let datos = new FormData();
+            for(let attr in form) {
+                datos.append(attr, form[attr]);
+            }
+            // add gasto_id
+            datos.append('gasto_id', gasto.id);
+            // request
             await projectTracking.post(`detalle`, datos)
                 .then(res => {
                     app_context.fireLoading(false);
@@ -61,6 +67,12 @@ const AddDetalle = (props) => {
         }
     }
 
+    // agregar file
+    const handleFile = ({ name, files }) => {
+        let isFile = files.length;
+        if (isFile) setForm({ ...form, file: files[0] });
+    }
+
     // render
     return (
         <Modal
@@ -77,7 +89,7 @@ const AddDetalle = (props) => {
                             <input type="text" 
                                 className="uppercase"
                                 readOnly 
-                                value={`${gasto && gasto.presupuesto && gasto.presupuesto.name} - ${gasto && gasto.presupuesto && gasto.presupuesto.ext_pptto}`}
+                                value={`${gasto && gasto.presupuesto} - ${gasto && gasto.ext_pptto}`}
                             />
                         </Form.Field>
                     </div>
@@ -99,18 +111,18 @@ const AddDetalle = (props) => {
                             <input type="text" 
                                 className="uppercase"
                                 readOnly 
-                                value={`${gasto && gasto.medida && gasto.medida.name}`}
+                                value={`${gasto && gasto.medida}`}
                             />
                         </Form.Field>
                     </div>
 
                     <div className="col-md-6 mb-3">
                         <Form.Field>
-                            <label htmlFor="">Total de gasto programado</label>
+                            <label htmlFor="">Saldo disponible</label>
                             <input type="text" 
                                 className="uppercase"
                                 readOnly 
-                                value={`${gasto && currencyFormatter.format(gasto.total, { code: 'PEN' })}`}
+                                value={`${gasto && currencyFormatter.format(gasto.saldo, { code: 'PEN' })}`}
                             />
                         </Form.Field>
                     </div>
@@ -255,7 +267,35 @@ const AddDetalle = (props) => {
                     </div>
 
                     <div className="col-md-12">
-                        Hola
+                        <Show condicion={form.file}
+                            predeterminado={
+                                <DropZone
+                                    id="file-datos"
+                                    name="file"
+                                    multiple={false}
+                                    title="Seleccionar archivo PDF"
+                                    accept="application/pdf"
+                                    onChange={handleFile}
+                                />
+                            }
+                        >
+                            <div className="card">
+                                <div className="card-body">
+                                    <div className="row">
+                                        <div className="col-md-10">
+                                            <b>{form.file && form.file.name || ""}</b>
+                                        </div>
+                                        <div className="col-md-2 text-center">
+                                            <Button color="red"
+                                                onClick={(e) => setForm({ ...form, file: null })}
+                                            >
+                                                <i className="fas fa-trash"></i>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Show>
                     </div>
 
                     <div className="col-md-12 text-right">

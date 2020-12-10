@@ -5,6 +5,7 @@ import { Confirm } from '../../services/utils';
 import { AppContext } from '../../contexts/AppContext';
 import { projectTracking } from '../../services/apis';
 import Swal from 'sweetalert2';
+import Show from '../show';
 
 const AddMetaToActivity = ({ objective }) => {
 
@@ -58,6 +59,55 @@ const AddMetaToActivity = ({ objective }) => {
                 if (metas.last_page > nextPage + 1) await getMetas(nextPage + 1, true);
             }).catch(err => console.log(err));
     }
+    
+    // habilitar editar meta
+    const handleEdit = async (obj, index) => {
+        let newMetas = JSON.parse(JSON.stringify(current_meta));
+        obj._edit = obj._edit ? false : true;
+        if (obj._edit) {
+            obj.current_description = obj.description;
+        } else {
+            obj.description = obj.current_description;
+        }
+        // setting
+        newMetas[index] = obj;
+        setCurrentMeta(newMetas);
+    }
+
+    // modificar meta
+    const handleInput = (obj, index, { name, value }) => {
+        let newMetas = JSON.parse(JSON.stringify(current_meta));
+        obj[name] = value;
+        newMetas[index] = obj;
+        setCurrentMeta(newMetas);
+    }
+
+    // actualizar datos
+    const updateMeta = async (obj, index) => {
+        let answer = await Confirm('warning', `¿Deseas actualizar el indicador?`, 'Actualizar');
+        if (answer) {
+            app_context.fireLoading(true);
+            await projectTracking.post(`meta/${obj.id}/update`, obj)
+                .then(res => {
+                    app_context.fireLoading(false);
+                    let { success, message, meta } = res.data;
+                    if (!success) throw new Error(message);
+                    Swal.fire({ icon: 'success', text: message });
+                    let newMetas = JSON.parse(JSON.stringify(current_meta));
+                    newMetas[index] = meta;
+                    setCurrentMeta(newMetas);
+                }).catch(err => {
+                    try {
+                        app_context.fireLoading(false);
+                        let { message, errors } = res.response.data;
+                        if (!errors) throw new Error(message);
+                        Swal.fire({ icon: 'warning', text: message });
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: error.message || err.message });
+                    }
+                });
+        }
+    }
 
     // primera carga
     useEffect(() => {
@@ -93,15 +143,48 @@ const AddMetaToActivity = ({ objective }) => {
                         </Button>
                     </td>
                 </tr>
-                {current_meta.map(m =>
-                    <tr>
-                        <td colSpan="2">
-                            <textarea 
-                                disabled
-                                name="description" 
-                                rows="4"
-                                value={m.description}
-                            />
+                {current_meta.map((m, indexM) =>
+                    <tr key={`meta-indicador-${indexM}`}>
+                        <td>
+                            <Show condicion={m._edit}
+                                predeterminado={<b>{m.description}</b>}
+                            >
+                                <textarea 
+                                    name="description" 
+                                    rows="4"
+                                    value={m.description}
+                                    onChange={({target}) => handleInput(m, indexM, target)}
+                                />
+                            </Show>
+                        </td>
+                        <td>
+                            <div className="btn-group text-center">
+                                <Show condicion={!m._edit}>
+                                    <button className="btn btn-sm btn-outline-primary"
+                                        onClick={(e) => handleEdit(m, indexM)}
+                                    >
+                                        <i className="fas fa-edit"></i>
+                                    </button>
+                                    
+                                    <button className="btn btn-sm btn-outline-red">
+                                        <i className="fas fa-trash"></i>
+                                    </button>
+                                </Show>
+
+                                <Show condicion={m._edit}>
+                                    <button className="btn btn-sm btn-outline-success"
+                                        onClick={(e) => updateMeta(m, indexM)}
+                                    >
+                                        <i className="fas fa-save"></i>
+                                    </button>
+                                    
+                                    <button className="btn btn-sm btn-outline-red"
+                                        onClick={(e) => handleEdit(m, indexM)}
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </Show>
+                            </div>
                         </td>
                     </tr>    
                 )}
