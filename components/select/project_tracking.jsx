@@ -5,7 +5,7 @@ import { projectTracking } from '../../services/apis';
 const SelectProject = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
                 api={projectTracking}
-                url={`project?state=1`}
+                url={`project?state[]=START&state[]=EXECUTE`}
                 id={`select-project-${id}-${name}`}
                 value={id}
                 text="code"
@@ -157,7 +157,7 @@ const SelectPlanTrabajoActivity = ({ id = "id", name, value, plan_trabajo_id, on
                 name={name}
                 valueChange={value || ""}
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-                placeholder="Seleccionar Medio de Pago"
+                placeholder="Seleccionar Actividad"
                 refresh={refresh}
                 execute={execute}
                 disabled={disabled}

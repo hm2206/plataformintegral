@@ -86,18 +86,22 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh }) => {
                                                         <th className="bg-white text-center">{gas.medida}</th>
                                                         <th className="bg-white text-right">{currencyFormatter.format(gas.monto, { code: 'PEN' })}</th>
                                                         <th className="bg-white text-center">{gas.cantidad}</th>
-                                                        <th className={`bg-white text-right ${gas.total < gas.ejecutado ? 'text-red' : ''}`}>{currencyFormatter.format(gas.total, { code: 'PEN' })}</th>
+                                                        <th className={`bg-white text-right ${gas.total < gas.ejecutado ? 'text-red' : ''} ${gas.total == gas.ejecutado ? 'text-success' : ''}`}>
+                                                            {currencyFormatter.format(gas.total, { code: 'PEN' })}
+                                                        </th>
                                                         <th className="bg-white text-right">{currencyFormatter.format(gas.ejecutado, { code: 'PEN' })}</th>
                                                         <th className="bg-white text-center">
                                                             <div className="btn-group">
-                                                                <button className="btn btn-sm btn-outline-dark"
-                                                                    onClick={(e) => {
-                                                                        setCurrentGasto(gas)    
-                                                                        setOption("add_detalle")
-                                                                    }}
-                                                                >
-                                                                    <i className="fas fa-upload"></i>
-                                                                </button>
+                                                                <Show condicion={!act.verify}>
+                                                                    <button className="btn btn-sm btn-outline-dark"
+                                                                        onClick={(e) => {
+                                                                            setCurrentGasto(gas)    
+                                                                            setOption("add_detalle")
+                                                                        }}
+                                                                    >
+                                                                        <i className="fas fa-upload"></i>
+                                                                    </button>
+                                                                </Show>
 
                                                                 <Show condicion={gas.ejecutado}
                                                                     predeterminado={

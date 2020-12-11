@@ -4,10 +4,27 @@ import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import moment from 'moment';
 import { projectTracking } from '../../services/apis';
 import currencyFormatter from 'currency-formatter';
+import Show from '../show';
+
+const states = {
+    START: {
+        text: 'INICIO',
+        color: 'primary'
+    },
+    EXECUTE: {
+        text: 'EJECUCIÓN',
+        color: 'success'
+    },
+    OVER: {
+        text: 'CERRADO',
+        color: 'danger'
+    }
+};
 
 const TabTeam = () => {
 
     const { project } = useContext(ProjectContext);
+    const isProject = Object.keys(project || {}).length;
 
     // estados
     const [financiamiento, setFinanciamiento] = useState([]);
@@ -109,6 +126,10 @@ const TabTeam = () => {
                     </tbody>
                 </table>
             </div>
+
+            <Show condicion={isProject}>
+                <b className="font-15">Estado del Proyecto: <span className={`badge badge-${states[project.state].color}`}>{states[project.state].text}</span></b>
+            </Show>
         </div>
     </Fragment>)
 }

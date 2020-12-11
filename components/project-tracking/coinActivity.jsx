@@ -6,8 +6,6 @@ import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import AddGasto from './addGasto';
-import AddDetalle from './addDetalle';
-import ListDetalle from './listDetalle';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import currencyFormatter from 'currency-formatter';
@@ -133,7 +131,7 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
         }
     }
 
-    // actuliazar gasto
+    // actualizar gasto
     const updateGasto = async (index, obj) => {
         let answer = await Confirm('warning', '¿Estas seguro en actualizar el gasto?')
         if (answer) {
@@ -155,6 +153,33 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                         Swal.fire({ icon: 'warning', text: message });
                     } catch (error) {
                         Swal.fire({ icon: 'error', text: error.message });
+                    }
+                });
+        }
+    }
+
+    // verificar actividad
+    const handleVerify = async (index, obj) => {
+        let answer = await Confirm('warning', '¿Estas seguro en verificar la actividad?')
+        if (answer) {
+            app_context.fireLoading(true);
+            await projectTracking.post(`activity/${obj.id}/verify`)
+                .then(res => {
+                    app_context.fireLoading(false);
+                    let { message } = res.data;
+                    Swal.fire({ icon: 'success', text: message });
+                    let newActivity = Object.assign({}, activity);
+                    obj.verify = 1;
+                    newActivity[index] = obj;
+                    setActivity(newActivity);
+                }).catch(err => {
+                    try {
+                        app_context.fireLoading(false);
+                        let { message, errors } = err.response.data;
+                        if (!errors) throw new Error(message);
+                        Swal.fire({ icon: 'warning', text: message });
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: error.message || err.message });
                     }
                 });
         }
@@ -224,17 +249,32 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                                     {currencyFormatter.format(act.total, { code: 'PEN' })}
                                                 </td>
                                                 <td width="5%" className="text-center">
-                                                    <Button size="mini"
-                                                        basic
-                                                        color="green"
-                                                        disabled={current_loading}
-                                                        onClick={(e) => {
-                                                            setCurrentActivity({ ...act, index: indexA })
-                                                            setOption("add_gasto")
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-plus"></i>
-                                                    </Button>
+                                                    <div className="btn-group">
+                                                        <Show condicion={!act.verify}
+                                                            predeterminado={
+                                                                <span className="badge badge-primary">
+                                                                    Verificado
+                                                                </span>
+                                                            }
+                                                        >
+                                                            <button className="btn btn-sm btn-success"
+                                                                disabled={current_loading}
+                                                                onClick={(e) => {
+                                                                    setCurrentActivity({ ...act, index: indexA })
+                                                                    setOption("add_gasto")
+                                                                }}
+                                                            >
+                                                                <i className="fas fa-plus"></i>
+                                                            </button>
+
+                                                            <button className="btn btn-sm btn-warning"
+                                                                disabled={current_loading}
+                                                                onClick={(e) => handleVerify(indexA, act)}
+                                                            >
+                                                                <i className="fas fa-check"></i>
+                                                            </button>
+                                                        </Show>
+                                                    </div>
                                                 </td>
                                             </tr>  
                                             {/* body */}
@@ -298,27 +338,35 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                                         <th className="text-right">{currencyFormatter.format(gas.total, { code: 'PEN' })}</th>
                                                         <td width="5%" className="text-center">
                                                             <div className="btn-group">
-                                                                <button className={`btn btn-sm btn-outline-${gas.edit ? 'red' : 'primary'}`}
-                                                                    onClick={(e) => toggleEdit(indexG, gas)}
-                                                                >
-                                                                    <i className={`fas fa-${gas.edit ? 'times' : 'edit'}`}></i>
-                                                                </button>
-
-                                                                <Show condicion={!gas.edit} 
+                                                                <Show condicion={!act.verify}
                                                                     predeterminado={
-                                                                        <button className="btn btn-sm btn-outline-success"
-                                                                            onClick={(e) => updateGasto(indexG, gas)}
-                                                                        >
-                                                                            <i className="fas fa-save"></i>
-                                                                        </button>
+                                                                        <span className="badge badge-success">
+                                                                            <i className="fas fa-check"></i>
+                                                                        </span>
                                                                     }
                                                                 >
-                                                                    <Show condicion={gas.detalles && !gas.detalles.length}>
-                                                                        <button className="btn btn-sm btn-outline-red"
-                                                                            onClick={(e) => handleDeleteGasto(indexG, gas, indexA, act)}
-                                                                        >
-                                                                            <i className="fas fa-trash"></i>
-                                                                        </button>
+                                                                    <button className={`btn btn-sm btn-outline-${gas.edit ? 'red' : 'primary'}`}
+                                                                        onClick={(e) => toggleEdit(indexG, gas)}
+                                                                    >
+                                                                        <i className={`fas fa-${gas.edit ? 'times' : 'edit'}`}></i>
+                                                                    </button>
+
+                                                                    <Show condicion={!gas.edit} 
+                                                                        predeterminado={
+                                                                            <button className="btn btn-sm btn-outline-success"
+                                                                                onClick={(e) => updateGasto(indexG, gas)}
+                                                                            >
+                                                                                <i className="fas fa-save"></i>
+                                                                            </button>
+                                                                        }
+                                                                    >
+                                                                        <Show condicion={gas.detalles && !gas.detalles.length}>
+                                                                            <button className="btn btn-sm btn-outline-red"
+                                                                                onClick={(e) => handleDeleteGasto(indexG, gas, indexA, act)}
+                                                                            >
+                                                                                <i className="fas fa-trash"></i>
+                                                                            </button>
+                                                                        </Show>
                                                                     </Show>
                                                                 </Show>
                                                             </div>

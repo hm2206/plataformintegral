@@ -26,7 +26,7 @@ const TabProject = (props) => {
                     </Tab.Pane> 
             },
             { 
-                menuItem: {key: 'team', icon: 'info circle', content: 'Proyecto Inicial', disabled: false }, 
+                menuItem: {key: 'team', icon: 'info circle', content: 'Proyecto', disabled: false }, 
                 render: () => 
                     <Tab.Pane style={styles}>
                         <TabProjectInitial/>
