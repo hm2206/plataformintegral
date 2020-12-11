@@ -171,6 +171,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
+                findHistorial();
             }).catch(err => {
                 app_context.fireLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
@@ -189,6 +190,25 @@ const InformacionCronograma = ({ cronograma, success }) => {
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
+                findHistorial();
+            }).catch(err => {
+                app_context.fireLoading(false);
+                Swal.fire({ icon: 'error', text: err.message })
+            })
+        }
+    }
+
+    const syncDescuentos = async () => {
+        let response = await Confirm("warning", "¿Desea agregar los descuentos a los trabajadores?", "Confirmar");
+        if (response) {
+            app_context.fireLoading(true);
+            await unujobs.post(`cronograma/${cronograma.id}/add_descuento`, {}, { headers: getHeaders() })
+            .then(async res => {
+                app_context.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                findHistorial();
             }).catch(err => {
                 app_context.fireLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
@@ -338,6 +358,12 @@ const InformacionCronograma = ({ cronograma, success }) => {
             case 'sync-aportacion':
                 await syncAportacion();
                 break;
+            case 'sync-descuento':
+                await syncDescuentos();
+                break;
+            case 'sync-obligacion':
+                await syncObligaciones();
+                break;
             case 'processing':
                 await processing();
                 break;
@@ -346,9 +372,6 @@ const InformacionCronograma = ({ cronograma, success }) => {
                 break;
             case 'generate-token':
                 await generateToken();
-                break;
-            case 'obl-massive':
-                await syncObligaciones();
                 break;
             default:
                 break;
@@ -479,9 +502,10 @@ const InformacionCronograma = ({ cronograma, success }) => {
                                                     options={[
                                                         { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
                                                         { key: "remu-massive", text: "Remuneración Masiva", icon: "cart arrow down" },
-                                                        { key: 'obl-massive', text: "Obl. Judiciales Masiva", icon: "cart arrow down" },
                                                         { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
+                                                        { key: 'sync-descuento', text: "Agregar Descuentos", icon: "arrow arrow down" },
                                                         { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
+                                                        { key: 'sync-obligacion', text: "Agregar Obl. Judiciales", icon: "arrow arrow down" },
                                                         { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
                                                         { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
                                                         { key: "change-meta", text: "Cambio de Metas", icon: "exchange" },
