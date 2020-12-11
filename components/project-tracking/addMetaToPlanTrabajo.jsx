@@ -36,6 +36,7 @@ const addMetaToPlanTrabajo = ({ plan_trabajo }) => {
                     if (!success) throw new Error(message);
                     Swal.fire({ icon: 'success', text: message });
                     setDescription("");
+                    getMetas();
                 }).catch(err => {
                     try {
                         app_context.fireLoading(false);

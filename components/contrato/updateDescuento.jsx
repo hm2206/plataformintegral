@@ -33,13 +33,6 @@ const PlaceholderConfigs = () => {
 }
 
 
-const defaultData = {
-    page: 0,
-    total: 0,
-    lastPage: 1,
-    data: []
-};
-
 // principal
 const UpdateDescuento = ({ info, edit, onUpdate }) => {
 
@@ -49,26 +42,23 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
     const [option, setOption] = useState("");
-    const [configs, setConfigs] = useState(defaultData);
+    const [configs, setConfigs] = useState([]);
+    const [current_page, setCurrentPage] = useState(1)
     const [old, setOld] = useState([]);
     const [form, setForm] = useState({});
     const [reload, setReload] = useState(false);
 
     // obtener las configuraciones de pago
-    const getConfig = async (nextPage = 1, add = false) => {
+    const getConfig = async (add = false) => {
         setCurrentLoading(true);
-        await unujobs.get(`info/${info.id}/type_descuento?page=${nextPage}`)
+        await unujobs.get(`info/${info.id}/type_descuento?page=${current_page}`)
             .then(async res => {
                 let { type_descuentos } = res.data;
-                let payload = {
-                    ...type_descuentos,
-                    lastPage: type_descuentos.last_page,
-                    page: type_descuentos.current_page,
-                    data: add ? [...configs.data, ...type_descuentos.data] : type_descuentos.data
-                }
+                let payload = add ? [...configs, ...type_descuentos.data] : type_descuentos.data;
                 // setting datos
                 setConfigs(payload);
                 setOld(JSON.parse(JSON.stringify(payload)));
+                if (type_descuentos.last_page >= type_descuentos.current_page + 1) setCurrentPage(type_descuentos.current_page + 1);
             })
             .catch(err => console.log(err));
         setCurrentLoading(false);
@@ -164,13 +154,18 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
 
     // cacelar edición
     useEffect(() => {
-        // if (!edit) setConfigs(JSON.parse(JSON.stringify(old)))
+        if (!edit) setConfigs(JSON.parse(JSON.stringify(old)))
     }, [edit]);
 
     // primera carga
     useEffect(() => {
         getConfig();
     }, []);
+
+    // next page
+    useEffect(() => {
+        if (current_page > 1) getConfig(true)
+    }, [current_page]);
 
     // render
     return (
@@ -225,7 +220,7 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
                             </div>
                         </Show>
 
-                        {configs && configs.data.map((obj, index) => 
+                        {configs.map((obj, index) => 
                                 <div className="col-md-6 mb-2" 
                                     key={`config-item-descuento-${index}`}
                                 >
@@ -268,28 +263,13 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
                             <PlaceholderConfigs/>
                         </Show>
 
-                        <Show condicion={!configs.data.length && !current_loading}>
+                        <Show condicion={!configs.length && !current_loading}>
                             <div className="col-md-12">
                                 <div className="text-center mt-4 mb-4">
                                     <b className="text-muted">No hay registros disponibles</b>
                                 </div>
                             </div>
                         </Show>
-
-                        <div className="col-md-12">
-                            <div className="row justify-content-center">
-                                <div className="col-md-12">
-                                    <div className="text-center">
-                                        <Button
-                                            disabled={current_loading || !(configs.lastPage >= configs.page + 1)}
-                                            onClick={(e) => getConfig(configs.page + 1, true)}
-                                        >
-                                            <i className="fas fa-arrow-down"></i> Obtener más datos
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
