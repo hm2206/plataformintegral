@@ -4,6 +4,7 @@ import { projectTracking } from '../../services/apis';
 import moment from 'moment';
 import Show from '../show';
 import InfoPlanTrabajo from './infoPlanTrabajo';
+import ExecutePlanTrabajo from './executePlanTrabajo';
 
 const situacions = {
     PENDIENTE: {
@@ -73,16 +74,13 @@ const TabPlanTrabajo = () => {
                         <th className="text-center" rowSpan="2">Duración</th>
                         <th className="text-center" colSpan="2">Fechas</th>
                         <th className="text-center" colSpan="3">Informe</th>
-                        <th className="text-center" colSpan="2">Reporte</th>
-                        <th className="text-center" rowSpan="2">Ver</th>
+                        <th className="text-center" rowSpan="2">Acciones</th>
                     </tr>
                     <tr>
                         <th className="text-center">Inicio</th>
                         <th className="text-center">Fin</th>
                         <th className="text-center">Fecha</th>
                         <th className="text-center">Situación</th>
-                        <th className="text-center">Documento</th>
-                        <th className="text-center">Fecha</th>
                         <th className="text-center">Documento</th>
                     </tr>
                 </thead>
@@ -95,17 +93,35 @@ const TabPlanTrabajo = () => {
                             <td className="text-center"></td> 
                             <td className="text-center">{pla.state}</td> 
                             <td className="text-center"></td> 
-                            <td className="text-center"></td> 
-                            <td className="text-center"></td> 
                             <td className="text-center">
-                                <button className="btn btn-sm btn-outline-primary"
-                                    onClick={(e) => {
-                                        setOption('info')
-                                        setCurrentPlanTrabajo(pla)
-                                    }}
-                                >
-                                    <i className="fas fa-eye"></i>
-                                </button>
+                                <div className="btn btn-group">
+                                    <button className="btn btn-sm btn-outline-primary"
+                                        onClick={(e) => {
+                                            setOption('info')
+                                            setCurrentPlanTrabajo(pla)
+                                        }}
+                                    >
+                                        <i className="fas fa-eye"></i>
+                                    </button>
+
+                                    <button className="btn btn-sm btn-outline-dark"
+                                        onClick={(e) => {
+                                            setOption('execute')
+                                            setCurrentPlanTrabajo(pla)
+                                        }}
+                                    >
+                                        <i className="fas fa-upload"></i>
+                                    </button>
+
+                                    <button className="btn btn-sm btn-outline-danger"
+                                        onClick={(e) => {
+                                            setOption('info')
+                                            setCurrentPlanTrabajo(pla)
+                                        }}
+                                    >
+                                        <i className="fas fa-file-pdf"></i>
+                                    </button>
+                                </div>
                             </td> 
                         </tr>
                     )}
@@ -132,6 +148,13 @@ const TabPlanTrabajo = () => {
 
         <Show condicion={option == 'info'}>
             <InfoPlanTrabajo
+                plan_trabajo={current_plan_trabajo}
+                isClose={(e) => setOption("")}
+            />
+        </Show>
+
+        <Show condicion={option == 'execute'}>
+            <ExecutePlanTrabajo
                 plan_trabajo={current_plan_trabajo}
                 isClose={(e) => setOption("")}
             />

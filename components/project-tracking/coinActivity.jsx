@@ -79,10 +79,12 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
         obj.edit = obj.edit ? false : true;
         // validar datos
         if (obj.edit) {
+            obj.current_description = obj.description;
             obj.current_monto = obj.monto;
             obj.current_cantidad = obj.cantidad;
             obj.current_total = obj.total;
         } else {
+            obj.description = obj.current_description;
             obj.monto = obj.current_monto;
             obj.cantidad = obj.current_cantidad;
             obj.total = obj.current_total;
@@ -153,33 +155,6 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                         Swal.fire({ icon: 'warning', text: message });
                     } catch (error) {
                         Swal.fire({ icon: 'error', text: error.message });
-                    }
-                });
-        }
-    }
-
-    // verificar actividad
-    const handleVerify = async (index, obj) => {
-        let answer = await Confirm('warning', '¿Estas seguro en verificar la actividad?')
-        if (answer) {
-            app_context.fireLoading(true);
-            await projectTracking.post(`activity/${obj.id}/verify`)
-                .then(res => {
-                    app_context.fireLoading(false);
-                    let { message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    let newActivity = Object.assign({}, activity);
-                    obj.verify = 1;
-                    newActivity[index] = obj;
-                    setActivity(newActivity);
-                }).catch(err => {
-                    try {
-                        app_context.fireLoading(false);
-                        let { message, errors } = err.response.data;
-                        if (!errors) throw new Error(message);
-                        Swal.fire({ icon: 'warning', text: message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message || err.message });
                     }
                 });
         }
@@ -257,7 +232,7 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                                                 </span>
                                                             }
                                                         >
-                                                            <button className="btn btn-sm btn-success"
+                                                            <button className="btn btn-sm btn-outline-success"
                                                                 disabled={current_loading}
                                                                 onClick={(e) => {
                                                                     setCurrentActivity({ ...act, index: indexA })
@@ -265,13 +240,6 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                                                 }}
                                                             >
                                                                 <i className="fas fa-plus"></i>
-                                                            </button>
-
-                                                            <button className="btn btn-sm btn-warning"
-                                                                disabled={current_loading}
-                                                                onClick={(e) => handleVerify(indexA, act)}
-                                                            >
-                                                                <i className="fas fa-check"></i>
                                                             </button>
                                                         </Show>
                                                     </div>
@@ -284,7 +252,16 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                                         className={`font-12`}
                                                     >
                                                         <th>
-                                                            {gas.description}
+                                                            <Show condicion={gas.edit}
+                                                                predeterminado={gas.description}
+                                                            >  
+                                                                <textarea 
+                                                                    name="description" 
+                                                                    rows="2"
+                                                                    value={gas.description}
+                                                                    onChange={({target}) => handleEditGasto(indexG, gas, target)}
+                                                                /> 
+                                                            </Show>
                                                         </th>
                                                         <th className="text-center">
                                                             <Show condicion={gas.edit}

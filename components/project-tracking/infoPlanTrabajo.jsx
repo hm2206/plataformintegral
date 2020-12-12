@@ -7,7 +7,6 @@ import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import TableSaldoFinanciero from './tableSaldoFinanciero';
-import AddMetaToPlanTrabajo from './addMetaToPlanTrabajo';
 import Swal from 'sweetalert2';
 import { SelectProjectObjective, SelectPlanTrabajoActivity } from '../select/project_tracking';
 
@@ -113,12 +112,6 @@ const InfoPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
 
                     <div className="col-md-12">
                         <TableSaldoFinanciero plan_trabajo={plan_trabajo} refresh={refresh}/>
-                    </div>
-
-                    <div className="col-md-12">
-                        <Form>
-                            <AddMetaToPlanTrabajo plan_trabajo={plan_trabajo}/>
-                        </Form>
                     </div>
                 </div>
             </div>
