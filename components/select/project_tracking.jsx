@@ -164,6 +164,24 @@ const SelectPlanTrabajoActivity = ({ id = "id", name, value, plan_trabajo_id, on
             />
 }
 
+const SelectRubro = ({ id = "id", name, value, onChange, refresh = false, disabled = false, execute = true }) => {
+    return <SelectBase 
+                api={projectTracking}
+                url={`rubro`}
+                id={`select-rubro-${id}-${name}`}
+                value={id}
+                text="description"
+                obj="rubros"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Rubro"
+                refresh={refresh}
+                execute={execute}
+                disabled={disabled}
+            />
+}
+
 
 // exportables
 export { 
@@ -175,5 +193,6 @@ export {
     SelectMedida,
     SelectDocumentType,
     SelectMedioPago,
-    SelectPlanTrabajoActivity
+    SelectPlanTrabajoActivity,
+    SelectRubro
 };

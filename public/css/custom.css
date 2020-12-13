@@ -288,3 +288,9 @@
     color:#DB2828!important;
     border-color:#DB2828!important;
 }
+
+
+/* background */
+.bg-pink {
+    background: rgba(242, 53, 86, 0.1)!important;
+}

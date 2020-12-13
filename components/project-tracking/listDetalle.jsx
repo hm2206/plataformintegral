@@ -116,6 +116,17 @@ const ListDetalle = (props) => {
                             />
                         </Form.Field>
                     </div>
+                    
+                    <div className="col-md-12 mb-3">
+                        <Form.Field>
+                            <label htmlFor="">Rubro</label>
+                            <input type="text" 
+                                className="uppercase"
+                                readOnly 
+                                value={gasto && gasto.rubro}
+                            />
+                        </Form.Field>
+                    </div>
 
                     <div className="col-md-12 mb-3">
                         <Form.Field>

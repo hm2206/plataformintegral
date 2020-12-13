@@ -6,7 +6,7 @@ import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
-import { SelectPresupuesto, SelectMedida } from '../select/project_tracking';
+import { SelectPresupuesto, SelectMedida, SelectRubro } from '../select/project_tracking';
 import Swal from 'sweetalert2';
 
 const AddGasto = ({ isClose, activity, onCreate }) => {
@@ -86,6 +86,18 @@ const AddGasto = ({ isClose, activity, onCreate }) => {
                                 execute={true}
                                 name="presupuesto_id"
                                 value={form.presupuesto_id}
+                                onChange={(e, obj) => handleInput(obj)}
+                            />
+                        </Form.Field>
+                    </div>
+
+                    <div className="col-md-12 mb-3">
+                        <Form.Field>
+                            <label htmlFor="">Rubro</label>
+                            <SelectRubro
+                                execute={true}
+                                name="rubro_id"
+                                value={form.rubro_id}
                                 onChange={(e, obj) => handleInput(obj)}
                             />
                         </Form.Field>
