@@ -5,6 +5,7 @@ import moment from 'moment';
 import Show from '../show';
 import InfoPlanTrabajo from './infoPlanTrabajo';
 import ExecutePlanTrabajo from './executePlanTrabajo';
+import AnualPlanTrabajo from './anualPlanTrabajo';
 
 const situacions = {
     PENDIENTE: {
@@ -115,7 +116,7 @@ const TabPlanTrabajo = () => {
 
                                     <button className="btn btn-sm btn-outline-danger"
                                         onClick={(e) => {
-                                            setOption('info')
+                                            setOption('anual')
                                             setCurrentPlanTrabajo(pla)
                                         }}
                                     >
@@ -155,6 +156,13 @@ const TabPlanTrabajo = () => {
 
         <Show condicion={option == 'execute'}>
             <ExecutePlanTrabajo
+                plan_trabajo={current_plan_trabajo}
+                isClose={(e) => setOption("")}
+            />
+        </Show>
+
+        <Show condicion={option == 'anual'}>
+            <AnualPlanTrabajo
                 plan_trabajo={current_plan_trabajo}
                 isClose={(e) => setOption("")}
             />

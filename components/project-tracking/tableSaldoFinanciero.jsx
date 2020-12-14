@@ -8,6 +8,7 @@ import Show from '../show';
 import Swal from 'sweetalert2';
 import AddDetalle from './addDetalle'
 import ListDetalle from './listDetalle'
+import ListMedioVerification from './listMedioVerification'
 import { Confirm } from '../../services/utils';
 
 const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
@@ -16,8 +17,8 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
     const app_context = useContext(AppContext);
 
     // estados
-    const [current_activities, setCurrentActivities] = useState([]);
     const [current_objectives, setCurrentObjectives] = useState([]);
+    const [current_medio_verification, setCurrentMedioVerification] = useState([]);
     const [current_gasto, setCurrentGasto] = useState({});
     const [option, setOption] = useState("");
 
@@ -241,7 +242,11 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                             </td>
 
                                             <td className="text-center">
-                                                <a href="#"><i className="fas fa-paperclip"></i></a>
+                                                <a href="#" onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setOption("list_medio_verification");
+                                                    setCurrentMedioVerification(m.medio_verification)
+                                                }}><i className="fas fa-paperclip"></i></a>
                                             </td>
                                         </tr>    
                                     )}
@@ -264,6 +269,13 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
         <Show condicion={option == 'list_detalle'}>
             <ListDetalle
                 gasto={current_gasto}
+                isClose={() => setOption("")}
+            />
+        </Show>
+
+        <Show condicion={option == 'list_medio_verification'}>
+            <ListMedioVerification
+                medio_verification={current_medio_verification}
                 isClose={() => setOption("")}
             />
         </Show>
