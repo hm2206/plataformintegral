@@ -293,6 +293,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
                     <BtnFloat theme="btn-success"
                         style={{ right: "40px" }}
                         onClick={add}    
+                        disabled={current_loading}
                     >
                         <i className="fas fa-plus"></i> 
                     </BtnFloat>
@@ -302,6 +303,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
                     <BtnFloat theme="btn-warning"
                         style={{ right: "40px" }}
                         onClick={(e) => add(1)}    
+                        disabled={current_loading}
                     >
                         <i className="fas fa-check"></i> 
                     </BtnFloat>
