@@ -15,6 +15,10 @@ const states = {
         text: 'EJECUCIÓN',
         color: 'success'
     },
+    PREOVER: {
+        text: 'PRE CIERRE',
+        color: 'warning'
+    },
     OVER: {
         text: 'CERRADO',
         color: 'white'
@@ -103,7 +107,7 @@ const TabTeam = () => {
                         </td>
                     </tr>
                     <tr>
-                        <td className="uppercase"><b>Coordinador General: </b></td>
+                        <td className="uppercase"><b>Investigador Responsable: </b></td>
                         <td colSpan="2">
                             <span className="uppercase">{project.principal && project.principal.person && project.principal.person.fullname || ""}</span>
                         </td>

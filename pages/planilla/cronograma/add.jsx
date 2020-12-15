@@ -57,6 +57,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
     const [current_loading, setCurrentLoading] = useState(false);
     const [change_page, setChangePage] = useState(false);
     const [is_filter, setIsFilter] = useState(false);
+    const [is_check_all, setCheckAll] = useState(false);
 
     // volver al listado del cronograma
     const handleBack = (e) => {
@@ -77,6 +78,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
         // search
         setPage(1);
         setIsFilter(true);
+        if (form.cargo_id || form.type_categoria_id) setCheckAll(true);
     }
 
     // add rows
@@ -116,8 +118,8 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
     }
 
     // agregar contrato a la planilla
-    const add = async () => {
-        let answer = await Confirm("warning", `¿Está seguro en agregar a los trabajadores(${rows.length}) al cronograma #${cronograma.id}?`);
+    const add = async (all = 0) => {
+        let answer = await Confirm("warning", `¿Está seguro en agregar a los trabajadores(${all ? total : rows.length}) al cronograma #${cronograma.id}?`);
         if (answer) {
             app_context.fireLoading(true);
             let datos = new FormData();
@@ -126,6 +128,9 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
             await rows.filter(r => payload.push(r.id));
             // send
             datos.append('info_id', payload.join(',')); 
+            datos.append('all', all);
+            datos.append('cargo_id', form.cargo_id);
+            datos.append('type_categoria_id', form.type_categoria_id);
             await unujobs.post(`cronograma/${cronograma.id}/add_all`, datos, { headers: { CronogramaID: cronograma.id } })
             .then(async res => {
                 app_context.fireLoading(false);
@@ -134,6 +139,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
                 await Swal.fire({ icon: 'success', text: message });
                 setPage(1);
                 setIsFilter(true);
+                setCheckAll(false);
             })
             .catch(err => {
                 app_context.fireLoading(false);
@@ -273,7 +279,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
                                             await setPage(page + 1)
                                             setChangePage(true);
                                         }}
-                                        disabled={!(last_page > page)}
+                                        disabled={!(last_page > page) || current_loading}
                                     >
                                         Obtener más registros
                                     </Button>
@@ -289,6 +295,15 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
                         onClick={add}    
                     >
                         <i className="fas fa-plus"></i> 
+                    </BtnFloat>
+                </Show>
+
+                <Show condicion={!rows.length && is_check_all && (form.cargo_id ||  form.type_categoria_id)}>
+                    <BtnFloat theme="btn-warning"
+                        style={{ right: "40px" }}
+                        onClick={(e) => add(1)}    
+                    >
+                        <i className="fas fa-check"></i> 
                     </BtnFloat>
                 </Show>
             </Fragment>

@@ -11,9 +11,9 @@ import moment from 'moment';
 import AddMetaToActivity from './addMetaToActivity';
 
 // componente de tabla de meses seún duración
-const TableMeses = ({ rows = 1, onChecked, isHeader = true, refresh = false, defaultPosition = {}, onReady, dateInitial = moment().format('YYYY-MM-DD') }) => {
+const TableMeses = ({ rows = 1, onChecked, isHeader = true, refresh = false, disabled = false, defaultPosition = [], onReady, dateInitial = moment().format('YYYY-MM-DD') }) => {
 
-    const isDefault = Object.keys(defaultPosition).length;
+    const isDefault = defaultPosition.length;
     
     // estados
     const [current_rows, setCurrentRows] = useState([]);
@@ -23,14 +23,13 @@ const TableMeses = ({ rows = 1, onChecked, isHeader = true, refresh = false, def
         let newRows = [];
         for(let i = 0; i < rows; i++) {
             if (isDefault) {
-                let p_start = defaultPosition.start;
-                let p_over = defaultPosition.over;
                 let value = i + 1;
+                console.log(defaultPosition.includes(value) ? true : false);
                 // add
                 await  newRows.push({
                     index: i,
                     value,
-                    checked: value >= p_start && value <= p_over ? true : false
+                    checked: defaultPosition.includes(value) ? true : false
                 });
             } else {
                 await  newRows.push({
@@ -116,7 +115,7 @@ const TableMeses = ({ rows = 1, onChecked, isHeader = true, refresh = false, def
                 <tr>
                     {current_rows.map(r => 
                         <td key={`table-rows-select-body-${r.index}`} width="5%" className={r.checked ? 'bg-primary' : ''}>
-                            <Checkbox checked={r.checked} onChange={(e, obj) => handleCheck(r.index, obj.checked)}/>
+                            <Checkbox checked={r.checked} onChange={(e, obj) => handleCheck(r.index, obj.checked)} disabled={disabled}/>
                         </td>    
                     )}
                 </tr>
@@ -156,13 +155,28 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
         setErrors(newErrors);
     }
 
+    // habilitar edición
+    const toggleEdit = (index, obj) => {
+        obj._edit = obj._edit ? false : true;
+        if (obj._edit) {
+            obj.current_title = obj.title;
+            obj.current_programado = JSON.parse(JSON.stringify(obj.programado));
+        } else {
+            obj.title = obj.current_title;
+            obj.programado = JSON.parse(JSON.stringify(obj.current_programado));
+        }
+        // setting
+        let newActivity = JSON.parse(JSON.stringify(activity));
+        newActivity.data[index] = obj;
+        setActivity(newActivity);
+    }
+
     // obtener el checked
-    const onChecked = async ({ count, data, start, over }) => {
+    const onChecked = async ({ count, data = [], start, over }) => {
         setNext(count ? true : false);
-        let newForm = Object.assign({}, form);
-        newForm.start = start;
-        newForm.over = over;
-        setForm(newForm);
+        let datos = [];
+        await data.map(async d => await datos.push(d.value))
+        setForm({ ...form, programado: datos });
     }
 
     // obtener activities
@@ -189,6 +203,7 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
             app_context.fireLoading(true);
             let datos = Object.assign({}, form);
             datos.objective_id = objective.id;
+            datos.programado = JSON.stringify(form.programado);
             await projectTracking.post(`activity`, datos)
                 .then(res => {
                     app_context.fireLoading(false);
@@ -318,7 +333,7 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
                                         <td>
                                             <Button color="green"
                                                 basic
-                                                disabled={!next}
+                                                disabled={!next || !form.title}
                                                 onClick={createActivity}
                                             >
                                                 <i className="fas fa-plus"></i>
@@ -333,6 +348,7 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
                                                     name="title"
                                                     value={act.title || ""}
                                                     rows="2"
+                                                    disabled={!act._edit}
                                                     onChange={(e) => handleActivity(indexA, e.target)}
                                                 />
                                             </td>
@@ -341,18 +357,34 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
                                                     refresh={cancel_table}
                                                     rows={project.duration}
                                                     isHeader={false}
-                                                    defaultPosition={{ start: act.start, over: act.over }}
+                                                    defaultPosition={act.programado}
                                                     onChecked={(obj) => handleCheckActivity(indexA, obj)}
                                                     onReady={(e) => setCancelTable(false)}
+                                                    disabled={!act._edit}
                                                 />
                                             </td>
                                             <td>
-                                                <Button color="red"
-                                                    disabled={edit}
-                                                    // onClick={createActivity}
-                                                >
-                                                    <i className="fas fa-times"></i>
-                                                </Button>
+                                                <div className="btn-group">
+                                                    <button className={`btn btn-sm btn-outline-${act._edit ? 'red' : 'primary'}`}
+                                                        onClick={(e) => toggleEdit(indexA, act)}
+                                                    >
+                                                        <i className={`fas fa-${act._edit ? 'times' : 'edit'}`}></i>
+                                                    </button>
+                                        
+                                                    <Show condicion={act._edit}
+                                                        predeterminado={
+                                                            <button className="btn btn-sm btn-outline-red">
+                                                                <i className="fas fa-trash"></i>
+                                                            </button>
+                                                        }
+                                                    >
+                                                        <button className="btn btn-sm btn-outline-success"
+                                                            onClick={(e) => toggleEdit(indexA, act)}
+                                                        >
+                                                            <i className="fas fa-save"></i>
+                                                        </button>
+                                                    </Show>
+                                                </div>
                                             </td>
                                         </tr>
                                     )}
