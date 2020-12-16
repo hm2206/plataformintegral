@@ -182,6 +182,24 @@ const SelectRubro = ({ id = "id", name, value, onChange, refresh = false, disabl
             />
 }
 
+const SelectArea = ({ id = "id", name, value, onChange, refresh = false, disabled = false, execute = true }) => {
+    return <SelectBase 
+                api={projectTracking}
+                url={`area`}
+                id={`select-area-${id}-${name}`}
+                value={id}
+                text="description"
+                obj="areas"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Líneas de Investigación"
+                refresh={refresh}
+                execute={execute}
+                disabled={disabled}
+            />
+}
+
 
 // exportables
 export { 
@@ -194,5 +212,6 @@ export {
     SelectDocumentType,
     SelectMedioPago,
     SelectPlanTrabajoActivity,
-    SelectRubro
+    SelectRubro,
+    SelectArea,
 };

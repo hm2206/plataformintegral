@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useState, useEffect } from 'react';
-import { Button } from 'semantic-ui-react';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
+import { AppContext } from '../../contexts/AppContext';
 import moment from 'moment';
 import { projectTracking } from '../../services/apis';
 import currencyFormatter from 'currency-formatter';
@@ -8,6 +8,9 @@ import Show from '../show';
 import Anexos from './anexos';
 import Router from 'next/dist/client/router';
 import CierreProject from './cierreProject';
+import { SelectArea } from '../select/project_tracking';
+import { Confirm } from '../../services/utils';
+import Swal from 'sweetalert2';
 
 const states = {
     START: {
@@ -37,6 +40,10 @@ const defaultPaginate = {
 
 const TabTeam = () => {
 
+    // app
+    const app_context = useContext(AppContext);
+
+    // project
     const { project } = useContext(ProjectContext);
     const isProject = Object.keys(project || {}).length;
 
@@ -50,6 +57,7 @@ const TabTeam = () => {
     const [total, setTotal] = useState(0);
     const [current_loading, setCurrentLoading] = useState(false);
     const [option, setOption] = useState("");
+    const [is_add_area, setIsAddArea] = useState(false);
 
     // obtener financiamiento
     const getFinanciamiento = async () => {
@@ -80,6 +88,30 @@ const TabTeam = () => {
         setCurrentLoading(false);
     }
 
+    // add línea de investigación
+    const addAreaToProject = async (e, { value }) => {
+        let answer = await Confirm('warning', `¿Estas seguro en agregar la línea de investigación al proyecto?`, 'Agregar');
+        if (answer && value) {
+            let datos = {};
+            datos.area_id = value;
+            datos.project_id = project.id;
+            app_context.fireLoading(true);
+            await projectTracking.post(`config_project_area`, datos)
+                .then(async res => {
+                    app_context.fireLoading(false);
+                    let { success, message } = res.data;
+                    if (!success) throw new Error(message);
+                    await Swal.fire({ icon: 'success', text: message });
+                    getAreas();
+                }).catch(err => {
+                    app_context.fireLoading(false);
+                    let { message } = err.response.data;
+                    Swal.fire({ icon: 'error', text: message || err.message });
+                });
+            setIsAddArea(false);
+        }
+    }
+ 
     // primera carga
     useEffect(() => {
         if (project.id) {
@@ -105,9 +137,39 @@ const TabTeam = () => {
                     <tr>
                         <td className="uppercase"><b>Líneas de Investigación: </b></td>
                         <td colSpan="2">
-                            {area && area.data.length && area.data.map((a, indexA) => 
-                                <small className="ml-2 badge badge-primary uppercase" key={`linea-de-investigacion-${indexA}`}>{a.description}</small>    
-                            )}
+                            <Show condicion={!is_add_area}
+                                predeterminado={
+                                    <div className="row">
+                                        <div className="col-md-10">
+                                            <SelectArea
+                                                name="area_id"
+                                                onChange={addAreaToProject}
+                                            />
+                                        </div>
+                                        <div className="col-md-2">
+                                            <button className="ml-1 btn btn-sm btn-outline-red"
+                                                onClick={(e) => setIsAddArea(false)}
+                                            >
+                                                <i className="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            >
+                                <Show condicion={project.state != 'OVER' && project.state != 'PREOVER'}>
+                                    <button className="ml-1 btn btn-sm btn-outline-primary"
+                                        onClick={(e) => setIsAddArea(true)}
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                    </button>
+                                </Show>
+
+                                <Show condicion={area && area.data.length}>
+                                    {area.data.map((a, indexA) => 
+                                        <small className="ml-2 badge badge-primary uppercase" key={`linea-de-investigacion-${indexA}`}>{a.description}</small>    
+                                    )}
+                                </Show>
+                            </Show>
                         </td>
                     </tr>
                     <tr>

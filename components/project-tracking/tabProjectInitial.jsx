@@ -254,6 +254,7 @@ const TabActivity = (props) => {
             <CoinActivity 
                 isClose={(e) => setOption("")}
                 objective={current_objective}
+                onCreate={(e) => getComponentes()}
             />
         </Show> 
     </Fragment>)

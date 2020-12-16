@@ -7,6 +7,7 @@ import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import { Confirm } from '../../services/utils';
 import { AppContext } from '../../contexts/AppContext';
 import Swal from 'sweetalert2';
+import Router from 'next/router';
 
 const TabTeam = () => {
 
@@ -44,10 +45,12 @@ const TabTeam = () => {
         if (answer) {
             app_context.fireLoading(true);
             await projectTracking.post(`team/${id}/delete`, {})
-                .then(res => {
+                .then(async res => {
                     app_context.fireLoading(false);
                     let { success, message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
+                    await Swal.fire({ icon: 'success', text: message });
+                    let { push, pathname, query } = Router;
+                    await push({ pathname, query });
                     getTeam();
                 }).catch(err => {
                     app_context.fireLoading(false);
@@ -117,7 +120,11 @@ const TabTeam = () => {
         <Show condicion={option == "add_team"}>
             <AddTeam 
                 isClose={(e) => setOption("")}
-                onCreate={(e) => getTeam()}
+                onCreate={async (e) => {
+                    let { push, pathname, query } = Router;
+                    await push({ pathname, query });
+                    getTeam()
+                }}
             />
         </Show>
     </Fragment>)

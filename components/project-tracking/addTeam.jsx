@@ -50,10 +50,10 @@ const AddTeam = (props) => {
             datos.person_id = person.id;
             datos.project_id = project.id;
             await projectTracking.post(`team`, datos)
-                .then(res => {
+                .then(async res => {
                     app_context.fireLoading(false);
                     let { success, message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
+                    await Swal.fire({ icon: 'success', text: message });
                     setPerson({});
                     setForm({});
                     if (typeof props.onCreate == 'function') props.onCreate();

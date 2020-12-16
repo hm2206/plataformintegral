@@ -71,6 +71,7 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
         newObj.total += gasto.total;
         newActivity.data = newData;
         setActivity(newActivity);
+        if (typeof onCreate == 'function') onCreate();
     }
 
     // habilitar edicion
