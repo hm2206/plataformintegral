@@ -191,67 +191,71 @@ const AddMetaToActivity = ({ objective }) => {
                 <tr>
                     <th className="text-center">Indicadores del objectivo</th>
                     <th className="text-center">Medios de Verificación</th>
-                    <th className="text-center">Agregar</th>
+                    <Show condicion={project.state != 'OVER' && project.state != 'PREOVER'}>
+                        <th className="text-center">Agregar</th>
+                    </Show>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <textarea 
-                            name="description" 
-                            rows="4"
-                            onChange={({target}) => setDescription(target.value)}
-                            value={description}
-                        />
-                    </td>
-                    <td>
-                        <div className="row">
-                            {/* agregar medio de verificación */}
-                            <div className="col-md-10">
-                                <textarea name="medio_verification" 
-                                    rows={2}
-                                    value={current_medio_verification || ""}
-                                    onChange={({target}) => setCurrentMedioVerification(target.value)}
-                                />
-                            </div>
-                            <div className="col-md-2">
-                                <button className="btn btn-sm btn-outline-success"
-                                    disabled={!current_medio_verification}
-                                    onClick={addCurrentMedioVerification}
-                                >
-                                    <i className="fas fa-plus"></i>
-                                </button>
-                            </div>
-                            <div className="col-md-12">
-                                <hr/>
-                            </div>
-                            {/* listar medio de verificación */}
-                            {medio_verification.map((v, indexV) => 
-                                <div className="col-md-12" key={`medio_verification_${indexV}`}>
-                                    <div className="row">
-                                        <div className="col-md-10 col-12 mb-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)' }}><b>{v}</b></div>
-                                        <div className="col-md-2 col-2 mb-2">
-                                            <button className="btn btn-sm btn-outline-danger"
-                                                onClick={(e) => deleteCurrentMedioVerification(indexV)}
-                                            >
-                                                <i className="fas fa-times"></i>
-                                            </button>
+                <Show condicion={project.state != 'OVER' && project.state != 'PREOVER'}>
+                    <tr>
+                        <td>
+                            <textarea 
+                                name="description" 
+                                rows="4"
+                                onChange={({target}) => setDescription(target.value)}
+                                value={description}
+                            />
+                        </td>
+                        <td>
+                            <div className="row">
+                                {/* agregar medio de verificación */}
+                                <div className="col-md-10">
+                                    <textarea name="medio_verification" 
+                                        rows={2}
+                                        value={current_medio_verification || ""}
+                                        onChange={({target}) => setCurrentMedioVerification(target.value)}
+                                    />
+                                </div>
+                                <div className="col-md-2">
+                                    <button className="btn btn-sm btn-outline-success"
+                                        disabled={!current_medio_verification}
+                                        onClick={addCurrentMedioVerification}
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div className="col-md-12">
+                                    <hr/>
+                                </div>
+                                {/* listar medio de verificación */}
+                                {medio_verification.map((v, indexV) => 
+                                    <div className="col-md-12" key={`medio_verification_${indexV}`}>
+                                        <div className="row">
+                                            <div className="col-md-10 col-12 mb-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)' }}><b>{v}</b></div>
+                                            <div className="col-md-2 col-2 mb-2">
+                                                <button className="btn btn-sm btn-outline-danger"
+                                                    onClick={(e) => deleteCurrentMedioVerification(indexV)}
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>    
-                            )}
-                        </div>
-                    </td>
-                    <td width="5%">
-                        <Button
-                            color="green"
-                            disabled={!description || !medio_verification.length}
-                            onClick={addMeta}
-                        >
-                            <i className="fas fa-plus"></i>
-                        </Button>
-                    </td>
-                </tr>
+                                    </div>    
+                                )}
+                            </div>
+                        </td>
+                        <td width="5%">
+                            <Button
+                                color="green"
+                                disabled={!description || !medio_verification.length}
+                                onClick={addMeta}
+                            >
+                                <i className="fas fa-plus"></i>
+                            </Button>
+                        </td>
+                    </tr>
+                </Show>
                 {current_meta.map((m, indexM) =>
                     <tr key={`meta-indicador-${indexM}`}>
                         <td>
@@ -322,37 +326,39 @@ const AddMetaToActivity = ({ objective }) => {
                                 </ul>
                             </Show>
                         </td>
-                        <td>
-                            <div className="btn-group text-center">
-                                <Show condicion={!m._edit}>
-                                    <button className="btn btn-sm btn-outline-primary"
-                                        onClick={(e) => handleEdit(m, indexM)}
-                                    >
-                                        <i className="fas fa-edit"></i>
-                                    </button>
-                                    
-                                    <button className="btn btn-sm btn-outline-red"
-                                        onClick={(e) => deleteMeta(indexM, m)}
-                                    >
-                                        <i className="fas fa-trash"></i>
-                                    </button>
-                                </Show>
+                        <Show condicion={project.state != 'OVER' && project.state != 'PREOVER'}>
+                            <td>
+                                <div className="btn-group text-center">
+                                    <Show condicion={!m._edit}>
+                                        <button className="btn btn-sm btn-outline-primary"
+                                            onClick={(e) => handleEdit(m, indexM)}
+                                        >
+                                            <i className="fas fa-edit"></i>
+                                        </button>
+                                        
+                                        <button className="btn btn-sm btn-outline-red"
+                                            onClick={(e) => deleteMeta(indexM, m)}
+                                        >
+                                            <i className="fas fa-trash"></i>
+                                        </button>
+                                    </Show>
 
-                                <Show condicion={m._edit}>
-                                    <button className="btn btn-sm btn-outline-success"
-                                        onClick={(e) => updateMeta(m, indexM)}
-                                    >
-                                        <i className="fas fa-save"></i>
-                                    </button>
-                                    
-                                    <button className="btn btn-sm btn-outline-red"
-                                        onClick={(e) => handleEdit(m, indexM)}
-                                    >
-                                        <i className="fas fa-times"></i>
-                                    </button>
-                                </Show>
-                            </div>
-                        </td>
+                                    <Show condicion={m._edit}>
+                                        <button className="btn btn-sm btn-outline-success"
+                                            onClick={(e) => updateMeta(m, indexM)}
+                                        >
+                                            <i className="fas fa-save"></i>
+                                        </button>
+                                        
+                                        <button className="btn btn-sm btn-outline-red"
+                                            onClick={(e) => handleEdit(m, indexM)}
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </Show>
+                                </div>
+                            </td>
+                        </Show>
                     </tr>    
                 )}
             </tbody>

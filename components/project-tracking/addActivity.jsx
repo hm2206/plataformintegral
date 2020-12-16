@@ -9,120 +9,7 @@ import Swal from 'sweetalert2';
 import Show from '../show';
 import moment from 'moment';
 import AddMetaToActivity from './addMetaToActivity';
-
-// componente de tabla de meses seún duración
-const TableMeses = ({ rows = 1, onChecked, isHeader = true, refresh = false, disabled = false, defaultPosition = [], onReady, dateInitial = moment().format('YYYY-MM-DD') }) => {
-
-    const isDefault = defaultPosition.length;
-    
-    // estados
-    const [current_rows, setCurrentRows] = useState([]);
-
-    // generar filas
-    const generateRows = async () => {
-        let newRows = [];
-        for(let i = 0; i < rows; i++) {
-            if (isDefault) {
-                let value = i + 1;
-                console.log(defaultPosition.includes(value) ? true : false);
-                // add
-                await  newRows.push({
-                    index: i,
-                    value,
-                    checked: defaultPosition.includes(value) ? true : false
-                });
-            } else {
-                await  newRows.push({
-                    index: i,
-                    value: i + 1,
-                    checked: false
-                });
-            }
-        }
-        // assignar
-        setCurrentRows(newRows);
-        // listo
-        if (typeof onReady == 'function') onReady(newRows);
-    }
-
-    // seleccionar casillero
-    const handleCheck = async (index, checked) => {
-        let newCurrentRows = JSON.parse(JSON.stringify(current_rows));
-        let newObj = newCurrentRows[index];
-        newObj.checked = checked;
-        newCurrentRows[index] = newObj;
-        let range_start = {};
-        let range_over = {};
-        // filtrar solo checked
-        let obj_checked = await newCurrentRows.filter(e => e.checked);
-        let is_checked = obj_checked.length
-        // validar rango de selección
-        // if (is_checked) {
-        //     // rangos de selección
-        //     range_start = obj_checked[0];
-        //     range_over = obj_checked[is_checked - 1];
-        //     // validar selección masiva
-        //     if (range_start.index < newObj.index && range_over.index > newObj.index) {
-        //         // deseleccionar
-        //         for(let initial = newObj.index; initial <= range_over.index; initial++) {
-        //             obj_checked.splice(initial, 1);
-        //             newCurrentRows[initial].checked = false;
-        //         }
-        //         // validar ultimo valor
-        //         obj_checked.pop();
-        //         // nuevo ultimo valor
-        //         range_over = obj_checked[obj_checked.length - 1];
-        //     } else {
-        //         // seleccionar masivamente
-        //         if (range_start.index + 1 < range_over.index) {
-        //             for(let initial = range_start.index; initial < range_over.index; initial++) {
-        //                 newCurrentRows[initial].checked = true;
-        //             }
-        //         }
-        //     }
-        // }
-        // disparar checked
-        if (typeof onChecked == 'function') onChecked({ count: is_checked, data: obj_checked, start: range_start.value, over: range_over.value });
-        setCurrentRows(newCurrentRows);
-    }
-
-    // generar filas cada vez que se modifique el row
-    useEffect(() => {
-        if (rows) generateRows();
-    }, [rows]);
-
-    // refrescar el generador de filas
-    useEffect(() => {
-        if (refresh) generateRows();
-    }, [refresh]);
-
-    // render
-    return <div className="table-responsive">
-        <table className="w-100">
-            <tbody>
-                <Show condicion={isHeader}>
-                    <tr>
-                        {current_rows.map(r => 
-                            <th key={`table-rows-select-header-${r.index}`} width="5%">{`${moment(dateInitial).add(r.index, "month").format("LL")}`.substr(0, 3)}</th>    
-                        )}
-                    </tr>
-                    <tr>
-                        {current_rows.map(r => 
-                            <th key={`table-rows-select-header-${r.index}`} width="5%">{r.value}</th>    
-                        )}
-                    </tr>
-                </Show>
-                <tr>
-                    {current_rows.map(r => 
-                        <td key={`table-rows-select-body-${r.index}`} width="5%" className={r.checked ? 'bg-primary' : ''}>
-                            <Checkbox checked={r.checked} onChange={(e, obj) => handleCheck(r.index, obj.checked)} disabled={disabled}/>
-                        </td>    
-                    )}
-                </tr>
-            </tbody>
-        </table>
-    </div>
-}
+import TableMeses from './tableMes';
 
 // agregar actividad
 const AddActivity = ({ objective, isClose, onCreate }) => {
@@ -142,7 +29,6 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
     const [old, setOld] = useState({ page: 1, last_page: 0, total: 0, data: [] });
     const [current_loading, setCurrentLoading] = useState(false);
     const [cancel, setCancel] = useState(false);
-    const [cancel_table, setCancelTable] = useState(false);
     const [edit, setEdit] = useState(false);
  
     // cambiar form
@@ -242,27 +128,36 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
     const handleCheckActivity = async (index, { count, data, start, over }) => {
         let newActivity = Object.assign({}, activity);
         let newData = JSON.parse(JSON.stringify(newActivity.data));
-        newData[index].start = start;
-        newData[index].over = over;
+        let payload = [];
+        await data.map(d => payload.push(d.value));
+        newData[index].programado = payload;
         newActivity.data = newData;
         setActivity(newActivity);
         setEdit(true);
     }
 
     // actualizar activities
-    const updateActivities = async () => {
+    const updateActivity = async (index, obj) => {
         let answer = await Confirm("warning", `¿Deseas guardar los datos?`, 'Guardar');
         if (answer) {
-            let activities = JSON.stringify(activity.data);
-            await projectTracking.post(`activity/${objective.id}/update_all`, { activities })
+            app_context.fireLoading(true);
+            let datos = Object.assign({}, obj);
+            datos.programado = JSON.stringify(datos.programado);
+            await projectTracking.post(`activity/${obj.id}/update`,  datos)
                 .then(res => {
+                    app_context.fireLoading(false);
                     let { message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
-                    setOld(JSON.parse(JSON.stringify(activity)));
+                    let newActivity = JSON.parse(JSON.stringify(activity));
+                    obj._edit = false;
+                    newActivity.data[index] = obj;
+                    setOld(JSON.parse(JSON.stringify(newActivity)));
+                    setActivity(newActivity);
                     setEdit(false);
                 })
                 .catch(err => {
                     try {
+                        app_context.fireLoading(false);
                         let { message } = err.response.data;
                         Swal.fire({ icon: 'error', text: message });
                     } catch (error) {
@@ -278,7 +173,6 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
             setActivity(JSON.parse(JSON.stringify(old)))
             setCancel(false);
             setEdit(false);
-            setCancelTable(true);
         }
     }, [cancel]);
 
@@ -308,38 +202,43 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
                                     <tr>
                                         <th width="35%">Actividad</th>
                                         <th>Duración <b className="badge badge-warning font-13">{moment(project.date_start).format('YYYY/MM/DD')}</b> al <b className="badge badge-warning font-13">{moment(project.date_over).format('YYYY/MM/DD')}</b></th>
-                                        <th width="5%">Agregar</th>
+                                        <Show condicion={project.state != 'OVER' && project.state != 'PREOVER'}>
+                                            <th width="5%">Opción</th>
+                                        </Show>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>
-                                            <textarea
-                                                placeholder="Titulo de la actividad"
-                                                name="title"
-                                                value={form.title || ""}
-                                                rows="3"
-                                                onChange={(e) => handleInput(e.target)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <TableMeses 
-                                                dateInitial={project.date_start}
-                                                refresh={refresh_table}
-                                                rows={project.duration}
-                                                onChecked={onChecked}
-                                            />
-                                        </td>
-                                        <td>
-                                            <Button color="green"
-                                                basic
-                                                disabled={!next || !form.title}
-                                                onClick={createActivity}
-                                            >
-                                                <i className="fas fa-plus"></i>
-                                            </Button>
-                                        </td>
-                                    </tr>
+                                    <Show condicion={project.state != 'OVER' && project.state != 'PREOVER'}>
+                                        <tr>
+                                            <td>
+                                                <textarea
+                                                    placeholder="Titulo de la actividad"
+                                                    name="title"
+                                                    value={form.title || ""}
+                                                    rows="3"
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <TableMeses 
+                                                    dateInitial={project.date_start}
+                                                    refresh={refresh_table}
+                                                    rows={project.duration}
+                                                    onChecked={onChecked}
+                                                />
+                                            </td>
+                                            
+                                            <td>
+                                                <Button color="green"
+                                                    basic
+                                                    disabled={!next || !form.title}
+                                                    onClick={createActivity}
+                                                >
+                                                    <i className="fas fa-plus"></i>
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    </Show>
                                     {activity.data.map((act, indexA) => 
                                         <tr key={`result-activity-${indexA}`}>
                                             <td>
@@ -354,38 +253,39 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
                                             </td>
                                             <td>
                                                 <TableMeses 
-                                                    refresh={cancel_table}
+                                                    refresh={!act._edit}
                                                     rows={project.duration}
                                                     isHeader={false}
                                                     defaultPosition={act.programado}
                                                     onChecked={(obj) => handleCheckActivity(indexA, obj)}
-                                                    onReady={(e) => setCancelTable(false)}
                                                     disabled={!act._edit}
                                                 />
                                             </td>
-                                            <td>
-                                                <div className="btn-group">
-                                                    <button className={`btn btn-sm btn-outline-${act._edit ? 'red' : 'primary'}`}
-                                                        onClick={(e) => toggleEdit(indexA, act)}
-                                                    >
-                                                        <i className={`fas fa-${act._edit ? 'times' : 'edit'}`}></i>
-                                                    </button>
-                                        
-                                                    <Show condicion={act._edit}
-                                                        predeterminado={
-                                                            <button className="btn btn-sm btn-outline-red">
-                                                                <i className="fas fa-trash"></i>
-                                                            </button>
-                                                        }
-                                                    >
-                                                        <button className="btn btn-sm btn-outline-success"
+                                            <Show condicion={project.state != 'OVER' && project.state != 'PREOVER'}>
+                                                <td>
+                                                    <div className="btn-group">
+                                                        <button className={`btn btn-sm btn-outline-${act._edit ? 'red' : 'primary'}`}
                                                             onClick={(e) => toggleEdit(indexA, act)}
                                                         >
-                                                            <i className="fas fa-save"></i>
+                                                            <i className={`fas fa-${act._edit ? 'times' : 'edit'}`}></i>
                                                         </button>
-                                                    </Show>
-                                                </div>
-                                            </td>
+                                            
+                                                        <Show condicion={act._edit}
+                                                            predeterminado={
+                                                                <button className="btn btn-sm btn-outline-red">
+                                                                    <i className="fas fa-trash"></i>
+                                                                </button>
+                                                            }
+                                                        >
+                                                            <button className="btn btn-sm btn-outline-success"
+                                                                onClick={(e) => updateActivity(indexA, act)}
+                                                            >
+                                                                <i className="fas fa-save"></i>
+                                                            </button>
+                                                        </Show>
+                                                    </div>
+                                                </td>
+                                            </Show>
                                         </tr>
                                     )}
                                 </tbody>
@@ -402,19 +302,6 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
                             objective={objective}
                         />
                     </div>
-
-                    <Show condicion={edit}>
-                        <div className="col-md-12 text-right">
-                            <hr/>
-                            <Button color="red" onClick={(e) => setCancel(true)}>
-                                <i className="fas fa-times"></i> Cancelar
-                            </Button>
-
-                            <Button color="teal" onClick={updateActivities}>
-                                <i className="fas fa-save"></i> Guardar Cambios
-                            </Button>
-                        </div>
-                    </Show>
                 </div>
             </Form>
         </Modal>

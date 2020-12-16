@@ -72,16 +72,18 @@ const TabTeam = () => {
                         <th className="text-center">N° Documento</th>
                         <th className="text-center">Rol</th>
                         <th className="text-center">Profesión</th>
-                        <th width="5%">
-                            <Button fluid 
-                                basic 
-                                size="mini"
-                                color="green" 
-                                onClick={(e) => setOption("add_team")}
-                            >
-                                <i className="fas fa-plus"></i>
-                            </Button>
-                        </th>
+                        <Show condicion={project.state != "OVER"}>
+                            <th width="5%">
+                                <Button fluid 
+                                    basic 
+                                    size="mini"
+                                    color="green" 
+                                    onClick={(e) => setOption("add_team")}
+                                >
+                                    <i className="fas fa-plus"></i>
+                                </Button>
+                            </th>
+                        </Show>
                     </tr>
                 </thead>
                 <tbody>
@@ -91,14 +93,16 @@ const TabTeam = () => {
                             <td className="text-center uppercase">{t.person && t.person.document_number}</td>
                             <td className="text-center uppercase">{t.role}</td>
                             <td className="text-center uppercase">{t.person && t.person.profession}</td>
-                            <td>
-                                <Button color="red" basic
-                                    size="mini"
-                                    onClick={(e) => deleteTeam(t.id)}
-                                >
-                                    <i className="fas fa-times"></i>
-                                </Button>
-                            </td>
+                            <Show condicion={project.state != "OVER"}>
+                                <td>
+                                    <Button color="red" basic
+                                        size="mini"
+                                        onClick={(e) => deleteTeam(t.id)}
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </Button>
+                                </td>
+                            </Show>
                         </tr>
                     )}
                     <Show condicion={!current_loading && !isTeam}>

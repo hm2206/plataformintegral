@@ -106,6 +106,18 @@ const CreateProject = () => {
 
                                         <div className="col-md-12 mb-4">
                                             <Form.Field>
+                                                <label>Resolución</label>
+                                                <input type="text"
+                                                    placeholder="ingrese la resolución del proyecto"
+                                                    value={form.resolucion || ""}
+                                                    name="title"
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-12 mb-4">
+                                            <Form.Field>
                                                 <label>Objectivo General</label>
                                                 <textarea
                                                     placeholder="ingrese el objectivo general del proyecto"

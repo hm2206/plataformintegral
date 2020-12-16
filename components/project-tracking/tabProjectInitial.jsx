@@ -132,13 +132,15 @@ const TabActivity = (props) => {
                 <hr/>
             </div>
 
-            <div className="col-md-12 mb-4 text-right">
-                <Button color="teal"
-                    onClick={(e) => setOption("add_componente")}
-                >
-                    <i className="fas fa-plus"></i> Agregar Objectivo
-                </Button>
-            </div>
+            <Show condicion={project.state != 'OVER'}>
+                <div className="col-md-12 mb-4 text-right">
+                    <Button color="teal"
+                        onClick={(e) => setOption("add_componente")}
+                    >
+                        <i className="fas fa-plus"></i> Agregar Objectivo
+                    </Button>
+                </div>
+            </Show>
 
             <Form className="col-md-12 mb-3">
             
@@ -209,13 +211,15 @@ const TabActivity = (props) => {
                                                 <i className="fas fa-coins"></i>
                                             </Button>
 
-                                            <Button size="mini"
-                                                basic
-                                                color="blue"
-                                                onClick={(e) => handleEdit(indexC, c)}
-                                            >
-                                                <i className="fas fa-edit"></i>
-                                            </Button>
+                                            <Show condicion={project.state != 'OVER'}>
+                                                <Button size="mini"
+                                                    basic
+                                                    color="blue"
+                                                    onClick={(e) => handleEdit(indexC, c)}
+                                                >
+                                                    <i className="fas fa-edit"></i>
+                                                </Button>
+                                            </Show>
                                         </Show>
                                     </div>
                                 </td>

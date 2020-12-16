@@ -6,6 +6,8 @@ import Show from '../show';
 import InfoPlanTrabajo from './infoPlanTrabajo';
 import ExecutePlanTrabajo from './executePlanTrabajo';
 import AnualPlanTrabajo from './anualPlanTrabajo';
+import Anexos from './anexos';
+import Router from 'next/dist/client/router'
 
 const situacions = {
     PENDIENTE: {
@@ -122,6 +124,15 @@ const TabPlanTrabajo = () => {
                                     >
                                         <i className="fas fa-file-pdf"></i>
                                     </button>
+
+                                    <button className="btn btn-sm btn-warning"
+                                        onClick={(e) => {
+                                            setOption('anexos')
+                                            setCurrentPlanTrabajo(pla)
+                                        }}
+                                    >
+                                        <i className="fas fa-paperclip"></i>
+                                    </button>
                                 </div>
                             </td> 
                         </tr>
@@ -165,6 +176,21 @@ const TabPlanTrabajo = () => {
             <AnualPlanTrabajo
                 plan_trabajo={current_plan_trabajo}
                 isClose={(e) => setOption("")}
+            />
+        </Show>
+
+        <Show condicion={option == 'anexos'}>
+            <Anexos
+                object_id={current_plan_trabajo.id}
+                object_type={'App/Models/PlanTrabajo'}
+                isClose={(e) => setOption("")}
+                files={current_plan_trabajo.anexos}
+                afterSave={(files) => {
+                    let datos = Object.assign({}, current_plan_trabajo);
+                    datos.anexos = [...datos.anexos, ...files];
+                    setCurrentPlanTrabajo(datos);
+                    getPlanTrabajo();
+                }}
             />
         </Show>
     </Fragment>)

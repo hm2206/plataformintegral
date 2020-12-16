@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, Fragment} from 'react';
 import { Button, Form, Select } from 'semantic-ui-react';
 import Modal from '../modal'
 import Show from '../show';
@@ -8,6 +8,8 @@ import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import currencyFormatter from 'currency-formatter'
 import Swal from 'sweetalert2';
+import ListMedioVerification from './listMedioVerification'
+import TableMeses from './tableMes'
 
 const defaultPage = {
     objective: {
@@ -18,7 +20,7 @@ const defaultPage = {
         page: 1,
         loading: false
     },
-    activity: {
+    financiamiento: {
         page: 1,
         loading: false
     },
@@ -42,6 +44,9 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
     const [current_page, setCurrentPage] = useState(defaultPage);
     const [current_objective, setCurrentObjective] = useState([]);
     const [current_team, setCurrentTeam] = useState([]);
+    const [current_financiamiento, setCurrentFinanciamiento] = useState([]);
+    const [option, setOption] = useState("");
+    const [current_medio_verification, setMedioVerification] = useState([]);
 
     // cambiar form
     const handleInput = ({ name, value }) => {
@@ -82,11 +87,27 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
         setCurrentPage(payload);
     }
 
+    // obtener financiamiento
+    const getFinanciamiento = async (nextPage = 1, add = false) => {
+        let payload = Object.assign({}, current_page);
+        payload.financiamiento.loading = true;
+        setCurrentPage(payload);
+        await projectTracking.get(`plan_trabajo/${plan_trabajo.id}/financiamiento`)
+            .then(res => {
+                let { success, message, objectives } = res.data;
+                if (!success) throw new Error(message);
+                setCurrentFinanciamiento(add ? [...current_financiamiento, ...objectives] : objectives);
+            }).catch(err => console.log(err.message));
+        payload.financiamiento.loading = false;
+        setCurrentPage(payload);
+    }
+
     // cargar datos
     useEffect(() => {
         if (project.id) {
             getObjective();
             getTeam();
+            getFinanciamiento();
         }
     }, []);
 
@@ -105,7 +126,7 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
         <Modal
             show={true}
             titulo={<span><i className="fas fa-file-alt"></i> Plan de Trabajo Anual</span>}
-            md="9"
+            md="12"
             isClose={isClose}
         >  
             <div className="card-body">
@@ -133,7 +154,7 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
                                             <td>{project.general_object}</td>
                                         </tr>
                                         <tr>
-                                            <th>Objectivo específico: </th>
+                                            <th>Objectivos específicos: </th>
                                             <td>
                                                 <ol type="1">
                                                     {current_objective.map((obj, indexO) => 
@@ -160,24 +181,81 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
                                 </td>
                             </tr>
                             <tr>
-                                <th colSpan="2" className="text-center">Avances programados y logrados</th>
+                                <th colSpan="2" className="text-center">Actividades a ejecutar</th>
                             </tr>
                             <tr>
                                 <td colSpan="2">
-                                    <ol type="1">
-                                        <li>
-                                            <div>Marco lógico</div>
-                                            <div className="table-responsive">
-                                                <table className="table table-bordered">
-                                                    <thead>
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th width="20%">Finalidad</th>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Objectivo general</th>
+                                                    <td>{project.general_object}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th colSpan="2" className="text-center">Objectivos Específicos</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {current_financiamiento.map((f, indexF) => 
+                                                    <Fragment key={`financiamiento-list-plan_trabajo_anual-${indexF}`}>
                                                         <tr>
-                                                            <th></th>
+                                                            <th colSpan="2">{f.title}</th>
+                                                        </tr> 
+
+                                                        <tr>
+                                                            <td colSpan="2">
+                                                                <div className="table-responsive">
+                                                                    <table className="table table-bordered">
+                                                                        {f.activities && f.activities.map((act, indexA) => 
+                                                                            <tr key={`financiamiento-list-plan_trabajo_anual_actividades-${indexA}`}>
+                                                                                <td width="40%">{act.title}</td>
+                                                                                <td>
+                                                                                    <div className="table responsive">
+                                                                                        <TableMeses 
+                                                                                            dateInitial={project.date_start}
+                                                                                            disabled
+                                                                                            title="Avances programados"
+                                                                                            rows={project.duration}
+                                                                                            defaultPosition={act.programado}
+                                                                                        />
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        )}
+                                                                        <tr>
+                                                                            <th>Indicadores</th>
+                                                                            <th className="text-center">Medio de verificación</th>
+                                                                        </tr>
+                                                                        {f.metas && f.metas.map((m, indexM) =>
+                                                                            <tr key={`financiamiento-list-plan_trabajo_anual_metas-${indexM}`}>
+                                                                                <td>{m.description}</td>
+                                                                                <td className="text-center">
+                                                                                    <a href="#"
+                                                                                        onClick={(e) => {
+                                                                                            e.preventDefault();
+                                                                                            setMedioVerification(m.medio_verification);
+                                                                                            setOption('medio_verification')
+                                                                                        }}
+                                                                                    >
+                                                                                        <i className="fas fa-paperclip"></i>
+                                                                                    </a>
+                                                                                </td>
+                                                                            </tr>
+                                                                        )}
+                                                                    </table>
+                                                                </div>
+                                                            </td>
                                                         </tr>
-                                                    </thead>
-                                                </table>
-                                            </div>
-                                        </li>
-                                    </ol>
+                                                    </Fragment>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -193,6 +271,13 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
                     </table>
                 </div>
             </div>
+
+            <Show condicion={option == 'medio_verification'}>
+                <ListMedioVerification
+                    medio_verification={current_medio_verification}
+                    isClose={(e) => setOption("")}
+                />
+            </Show>
         </Modal>
     )
 }

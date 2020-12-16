@@ -5,6 +5,9 @@ import moment from 'moment';
 import { projectTracking } from '../../services/apis';
 import currencyFormatter from 'currency-formatter';
 import Show from '../show';
+import Anexos from './anexos';
+import Router from 'next/dist/client/router';
+import CierreProject from './cierreProject';
 
 const states = {
     START: {
@@ -46,6 +49,7 @@ const TabTeam = () => {
     const [total_porcentaje_no_monetario, setTotalPorcentajeNoMonetario] = useState(0);
     const [total, setTotal] = useState(0);
     const [current_loading, setCurrentLoading] = useState(false);
+    const [option, setOption] = useState("");
 
     // obtener financiamiento
     const getFinanciamiento = async () => {
@@ -95,6 +99,18 @@ const TabTeam = () => {
                         <td colSpan="2">{project.code}</td>
                     </tr>
                     <tr>
+                        <td className="uppercase"><b>Resolución: </b></td>
+                        <td colSpan="2" className="uppercase">{project.resolucion}</td>
+                    </tr>
+                    <tr>
+                        <td className="uppercase"><b>Líneas de Investigación: </b></td>
+                        <td colSpan="2">
+                            {area && area.data.length && area.data.map((a, indexA) => 
+                                <small className="ml-2 badge badge-primary uppercase" key={`linea-de-investigacion-${indexA}`}>{a.description}</small>    
+                            )}
+                        </td>
+                    </tr>
+                    <tr>
                         <td className="uppercase"><b>Duración: </b></td>
                         <td colSpan="2">
                             <span className="uppercase">{project.duration} meses</span>
@@ -113,19 +129,54 @@ const TabTeam = () => {
                         </td>
                     </tr>
                     <tr>
-                        <td className="uppercase"><b>Líneas de Investigación: </b></td>
-                        <td colSpan="2">
-                            {area && area.data.length && area.data.map((a, indexA) => 
-                                <small className="ml-2 badge badge-warning uppercase" key={`linea-de-investigacion-${indexA}`}>{a.description}</small>    
-                            )}
-                        </td>
-                    </tr>
-                    <tr>
                         <td className="uppercase"><b>ESTADO: </b></td>
                         <td colSpan="2">
                             <Show condicion={isProject}>
                                 <b className={`uppercase && badge badge-${states[project.state].color}`}>{states[project.state].text}</b>
-                            </Show>
+                            </Show> 
+                        </td>
+                    </tr>
+                    <Show condicion={project.state == 'PREOVER'}>
+                        <tr>
+                            <td className="uppercase">
+                                <b>Informe de Cierre</b>
+                            </td>
+                            <td colSpan="2">
+                                <button className="btn btn-sm btn-outline-dark"
+                                    onClick={(e) => setOption("cierre")}
+                                >
+                                    Cerrar Proyecto <i className="fas fa-arrow-down"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </Show>
+
+                    <Show condicion={project.state == 'OVER'}>
+                        <tr>
+                            <td className="uppercase">
+                                <b>Resolución de Cierre</b>
+                            </td>
+                            <td colSpan="2" className="uppercase">
+                                {project.cierre_resolucion}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className="uppercase">
+                                <b>Motivo de Cierre</b>
+                            </td>
+                            <td colSpan="2" className="uppercase">
+                                {project.cierre_motivo}
+                            </td>
+                        </tr>
+                    </Show>
+                    <tr>
+                        <td className="uppercase"><b>ANEXOS: </b></td>
+                        <td colSpan="2">
+                            <a href="#" className="font-14"
+                                onClick={(e) => setOption("anexos")}
+                            >
+                                <i className="fas fa-paperclip"></i>
+                            </a>
                         </td>
                     </tr>
                 </thead>
@@ -187,6 +238,30 @@ const TabTeam = () => {
                 </table>
             </div>
         </div>
+
+        <Show condicion={option == 'anexos'}>
+            <Anexos
+                object_id={project.id}
+                object_type={'App/Models/Project'}
+                isClose={(e) => setOption("")}
+                files={project.anexos}
+                afterSave={(e) => {
+                    let { push, pathname, query } = Router;
+                    push({ pathname, query });
+                }}
+            />
+        </Show>
+
+        <Show condicion={option == 'cierre'}>
+            <CierreProject
+                isClose={(e) => setOption("")}
+                afterSave={async (e) => {
+                    let { push, pathname, query } = Router;
+                    await push({ pathname, query });
+                    setOption("");
+                }}
+            />
+        </Show>
     </Fragment>)
 }
 
