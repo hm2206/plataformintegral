@@ -110,7 +110,7 @@ const CreateProject = () => {
                                                 <input type="text"
                                                     placeholder="ingrese la resolución del proyecto"
                                                     value={form.resolucion || ""}
-                                                    name="title"
+                                                    name="resolucion"
                                                     onChange={(e) => handleInput(e.target)}
                                                 />
                                             </Form.Field>
