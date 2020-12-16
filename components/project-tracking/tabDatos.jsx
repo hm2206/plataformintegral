@@ -123,7 +123,7 @@ const TabTeam = () => {
                         </td>
                     </tr>
                     <tr>
-                        <td className="uppercase"><b>Investigador Responsable: </b></td>
+                        <td className="uppercase"><b>Investigador Principal: </b></td>
                         <td colSpan="2">
                             <span className="uppercase">{project.principal && project.principal.person && project.principal.person.fullname || ""}</span>
                         </td>
