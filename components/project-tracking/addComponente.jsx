@@ -97,8 +97,7 @@ const AddComponente = (props) => {
                     <div className="col-md-12 mb-3">
                         <Form.Field error={errors.title && errors.title[0] || ""}>
                             <label htmlFor="">Titulo del Componente</label>
-                            <input  
-                                type="text"
+                            <textarea  
                                 name="title"
                                 value={form.title || ""}
                                 onChange={({target}) => handleInput(target)}
