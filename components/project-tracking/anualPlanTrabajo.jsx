@@ -102,6 +102,24 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
         setCurrentPage(payload);
     }
 
+    // reporte
+    const getReport = async () => {
+        app_context.fireLoading(true);
+        await projectTracking.post(`report/anual_plan_trabajo/${plan_trabajo.id}`, {}, { responseType: 'blob' })
+            .then(res => {
+                app_context.fireLoading(false);
+                let { data } = res;
+                let a = document.createElement('a');
+                a.href = URL.createObjectURL(data);
+                a.target = '__blank';
+                a.click();
+            }).catch(err => {
+                app_context.fireLoading(false);
+                let { message } = err.response.data;
+                Swal.fire({ icon: 'error', text: message || err.message });
+            });
+    }
+
     // cargar datos
     useEffect(() => {
         if (project.id) {
@@ -269,7 +287,7 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
                             </tr>
                             <tr>
                                 <th colSpan="2" className="text-right">
-                                    <button className="btn btn-primary">
+                                    <button className="btn btn-primary" onClick={getReport}>
                                         <i className="fas fa-file-alt"></i> Imprimir reporte
                                     </button>
                                 </th>
