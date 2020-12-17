@@ -112,6 +112,32 @@ const TabTeam = () => {
         }
     }
  
+    // eliminar línea de investigación
+    const deleteAreaToProject = async (e, index, obj) => {
+        e.preventDefault();
+        if (project.state != 'OVER' && project.state != 'PREOVER') {
+            let answer = await Confirm("warning", "¿Estás seguro en eliminar la línea de investigación?");
+            if (answer) {
+                app_context.fireLoading(true);
+                await projectTracking.post(`config_project_area/${obj.id}/delete`)
+                    .then(res => {
+                        app_context.fireLoading(false);
+                        let { success, message } = res.data;
+                        if (!success) throw new Error(message);
+                        let newArea = Object.assign({}, area);
+                        newArea.data.splice(index, 1);
+                        setArea(newArea);
+                        Swal.fire({ icon: 'success', text: message });
+                    }).catch(err => {
+                        app_context.fireLoading(false);
+                        let { message } = err.response.data;
+                        Swal.fire({ icon: 'error', text: message || err.message });
+                    });
+                app_context.fireLoading(false);
+            }
+        }
+    }
+
     // primera carga
     useEffect(() => {
         if (project.id) {
@@ -166,7 +192,14 @@ const TabTeam = () => {
 
                                 <Show condicion={area && area.data.length}>
                                     {area.data.map((a, indexA) => 
-                                        <small className="ml-2 badge badge-primary uppercase" key={`linea-de-investigacion-${indexA}`}>{a.description}</small>    
+                                        <a className="ml-2 badge badge-primary uppercase text-white" 
+                                            key={`linea-de-investigacion-${indexA}`}
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={(e) => deleteAreaToProject(e, indexA, a)}
+                                            href="#"
+                                        >
+                                            {a.description}
+                                        </a>    
                                     )}
                                 </Show>
                             </Show>
