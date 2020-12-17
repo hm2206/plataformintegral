@@ -37,12 +37,11 @@ const IndexPresupuesto = ({ success, presupuestos }) => {
             <Datatable
                 titulo="Lista de Presupuesto"
                 isFilter={false}
-                headers={["#ID", "Nombre", "Ext. Presupuestal", "Monto", "Estado"]}
+                headers={["#ID", "Nombre", "Ext. Presupuestal", "Estado"]}
                 index={[
                     { key: "id", type: "text" },
                     { key: "name", type: "text" },
                     { key: "ext_pptto", type: "text" },
-                    { key: "monto", type: 'icon', bg: 'dark' },
                     { key: "state", type: "switch", bg_true: "success", is_true: "Activo", bg_false: "danger", is_false: "Desactivado" }
                 ]}
                 data={success ? presupuestos.data : []}

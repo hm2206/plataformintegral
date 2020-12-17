@@ -106,19 +106,6 @@ const CreatePresupuesto = () => {
                                         </div>
 
                                         <div className="col-md-6 mb-4">
-                                            <Form.Field error={errors.monto && errors.monto[0] || ""}>
-                                                <label>Monto Presupuestado</label>
-                                                <input type="number"
-                                                    value={form.monto || ""}
-                                                    placeholder="Ingrese el monto presupuestal"
-                                                    name="monto"
-                                                    onChange={(e) => handleInput(e.target)}
-                                                />
-                                                <label htmlFor="">{errors.monto && errors.monto[0] || ""}</label>
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-6 mb-4">
                                             <Form.Field error={errors.principal && errors.principal[0] || ""}>
                                                 <label>Principal</label>
                                                 <Checkbox
@@ -131,31 +118,15 @@ const CreatePresupuesto = () => {
                                             </Form.Field>
                                         </div>
 
-                                        <div className="col-md-6 mb-4">
-                                            <Form.Field error={errors.year && errors.year[0] || ""}>
-                                                <label>Año</label>
-                                                <input type="number"
-                                                    value={form.year || ""}
-                                                    placeholder="Ingrese el año del presupuesto"
-                                                    name="year"
-                                                    onChange={(e) => handleInput(e.target)}
-                                                />
-                                                <label htmlFor="">{errors.year && errors.year[0] || ""}</label>
-                                            </Form.Field>
-                                        </div>
-
                                         <Show condicion={!form.principal}>
                                             <div className="col-md-6 mb-4">
                                                 <Form.Field error={errors.presupuesto_id && errors.presupuesto_id[0] || ""}>
                                                     <label>Presupuesto Principal</label>
                                                     <SelectPresupuesto
                                                         name="presupuesto_id"
-                                                        disabled={!form.year || (form.year && form.year.length < 4)}
-                                                        refresh={form.year && form.year.length >= 4 ? form.year : false}
                                                         value={form.presupuesto_id}
                                                         onChange={(e, obj) => handleInput(obj)}
                                                         principal={1}
-                                                        year={form.year}
                                                     />
                                                     <label htmlFor="">{errors.presupuesto_id && errors.presupuesto_id[0] || ""}</label>
                                                 </Form.Field>

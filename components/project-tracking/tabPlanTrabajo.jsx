@@ -1,13 +1,17 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import { projectTracking } from '../../services/apis';
+import { AppContext } from '../../contexts/AppContext';
 import moment from 'moment';
 import Show from '../show';
 import InfoPlanTrabajo from './infoPlanTrabajo';
 import ExecutePlanTrabajo from './executePlanTrabajo';
 import AnualPlanTrabajo from './anualPlanTrabajo';
 import Anexos from './anexos';
-import Router from 'next/dist/client/router'
+import Router from 'next/router'
+import { Button, Form } from 'semantic-ui-react';
+import { Confirm } from '../../services/utils'
+import Swal from 'sweetalert2';
 
 const situacions = {
     PENDIENTE: {
@@ -38,6 +42,10 @@ const situacions = {
 
 const TabPlanTrabajo = () => {
 
+    // app
+    const app_context = useContext(AppContext);
+
+    // project
     const { project } = useContext(ProjectContext);
 
     // stados
@@ -45,6 +53,7 @@ const TabPlanTrabajo = () => {
     const [plan_trabajo, setPlanTrabajo] = useState({ page: 1, lastPage: 0, data: [] });
     const [option, setOption] = useState("");
     const [current_plan_trabajo, setCurrentPlanTrabajo] = useState({});
+    const [duration, setDuration] = useState("");
 
     // obtener plan de trabajo
     const getPlanTrabajo = async () => {
@@ -62,6 +71,30 @@ const TabPlanTrabajo = () => {
         setCurrentLoading(false);
     }
 
+    // crear plan de trabajo
+    const savePlanTrabajo = async () => {
+        let answer = await Confirm('warning', `¿Estas seguro en guardar el proyecto?`);
+        if (answer) {
+            app_context.fireLoading(true);
+            let datos = {};
+            datos.project_id = project.id;
+            datos.duration = duration;
+            await projectTracking.post('plan_trabajo', datos)
+                .then(res => {
+                    app_context.fireLoading(false);
+                    let { message } = res.data;
+                    Swal.fire({ icon: 'success', text: message });
+                    setDuration("");
+                }).catch(err => {
+                    app_context.fireLoading(false);
+                    let { message, errors } = err.response.data;
+                    Swal.fire({ icon: 'warning', text: message });
+                }).catch(err => {
+                    Swal.fire({ icon: 'error', text: err.message });
+                });
+        }
+    }
+
     // primera carga
     useEffect(() => {
         if (project.id) getPlanTrabajo();
@@ -70,6 +103,28 @@ const TabPlanTrabajo = () => {
     // render
     return (
     <Fragment>
+        <Show condicion={project.state != 'OVER'}>
+            <Form className="row">
+                <div className="col-md-6">
+                    <Form.Field>
+                        <input type="number"
+                            placeholder="Ingrese la duración"
+                            onChange={({target}) => setDuration(target.value)}
+                        />
+                    </Form.Field>
+                </div>
+
+                <div className="col-md-5 mb-4">
+                    <Button color="teal"
+                        onClick={savePlanTrabajo}
+                        disabled={!duration}
+                    >
+                        <i className="fas fa-plus"></i> Agregar Plan de Trabajo
+                    </Button>
+                </div>
+            </Form>
+        </Show>
+
         <div className="table-responsive font-13">
             <table className="table table-bordered table-striped">
                 <thead>

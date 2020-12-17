@@ -267,6 +267,13 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
                             <tr>
                                 <th colSpan="2" className="text-center">Presupuesto</th>
                             </tr>
+                            <tr>
+                                <th colSpan="2" className="text-right">
+                                    <button className="btn btn-primary">
+                                        <i className="fas fa-file-alt"></i> Imprimir reporte
+                                    </button>
+                                </th>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
