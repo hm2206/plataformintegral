@@ -64,27 +64,28 @@ const EditProject = ({ success, project }) => {
             let newKeywords = JSON.parse(JSON.stringify(keywords));
             newKeywords.splice(index, 1);
             setKeywords(newKeywords);
+            setEdit(true);
         }
     }
         
     // guardar proyect
     const saveProject = async () => {
-        let answer = await Confirm('warning', `¿Estas seguro en guardar el proyecto?`);
+        let answer = await Confirm('warning', `¿Estas seguro en actualizar el proyecto?`);
         if (answer) {
             app_context.fireLoading(true);
             let newForm = Object.assign({}, form);
             newForm.keywords = JSON.stringify(keywords);
-            await projectTracking.post('project', newForm)
+            await projectTracking.post(`project/${project.id}/update`, newForm)
                 .then(res => {
                     app_context.fireLoading(false);
                     let { message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setCurrentKeyword("");
-                    setForm({});
-                    setKeywords([]);
+                    setEdit(false);
                 }).catch(err => {
                     app_context.fireLoading(false);
                     let { message, errors } = err.response.data;
+                    if (!errors) throw new Error(message || err.message);
                     Swal.fire({ icon: 'warning', text: message });
                 }).catch(err => {
                     Swal.fire({ icon: 'error', text: err.message });
@@ -119,6 +120,18 @@ const EditProject = ({ success, project }) => {
                                                     placeholder="ingrese el titulo del proyecto"
                                                     value={form.title || ""}
                                                     name="title"
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-12 mb-4">
+                                            <Form.Field>
+                                                <label>Resolución</label>
+                                                <input type="text"
+                                                    placeholder="ingrese la resolución del proyecto"
+                                                    value={form.resolucion || ""}
+                                                    name="resolucion"
                                                     onChange={(e) => handleInput(e.target)}
                                                 />
                                             </Form.Field>

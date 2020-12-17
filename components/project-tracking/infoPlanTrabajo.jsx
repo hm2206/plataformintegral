@@ -90,6 +90,7 @@ const InfoPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
                                     execute={false}
                                     name="activity_id"
                                     value={form.activity_id}
+                                    disabled={!form.objective_id}
                                     onChange={(e, obj) => handleInput(obj)}
                                 />
                             </div>
