@@ -38,7 +38,11 @@ export default class EditTypeDescuento extends Component
         let { query } = this.props;
         let id = query.id ? atob(query.id) : '__error';
         await unujobs.get(`type_descuento/${id}`)
-        .then(res => this.setState({ form: res.data, old: res.data }))
+        .then(res => {
+            let { success, message, type_descuento } = res.data;
+            if (!success) throw new Error(message);
+            this.setState({ form: type_descuento, old: JSON.parse(JSON.stringify(type_descuento))});
+        })
         .catch(err => this.setState({ form: {}, old: {} }));
         this.setState({ loading: false });
     }
