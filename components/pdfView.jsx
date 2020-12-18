@@ -2,6 +2,7 @@ import React, { useState, useEffect, Fragment } from 'react';
 import { Form, Checkbox, Button } from 'semantic-ui-react';
 import Show from './show';
 import { Confirm } from '../services/utils';
+import ListPfx from './listPfx';
 
 const PdfView = ({ 
     pdfUrl = "https://www.iaa.csic.es/python/curso-python-para-principiantes", 
@@ -29,6 +30,8 @@ const PdfView = ({
     const [current_position, setCurrentPosition] = useState("");
     const [count_signature, setCountSignature] = useState(0);
     const [positions, setPositions] = useState([]);
+    const [current_select, setCurrentSelect] = useState({});
+    const isSelect = Object.keys(current_select).length;
 
     // config rectangulo
     const columns = 5;
@@ -124,13 +127,21 @@ const PdfView = ({
                     <div className="col-md-4 col-lg-3">
                         <div className="h-100 w-100" style={{ borderLeft: '1px solid rgba(20,20,31,.12)' }}>
                             <div className="card-body">
-                               <Show condicion={count_signature}>
-                                <div className="card">
+                                <div className="row">
+                                    <ListPfx
+                                        classBody="col-md-12"
+                                        classSkeleton="col-md-12"
+                                        onClick={(e, obj) => setCurrentSelect(obj)}
+                                    />
+                                </div>
+                                
+                                <Show condicion={count_signature}>
+                                    <div className="card">
                                         <div className="card-header">
                                         <i className="fas fa-signature"></i>  Se encontró {count_signature} firmas
                                         </div>
                                     </div>
-                               </Show>
+                                </Show>
 
                                 <div className="card">
                                     <div className="card-header">
@@ -227,7 +238,7 @@ const PdfView = ({
                                     <Show condicion={onSignature}>
                                         <Button color="teal"
                                             onClick={handleSignature}
-                                            disabled={signature ? !typeof current_position == 'number' || !page : !page}
+                                            disabled={(signature ? !typeof current_position == 'number' || !page : !page) || !isSelect}
                                         >
                                             <i className="fas fa-signature"></i> Firmar
                                         </Button>
