@@ -1,8 +1,11 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, useContext } from 'react';
 import { Form, Checkbox, Button } from 'semantic-ui-react';
 import Show from './show';
 import { Confirm } from '../services/utils';
 import ListPfx from './listPfx';
+import { signature } from '../services/apis';
+import { AppContext } from '../contexts/AppContext'
+import Swal from 'sweetalert2';
 
 const PdfView = ({ 
     pdfUrl = "https://www.iaa.csic.es/python/curso-python-para-principiantes", 
@@ -13,8 +16,11 @@ const PdfView = ({
     disabledImage = false,
     metaInfo = { reason: "Yo soy el firmante", location: "PE", image: "" },
     onClose = null,
-    onSignature = null
+    onSigned = null
 }) => {
+
+    // app
+    const app_context = useContext(AppContext);
 
     // obtener metadatos del pdf
     let pdfPages = pdfDoc.getPages(); 
@@ -23,7 +29,7 @@ const PdfView = ({
     // estados
     const [reason, setReason] = useState(metaInfo.reason || "");
     const [location, setLocation] = useState(metaInfo.location || "");
-    const [signature, setSignature] = useState(false);
+    const [current_signature, setCurrentSignature] = useState(false);
     const [image, setImage] = useState(defaultImage || "");
     const [page, setPage] = useState(1);
     const [select_page, setSelectPage] = useState(pdfPages[page - 1]);
@@ -67,25 +73,58 @@ const PdfView = ({
         }
     }
 
-    const handleSignature = () => {
-        let payload = {};
-        // assign pdfBlob
-        payload.pdfBlob = pdfBlob;
-        payload.page = page;
-        payload.visible = false;
-        // validar datos
-        if (!disabledMetaInfo) {
-            payload.reason = reason;
-            payload.location = location;
+    const signer = async () => {
+        let answer = await Confirm("warning", `¿Estás seguro en firmar el PDF?`, 'Firmar');        
+        if (answer) {
+            let payload = {};
+            // assign pdfBlob
+            payload.pdfBlob = pdfBlob;
+            payload.page = page;
+            payload.visible = false;
+            // validar datos
+            if (!disabledMetaInfo) {
+                payload.reason = reason;
+                payload.location = location;
+            }
+            // firma visible
+            if (current_signature) {
+                payload.position = current_position;
+                payload.visible = true;
+            }
+            // emitir evento
+            app_context.fireLoading(true);
+            let datos = new FormData;
+            datos.append('reason', payload.reason);
+            datos.append('location', payload.location);
+            datos.append('page', payload.page);
+            datos.append('file', payload.pdfBlob);
+            datos.append('visible', payload.visible);
+            datos.append('certificate_id', current_select.id);
+            if (payload.position) datos.append('position', payload.position);
+            await signature.post(`auth/signer`, datos, { responseType: 'blob' })
+                .then(async res => {
+                    let { data } = res;
+                    if (typeof onSigned == 'function') await onSigned(payload, data);
+                    else {
+                        let a = document.createElement('a');
+                        a.href = URL.createObjectURL(data);
+                        a.target = '__blank';
+                        a.download = payload.pdfBlob.name;
+                        await a.click();
+                    }
+                    // cerrar díalogo
+                    if (typeof onClose == 'function') onClose();
+                }).catch(err => {
+                    try {
+                        let { message, errors } = err.response.data;
+                        if (!errors) throw new Error(message || err.message);
+                        Swal.fire({ icon: 'warning', text: message });
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: error.message });
+                    }
+                });
+            app_context.fireLoading(false);
         }
-        // firma visible
-        if (signature) {
-            payload.position = current_position;
-            payload.visible = true;
-        }
-        // emitir evento
-        if (typeof onSignature == 'function') onSignature(payload);
-        if (typeof onClose == 'function') onClose(true);
     }
 
     const getSignatures = async () => {
@@ -191,9 +230,9 @@ const PdfView = ({
                                                 <label htmlFor="">Firma Visible</label>
                                                 <div>
                                                     <Checkbox toggle 
-                                                        checked={signature}
-                                                        name="signature"
-                                                        onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked }, setSignature)}
+                                                        checked={current_signature}
+                                                        name="current_signature"
+                                                        onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked }, setCurrentSignature)}
                                                     />
                                                 </div>
                                             </Form.Field>
@@ -201,7 +240,7 @@ const PdfView = ({
                                     </div>
                                 </div>
 
-                                <Show condicion={signature}>
+                                <Show condicion={current_signature}>
                                     <div className="card">
                                         <div className="card-header">
                                             <i className="fas fa-cog"></i> Configurar Posición
@@ -235,14 +274,12 @@ const PdfView = ({
                                 </Show>
                             
                                 <div className="mt-3 text-right">
-                                    <Show condicion={onSignature}>
-                                        <Button color="teal"
-                                            onClick={handleSignature}
-                                            disabled={(signature ? !typeof current_position == 'number' || !page : !page) || !isSelect}
-                                        >
-                                            <i className="fas fa-signature"></i> Firmar
-                                        </Button>
-                                    </Show>
+                                    <Button color="teal"
+                                        onClick={signer}
+                                        disabled={(current_signature ? !typeof current_position == 'number' || !page : !page) || !isSelect}
+                                    >
+                                        <i className="fas fa-signature"></i> Firmar
+                                    </Button>
                                 </div>
                             </div>
                         </div>

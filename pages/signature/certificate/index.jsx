@@ -77,13 +77,14 @@ const IndexCertificate = ({ query, success, certificates }) => {
                     <Form>
                         <div className="col-md-12">
                             <DataTable titulo={<span>Lista de Certificados </span>}
-                                headers={["#ID", "Foto", "Apellidos y Nombres", "N° Documento", "Fecha de Nac."]}
+                                headers={["#ID", "Foto", "Apellidos y Nombres", "N° Documento", "Serial N°", "Fecha de Nac."]}
                                 data={certificates.data || []}
                                 index={[
                                     { key: "id", type: "text" },
                                     { key: 'person.image_images.image_50x50', type: 'cover' },
                                     { key: "person.fullname", type: "text", className: "uppercase" },
                                     { key: "person.document_number", type: "icon" },
+                                    { key: "serial_number", type: 'icon', bg: 'dark' },
                                     { key: "person.date_of_birth", type: "date", bg: 'dark' }
                                 ]}
                                 options={[

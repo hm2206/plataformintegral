@@ -10,6 +10,7 @@ import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import AssignPerson from '../../../components/authentication/user/assignPerson';
 import atob from 'atob';
+import moment from 'moment';
 
 const CreateCertificate = ({ query, certificate, success }) => {
 
@@ -103,6 +104,30 @@ const CreateCertificate = ({ query, certificate, success }) => {
                                             <label htmlFor="">N° Documento</label>
                                             <input type="text"
                                                 value={certificate && certificate.person && certificate.person.document_number}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="col-md-12 mb-4">
+                                            <label htmlFor="">Serial Number</label>
+                                            <input type="text"
+                                                value={certificate && certificate.serial_number}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="col-md-6 mb-4">
+                                            <label htmlFor="">Not Before</label>
+                                            <input type="text"
+                                                value={certificate && moment(certificate.not_before).format('DD/MM/YYYY HH:mm:ss')}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="col-md-6 mb-4">
+                                            <label htmlFor="">Not After</label>
+                                            <input type="text"
+                                                value={certificate && moment(certificate.not_after).format('DD/MM/YYYY HH:mm:ss')}
                                                 readOnly
                                             />
                                         </div>

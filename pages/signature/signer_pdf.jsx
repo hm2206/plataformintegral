@@ -42,38 +42,6 @@ const SignerPDF = () => {
         setPdfDoc(undefined);
         setPdfUrl("");
     }
-
-    // obtener firma
-    const onSignature = async (e) => {
-        let answer = await Confirm("warning", `¿Estás seguro en firmar el PDF?`, 'Firmar');
-        if (answer) {
-            app_context.fireLoading(true);
-            let datos = new FormData;
-            datos.append('reason', e.reason);
-            datos.append('location', e.location);
-            datos.append('page', e.page);
-            datos.append('file', e.pdfBlob);
-            datos.append('visible', e.visible);
-            if (e.position) datos.append('position', e.position);
-            await signature.post(`auth/signer`, datos, { responseType: 'blob' })
-                .then(res => {
-                    let { data } = res;
-                    let a = document.createElement('a');
-                    a.href = URL.createObjectURL(data);
-                    a.target = '__blank';
-                    a.download = e.pdfBlob.name;
-                    a.click();
-                }).catch(err => {
-                    try {
-                        let { message } = err.response.data;
-                        Swal.fire({ icon: 'error', text: message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: err.message });
-                    }
-                });
-            app_context.fireLoading(false);
-        }
-    }
     
     // render
     return <div className="col-md-12">
@@ -104,7 +72,6 @@ const SignerPDF = () => {
                 pdfBlob={pdf_blob}
                 pdfDoc={pdf_doc}
                 pdfUrl={pdf_url}
-                onSignature={onSignature}
                 onClose={onClose}
             />
         </Show>
