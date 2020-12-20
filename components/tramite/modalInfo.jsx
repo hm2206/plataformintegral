@@ -8,6 +8,7 @@ import apis from '../../services/apis';
 const api_tramite = apis.tramite;
 import Swal from 'sweetalert2';
 import { Confirm } from '../../services/utils';
+import { DropZone } from '../Utils';
 
 const Documento = ({ tramite }) => {
 
@@ -143,12 +144,12 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id, onRefresh, is
     }
 
     // actualizar archivo
-    const updateFile = async (target, index) => {
+    const updateFile = async (file, index) => {
         let answer = await Confirm("warning", `¿Deseas actualizar el archivo?`, 'Actualizar')
         if (answer) {
             app_context.fireLoading(true);
             let datos = new FormData;
-            datos.append('file', target.files[0]);
+            datos.append('file', file);
             datos.append('index', index)
             await api_tramite.post(`tramite/${tramite.id}/update_file`, datos, {
                 headers:  { DependenciaId: tracking.dependencia_id }
@@ -163,18 +164,15 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id, onRefresh, is
                 Swal.fire({ icon: 'error', text: err.message });
             });
         }
-        // vaciar file
-        let nodeInput = document.getElementById(`index-file-${index}`);
-        if (nodeInput)  nodeInput.value = null;
     }
 
     // agregar archivos
-    const attachFile = async (target) => {
-        let answer = await Confirm("warning", `¿Deseas agrear un archivo?`, 'Agregar')
+    const attachFile = async (current_file) => {
+        let answer = await Confirm("warning", `¿Estás seguro en agregar el archivo?`, 'Agregar')
         if (answer) {
             app_context.fireLoading(true);
             let datos = new FormData;
-            datos.append('file', target.files[0]);
+            datos.append('file', current_file);
             await api_tramite.post(`tramite/${tramite.id}/attach_file`, datos, {
                 headers:  { DependenciaId: tracking.dependencia_id }
             }).then(res => {
@@ -188,9 +186,6 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id, onRefresh, is
                 Swal.fire({ icon: 'error', text: err.message });
             });
         }
-        // vaciar file
-        let nodeInput = document.getElementById(`new_file`);
-        nodeInput.value = null;
     }
 
     const getMeta = (path) => {
@@ -233,18 +228,16 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id, onRefresh, is
                             </a>
 
                             <Show condicion={!tramite.verify && tracking.dependencia_destino_id == tramite.dependencia_id}>
-                                <label className="mr-1 mt-2 btn btn-sm btn-icon btn-secondary"
-                                    title="Remplazar Archivo"
-                                >
-                                    <i className="fas fa-upload"></i> 
-                                    <input type="file" 
-                                        name="file" 
-                                        hidden
-                                        accept="application/pdf"
-                                        id={`index-file-${indexF}`}
-                                        onChange={(({ target }) => updateFile(target, indexF))}
-                                    />
-                                </label>
+                                <DropZone 
+                                    id={`index-file-${indexF}`} 
+                                    name="file"
+                                    icon="fas fa-upload"
+                                    multiple={false}
+                                    accept="application/pdf"
+                                    onChange={({ files }) => updateFile(files[0], indexF)}
+                                    onSigned={({ file }) => updateFile(file, indexF)}
+                                    basic={true}
+                                />
 
                                 <Show condicion={current_files.length > 1}>
                                     <a className="mr-1 btn btn-sm btn-icon btn-secondary"
@@ -265,10 +258,16 @@ const FileInfo = ({ tracking, tramite, files = [], dependencia_id, onRefresh, is
                 <Show condicion={!tramite.verify}>
                     <tr>
                         <th colSpan="2" className="text-right">
-                            <label className="ui button green basic" style={{ cursor: 'pointer' }}>
-                                <input type="file" id="new_file" hidden onChange={(e) => attachFile(e.target)}/>
-                                <i className="fas fa-plus"></i>
-                            </label>
+                            <DropZone 
+                                id="files" 
+                                name="files"
+                                icon="save"
+                                multiple={false}
+                                title="Select. Archivo Pdf"
+                                accept="application/pdf"
+                                onChange={({ files }) => attachFile(files[0])}
+                                onSigned={({ file }) => attachFile(file)}
+                            />
                         </th>
                     </tr>
                 </Show>

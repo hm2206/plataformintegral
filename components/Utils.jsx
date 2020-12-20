@@ -4,7 +4,9 @@ import { Dropdown, Button, Icon, Form, Header, Progress } from 'semantic-ui-reac
 import Swal from "sweetalert2";
 import Modal from './modal';
 import Skeleton from 'react-loading-skeleton';
-
+import PdfView from './pdfView';
+import { Confirm } from '../services/utils';
+import { PDFDocument } from 'pdf-lib'
 
 const InputFile = ({ id, name, onChange, error = false, children = null, title = "Select", accept = "*", icon = 'image', label = null }) => {
 
@@ -32,7 +34,22 @@ const InputFile = ({ id, name, onChange, error = false, children = null, title =
 }
 
 
-const DropZone = ({ id, name, onChange, error = false, multiple = true, children = null, title = "Select", accept = "*", icon = 'image', label = null, result = [], onDelete = null }) => {
+const DropZone = ({ 
+  id, name, onChange, error = false, 
+  multiple = true, children = null, 
+  title = "Select", accept = "*", 
+  icon = 'image', label = null, 
+  result = [], onDelete = null ,
+  onSigned = null, size = 6, 
+  signerTypes = ['application/pdf'],
+  basic = false
+}) => {
+
+  // estados
+  const [pdf_url, setPdfUrl] = useState("");
+  const [pdf_doc, setPdfDoc] = useState(undefined);
+  const [pdf_blob, setPdfBlob] = useState(undefined);
+  const [show_signed, setShowSigned] = useState(false);
 
   const metaDatos = (name) => {
     let items = {
@@ -44,49 +61,116 @@ const DropZone = ({ id, name, onChange, error = false, multiple = true, children
     // response 
     return items[keyName] || { color: '#37474f', icon: 'fas fa-file-alt' };
   };
+  
+  const handleChange = async ({ name, files }) => {
+    if (typeof onSigned == 'function') {
+      let file = files[0];
+      let size_limit = size * 1024;
+      if (size_limit >= (file.size / 1024)) {
+        if (signerTypes.includes(file.type)) {
+          let reader = new FileReader();
+          await reader.readAsArrayBuffer(file);
+          reader.onload = async () => {
+            let pdfDoc = await PDFDocument.load(reader.result);
+            let url = URL.createObjectURL(file);
+            setPdfDoc(pdfDoc);
+            setPdfBlob(file);
+            setPdfUrl(url);
+            let answer = await Confirm("info", `¿Desea añadir firma digital al archivo "${file.name}"?`, 'Firmar');
+            if (answer) {
+              setShowSigned(true);
+            } else typeof onChange == 'function' ? onChange({ name, files }) : null;
+          }
+        } else typeof onChange == 'function' ? onChange({ name, files }) : null;
+      }
+    } else typeof onChange == 'function' ? onChange({ name, files }) : null;
+    // eliminar archivos temporales
+    let inputNode = document.getElementById(id);
+    if(inputNode) inputNode.value = null;
+  }
+
+  const handleSigner = async (obj, blob) => {
+    blob.lastModifiedDate = new Date();
+    let file = new File([blob], obj.pdfBlob.name);
+    typeof onSigned == 'function' ? onSigned({ name, file, obj }) : null;
+    setShowSigned(false);
+  }
+
+  if (basic) {
+    return (<Fragment>
+        <label className='mr-1 btn btn-sm btn-icon btn-secondary mt-2' htmlFor={id} style={{ cursor: 'pointer' }}>
+          <i className={icon}></i>
+          <input type="file"
+            id={id} 
+            accept={accept}
+            name={name}
+            multiple={multiple}
+            onChange={async ({ target }) => handleChange(target)}
+            hidden
+          />
+        </label>
+
+        <Show condicion={show_signed}>
+          <PdfView
+            pdfUrl={pdf_url} 
+            pdfDoc={pdf_doc}
+            pdfBlob={pdf_blob}
+            onSigned={handleSigner}
+            onClose={(e) => setShowSigned(false)}
+          />
+        </Show>  
+      </Fragment>);
+  }
 
   return (<Form.Field error={error || false}>
     <label htmlFor={id}>{label}</label>
-    <label className="dropzone" htmlFor={id} style={{ overflow: 'hidden' }}>
-        <div className="text-center dropzone-color pt-3 pb-3" style={{ fontSize: '4em' }}>
-          <i className={`fas fa-cloud-upload-alt`}></i>
-          <div style={{ fontSize: '13px', color: '#455a64' }}>
-            {title}
-          </div>
+    <label className='dropzone' htmlFor={id} style={{ overflow: 'hidden' }}>
+      <div className="text-center dropzone-color pt-3 pb-3" style={{ fontSize: '4em' }}>
+        <i className={`fas fa-cloud-upload-alt`}></i>
+        <div style={{ fontSize: '13px', color: '#455a64' }}>
+          {title}
         </div>
+      </div>
+      
         <input type="file"
             id={id} 
             accept={accept}
             name={name}
             multiple={multiple}
-            onChange={async (e) => {
-              let { name, files } = e.target;
-              if (typeof onChange == 'function') await onChange({ name, files });
-              let inputNode = document.getElementById(id)
-              if(inputNode) inputNode.value = null;
-            }}
+            onChange={async ({ target }) => handleChange(target)}
             hidden
         />
     </label>
     <label>{error || ""}</label>
-    <div className="row">
-      {result.map((f, indexF) => 
-        <div className="col-md-3" key={`${id}-files-${f.name}`}>
-          <div className="card">
-            <div className="card-body" style={{ overflow: 'hidden' }}>
-              <div className="dropzone-text">
-                <i className={metaDatos(f.name).icon} style={{ color: metaDatos(f.name).color }}></i> {f.name}
+    
+      <div className="row">
+        {result.map((f, indexF) => 
+          <div className="col-md-3" key={`${id}-files-${f.name}`}>
+            <div className="card">
+              <div className="card-body" style={{ overflow: 'hidden' }}>
+                <div className="dropzone-text">
+                  <i className={metaDatos(f.name).icon} style={{ color: metaDatos(f.name).color }}></i> {f.name}
+                </div>
+                <span className="dropzone-item-delete" onClick={(e) => typeof onDelete == 'function' ? onDelete({ e, index: indexF, file: f }) : null}>
+                  <i className="fas fa-times"></i>
+                </span>
+                <hr/>
+                <b>{(f.size / (1024 * 1024)).toFixed(2)}MB</b>
               </div>
-              <span className="dropzone-item-delete" onClick={(e) => typeof onDelete == 'function' ? onDelete({ e, index: indexF, file: f }) : null}>
-                <i className="fas fa-times"></i>
-              </span>
-              <hr/>
-              <b>{(f.size / (1024 * 1024)).toFixed(2)}MB</b>
             </div>
-          </div>
-        </div>  
-      )}
-    </div>
+          </div>  
+        )}
+      </div>
+    
+    <Show condicion={show_signed}>
+      <PdfView
+        pdfUrl={pdf_url} 
+        pdfDoc={pdf_doc}
+        pdfBlob={pdf_blob}
+        onSigned={handleSigner}
+        onClose={(e) => setShowSigned(false)}
+      />
+    </Show>
   </Form.Field>);
 }
 

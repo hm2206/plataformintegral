@@ -202,7 +202,7 @@ class MyApp extends App {
   } 
 
   componentDidCatch = (error, info) => {
-    history.go('/404');
+    // history.go('/404');
   }
 
   handleScreen = () => {

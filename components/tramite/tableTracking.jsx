@@ -16,6 +16,7 @@ import { TrackingContext } from '../../contexts/tracking/TrackingContext';
 import { SelectAuthEntityDependencia } from '../../components/select/authentication';
 import ModalVerify from './modalVerify';
 import { Confirm } from '../../services/utils';
+import Skeleton from 'react-loading-skeleton';
 
 const api_tramite = apis.tramite;
 
@@ -47,6 +48,7 @@ const TableTracking = ({ title, query, onSearch, url }) => {
     const [semaforo, setSemaforo] = useState([]);
     const [current_config, setCurrentConfig] = useState({});
     const [send, setSend] = useState(false);
+    const [current_role_loading, setCurrentRoleloading] = useState(false);
 
     // dependencia predeterminada
     useEffect(() => {
@@ -201,11 +203,13 @@ const TableTracking = ({ title, query, onSearch, url }) => {
 
     // obtener role
     const getRole = async () => {
+        setCurrentRoleloading(true);
         await api_tramite.get('auth/role', { headers: { DependenciaId: query.dependencia_id } })
             .then(res => {
                 let { role } = res.data;
                 setRole(role);
             }).catch(err => setRole({}));
+        setCurrentRoleloading(false);
     }
 
     // activar el trámite
@@ -234,14 +238,21 @@ const TableTracking = ({ title, query, onSearch, url }) => {
                 <div className="car card-fluid">
                     <div className="card-header">
                         {title} 
-                        <i className="fas fa-arrow-right ml-2 mr-2"></i> 
-                        <span className={role && role.level && roles[role.level].className || "badge badge-dark"}>
-                            <Show condicion={isRole}
-                                predeterminado="TRABAJADOR"
-                            >
-                                {role && role.level && role.level && roles[role.level].text || ""}
-                            </Show>
-                        </span>
+
+                        <Show condicion={current_role_loading}>
+                            <Skeleton width="100px" height="25px" className="ml-3"/>
+                        </Show>
+
+                        <Show condicion={!current_role_loading}>
+                            <i className="fas fa-arrow-right ml-2 mr-2"></i> 
+                            <span className={role && role.level && roles[role.level].className || "badge badge-dark"}>
+                                <Show condicion={isRole}
+                                    predeterminado="TRABAJADOR"
+                                >
+                                    {role && role.level && role.level && roles[role.level].text || ""}
+                                </Show>
+                            </span>
+                        </Show>
                     </div>
 
                     <div className="card-body">

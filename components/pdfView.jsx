@@ -155,11 +155,11 @@ const PdfView = ({
             }}
         >
             <div className="card w-100 h-100" style={{ overflowY: 'auto', overflowX: 'hidden' }}>
-                <div className="card-header pl-4">
+                <div className="card-header pl-4 text-left">
                     <i className="fas fa-file-pdf"></i> Visualizador de pdf
                     <i className="fas fa-times close" style={{ cursor: 'pointer' }} onClick={handleClose}></i>
                 </div>
-                <div className="row h-100">
+                <div className="row h-100 text-left">
                     <div className="col-md-8 col-lg-9">
                         <iframe className="w-100 h-100 pl-4" frameBorder="0" src={pdfUrl}/>
                     </div>

@@ -135,36 +135,10 @@ const CreateTramite = ({ verify = 0 }) => {
     }
 
     // realizar firma
-    const onSignature = async (obj) => {
-        let answer = await Confirm("warning", `¿Estás seguro en firmar el PDF?`, 'Firmar');
-        if (answer) {
-            app_context.fireLoading(true);
-            let datos = new FormData();
-            datos.append('location', obj.location)
-            datos.append('page', obj.page)
-            datos.append('reason', obj.reason)
-            datos.append('visible', obj.visible)
-            datos.append('file', obj.pdfBlob)
-            if (obj.position) datos.append('position', obj.position)
-            // firmar pdf
-            await signature.post(`auth/signer`, datos, { responseType: 'blob' })
-                .then(res => {
-                    app_context.fireLoading(false);
-                    let { data } = res;
-                    data.lastModifiedDate = new Date();
-                    let file = new File([data], obj.pdfBlob.name);
-                    setCurrentFiles([...current_files, file]);
-                    Swal.fire({ icon: 'success', text: 'El pdf se firmó correctamente!' });
-                }).catch(err => {
-                    try {
-                        app_context.fireLoading(false);
-                        let { message } = err.response.data;
-                        Swal.fire({ icon: 'error', text: message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message });
-                    }
-                });
-        }
+    const onSignature = async (obj, blob) => {
+        blob.lastModifiedDate = new Date();
+        let file = new File([blob], obj.pdfBlob.name);
+        setCurrentFiles([...current_files, file]);
     }
 
     // render
@@ -285,7 +259,7 @@ const CreateTramite = ({ verify = 0 }) => {
                         pdfUrl={pdf_url} 
                         pdfDoc={pdf_doc}
                         pdfBlob={pdf_blob}
-                        onSignature={onSignature}
+                        onSigned={onSignature}
                         onClose={(e) => setOption("")}
                     />
                 </Show>

@@ -87,37 +87,8 @@ const ModalNextTracking = (props) =>{
     }
 
     // manejar archivos
-    const handleFiles = async ({ files }) => {
-        let size_total = size_files;
-        let size_limit = 6 * 1024;
-        for (let f of files) {
-            size_total += f.size;
-            if ((size_total / 1024) <= size_limit) {
-                let answer = await Confirm("info", `¿Desea añadir firma digital al archivo "${f.name}"?`, 'Firmar');
-                if (answer) addSignature(f);
-                else {
-                    setCurrentFiles([...current_files, f]);
-                }
-            } else {
-                size_total = size_total - f.size;
-                Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(6)}MB)` });
-                return false;
-            }
-        }
-    }
-
-    // agregar pdf para firmar
-    const addSignature = async (blob) => {
-        let reader = new FileReader();
-        await reader.readAsArrayBuffer(blob);
-        reader.onload = async () => {
-            let pdfDoc = await PDFDocument.load(reader.result);
-            let url = URL.createObjectURL(blob);
-            setPdfDoc(pdfDoc);
-            setPdfBlob(blob);
-            setPdfUrl(url);
-            setOption("signer");
-        }
+    const handleFiles = async (file) => {
+        setCurrentFiles([...current_files, file]);
     }
  
     // eliminar pdf
@@ -127,39 +98,6 @@ const ModalNextTracking = (props) =>{
         let size = current_files - file.size;
         setCurrentFiles(newFiles);
         setSizeFiles(size);
-    }
-
-     // realizar firma
-    const onSignature = async (obj) => {
-        let answer = await Confirm("warning", `¿Estás seguro en firmar el PDF?`, 'Firmar');
-        if (answer) {
-            app_context.fireLoading(true);
-            let datos = new FormData();
-            datos.append('location', obj.location)
-            datos.append('page', obj.page)
-            datos.append('reason', obj.reason)
-            datos.append('visible', obj.visible)
-            datos.append('file', obj.pdfBlob)
-            if (obj.position) datos.append('position', obj.position)
-            // firmar pdf
-            await signature.post(`auth/signer`, datos, { responseType: 'blob' })
-                .then(res => {
-                    app_context.fireLoading(false);
-                    let { data } = res;
-                    data.lastModifiedDate = new Date();
-                    let file = new File([data], obj.pdfBlob.name);
-                    setCurrentFiles([...current_files, file]);
-                    Swal.fire({ icon: 'success', text: 'El pdf se firmó correctamente!' });
-                }).catch(err => {
-                    try {
-                        app_context.fireLoading(false);
-                        let { message } = err.response.data;
-                        Swal.fire({ icon: 'error', text: message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: err.message });
-                    }
-                });
-        }
     }
 
     // procesar trámite
@@ -375,11 +313,11 @@ const ModalNextTracking = (props) =>{
                                     <label htmlFor="">Adjuntar Archivo</label>
                                     <DropZone id="files" 
                                         name="files"
-                                        onChange={(e) => handleFiles(e)} 
-                                        icon="save"
+                                        onChange={({ files }) => handleFiles(files[0])} 
+                                        onSigned={({ file }) => handleFiles(file)}
                                         result={current_files}
-                                        title="Select. Archivo (*.docx, *.pdf)"
-                                        accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                        title="Select. Archivo (*.pdf)"
+                                        accept="application/pdf"
                                         onDelete={(e) => deleteFile(e.index, e.file)}
                                     />
                                     <label htmlFor="">{errors.files && errors.files[0] || ""}</label>
@@ -491,17 +429,6 @@ const ModalNextTracking = (props) =>{
                             // handleCurrentCopy({ user: { key: `key-user-${e.username}`, value: e.id, text: e.fullname } })
                             // handleAddCopy();
                         }}
-                    />
-                </Show>
-
-                {/* firmar pdf  */}
-                <Show condicion={option == "signer"}>
-                    <PdfView 
-                        pdfUrl={pdf_url} 
-                        pdfDoc={pdf_doc}
-                        pdfBlob={pdf_blob}
-                        onSignature={onSignature}
-                        onClose={(e) => setOption("")}
                     />
                 </Show>
             </Modal>
