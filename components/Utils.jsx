@@ -79,10 +79,10 @@ const DropZone = ({
             let answer = await Confirm("info", `¿Desea añadir firma digital al archivo "${file.name}"?`, 'Firmar');
             if (answer) {
               setShowSigned(true);
-            } else typeof onChange == 'function' ? onChange({ name, files }) : null;
+            } else typeof onChange == 'function' ? onChange({ name, files: [file] }) : null;
           }
         } else typeof onChange == 'function' ? onChange({ name, files }) : null;
-      }
+      } else typeof onChange == 'function' ? onChange({ name, files }) : null;
     } else typeof onChange == 'function' ? onChange({ name, files }) : null;
     // eliminar archivos temporales
     let inputNode = document.getElementById(id);

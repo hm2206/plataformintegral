@@ -87,8 +87,8 @@ const ModalNextTracking = (props) =>{
     }
 
     // manejar archivos
-    const handleFiles = async (file) => {
-        setCurrentFiles([...current_files, file]);
+    const handleFiles = async (files) => {
+        setCurrentFiles([...current_files, ...files]);
     }
  
     // eliminar pdf
@@ -313,8 +313,8 @@ const ModalNextTracking = (props) =>{
                                     <label htmlFor="">Adjuntar Archivo</label>
                                     <DropZone id="files" 
                                         name="files"
-                                        onChange={({ files }) => handleFiles(files[0])} 
-                                        onSigned={({ file }) => handleFiles(file)}
+                                        onChange={({ files }) => handleFiles(files)} 
+                                        onSigned={({ file }) => handleFiles([file])}
                                         result={current_files}
                                         title="Select. Archivo (*.pdf)"
                                         accept="application/pdf"
