@@ -88,7 +88,7 @@ const Contrato = ({ success, infos, query }) => {
                                 { key: "estado", type: "switch", is_true: "Activo", is_false: "Terminado"}
                             ]}
                             options={[
-                                { key: "edit", icon: "fas fa-pencil-alt" }
+                                { key: "pay", icon: "fas fa-coins" }
                             ]}
                             getOption={handleOption}
                         >
