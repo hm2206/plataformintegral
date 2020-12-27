@@ -112,6 +112,14 @@ const Edit = ({ success, info, query }) => {
         }
     }
 
+    // handle back
+    const handleBack = () => {
+        let { query, pathname, push } = Router;
+        let href = query.href ? atob(query.href || "") : "";
+        if (href) push(href);
+        else push({ pathname: backUrl(pathname), query: { query_search: `${success ? info.person.fullname : ''}` }}) 
+    }
+
     return (
     <Fragment>
         <div className="col-md-12">
@@ -119,7 +127,7 @@ const Edit = ({ success, info, query }) => {
                 <div className="card-">
                     <div className="card-header">
                         <BtnBack 
-                            onClick={(e) => Router.push({ pathname: backUrl(Router.pathname), query: { query_search: `${success ? info.person.fullname : ''}` }})}
+                            onClick={handleBack}
                         /> <span className="ml-4">Editar Contrato</span>
                     </div>
 
