@@ -11,7 +11,11 @@ export const allTypeDetalle = (ctx) => {
     return async (dispatch) => {
         let { query } = ctx;
         await unujobs.get(`type_detalle`, {}, ctx)
-        .then(res =>  dispatch({ type: typeDetalleActionsTypes.TYPE_DETALLE, payload: res.data }))
+        .then(res =>  {
+            let { success, type_detalles, message } = res.data;
+            if (!success) throw new Error(message);
+            return dispatch({ type: typeDetalleActionsTypes.TYPE_DETALLE, payload: type_detalles })
+        })
         .catch(err => console.log(err.message));
     }
 }

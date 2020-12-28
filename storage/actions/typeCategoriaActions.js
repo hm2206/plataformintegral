@@ -13,7 +13,7 @@ export const pageTypeCategoria = (ctx) => {
         await unujobs.get(`type_categoria?page=${query.page}`, {}, ctx)
         .then(res =>  {
             let { type_categorias } = res.data;
-            return dispatch({ type: typeCategoriaActionsTypes.PAGE_TYPE_CATEGORIA, payload: res.data })
+            return dispatch({ type: typeCategoriaActionsTypes.PAGE_TYPE_CATEGORIA, payload: type_categorias })
         })
         .catch(err => console.log(err.message));
     }

@@ -2,6 +2,12 @@ import React, { useState, useContext } from 'react';
 
 const Grado = ({ work }) => {
 
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [current_grados, setCurrentGrados] = useState([]);
+    const [current_page, setCurrentPage] = useState(1);
+    const [current_last_page, setCurrentLastPage] = useState(0);
+    const [current_total, setCurrentTotal] = useState(0);
+
     // render
     return <div className="row">
         <div className="col-md-12">
