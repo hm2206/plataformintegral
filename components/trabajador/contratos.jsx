@@ -4,7 +4,6 @@ import Show from '../show'
 import { escalafon } from '../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
-import Cookies from 'js-cookie';
 
 const Placeholder = () => {
 

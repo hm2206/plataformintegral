@@ -1,7 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import moment from 'moment';
-import { tipo_documento } from '../../services/storage.json';
 import { unujobs } from '../../services/apis';
 import { Confirm, parseOptions } from '../../services/utils';
 import Swal from 'sweetalert2';

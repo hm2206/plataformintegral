@@ -47,7 +47,7 @@ const TrabajadorID = ({ work, pathname, query }) => {
                     { key: "ascenso", text: "Ascensos" },
                     { key: "familiar", text: "Familia" },
                     { key: "desplazamiento", text: "Desplazamientos" },
-                    { key: "merito", text: "Mérito/Desmérito" },
+                    { key: "merito", text: "Mérito/Demérito" },
                     { key: "licencia", text: "Licencias" },
                     { key: "permiso", text: "Permisos" },
                     { key: "vacacion", text: "Vacaciónes" }

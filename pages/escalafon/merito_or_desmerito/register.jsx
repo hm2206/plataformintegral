@@ -201,7 +201,7 @@ const RegisterFormacionAcademica = () => {
                                                         placeholder="Seleccionar"
                                                         options={[
                                                             { key: "MERITO", value: "MERITO", text: "Mérito" },
-                                                            { key: "DESMERITO", value: "DESMERITO", text: "Desmérito" },
+                                                            { key: "DESMERITO", value: "DEMERITO", text: "Demérito" },
                                                         ]}
                                                         value={`${form.accion || ""}`}
                                                         onChange={(e, obj) => handleInput(obj)}
