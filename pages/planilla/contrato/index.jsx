@@ -159,12 +159,6 @@ const Contrato = ({ success, infos, query }) => {
                             />
                         </div>
                     </div>
-
-                    <BtnFloat
-                        onClick={(e) => Router.push({ pathname: `${Router.pathname}/register` })}
-                    >
-                        <i className="fas fa-plus"></i>
-                    </BtnFloat>
                 </Form>
             </Body>
     </div>)
