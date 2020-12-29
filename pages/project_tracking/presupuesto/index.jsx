@@ -32,36 +32,36 @@ const IndexPresupuesto = ({ success, presupuestos }) => {
 
     // render
     return (
-    <div className="col-md-12">
-        <Body>
-            <Datatable
-                titulo="Lista de Presupuesto"
-                isFilter={false}
-                headers={["#ID", "Nombre", "Ext. Presupuestal", "Estado"]}
-                index={[
-                    { key: "id", type: "text" },
-                    { key: "name", type: "text" },
-                    { key: "ext_pptto", type: "text" },
-                    { key: "state", type: "switch", bg_true: "success", is_true: "Activo", bg_false: "danger", is_false: "Desactivado" }
-                ]}
-                data={success ? presupuestos.data : []}
-                options={[
-                    // { 
-                    //     key: "edit",
-                    //     icon: "fas fa-pencil-alt",
-                    //     title: "Editar Plan de Trabajo"  
-                    // }
-                ]}
-                getOption={getOption}
-            />
-        </Body>
-        
-        <BtnFloat
-            onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })} 
-        >
-            <i className="fas fa-plus"></i>
-        </BtnFloat>
-    </div>)
+        <div className="col-md-12">
+            <Body>
+                <Datatable
+                    titulo="Lista de Presupuesto"
+                    isFilter={false}
+                    headers={["#ID", "Nombre", "Ext. Presupuestal", "Estado"]}
+                    index={[
+                        { key: "id", type: "text" },
+                        { key: "name", type: "text" },
+                        { key: "ext_pptto", type: "text" },
+                        { key: "state", type: "switch", bg_true: "success", is_true: "Activo", bg_false: "danger", is_false: "Desactivado" }
+                    ]}
+                    data={success ? presupuestos.data : []}
+                    options={[
+                        {
+                            key: "edit",
+                            icon: "fas fa-pencil-alt",
+                            title: "Editar Presupuesto"
+                        }
+                    ]}
+                    getOption={getOption}
+                />
+            </Body>
+
+            <BtnFloat
+                onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })}
+            >
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
+        </div>)
 }
 
 // server rendering

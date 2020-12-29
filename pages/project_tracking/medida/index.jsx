@@ -18,6 +18,7 @@ const IndexMedida = ({ success, medidas }) => {
             case 'information':
             case 'edit':
                 let id = btoa(obj.id);
+                // console.log(Router.pathname)
                 Router.push({ pathname: `${Router.pathname}/${key}`, query: { id } });
                 break;
             default:
@@ -27,41 +28,36 @@ const IndexMedida = ({ success, medidas }) => {
 
     // render
     return (
-    <div className="col-md-12">
-        <Body>
-            <Datatable
-                titulo="Lista de Medidas"
-                isFilter={false}
-                headers={["#ID", "Nombre Corto", "Nombre", "Estado"]}
-                index={[
-                    { key: "id", type: "text" },
-                    { key: "name_short", type: "text" },
-                    { key: "name", type: "text" },
-                    { key: "state", type: "switch", bg_true: "success", is_true: "Activo", bg_false: "danger", is_false: "Desactivado" }
-                ]}
-                data={success ? medidas.data : []}
-                options={[
-                    { 
-                        key: "information",
-                        icon: "fas fa-info",
-                        title: "Mostrar más información del plan de trabajo"  
-                    },
-                    { 
-                        key: "edit",
-                        icon: "fas fa-pencil-alt",
-                        title: "Editar Plan de Trabajo"  
-                    }
-                ]}
-                getOption={getOption}
-            />
-        </Body>
-        
-        <BtnFloat
-            onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })} 
-        >
-            <i className="fas fa-plus"></i>
-        </BtnFloat>
-    </div>)
+        <div className="col-md-12">
+            <Body>
+                <Datatable
+                    titulo="Lista de Medidas"
+                    isFilter={false}
+                    headers={["#ID", "Nombre Corto", "Nombre", "Estado"]}
+                    index={[
+                        { key: "id", type: "text" },
+                        { key: "name_short", type: "text" },
+                        { key: "name", type: "text" },
+                        { key: "state", type: "switch", bg_true: "success", is_true: "Activo", bg_false: "danger", is_false: "Desactivado" }
+                    ]}
+                    data={success ? medidas.data : []}
+                    options={[
+                        {
+                            key: "edit",
+                            icon: "fas fa-pencil-alt",
+                            title: "Editar Plan de Trabajo"
+                        }
+                    ]}
+                    getOption={getOption}
+                />
+            </Body>
+
+            <BtnFloat
+                onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })}
+            >
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
+        </div>)
 }
 
 // server rendering

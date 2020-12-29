@@ -8,6 +8,7 @@ import atob from 'atob';
 import Router from 'next/router';
 import { Form, Button } from 'semantic-ui-react';
 import Show from '../../../components/show'
+import Swal from 'sweetalert2';
 
 //  componente principal
 const EditProject = ({ success, project }) => {
@@ -65,7 +66,7 @@ const EditProject = ({ success, project }) => {
             setKeywords(newKeywords);
         }
     }
-        
+
     // guardar proyect
     const saveProject = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en guardar el proyecto?`);
@@ -73,7 +74,7 @@ const EditProject = ({ success, project }) => {
             app_context.fireLoading(true);
             let newForm = Object.assign({}, form);
             newForm.keywords = JSON.stringify(keywords);
-            await projectTracking.post('project', newForm)
+            await projectTracking.post('plan_trabajo/' + newForm.id, newForm)
                 .then(res => {
                     app_context.fireLoading(false);
                     let { message } = res.data;
@@ -81,6 +82,7 @@ const EditProject = ({ success, project }) => {
                     setCurrentKeyword("");
                     setForm({});
                     setKeywords([]);
+                    setEdit(false);
                 }).catch(err => {
                     app_context.fireLoading(false);
                     let { message, errors } = err.response.data;
@@ -104,11 +106,11 @@ const EditProject = ({ success, project }) => {
             <Body>
                 <div className="card-">
                     <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push({ pathname: backUrl(Router.pathname) })}/> Editar Proyecto: <b className="capitalize text-primary"><u>"{project && project.title}"</u></b>
+                        <BtnBack onClick={(e) => Router.push({ pathname: backUrl(Router.pathname) })} /> Editar Proyecto: <b className="capitalize text-primary"><u>"{project && project.title}"</u></b>
                     </div>
                     <div className="card-body">
                         <div className="row justify-content-center">
-                        <div className="col-md-9">
+                            <div className="col-md-9">
                                 <Form>
                                     <div className="row">
                                         <div className="col-md-12 mb-4">
@@ -187,8 +189,8 @@ const EditProject = ({ success, project }) => {
                                                         <div className="col-md-2 mb-3">
                                                             <Form.Field>
                                                                 <label htmlFor="">Agregar</label>
-                                                                <Button fluid 
-                                                                    basic 
+                                                                <Button fluid
+                                                                    basic
                                                                     color="green"
                                                                     onClick={addKeyword}
                                                                     disabled={!current_keyword}
@@ -205,9 +207,9 @@ const EditProject = ({ success, project }) => {
                                                                 </div>
                                                             </Show>
 
-                                                            {keywords.map((k, indexK) => 
-                                                                <span title="Eliminar" 
-                                                                    className="badge badge-dark mr-1 ml-1" 
+                                                            {keywords.map((k, indexK) =>
+                                                                <span title="Eliminar"
+                                                                    className="badge badge-dark mr-1 ml-1"
                                                                     style={{ cursor: 'pointer' }}
                                                                     key={`keyword-${k}`}
                                                                     onClick={(e) => leaveKeyword(indexK, k)}
@@ -222,7 +224,7 @@ const EditProject = ({ success, project }) => {
                                         </div>
 
                                         <div className="col-md-12">
-                                            <hr/>
+                                            <hr />
 
                                             <div className="text-right">
                                                 <Button color="red" disabled={!edit} onClick={cancelProject}>

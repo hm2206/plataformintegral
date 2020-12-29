@@ -53,11 +53,11 @@ const IndexPlanTrabajo = ({ success, plan_trabajos }) => {
                     //     icon: "fas fa-info",
                     //     title: "Mostrar más información del plan de trabajo"  
                     // },
-                    // { 
-                    //     key: "edit",
-                    //     icon: "fas fa-pencil-alt",
-                    //     title: "Editar Plan de Trabajo"  
-                    // }
+                    { 
+                        key: "edit",
+                        icon: "fas fa-pencil-alt",
+                        title: "Editar Plan de Trabajo"  
+                    }
                 ]}
                 getOption={getOption}
             />
