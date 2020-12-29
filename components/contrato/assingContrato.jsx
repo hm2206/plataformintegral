@@ -19,36 +19,41 @@ export default class AssignContrato extends Component
     }
 
     componentDidMount = async () => {
-        await this.getPeople(1, this.state);
+        await this.getInfos(1, this.state);
     }
 
-    getPeople = async (page = 1, state, update = false) => {
+    getInfos = async (page = 1, state, update = false) => {
         this.setState({ loader: true });
         await unujobs.get(`info?page=${page}&query_search=${state.query_search || ""}&estado=1`)
-        .then(res => this.setState(state => {
-            let { data, last_page, current_page, total } = res.data;
-            state.people.data = update ? data : [...state.people.data, ...data];
-            state.people.lastPage = last_page;
-            state.people.page = current_page;
-            state.people.total = total;
-            return { people: state.people };
-        }))
-        .catch(err => console.log(err.message));
+        .then(res => {
+            let { success, message, infos } = res.data;
+            if (!success) throw new Error(message);
+            this.setState(state => {
+                let { data, last_page, current_page, total } = infos;
+                state.people.data = update ? data : [...state.people.data, ...data];
+                state.people.lastPage = last_page;
+                state.people.page = current_page;
+                state.people.total = total;
+                return { people: state.people };
+            })
+        }).catch(err => console.log(err.message));
         this.setState({ loader: false });
     }
 
     handlePage = async (nextPage) => {
         this.setState({ loader: true });
-        await this.getPeople(nextPage, this.state);
+        await this.getInfos(nextPage, this.state);
     }
 
     handleAdd = async (obj) => {
-        let { getAdd } = this.props;
+        let { getAdd, local } = this.props;
         if (typeof getAdd == 'function') {
             let { push, pathname, query } = Router;
             await getAdd(obj);
-            query.assign = "";
-            push({ pathname, query });
+            if (!local) {
+                query.assign = "";
+                push({ pathname, query });
+            }
         }
     }
 
@@ -79,7 +84,7 @@ export default class AssignContrato extends Component
                         <div className="col-md-2">
                             <Button fluid
                                 onClick={async (e) => {
-                                    await this.getPeople(1, this.state, true)
+                                    await this.getInfos(1, this.state, true)
                                 }}
                             >
                                 <i className="fas fa-search"></i>

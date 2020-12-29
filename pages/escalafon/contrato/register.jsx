@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useContext } from 'react';
+import React, { Fragment, useState, useContext, useEffect } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, BtnBack } from '../../../components/Utils';
@@ -14,7 +14,6 @@ import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta } fro
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
 import { AppContext } from '../../../contexts/AppContext';
 
-
 const Register = () => {
 
     // app
@@ -26,6 +25,11 @@ const Register = () => {
     const isWork = Object.keys(work).length;
     const [form, setForm] = useState({ is_aportacion: 1 });
     const [errors, setErrors] = useState({});
+
+    // primera carga
+    useEffect(() => {
+        app_context.fireEntity({ render: true });
+    }, []);
 
     // volver atrás
     const handleBack = () => {

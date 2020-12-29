@@ -1,58 +1,32 @@
-import React, { Component } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import moment from 'moment';
-import { tipo_documento } from '../../services/storage.json';
 import { unujobs } from '../../services/apis';
-import { parseOptions } from '../../services/utils';
+import { Confirm, parseOptions } from '../../services/utils';
 import Swal from 'sweetalert2';
 import Show from '../../components/show';
 import Router from 'next/router';
+import { SelectBanco, SelectAfp } from '../select/cronograma';
+import { AppContext } from '../../contexts/AppContext'
 
-export default class General extends Component
-{
+const  General = ({ work }) => {
 
-    state = {
-        loading: false,
-        bancos: [],
-        afps: [],
-        work: {},
-        person: {},
-        edit: {
-            work: false,
-            person: false
-        }
-    }
+    // app
+    const app_context = useContext(AppContext);
 
-    componentDidMount = async () => {
-        await this.setting(this.props)
-        await this.getBancos();
-        await this.getLeySociales();
-    }
+    // estados
+    const [person, setPerson] = useState(JSON.parse(JSON.stringify(work.person)) || {});
+    const [current_work, setCurrentWork] = useState(work || {});
+    const [edit, setEdit] = useState(false);
 
-    componentWillReceiveProps = async (nextProps) => {
-        let { work, person } = this.props;
-        if (work != nextProps.work || person != nextProps.person) {
-            await this.setState({ work: {}, person: {} });
-            this.setting(nextProps);
-        }
-    }
-
-    setting = async (props) => {
-        await this.setState({
-            work: props.work,
-            person: props.person
-        });
-    }
-
-    handleInput = ({ name, value }, obj = 'work') => {
-        let newObject = Object.assign({}, this.state[obj]);
-        let newEdit = Object.assign({}, this.state.edit);
+    const handleInput = ({ name, value }) => {
+        let newObject = Object.assign({}, current_work);
         newObject[name] = value;
-        newEdit[obj] = true;
-        this.setState({[obj]: newObject, edit: newEdit});
+        setCurrentWork(newObject);
+        setEdit(true);
     }
 
-    leaveForm = async (e, name) => {
+    const leaveForm = async (e) => {
         e.preventDefault();
         let answer = await Swal.fire({
             icon: 'warning',
@@ -62,66 +36,60 @@ export default class General extends Component
         });
         // verify
         if (answer) {
-            Router.push({ pathname: Router.pathname, query: Router.query })
-            let newObj = Object.assign({}, this.state.loading);
-            newObj[name] = false;
-            this.setState({edit: newObj});
+            setCurrentWork(JSON.parse(JSON.stringify(work)))
+            setEdit(false);
         }
     }
 
-    getBancos = async () => {
-        this.setState({ loading: true });
-        await unujobs.get('banco')
-        .then(res => this.setState({ bancos: res.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
+    const updateWork = async () => {
+        let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`, 'Estoy Seguro')
+        if (answer) {
+            app_context.fireLoading(true);
+            let form = Object.assign({}, current_work);
+            form._method = 'PUT';
+            await unujobs.post(`work/${work.id}`, form)
+            .then(res => {
+                app_context.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                setEdit(false);
+                Swal.fire({ icon: 'success', text: message });
+            })
+            .catch(err => {
+                try {
+                    app_context.fireLoading(false);
+                    let { data } = err.response;
+                    if (!data) throw new Error(err.message);
+                    let { message, errors } = data;
+                    if (!errors) throw new Error(message);
+                    Swal.fire({ icon: 'warning', text: message });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: error.message });
+                }
+            });
+        }
     }
 
-    getLeySociales = async () => {
-        this.setState({ loading: true });
-        await unujobs.get('afp')
-        .then(res => this.setState({ afps: res.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
+    // render
+    return (
+        <Form>
+            <div className="row">
+                <div className="col-md-12 mb-4">
+                    <h4><i className="fas fa-info-circle"></i> Datos Generales del Trabajador</h4>
+                </div>
 
-    updateWork = async () => {
-        this.setState({ loading: true });
-        let form = Object.assign({}, this.state.work);
-        form._method = 'PUT';
-        await unujobs.post(`work/${this.state.work.id}`, form)
-        .then(res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            Swal.fire({ icon, text: message });
-        })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        this.setState(state => ({ loading: false, edit: { work: false, person: state.edit.person } }));
-    }
-
-    render() {
-
-        let { work, person, edit } = this.state;
-
-        return (
-            <Form loading={this.state.loading}>
-                <div className="row">
-                    <div className="col-md-12 mb-4">
-                        <h4><i className="fas fa-info-circle"></i> Datos Generales del Trabajador</h4>
+                <div className="col-md-4">
+                    <div>
+                        <b><i className="fas fa-place"></i> Ubicación</b>
+                        <hr/>
                     </div>
-
-                    <div className="col-md-4">
-                        <div>
-                            <b><i className="fas fa-place"></i> Ubicación</b>
-                            <hr/>
-                        </div>
-                        <iframe src={`https://www.google.com/maps/embed?pb=!1m12!1m8!1m3!1d63151.44781604753!2d-74.58435273334369!3d-8.405050255752414!3m2!1i1024!2i768!4f13.1!2m1!1s${person && person.address}!5e0!3m2!1ses!2spe!4v1586299621785!5m2!1ses!2spe`} 
-                            frameborder="0" 
-                            style={{ border: "0px", width: "100%", height: "200px" }}
-                            aria-hidden="false" 
-                            tabindex="0"
-                        />
-                    </div>
+                    <iframe src={`https://www.google.com/maps/embed?pb=!1m12!1m8!1m3!1d63151.44781604753!2d-74.58435273334369!3d-8.405050255752414!3m2!1i1024!2i768!4f13.1!2m1!1s${person && person.address}!5e0!3m2!1ses!2spe!4v1586299621785!5m2!1ses!2spe`} 
+                        frameborder="0" 
+                        style={{ border: "0px", width: "100%", height: "200px" }}
+                        aria-hidden="false" 
+                        tabindex="0"
+                    />
+                </div>
 
                     <div className="col-md-8">
                         <b><i className="fas fa-user"></i> Datos Personales</b>
@@ -130,28 +98,28 @@ export default class General extends Component
                             <div className="col-md-6 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Prefijo</label>
-                                    <input type="text" value={person.profession} disabled={true}/>
+                                    <input type="text" className="uppercase" value={person.profession} readOnly={true}/>
                                 </Form.Field>
                             </div>
 
                             <div className="col-md-6 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Nombre Completo</label>
-                                    <input type="text" value={person.fullname} disabled={true}/>
+                                    <input type="text" className="uppercase" value={person.fullname} readOnly={true}/>
                                 </Form.Field>
                             </div>
 
                             <div className="col-md-6 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Tipo. Documento</label>
-                                    <input type="text" value={person.document_type} disabled={true}/>
+                                    <input type="text" className="uppercase" value={person.document_type} readOnly={true}/>
                                 </Form.Field>
                             </div>
 
                             <div className="col-md-6 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">N° Documento</label>
-                                    <input type="text" value={person.document_number} disabled={true}/>
+                                    <input type="text" value={person.document_number} readOnly={true}/>
                                 </Form.Field>
                             </div>
 
@@ -161,6 +129,7 @@ export default class General extends Component
                                     <Select placeholder="Select. Ubigeo" 
                                         value={person.gender}
                                         name="gender"
+                                        disabled
                                         onChange={(e, obj) => this.handleInput(obj, 'person')}
                                         options={[
                                             { key: "M", value: "M", text: "Masculino" },
@@ -174,22 +143,24 @@ export default class General extends Component
                             <div className="col-md-6 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Fecha de Nacimiento</label>
-                                    <input type="date" value={moment.utc(person.date_of_birth).format('YYYY-MM-DD')} disabled={true}/>
+                                    <input type="date" value={moment.utc(person.date_of_birth).format('YYYY-MM-DD')} readOnly={true}/>
                                 </Form.Field>
                             </div>
 
-                            <div className="col-md-6 mb-2">
+                            <div className="col-md-12 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Ubigeo <b className="text-red">*</b></label>
-                                    <Select placeholder="Select. Ubigeo"/>
+                                    <input type="text" readOnly value={
+                                        `${person && person.departamento || ""} - ${person && person.provincia || ""} - ${person && person.distrito || ""}`
+                                    }/>
                                 </Form.Field>
                             </div>
 
-                            <div className="col-md-6 mb-2">
+                            <div className="col-md-12 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Dirección</label>
                                     <input type="text" 
-                                        value={person.address}
+                                        value={person.address || ""}
                                         name="address"
                                         readOnly
                                     />
@@ -200,7 +171,7 @@ export default class General extends Component
                                 <Form.Field>
                                     <label htmlFor="">Telefono</label>
                                     <input type="tel" 
-                                        value={person.phone ? person.phone : ''}
+                                        value={person.phone || ""}
                                         name="phone"
                                         readOnly
                                     />
@@ -211,7 +182,7 @@ export default class General extends Component
                                 <Form.Field>
                                     <label htmlFor="">Correo de Contacto</label>
                                     <input type="email" 
-                                        value={person.email_contact ? person.email_contact : ''}
+                                        value={person.email_contact || ""}
                                         name="email_contact"
                                         readOnly
                                     />
@@ -230,12 +201,10 @@ export default class General extends Component
                             <div className="col-md-6 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Banco <b className="text-red">*</b></label>
-                                    <Select
-                                        options={parseOptions(this.state.bancos, ["select-banco", "", "Select. Banco"], ["id", "id", "nombre"])}
-                                        value={work.banco_id}
-                                        placeholder="Select. Banco"
+                                    <SelectBanco
+                                        value={current_work.banco_id}
                                         name="banco_id"
-                                        onChange={(e, obj) => this.handleInput(obj, 'work')}
+                                        onChange={(e, data) => handleInput(data)}
                                     />
                                 </Form.Field>
                             </div>
@@ -244,9 +213,9 @@ export default class General extends Component
                                 <Form.Field>
                                     <label htmlFor="">N° Cuenta</label>
                                     <input type="text" 
-                                        value={work.numero_de_cuenta ? work.numero_de_cuenta : ''}
+                                        value={current_work.numero_de_cuenta || ""}
                                         name="numero_de_cuenta"
-                                        onChange={(e) => this.handleInput(e.target, 'work')}
+                                        onChange={(e) => handleInput(e.target)}
                                     />
                                 </Form.Field>
                             </div>
@@ -254,12 +223,10 @@ export default class General extends Component
                             <div className="col-md-6 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Ley Social <b className="text-red">*</b></label>
-                                    <Select
-                                        value={work.afp_id}
-                                        options={parseOptions(this.state.afps, ["select-afp", "", "Select. Ley Social"], ["id", "id", "descripcion"])}
-                                        placeholder="Select. Ley Social"
+                                    <SelectAfp
                                         name="afp_id"
-                                        onChange={(e, obj) => this.handleInput(obj, 'work')}
+                                        value={current_work.afp_id}
+                                        onChange={(e, data) => handleInput(data)}
                                     />
                                 </Form.Field>
                             </div>
@@ -268,9 +235,9 @@ export default class General extends Component
                                 <Form.Field>
                                     <label htmlFor="">N° Cussp</label>
                                     <input type="text" 
-                                        value={work.numero_de_cussp ? work.numero_de_cussp : ''}
+                                        value={current_work.numero_de_cussp || ""}
                                         name="numero_de_cussp"
-                                        onChange={(e) => this.handleInput(e.target, 'work')}
+                                        onChange={(e) => handleInput(e.target)}
                                     />
                                 </Form.Field>
                             </div>
@@ -279,9 +246,9 @@ export default class General extends Component
                                 <Form.Field>
                                     <label htmlFor="">Fecha de Afiliación</label>
                                     <input type="date" 
-                                        value={work.fecha_de_afiliacion ? work.fecha_de_afiliacion : ''}
+                                        value={current_work.fecha_de_afiliacion || ""}
                                         name="fecha_de_afiliacion"
-                                        onChange={(e) => this.handleInput(e.target, 'work')}
+                                        onChange={(e) => handleInput(e.target)}
                                     />
                                 </Form.Field>
                             </div>
@@ -290,9 +257,9 @@ export default class General extends Component
                                 <Form.Field>
                                     <label htmlFor="">N° Essalud</label>
                                     <input type="text" 
-                                        value={work.numero_de_essalud ? work.numero_de_essalud : ''}
+                                        value={current_work.numero_de_essalud || ""}
                                         name="numero_de_essalud"
-                                        onChange={(e) => this.handleInput(e.target, 'work')}
+                                        onChange={(e) => handleInput(e.target)}
                                     />
                                 </Form.Field>
                             </div>
@@ -306,20 +273,20 @@ export default class General extends Component
                                             {key: "1", value: 1, text: "Afecto"}
                                         ]}
                                         placeholder="Select. Prima Seguro"
-                                        value={work.prima_seguro}
+                                        value={current_work.prima_seguro}
                                         name="prima_seguro"
-                                        onChange={(e, obj) => this.handleInput(obj, 'work')}
+                                        onChange={(e, obj) => handleInput(obj)}
                                     />
                                 </Form.Field>
                             </div>
 
                             <div className="col-md-12 mt-4 text-right col-12">
-                                <Show condicion={edit.work}>
+                                <Show condicion={edit}>
                                     <div className="row">
                                         <div className="col-6">
                                             <Button color="red"
                                                 fluid
-                                                onClick={(e) => this.leaveForm(e, work)}
+                                                onClick={leaveForm}
                                             >
                                                 <i className="fas fa-trash-alt"></i> Cancelar Cambios
                                             </Button>
@@ -327,7 +294,7 @@ export default class General extends Component
                                         <div className="col-6">
                                             <Button color="teal"
                                                 fluid
-                                                onClick={this.updateWork}
+                                                onClick={updateWork}
                                             >
                                                 <i className="fas fa-save"></i> Actualizar Información
                                             </Button>
@@ -342,6 +309,7 @@ export default class General extends Component
                 </div>
             </Form>
         );
-    }
-
 }
+
+// export 
+export default General;

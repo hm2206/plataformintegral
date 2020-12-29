@@ -1,5 +1,5 @@
 import React, { useState, Fragment, useContext, useEffect } from 'react';
-import { Form, Button, Checkbox } from 'semantic-ui-react';
+import { Form, Button, Select } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Body, DropZone } from '../../../components/Utils';
 import ContentControl from '../../../components/contentControl';
@@ -9,10 +9,11 @@ import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import AssignContrato from '../../../components/contrato/assingContrato';  
 import { AppContext } from '../../../contexts/AppContext';
-import { SelectSitacionLaboral } from '../../../components/select/cronograma';
+import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
+import AssignTrabajadorEntity from '../../../components/contrato/assingTrabajadorEntity';
 
 
-const RegisterLicencia = () => {
+const RegisterFormacionAcademica = () => {
 
     // app
     const app_context = useContext(AppContext);
@@ -51,18 +52,18 @@ const RegisterLicencia = () => {
         setErrors(newErrors);
     }
 
-    // crear ascenso
+    // crear permiso
     const create = async () => {
-        let answer = await Confirm("warning", "¿Estas seguro en guardar el desplazamiento?", "Estoy Seguro");
+        let answer = await Confirm("warning", "¿Estas seguro en guardar el permiso?", "Estoy Seguro");
         if (answer) {
             app_context.fireLoading(true);
             let newForm = new FormData;
-            newForm.append('info_id', person.id);
+            newForm.append('work_id', person.id);
             for(let key in form) {
                 newForm.append(key, form[key]);
             }
             // send
-            await escalafon.post('licencia', newForm)
+            await escalafon.post('permiso', newForm)
             .then(async res => {
                 app_context.fireLoading(false);
                 let { success, message } = res.data;
@@ -90,7 +91,7 @@ const RegisterLicencia = () => {
             <div className="col-md-12">
                 <Body>
                     <div className="card-header">
-                        <span className="ml-3">Regístrar Lícencia de Trabajo</span>
+                        <span className="ml-3">Regístrar Permiso</span>
                     </div>
                 </Body>
             </div>
@@ -147,39 +148,6 @@ const RegisterLicencia = () => {
                                                 </Form.Field>
                                             </div>
 
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
-                                                    <label htmlFor="">Meta Pres.</label>
-                                                    <input type="text"
-                                                        value={person.meta && person.meta && person.meta.metaID || ""}
-                                                        disabled
-                                                        readOnly
-                                                    />
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
-                                                    <label htmlFor="">Partición Pres.</label>
-                                                    <input type="text"
-                                                        value={person.cargo && person.cargo && person.cargo.descripcion || ""}
-                                                        disabled
-                                                        readOnly
-                                                    />
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-4 mb-2">
-                                                <Form.Field>
-                                                    <label htmlFor="">Tip. Categoría</label>
-                                                    <input type="text"
-                                                        value={person.type_categoria && person.type_categoria && person.type_categoria.descripcion || ""}
-                                                        disabled
-                                                        readOnly
-                                                    />
-                                                </Form.Field>
-                                            </div>
-
                                             <div className="col-md-4 mt-1">
                                                 <Button onClick={(e) => setOption("ASSIGN")}>
                                                     <i className="fas fa-sync"></i> Cambiar Personal
@@ -192,7 +160,7 @@ const RegisterLicencia = () => {
                                 <div className="col-md-12">
                                     <div>
                                         <hr/>
-                                        <i className="fas fa-info-circle mr-1"></i> Información de Licencia de trabajo
+                                        <i className="fas fa-info-circle mr-1"></i> Información del Permiso
                                         <hr/>
                                     </div>    
                                 </div>
@@ -200,95 +168,68 @@ const RegisterLicencia = () => {
                                 <div className="col-md-10">
                                     <div className="card-body">
                                         <div className="row w-100 justify-content-center">
-                                            <div className="col-md-6 mb-3">
-                                                <Form.Field error={errors.resolucion && errors.resolucion[0] || null}>
-                                                    <label htmlFor="">N° Resolución <b className="text-red">*</b></label>
+                                            <div className="col-md-6 mb-2">
+                                                <Form.Field error={errors.nro_papeleta && errors.nro_papeleta[0] ? true : null}>
+                                                    <label htmlFor="">Nro Papeleta <b className="text-red">*</b></label>
                                                     <input type="text"
-                                                        name="resolucion"
-                                                        value={form.resolucion || ""}
-                                                        onChange={(e) => handleInput(e.target)}
-                                                        disabled={app_context.isLoading}
+                                                        value={`${form.nro_papeleta || ""}`}
+                                                        name="nro_papeleta"
+                                                        onChange={({ target }) => handleInput(target)}
                                                     />
-                                                    <label htmlFor="">{errors.resolucion && errors.resolucion[0] || null}</label>
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-6 mb-3">
-                                                <Form.Field error={errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || null}>
-                                                    <label htmlFor="">Fecha Resolución <b className="text-red">*</b></label>
-                                                    <input type="date"
-                                                        name="fecha_de_resolucion"
-                                                        value={form.fecha_de_resolucion || ""}
-                                                        onChange={(e) => handleInput(e.target)}
-                                                        disabled={app_context.isLoading}
-                                                    />
-                                                    <label htmlFor="">{errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || null}</label>
+                                                   <label htmlFor="">{errors.nro_papeleta && errors.nro_papeleta[0] || null}</label>
                                                 </Form.Field>
                                             </div>
 
                                             <div className="col-md-6 mb-2">
-                                                <Form.Field error={errors.situacion_laboral_id && errors.situacion_laboral_id[0] || null}>
-                                                    <label htmlFor="">Situación Laboral</label>
-                                                    <SelectSitacionLaboral
-                                                        licencia={1}
-                                                        name="situacion_laboral_id"
-                                                        value={`${form.situacion_laboral_id || ""}`}
-                                                        onChange={(e, data) => handleInput(data)}
-                                                    />
-                                                    <label htmlFor="">{errors.situacion_laboral_id && errors.situacion_laboral_id[0] || null}</label>
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-6 mb-3">
-                                                <Form.Field>
-                                                    <label htmlFor="">Licencia Remunerada</label>
-                                                    <div>
-                                                        <Checkbox toggle
-                                                            name="is_pay"
-                                                            checked={form.is_pay ? true : false}
-                                                            onChange={(e, data) => handleInput({ name: data.name, value: data.checked ? 1 : 0 })}
-                                                        />
-                                                    </div>
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-6 mb-3">
-                                                <Form.Field error={errors.fecha_inicio && errors.fecha_inicio[0] || null}>
-                                                    <label htmlFor="">Fecha Inicio <b className="text-red">*</b></label>
+                                                <Form.Field error={errors.fecha && errors.fecha[0] || null}>
+                                                    <label htmlFor="">Fecha <b className="text-red">*</b></label>
                                                     <input type="date"
-                                                        name="fecha_inicio"
-                                                        value={form.fecha_inicio || ""}
+                                                        name="fecha"
+                                                        value={form.fecha || ""}
                                                         onChange={(e) => handleInput(e.target)}
                                                         disabled={app_context.isLoading}
                                                     />
-                                                    <label htmlFor="">{errors.fecha_inicio && errors.fecha_inicio[0] || null}</label>
+                                                    <label htmlFor="">{errors.fecha && errors.fecha[0] || ""}</label>
                                                 </Form.Field>
                                             </div>
-
-                                            <div className="col-md-6 mb-3">
-                                                <Form.Field error={errors.fecha_final && errors.fecha_final[0] || null}>
-                                                    <label htmlFor="">Fecha Inicio <b className="text-red">*</b></label>
-                                                    <input type="date"
-                                                        name="fecha_final"
-                                                        value={form.fecha_final || ""}
+                                            
+                                            <div className="col-md-6 mb-2">
+                                                <Form.Field error={errors.hora_salida && errors.hora_salida[0] || null}>
+                                                    <label htmlFor="">Hora Salida</label>
+                                                    <input type="time"
+                                                        name="hora_salida"
+                                                        value={form.hora_salida || ""}
                                                         onChange={(e) => handleInput(e.target)}
                                                         disabled={app_context.isLoading}
                                                     />
-                                                    <label htmlFor="">{errors.fecha_final && errors.fecha_final[0] || null}</label>
+                                                    <label htmlFor="">{errors.hora_salida && errors.hora_salida[0] || ""}</label>
+                                                </Form.Field>
+                                            </div>
+
+                                            <div className="col-md-6 mb-2">
+                                                <Form.Field error={errors.hora_retorno && errors.hora_retorno[0] || null}>
+                                                    <label htmlFor="">Hora Retorno</label>
+                                                    <input type="time"
+                                                        name="hora_retorno"
+                                                        value={form.hora_retorno || ""}
+                                                        onChange={(e) => handleInput(e.target)}
+                                                        disabled={app_context.isLoading}
+                                                    />
+                                                    <label htmlFor="">{errors.hora_retorno && errors.hora_retorno[0] || ""}</label>
                                                 </Form.Field>
                                             </div>
 
                                             <div className="col-md-12 mb-3">
-                                                <Form.Field error={errors.descripcion && errors.descripcion[0] || null}>
-                                                    <label htmlFor="">Descripción <b className="text-red">*</b></label>
+                                                <Form.Field error={errors.justificacion && errors.justificacion[0] || null}>
+                                                    <label htmlFor="">Justificación <b className="text-red">*</b></label>
                                                     <textarea type="text"
-                                                        name="descripcion"
+                                                        name="justificacion"
                                                         rows="3"
-                                                        value={form.descripcion || ""}
+                                                        value={form.justificacion || ""}
                                                         onChange={(e) => handleInput(e.target)}
                                                         disabled={app_context.isLoading}
                                                     />
-                                                    <label htmlFor="">{errors.descripcion && errors.descripcion[0] || null}</label>
+                                                    <label htmlFor="">{errors.justificacion && errors.justificacion[0] || null}</label>
                                                 </Form.Field>
                                             </div>
 
@@ -346,7 +287,7 @@ const RegisterLicencia = () => {
             </ContentControl>
 
             <Show condicion={option == 'ASSIGN'}>
-                <AssignContrato
+                <AssignTrabajadorEntity
                     getAdd={getAdd}
                     local={true}
                     isClose={(e) => setOption("")}
@@ -357,7 +298,7 @@ const RegisterLicencia = () => {
 }
 
 // server
-RegisterLicencia.getInitialProps = async (ctx) => {
+RegisterFormacionAcademica.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
     let { query, pathname } = ctx;
     // response
@@ -365,4 +306,4 @@ RegisterLicencia.getInitialProps = async (ctx) => {
 }
  
 // exportar
-export default RegisterLicencia;
+export default RegisterFormacionAcademica;

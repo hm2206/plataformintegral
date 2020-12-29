@@ -7,6 +7,7 @@ import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
 import { AUTHENTICATE } from '../../../services/auth';
+import { SelectTypeDescuento } from '../../../components/select/cronograma';
 
 
 export default class CreateTypeDetalle extends Component
@@ -109,27 +110,10 @@ export default class CreateTypeDetalle extends Component
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-3">
+                                    <div className="col-md-8 mb-3">
                                         <Form.Field error={errors && errors.type_descuento_id && errors.type_descuento_id[0]}>
-                                            <label htmlFor="">Clave</label>
-                                            <Select
-                                                placeholder="Select. Clave Descuento"
-                                                options={parseOptions(this.state.type_descuentos, ["sel-clave", "", "Select. Clave"], ["id", "id", "key"])}
-                                                value={form.type_descuento_id}
-                                                name="type_descuento_id"
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                                disabled={this.state.loading}
-                                            />
-                                            <label>{errors && errors.type_descuento_id && errors.type_descuento_id[0]}</label>  
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.type_descuento_id && errors.type_descuento_id[0]}>
-                                            <label htmlFor="">Descuento</label>
-                                            <Select
-                                                placeholder="Select. Descripcion Descuento"
-                                                options={parseOptions(this.state.type_descuentos, ["sel-descripcion", "", "Select. Descripcion"], ["id", "id", "descripcion"])}
+                                            <label htmlFor="">Tipo de Descuento</label>
+                                            <SelectTypeDescuento
                                                 value={form.type_descuento_id}
                                                 name="type_descuento_id"
                                                 onChange={(e, obj) => this.handleInput(obj)}

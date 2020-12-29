@@ -53,7 +53,7 @@ const RegisterLicencia = () => {
 
     // crear ascenso
     const create = async () => {
-        let answer = await Confirm("warning", "¿Estas seguro en guardar el desplazamiento?", "Estoy Seguro");
+        let answer = await Confirm("warning", "¿Estas seguro en guardar la vacación?", "Estoy Seguro");
         if (answer) {
             app_context.fireLoading(true);
             let newForm = new FormData;
@@ -62,7 +62,7 @@ const RegisterLicencia = () => {
                 newForm.append(key, form[key]);
             }
             // send
-            await escalafon.post('licencia', newForm)
+            await escalafon.post('vacacion', newForm)
             .then(async res => {
                 app_context.fireLoading(false);
                 let { success, message } = res.data;
@@ -90,7 +90,7 @@ const RegisterLicencia = () => {
             <div className="col-md-12">
                 <Body>
                     <div className="card-header">
-                        <span className="ml-3">Regístrar Lícencia de Trabajo</span>
+                        <span className="ml-3">Regístrar Vacación</span>
                     </div>
                 </Body>
             </div>
@@ -192,7 +192,7 @@ const RegisterLicencia = () => {
                                 <div className="col-md-12">
                                     <div>
                                         <hr/>
-                                        <i className="fas fa-info-circle mr-1"></i> Información de Licencia de trabajo
+                                        <i className="fas fa-info-circle mr-1"></i> Información de la vacación 
                                         <hr/>
                                     </div>    
                                 </div>
@@ -200,58 +200,6 @@ const RegisterLicencia = () => {
                                 <div className="col-md-10">
                                     <div className="card-body">
                                         <div className="row w-100 justify-content-center">
-                                            <div className="col-md-6 mb-3">
-                                                <Form.Field error={errors.resolucion && errors.resolucion[0] || null}>
-                                                    <label htmlFor="">N° Resolución <b className="text-red">*</b></label>
-                                                    <input type="text"
-                                                        name="resolucion"
-                                                        value={form.resolucion || ""}
-                                                        onChange={(e) => handleInput(e.target)}
-                                                        disabled={app_context.isLoading}
-                                                    />
-                                                    <label htmlFor="">{errors.resolucion && errors.resolucion[0] || null}</label>
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-6 mb-3">
-                                                <Form.Field error={errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || null}>
-                                                    <label htmlFor="">Fecha Resolución <b className="text-red">*</b></label>
-                                                    <input type="date"
-                                                        name="fecha_de_resolucion"
-                                                        value={form.fecha_de_resolucion || ""}
-                                                        onChange={(e) => handleInput(e.target)}
-                                                        disabled={app_context.isLoading}
-                                                    />
-                                                    <label htmlFor="">{errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || null}</label>
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-6 mb-2">
-                                                <Form.Field error={errors.situacion_laboral_id && errors.situacion_laboral_id[0] || null}>
-                                                    <label htmlFor="">Situación Laboral</label>
-                                                    <SelectSitacionLaboral
-                                                        licencia={1}
-                                                        name="situacion_laboral_id"
-                                                        value={`${form.situacion_laboral_id || ""}`}
-                                                        onChange={(e, data) => handleInput(data)}
-                                                    />
-                                                    <label htmlFor="">{errors.situacion_laboral_id && errors.situacion_laboral_id[0] || null}</label>
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-6 mb-3">
-                                                <Form.Field>
-                                                    <label htmlFor="">Licencia Remunerada</label>
-                                                    <div>
-                                                        <Checkbox toggle
-                                                            name="is_pay"
-                                                            checked={form.is_pay ? true : false}
-                                                            onChange={(e, data) => handleInput({ name: data.name, value: data.checked ? 1 : 0 })}
-                                                        />
-                                                    </div>
-                                                </Form.Field>
-                                            </div>
-
                                             <div className="col-md-6 mb-3">
                                                 <Form.Field error={errors.fecha_inicio && errors.fecha_inicio[0] || null}>
                                                     <label htmlFor="">Fecha Inicio <b className="text-red">*</b></label>
@@ -266,17 +214,32 @@ const RegisterLicencia = () => {
                                             </div>
 
                                             <div className="col-md-6 mb-3">
-                                                <Form.Field error={errors.fecha_final && errors.fecha_final[0] || null}>
-                                                    <label htmlFor="">Fecha Inicio <b className="text-red">*</b></label>
+                                                <Form.Field error={errors.fecha_limite && errors.fecha_limite[0] || null}>
+                                                    <label htmlFor="">Fecha Límite <b className="text-red">*</b></label>
                                                     <input type="date"
-                                                        name="fecha_final"
-                                                        value={form.fecha_final || ""}
+                                                        name="fecha_limite"
+                                                        value={form.fecha_limite || ""}
                                                         onChange={(e) => handleInput(e.target)}
                                                         disabled={app_context.isLoading}
                                                     />
-                                                    <label htmlFor="">{errors.fecha_final && errors.fecha_final[0] || null}</label>
+                                                    <label htmlFor="">{errors.fecha_limite && errors.fecha_limite[0] || null}</label>
                                                 </Form.Field>
                                             </div>
+
+                                            <div className="col-md-6 mb-3">
+                                                <Form.Field error={errors.dias_ejecutados && errors.dias_ejecutados[0] || null}>
+                                                    <label htmlFor="">Días Ejecutados <b className="text-red">*</b></label>
+                                                    <input type="number"
+                                                        name="dias_ejecutados"
+                                                        value={form.dias_ejecutados || ""}
+                                                        onChange={(e) => handleInput(e.target)}
+                                                        disabled={app_context.isLoading}
+                                                    />
+                                                    <label htmlFor="">{errors.dias_ejecutados && errors.dias_ejecutados[0] || null}</label>
+                                                </Form.Field>
+                                            </div>
+
+                                            <div className="col-md-6"></div>
 
                                             <div className="col-md-12 mb-3">
                                                 <Form.Field error={errors.descripcion && errors.descripcion[0] || null}>

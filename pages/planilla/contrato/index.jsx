@@ -88,7 +88,7 @@ const Contrato = ({ success, infos, query }) => {
                                 { key: "estado", type: "switch", is_true: "Activo", is_false: "Terminado"}
                             ]}
                             options={[
-                                { key: "edit", icon: "fas fa-pencil-alt" }
+                                { key: "pay", icon: "fas fa-coins" }
                             ]}
                             getOption={handleOption}
                         >
@@ -159,12 +159,6 @@ const Contrato = ({ success, infos, query }) => {
                             />
                         </div>
                     </div>
-
-                    <BtnFloat
-                        onClick={(e) => Router.push({ pathname: `${Router.pathname}/register` })}
-                    >
-                        <i className="fas fa-plus"></i>
-                    </BtnFloat>
                 </Form>
             </Body>
     </div>)

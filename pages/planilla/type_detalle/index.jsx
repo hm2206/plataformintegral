@@ -158,7 +158,7 @@ export default class TypeDetalle extends Component {
                         }
                         optionAlign="text-center"
                         getOption={this.getOption}
-                        data={type_detalles}
+                        data={type_detalles && type_detalles.data || []}
                     />
                 </Body>
 
