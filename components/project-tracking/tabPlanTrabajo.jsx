@@ -54,6 +54,8 @@ const TabPlanTrabajo = () => {
     const [option, setOption] = useState("");
     const [current_plan_trabajo, setCurrentPlanTrabajo] = useState({});
     const [duration, setDuration] = useState("");
+    const [resolucion, setResolucion] = useState("");
+    const [date_resolucion, setDateResolucion] = useState("");
 
     // obtener plan de trabajo
     const getPlanTrabajo = async () => {
@@ -78,6 +80,8 @@ const TabPlanTrabajo = () => {
             app_context.fireLoading(true);
             let datos = {};
             datos.project_id = project.id;
+            datos.resolucion = resolucion;
+            datos.date_resolucion = date_resolucion;
             datos.duration = duration;
             await projectTracking.post('plan_trabajo', datos)
                 .then(res => {
@@ -85,6 +89,9 @@ const TabPlanTrabajo = () => {
                     let { message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setDuration("");
+                    setResolucion("");
+                    setDateResolucion("");
+                    getPlanTrabajo();
                 }).catch(err => {
                     app_context.fireLoading(false);
                     let { message, errors } = err.response.data;
@@ -105,21 +112,42 @@ const TabPlanTrabajo = () => {
     <Fragment>
         <Show condicion={project.state != 'OVER'}>
             <Form className="row">
-                <div className="col-md-6">
+                <div className="col-md-3 mb-3">
+                    <Form.Field>
+                        <input type="text"
+                            placeholder="Ingrese la resolución"
+                            onChange={({target}) => setResolucion(target.value)}
+                            value={resolucion || ""}
+                        />
+                    </Form.Field>
+                </div>
+
+                <div className="col-md-3 mb-3">
+                    <Form.Field>
+                        <input type="date"
+                            placeholder="Ingrese la fecha de resolución"
+                            value={date_resolucion || ""}
+                            onChange={({target}) => setDateResolucion(target.value)}
+                        />
+                    </Form.Field>
+                </div>
+
+                <div className="col-md-3 mb-3">
                     <Form.Field>
                         <input type="number"
+                            value={duration || ""}
                             placeholder="Ingrese la duración"
                             onChange={({target}) => setDuration(target.value)}
                         />
                     </Form.Field>
                 </div>
 
-                <div className="col-md-5 mb-4">
+                <div className="col-md-3 mb-4">
                     <Button color="teal"
                         onClick={savePlanTrabajo}
                         disabled={!duration}
                     >
-                        <i className="fas fa-plus"></i> Agregar Plan de Trabajo
+                        <i className="fas fa-plus"></i> Agregar
                     </Button>
                 </div>
             </Form>
