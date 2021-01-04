@@ -18,9 +18,9 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
 
     // estados
     const [current_objectives, setCurrentObjectives] = useState([]);
-    const [current_medio_verification, setCurrentMedioVerification] = useState([]);
     const [current_gasto, setCurrentGasto] = useState({});
     const [option, setOption] = useState("");
+    const [current_meta, setCurrentMeta] = useState({});
 
     const getSaldoFinanciero = async () => {
         projectTracking.get(`plan_trabajo/${plan_trabajo.id}/financiamiento`)
@@ -36,9 +36,9 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
         getSaldoFinanciero();
     }
 
-    // verificar actividad
+    // verificación financiera
     const handleVerify = async (indexO, indexA, obj) => {
-        let answer = await Confirm('warning', '¿Estas seguro en verificar la actividad?')
+        let answer = await Confirm('warning', '¿Estas seguro en verificar financieramente la actividad?')
         if (answer) {
             app_context.fireLoading(true);
             await projectTracking.post(`activity/${obj.id}/verify`)
@@ -49,6 +49,35 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                     let newObjectives = JSON.parse(JSON.stringify(current_objectives));
                     let newActivities = newObjectives[indexO].activities;
                     obj.verify = 1;
+                    newActivities[indexA] = obj;
+                    newObjectives.activities = newActivities;
+                    setCurrentObjectives(newObjectives);
+                }).catch(err => {
+                    try {
+                        app_context.fireLoading(false);
+                        let { message, errors } = err.response.data;
+                        if (!errors) throw new Error(message);
+                        Swal.fire({ icon: 'warning', text: message });
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: error.message || err.message });
+                    }
+                });
+        }
+    }
+
+    // verificación técnica
+    const handleVerifyTecnica = async (indexO, indexA, obj) => {
+        let answer = await Confirm('warning', '¿Estas seguro en verificar técnicamente la actividad?')
+        if (answer) {
+            app_context.fireLoading(true);
+            await projectTracking.post(`activity/${obj.id}/verify_tecnica`)
+                .then(res => {
+                    app_context.fireLoading(false);
+                    let { message } = res.data;
+                    Swal.fire({ icon: 'success', text: message });
+                    let newObjectives = JSON.parse(JSON.stringify(current_objectives));
+                    let newActivities = newObjectives[indexO].activities;
+                    obj.verify_tecnica = 1;
                     newActivities[indexA] = obj;
                     newObjectives.activities = newActivities;
                     setCurrentObjectives(newObjectives);
@@ -112,7 +141,8 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                     <Show condicion={execute}>
                                         <th className="text-center" width="10%">TOTAL EJEC.</th>
                                         <th className="text-center" width="10%">TOTAL SALDO</th>
-                                        <th className="text-center" width="10%">VERIFICAR</th>
+                                        <th className="text-center" width="5%" title="Verificación Técnica">VT</th>
+                                        <th className="text-center" width="5%" title="Verificación Financiera">VF</th>
                                     </Show>
                                 </tr>
                             </thead>
@@ -126,12 +156,27 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                                 <th className="font-13 text-right">{currencyFormatter.format(act.total_ejecutado, { code: 'PEN' })}</th>
                                                 <th className={`font-13 text-right ${act.total_saldo < 0 ? 'text-red' : ''}`}>{currencyFormatter.format(act.total_saldo, { code: 'PEN' })}</th>
                                                 <td className="text-center bg-white">
+                                                    <Show condicion={!act.verify_tecnica}
+                                                        predeterminado={
+                                                            <span className="badge badge-success"><i className="fas fa-check"></i></span>
+                                                        }
+                                                    >
+                                                        <button className="btn btn-sm btn-outline-warning"
+                                                            title="Verificación Técnica"
+                                                            onClick={(e) => handleVerifyTecnica(indexO, indexA, act)}
+                                                        >
+                                                            <i className="fas fa-check"></i>
+                                                        </button>
+                                                    </Show>
+                                                </td>
+                                                <td className="text-center bg-white">
                                                     <Show condicion={!act.verify}
                                                         predeterminado={
                                                             <span className="badge badge-success"><i className="fas fa-check"></i></span>
                                                         }
                                                     >
                                                         <button className="btn btn-sm btn-outline-warning"
+                                                            title="Verificación Financiera"
                                                             onClick={(e) => handleVerify(indexO, indexA, act)}
                                                         >
                                                             <i className="fas fa-check"></i>
@@ -144,12 +189,12 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                         <Show condicion={act.gastos && act.gastos.length}
                                             predeterminado={
                                                 <tr>
-                                                    <td colSpan="5" className="text-center font-11">No hay registros disponibles</td>
+                                                    <td colSpan="6" className="text-center font-11">No hay registros disponibles</td>
                                                 </tr>
                                             }
                                         >                                
                                             <tr>
-                                                <td colSpan="5">
+                                                <td colSpan="6">
                                                     <table className="table table-bordered">
                                                         <thead className="text-center font-11">
                                                             <tr>
@@ -245,8 +290,8 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                                 <a href="#" onClick={(e) => {
                                                     e.preventDefault();
                                                     setOption("list_medio_verification");
-                                                    setCurrentMedioVerification(m.medio_verification)
-                                                }}><i className="fas fa-paperclip"></i></a>
+                                                    setCurrentMeta(m);
+                                                }}><i className="fas fa-search"></i></a>
                                             </td>
                                         </tr>    
                                     )}
@@ -275,7 +320,7 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
 
         <Show condicion={option == 'list_medio_verification'}>
             <ListMedioVerification
-                medio_verification={current_medio_verification}
+                meta={current_meta}
                 isClose={() => setOption("")}
             />
         </Show>

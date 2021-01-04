@@ -101,6 +101,7 @@ const TabTeam = () => {
                     app_context.fireLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
+                    setIsAddArea(false);
                     await Swal.fire({ icon: 'success', text: message });
                     getAreas();
                 }).catch(err => {
@@ -108,7 +109,6 @@ const TabTeam = () => {
                     let { message } = err.response.data;
                     Swal.fire({ icon: 'error', text: message || err.message });
                 });
-            setIsAddArea(false);
         }
     }
  
@@ -339,11 +339,6 @@ const TabTeam = () => {
                 object_id={project.id}
                 object_type={'App/Models/Project'}
                 isClose={(e) => setOption("")}
-                files={project.anexos}
-                afterSave={(e) => {
-                    let { push, pathname, query } = Router;
-                    push({ pathname, query });
-                }}
             />
         </Show>
 

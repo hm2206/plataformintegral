@@ -209,7 +209,7 @@ export default class CardProfile extends Component {
                           <img src={user.image_images && user.image_images.image_200x200 || '/img/perfil.jpg'} alt="perfil"/>
                         </a> 
                         
-                        <h3 className="card-title text-truncate">
+                        <h3 className="card-title text-truncate uppercase">
                             <a href="#">{user.person && user.person.fullname}</a>
                         </h3>
                         <h6 className="card-subtitle text-muted mb-3">{user.person && user.person.address}</h6>
