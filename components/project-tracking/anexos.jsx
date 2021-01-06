@@ -109,7 +109,7 @@ const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true })
                             <Show condicion={!current_loading && !data.length}>
                                 <tr>
                                     <td className="text-center" colSpan="3">
-                                        No hay medios de verificación
+                                        No hay registros disponibles
                                         <a href="#" className="ml-2" onClick={(e) => {
                                             e.preventDefault();
                                             getObject();

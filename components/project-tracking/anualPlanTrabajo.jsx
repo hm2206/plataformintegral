@@ -141,169 +141,152 @@ const AnualPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
 
     // render
     return (
-        <Modal
-            show={true}
-            titulo={<span><i className="fas fa-file-alt"></i> Plan de Trabajo Anual</span>}
-            md="12"
-            isClose={isClose}
-        >  
-            <div className="card-body">
-                <div className="table-responsive">
-                    <table className="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Titulo: </th>
-                                <td>{project.title}</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th colSpan="2" className="text-center">Información General</th>
-                            </tr>
-                            <tr>
-                                <td colSpan="2">
-                                    <table className="table table-bordered">
+        <div className="table-responsive">
+            <table className="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Titulo: </th>
+                        <td>{project.title}</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th colSpan="2" className="text-center">Información General</th>
+                    </tr>
+                    <tr>
+                        <td colSpan="2">
+                            <table className="table table-bordered">
+                                <tr>
+                                    <th width="25%">Resolución de aprobación del proyecto: </th>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th>Objectivo general: </th>
+                                    <td>{project.general_object}</td>
+                                </tr>
+                                <tr>
+                                    <th>Objectivos específicos: </th>
+                                    <td>
+                                        <ol type="1">
+                                            {current_objective.map((obj, indexO) => 
+                                                <li key={`objective-datos-${indexO}`}>{obj.title}</li>
+                                            )}
+                                        </ol>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Duración del proyecto: </th>
+                                    <td>{project.duration} meses</td>
+                                </tr>
+                                <tr>
+                                    <th>Costo del proyecto: </th>
+                                    <td>{currencyFormatter.format(project.monto, { code: 'PEN' })}</td>
+                                </tr>
+                                {current_team.map((t, indexT) => 
+                                    <tr key={`list-team-porject-${project.id}-${indexT}`}>
+                                        <th>{t.role}: </th>
+                                        <td className="uppercase font-12">{t.person && t.person.fullname || ""}</td>
+                                    </tr>    
+                                )}
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colSpan="2" className="text-center">Actividades a ejecutar</th>
+                    </tr>
+                    <tr>
+                        <td colSpan="2">
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead>
                                         <tr>
-                                            <th width="25%">Resolución de aprobación del proyecto: </th>
+                                            <th width="20%">Finalidad</th>
                                             <td></td>
                                         </tr>
                                         <tr>
-                                            <th>Objectivo general: </th>
+                                            <th>Objectivo general</th>
                                             <td>{project.general_object}</td>
                                         </tr>
                                         <tr>
-                                            <th>Objectivos específicos: </th>
-                                            <td>
-                                                <ol type="1">
-                                                    {current_objective.map((obj, indexO) => 
-                                                        <li key={`objective-datos-${indexO}`}>{obj.title}</li>
-                                                    )}
-                                                </ol>
-                                            </td>
+                                            <th colSpan="2" className="text-center">Objectivos Específicos</th>
                                         </tr>
-                                        <tr>
-                                            <th>Duración del proyecto: </th>
-                                            <td>{project.duration} meses</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Costo del proyecto: </th>
-                                            <td>{currencyFormatter.format(project.monto, { code: 'PEN' })}</td>
-                                        </tr>
-                                        {current_team.map((t, indexT) => 
-                                            <tr key={`list-team-porject-${project.id}-${indexT}`}>
-                                                <th>{t.role}: </th>
-                                                <td className="uppercase font-12">{t.person && t.person.fullname || ""}</td>
-                                            </tr>    
-                                        )}
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th colSpan="2" className="text-center">Actividades a ejecutar</th>
-                            </tr>
-                            <tr>
-                                <td colSpan="2">
-                                    <div className="table-responsive">
-                                        <table className="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th width="20%">Finalidad</th>
-                                                    <td></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Objectivo general</th>
-                                                    <td>{project.general_object}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th colSpan="2" className="text-center">Objectivos Específicos</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {current_financiamiento.map((f, indexF) => 
-                                                    <Fragment key={`financiamiento-list-plan_trabajo_anual-${indexF}`}>
-                                                        <tr>
-                                                            <th colSpan="2">{f.title}</th>
-                                                        </tr> 
-
-                                                        <tr>
-                                                            <td colSpan="2">
-                                                                <div className="table-responsive">
-                                                                    <table className="table table-bordered">
-                                                                        {f.activities && f.activities.map((act, indexA) => 
-                                                                            <tr key={`financiamiento-list-plan_trabajo_anual_actividades-${indexA}`}>
-                                                                                <td width="40%">{act.title}</td>
-                                                                                <td>
-                                                                                    <div className="table responsive">
-                                                                                        <TableMeses 
-                                                                                            dateInitial={project.date_start}
-                                                                                            disabled
-                                                                                            title="Avances programados"
-                                                                                            rows={project.duration}
-                                                                                            defaultPosition={act.programado}
-                                                                                        />
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        )}
-                                                                        <tr>
-                                                                            <th>Indicadores</th>
-                                                                            <th className="text-center">Medio de verificación</th>
-                                                                        </tr>
-                                                                        {f.metas && f.metas.map((m, indexM) =>
-                                                                            <tr key={`financiamiento-list-plan_trabajo_anual_metas-${indexM}`}>
-                                                                                <td>{m.description}</td>
-                                                                                <td className="text-center">
-                                                                                    <a href="#"
-                                                                                        onClick={(e) => {
-                                                                                            e.preventDefault();
-                                                                                            setMedioVerification(m.medio_verification);
-                                                                                            setOption('medio_verification')
-                                                                                        }}
-                                                                                    >
-                                                                                        <i className="fas fa-paperclip"></i>
-                                                                                    </a>
-                                                                                </td>
-                                                                            </tr>
-                                                                        )}
-                                                                    </table>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </Fragment>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th colSpan="2" className="text-center">Métodos para ejecutar las actividades</th>
-                            </tr>
-                            <tr>
-                                <th colSpan="2" className="text-center">Cronograma mensual de actividades</th>
-                            </tr>
-                            <tr>
-                                <th colSpan="2" className="text-center">Presupuesto</th>
-                            </tr>
-                            <tr>
-                                <th colSpan="2" className="text-right">
-                                    <button className="btn btn-primary" onClick={getReport}>
-                                        <i className="fas fa-file-alt"></i> Imprimir reporte
-                                    </button>
-                                </th>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <Show condicion={option == 'medio_verification'}>
-                <ListMedioVerification
-                    medio_verification={current_medio_verification}
-                    isClose={(e) => setOption("")}
-                />
-            </Show>
-        </Modal>
+                                    </thead>
+                                    <tbody>
+                                    {current_financiamiento.map((f, indexF) => 
+                                        <Fragment key={`financiamiento-list-plan_trabajo_anual-${indexF}`}>
+                                            <tr>
+                                                <th colSpan="2">{f.title}</th>
+                                            </tr> 
+                                            <tr>
+                                                <td colSpan="2">
+                                                    <div className="table-responsive">
+                                                        <table className="table table-bordered">
+                                                            {f.activities && f.activities.map((act, indexA) => 
+                                                                <tr key={`financiamiento-list-plan_trabajo_anual_actividades-${indexA}`}>
+                                                                    <td width="40%">{act.title}</td>
+                                                                    <td>
+                                                                        <div className="table responsive">
+                                                                            <TableMeses 
+                                                                                dateInitial={project.date_start}
+                                                                                disabled
+                                                                                title="Avances programados"
+                                                                                rows={project.duration}
+                                                                                defaultPosition={act.programado}
+                                                                            />
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                            <tr>
+                                                                <th>Indicadores</th>
+                                                                <th className="text-center">Medio de verificación</th>
+                                                            </tr>
+                                                            {f.metas && f.metas.map((m, indexM) =>
+                                                                <tr key={`financiamiento-list-plan_trabajo_anual_metas-${indexM}`}>
+                                                                    <td>{m.description}</td>
+                                                                    <td className="text-center">
+                                                                        <a href="#"
+                                                                            onClick={(e) => {
+                                                                                e.preventDefault();
+                                                                                setMedioVerification(m.medio_verification);
+                                                                                setOption('medio_verification')
+                                                                            }}
+                                                                        >
+                                                                            <i className="fas fa-paperclip"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </Fragment>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th colSpan="2" className="text-center">Métodos para ejecutar las actividades</th>
+                </tr>
+                <tr>
+                    <th colSpan="2" className="text-center">Cronograma mensual de actividades</th>
+                </tr>
+                <tr>
+                    <th colSpan="2" className="text-center">Presupuesto</th>
+                </tr>
+                <tr>
+                    <th colSpan="2" className="text-right">
+                        <button className="btn btn-primary" onClick={getReport}>
+                            <i className="fas fa-file-alt"></i> Imprimir reporte
+                        </button>
+                    </th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     )
 }
 

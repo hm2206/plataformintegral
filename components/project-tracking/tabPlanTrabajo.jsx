@@ -11,8 +11,7 @@ import Anexos from './anexos';
 import AddPlanTrabajo from './addPlanTrabajo';
 import Router from 'next/router'
 import { Button, Form } from 'semantic-ui-react';
-import { Confirm } from '../../services/utils'
-import Swal from 'sweetalert2';
+import ReportPlanTrabajo from './reportPlanTrabajo';
 import currentFormatter from 'currency-formatter'
 
 const situacions = {
@@ -197,7 +196,7 @@ const TabPlanTrabajo = () => {
         </Show>
 
         <Show condicion={option == 'anual'}>
-            <AnualPlanTrabajo
+            <ReportPlanTrabajo
                 plan_trabajo={current_plan_trabajo}
                 isClose={(e) => setOption("")}
             />
