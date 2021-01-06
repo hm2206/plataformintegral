@@ -73,7 +73,7 @@ class Sidebar extends Component {
                     <span className="fas fa-bell"></span> Notificaciones
                   </a>{" "}
                   <a className="dropdown-item" href="/">
-                    <span className="fas fa-user"></span> 
+                    <span className="fas fa-user"></span> Perfil
                   </a>{" "}
                   <a className="dropdown-item" href="#" 
                     onClick={(e) => {
@@ -95,7 +95,7 @@ class Sidebar extends Component {
                       href="/"
                     >
                       <span className="menu-icon fas fa-user"></span>{" "}
-                      <span className="menu-text"></span>
+                      <span className="menu-text">Perfil</span>
                     </a>
                   </li>
                   <Navigation options={this.state.options}/>
