@@ -69,7 +69,7 @@ const Ascenso = ({ work }) => {
                                 <div className="mb-2"><b>Descripción: </b> {d.descripcion}</div>
                                 <div className="mb-2"><b>Fecha de Inicio: </b> {moment(d.fecha_inicio).format('DD/MM/YYYY')}</div>
                                 <div className="mb-2"><b>Dependencia: </b> {d.dependencia && d.dependencia.nombre}</div>
-                                <div className="mb-2"><b>Perfil Laboral: </b> {d.perfil_laboral && d.perfil_laboral.descripcion}</div>
+                                <div className="mb-2"><b> Laboral: </b> {d._laboral && d._laboral.descripcion}</div>
                             </div>
                             <div className="col-md-2 text-right">
                                 <div className="btn-group">

@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../contexts/AppContext';
 import Skeleton from 'react-loading-skeleton';
-import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../select/authentication';
+import { SelectDependencia, SelectDependenciaLaboral } from '../select/authentication';
 import { SelectAfp, SelectMeta, SelectSitacionLaboral, SelectTypeCategoriaCargo } from '../select/cronograma';
 
 const PlaceHolderInput = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
@@ -320,25 +320,25 @@ const Afectacion = () => {
                         </Show>
                     </Form.Field>
 
-                    <Form.Field error={errors.perfil_laboral_id && errors.perfil_laboral_id[0]}>
+                    <Form.Field error={errors._laboral_id && errors._laboral_id[0]}>
                         <Show condicion={!loading}
                             predeterminado={<PlaceHolderInput/>}
                         >
-                            <label><h5>Perfil Laboral <b className="text-red">*</b></h5></label>
+                            <label><h5> Laboral <b className="text-red">*</b></h5></label>
                             <Show condicion={edit}
-                                predeterminado={<input value={historial.perfil_laboral && historial.perfil_laboral.nombre || ""} disabled readOnly/>}
+                                predeterminado={<input value={historial._laboral && historial._laboral.nombre || ""} disabled readOnly/>}
                             >
-                                <SelectDependenciaPerfilLaboral
+                                <SelectDependenciaLaboral
                                     disabled={!edit}
                                     dependencia_id={historial.dependencia_id}
                                     refresh={historial.dependencia_id}
-                                    value={historial.perfil_laboral_id}
-                                    name="perfil_laboral_id"
+                                    value={historial._laboral_id}
+                                    name="_laboral_id"
                                     onChange={(e, obj) => handleInput(obj)}
-                                    error={errors.perfil_laboral_id && errors.perfil_laboral_id[0]}
+                                    error={errors._laboral_id && errors._laboral_id[0]}
                                 />
                             </Show>
-                            <label>{errors.perfil_laboral_id && errors.perfil_laboral_id[0]}</label>
+                            <label>{errors._laboral_id && errors._laboral_id[0]}</label>
                         </Show>
                     </Form.Field>
 

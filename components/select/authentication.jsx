@@ -94,39 +94,39 @@ const SelectDependencia = ({ id = "id", name, value, onChange, refresh = false, 
 }
 
 
-const SelectDependenciaPerfilLaboral = ({ dependencia_id, id = "id", name, value, onChange, refresh = false, disabled = false, execute = true }) => {
+const SelectDependenciaLaboral = ({ dependencia_id, id = "id", name, value, onChange, refresh = false, disabled = false, execute = true }) => {
     return dependencia_id 
         ?   <SelectBase 
                 api={authentication}
-                url={`dependencia/${dependencia_id}/perfil_laboral`}
-                id={`select-dependencia-perfil-laboral-${id}-${name}`}
+                url={`dependencia/${dependencia_id}/_laboral`}
+                id={`select-dependencia--laboral-${id}-${name}`}
                 value={id}
                 text="nombre"
-                obj="perfil_laboral"
+                obj="_laboral"
                 name={name}
                 valueChange={value || ""}
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-                placeholder="Seleccionar Perfil Laboral"
+                placeholder="Seleccionar  Laboral"
                 refresh={refresh}
                 execute={execute}
                 disabled={disabled}
             />
-        :   <Select placeholder="Seleccionar Perfil Laboral" disabled fluid value="" options={[]}/>
+        :   <Select placeholder="Seleccionar  Laboral" disabled fluid value="" options={[]}/>
 }
 
 
-const SelectPerfilLaboral = ({ id = "id", name, value, onChange, refresh = false }) => {
+const SelectLaboral = ({ id = "id", name, value, onChange, refresh = false }) => {
     return <SelectBase 
                 api={authentication}
-                url={`perfil_laboral`}
-                id={`select_perfil_laboral-${id}-${name}`}
+                url={`_laboral`}
+                id={`select__laboral-${id}-${name}`}
                 value={id}
                 text="nombre"
-                obj="perfil_laboral"
+                obj="_laboral"
                 name={name}
                 valueChange={value || ""}
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-                placeholder="Seleccionar Perfil Laboral"
+                placeholder="Seleccionar  Laboral"
                 refresh={refresh}
                 execute={true}
             />
@@ -171,8 +171,8 @@ const SelectAuthEntityDependencia = ({ entity_id, id = "id", name, value, onChan
 
 export { 
     SelectDependencia,
-    SelectDependenciaPerfilLaboral,
-    SelectPerfilLaboral,
+    SelectDependenciaLaboral,
+    SelectLaboral,
     SelectEntityNotUser,
     SelectEntityUser,
     SelectEntityDependenciaUser,

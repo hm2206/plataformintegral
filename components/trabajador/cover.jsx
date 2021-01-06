@@ -15,7 +15,7 @@ export default class Cover extends Component {
                     <a href={this.props.image} target="_blank" class="user-avatar user-avatar-xl"
                         style={{ width: "150px", height: "150px", borderRadius: "50%" }}
                     >
-                        <img src={this.props.image ? this.props.image: "/img/perfil.jpg"} 
+                        <img src={this.props.image ? this.props.image: "/img/.jpg"} 
                             alt={this.props.titulo}
                             style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "50%" }}
                         />
