@@ -52,7 +52,7 @@ class Sidebar extends Component {
                 data-target="#dropdown-aside"
               >
                 <span className="user-avatar user-avatar-lg">
-                  <img src={auth && auth.image ? auth.image && auth.image_images && auth.image_images.image_50x50 : '/img/perfil.jpg'} alt={auth && auth.person && auth.person.fullname} />
+                  <img src={auth && auth.image ? auth.image && auth.image_images && auth.image_images.image_50x50 : '/img/.jpg'} alt={auth && auth.person && auth.person.fullname} />
                 </span>{" "}
                 <span className="account-icon">
                   <span className="fa fa-caret-down fa-lg"></span>
@@ -73,7 +73,7 @@ class Sidebar extends Component {
                     <span className="fas fa-bell"></span> Notificaciones
                   </a>{" "}
                   <a className="dropdown-item" href="/">
-                    <span className="fas fa-user"></span> Perfil
+                    <span className="fas fa-user"></span> 
                   </a>{" "}
                   <a className="dropdown-item" href="#" 
                     onClick={(e) => {
@@ -95,7 +95,7 @@ class Sidebar extends Component {
                       href="/"
                     >
                       <span className="menu-icon fas fa-user"></span>{" "}
-                      <span className="menu-text">Perfil</span>
+                      <span className="menu-text"></span>
                     </a>
                   </li>
                   <Navigation options={this.state.options}/>
