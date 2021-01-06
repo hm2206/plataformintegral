@@ -221,7 +221,7 @@ const Descuento = () => {
                         <Form.Field>
                             <div className="row justify-aligns-center">
                                 <Show condicion={obj.edit}>
-                                    <div className={edit ? 'col-md-9 col-9' : 'col-md-12 col-12'}>
+                                    <div className={!cronograma.remanente && edit ? 'col-md-9 col-9' : 'col-md-12 col-12'}>
                                         <input type="number"
                                             step="any" 
                                             value={obj.monto || ""}
@@ -231,7 +231,7 @@ const Descuento = () => {
                                         />
                                     </div>
 
-                                    <Show condicion={edit}>
+                                    <Show condicion={!cronograma.remanente && edit}>
                                         <div className="col-md-3 col-3">
                                             <Button 
                                                 icon="asl"

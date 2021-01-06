@@ -8,10 +8,12 @@ import InfoPlanTrabajo from './infoPlanTrabajo';
 import ExecutePlanTrabajo from './executePlanTrabajo';
 import AnualPlanTrabajo from './anualPlanTrabajo';
 import Anexos from './anexos';
+import AddPlanTrabajo from './addPlanTrabajo';
 import Router from 'next/router'
 import { Button, Form } from 'semantic-ui-react';
 import { Confirm } from '../../services/utils'
 import Swal from 'sweetalert2';
+import currentFormatter from 'currency-formatter'
 
 const situacions = {
     PENDIENTE: {
@@ -54,6 +56,8 @@ const TabPlanTrabajo = () => {
     const [option, setOption] = useState("");
     const [current_plan_trabajo, setCurrentPlanTrabajo] = useState({});
     const [duration, setDuration] = useState("");
+    const [resolucion, setResolucion] = useState("");
+    const [date_resolucion, setDateResolucion] = useState("");
 
     // obtener plan de trabajo
     const getPlanTrabajo = async () => {
@@ -71,30 +75,6 @@ const TabPlanTrabajo = () => {
         setCurrentLoading(false);
     }
 
-    // crear plan de trabajo
-    const savePlanTrabajo = async () => {
-        let answer = await Confirm('warning', `¿Estas seguro en guardar el proyecto?`);
-        if (answer) {
-            app_context.fireLoading(true);
-            let datos = {};
-            datos.project_id = project.id;
-            datos.duration = duration;
-            await projectTracking.post('plan_trabajo', datos)
-                .then(res => {
-                    app_context.fireLoading(false);
-                    let { message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    setDuration("");
-                }).catch(err => {
-                    app_context.fireLoading(false);
-                    let { message, errors } = err.response.data;
-                    Swal.fire({ icon: 'warning', text: message });
-                }).catch(err => {
-                    Swal.fire({ icon: 'error', text: err.message });
-                });
-        }
-    }
-
     // primera carga
     useEffect(() => {
         if (project.id) getPlanTrabajo();
@@ -105,21 +85,9 @@ const TabPlanTrabajo = () => {
     <Fragment>
         <Show condicion={project.state != 'OVER'}>
             <Form className="row">
-                <div className="col-md-6">
-                    <Form.Field>
-                        <input type="number"
-                            placeholder="Ingrese la duración"
-                            onChange={({target}) => setDuration(target.value)}
-                        />
-                    </Form.Field>
-                </div>
-
-                <div className="col-md-5 mb-4">
-                    <Button color="teal"
-                        onClick={savePlanTrabajo}
-                        disabled={!duration}
-                    >
-                        <i className="fas fa-plus"></i> Agregar Plan de Trabajo
+                <div className="col-md-12 mb-4 text-right">
+                    <Button color="teal" onClick={(e) => setOption('plan_trabajo')}>
+                        <i className="fas fa-plus"></i> Agregar plan de trabajo
                     </Button>
                 </div>
             </Form>
@@ -131,15 +99,13 @@ const TabPlanTrabajo = () => {
                     <tr>
                         <th className="text-center" rowSpan="2">Duración</th>
                         <th className="text-center" colSpan="2">Fechas</th>
-                        <th className="text-center" colSpan="3">Informe</th>
+                        <th className="text-center" rowSpan="2">Costo</th>
+                        <th className="text-center" rowSpan="2">Situación</th>
                         <th className="text-center" rowSpan="2">Acciones</th>
                     </tr>
                     <tr>
                         <th className="text-center">Inicio</th>
                         <th className="text-center">Fin</th>
-                        <th className="text-center">Fecha</th>
-                        <th className="text-center">Situación</th>
-                        <th className="text-center">Documento</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -148,9 +114,8 @@ const TabPlanTrabajo = () => {
                             <td className="text-center">{pla.duration}</td>    
                             <td className="text-center">{moment(pla.date_start).format('DD/MM/YYYY')}</td>  
                             <td className="text-center">{moment(pla.date_over).format('DD/MM/YYYY')}</td> 
-                            <td className="text-center"></td> 
+                            <th className="text-center">{currentFormatter.format(pla.monto, { code: 'PEN' })}</th> 
                             <td className="text-center">{pla.state}</td> 
-                            <td className="text-center"></td> 
                             <td className="text-center">
                                 <div className="btn btn-group">
                                     <button className="btn btn-sm btn-outline-primary"
@@ -158,11 +123,13 @@ const TabPlanTrabajo = () => {
                                             setOption('info')
                                             setCurrentPlanTrabajo(pla)
                                         }}
+                                        title="Ver más"
                                     >
-                                        <i className="fas fa-eye"></i>
+                                        <i className="fas fa-search"></i>
                                     </button>
 
                                     <button className="btn btn-sm btn-outline-dark"
+                                        title="Ejecutar plan de trabajo"
                                         onClick={(e) => {
                                             setOption('execute')
                                             setCurrentPlanTrabajo(pla)
@@ -172,6 +139,7 @@ const TabPlanTrabajo = () => {
                                     </button>
 
                                     <button className="btn btn-sm btn-outline-danger"
+                                        title="reporte"
                                         onClick={(e) => {
                                             setOption('anual')
                                             setCurrentPlanTrabajo(pla)
@@ -181,6 +149,7 @@ const TabPlanTrabajo = () => {
                                     </button>
 
                                     <button className="btn btn-sm btn-warning"
+                                        title="Anexos del plan de trabajo"
                                         onClick={(e) => {
                                             setOption('anexos')
                                             setCurrentPlanTrabajo(pla)
@@ -201,7 +170,7 @@ const TabPlanTrabajo = () => {
             </table>
         </div>
 
-        <div className="mt-5">
+        {/* <div className="mt-5">
             <b className="font-13"><u>Situación del Informe</u></b>
             <div className="font-12">
                 <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['PENDIENTE'].color }}></div> {situacions['PENDIENTE'].text}</div>
@@ -211,7 +180,7 @@ const TabPlanTrabajo = () => {
                 <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['RESERVA'].color }}></div> {situacions['RESERVA'].text}</div>
                 <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['DESAPROBADO'].color }}></div> {situacions['DESAPROBADO'].text}</div>
             </div>
-        </div>
+        </div> */}
 
         <Show condicion={option == 'info'}>
             <InfoPlanTrabajo
@@ -239,13 +208,12 @@ const TabPlanTrabajo = () => {
                 object_id={current_plan_trabajo.id}
                 object_type={'App/Models/PlanTrabajo'}
                 isClose={(e) => setOption("")}
-                files={current_plan_trabajo.anexos}
-                afterSave={(files) => {
-                    let datos = Object.assign({}, current_plan_trabajo);
-                    datos.anexos = [...datos.anexos, ...files];
-                    setCurrentPlanTrabajo(datos);
-                    getPlanTrabajo();
-                }}
+            />
+        </Show>
+
+        <Show condicion={option == 'plan_trabajo'}>
+            <AddPlanTrabajo isClose={(e) => setOption("")}
+                onSave={(e) => getPlanTrabajo()}
             />
         </Show>
     </Fragment>)

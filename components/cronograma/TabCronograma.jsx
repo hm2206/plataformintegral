@@ -47,17 +47,17 @@ const TabCronograma = (props) => {
                     </Tab.Pane>
                 )
             },
+            {
+                menuItem: {key: 'descuento', icon: 'arrow down cart', content: 'Descuentos', disabled: edit || loading || block },
+                render: () => (
+                    <Tab.Pane style={styles}>
+                        <Descuento/>
+                    </Tab.Pane>
+                )
+            },
     ];
 
     const otherPanes = [
-        {
-            menuItem: {key: 'descuento', icon: 'arrow down cart', content: 'Descuentos', disabled: edit || loading || block },
-            render: () => (
-                <Tab.Pane style={styles}>
-                    <Descuento/>
-                </Tab.Pane>
-            )
-        },
         {
             menuItem: {key: 'detallado', icon: 'briefcase', content: 'Más descuentos', disabled: edit || loading || block },
             render: () => (

@@ -3,7 +3,6 @@ import { AUTH, AUTHENTICATE } from '../services/auth';
 import { Body } from '../components/Utils';
 import CardProfile from '../components/cardProfile';
 import CardToken from '../components/cardToken';
-import cardChangePassword from '../components/cardChangePassword'
 import CardChangePassword from '../components/cardChangePassword';
 
 export default class Index extends Component
