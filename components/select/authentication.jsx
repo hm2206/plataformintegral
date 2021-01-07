@@ -94,7 +94,7 @@ const SelectDependencia = ({ id = "id", name, value, onChange, refresh = false, 
 }
 
 
-const SelectDependenciaLaboral = ({ dependencia_id, id = "id", name, value, onChange, refresh = false, disabled = false, execute = true }) => {
+const SelectDependenciaPerfilLaboral = ({ dependencia_id, id = "id", name, value, onChange, refresh = false, disabled = false, execute = true }) => {
     return dependencia_id 
         ?   <SelectBase 
                 api={authentication}
@@ -171,7 +171,7 @@ const SelectAuthEntityDependencia = ({ entity_id, id = "id", name, value, onChan
 
 export { 
     SelectDependencia,
-    SelectDependenciaLaboral,
+    SelectDependenciaPerfilLaboral,
     SelectLaboral,
     SelectEntityNotUser,
     SelectEntityUser,

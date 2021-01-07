@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../contexts/AppContext';
 import Skeleton from 'react-loading-skeleton';
-import { SelectDependencia, SelectDependenciaLaboral } from '../select/authentication';
+import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../select/authentication';
 import { SelectAfp, SelectMeta, SelectSitacionLaboral, SelectTypeCategoriaCargo } from '../select/cronograma';
 
 const PlaceHolderInput = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
@@ -328,7 +328,7 @@ const Afectacion = () => {
                             <Show condicion={edit}
                                 predeterminado={<input value={historial._laboral && historial._laboral.nombre || ""} disabled readOnly/>}
                             >
-                                <SelectDependenciaLaboral
+                                <SelectDependenciaPerfilLaboral
                                     disabled={!edit}
                                     dependencia_id={historial.dependencia_id}
                                     refresh={historial.dependencia_id}
