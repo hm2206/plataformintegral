@@ -80,15 +80,17 @@ const Register = () => {
                 // query
                 let query = {
                     id,
-                    href: location.pathname
+                    href: btoa(location.pathname || "")
                 }
                 Router.push({ pathname: `${backUrl(Router.pathname)}/edit`, query });
             }).catch(err => {
                 try {
                     app_context.fireLoading(false);
-                    let { message, errors } = err.response.data;
-                    setErrors(errors);
-                    Swal.fire({ icon: 'warning', text: 'message' })
+                    let { data } = err.response;
+                    if (typeof data != 'object') throw new Error(err.message);
+                    if (typeof data.errors != 'object') throw new Error(data.message || "");
+                    Swal.fire({ icon: 'warning', text: data.message });
+                    setErrors(data.errors);
                 } catch(error) {
                     Swal.fire({ icon: 'error', text: err.message })
                 }
@@ -154,6 +156,7 @@ const Register = () => {
                                                 <Form.Field>
                                                     <label htmlFor="">Apellidos y Nombres</label>
                                                     <input type="text"
+                                                        className="uppercase"
                                                         value={work.person && work.person.fullname || ""}
                                                         disabled
                                                         readOnly
@@ -341,6 +344,50 @@ const Register = () => {
                                             </div>
 
                                             <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.resolucion && errors.resolucion[0] || ""}>
+                                                    <label htmlFor="">Resolución <b className="text-red">*</b></label>
+                                                    <input type="text" 
+                                                        name="resolucion"
+                                                        placeholder="N° Resolución"
+                                                        value={form.resolucion || ""}
+                                                        onChange={(e) => handleInput(e.target)}
+                                                    />
+                                                    <b className="text-red">{errors && errors.resolucion && errors.resolucion[0]}</b>
+                                                </Form.Field>
+                                            </div>
+
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || ""}>
+                                                    <label htmlFor="">Fecha de Resolución <b className="text-red">*</b></label>
+                                                    <input type="date" 
+                                                        name="fecha_de_resolucion"
+                                                        placeholder="Fecha de resolucion"
+                                                        value={form.fecha_de_resolucion || ""}
+                                                        onChange={(e) => handleInput(e.target)}
+                                                    />
+                                                    <b className="text-red">{errors && errors.fecha_de_resolucion && errors.fecha_de_resolucion[0]}</b>
+                                                </Form.Field>
+                                            </div>
+                                            
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field error={errors && errors.file && errors.file[0] || ""}>
+                                                    <label htmlFor="file">Archivo de Regístro</label>
+                                                    <label htmlFor="file" className="btn btn-outline-dark">
+                                                        <i className="fas fa-file-alt"></i>
+                                                        <input type="file" 
+                                                            id="file"
+                                                            onChange={(e) => handleFile(e.target)}
+                                                            name="file"
+                                                            hidden 
+                                                            placeholder="Archivo de Regístro"
+                                                            accept="application/pdf"
+                                                        />
+                                                    </label>
+                                                    <label>{errors && errors.file && errors.file[0]}</label>
+                                                </Form.Field>
+                                            </div>
+
+                                            <div className="col-md-4 mb-3">
                                                 <Form.Field error={errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] || ""}>
                                                     <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
                                                     <input type="date" 
@@ -363,24 +410,6 @@ const Register = () => {
                                                         onChange={(e) => handleInput(e.target)}
                                                     />
                                                     <label htmlFor="">{errors && errors.fecha_de_cese && errors.fecha_de_cese[0]}</label>
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.file && errors.file[0] || ""}>
-                                                    <label htmlFor="file">Archivo de Regístro</label>
-                                                    <label htmlFor="file" className="btn btn-outline-dark">
-                                                        <i className="fas fa-file-alt"></i>
-                                                        <input type="file" 
-                                                            id="file"
-                                                            onChange={(e) => handleFile(e.target)}
-                                                            name="file"
-                                                            hidden 
-                                                            placeholder="Archivo de Regístro"
-                                                            accept="application/pdf"
-                                                        />
-                                                    </label>
-                                                    <label>{errors && errors.file && errors.file[0]}</label>
                                                 </Form.Field>
                                             </div>
                                             

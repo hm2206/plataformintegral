@@ -153,9 +153,7 @@ export default class CreateAfp extends Component
                                     <div className="col-md-4 mb-3">
                                         <Form.Field error={errors.type_descuento_id && errors.type_descuento_id[0] || false}>
                                             <label htmlFor="">Tip. Descuento</label>
-                                            <Select
-                                                options={parseOptions(type_descuentos, ["select-type", "", "Seleccionar Tip. Descuento"], ["id", "id", "descripcion"])}
-                                                placeholder="Seleccionar Tip. Descuento"
+                                            <SelectTypeDescuento
                                                 name="type_descuento_id"
                                                 value={form.type_descuento_id || ""}
                                                 disabled
@@ -202,19 +200,7 @@ export default class CreateAfp extends Component
                                             <hr/>
                                         </h5>
 
-                                        <div className="col-md-4 mb-3">
-                                            <Form.Field>
-                                                <label htmlFor="">Clave</label>
-                                                <SelectTypeDescuento
-                                                    name="aporte_descuento_id"
-                                                    value={form.aporte_descuento_id || ""}
-                                                    disabled={block || loading}
-                                                    onChange={(e, obj) => this.handleInput(obj)}
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mb-3">
+                                        <div className="col-md-8 mb-3">
                                             <Form.Field>
                                                 <label htmlFor="">Tip. Descuento</label>
                                                 <SelectTypeDescuento
@@ -245,19 +231,7 @@ export default class CreateAfp extends Component
                                             <hr/>
                                         </h5>
 
-                                        <div className="col-md-4 mb-3">
-                                            <Form.Field>
-                                                <label htmlFor="">Clave</label>
-                                                <SelectTypeDescuento
-                                                    name="prima_descuento_id"
-                                                    value={form.prima_descuento_id || ""}
-                                                    disabled={block || loading}
-                                                    onChange={(e, obj) => this.handleInput(obj)}
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mb-3">
+                                        <div className="col-md-8 mb-3">
                                             <Form.Field>
                                                 <label htmlFor="">Tip. Descuento</label>
                                                 <SelectTypeDescuento

@@ -323,6 +323,30 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
+                                                <label htmlFor="">N° Resolución</label>
+                                                <input type="date" 
+                                                    disabled={!edit}
+                                                    value={form.resolucion || ""}
+                                                    name="resolucion" 
+                                                    onChange={({target}) => handleInput(target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Fecha de Resolución</label>
+                                                <input type="date" 
+                                                    disabled={!edit}
+                                                    value={form.fecha_de_resolucion || ""}
+                                                    name="fecha_de_resolucion" 
+                                                    onChange={({target}) => handleInput(target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
                                                 <label htmlFor="">Fecha de Ingreso</label>
                                                 <input type="date" 
                                                     disabled={!edit}

@@ -98,11 +98,11 @@ const SelectDependenciaPerfilLaboral = ({ dependencia_id, id = "id", name, value
     return dependencia_id 
         ?   <SelectBase 
                 api={authentication}
-                url={`dependencia/${dependencia_id}/_laboral`}
+                url={`dependencia/${dependencia_id}/perfil_laboral`}
                 id={`select-dependencia--laboral-${id}-${name}`}
                 value={id}
                 text="nombre"
-                obj="_laboral"
+                obj="perfil_laboral"
                 name={name}
                 valueChange={value || ""}
                 onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
