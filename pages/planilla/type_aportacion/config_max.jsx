@@ -102,7 +102,7 @@ const ItemConfig = ({ obj = {}, index, disabled = false, onUpdate = null }) => {
                     <div className="col-md-6 mb-3">
                         <label htmlFor="">Año</label>
                         <input type="number"
-                            value={form.year || ""}
+                            value={obj.year || ""}
                             readOnly
                         />
                     </div>
@@ -195,8 +195,9 @@ const TypeAportacionConfigMax = ({ success, type_aportacion, pathname, query }) 
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
-                    await getConfigAportes();
+                    setFilterYear(form.year || filter_year);
                     setErrors({});
+                    setForm({});
                 })
                 .catch(err => {
                     try {
