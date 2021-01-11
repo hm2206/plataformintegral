@@ -350,10 +350,10 @@ const BtnFloat = ({ theme, children, onClick, disabled = false, size = 'lg', sty
 const BtnBack = ({ title = 'Ir atrás', theme, children, onClick, disabled }) =>  (
   <button style={{ 
       borderRadius: '50%', 
-      border: '2px solid #346cb0', 
+      border: '2px solid #6f42c1', 
       width: '2.4em', 
       height: '2.4em',
-      color: '#346cb0',
+      color: '#6f42c1',
       background: '#fff'
     }}
     title={title}

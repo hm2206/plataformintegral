@@ -98,7 +98,7 @@
 /* dropzone */
 .dropzone {
     width: 100%;
-    border: 1.7px solid #42a5f5;
+    border: 1.7px solid #4099ff;
     border-style: dashed;
     border-spacing: 2em;
     border-radius: 0.4em;
@@ -106,7 +106,7 @@
 }
 
 .dropzone-color {
-    color: #1976d2;
+    color: #6610f2;
 }
 
 
@@ -293,4 +293,50 @@
 /* background */
 .bg-pink {
     background: rgba(242, 53, 86, 0.1)!important;
+}
+
+
+/* links */
+.text-link {
+    color: #6E7FF3;
+}
+
+a {
+    color: #287cdc;
+}
+
+.btn-primary {
+    background-color: #6e7ff3!important;
+    color: #ffffff!important;
+}
+
+.bg-primary {
+    color: #fff!important;
+}
+
+.blue {
+    background-color: #2887f3!important;
+}
+
+.teal {
+    background-color: #11c788!important;
+}
+
+.bg-pink {
+    background-color: #FF53701A!important;
+}
+.bg-gray-1 {
+    background-color:  rgba(0, 0, 0, 0.1)
+}
+
+.bg-gray-05 {
+    background-color: rgba(0, 0, 0, 0.05)
+}
+
+.bg-gray-03 {
+    background-color: rgba(0, 0, 0, 0.03)
+}
+
+.bg-gray-01 {
+    background-color: rgba(0, 0, 0, 0.01)
 }

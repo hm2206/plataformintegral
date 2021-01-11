@@ -192,7 +192,7 @@ const TabTeam = () => {
 
                                 <Show condicion={area && area.data.length}>
                                     {area.data.map((a, indexA) => 
-                                        <a className="ml-2 badge badge-primary uppercase text-white" 
+                                        <a className="ml-2 badge badge-dark uppercase text-white" 
                                             key={`linea-de-investigacion-${indexA}`}
                                             style={{ cursor: 'pointer' }}
                                             onClick={(e) => deleteAreaToProject(e, indexA, a)}

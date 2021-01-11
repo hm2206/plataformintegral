@@ -7,6 +7,7 @@ import { unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
+import { SelectTypeDescuento } from '../../../components/select/cronograma';
 
 
 export default class CreateAfp extends Component
@@ -31,7 +32,6 @@ export default class CreateAfp extends Component
     }
 
     componentDidMount = async () => {
-        this.getTypeDescuentos();
         this.findAfp();
     }
 
@@ -40,24 +40,13 @@ export default class CreateAfp extends Component
         let { query } = this.props;
         let id = query.id ? atob(query.id) : '__error';
         await unujobs.get(`afp/${id}`)
-        .then(res => this.setState({ form: res.data, old: res.data }))
+        .then(res => {
+            let { success, message, afp } = res.data;
+            if (!success) throw new Error(message);
+            this.setState({ form: afp, old: afp })
+        })
         .catch(err => this.setState({ form: {}, old: {} }));
         this.setState({ loading: false });
-    }
-
-    getTypeDescuentos = async (page = 1) => {
-        this.setState({ block: true });
-        await unujobs.get(`type_descuento?page=${page}`)
-        .then(async res => {
-            let { data, current_page, last_page } = res.data;
-            await this.setState(state => {
-                return { type_descuentos: [...state.type_descuentos, ...data] }
-            });
-            // validar si continua
-            if (current_page + 1 <= last_page) await this.getTypeDescuentos(current_page + 1);
-        })
-        .catch(err => console.log(err.message));
-        this.setState({ block: false });
     }
 
     handleInput = ({ name, value }) => {
@@ -216,9 +205,7 @@ export default class CreateAfp extends Component
                                         <div className="col-md-4 mb-3">
                                             <Form.Field>
                                                 <label htmlFor="">Clave</label>
-                                                <Select
-                                                    options={parseOptions(type_descuentos, ["select-type-aporte", "", "Seleccionar clave"], ["id", "id", "key"])}
-                                                    placeholder="Seleccionar Tip. Descuento"
+                                                <SelectTypeDescuento
                                                     name="aporte_descuento_id"
                                                     value={form.aporte_descuento_id || ""}
                                                     disabled={block || loading}
@@ -230,9 +217,7 @@ export default class CreateAfp extends Component
                                         <div className="col-md-4 mb-3">
                                             <Form.Field>
                                                 <label htmlFor="">Tip. Descuento</label>
-                                                <Select
-                                                    options={parseOptions(type_descuentos, ["select-type-aporte-desct", "", "Seleccionar Tip. Descuento"], ["id", "id", "descripcion"])}
-                                                    placeholder="Seleccionar Tip. Descuento"
+                                                <SelectTypeDescuento
                                                     name="aporte_descuento_id"
                                                     value={form.aporte_descuento_id || ""}
                                                     disabled={block || loading}
@@ -263,9 +248,7 @@ export default class CreateAfp extends Component
                                         <div className="col-md-4 mb-3">
                                             <Form.Field>
                                                 <label htmlFor="">Clave</label>
-                                                <Select
-                                                    options={parseOptions(type_descuentos, ["select-type-prim", "", "Seleccionar clave"], ["id", "id", "key"])}
-                                                    placeholder="Seleccionar Tip. Descuento"
+                                                <SelectTypeDescuento
                                                     name="prima_descuento_id"
                                                     value={form.prima_descuento_id || ""}
                                                     disabled={block || loading}
@@ -277,9 +260,7 @@ export default class CreateAfp extends Component
                                         <div className="col-md-4 mb-3">
                                             <Form.Field>
                                                 <label htmlFor="">Tip. Descuento</label>
-                                                <Select
-                                                    options={parseOptions(type_descuentos, ["select-type-prima-desct", "", "Seleccionar Tip. Descuento"], ["id", "id", "descripcion"])}
-                                                    placeholder="Seleccionar Tip. Descuento"
+                                                <SelectTypeDescuento
                                                     name="prima_descuento_id"
                                                     value={form.prima_descuento_id || ""}
                                                     disabled={block || loading}

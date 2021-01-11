@@ -8,12 +8,10 @@ const CierrePlanTrabajo = ({ plan_trabajo }) => {
 
     const [current_loading, setCurrentLoading] = useState(false);
     const [current_project, setCurrentProject] = useState({});
-    const [current_text_estatico, setCurrentTextEstatico] = useState("");
     const [current_plan_trabajo, setCurrentPlanTrabajo] = useState({});
-    const [current_objectives, setCurrentObjectives] = useState([]);
     const [current_principal, setCurrentPrincipal] = useState({});
-    const [current_areas, setCurrentAreas] = useState([]);
-    const [current_teams, setCurrentTeams] = useState([]);
+    const [current_avances, setCurrentAvances] = useState({});
+    const [current_rubro, setCurrentRubro] = useState({ datos: [], total_programado: 0, total_ejecutado: 0 });
     const [current_presupuestado, setCurrentPresupuestado] = useState([]);
     const [current_financiamiento, setCurrentFinanciamiento] = useState([]);
     const [current_anexos, setCurrentAnexos] = useState([]);
@@ -25,14 +23,12 @@ const CierrePlanTrabajo = ({ plan_trabajo }) => {
         setCurrentLoading(true);
         await projectTracking.post(`report/anual_plan_trabajo/${plan_trabajo.id}`)
             .then(res => {
-                let { project, plan_trabajo, text_estatico, objectives, areas, principal, teams, presupuestado, financiamiento, anexos } = res.data;
+                let { project, plan_trabajo, principal, avances, rubros, presupuestado, financiamiento, anexos } = res.data;
                 setCurrentProject(project || {});
-                setCurrentTextEstatico(text_estatico || "");
                 setCurrentPlanTrabajo(plan_trabajo || {});
-                setCurrentObjectives(objectives || []);
-                setCurrentAreas(areas || []);
                 setCurrentPrincipal(principal || {});
-                setCurrentTeams(teams || []);
+                setCurrentAvances(avances || {});
+                setCurrentRubro(rubros || {});
                 setCurrentPresupuestado(presupuestado || []);
                 setCurrentFinanciamiento(financiamiento || []);
                 setCurrentAnexos(anexos || []);
@@ -61,7 +57,9 @@ const CierrePlanTrabajo = ({ plan_trabajo }) => {
                     </tr>
                     <tr>
                         <td>Referencia:</td>
-                        <td>{current_project.referencia}</td>
+                        <td>
+                            <textarea name="referencia" value={current_project.referencia || ""}/>
+                        </td>
                     </tr>
                     <tr>
                         <td>Fecha:</td>
@@ -69,222 +67,220 @@ const CierrePlanTrabajo = ({ plan_trabajo }) => {
                     </tr>
                     <tr>
                         <td colSpan="2">
-                            <textarea value={current_text_estatico} readOnly/>
+                            <div className="py-2">
+                                El Reporte de Evaluación del Informe Anual  de Actividades y de Gastos xxxx, del proyecto fue <br/>
+                                revisado y analizado en la Dirección de Gestión de la Investigación de la Vicepresidenci <br/>
+                                de Investigación, considerando la documentación remitida por el Investigador Principal Sr(a) <br/>
+                                <span className="font-12 uppercase">{current_principal && current_principal.person && current_principal.person.fullname || ""}</span>, verificándose lo siguiente: <br/>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <th colSpan="2">Cuadro 1: Avance técnico y financiero porcentual del proyecto en ejecución</th>
+                        <th colSpan="2" className="bg-dark text-white">Cuadro 1: Avance técnico y financiero porcentual del proyecto en ejecución</th>
                     </tr>
-                    <tr>
-                        <td width="20%">1.1. Área y línea de investigación.</td>
-                        <td>
-                            <ul>
-                                {current_areas.map((a, indexA) => 
-                                    <li key={`linea-de-investigacion-${indexA}`}>{a.description}</li>    
-                                )}
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>1.2. Resolución de aprobación del proyecto.</td>
-                        <td>{current_project.resolucion}</td>
-                    </tr>
-                    <tr>
-                        <td>1.3. Duración del proyecto.</td>
-                        <td>{current_project.duration} (MESES)</td>
-                    </tr>
-                    <tr>
-                        <td>1.4. Costo del proyecto.</td>
-                        <td>{currentFormatter.format(current_project.monto, { code: 'PEN' })}</td>
-                    </tr>
-                    
-                    <tr>
-                        <td>1.6. Datos de la(s) institución (es) cooperante(s).</td>
-                        <td></td>
-                    </tr>
-                </tbody>
-
-                <tbody>
-                    {current_teams.map((t, indexT) => 
-                        <tr key={`list-team-${indexT}`}>
-                            <td>2.{indexT + 1}. {t.role}</td>
-                            <td className="font-12 uppercase">{t.person && t.person.fullname || ""}</td>
-                        </tr>
-                    )}
-                </tbody>
-
-                <thead>
-                    <tr>
-                        <th colSpan="2" className="bg-dark text-white">III. Escuelas involucradas y beneficiadas</th>
-                    </tr>
-                </thead>
-
-                <thead>
-                    <tr>
-                        <th colSpan="2" className="bg-dark text-white">IV. Objectivos de Proyecto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>4.1. Objectivo General</td>
-                        <td>{current_project.general_object || ""}</td>
-                    </tr>
-                    {current_objectives.map((obj, indexO) => 
-                        <tr key={`list-object-especifico-${indexO}`}>
-                            <td>4.{indexO + 2}. Objectivo Específico</td>
-                            <td>{obj.title}</td>
-                        </tr>
-                    )}
-                </tbody>
-
-                <thead>
-                    <tr>
-                        <th colSpan="2" className="bg-dark text-white">V. Resultados alcanzados</th>
-                    </tr>
-                </thead>
-                <tbody>
                     <tr>
                         <td colSpan="2">
-                            <Form.Field>
-                                <textarea name="resultados_alcanzados" value={current_plan_trabajo.resultados_alcanzados || ""}/>
-                            </Form.Field>
-                        </td>
-                    </tr>
-                </tbody>
-
-                <thead>
-                    <tr>
-                        <th colSpan="2" className="bg-dark text-white">VI. Exposición de motivos de cierre por fuerza mayor o por mala gestión</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colSpan="2">
-                            <Form.Field>
-                                <textarea name="resultados_alcanzados" value={current_plan_trabajo.motivos || ""}/>
-                            </Form.Field>
-                        </td>
-                    </tr>
-                </tbody>
-
-                <thead>
-                    <tr>
-                        <th colSpan="2" className="bg-dark text-white">VII. Informe financiero del proyecto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colSpan="2">
-                            7.1. Presupuesto detallado por actividades.
                             <div className="table-responsive">
                                 <table className="table table-bordered">
                                     <thead className="text-center">
                                         <tr>
-                                            <th>Objectivo/Actividad</th>
-                                            <th width="20%">Presupuesto Aprobado.</th>
-                                            <th width="20%">Presupuesto ejecutado.</th>
+                                            <th rowSpan="2">Detalle</th>
+                                            <th colSpan="2">
+                                                <div>Plan de Trabajo</div>
+                                                <div>{moment(plan_trabajo.date_start).format('YYYY')}</div>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th>Técnico</th>
+                                            <th>Financiero</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Número de actividades en el proyecto (NAP) y presupuesto total (PT)</td>
+                                            <td className="text-right">{current_avances.count_activities || 0}</td>
+                                            <td className="text-right">{currentFormatter.format(current_avances.total_gasto || 0, { code: 'PEN' })}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>N° de Actividades programadas en el Plan de Trabajo (NAPT) y Gasto programado (GP).</td>
+                                            <td className="text-right">{current_avances.count_activities_plan_trabajo || 0}</td>
+                                            <td className="text-right">{currentFormatter.format(current_avances.total_gasto_plan_trabajo || 0, { code: 'PEN' })}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>N° de Actividades verificadas* (NAV) y Gasto verificado* (GV)</td>
+                                            <td className="text-right">{current_avances.count_activities_plan_trabajo_verify_tecnica || 0}</td>
+                                            <td className="text-right">{currentFormatter.format(current_avances.total_gasto_plan_trabajo_verify || 0, { code: 'PEN' })}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>%Avance técnico (%AT) y % gasto ejecutado (%GE) sobre el Plan de Trabajo.</td>
+                                            <td className="text-right">{current_avances.porcentaje_activities_plan_trabajo_verify_tecnica || 0}%</td>
+                                            <td className="text-right">{current_avances.porcentaje_gasto_plan_trabajo_verify || 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>% Avance Técnico Total Acumulado (%ATTA) y %Gasto Financiero Total Acumulado (%GFTA)</td>
+                                            <td className="text-right">{current_avances.porcentaje_activities_acumulados || 0}%</td>
+                                            <td className="text-right">{current_avances.porcentaje_gastos_acumulados || 0}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Número total de Actividades pendientes (NAPEN) y Saldo disponible en el proyecto.</td>
+                                            <td className="text-right">{current_avances.count_activities_pendientes || 0}</td>
+                                            <td className="text-right">{currentFormatter.format(current_avances.total_gastos_pendientes || 0, { code: 'PEN' })}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>*El término verificado, significa cumplido o su ejecución ha sido aceptada.</div>
+                            <br/>
+                            <div><b><u>A.	Resumen:</u></b></div> <br/>
+                            <div>
+                                El porcentaje de avance técnico del proyecto es del <b>{current_avances.porcentaje_activities_plan_trabajo_verify_tecnica || 0}%</b>, al haberse cumplido con <b>{current_avances.porcentaje_gasto_plan_trabajo_verify}</b> de las <br/>
+                                actividades programadas en el Plan de Trabajo <b>{moment(plan_trabajo.date_start).format('YYYY')}</b>, en tanto el avance financiero alcanzó el <br/> 
+                                <b>{current_avances.porcentaje_gasto_plan_trabajo_verify || 0}%</b>. <br/><br/>
+
+                                El porcentaje de Avance Técnico Total Acumulado es de <b>{current_avances.porcentaje_activities_acumulados || 0}%</b> y el porcentaje de Gasto Financiero Total Acumulado 
+                                es de <b>{current_avances.porcentaje_gastos_acumulados || 0}%</b>. <br/><br/>
+
+                                El número total de actividades pendientes es de <b>{current_avances.count_activities_pendientes || 0}</b>, y el saldo del proyecto a la fecha de presentación del plan de <br/> 
+                                trabajo es de <b>{currentFormatter.format(current_avances.total_gastos_pendientes || 0, { code: 'PEN' })}</b> <br/><br/>
+
+                                Sobre el gasto elegible por la UNIA expuesto en el xx Concurso, hasta la fecha de presentación <br/>
+                                del IAAyG, el proyecto ejecutó S/. xxxxx, que representa el xxxx% del importe entregado por la <br/>
+                                UNIA.
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th colSpan="2" className="bg-dark text-white">Cuadro 2: Avance técnico y financiero porcentual del proyecto en ejecución</th>
+                    </tr>
+                    <tr>
+                        <td colSpan="2">
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead className="text-center">
+                                        <tr>
+                                            <th>Gastos elegibles</th>
+                                            <th>Presupuesto Aprobado Plan de Trabajo</th>
+                                            <th>Rendido y Verificado IAAyG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {current_rubro && current_rubro.datos && current_rubro.datos.map((rub, indexR) => 
+                                            <tr key={`lista-presupuestado-${indexR}`}>
+                                                <td className="uppercase font-12">{rub.description}</td>
+                                                <td className="text-right">{currentFormatter.format(rub.programado, { code: 'PEN' })}</td>
+                                                <td className="text-right">{currentFormatter.format(rub.ejecutado, { code: 'PEN' })}</td>
+                                            </tr>
+                                        )}
+                                        <tr>
+                                            <th style={{ background: 'rgba(0, 0, 0, 0.05)' }}>Total</th>
+                                            <th style={{ background: 'rgba(0, 0, 0, 0.05)' }} className="text-right">
+                                                {currentFormatter.format(current_rubro.total_programado || 0, { code: 'PEN' })}
+                                            </th>
+                                            <th style={{ background: 'rgba(0, 0, 0, 0.05)' }} className="text-right">
+                                                {currentFormatter.format(current_rubro.total_ejecutado || 0, { code: 'PEN' })}
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th colSpan="2">Importe elegible rendido por el investigador o gasto ejecutado.</th>
+                                            <td className="text-right" style={{ background: 'rgba(0, 0, 0, 0.03)' }}>
+                                                {currentFormatter.format(current_rubro.total_ejecutado || 0, { code: 'PEN' })}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th colSpan="2">%Gasto ejecutado</th>
+                                            <td className="text-right" style={{ background: 'rgba(0, 0, 0, 0.03)' }}>
+                                                {currentFormatter.format(current_rubro.porcentaje_ejecutado || 0, { code: 'PEN' })}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th colSpan="2">Saldo disponible en el proyecto</th>
+                                            <td className="text-right" style={{ background: 'rgba(0, 0, 0, 0.1)' }}>
+                                                {currentFormatter.format(current_rubro.saldo || 0, { code: 'PEN' })}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="text-center">
+                                Hasta el término del Plan de Trabajo {moment(plan_trabajo.date_start).format('YYYY')}, el saldo del proyecto corresponde a {currentFormatter.format(current_project.monto - current_rubro.total_programado, { code: 'PEN' })}.
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th colSpan="2" className="bg-dark text-white">Cuadro 3: Gasto programado y Gasto ejecutado</th>
+                    </tr>
+                    <tr>
+                        <td colSpan="2">
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead className="text-center">
+                                        <tr>
+                                            <th width="25%">Componente/Actividad</th>
+                                            <th>Descripción</th>
+                                            <th width="7%">Unidad Medida</th>
+                                            <th width="7%">Cant.</th>
+                                            <th width="10%">Costo Unitario</th>
+                                            <th width="10%">Gasto Aprobado</th>
+                                            <th width="10%">Gasto Ejecutado</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {current_financiamiento.map((fin, indexF) => 
-                                            <Fragment key={`lista-financiamiento-${indexF}`}>
-                                                <tr>
-                                                    <td colSpan="3" style={{ background: 'rgba(0, 0, 0, 0.1)' }}><b>Objectivo Especifico {fin.index}:</b> {fin.title}</td>
-                                                </tr>
-                                                {fin.activities && fin.activities.map((act, indexA) => 
-                                                    <Fragment key={`lista-activity-${indexA}`}>
-                                                        <tr>
-                                                            <td colSpan="3" style={{ background: 'rgba(0, 0, 0, 0.03)' }}><b>Actividad {fin.index}.{act.index}.</b> {act.title}</td>
+                                            <Fragment>
+                                                <tr key={`lista-financiamiento-${indexF}`}>
+                                                    <td className="bg-gray-1">{fin.title }</td>
+                                                    <td className="bg-gray-1"></td>
+                                                    <td className="bg-gray-1"></td>
+                                                    <td className="bg-gray-1"></td>
+                                                    <td className="bg-gray-1"></td>
+                                                    <td className="bg-gray-1"></td>
+                                                    <td className="bg-gray-1"></td>
+                                                </tr>  
+                                                {fin.activities.map((act, indexA) => 
+                                                    <Fragment>
+                                                        <tr key={`lista-actividades-${indexA}`}>
+                                                            <td rowSpan={act.gastos.length + 1 || 1} className="bg-gray-03">{act.index}. {act.title}</td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
                                                         </tr>
-                                                        {act.rubros && act.rubros.map((rub, indexR) => 
-                                                            <tr key={`lista-rubro-${indexR}`}>
-                                                                <td className="font-12">{rub.description}</td>
-                                                                <td className="text-right">{currentFormatter.format(rub.programado, { code: 'PEN' })}</td>
-                                                                <td className="text-right">{currentFormatter.format(rub.ejecutado, { code: 'PEN' })}</td>
+                                                        {act.gastos.map((gas, indexG) => 
+                                                            <tr key={`lista-gasto-${indexG}`}>
+                                                                <td>{gas.description}</td>
+                                                                <td>{gas.medida}</td>
+                                                                <td className="text-center">{gas.cantidad}</td>
+                                                                <td className="text-right">{currentFormatter.format(gas.monto || 0, { code: 'PEN' })}</td>
+                                                                <td className="text-right">{currentFormatter.format(gas.total || 0, { code: 'PEN' })}</td>
+                                                                <td className="text-right">{currentFormatter.format(gas.ejecutado || 0, { code: 'PEN' })}</td>
                                                             </tr>
                                                         )}
                                                     </Fragment>
                                                 )}
-                                            </Fragment>
+                                            </Fragment> 
                                         )}
                                     </tbody>
                                 </table>
                             </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colSpan="2">
-                            7.2. Distribución de gastos por partida presupuestaria.
-                            <div className="table-responsive">
-                                <table className="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Especifica</th>
-                                            <th>Concepto</th>
-                                            <th>Presupuesto Aprobado</th>
-                                            <th>Presupuesto Ejecutado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {current_presupuestado.map((pre, indexP) => 
-                                            <tr key={`lista-presupuestada-${indexP}`}>
-                                                <td>{pre.ext_pptto}</td>
-                                                <td className="uppercase" cols>{pre.name}</td>
-                                                <td className="text-right">{currentFormatter.format(pre.programado, { code: 'PEN' })}</td>
-                                                <td className="text-right">{currentFormatter.format(pre.ejecutado, { code: 'PEN' })}</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+
+                            <div className="text-center">
+                                Hasta el término del Plan de Trabajo {moment(plan_trabajo.date_start).format('YYYY')}, el saldo del proyecto corresponde a {currentFormatter.format(current_project.monto - current_rubro.total_programado, { code: 'PEN' })}.
                             </div>
                         </td>
                     </tr>
-                </tbody>
-
-                <thead>
                     <tr>
-                        <th colSpan="2" className="bg-dark text-white">VIII. Adquisición de bienes duraderos, ubicación actual y destino final de uso</th>
-                    </tr>
-                </thead>
-
-                <thead>
-                    <tr>
-                        <th colSpan="2" className="bg-dark text-white">IX. Lecciones aprendidas y recomendaciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colSpan="2">
-                            <Form.Field>
-                                <textarea name="resultados_alcanzados" value={current_plan_trabajo.recomendaciones || ""}/>
-                            </Form.Field>
-                        </td>
-                    </tr>
-                </tbody>
-
-                <thead>
-                    <tr>
-                        <th colSpan="2" className="bg-dark text-white">X. Anexos</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colSpan="2">
-                            <ul>
-                                {current_anexos.map((a, indexA) => 
-                                    <li key={`lista-anexos-${indexA}`}>
-                                        <a href={a.url} target="_blank">{a.name}</a>
-                                    </li>
-                                )}
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colSpan="2" className="text-right">
-                            <button className="btn btn-primary">
-                                <i className="fa fa-print"></i> Reporte
-                            </button>
-                        </td>
+                        <th colSpan="2">
+                            <div className="text-right">
+                                <button className="btn btn-primary">
+                                    <i className="fas fa-print"></i> Reporte
+                                </button>
+                            </div>
+                        </th>
                     </tr>
                 </tbody>
             </table>
