@@ -3,7 +3,7 @@ import { Body } from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { unujobs } from '../../../services/apis';
 import { InputCredencias, InputEntity, InputAuth } from '../../../services/utils';
-import { Form, Button } from 'semantic-ui-react';
+import { Form, Button, Checkbox } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import { getPlame } from '../../../services/requests/cronograma'; 
 import Router from 'next/router';
@@ -25,22 +25,24 @@ export default class Plame extends Component
     state = {
         year: 2020,
         mes: 6,
-        loading: false
+        loading: false,
+        cronogramas: []
     }
 
     componentDidMount = async () => {
         this.props.fireEntity({ render: true });
-        this.setState((state, props) => ({
+        await this.setState((state, props) => ({
             year: props.query && props.query.year || 2020,
             mes: props.query && props.query.mes || 6
         }));
+        await this.getCronogramas();
     }
 
     handleInput = ({name, value}) => {
         this.setState({ [name]: value });
     }
 
-    handleClick = (url) => {
+    handleClick = async (url) => {
         let form = document.createElement('form');
         document.body.appendChild(form);
         // add credenciales
@@ -49,6 +51,18 @@ export default class Plame extends Component
         form.appendChild(InputEntity());
         // add token 
         form.appendChild(InputAuth());
+        // agregar ids
+        await this.state.cronogramas.filter(async c => {
+            let index = 0;
+            if (c._check) {
+                let input_id = document.createElement('input');
+                input_id.hidden = true;
+                input_id.value = c.id;
+                input_id.name = `id[${index}]`;
+                form.appendChild(input_id);
+                index++;
+            }
+        });
         // config form
         form.method = 'POST'
         form.action = `${unujobs.path}/${url}`;
@@ -56,17 +70,39 @@ export default class Plame extends Component
         form.submit();
     }
 
-    handleSearch = () => {
+    handleSearch = async () => {
         let { query, pathname, push } = Router;
         let { year, mes } = this.state;
         query.year = year;
         query.mes = mes;
-        push({ pathname, query });
+        await push({ pathname, query });
+        await this.getCronogramas();
+    }
+
+    getCronogramas = async () => {
+        let { year, mes } = this.state;
+        await unujobs.get(`cronograma?year=${year}&mes=${mes}`)
+            .then(res => {
+                console.log(res.data);
+                let { data } = res.data;
+                this.setState({ cronogramas: data || [] });
+            }).catch(err => {
+                this.setState({ cronogramas: [] })
+            });
+    }
+
+    checkCronograma = async (index, obj, { name, checked }) => {
+        obj[name] = checked;
+        this.setState(state => {
+            state.cronogramas[index] = obj;
+            return { cronogramas: state.cronogramas }
+        }); 
     }
 
     render() {
 
         let { plame } = this.props;
+        let { cronogramas } = this.state;
 
         return (
             <div className="col-md-12">
@@ -111,6 +147,40 @@ export default class Plame extends Component
 
                             <div className="row">
                                 <div className="col-md-12 mb-5">
+                                    <hr/>
+                                </div>
+
+                                <div className="col-md-12">
+                                    <div className="row">
+                                        {cronogramas.map((cro, indexC) => 
+                                            <div className="col-md-4" key={`lista-cronogramas-${indexC}`}>
+                                               <div className={`card ${cro._check ? 'bg-primary' : ''} ${cro.estado ? 'disabled' : ''}`}>
+                                                   <div className="card-header">
+                                                        <div className="row">
+                                                            <div className="col-md-10">
+                                                                #{cro.id} - {cro.planilla && cro.planilla.nombre || ""}
+                                                            </div>
+                                                            <div className="col-md-2">
+                                                                <Checkbox toggle checked={cro._check ? true : false}
+                                                                    name="_check"
+                                                                    onChange={(e, obj) => this.checkCronograma(indexC, cro, obj)}
+                                                                    disabled={cro.estado}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                   </div>
+                                                   <div className="card-body">
+                                                        <div><b><i className="fas fa-users"></i> Total Trabajadores: </b><small className="badge badge-warning">{cro.historial_count || 0}</small></div>
+                                                        <div><b><i className="fas fa-i"></i>Adicional: </b> {cro.adicional ? cro.adicional : 'NO'}</div>
+                                                        <div><b><i className="fas fa-i"></i>Remanente: </b> {cro.remenente ? 'SI' : 'NO'}</div>
+                                                   </div>
+                                               </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="col-md-12">
                                     <hr/>
                                 </div>
 
