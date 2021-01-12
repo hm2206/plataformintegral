@@ -45,6 +45,9 @@ const Edit = ({ success, info, query }) => {
         let newForm = Object.assign({}, form);
         newForm[name] = value;
         setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
     // actualizar contrato 
@@ -62,10 +65,12 @@ const Edit = ({ success, info, query }) => {
             datos.append('situacion_laboral_id', form.situacion_laboral_id || "");
             datos.append('is_pay', form.is_pay || "");
             datos.append('plaza', form.plaza || "");
+            datos.append('resolucion', form.resolucion || "");
+            datos.append('fecha_de_resolucion', form.fecha_de_resolucion || "");
             datos.append('fecha_de_ingreso', form.fecha_de_ingreso || "")
             datos.append('fecha_de_cese', form.fecha_de_cese || "")
             datos.append('observacion', form.observacion || "");
-            datos.append('_method', 'PUT')
+            datos.append('_method', 'PUT');
             // actualizar
             await unujobs.post(`info/${info.id}`, datos)
                 .then(async res => {
@@ -80,12 +85,14 @@ const Edit = ({ success, info, query }) => {
                 }).catch(async err => {
                     try {
                         app_context.fireLoading(false)
-                        let { message, errors } = err.response.data;
-                        setErrors(errors);
-                        await Swal.fire({ icon: 'warning', text: message });
+                        let { data } = err.response;
+                        if (typeof data != 'object') throw new Error(err.message);
+                        if (typeof data.errors != 'object') throw new Error(data.message);
+                        await Swal.fire({ icon: 'warning', text: data.message });
+                        setErrors(data.errors);
                     } catch (error) {
                         app_context.fireLoading(false)
-                        Swal.fire({ icon: 'error', message: err.message });
+                        Swal.fire({ icon: 'error', message: error.message });
                     }
                 });
         }
@@ -177,13 +184,14 @@ const Edit = ({ success, info, query }) => {
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.cargo_id && errors.cargo_id[0] || ""}>
                                                 <label htmlFor="">Partición Presupuestal</label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectCargo name="cargo_id" value={form.cargo_id} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
                                                     <input type="text" disabled value={form.cargo || ""} readOnly/>
                                                 </Show>
+                                                <label>{errors.cargo_id && errors.cargo_id[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
@@ -195,18 +203,19 @@ const Edit = ({ success, info, query }) => {
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.pap && errors.pap[0] || ""}>
                                                 <label htmlFor="">P.A.P</label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<Select name="pap" value={form.pap} options={storage.pap} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
                                                     <input type="text" disabled value={info.pap}/>
                                                 </Show>
+                                                <label>{errors.pap && errors.pap[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.type_categoria_id && errors.type_categoria_id[0] || ""}>
                                                 <label htmlFor="">Tip. Categoría</label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectCargoTypeCategoria 
@@ -220,11 +229,12 @@ const Edit = ({ success, info, query }) => {
                                                 >
                                                     <input type="text" disabled value={info.categoria} readOnly/>
                                                 </Show>
+                                                <label>{errors.type_categoria_id && errors.type_categoria_id[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.meta_id && errors.meta_id[0] || ""}>
                                                 <label htmlFor="">MetaID</label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectMeta name="meta_id" 
@@ -235,6 +245,7 @@ const Edit = ({ success, info, query }) => {
                                                 >
                                                     <input type="text" disabled value={info.metaID}/>
                                                 </Show>
+                                                <label>{errors.meta_id && errors.meta_id[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
@@ -253,7 +264,7 @@ const Edit = ({ success, info, query }) => {
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.dependencia_id && errors.dependencia_id[0] || ""}>
                                                 <label htmlFor="">Dependencia</label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectDependencia name="dependencia_id" 
@@ -263,11 +274,12 @@ const Edit = ({ success, info, query }) => {
                                                 >
                                                     <input type="text" disabled value={info.dependencia && info.dependencia.nombre}/>
                                                 </Show>
+                                                <label>{errors.dependencia_id && errors.dependencia_id[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.perfil_laboral_id && errors.perfil_laboral_id[0] || ""}>
                                                 <label htmlFor="">Perfil Laboral</label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectDependenciaPerfilLaboral
@@ -280,11 +292,12 @@ const Edit = ({ success, info, query }) => {
                                                 >
                                                     <input type="text" disabled value={info.perfil_laboral && info.perfil_laboral.nombre || ""}/>
                                                 </Show>
+                                                <label>{errors.perfil_laboral_id && errors.perfil_laboral_id[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.situacion_laboral_id && errors.situacion_laboral_id[0] || ""}>
                                                 <label htmlFor="">Situación Laboral</label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectSitacionLaboral name="situacion_laboral_id" 
@@ -294,6 +307,7 @@ const Edit = ({ success, info, query }) => {
                                                 >
                                                     <input type="text" disabled value={form.situacion_laboral || ""}/>
                                                 </Show>
+                                                <label>{errors.situacion_laboral_id && errors.situacion_laboral_id[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
@@ -322,19 +336,20 @@ const Edit = ({ success, info, query }) => {
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.resolucion && errors.resolucion[0] || ""}>
                                                 <label htmlFor="">N° Resolución</label>
-                                                <input type="date" 
+                                                <input type="text" 
                                                     disabled={!edit}
                                                     value={form.resolucion || ""}
                                                     name="resolucion" 
                                                     onChange={({target}) => handleInput(target)}
                                                 />
+                                                <label>{errors.resolucion && errors.resolucion[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || ""}>
                                                 <label htmlFor="">Fecha de Resolución</label>
                                                 <input type="date" 
                                                     disabled={!edit}
@@ -342,11 +357,12 @@ const Edit = ({ success, info, query }) => {
                                                     name="fecha_de_resolucion" 
                                                     onChange={({target}) => handleInput(target)}
                                                 />
+                                                <label>{errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] || ""}>
                                                 <label htmlFor="">Fecha de Ingreso</label>
                                                 <input type="date" 
                                                     disabled={!edit}
@@ -354,11 +370,12 @@ const Edit = ({ success, info, query }) => {
                                                     name="fecha_de_ingreso" 
                                                     onChange={({target}) => handleInput(target)}
                                                 />
+                                                <label>{errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.fecha_de_cese && errors.fecha_de_cese[0] || ""}>
                                                 <label htmlFor="">Fecha de Cese</label>
                                                 <input type="date" 
                                                     disabled={!edit}
@@ -366,6 +383,7 @@ const Edit = ({ success, info, query }) => {
                                                     value={form.fecha_de_cese || ""} 
                                                     onChange={({target}) => handleInput(target)}
                                                 />
+                                                <label>{errors.fecha_de_cese && errors.fecha_de_cese[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
@@ -437,7 +455,7 @@ const Edit = ({ success, info, query }) => {
                                         </div>
 
                                         <div className="col-md-8 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.observacion && errors.observacion[0] || ""}>
                                                 <label htmlFor="">Observación</label>
                                                 <textarea type="text" 
                                                     disabled={!edit} 
@@ -445,6 +463,7 @@ const Edit = ({ success, info, query }) => {
                                                     name="observacion"
                                                     onChange={({target}) => handleInput(target)}
                                                 />
+                                                <label>{errors.observacion && errors.observacion[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
@@ -453,7 +472,7 @@ const Edit = ({ success, info, query }) => {
                                                 <Form.Field>
                                                     <label htmlFor="">File</label>
                                                     <Button color="red"
-                                                        onClick={(e) => this.handleFile(info.file)}
+                                                        onClick={(e) => handleFile(info.file)}
                                                     >
                                                         <i className="fas fa-file-pdf"></i>
                                                     </Button>
