@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Body } from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
 import { unujobs } from '../../../services/apis';
@@ -7,42 +7,28 @@ import { Form, Button, Checkbox } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import { getPlame } from '../../../services/requests/cronograma'; 
 import Router from 'next/router';
+import { AppContext } from '../../../contexts/AppContext';
+import Swal from 'sweetalert2';
 
 
-export default class Plame extends Component 
-{
+const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        let date = new Date();
-        query.mes = query.mes || date.getMonth() + 1;
-        query.year = query.year || date.getFullYear();
-        let plame = await getPlame(ctx);
-        return { pathname, query, plame };
-    }
+    // app
+    const app_context = useContext(AppContext);
 
-    state = {
-        year: 2020,
-        mes: 6,
-        loading: false,
-        cronogramas: []
-    }
+    // estados
+    const [year, setYear] = useState(2020);
+    const [mes, setMes] = useState(10);
 
-    componentDidMount = async () => {
-        this.props.fireEntity({ render: true });
-        await this.setState((state, props) => ({
-            year: props.query && props.query.year || 2020,
-            mes: props.query && props.query.mes || 6
-        }));
-        await this.getCronogramas();
-    }
+    // config page
+    useEffect(() => {
+        app_context.fireEntity({ render: true });
+        setYear(query && query.year || "");
+        setMes(query && query.mes || "");
+    }, []);
 
-    handleInput = ({name, value}) => {
-        this.setState({ [name]: value });
-    }
 
-    handleClick = async (url) => {
+    const handleClick = async (url) => {
         let form = document.createElement('form');
         document.body.appendChild(form);
         // add credenciales
@@ -51,200 +37,162 @@ export default class Plame extends Component
         form.appendChild(InputEntity());
         // add token 
         form.appendChild(InputAuth());
-        // agregar ids
-        await this.state.cronogramas.filter(async c => {
-            let index = 0;
-            if (c._check) {
-                let input_id = document.createElement('input');
-                input_id.hidden = true;
-                input_id.value = c.id;
-                input_id.name = `id[${index}]`;
-                form.appendChild(input_id);
-                index++;
-            }
-        });
-        // config form
-        form.method = 'POST'
+        // abrir
+        form.method = 'POST';
         form.action = `${unujobs.path}/${url}`;
-        form.target = '_blank'
+        form.target = '_blank';
         form.submit();
     }
 
-    handleSearch = async () => {
-        let { query, pathname, push } = Router;
-        let { year, mes } = this.state;
+    const handleSearch = () => {
+        let { push } = Router;
         query.year = year;
         query.mes = mes;
-        await push({ pathname, query });
-        await this.getCronogramas();
+        push({ pathname, query });
     }
 
-    getCronogramas = async () => {
-        let { year, mes } = this.state;
-        await unujobs.get(`cronograma?year=${year}&mes=${mes}`)
-            .then(res => {
-                console.log(res.data);
-                let { data } = res.data;
-                this.setState({ cronogramas: data || [] });
-            }).catch(err => {
-                this.setState({ cronogramas: [] })
-            });
-    }
+    // render() {
+    return (
+        <div className="col-md-12">
+            <Body>
+                <Form>
+                    <div className="card-header">
+                        <b>Reporte PDT-PLAME</b>
+                    </div>
 
-    checkCronograma = async (index, obj, { name, checked }) => {
-        obj[name] = checked;
-        this.setState(state => {
-            state.cronogramas[index] = obj;
-            return { cronogramas: state.cronogramas }
-        }); 
-    }
-
-    render() {
-
-        let { plame } = this.props;
-        let { cronogramas } = this.state;
-
-        return (
-            <div className="col-md-12">
-                <Body>
-                    <Form loading={this.state.loading}>
-                        <div className="card-header">
-                            <b>Reporte PDT-PLAME</b>
-                        </div>
-
-                        <div className="card-body">
-                            <div className="row">
-                                <div className="col-md-3 mb-1 col-6">
-                                    <Form.Field>
-                                        <input type="number" 
-                                            name="year"
-                                            value={this.state.year}
-                                            onChange={(e) => this.handleInput(e.target)}
-                                        />
-                                    </Form.Field>
-                                </div>
-
-                                <div className="col-md-3 mb-1 col-6">
-                                    <Form.Field>
-                                        <input type="number" 
-                                            name="mes"
-                                            value={this.state.mes}
-                                            onChange={(e) => this.handleInput(e.target)}
-                                        />
-                                    </Form.Field>
-                                </div>
-
-                                <div className="col-md-2 mb-1 col-12 mt-1">
-                                    <Button
-                                        fluid
-                                        color="blue"
-                                        onClick={this.handleSearch}
-                                    >
-                                        <i className="fas fa-search"></i> Buscar
-                                    </Button>
-                                </div>
+                    <div className="card-body">
+                        <div className="row">
+                            <div className="col-md-3 mb-1 col-6">
+                                <Form.Field>
+                                    <input type="number" 
+                                        name="year"
+                                        value={year || ""}
+                                        onChange={({ target }) => setYear(target.value)}
+                                    />
+                                </Form.Field>
                             </div>
 
-                            <div className="row">
-                                <div className="col-md-12 mb-5">
-                                    <hr/>
+                            <div className="col-md-3 mb-1 col-6">
+                                <Form.Field>
+                                    <input type="number" 
+                                        name="mes"
+                                        value={mes || ""}
+                                        max={12}
+                                        onChange={({ target }) => setMes(target.value)}
+                                    />
+                                </Form.Field>
+                            </div>
+
+                            <div className="col-md-2 mb-1 col-12 mt-1">
+                                <Button
+                                    fluid
+                                    color="blue"
+                                    onClick={handleSearch}
+                                >
+                                    <i className="fas fa-search"></i> Buscar
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="row">
+                            <div className="col-md-12">
+                                <hr/>
+                            </div>
+
+                            <Show condicion={!success}>
+                                <div className="col-md-12 mt-5">
+                                    <h3 className="text-center">
+                                        <i className="fas fa-file-alt mb-2" style={{ fontSize: '3em' }}></i>
+                                        <br/>
+                                        {message}
+                                    </h3>
+                                </div>
+                            </Show>
+
+                            <Show condicion={success}>
+                                <div className="col-md-12 mb-1">
+                                    <div className="row">
+                                        <div className="col-md-3">
+                                            <div 
+                                                className="card card-body text-primary"
+                                                style={{ cursor: 'pointer'  }}
+                                                onClick={(e) => handleClick(`pdf/plame/${year}/${mes}`)}
+                                            >
+                                                <span><i className="fas fa-users mr-1"></i> Reporte PLAME</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-md-3">
+                                            <div
+                                                className="card card-body text-success"
+                                                style={{ cursor: 'pointer'  }}
+                                                onClick={(e) => handleClick(`plame/jor/${year}/${mes}?download=1`)}
+                                            >
+                                                <span><i className="fas fa-file-alt mr-1"></i> Generar JOR</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-md-3">
+                                            <div 
+                                                className="card card-body text-dark"
+                                                style={{ cursor: 'pointer'  }}
+                                                onClick={(e) => handleClick(`plame/rem/${year}/${mes}?download=1`)}
+                                            >
+                                                <span><i className="fas fa-file-alt mr-1"></i> Generar REM</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-md-3">
+                                            <div
+                                                className="card card-body text-red"
+                                                style={{ cursor: 'pointer'  }}
+                                                onClick={(e) => handleClick(`plame/rem/${year}/${mes}?download=1&extension=pen`)}
+                                            >
+                                                <span><i className="fas fa-file-alt mr-1"></i> Generar PEN</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="col-md-12">
                                     <div className="row">
+                                        <Show condicion={cronogramas.length}>
+                                            <div className="col-md-12">
+                                                <hr/>
+                                            </div>
+                                        </Show>
+                                        {/* cronogramas */}
                                         {cronogramas.map((cro, indexC) => 
-                                            <div className="col-md-4" key={`lista-cronogramas-${indexC}`}>
-                                               <div className={`card ${cro._check ? 'bg-primary' : ''} ${cro.estado ? 'disabled' : ''}`}>
-                                                   <div className="card-header">
-                                                        <div className="row">
-                                                            <div className="col-md-10">
-                                                                #{cro.id} - {cro.planilla && cro.planilla.nombre || ""}
-                                                            </div>
-                                                            <div className="col-md-2">
-                                                                <Checkbox toggle checked={cro._check ? true : false}
-                                                                    name="_check"
-                                                                    onChange={(e, obj) => this.checkCronograma(indexC, cro, obj)}
-                                                                    disabled={cro.estado}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                   </div>
-                                                   <div className="card-body">
-                                                        <div><b><i className="fas fa-users"></i> Total Trabajadores: </b><small className="badge badge-warning">{cro.historial_count || 0}</small></div>
-                                                        <div><b><i className="fas fa-i"></i>Adicional: </b> {cro.adicional ? cro.adicional : 'NO'}</div>
-                                                        <div><b><i className="fas fa-i"></i>Remanente: </b> {cro.remenente ? 'SI' : 'NO'}</div>
-                                                   </div>
-                                               </div>
+                                            <div className="col-md-3">
+                                                <div className="card" style={{  cursor: 'pointer'  }}>
+                                                    <div className="card-body">
+                                                        <b>#{cro.id} - {cro.planilla && cro.planilla.nombre || ""}</b>
+                                                        <hr/>
+                                                        <div>{cro.observacion}</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
                                 </div>
-
-                                <div className="col-md-12">
-                                    <hr/>
-                                </div>
-
-                                <Show condicion={!plame.success}>
-                                    <div className="col-md-12 mt-5">
-                                        <h3 className="text-center">
-                                            <i className="fas fa-file-alt mb-2" style={{ fontSize: '3em' }}></i>
-                                            <br/>
-                                            {plame.message}
-                                        </h3>
-                                    </div>
-                                </Show>
-
-                                <Show condicion={plame.success}>
-                                    <div className="col-md-12 mb-1">
-                                        <div className="row">
-                                            <div className="col-md-3">
-                                                <div 
-                                                    className="card card-body text-primary"
-                                                    style={{ cursor: 'pointer'  }}
-                                                    onClick={(e) => this.handleClick(`pdf/plame/${this.state.year}/${this.state.mes}`)}
-                                                >
-                                                    <span><i className="fas fa-users mr-1"></i> Reporte PLAME</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="col-md-3">
-                                                <div
-                                                    className="card card-body text-success"
-                                                    style={{ cursor: 'pointer'  }}
-                                                    onClick={(e) => this.handleClick(`plame/jor/${this.state.year}/${this.state.mes}?download=1`)}
-                                                >
-                                                    <span><i className="fas fa-file-alt mr-1"></i> Generar JOR</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="col-md-3">
-                                                <div 
-                                                    className="card card-body text-dark"
-                                                    style={{ cursor: 'pointer'  }}
-                                                    onClick={(e) => this.handleClick(`plame/rem/${this.state.year}/${this.state.mes}?download=1`)}
-                                                >
-                                                    <span><i className="fas fa-file-alt mr-1"></i> Generar REM</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="col-md-3">
-                                                <div
-                                                    className="card card-body text-red"
-                                                    style={{ cursor: 'pointer'  }}
-                                                    onClick={(e) => this.handleClick(`plame/rem/${this.state.year}/${this.state.mes}?download=1&extension=pen`)}
-                                                >
-                                                    <span><i className="fas fa-file-alt mr-1"></i> Generar PEN</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Show>
-                            </div>
+                            </Show>
                         </div>
-                    </Form>
-                </Body>
-            </div>
-        )
-    }
-
+                    </div>
+                </Form>
+            </Body>
+        </div>)
 }
+
+// server rendering
+PlameIndex.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    let date = new Date();
+    query.mes = typeof query.mes != 'undefined' ? query.mes : date.getMonth() + 1;
+    query.year = typeof query.year != 'undefined' ? query.year : date.getFullYear();
+    let { cronogramas, message, success } = await getPlame(ctx);
+    return { pathname, query, success, message, cronogramas };
+}
+
+// exportar
+export default PlameIndex;
