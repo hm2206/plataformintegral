@@ -317,6 +317,33 @@ const InformacionCronograma = ({ cronograma, success }) => {
         }
     }
 
+    // añadir o quitar al plame
+    const togglePlame = async () => {
+        let answer = await Confirm('warning', `¿Estás seguro en ${cronograma.plame ? 'quitar de ' : 'aplicar al'} PDF-PLAME?`, 'Confirmar');
+        if (answer) {
+            app_context.fireLoading(true);
+            // request
+            await unujobs.post(`cronograma/${cronograma.id}/plame`, {}, { headers: getHeaders() })
+                .then(async res => {
+                    app_context.fireLoading(false);
+                    let { success, message } = res.data;
+                    if (!success) throw new Error(message);
+                    await Swal.fire({ icon: 'success', text: message });
+                    let { push, pathname, query } = Router;
+                    await push({ pathname, query });
+                }).catch(err => {
+                    try {
+                        app_context.fireLoading(false);
+                        let { data } = err.response;
+                        if (typeof data != 'object') throw new Error(err.message);
+                        throw new Error(data.message);
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: err.message })   
+                    }
+                });
+        }
+    }
+
     // obtener reporte anual
     const linkRenta = async (e) => {
         e.preventDefault();
@@ -373,6 +400,9 @@ const InformacionCronograma = ({ cronograma, success }) => {
             case 'generate-token':
                 await generateToken();
                 break;
+            case 'plame':
+                await togglePlame();
+                break;
             default:
                 break;
         }
@@ -419,6 +449,14 @@ const InformacionCronograma = ({ cronograma, success }) => {
 
                     <div className="col-md-12 mt-3">
                         <hr/>
+
+                        <Show condicion={cronograma.plame}>
+                            <Message className="disable">
+                                <div><b>El cronograma aplica para el</b> <span className="badge badge-dark">PDT-PLAME</span></div>
+                            </Message>
+                            <hr/>
+                        </Show>
+
                         <Show condicion={success}
                             predeterminado={<NotFound message="El cronograma de pago no existe"/>}
                         >
@@ -503,9 +541,9 @@ const InformacionCronograma = ({ cronograma, success }) => {
                                                         { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
                                                         { key: "remu-massive", text: "Remuneración Masiva", icon: "cart arrow down" },
                                                         { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
-                                                        { key: 'sync-descuento', text: "Agregar Descuentos", icon: "arrow arrow down" },
+                                                        { key: 'sync-descuento', text: "Agregar Descuentos", icon: "arrow circle down" },
                                                         { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
-                                                        { key: 'sync-obligacion', text: "Agregar Obl. Judiciales", icon: "arrow arrow down" },
+                                                        { key: 'sync-obligacion', text: "Agregar Obl. Judiciales", icon: "arrow circle arrow down" },
                                                         { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
                                                         { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
                                                         { key: "change-meta", text: "Cambio de Metas", icon: "exchange" },
@@ -524,6 +562,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
                                                     disabled={loading || edit || block}
                                                     options={[
                                                         { key: "generate-token", text: "Generar Token", icon: "cloud upload" },
+                                                        { key: "plame", text: `${!cronograma.plame ? 'Aplicar' : 'No aplicar'} al PDT-PLAME`, icon: "balance scale"},
                                                         { key: "email", text: "Mail Masivos", icon: "mail" },
                                                         { key: "report", text: "Reportes", icon: "file text outline" },
                                                     ]}
