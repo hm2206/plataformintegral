@@ -11,7 +11,7 @@ import ContentControl from '../../../components/contentControl';
 import atob from 'atob';
 import btoa from 'btoa';
 import { AppContext } from '../../../contexts/AppContext';
-import { SelectCargo, SelectCargoTypeCategoria, SelectMeta, SelectSitacionLaboral } from '../../../components/select/cronograma';
+import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta, SelectSitacionLaboral } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
 import storage from '../../../services/storage.json';
 
@@ -56,20 +56,7 @@ const Edit = ({ success, info, query }) => {
         if (answer) {
             app_context.fireLoading(true)
             let datos = new FormData;
-            datos.append('cargo_id', form.cargo_id || "");
-            datos.append('type_categoria_id', form.type_categoria_id || "");
-            datos.append('pap', form.pap || "");
-            datos.append('meta_id', form.meta_id || "");
-            datos.append('dependencia_id', form.dependencia_id || "");
-            datos.append('perfil_laboral_id', form.perfil_laboral_id || "");
-            datos.append('situacion_laboral_id', form.situacion_laboral_id || "");
-            datos.append('is_pay', form.is_pay || "");
-            datos.append('plaza', form.plaza || "");
-            datos.append('resolucion', form.resolucion || "");
-            datos.append('fecha_de_resolucion', form.fecha_de_resolucion || "");
-            datos.append('fecha_de_ingreso', form.fecha_de_ingreso || "")
-            datos.append('fecha_de_cese', form.fecha_de_cese || "")
-            datos.append('observacion', form.observacion || "");
+            await Object.keys(form).map(key => datos.append(key, form[key]));
             datos.append('_method', 'PUT');
             // actualizar
             await unujobs.post(`info/${info.id}`, datos)
@@ -177,9 +164,14 @@ const Edit = ({ success, info, query }) => {
                                 <div className="col-md-8">
                                     <div className="row">
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
+                                            <Form.Field error={errors.planilla_id && errors.planilla_id[0] || ""}>
                                                 <label htmlFor="">Planilla</label>
-                                                <input type="text" disabled defaultValue={info.planilla || ""}/>
+                                                <Show condicion={!edit}
+                                                    predeterminado={<SelectPlanilla name="planilla_id" value={form.planilla_id} onChange={(e, obj) => handleInput(obj)}/>}
+                                                >
+                                                    <input type="text" disabled value={form.planilla || ""} readOnly/>
+                                                </Show>
+                                                <label>{errors.planilla_id && errors.planilla_id[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
