@@ -1,0 +1,73 @@
+{
+    "status": {
+        "REGISTRADO": {
+            "text": "R",
+            "title": "Regístrado",
+            "className": "badge-dark",
+            "btn": "dark",
+            "color": "black"
+        },
+        "PENDIENTE": {
+            "text": "P",
+            "title": "Pendiente",
+            "className": "badge-orange",
+            "btn": "orange",
+            "color": "orange"
+        },
+        "ACEPTADO": {
+            "text": "A",
+            "title": "Aceptado",
+            "className": "badge-primary",
+            "btn": "primary",
+            "label": "Aceptar",
+            "color": "blue"
+        },
+        "DERIVADO": {
+            "text": "D",
+            "title": "Derivado",
+            "className": "badge-purple",
+            "btn": "purple",
+            "label": "Derivar",
+            "color": "purple"
+        },
+        "FINALIZADO": {
+            "text": "F",
+            "title": "Finalizado",
+            "className": "badge-success",
+            "btn": "success",
+            "label": "Finalizar",
+            "color": "teal"
+        },
+        "RECHAZADO": {
+            "text": "R",
+            "title": "Rechazado",
+            "className": "badge-warning",
+            "btn": "warning",
+            "label": "Rechazar",
+            "color": "red"
+        },
+        "ANULADO": {
+            "text": "A",
+            "title": "Anulado",
+            "className": "badge-danger",
+            "btn": "danger",
+            "label": "Anular",
+            "color": "red"
+        },
+        "ENVIADO": {
+            "text": "E",
+            "title": "Enviado",
+            "className": "badge-light",
+            "btn": "light",
+            "color": "olive"
+        },
+        "RESPONDIDO": {
+            "text": "R",
+            "title": "Respondido",
+            "className": "badge-info",
+            "btn": "info",
+            "label": "Responder",
+            "color": "orange"
+        }
+    }
+}

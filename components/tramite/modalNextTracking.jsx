@@ -4,7 +4,7 @@ import { Form, Button } from 'semantic-ui-react';
 import { SelectDependencia } from '../select/authentication';
 import Show from '../show';
 import { DropZone } from '../Utils';
-import { status } from './env.json';
+import { status } from './datos.json';
 import { Confirm } from '../../services/utils';
 import { AppContext } from '../../contexts/AppContext';
 import { tramite } from '../../services/apis';
