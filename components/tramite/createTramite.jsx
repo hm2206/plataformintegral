@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
+import Modal from '../modal';
 import { DropZone } from '../Utils';
 import { Confirm } from '../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
@@ -12,7 +13,7 @@ import { SelectAuthEntityDependencia } from '../select/authentication';
 import { SelectTramiteType } from '../select/tramite';
 
 
-const CreateTramite = ({ verify = 0 }) => {
+const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -20,251 +21,193 @@ const CreateTramite = ({ verify = 0 }) => {
     // estados
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
-    const [option, setOption] = useState("");
+    const isUser = Object.keys(user).length;
     const [current_files, setCurrentFiles] = useState([]);
-    const [size_files, setSizeFiles] = useState(0);
 
-    // estado del pdf
-    const [pdf_url, setPdfUrl] = useState("");
-    const [pdf_doc, setPdfDoc] = useState(undefined);
-    const [pdf_blob, setPdfBlob] = useState(undefined);
-
-    // primera carga
-    useEffect(() => {
-        app_context.fireEntity({ render: true });
-    }, []);
-    
-    // cambiar el form
+    // cambio de form
     const handleInput = ({ name, value }) => {
-        const newForm = Object.assign({}, form);
+        let newForm = Object.assign({}, form);
         newForm[name] = value;
         setForm(newForm);
-        const newErrors = Object.assign({}, errors);
+        let newErrors = Object.assign({}, errors);
         newErrors[name] = [];
         setErrors(newErrors);
     }
-
-    // dependencia predeterminada
-    const defaultDependencia = async (datos = []) => {
-        if (datos.length >= 2) {
-            let current_dependencia = datos[1];
-            let newForm = Object.assign({}, form);
-            newForm['dependencia_id'] = current_dependencia.value;
-            setForm(newForm);
-        }
+    
+    // obtener files
+    const handleFile = async (file) => {
+        let size = 0;
+        // obtener tamaño del archivo
+        await current_files.map(f => size += f.size);
+        let limite = 1024 * 6;
+        if (limite >= (size / 1024)) setCurrentFiles([...current_files, file]);
     }
 
-    // manejar archivos
-    const handleFiles = async ({ files }) => {
-        let size_total = size_files;
-        let size_limit = 6 * 1024;
-        for (let f of files) {
-            size_total += f.size;
-            if ((size_total / 1024) <= size_limit) {
-                let answer = await Confirm("info", `¿Desea añadir firma digital al archivo "${f.name}"?`, 'Firmar');
-                if (answer) addSignature(f);
-                else {
-                    setCurrentFiles([...current_files, f]);
-                }
-            } else {
-                size_total = size_total - f.size;
-                Swal.fire({ icon: 'error', text: `El limíte máximo es de 2MB, tamaño actual(${(size_total / (1024 * 1024)).toFixed(6)}MB)` });
-                return false;
-            }
-        }
-    }
-
-    // agregar pdf para firmar
-    const addSignature = async (blob) => {
-        let reader = new FileReader();
-        await reader.readAsArrayBuffer(blob);
-        reader.onload = async () => {
-            let pdfDoc = await PDFDocument.load(reader.result);
-            let url = URL.createObjectURL(blob);
-            setPdfDoc(pdfDoc);
-            setPdfBlob(blob);
-            setPdfUrl(url);
-            setOption("signer");
-        }
-    }
- 
-    // eliminar pdf
-    const deleteFile = (index, file) => {
-        let newFiles = current_files;
-        newFiles.splice(index, 1);
-        let size = current_files - file.size;
+    // eliminar archivo del array
+    const handleDeleteFile = async ({ index }) => {
+        let newFiles = [];
+        await current_files.filter((f, indexF) => indexF != index ? newFiles.push(f) : null);
         setCurrentFiles(newFiles);
-        setSizeFiles(size);
     }
 
-    // guardar tramite
-    const saveTramite = async () => {
-        let answer = await Confirm('warning', `¿Deseas guardar el tramite?`, 'Guardar');
+    // guardar el tramite
+    const save = async () => {
+        let answer = await Confirm('warning', `¿Deseas guardar el tramite?`);
         if (answer) {
-            let datos = new FormData();
-            datos.append('tramite_type_id', form.tramite_type_id || "");
-            datos.append('document_number', form.document_number || "");
-            datos.append('folio_count', form.folio_count || "");
-            datos.append('asunto', form.asunto || "");
-            datos.append('verify', verify || 0);
-            // add files
-            current_files.map(async f => await datos.append('files', f));
-            // request
             app_context.fireLoading(true);
-            await tramite.post('tramite', datos, { headers: { DependenciaId: form.dependencia_id } })
-            .then(res => {
-                app_context.fireLoading(false);
-                let { success, message, tramite } = res.data;
-                if (!success) throw new Error(message);
-                Swal.fire({ icon: 'success', text: message });
-                setForm({});
-                setCurrentFiles([]);
-                setErrors({})
-                setSizeFiles(0);
-            }).catch(err => {
-                try {
+            let datos = new FormData;
+            datos.append('person_id', user.person_id);
+            await Object.keys(form).map(key => datos.append(key, form[key]));
+            await current_files.map(f => datos.append('files', f));
+            await tramite.post(`tramite`, datos, { headers: { DependenciaId: dependencia_id } })
+                .then(res => {
                     app_context.fireLoading(false);
-                    let response = JSON.parse(err.message);
-                    Swal.fire({ icon: 'warning', text: response.message });
-                    setErrors(response.errors);
-                } catch (error) {
-                    Swal.fire({ icon: 'error', text: err.message });
-                }
-            })
+                    let { success, message } = res.data;
+                    if (!success) throw new Error(message);
+                    Swal.fire({ icon: 'success', text: message });
+                    setForm({});
+                    setErrors({})
+                    setCurrentFiles([]);
+                    if (typeof onSave == 'function') onSave();
+                }).catch(err => {
+                    try {
+                        app_context.fireLoading(false);
+                        let { data } = err.response;
+                        if (typeof data != 'object') throw new Error(err.message);
+                        if (typeof data.errors != 'object') throw new Error(data.message);
+                        Swal.fire({ icon: 'warning', text: data.message });
+                        setErrors(data.errors);
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', text: error.message });
+                    }
+                });
         }
-    }
-
-    // realizar firma
-    const onSignature = async (obj, blob) => {
-        blob.lastModifiedDate = new Date();
-        let file = new File([blob], obj.pdfBlob.name);
-        setCurrentFiles([...current_files, file]);
     }
 
     // render
-    return (
-            <Fragment>
-                <Form className="row justify-content-center">
-                            <div className="col-md-8">
-                                <div className="row">
-                                    <div className="col-md-6 mt-3">
-                                        <Form.Field error={errors && errors.dependencia_id && errors.dependencia_id[0] || ""}>
-                                            <label htmlFor="">Mi Dependencia <b className="text-red">*</b></label>
-                                            <SelectAuthEntityDependencia
-                                                value={form.dependencia_id}
-                                                name="dependencia_id"
-                                                entity_id={app_context.entity_id || ""}
-                                                onChange={(e, obj) => handleInput(obj)}
-                                                onReady={defaultDependencia}
-                                            />
-                                            <label>{errors && errors.dependencia_id && errors.dependencia_id[0] || ""}</label>
-                                        </Form.Field>
-                                    </div>
-                                    
-                                    <div className="col-md-6 mt-3">
-                                        <Form.Field error={errors && errors.tramite_type_id && errors.tramite_type_id[0] || ""}>
-                                            <label htmlFor="">Tipo de Tramite<b className="text-red">*</b></label>
-                                            <SelectTramiteType
-                                                value={form.tramite_type_id}
-                                                name="tramite_type_id"
-                                                onChange={(e, obj) => handleInput(obj)}
-                                            />
-                                            <label>{errors && errors.tramite_type_id && errors.tramite_type_id[0] || ""}</label>
-                                        </Form.Field>
-                                    </div>
+    return <Fragment>
+        <Modal show={true}
+            isClose={isClose}
+            titulo={<span><i className="fas fa-plus"></i> Trámite nuevo</span>}
+        >
+            <div className="card-body">
+                <Form>
+                    <h5>
+                        <i className="fas fa-user"></i> Datos del Remitente
+                        <hr/>
+                    </h5>
 
-                                    <div className="col-md-6 mt-3">
-                                        <Form.Field error={errors && errors.document_number && errors.document_number[0] || ""}>
-                                            <label htmlFor="">N° Documento<b className="text-red">*</b></label>
-                                            <input type="text"
-                                                placeholder="Ingrese el N° documento"
-                                                name="document_number"
-                                                value={form.document_number || ""}
-                                                onChange={(e) => handleInput(e.target)}
-                                            />
-                                            <label>{errors && errors.document_number && errors.document_number[0] || ""}</label>
-                                        </Form.Field>
-                                    </div>
+                    <Show condicion={isUser} 
+                        predeterminado={
+                            <div className="text-center">
+                                <b className="text-muted">No se encontró al remitente</b>
+                            </div>
+                        }
+                    >
+                        <Form.Field className="mb-3">
+                            <label htmlFor="">N° Documento</label>
+                            <input type="text" readOnly value={user && user.person && user.person.document_number || ""}/>
+                        </Form.Field>
 
-                                    <div className="col-md-6 mt-3">
-                                        <Form.Field error={errors && errors.folio_count && errors.folio_count[0] || ""}>
-                                            <label htmlFor="">N° Folio<b className="text-red">*</b></label>
-                                            <input type="text"
-                                                placeholder="Ingrese el N° Folio"
-                                                name="folio_count"
-                                                value={form.folio_count || ""}
-                                                onChange={(e) => handleInput(e.target)}
-                                            />
-                                            <label>{errors && errors.folio_count && errors.folio_count[0] || ""}</label>
-                                        </Form.Field>
-                                    </div>
+                        <Form.Field className="mb-3">
+                            <label htmlFor="">Apellidos y Nombres</label>
+                            <input type="text" readOnly className="uppercase" value={user && user.person && user.person.fullname || ""}/>
+                        </Form.Field>
+                    </Show>
+                    <hr/>
 
-                                    <div className="col-md-12 mt-3">
-                                        <Form.Field error={errors && errors.asunto && errors.asunto[0] || ""}>
-                                            <label htmlFor="">Asunto de Tramite<b className="text-red">*</b></label>
-                                            <input
-                                                placeholder="Ingrese el asunto del trámite"
-                                                name="asunto"
-                                                value={form.asunto || ""}
-                                                onChange={(e) => handleInput(e.target)}
-                                            />
-                                            <label>{errors && errors.asunto && errors.asunto[0] || ""}</label>
-                                        </Form.Field>
-                                    </div>
+                    <h5>
+                        <i className="fas fa-file-alt"></i> Datos del Documento
+                        <hr/>
+                    </h5>
 
-                                    <div className="col-md-12 mt-3">
-                                        <Form.Field error={errors && errors.observation && errors.observation[0] || ""}>
-                                            <label htmlFor="">Observación</label>
-                                            <textarea
-                                                placeholder="Ingrese un observación"
-                                                name="observation"
-                                                value={form.observation || ""}
-                                                onChange={(e) => handleInput(e.target)}
-                                            />
-                                            <label>{errors && errors.observation && errors.observation[0] || ""}</label>
-                                        </Form.Field>
-                                    </div>
+                    <Form.Field className="mb-3">
+                        <label>Dependencia Origen</label>
+                        <SelectAuthEntityDependencia
+                            entity_id={app_context.entity_id}
+                            value={dependencia_id}
+                            disabled
+                        />
+                    </Form.Field>
 
-                                    <div className="col-md-12 mt-3">
-                                        <DropZone 
-                                            id="files" 
-                                            name="files"
-                                            onChange={(e) => handleFiles(e)} 
-                                            icon="save"
-                                            result={current_files}
-                                            multiple={false}
-                                            title="Select. Archivo Pdf"
-                                            accept="application/pdf"
-                                            onDelete={(e) => deleteFile(e.index, e.file)}
+                    <Form.Field className="mb-3" error={errors.type_tramite_id && errors.type_tramite_id[0] || ""}>
+                        <label>Tipo de Trámite <b className="text-danger">*</b></label>
+                        <SelectTramiteType
+                            name="tramite_type_id"
+                            value={form.tramite_type_id}
+                            onChange={(e, target) => handleInput(target)}
+                        />
+                        <label>{errors.tramite_type_id && errors.tramite_type_id[0] || ""}</label>
+                    </Form.Field>
 
-                                        />
-                                    </div>
+                    <Form.Field className="mb-3" error={errors.document_number && errors.document_number[0] || ""}>
+                        <label>N° Documento <b className="text-danger">*</b></label>
+                        <input type="text"
+                            name="document_number"
+                            value={form.document_number || ""}
+                            onChange={({ target }) => handleInput(target)}
+                        />
+                        <label>{errors.document_number && errors.document_number[0] || ""}</label>
+                    </Form.Field>
 
-                                    <div className="col-md-12 mt-4">
-                                        <hr/>
-                                        <div className="text-right">
-                                            <Button color="teal"
-                                                onClick={saveTramite}
-                                            >
-                                                <i className="fas fa-save"></i> Guardar Tramite
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
+                    <Form.Field className="mb-3" error={errors.asunto && errors.asunto[0] || ""}>
+                        <label>Asunto <b className="text-danger">*</b></label>
+                        <textarea 
+                            name="asunto" 
+                            rows="2"
+                            value={form.asunto || ""}
+                            onChange={({ target }) => handleInput(target)}
+                        />
+                        <label>{errors.asunto && errors.asunto[0] || ""}</label>
+                    </Form.Field>
+
+                    <Form.Field className="mb-3" error={errors.folio_count && errors.folio_count[0] || ""}>
+                        <label>N° Folio <b className="text-danger">*</b></label>
+                        <input type="number"
+                            name="folio_count"
+                            value={form.folio_count || ""}
+                            onChange={({ target }) => handleInput(target)}
+                        />
+                        <label>{errors.folio_count && errors.folio_count[0] || ""}</label>
+                    </Form.Field>
+
+                    <Form.Field className="mb-3" error={errors.observation && errors.observation[0] || ""}>
+                        <label>Observación</label>
+                        <textarea 
+                            name="observation" 
+                            rows="5"
+                            value={form.observation || ""}
+                            onChange={({ target }) => handleInput(target)}
+                        />
+                        <label>{errors.observation && errors.observation[0] || ""}</label>
+                    </Form.Field>
+
+                    <Form.Field className="mb-3" error={errors.files && errors.files[0] || ""}>
+                        <label>Archivos <b className="text-danger">*</b></label>
+                        <DropZone
+                            id="file-tramite-serve"
+                            name="files"
+                            title="Seleccinar PDF"
+                            accept="application/pdf"
+                            result={current_files}
+                            onSigned={({ file }) => handleFile(file)}
+                            onChange={({ files }) => handleFile(files[0])}
+                            onDelete={handleDeleteFile}
+                        />
+                        <label>{errors.files && errors.files[0] || ""}</label>
+                    </Form.Field>
+
+                    <hr/>
+
+                    <div className="text-right">
+                        <Button color="teal" onClick={save} disabled={!isUser}>
+                            <i className="fas fa-save"></i> Guardar
+                        </Button>
                     </div>
                 </Form>
-
-                <Show condicion={option == "signer"}>
-                    <PdfView 
-                        pdfUrl={pdf_url} 
-                        pdfDoc={pdf_doc}
-                        pdfBlob={pdf_blob}
-                        onSigned={onSignature}
-                        onClose={(e) => setOption("")}
-                    />
-                </Show>
-            </Fragment>
-        )
+            </div>
+        </Modal>
+    </Fragment>
 }
 
 

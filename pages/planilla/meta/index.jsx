@@ -68,6 +68,25 @@ const Meta = ({ success, metas, query }) => {
         push({ pathname, query });
     }
 
+    // aperturar metas desde un año anterior
+    const aperturarMetas = async (obj, estado) => {
+        let answer = await Confirm("warning", `¿Estás seguro en aperturar las metas desde un año anterior?`)
+        if (answer) {
+            app_context.fireLoading(true);
+            await unujobs.post(`meta/apertura`, { estado })
+            .then(async res => {
+                app_context.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await handleSearch();
+            }).catch(err => {
+                app_context.fireLoading(false);
+                Swal.fire({ icon: 'error', text: err.message })
+            });
+        }
+    }
+
     // cambio de página
     const handlePage = async (e, { activePage }) => {
         let { pathname, query, push } = Router;
@@ -151,7 +170,7 @@ const Meta = ({ success, metas, query }) => {
                     >
                         <div className="card-body">
                             <div className="row">
-                                <div className="col-md-3">
+                                <div className="col-md-3 mb-2">
                                     <Form.Field>
                                         <input type="number" 
                                             name="year"
@@ -160,7 +179,7 @@ const Meta = ({ success, metas, query }) => {
                                         />
                                     </Form.Field>
                                 </div>
-                                <div className="col-md-4">
+                                <div className="col-md-4 mb-2">
                                     <Form.Field>
                                         <Select
                                             fluid
@@ -174,12 +193,21 @@ const Meta = ({ success, metas, query }) => {
                                         />
                                     </Form.Field>
                                 </div>
-                                <div className="col-md-2">
+                                <div className="col-md-2 mb-2">
                                     <Button fluid
                                         color="blue"
                                         onClick={handleSearch}
                                     >
                                         <i className="fas fa-search"></i>
+                                    </Button>
+                                </div>
+
+                                <div className="col-md-2 mb-2">
+                                    <Button fluid
+                                        color="purple"
+                                        onClick={aperturarMetas}
+                                    >
+                                        Aperturar
                                     </Button>
                                 </div>
                             </div>

@@ -13,6 +13,14 @@
     text-transform: uppercase!important;
 }
 
+.lowercase {
+    text-transform: lowercase!important;
+}
+
+.text-ellipsis {
+    text-overflow: ellipsis;
+}
+
 .loading-brand {
     transition: all 0.4s;
     transform: scale(1);
@@ -251,6 +259,18 @@
     font-size: 15px!important;
 }
 
+.font-16 {
+    font-size: 16px!important;
+}
+
+.font-17 {
+    font-size: 17px!important;
+}
+
+.font-18 {
+    font-size: 18px!important;
+}
+
 
 /* hover */
 .hover-basic:hover {
@@ -344,4 +364,72 @@ a {
 
 .disabled {
     opacity: 0.5;
+}
+
+
+/* tramite */
+/* .nav-custom-content {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1); */
+/* } */
+
+.nav-custom {
+    color: #263238;
+    padding: 1em 0.5em;
+    position: relative;
+    cursor: pointer;
+}
+
+.nav-custom.active {
+    color: #FF5370!important;
+    font-weight: bold;
+}
+
+.nav-custom.active:after {
+    content: "";
+    display: block;
+    position: absolute;
+    bottom: -1px;
+    left: 0px;
+    height: 3.5px;
+    width: 100%;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    background: #FF5370;
+}
+
+.table-select th {
+    cursor: pointer;
+}
+
+.table-select:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.table-item {
+    border-top: 1.5px solid rgba(0, 0, 0, 1)!important;
+    padding-top: 2em!important;
+    padding-bottom: 2em!important;
+}
+
+.item-attach {
+    display: inline-block;
+    border: 1px solid #e2e5e8;
+    border-radius: 50px;
+    padding: 5px 15px;
+    color: #546e7a;
+    margin-top: 10px;
+    margin-right: 1em;
+    max-width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis!important;
+}
+
+.item-attach:hover {
+    background: rgba(0,0,0,0.03);
+    color: #263238;
+}
+
+.cursor-pointer {
+    cursor: pointer;
 }
