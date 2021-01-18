@@ -32,7 +32,7 @@ const FileInfo = ({ files = [] }) => {
                         </th>
                         <th>
                             <a href={f} target="_blank" rel="noopener noreferrer">
-                                Ver
+                                <i className="fas fa-search"></i>
                             </a>
                         </th>
                     </tr>
@@ -43,31 +43,46 @@ const FileInfo = ({ files = [] }) => {
 }
 
 
-export default class ModalFiles extends Component
-{
+const ModalFiles  = ({ files = [], isClose = null }) => {
 
-    render() {
-
-        let { origen, tracking } = this.props;
-
-        return (
-            <Modal
-                show={true}
-                md="6"
-                {...this.props}
-                titulo={<span>Archivos del Trámite</span>}
-                classClose="text-white opacity-1"
-            >
-                <Form className="card-body">
-                    <div className="pl-4 mt-4 pr-4">
-                        <Tab panes={[
-                            { menuItem: 'Archivos Originales', render: () => <Tab.Pane><FileInfo files={origen}/></Tab.Pane> },
-                            { menuItem: 'Archivos del Seguimiento', render: () => <Tab.Pane><FileInfo files={tracking}/></Tab.Pane> }
-                        ]}/>
-                    </div>
-                </Form>
-            </Modal>
-        );
-    }
-
+    // render
+    return (
+        <Modal
+            show={true}
+            md="6"
+            isClose={isClose}
+            titulo={<span>Archivos del Trámite</span>}
+            classClose="text-white opacity-1"
+        >
+            <Form className="card-body">
+                <div className="pl-4 mt-4 pr-4 table-responsive">
+                    <table className="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Archivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {files.map((f, indexF) => 
+                                <tr key={`file-tracking-${f.id}-${indexF}`}>
+                                    <th>
+                                        <i className={`fas fa-${f.extname}`}></i> {f.name}
+                                    </th>
+                                    <th>
+                                        <a href={f.url} target="_blank" rel="noopener noreferrer">
+                                            Ver
+                                        </a>
+                                    </th>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </Form>
+        </Modal>
+    );
 }
+
+// exportar
+export default ModalFiles;

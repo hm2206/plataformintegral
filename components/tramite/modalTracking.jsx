@@ -12,6 +12,7 @@ import SendRoundedIcon from '@material-ui/icons/SendRounded';
 import CallMissedOutgoingRoundedIcon from '@material-ui/icons/CallMissedOutgoingRounded';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import CheckCircleOutlineOutlinedIcon from '@material-ui/icons/CheckCircleOutlineOutlined';
+import FileCopy from '@material-ui/icons/FileCopy';
 import CloseIcon from '@material-ui/icons/Close';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import ChatIcon from '@material-ui/icons/Chat';
@@ -27,8 +28,10 @@ const ModalTracking = ({ isClose = null, slug = "" }) => {
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [current_total, setCurrentTotal] = useState(0);
     const [is_error, setIsError] = useState(false);
+    const [option, setOption] = useState("");
+    const [current_files, setCurrentFiles] = useState([]);
 
-
+    // obtener linea de tiempo
     const getTracking = async (add = false) => {
         setCurrentLoading(true);
         await tramite.get(`tramite/${slug}/timeline`)
@@ -84,6 +87,7 @@ const ModalTracking = ({ isClose = null, slug = "" }) => {
     // obtener meta datos
     const getMetadata = (status) => {
         let icons = {
+            REGISTRADO: { icon: <FileCopy/> },
             DERIVADO: { icon: <CallMissedOutgoingRoundedIcon style={{ color: '#5e35b1' }} />, message: "La dependencia ha derivado el documento a: " , color: '#5e35b1' },
             ACEPTADO: { icon: <CheckCircleOutlineOutlinedIcon fontSize="large" style={{ color: '#346cb0' }} />, message: "Fue Aceptado en: ", color: '#346cb0' },
             RECHAZADO: { icon: <CloseIcon style={{ color: '#b76ba3' }} />, message: "", color: '#b76ba3' },
@@ -133,7 +137,7 @@ const ModalTracking = ({ isClose = null, slug = "" }) => {
                             className="vertical-timeline-element--work mb-3"
                             date={moment(d.created_at).lang('es').format('h:mm a')}
                             iconStyle={{ background: '#fff', color: getMetadata(d.status).color, border: `2px solid ${getMetadata(d.status).color || '#78909c'}` }}
-                            icon={getMetadata(d.status).icon}
+                            icon={getMetadata(d.status).icon || <i className="fas fa-file-alt"></i>}
                             contentArrowStyle={{ borderRight: `10px solid ${getMetadata(d.status).color || '#78909c'}` }}
                             contentStyle={{ border: `4px solid ${getMetadata(d.status).color || '#78909c'}` }}
                         >
@@ -145,15 +149,24 @@ const ModalTracking = ({ isClose = null, slug = "" }) => {
                             </p>
                             <hr/>
                             <div className="text-center">
-                                <button className="btn btn-sm btn-dark" onClick={(e) => {
-                                    setOption("SHOW_FILE")
-                                }}>
-                                    <i className="fas fa-file-alt"></i> Archivos
-                                </button>
+                                <Show condicion={d.files && d.files.length}>
+                                    <button className="btn btn-sm btn-dark" onClick={(e) => {
+                                        setCurrentFiles(d.files || [])
+                                        setOption("SHOW_FILE")
+                                    }}>
+                                        <i className="fas fa-file-alt"></i> Archivos
+                                    </button>
+                                </Show>
                             </div>
                         </VerticalTimelineElement>
                     )}
                 </VerticalTimeline>
+                {/* modal de archivos */}
+                <Show condicion={option == 'SHOW_FILE'}>
+                    <ModalFiles files={current_files}
+                        isClose={(e) => setOption("")}
+                    />
+                </Show>
             </div>
         </Modal>
     );

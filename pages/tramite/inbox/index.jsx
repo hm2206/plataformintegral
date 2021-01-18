@@ -252,7 +252,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                             <th width="15%" onClick={(e) => information(d.tramite && d.tramite.slug)}>
                                                 {moment(d.created_at).format('DD/MM/YYYY hh:ss a')}
                                             </th>
-                                            <th width="5%" onClick={(e) => information(d.slug)}>
+                                            <th width="5%" onClick={(e) => information(d.tramite && d.tramite.slug)}>
                                                 <span className={`badge ${getStatus(d.status).className}`}>{getStatus(d.status).text || ""}</span>
                                             </th>
                                         </tr>
