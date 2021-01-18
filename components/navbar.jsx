@@ -2,8 +2,6 @@ import React, { Component, Fragment } from "react";
 import SkullAuth from "../components/loaders/skullAuth";
 import Logo from "../components/logo";
 import { authentication } from '../services/apis';
-import { connect } from 'react-redux';
-import initStore from '../storage/store';
 import Notification from './notification';
 import { app } from '../env.json';
 import Show from "./show";
@@ -13,6 +11,7 @@ import Cookies from 'js-cookie';
 import Router from "next/router";
 import Link from "next/link";
 import btoa from 'btoa';
+import { Confirm } from '../services/utils';
 
 
 class Navbar extends Component {
@@ -84,6 +83,12 @@ class Navbar extends Component {
     push({ pathname, query });
   }
 
+  handleRefreshPage = async (e) => {
+    e.preventDefault();
+    let answer = await Confirm(`warning`, '¿Estás seguro en actualizar la página?', 'Actualizar');
+    if (answer) location.href = location.href;
+  }
+
   render() {
 
     let { screen_lg, screenX, my_app, logout, config_entity, auth, notification, no_read } = this.props;
@@ -139,6 +144,11 @@ class Navbar extends Component {
               </div>
               <div className="top-bar-item top-bar-item-right px-0 d-none d-sm-flex">
                 <ul className="header-nav nav">
+                  <li className="nav-item">
+                    <a href="" className="nav-link" onClick={this.handleRefreshPage}>
+                      <i className="fas fa-sync"></i>
+                    </a>
+                  </li>
                   <Notification notification={notification} no_read={no_read}/>
                 </ul>
 

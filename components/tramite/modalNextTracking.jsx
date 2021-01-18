@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Modal from '../modal';
 import { Form, Button } from 'semantic-ui-react';
 import { SelectDependencia } from '../select/authentication';
@@ -9,6 +9,7 @@ import { Confirm } from '../../services/utils';
 import { AppContext } from '../../contexts/AppContext';
 import { tramite } from '../../services/apis';
 import Swal from 'sweetalert2';
+import SearchUserToDependencia from '../authentication/user/searchUserToDependencia'
 
 const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, action = "", onSave = null }) => {
 
@@ -19,11 +20,14 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const [current_files, setCurrentFiles] = useState([]);
+    const [option, setOption] = useState("");
+    const [user, setUser] = useState({});
+    const isUser = Object.keys(user).length;
 
     // mostrar componentes
     const destino = ['DERIVADO'];
-    const descripcion = ['ANULADO', 'DERIVADO', 'ACEPTADO', 'RECHAZADO'];
-    const archivos = ['DERIVADO'];
+    const descripcion = ['ANULADO', 'DERIVADO', 'ACEPTADO', 'RECHAZADO', 'RESPONDIDO'];
+    const archivos = ['DERIVADO', 'RESPONDIDO'];
 
     // combiar form
     const handleInput = ({ name, value }) => {
@@ -51,6 +55,12 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
         setCurrentFiles(newFiles);
     }
 
+    // obtener usuario
+    const handleAdd = async (obj) => {
+        setOption("");
+        setUser(obj);
+    }
+
     // obtener status
     const getStatus = () => status[action] || {};
 
@@ -63,6 +73,8 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
             let datos = new FormData;
             datos.append('status', action);
             await Object.keys(form).map(key => datos.append(key, form[key]));
+            // agregar usuario destino
+            if (isUser) datos.append('user_destino_id', user.id);
             // agregar files
             await current_files.map(f => datos.append('files', f));
             // request
@@ -89,6 +101,11 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
         }
     }
 
+    // seleccionar dependencia destino predeterminado
+    useEffect(() => {
+        setForm({ dependencia_destino_id: tracking.dependencia_id });
+    }, []);
+
     // render
     return (
         <Modal show={true}
@@ -109,7 +126,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                     </Form.Field>
 
                     <Show condicion={destino.includes(action) && tracking.revisado}>
-                        <Show condicion={(boss && boss.user_id == app_context.auth.id) || (tracking.modo == 'DEPENDENCIA' && Object.assign(role).length)}>
+                        <Show condicion={(boss && boss.user_id == app_context.auth.id) || (tracking.modo == 'DEPENDENCIA' && Object.keys(role).length)}>
                             <Form.Field className="mb-3">
                                 <label htmlFor="">Dependencia Destino <b className="text-danger">*</b></label>
                                 <SelectDependencia
@@ -120,6 +137,30 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                                 <label></label>
                             </Form.Field>
                         </Show>
+                    </Show>
+
+                    <Show condicion={destino.includes(action) && tracking.revisado && form.dependencia_destino_id == tracking.dependencia_destino_id}>
+                        <Form.Field className="mb-3">
+                            <label htmlFor="">Usuario Destino</label>
+                            <div className="row">
+                                <Show condicion={isUser}>
+                                    <div className="col-md-10 col-lg-11">
+                                        <input type="text"
+                                            className="uppercase"
+                                            disabled
+                                            value={`${user.document_number} - ${user.fullname || ""}`}
+                                        />
+                                    </div>
+                                </Show>
+                                <div className="col-md-2 col-lg-1">
+                                    <button className="btn btn-sm btn-outline-dark mb-2" onClick={(e) => setOption("ASSIGN")}>
+                                        {isUser ? <i className="fas fa-sync"></i> : <i className="fas fa-plus"></i>}
+                                    </button>
+                                </div>
+                            </div>
+                            <label></label>
+                            <hr/>
+                        </Form.Field>
                     </Show>
 
                     <Show condicion={descripcion.includes(action)}>
@@ -160,6 +201,15 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                         </Button>
                     </div>
                 </Form>
+
+                <Show condicion={option == 'ASSIGN'}>
+                    <SearchUserToDependencia
+                        isClose={(e) => setOption("")}
+                        getAdd={handleAdd}
+                        entity_id={app_context.entity_id}
+                        dependencia_id={tracking.dependencia_id}
+                    />
+                </Show>
             </div>
         </Modal>
     )

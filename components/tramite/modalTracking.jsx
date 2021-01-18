@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import Modal from '../modal';
 import atob from 'atob';
 import { Button, Form, List, Image } from 'semantic-ui-react';
@@ -18,64 +18,71 @@ import ChatIcon from '@material-ui/icons/Chat';
 import Swal from 'sweetalert2';
 
 
-export default class ModalTracking extends Component
-{
+const ModalTracking = ({ isClose = null, slug = "" }) => {
 
-    state = {
-        view_file: {
-            show: false,
-            origen: [],
-            tracking: []
-        },
-        loader: false,
-        tracking: {
-            total: 0,
-            page: 1,
-            lastPage: 1,
-            data: []
-        },
-        query_search: ""
+    // estados
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [datos, setDatos] = useState([]);
+    const [current_page, setCurrentPage] = useState(1);
+    const [current_last_page, setCurrentLastPage] = useState(0);
+    const [current_total, setCurrentTotal] = useState(0);
+    const [is_error, setIsError] = useState(false);
+
+
+    const getTracking = async (add = false) => {
+        setCurrentLoading(true);
+        await tramite.get(`tramite/${slug}/timeline`)
+            .then(res => {
+                let { trackings, success, message } = res.data;
+                if (!success) throw new Error(message);
+                setCurrentPage(trackings.page);
+                setCurrentTotal(trackings.total);
+                setCurrentLastPage(trackings.lastPage);
+                setDatos(add ? [...datos, ...trackings.data] : trackings.data);
+                setIsError(false);
+            }).catch(err => setIsError(true));
+        setCurrentLoading(false);
     }
 
-    componentDidMount = async () => {
-        let { tramite } = this.props;
-        await this.getTracking(tramite && tramite.slug, 1);
-    }
+    // montar componentes
+    useEffect(() => {
+        getTracking();
+    }, []);
 
-    getTracking = async (slug, page = 1, up = false) => {
-        this.setState({ loader: true });
-        await tramite.get(`public/tramite/${slug}/tracking?page=${page}`)
-        .then(res => {
-            let { success, message, tracking } = res.data;
-            if (!success) throw new Error(message);
-            this.setState(state => {
-                state.tracking.total = tracking.total;
-                state.tracking.page = tracking.page;
-                state.tracking.lastPage = tracking.lastPage;
-                state.tracking.data = up ? [...state.tracking.data, ...tracking.data] : tracking.data;
-                return { tracking: state.tracking };
-            })
-        })
-        .catch(err => console.log(err.message));
-        this.setState({ loader: false });
-    }
+    // state = {
+    //     view_file: {
+    //         show: false,
+    //         origen: [],
+    //         tracking: []
+    //     },
+    //     loader: false,
+    //     tracking: {
+    //         total: 0,
+    //         page: 1,
+    //         lastPage: 1,
+    //         data: []
+    //     },
+    //     query_search: ""
+    // }
+    
+    // const handlePage = async (nextPage) => {
+    //     this.setState({ loader: true });
+    //     let { tramite } = this.props;
+    //     await this.getTracking(tramite && tramite.slug, nextPage, true);
+    // }
 
-    handlePage = async (nextPage) => {
-        this.setState({ loader: true });
-        let { tramite } = this.props;
-        await this.getTracking(tramite && tramite.slug, nextPage, true);
-    }
 
-    openFiles = async (tracking) => {
-        this.setState((state, props) => {
-            state.view_file.show = true;
-            state.view_file.origen = props.tramite.tramite_files;
-            state.view_file.tracking = tracking.files;
-            return { view_file: state.view_file }
-        }); 
-    }
+    // openFiles = async (tracking) => {
+    //     this.setState((state, props) => {
+    //         state.view_file.show = true;
+    //         state.view_file.origen = props.tramite.tramite_files;
+    //         state.view_file.tracking = tracking.files;
+    //         return { view_file: state.view_file }
+    //     }); 
+    // }
 
-    getMetadata = (status) => {
+    // obtener meta datos
+    const getMetadata = (status) => {
         let icons = {
             DERIVADO: { icon: <CallMissedOutgoingRoundedIcon style={{ color: '#5e35b1' }} />, message: "La dependencia ha derivado el documento a: " , color: '#5e35b1' },
             ACEPTADO: { icon: <CheckCircleOutlineOutlinedIcon fontSize="large" style={{ color: '#346cb0' }} />, message: "Fue Aceptado en: ", color: '#346cb0' },
@@ -89,7 +96,8 @@ export default class ModalTracking extends Component
         return icons[status] || {};
     }
 
-    getPrint = async () => {
+    // imprimir tracking
+    const getPrint = async () => {
         this.setState({ loader: true })
         console.log(this.props.tramite);
         await tramite.get(`report/tracking/${this.props.tramite.tramite_id}`, { responseType: 'blob' })
@@ -104,85 +112,52 @@ export default class ModalTracking extends Component
         this.setState({ loader: false })
     }
  
-    render() {
 
-        let { loader, tracking, view_file } = this.state;
-        let { tramite } = this.props;
-
-        return (
-            <Modal
-                show={true}
-                md="10"
-                {...this.props}
-                titulo={
-                    <span>
-                        <button className="mr-5 btn btn-sm btn-primary" onClick={this.getPrint}>
-                            <i className="fas fa-print"></i>
-                        </button>
-                        Seguimiento del Trámite <span className="badge badge-dark">{tramite && tramite.slug}</span>
-                    </span>
-                }
-            >
-                <Form className="h-100" loading={loader} id="print-tracking">
-                    <Show condicion={tracking && tracking.data && tracking.data.length}>
-                        <VerticalTimeline className="line-gray timeline-h-100">
-                            {   
-                                tracking && tracking.data && tracking.data.map(track => 
-                                    <VerticalTimelineElement
-                                        key={`tracking-timeline-${track.id}`}
-                                        className="vertical-timeline-element--work mb-3"
-                                        date={ moment(track.created_at).lang('es').format('h:mm a') }
-                                        iconStyle={{ background: '#fff', color: this.getMetadata(track.status).color, border: `2px solid ${this.getMetadata(track.status).color}` }}
-                                        icon={ this.getMetadata(track.status).icon }
-                                        contentArrowStyle={{ borderRight: `10px solid ${this.getMetadata(track.status).color}` }}
-                                        contentStyle={{ border: `4px solid ${this.getMetadata(track.status).color}` }}
-                                    >
-                                        <h3 className="vertical-timeline-element-title text-center mb-3">{this.getMetadata(track.status).name || track.status}</h3>
-                                        <h4 className="vertical-timeline-element-subtitle">Lugar de destino: <span className="badge badge-dark mr-1">{ `${track.dependencia_destino && track.dependencia_destino.nombre}`.toUpperCase() }</span></h4>
-                                        <p className="text-center">
-                                            { moment(track.created_at).lang('es').format('LL') }
-                                        </p>
-                                        <hr/>
-                                        <div className="text-center">
-                                            <button className="btn btn-sm btn-dark" onClick={(e) => this.openFiles(track)}>
-                                                <i className="fas fa-file-alt"></i> Archivos
-                                            </button>
-                                        </div>
-                                    </VerticalTimelineElement>    
-                                )
-                            }
-                        </VerticalTimeline>
-                    </Show>
-
-                    <Show condicion={!(tracking && tracking.data && tracking.data.length)}>
-                        <h4 className="text-center" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                            <div className="mb-2">
-                                <i className="fas fa-file-alt" style={{ fontSize: '5em' }}></i>
-                            </div>
-                            <b style={{ fontSize: '1.5em' }}>No se encontró el recorrido del documento</b>
-                            <div className="mt-3">
-                                <button className="btn btn-sm btn-outline-primary"
-                                    onClick={(e) => this.getTracking(tramite.slug)}
-                                >
-                                    <i className="fas fa-sync"></i> Refrescar
+    return (
+        <Modal
+            show={true}
+            md="10"
+            isClose={isClose}
+            titulo={
+                <span>
+                <button className="mr-2 btn btn-sm btn-primary">
+                    <i className="fas fa-print"></i>
+                </button> Seguimiento del Trámite <span className="badge badge-dark"></span>
+            </span>
+        }>
+            <div className="card-body">
+                <VerticalTimeline className="line-gray timeline-h-100">
+                    {datos.map((d, indexD) => 
+                        <VerticalTimelineElement
+                            key={`tracking-timeline-${indexD}`}
+                            className="vertical-timeline-element--work mb-3"
+                            date={moment(d.created_at).lang('es').format('h:mm a')}
+                            iconStyle={{ background: '#fff', color: getMetadata(d.status).color, border: `2px solid ${getMetadata(d.status).color || '#78909c'}` }}
+                            icon={getMetadata(d.status).icon}
+                            contentArrowStyle={{ borderRight: `10px solid ${getMetadata(d.status).color || '#78909c'}` }}
+                            contentStyle={{ border: `4px solid ${getMetadata(d.status).color || '#78909c'}` }}
+                        >
+                            <h3 className="vertical-timeline-element-title text-center mb-3">{getMetadata(d.status).name || d.status}</h3>
+                            <h4 className="vertical-timeline-element-subtitle">Lugar de destino: <span className="badge badge-dark mr-1">{`${d.dependencia_destino && d.dependencia_destino.nombre}`.toUpperCase()}</span></h4>
+                            <h4 className="vertical-timeline-element-subtitle">Persona: <span className="badge badge-dark mr-1">{`${d.person && d.person.fullname || ""}`.toUpperCase()}</span></h4>
+                            <p className="text-center">
+                                {moment(d.created_at).lang('es').format('LL')}
+                            </p>
+                            <hr/>
+                            <div className="text-center">
+                                <button className="btn btn-sm btn-dark" onClick={(e) => {
+                                    setOption("SHOW_FILE")
+                                }}>
+                                    <i className="fas fa-file-alt"></i> Archivos
                                 </button>
                             </div>
-                        </h4> 
-                    </Show>
-
-                    <Show condicion={view_file.show}>
-                        <ModalFiles
-                            origen={view_file.origen}
-                            tracking={view_file.tracking}
-                            isClose={(e) => this.setState(state => {
-                                state.view_file.show = false;
-                                return { view_file: state.view_file }
-                            })}
-                        />
-                    </Show>
-                </Form>
-            </Modal>
-        );
-    }
-
+                        </VerticalTimelineElement>
+                    )}
+                </VerticalTimeline>
+            </div>
+        </Modal>
+    );
 }
+
+// exportar
+export default ModalTracking; 

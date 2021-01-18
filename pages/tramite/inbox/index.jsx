@@ -5,10 +5,10 @@ import Show from '../../../components/show';
 import { Button, Message } from 'semantic-ui-react'
 import { SelectAuthEntityDependencia } from '../../../components/select/authentication';
 import CreateTramite from '../../../components/tramite/createTramite';
-import btoa from 'btoa';
 import { AppContext } from '../../../contexts/AppContext';
 import Skeleton from 'react-loading-skeleton';
 import { tramite } from '../../../services/apis';
+import { status } from '../../../components/tramite/datos.json';
 import moment from 'moment';
 import { AUTHENTICATE } from '../../../services/auth';
 
@@ -40,6 +40,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     const [current_page, setCurrentPage] = useState(1);
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [current_total, setCurrentTotal] = useState(0);
+    const [is_tab, setIsTab] = useState(false);
 
     // props
     let isRole = Object.keys(role).length;
@@ -66,15 +67,9 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     }
 
     // status
-    const getStatus = (status) => {
-        let datos = {
-            REGISTRADO: {
-                text: "R",
-                className: "badge-success"
-            }
-        };
+    const getStatus = (current_status) => {
         // response
-        return datos[status] || {};
+        return status[current_status] || {};
     }
 
     // obtener trackings
@@ -118,8 +113,16 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     // montar componente
     useEffect(() => {
         app_context.fireEntity({ render: true });
-        if (success) getTracking();
-    }, [query.dependencia_id, tab]);
+        if (success) {
+            setTab("YO")
+            getTracking();
+        }
+    }, [query.dependencia_id]);
+
+    // montar componente al cambiar el tab
+    useEffect(() => {
+        if (is_tab) getTracking();
+    }, [tab]);
 
     // render
     return (
@@ -157,6 +160,12 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                 value={query.dependencia_id || ""}
                             />
                         </div>
+
+                        <div className="col-md-2 mb-2">
+                            <Button color="blue" basic onClick={(e) => getTracking()}>
+                                <i className="fas fa-sync"></i>
+                            </Button>
+                        </div>
                     </div>
 
                     <Show condicion={query.dependencia_id}
@@ -172,14 +181,20 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                         <div className="nav-custom-content">
                             <div className="row">
                                 <div className="col-md-3">
-                                    <div className={`nav-custom ${tab == 'YO' ? 'active' : ''}`} onClick={(e) => setTab("YO")}>
+                                    <div className={`nav-custom ${tab == 'YO' ? 'active' : ''}`} onClick={(e) => {
+                                        setTab("YO")
+                                        setIsTab(true)
+                                    }}>
                                         <i className="fas fa-inbox"></i>  Yo
                                     </div>
                                 </div>
 
                                 <Show condicion={success && role && role.level && role.level == 'SECRETARY'}>
                                     <div className="col-md-3">
-                                        <div className={`nav-custom ${tab == 'DEPENDENCIA' ? 'active' : ''}`} onClick={(e) => setTab("DEPENDENCIA")}>
+                                        <div className={`nav-custom ${tab == 'DEPENDENCIA' ? 'active' : ''}`} onClick={(e) => {
+                                            setTab("DEPENDENCIA")
+                                            setIsTab(true)
+                                        }}>
                                             <i className="fas fa-building"></i>  Mi Dependencia
                                         </div>
                                     </div>

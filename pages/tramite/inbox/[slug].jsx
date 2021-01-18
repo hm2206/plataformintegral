@@ -1,9 +1,8 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
 import Router from 'next/router';
-import { Body } from '../../../components/Utils';
+import { Body, BtnBack, DropZone } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import { tramite } from '../../../services/apis';
-import { BtnBack } from '../../../components/Utils';
 import { Button } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import { status } from '../../../components/tramite/datos.json';
@@ -11,6 +10,40 @@ import { AppContext } from '../../../contexts/AppContext';
 import ModalNextTracking from '../../../components/tramite/modalNextTracking';
 import { Confirm, backUrl } from '../../../services/utils';
 import Swal from 'sweetalert2';
+import ModalTracking from '../../../components/tramite/modalTracking';
+
+const ItemFile = ({ url, name, extname, edit = false, className = null }) => {
+
+    // render
+    return (
+        <div style={{ position: 'relative', width: '100%' }} className={className}>
+            <a href={url || ""} 
+                target="_blank" 
+                className="item-attach font-12"
+                title={name || ""}
+            >
+                <i className={`fas fa-file-${extname}`}></i> {name || ""} 
+            </a>
+
+            <Show condicion={edit}>
+                <span className="text-success"
+                    title="Firmar Archivo"
+                    style={{ position: 'absolute', left: '-20px', cursor: 'pointer' }}
+                >
+                    <i className="fas fa-signature"></i>
+                </span>
+
+                <span className="text-danger" 
+                    title="Eliminar Archivo"
+                    style={{ position: 'absolute', bottom: '-0px', left: '-20px', cursor: 'pointer' }}
+                >
+                    <i className="fas fa-times"></i>
+                </span>
+            </Show>
+        </div>
+    )
+}
+
 
 const InboxIndex = ({ pathname, query, success, tracking }) => {
 
@@ -90,6 +123,29 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
         push(Router.asPath);
     }
 
+    // agregar archivo
+    const addFile = async ({ name, file }, object_type = 'App/Models/Tramite') => {
+        let datos = new FormData;
+        datos.append('files', file);
+        datos.append('object_id', tracking.first ? current_tramite.id : tracking.id);
+        datos.append('object_type', object_type);
+        await tramite.post(`file`, datos)
+            .then(res => {
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                Swal.fire({ icon: 'success', text: message });
+            }).catch(err => {
+                try {
+                    let { data } = err.response;
+                    if (typeof data != 'object') throw new Error(err.message);
+                    if (typeof data.errors != 'object') throw Error(data.message);
+                    Swal.fire({ icon: 'warning', text: data.message });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: error.message });
+                }
+            });
+    }
+
     // extruir objecto
     let current_tramite = tracking.tramite;
 
@@ -137,14 +193,16 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                             <u className="capitalize">{current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || ""}</u>
                                         </div>
                                         <div className="text-muted font-12">{current_tramite.person && current_tramite.person.email_contact || ""}</div>
-                                        <div>
-                                            <b title={getStatus().title} className={`badge ${getStatus().className}`}>
-                                                {getStatus().text}
-                                            </b>
-                                            <span className={`text-${tracking.revisado ? 'success' : 'danger'} ml-2`}>
-                                                <i className={`fas fa-${tracking.revisado ? 'check' : 'times'}`}></i>
-                                            </span>
-                                        </div>
+                                        <Show condicion={tracking.first}>
+                                            <div>
+                                                <b title={getStatus().title} className={`badge ${getStatus().className}`}>
+                                                    {getStatus().text}
+                                                </b>
+                                                <span className={`text-${tracking.revisado ? 'success' : 'danger'} ml-2`}>
+                                                    <i className={`fas fa-${tracking.revisado ? 'check' : 'times'}`}></i>
+                                                </span>
+                                            </div>
+                                        </Show>
                                     </div>
                                 </div>
                             </div>
@@ -190,7 +248,12 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
 
                                     <div className="font-14 mb-1">
                                         <b>Recorrido del trámite: </b> 
-                                        <a href="#" className="font-15 ml-1">
+                                        <a href="#" className="font-15 ml-1" 
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setOption('TIMELINE');
+                                            }}
+                                        >
                                             <i className="fas fa-search"></i>
                                         </a>
                                     </div>
@@ -205,53 +268,131 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                         </div>
                                     </Show>
                                 </div>
-                                
-                                {/* archivos de tracking */}
-                                <div className="col-md-4 font-14 mb-2">
+
+                                {/* archivos de tramite */}
+                                <div className="col-md-4 font-14 mt-5">
                                     <b className="font-14">Archivos del Trámite: </b>
-                                    <div className="mt-1">
+                                    <div className="mt-1 ml-2">
                                         {current_tramite.files.map((f, indexF) => 
-                                            <a href={f.url || ""} 
-                                                target="_blank" 
-                                                className="item-attach font-12"
-                                                title={f.name || ""}
-                                                key={`list-file-tramite-${indexF}`}
-                                            >
-                                                <i className={`fas fa-file-${f.extname}`}></i> {f.name || ""} 
-                                            </a>
+                                            <ItemFile
+                                                className="mb-3"
+                                                key={`item-file-tramite-${indexF}`}
+                                                url={f.url}
+                                                name={f.name}
+                                                extname={f.exname}
+                                                edit={tracking.user_verify_id == app_context.auth.id && tracking.first && !tracking.revisado}
+                                            />
                                         )}
                                     </div>
-                                </div>
 
-                                <Show condicion={tracking.description}>
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-                                </Show>
-                            </div>
-
-                            <Show condicion={!tracking.first}>
-                                <div className="font-13 mt-4">
-                                    <span className="font-14">{tracking.description || ""}</span>
-                                    <Show condicion={tracking.files && tracking.files.length}>
-                                        <hr/>
-                                        <b className="font-13"><i className="fas fa-paperclip"></i> Archivos del Seguimiento</b>
-                                        {/* archivos de tracking */}
-                                        <div className="mt-1">
-                                            {tracking.files.map((f, indexF) => 
-                                                <a href={f.url || ""} 
-                                                    target="_blank" 
-                                                    className="item-attach font-12"
-                                                    title={f.name || ""}
-                                                    key={`list-file-tracking-${indexF}`}
-                                                >
-                                                    <i className={`fas fa-file-${f.extname}`}></i> {f.name || ""} 
-                                                </a>
-                                            )}
+                                    {/* agregar archivos */}
+                                    <Show condicion={tracking.user_verify_id == app_context.auth.id && tracking.first && !tracking.revisado}>
+                                        <div className="text-right">
+                                            <DropZone
+                                                id="file-tracking-datos"
+                                                title="Seleccionar archivo PDF"
+                                                accept="application/pdf"
+                                                multiple={false}
+                                                size={6}
+                                                basic={true}
+                                                icon="fas fa-plus"
+                                                onChange={async ({ files, name }) => await addFile({ name, file: files[0] })}
+                                                onSigned={async ({ name, file }) => await addFile({ name, file })}
+                                            />
                                         </div>
                                     </Show>
                                 </div>
-                            </Show>
+                                
+                                {/* datos del tracking */}
+                                <Show condicion={!tracking.first}>
+                                    <div className="col-md-12"><hr/></div>
+                                    
+                                    <div className="col-md-8 mt-5">
+                                        <div className="row">
+                                            <div className="col-xs mb-2">
+                                                <img 
+                                                    style={{ 
+                                                        width: "80px", height: "100px", 
+                                                        objectFit: 'cover', 
+                                                        border: "5px solid #fff", 
+                                                        boxShadow: "0px 0px 1px 1px rgba(0,0,0,0.2) inset, 0px 0px 1px 1px rgba(0,0,0,0.1)",
+                                                        borderRadius: '0.5em'
+                                                    }}
+                                                    src={tracking.person && tracking.person.image_images && tracking.person.image_images.image_200x200} 
+                                                    alt="persona"
+                                                />
+                                            </div>
+                                                    
+                                            <div className="col-xs mb-2">
+                                                <div className="ml-2">
+                                                    <b className="font-15 lowercase">
+                                                        <span className="capitalize">{tracking.person && tracking.person.fullname || ""}</span>
+                                                    </b>
+                                                    <div className="text-primary font-12 lowercase">
+                                                        <u className="capitalize">{tracking.dependencia_destino && tracking.dependencia_destino.nombre || ""}</u>
+                                                    </div>
+                                                    <div className="text-muted font-12">{tracking.person && tracking.person.email_contact || ""}</div>
+                                                    <div>
+                                                        <b title={getStatus().title} className={`badge ${getStatus().className}`}>
+                                                            {getStatus().text}
+                                                        </b>
+                                                        <span className={`text-${tracking.revisado ? 'success' : 'danger'} ml-2`}>
+                                                            <i className={`fas fa-${tracking.revisado ? 'check' : 'times'}`}></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* archivos de tracking */}
+                                    <div className="col-md-4 font-14 mt-5">
+                                        <b className="font-14">Archivos del Seguímiento: </b>
+                                        <div className="mt-1">
+                                            {current_tramite.files.map((f, indexF) => 
+                                                <div key={`list-file-tramite-${indexF}`} style={{ position: 'relative' }}>
+                                                    <a href={f.url || ""} 
+                                                        target="_blank" 
+                                                        className="item-attach font-12"
+                                                        title={f.name || ""}
+                                                    >
+                                                        <i className={`fas fa-file-${f.extname}`}></i> {f.name || ""} 
+                                                    </a>
+                                                    <Show condicion={tracking.user_verify_id == app_context.auth.id && !tracking.revisado}>
+                                                        <span className="text-primary"
+                                                            style={{ position: 'absolute', left: '200px', cursor: 'pointer' }}
+                                                        >
+                                                            <i className="fas fa-upload"></i>
+                                                        </span>
+                                                        <span className="text-danger" 
+                                                            style={{ position: 'absolute', bottom: '0px', left: '200px', cursor: 'pointer' }}
+                                                        >
+                                                            <i className="fas fa-times"></i>
+                                                        </span>
+                                                    </Show>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* agregar archivos */}
+                                        <Show condicion={tracking.user_verify_id == app_context.auth.id && !tracking.revisado}>
+                                            <DropZone
+                                                id="file-tracking-datos"
+                                                title="Seleccionar archivo PDF"
+                                                accept="application/pdf"
+                                                multiple={false}
+                                                size={6}
+                                                basic={true}
+                                                icon="fas fa-plus"
+                                            />
+                                        </Show>
+                                    </div>
+
+                                    <div className="col-md-12 mt-3 mb-4">
+                                        {tracking.description || ""}
+                                    </div>
+                                </Show>
+                            </div>
                         </div>
 
                         <Show condicion={!current_loading}
@@ -333,6 +474,13 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                     isClose={(e) => setOption("")}
                     action={action}
                     onSave={handleOnSave}
+                />
+            </Show>
+            {/* liniea de tiempo */}
+            <Show condicion={option == 'TIMELINE'}>
+                <ModalTracking 
+                    isClose={(e) => setOption("")}
+                    slug={current_tramite.slug}
                 />
             </Show>
         </div>
