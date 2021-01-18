@@ -102,6 +102,19 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         setForm(newForm);
     }
 
+    // seleccionar la primera opción
+    const dependenciaDefault = (dependencias = []) => {
+        if (!query.dependencia_id) {
+            let isAllow = dependencias.length;
+            if (isAllow >= 2) {
+                let current_dependencia = dependencias[1];
+                query.dependencia_id = current_dependencia.value;
+                let { push } = Router;
+                push({ pathname, query });
+            }
+        }
+    }
+
     // vaciar tab
     useEffect(() => {
         setCurrentPage(1);
@@ -150,6 +163,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
 
                         <div className="col-md-4 mb-2">
                             <SelectAuthEntityDependencia
+                                onReady={dependenciaDefault}
                                 entity_id={app_context.entity_id || ""}
                                 name="dependencia_id"
                                 onChange={(e, obj) => {
@@ -238,7 +252,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                             <th width="15%" onClick={(e) => information(d.tramite && d.tramite.slug)}>
                                                 {moment(d.created_at).format('DD/MM/YYYY hh:ss a')}
                                             </th>
-                                            <th width="5%" onClick={(e) => information(d.id)}>
+                                            <th width="5%" onClick={(e) => information(d.slug)}>
                                                 <span className={`badge ${getStatus(d.status).className}`}>{getStatus(d.status).text || ""}</span>
                                             </th>
                                         </tr>

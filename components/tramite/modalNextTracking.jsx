@@ -183,6 +183,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                                 title="Seleccinar PDF"
                                 accept="application/pdf"
                                 result={current_files}
+                                multiple={false}
                                 onSigned={({ file }) => handleFile(file)}
                                 onChange={({ files }) => handleFile(files[0])}
                                 onDelete={handleDeleteFile}

@@ -188,6 +188,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                             id="file-tramite-serve"
                             name="files"
                             title="Seleccinar PDF"
+                            multiple={false}
                             accept="application/pdf"
                             result={current_files}
                             onSigned={({ file }) => handleFile(file)}
