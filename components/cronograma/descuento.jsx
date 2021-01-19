@@ -225,7 +225,7 @@ const Descuento = () => {
                                         <input type="number"
                                             step="any" 
                                             value={obj.monto || ""}
-                                            disabled={!edit || !historial.is_pay}
+                                            disabled={!edit}
                                             onChange={({target}) => handleMonto(index, target.value, obj)}
                                             min="0"
                                         />
@@ -274,7 +274,7 @@ const Descuento = () => {
                                                 onClick={(e) => handleEdit(obj, 1)}
                                                 style={{ width: "100%", height: "100%" }}
                                                 size="small"
-                                                disabled={current_loading || !edit || !historial.is_pay}>
+                                                disabled={current_loading || !edit}>
                                             </Button>
                                         </div>
                                     </Show>

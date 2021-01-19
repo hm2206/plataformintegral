@@ -521,11 +521,13 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                         >
                                                 <Show condicion={tracking.current}>
                                                     <div className="col-md-12 mt-4">
-                                                        <Show condicion={tracking.status == 'REGISTRADO'}>
+                                                        <Show condicion={!tracking.revisado && 
+                                                            app_context.auth.id == tracking.user_verify_id && 
+                                                            tracking.status == 'REGISTRADO'
+                                                        }>
                                                             <Button color="red" 
                                                                 basic
                                                                 size="mini"
-                                                                disabled={!tracking.revisado}
                                                                 onClick={() => handleNext('ANULADO')}
                                                             >
                                                                 Anular <i class="fas fa-times"></i>
@@ -573,6 +575,16 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                                                 onClick={() => handleNext('ACEPTADO')}
                                                             >
                                                                 Aceptar <i class="fas fa-check"></i>
+                                                            </Button>
+                                                        </Show>
+
+                                                        <Show condicion={tracking.status == 'PENDIENTE'}>
+                                                            <Button color="teal" 
+                                                                size="mini"
+                                                                disabled={!tracking.revisado}
+                                                                onClick={() => handleNext('FINALIZADO')}
+                                                            >
+                                                                Finalizar <i class="fas fa-check"></i>
                                                             </Button>
                                                         </Show>
                                                     </div>

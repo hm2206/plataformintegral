@@ -26,7 +26,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
 
     // mostrar componentes
     const destino = ['DERIVADO'];
-    const descripcion = ['ANULADO', 'DERIVADO', 'ACEPTADO', 'RECHAZADO', 'RESPONDIDO'];
+    const descripcion = ['ANULADO', 'DERIVADO', 'ACEPTADO', 'RECHAZADO', 'RESPONDIDO', 'FINALIZADO'];
     const archivos = ['DERIVADO', 'RESPONDIDO'];
 
     // combiar form
