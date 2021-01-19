@@ -12,6 +12,7 @@ import { Confirm, backUrl } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import ModalTracking from '../../../components/tramite/modalTracking';
 import ItemFileCircle from '../../../components/itemFileCircle';
+import Visualizador from '../../../components/visualizador';
 
 const InboxIndex = ({ pathname, query, success, tracking }) => {
 
@@ -24,6 +25,7 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
     const [action, setAction] = useState("");
     const [role, setRole] = useState({});
     const [boss, setBoss] = useState({});
+    const [current_file, setCurrentFile] = useState({});
 
     // obtener role
     const getRole = async () => {
@@ -252,6 +254,15 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                                         </a>
                                                     </div>
 
+                                                    <Show condicion={tracking.first}>
+                                                        <div className="row mb-4 mt-3">
+                                                            <div className="col-md-10">
+                                                                <label htmlFor="">Observación</label>
+                                                                <textarea name="" rows="3" className="form-control"/>
+                                                            </div>
+                                                        </div>
+                                                    </Show>
+
                                                     <Show condicion={!tracking.revisado && tracking.user_verify_id == app_context.auth.id}>
                                                         <div className="font-14 mb-1">
                                                             <button className="btn btn-outline-info"
@@ -279,6 +290,11 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                                                     (tracking.user_verify_id == app_context.auth.id || 
                                                                     tracking.user_id == app_context.auth.id)
                                                                 }
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    setCurrentFile(f);
+                                                                    setOption("VISUALIZADOR");
+                                                                }}
                                                                 onAction={(e) => {
                                                                     let { push } = Router;
                                                                     push(location.href);
@@ -372,6 +388,11 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                                             name={f.name}
                                                             extname={f.extname}
                                                             edit={tracking.user_verify_id == app_context.auth.id && !tracking.revisado}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setCurrentFile(f);
+                                                                setOption("VISUALIZADOR");
+                                                            }}
                                                             onAction={(e) => {
                                                                 let { push } = Router;
                                                                 push(location.href);
@@ -492,6 +513,15 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                     <ModalTracking 
                         isClose={(e) => setOption("")}
                         slug={current_tramite.slug}
+                    />
+                </Show>
+                {/* visualizador */}
+                <Show condicion={option == 'VISUALIZADOR'}>
+                    <Visualizador
+                        name={current_file.name || ""}
+                        extname={current_file.extname || ""}
+                        url={current_file.url || ""}
+                        onClose={(e) => setOption("")}
                     />
                 </Show>
             </Show>

@@ -9,7 +9,7 @@ import axios from 'axios';
 import PdfView from './pdfView';
 import { PDFDocument } from 'pdf-lib';
 
-const ItemFileCircle = ({ id, url, name, extname, edit = false, hidden = [], onAction = null }) => {
+const ItemFileCircle = ({ id, url, name, extname, edit = false, hidden = [], onAction = null, onClick = null }) => {
 
     // add
     const app_context = useContext(AppContext);
@@ -99,6 +99,7 @@ const ItemFileCircle = ({ id, url, name, extname, edit = false, hidden = [], onA
                 target="_blank" 
                 className="item-attach font-12"
                 title={name || ""}
+                onClick={(e) => typeof onClick == 'function' ? onClick(e) : null}
             >
                 <i className={`fas fa-file-${extname}`}></i> {name || ""} 
             </a>

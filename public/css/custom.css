@@ -433,3 +433,22 @@ a {
 .cursor-pointer {
     cursor: pointer;
 }
+
+
+/* visualizador de archivos */
+.window-visualizador {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background: rgba(0,0,0,0.8);
+    z-index: 1040;
+}
+
+.visualizador-header {
+    width: 100%;
+    padding: 1em 2em;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+}

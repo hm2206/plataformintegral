@@ -12,6 +12,9 @@ import { status } from '../../../components/tramite/datos.json';
 import moment from 'moment';
 import { AUTHENTICATE } from '../../../services/auth';
 import ItemFileCircle from '../../../components/itemFileCircle';
+import dynamic from 'next/dynamic';
+const Visualizador = dynamic(() => import('../../../components/visualizador'), { ssr: false })
+ 
 
 const PlaceholderTable = () => {
     let datos = [1, 2, 3, 4];
@@ -42,6 +45,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [current_total, setCurrentTotal] = useState(0);
     const [is_tab, setIsTab] = useState(false);
+    const [current_file, setCurrentFile] = useState({});
 
     // props
     let isRole = Object.keys(role).length;
@@ -240,6 +244,11 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                                 url={f.url}
                                                                 name={f.name}
                                                                 extname={f.extname}
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    setCurrentFile(f);
+                                                                    setOption('VISUALIZADOR')
+                                                                }}
                                                             />
                                                         </div>
                                                     )}
@@ -290,6 +299,16 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                         getTracking()
                         setOption("");
                     }}
+                />
+            </Show>
+
+            {/* visualizador de archivo */}
+            <Show condicion={option == 'VISUALIZADOR'}>
+                <Visualizador
+                    name={current_file.name || ""}
+                    extname={current_file.extname || ""}
+                    url={current_file.url || ""}
+                    onClose={(e) => setOption("")}
                 />
             </Show>
         </div>
