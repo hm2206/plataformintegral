@@ -11,6 +11,7 @@ import { tramite } from '../../../services/apis';
 import { status } from '../../../components/tramite/datos.json';
 import moment from 'moment';
 import { AUTHENTICATE } from '../../../services/auth';
+import ItemFileCircle from '../../../components/itemFileCircle';
 
 const PlaceholderTable = () => {
     let datos = [1, 2, 3, 4];
@@ -230,19 +231,22 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                 <div className="text-ellipsis cursor-pointer" onClick={(e) => information(d.tramite && d.tramite.slug)}>
                                                     <b>{d.tramite && d.tramite.asunto || ""}</b>
                                                 </div>
-                                                {d.files.map((f, indexF) => 
-                                                    <a href="http://localhost:8000" 
-                                                        target="_blank" 
-                                                        className="item-attach font-12"
-                                                        style={{ display: 'none' }}
-                                                        key={`list-file-${indexF}`}
-                                                    >
-                                                        <i className={`fas fa-file-${f.extname}`}></i> {f.name || ""} 
-                                                    </a>
-                                                )}
+                                                <div className="row">
+                                                    {d.tramite && d.tramite.files.map((f, indexF) => 
+                                                        <div className="col-xs">
+                                                            <ItemFileCircle
+                                                                key={`item-tramite-${indexF}`}
+                                                                id={f.id}
+                                                                url={f.url}
+                                                                name={f.name}
+                                                                extname={f.extname}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
                                             <th width="20%" onClick={(e) => information(d.tramite && d.tramite.slug)} className="lowercase">
-                                                <span className="capitalize">{d.person && d.person.fullname || ""}</span>
+                                                <span className="capitalize">{d.tramite && d.tramite.person && d.tramite.person.fullname || ""}</span>
                                             </th>
                                             <th width="20%" onClick={(e) => information(d.tramite && d.tramite.slug)} className="lowercase">
                                                 <span className="capitalize">
@@ -253,7 +257,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                 {moment(d.created_at).format('DD/MM/YYYY hh:ss a')}
                                             </th>
                                             <th width="5%" onClick={(e) => information(d.tramite && d.tramite.slug)}>
-                                                <span className={`badge ${getStatus(d.status).className}`}>{getStatus(d.status).text || ""}</span>
+                                                <span className={`uppercase badge ${getStatus(d.status).className}`}>{getStatus(d.status).title || ""}</span>
                                             </th>
                                         </tr>
                                     )}
@@ -282,7 +286,10 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                     dependencia_id={query.dependencia_id || ""}
                     isClose={(e) => setOption("")}
                     user={tab == 'DEPENDENCIA' ? boss.user || {} : app_context.auth || {}}
-                    onSave={(e) => getTracking()}
+                    onSave={(e) => {
+                        getTracking()
+                        setOption("");
+                    }}
                 />
             </Show>
         </div>
