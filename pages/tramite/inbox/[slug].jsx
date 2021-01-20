@@ -260,15 +260,6 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                                         </a>
                                                     </div>
 
-                                                    <Show condicion={tracking.first}>
-                                                        <div className="row mb-4 mt-3">
-                                                            <div className="col-md-10">
-                                                                <label htmlFor="">Observación</label>
-                                                                <textarea name="" rows="3" className="form-control"/>
-                                                            </div>
-                                                        </div>
-                                                    </Show>
-
                                                     <Show condicion={!tracking.revisado && tracking.user_verify_id == app_context.auth.id}>
                                                         <div className="font-14 mb-1">
                                                             <button className="btn btn-outline-info"
