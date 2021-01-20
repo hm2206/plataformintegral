@@ -242,6 +242,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                                 key={`item-tramite-${indexF}`}
                                                                 id={f.id}
                                                                 url={f.url}
+                                                                is_observation={f.observation ? true : false}
                                                                 name={f.name}
                                                                 extname={f.extname}
                                                                 onClick={(e) => {
@@ -305,10 +306,13 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
             {/* visualizador de archivo */}
             <Show condicion={option == 'VISUALIZADOR'}>
                 <Visualizador
+                    id={current_file.id || '_error'}
+                    observation={current_file.observation || ""}
                     name={current_file.name || ""}
                     extname={current_file.extname || ""}
                     url={current_file.url || ""}
                     onClose={(e) => setOption("")}
+                    onUpdate={refreshData}
                 />
             </Show>
         </div>

@@ -452,3 +452,21 @@ a {
     background: rgba(0,0,0,0.8);
     color: #fff;
 }
+
+/* nota */
+.content-note {
+    position: fixed;
+    width: 450px;
+    height: 250px;
+    border-radius: 0.5em;
+    right: 30px;
+    bottom: 10px;
+    z-index: 6000;
+    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.border-orange {
+    border-color: #ff6f00;
+    font-weight: bold;
+}

@@ -93,6 +93,12 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
         push(Router.asPath);
     }
 
+    // refrescar datos
+    const refreshData = async () => {
+        let { push } = Router;
+        push(Router.asPath);
+    }
+
     // agregar archivo
     const addFile = async ({ name, file }, object_type = 'App/Models/Tramite') => {
         let datos = new FormData;
@@ -281,6 +287,7 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                                         {current_tramite.files.map((f, indexF) => 
                                                             <ItemFileCircle
                                                                 id={f.id}
+                                                                is_observation={f.observation ? true : false}
                                                                 className="mb-3"
                                                                 key={`item-file-tramite-${indexF}`}
                                                                 url={f.url}
@@ -383,6 +390,7 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                                         <ItemFileCircle
                                                             id={f.id}
                                                             className="mb-3"
+                                                            is_observation={f.observation ? true : false}
                                                             key={`item-file-tracking-${indexF}`}
                                                             url={f.url}
                                                             name={f.name}
@@ -518,10 +526,13 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                 {/* visualizador */}
                 <Show condicion={option == 'VISUALIZADOR'}>
                     <Visualizador
+                        id={current_file.id || "_error"}
+                        observation={current_file.observation || ""}
                         name={current_file.name || ""}
                         extname={current_file.extname || ""}
                         url={current_file.url || ""}
                         onClose={(e) => setOption("")}
+                        onUpdate={refreshData}
                     />
                 </Show>
             </Show>

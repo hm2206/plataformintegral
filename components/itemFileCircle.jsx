@@ -9,7 +9,7 @@ import axios from 'axios';
 import PdfView from './pdfView';
 import { PDFDocument } from 'pdf-lib';
 
-const ItemFileCircle = ({ id, url, name, extname, edit = false, hidden = [], onAction = null, onClick = null }) => {
+const ItemFileCircle = ({ id, url, name, extname, is_observation = false, edit = false, hidden = [], onAction = null, onClick = null }) => {
 
     // add
     const app_context = useContext(AppContext);
@@ -94,10 +94,10 @@ const ItemFileCircle = ({ id, url, name, extname, edit = false, hidden = [], onA
 
     // render
     return (
-        <div style={{ position: 'relative', width: '100%' }} className={edit ? 'mb-3' : ''}>
+        <div style={{ position: 'relative', width: '100%' }} className={`${edit ? 'mb-3' : ''}`}>
             <a href={url || ""} 
                 target="_blank" 
-                className="item-attach font-12"
+                className={`item-attach font-12 ${is_observation ? 'border-orange' : ''}`}
                 title={name || ""}
                 onClick={(e) => typeof onClick == 'function' ? onClick(e) : null}
             >
