@@ -312,7 +312,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                     extname={current_file.extname || ""}
                     url={current_file.url || ""}
                     onClose={(e) => setOption("")}
-                    onUpdate={refreshData}
+                    onUpdate={getTracking}
                 />
             </Show>
         </div>
