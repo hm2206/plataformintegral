@@ -25,13 +25,23 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
     const [current_files, setCurrentFiles] = useState([]);
 
     // cambio de form
-    const handleInput = ({ name, value }) => {
+    const handleInput = async ({ name, value }, callback = true) => {
         let newForm = Object.assign({}, form);
-        newForm[name] = value;
-        setForm(newForm);
         let newErrors = Object.assign({}, errors);
-        newErrors[name] = [];
-        setErrors(newErrors);
+        if (typeof callback == 'function') {
+            let _result = callback(value);
+            if (_result) {
+                newForm[name] = value;
+                setForm(newForm);
+                newErrors[name] = [];
+                setErrors(newErrors);
+            }
+        } else {
+            newForm[name] = value;
+            setForm(newForm);
+            newErrors[name] = [];
+            setErrors(newErrors);
+        }
     }
     
     // obtener files
@@ -166,7 +176,13 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                         <input type="number"
                             name="folio_count"
                             value={form.folio_count || ""}
-                            onChange={({ target }) => handleInput(target)}
+                            onChange={({ target }) => handleInput(target, (value) => {
+                                if (value > 0) return true;
+                                if (value == '') return true;
+                                return false;
+                            })}
+                            min="1"
+                            max="10000"
                         />
                         <label>{errors.folio_count && errors.folio_count[0] || ""}</label>
                     </Form.Field>
