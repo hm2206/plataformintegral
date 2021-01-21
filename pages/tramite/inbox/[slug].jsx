@@ -236,30 +236,7 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                                 <div className="col-md-4 font-14 mt-5">
                                                     <b className="font-14">Archivos del Trámite: </b>
                                                     <div className="mt-1 ml-2">
-                                                        {current_tramite.files.map((f, indexF) => 
-                                                            <ItemFileCircle
-                                                                id={f.id}
-                                                                is_observation={f.observation ? true : false}
-                                                                className="mb-3"
-                                                                key={`item-file-tramite-${indexF}`}
-                                                                url={f.url}
-                                                                name={f.name}
-                                                                extname={f.extname}
-                                                                edit={!tracking.revisado && tracking.first &&
-                                                                    (tracking.user_verify_id == app_context.auth.id || 
-                                                                    tracking.user_id == app_context.auth.id)
-                                                                }
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    setCurrentFile(f);
-                                                                    setOption("VISUALIZADOR");
-                                                                }}
-                                                                onAction={(e) => {
-                                                                    let { push } = Router;
-                                                                    push(location.href);
-                                                                }}
-                                                            />
-                                                        )}
+                                                        
                                                     </div>
 
                                                     {/* agregar archivos */}
@@ -363,85 +340,7 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                             </div>
                                         </Show>
 
-                                        {/* configuración de los archivos del tracking */}
-                                        <Show condicion={!current_loading}
-                                            predeterminado={
-                                                <Fragment>
-                                                    Obteniendo datos...
-                                                </Fragment>
-                                            }
-                                        >
-                                                <Show condicion={tracking.current}>
-                                                    <div className="col-md-12 mt-4">
-                                                        <Show condicion={!tracking.revisado && 
-                                                            app_context.auth.id == tracking.user_verify_id && 
-                                                            tracking.status == 'REGISTRADO'
-                                                        }>
-                                                            <Button color="red" 
-                                                                basic
-                                                                size="mini"
-                                                                onClick={() => handleNext('ANULADO')}
-                                                            >
-                                                                Anular <i class="fas fa-times"></i>
-                                                            </Button>
-                                                        </Show>
-                                                                
-                                                        <Show condicion={tracking.status == 'PENDIENTE'}>
-                                                            <Button color="orange" 
-                                                                basic 
-                                                                size="mini"
-                                                                disabled={!tracking.revisado}
-                                                                onClick={() => handleNext('RESPONDIDO')}
-                                                            >
-                                                                Responder <i class="fas fa-reply"></i>
-                                                            </Button>
-                                                        </Show>
-
-                                                        <Show condicion={tracking.status == 'REGISTRADO' || tracking.status == 'PENDIENTE'}>
-                                                            <Button color="purple" 
-                                                                basic 
-                                                                size="mini"
-                                                                disabled={!tracking.revisado}
-                                                                onClick={() => handleNext('DERIVADO')}
-                                                            >
-                                                                Derivar <i class="fas fa-paper-plane"></i>
-                                                            </Button>
-                                                        </Show>
-
-                                                        <Show condicion={tracking.status == 'ENVIADO'}>
-                                                            <Button color="red" 
-                                                                basic 
-                                                                size="mini"
-                                                                disabled={!tracking.revisado}
-                                                                onClick={() => handleNext('RECHAZADO')}
-                                                            >
-                                                                Rechazar <i class="fas fa-times"></i>
-                                                            </Button>
-                                                        </Show>
-
-                                                        <Show condicion={tracking.status == 'ENVIADO'}>
-                                                            <Button color="green" 
-                                                                basic 
-                                                                size="mini"
-                                                                disabled={!tracking.revisado}
-                                                                onClick={() => handleNext('ACEPTADO')}
-                                                            >
-                                                                Aceptar <i class="fas fa-check"></i>
-                                                            </Button>
-                                                        </Show>
-
-                                                        <Show condicion={tracking.status == 'PENDIENTE'}>
-                                                            <Button color="teal" 
-                                                                size="mini"
-                                                                disabled={!tracking.revisado}
-                                                                onClick={() => handleNext('FINALIZADO')}
-                                                            >
-                                                                Finalizar <i class="fas fa-check"></i>
-                                                            </Button>
-                                                        </Show>
-                                                    </div>
-                                            </Show>
-                                        </Show>
+                                        
                                     </div>
                                 </div>
                             </div>

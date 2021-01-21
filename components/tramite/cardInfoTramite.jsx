@@ -21,7 +21,7 @@ const CardInfoTramite = ({ remitente, email, dependencia, status, image, revisad
                             boxShadow: "0px 0px 1px 1px rgba(0,0,0,0.2) inset, 0px 0px 1px 1px rgba(0,0,0,0.1)",
                             borderRadius: '0.5em'
                         }}
-                        src={image || ""} 
+                        src={image || "/img/perfil.jpg"} 
                         alt="persona"
                     />
                 </div>

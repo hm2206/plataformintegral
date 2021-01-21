@@ -48,6 +48,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     const app_context = useContext(AppContext);
 
     // estados
+    const [current_refresh, setCurrentRefresh] = useState(false);
     const [tab, setTab] = useState("YO");
     const [option, setOption] = useState("");
     const [form, setForm] = useState({});
@@ -145,6 +146,11 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         app_context.fireEntity({ render: true });
         if (success) {
             setTab("YO")
+            setCurrentRender("LIST");
+            setCurrentTotal(0);
+            setCurrentLastPage(0);
+            setCurrentPage(1);
+            setDatos([]);
             getTracking();
         }
     }, [query.dependencia_id]);
@@ -190,7 +196,11 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                 </div>
 
                                 <div className="col-md-2 mb-2">
-                                    <Button color="blue" basic onClick={(e) => getTracking()}>
+                                    <Button color="blue" basic onClick={async (e) => {
+                                        setCurrentRefresh(true);
+                                        await getTracking()
+                                        setCurrentRefresh(false);
+                                    }}>
                                         <i className="fas fa-sync"></i>
                                     </Button>
                                 </div>
@@ -229,6 +239,9 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                             setCurrentMenu(s)
                                                             setCurrentRender('LIST');
                                                             setIsMenu(true);
+                                                            setDatos([]);
+                                                            setCurrentPage(1);
+                                                            setCurrentTotal(0);
                                                         }}
                                                     >
                                                         <span><i className={s.icon}></i> {s.text}</span>
@@ -253,8 +266,15 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
 
                                             <div className="col-xl-2 col-md-2 col-2 mb-2">
                                                 <button className="btn btn-primary"
-                                                    disabled={current_loading || !query_search}
-                                                    onClick={(e) => getTracking()}
+                                                    disabled={current_loading}
+                                                    onClick={(e) => {
+                                                        setCurrentRender('LIST');
+                                                        setDatos([]);
+                                                        setCurrentPage(1);
+                                                        setCurrentLastPage(0);
+                                                        setCurrentTotal(0);
+                                                        getTracking();
+                                                    }}
                                                 >
                                                     <i className="fas fa-search"></i>
                                                 </button>
@@ -328,7 +348,16 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
 
                                         {/* render show */}
                                         <Show condicion={current_render == 'SHOW'}>
-                                            <RenderShow tracking={current_tracking}/>
+                                            <RenderShow
+                                                tracking={current_tracking}
+                                                role={role}
+                                                boss={boss}
+                                                refresh={current_refresh}
+                                                onFile={(f) => {
+                                                    setOption("VISUALIZADOR")
+                                                    setCurrentFile(f);
+                                                }}
+                                            />
                                         </Show>
                                     </div>
                                 </div>
