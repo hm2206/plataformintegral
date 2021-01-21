@@ -186,6 +186,14 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         if (is_menu) getTracking();
     }, [is_menu])
 
+    // cambiar de estado
+    useEffect(() => {
+        if (current_refresh) {
+            if (current_render == 'LIST') getTracking();
+            setCurrentRefresh(false);
+        }
+    }, [current_refresh]);
+
     // render
     return (
         <div className="col-md-12">
@@ -217,11 +225,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                 </div>
 
                                 <div className="col-md-2 mb-2">
-                                    <Button color="blue" basic onClick={async (e) => {
-                                        setCurrentRefresh(true);
-                                        await getTracking()
-                                        setCurrentRefresh(false);
-                                    }}>
+                                    <Button color="blue" basic onClick={async (e) => setCurrentRefresh(true)}>
                                         <i className="fas fa-sync"></i>
                                     </Button>
                                 </div>
@@ -400,7 +404,10 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                     extname={current_file.extname || ""}
                     url={current_file.url || ""}
                     onClose={(e) => setOption("")}
-                    onUpdate={(e) => getTracking()}
+                    onUpdate={(e) => {
+                        if (current_render == 'LIST') getTracking()
+                        else setCurrentRefresh(true);
+                    }}
                 />
             </Show>
         </div>
