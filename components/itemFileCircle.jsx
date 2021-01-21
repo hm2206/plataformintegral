@@ -31,7 +31,7 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = false, edit =
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
-                    if (typeof onAction == 'function') onAction();
+                    if (typeof onAction == 'function') onAction('delete');
                 }).catch(err => {
                     try {
                         app_context.fireLoading(false);
@@ -83,8 +83,7 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = false, edit =
             .then(async res => {
                 app_context.fireLoading(false);
                 await Swal.fire({ icon: 'success', text: 'El archivo se firmó correctamente!' });
-                let { push } = Router;
-                push(location.href);
+                if (typeof onAction == 'function') onAction('signature')
             }).catch(err => {
                 app_context.fireLoading(false);
                 console.log(err);

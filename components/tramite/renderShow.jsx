@@ -71,8 +71,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                 let { success, message, files } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
-                let { push } = Router;
-                await push(location.href);
+                setCurrentRefesh(true);
             }).catch(err => {
                 try {
                     app_context.fireLoading(false);
@@ -212,18 +211,19 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                                     e.preventDefault();
                                                     if (typeof onFile == 'function') onFile(f)
                                                 }}
-                                                onAction={(e) => alert('ok')}
+                                                onAction={(e) => setCurrentRefesh(true)}
                                             />
                                         </div>
                                     )}
                                 </Show>
                                 {/* agregar archivos */}
                                 <Show condicion={
-                                    current_tracking.user_verify_id == app_context.auth.id && 
                                     current_tracking.first && 
-                                    !current_tracking.revisado
+                                    !current_tracking.revisado && 
+                                    (current_tracking.user_id == app_context.auth.id || 
+                                    current_tracking.user_verify_id == app_context.auth.id)
                                 }>
-                                    <div className="text-right">
+                                    <div className="text-right ml-3">
                                         <DropZone
                                             id="file-tramite-datos"
                                             title="Seleccionar archivo PDF"
@@ -272,11 +272,12 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                                 name={f.name}
                                                 extname={f.extname}
                                                 edit={true}
+                                                hidden={['delete']}
                                                 onClick={(e) => {
                                                     e.preventDefault();
                                                     if (typeof onFile == 'function') onFile(f)
                                                 }}
-                                                onAction={(e) => alert('ok')}
+                                                onAction={(e) => setCurrentRefesh(true)}
                                             />
                                         </div>
                                     )}
