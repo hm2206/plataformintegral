@@ -81,8 +81,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
             await tramite.post(`tracking/${tracking.id}/next`, datos, { headers: { DependenciaId: tracking.dependencia_id } })
                 .then(async res => {
                     app_context.fireLoading(false);
-                    let { success, message } = res.data;
-                    let current_tracking = res.data.tracking;
+                    let { success, message, current_tracking } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
                     if (typeof onSave == 'function') onSave(current_tracking);

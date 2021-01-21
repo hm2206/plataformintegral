@@ -133,6 +133,27 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         }
     }
 
+    // seleccionar menu
+    const handleSelectMenu = (index = 0) => {
+        if (!current_loading) {
+            let current = current_status[index];
+            setCurrentMenu(current);
+            setCurrentRender('LIST');
+            setIsMenu(true);
+            setDatos([]);
+            setCurrentPage(1);
+            setCurrentTotal(0);
+        }
+    }
+
+    // manejador de creado
+    const handleOnSave = () => {
+        setOption("");
+        setCurrentRender("LIST");
+        if (current_menu.index == 2) getTracking();
+        else handleSelectMenu(2);
+    }
+
     // vaciar tab
     useEffect(() => {
         setCurrentPage(1);
@@ -235,14 +256,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                 {current_status.map((s, indexS) => 
                                                     <a className={`nav-link text-left cursor-pointer ${indexS === current_menu.index ? 'active' : ''}`}
                                                         key={`item-menu-mail-${indexS}-${s.key}`}
-                                                        onClick={(e) => {
-                                                            setCurrentMenu(s)
-                                                            setCurrentRender('LIST');
-                                                            setIsMenu(true);
-                                                            setDatos([]);
-                                                            setCurrentPage(1);
-                                                            setCurrentTotal(0);
-                                                        }}
+                                                        onClick={(e) => handleSelectMenu(indexS)}
                                                     >
                                                         <span><i className={s.icon}></i> {s.text}</span>
                                                         <span className="float-right">{s.revisado ? s.revisado : ''}</span>
@@ -373,10 +387,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                     dependencia_id={query.dependencia_id || ""}
                     isClose={(e) => setOption("")}
                     user={tab == 'DEPENDENCIA' ? boss.user || {} : app_context.auth || {}}
-                    onSave={(e) => {
-                        getTracking()
-                        setOption("");
-                    }}
+                    onSave={handleOnSave}
                 />
             </Show>
 

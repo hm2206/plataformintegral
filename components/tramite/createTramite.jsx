@@ -62,13 +62,13 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
             await tramite.post(`tramite`, datos, { headers: { DependenciaId: dependencia_id } })
                 .then(res => {
                     app_context.fireLoading(false);
-                    let { success, message } = res.data;
+                    let { success, message, tramite } = res.data;
                     if (!success) throw new Error(message);
                     Swal.fire({ icon: 'success', text: message });
                     setForm({});
                     setErrors({})
                     setCurrentFiles([]);
-                    if (typeof onSave == 'function') onSave();
+                    if (typeof onSave == 'function') onSave(tramite);
                 }).catch(err => {
                     try {
                         app_context.fireLoading(false);

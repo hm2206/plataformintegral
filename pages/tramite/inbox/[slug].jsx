@@ -267,8 +267,6 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                     <div className="row">
                                         {/* datos del tracking */}
                                         <Show condicion={!tracking.first}>
-                                            {/* <div className="col-md-12"><hr/></div> */}
-                                                    
                                             <div className="col-md-8">
                                                 <div className="row">
                                                     <div className="col-xs mb-2 ml-4">
