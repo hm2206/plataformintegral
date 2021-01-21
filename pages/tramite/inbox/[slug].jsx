@@ -167,46 +167,7 @@ const InboxIndex = ({ pathname, query, success, tracking }) => {
                                 <div className="card card-body">
                                     <div className="row">
                                         <div className="col-md-8">
-                                            <div className="row">
-                                                <div className="ml-4 col-xs mb-2">
-                                                    <img 
-                                                        style={{ 
-                                                            width: "80px", height: "100px", 
-                                                            objectFit: 'cover', 
-                                                            border: "5px solid #fff", 
-                                                            boxShadow: "0px 0px 1px 1px rgba(0,0,0,0.2) inset, 0px 0px 1px 1px rgba(0,0,0,0.1)",
-                                                            borderRadius: '0.5em'
-                                                        }}
-                                                        src={current_tramite.person && current_tramite.person.image_images && current_tramite.person.image_images.image_200x200} 
-                                                        alt="persona"
-                                                    />
-                                                </div>
-                                                        
-                                                <div className="col-xs mb-2">
-                                                    <div className="ml-2">
-                                                        <div className="font-13">
-                                                            <b className="badge badge-dark">{current_tramite.slug || ""}</b>
-                                                        </div>
-                                                        <b className="font-15 lowercase">
-                                                            <span className="capitalize">{current_tramite.person && current_tramite.person.fullname || ""}</span>
-                                                        </b>
-                                                        <div className="text-primary font-12 lowercase">
-                                                            <u className="capitalize">{current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || ""}</u>
-                                                        </div>
-                                                        <div className="text-muted font-12">{current_tramite.person && current_tramite.person.email_contact || ""}</div>
-                                                        <Show condicion={tracking.first}>
-                                                            <div>
-                                                                <b title={getStatus().title} className={`badge ${getStatus().className}`}>
-                                                                    {getStatus().text}
-                                                                </b>
-                                                                <span className={`text-${tracking.revisado ? 'success' : 'danger'} ml-2`}>
-                                                                    <i className={`fas fa-${tracking.revisado ? 'check' : 'times'}`}></i>
-                                                                </span>
-                                                            </div>
-                                                        </Show>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            
                                         </div>
 
                                         <div className="col-md-4 text-center">

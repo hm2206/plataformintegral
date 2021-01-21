@@ -363,7 +363,7 @@ a {
 
 
 .disabled {
-    opacity: 0.5;
+    opacity: 0.7;
 }
 
 
@@ -371,6 +371,22 @@ a {
 /* .nav-custom-content {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1); */
 /* } */
+
+/* nav mail */
+
+.nav-pills .nav-item .nav-link.active {
+    font-weight: 600;
+    background: rgba(255, 83, 112, 0.1);
+    color: #FF5370;
+    border-color: rgba(255, 83, 112, 0.1);
+    border-radius: 0px;
+    border-top-right-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+.nav-pills .nav-item .nav-link:hover{
+    color: #FF5370;
+}
 
 .nav-custom {
     color: #263238;

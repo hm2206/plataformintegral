@@ -68,7 +68,7 @@ const Editrubro = ({ success, rubro }) => {
         <div className="card-">
           <div className="card-header">
             <BtnBack onClick={(e) => Router.push(backUrl(Router.pathname))} />{" "}
-            Editar Línea de Investigación
+            Editar Rubro
           </div>
           <div className="card-body">
             <div className="row justify-content-center">

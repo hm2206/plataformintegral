@@ -11,7 +11,8 @@ import { tramite } from '../../../services/apis';
 import { status } from '../../../components/tramite/datos.json';
 import moment from 'moment';
 import { AUTHENTICATE } from '../../../services/auth';
-import ItemFileCircle from '../../../components/itemFileCircle';
+import ItemTable from '../../../components/itemTable';
+import RenderShow from '../../../components/tramite/renderShow';
 import dynamic from 'next/dynamic';
 const Visualizador = dynamic(() => import('../../../components/visualizador'), { ssr: false })
  
@@ -30,6 +31,17 @@ const PlaceholderTable = () => {
     )
 }
 
+// menus
+const current_status = [
+    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['ENVIADO', 'PENDIENTE'] },
+    { key: "DERIVADO", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['DERIVADO', 'RESPONDIDO'] },
+    { key: "REGISTRADO", icon: 'far fa-file', text: 'Regístrados', index: 2, filtros: ['REGISTRADO'] },
+    { key: "ACEPTADO", icon: 'fas fa-check', text: 'Aceptados', index: 3, filtros: ['ACEPTADO'] },
+    { key: "RECHAZADO", icon: 'fas fa-times', text: 'Rechazados', index: 4, filtros: ['RECHAZADO'] },
+    { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 5, filtros: ['ANULADO'] },
+    { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 6, filtros: ['FINALIZADO'] }
+];
+
 const InboxIndex = ({ pathname, query, success, role, boss }) => {
 
     // app
@@ -46,6 +58,11 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     const [current_total, setCurrentTotal] = useState(0);
     const [is_tab, setIsTab] = useState(false);
     const [current_file, setCurrentFile] = useState({});
+    const [current_menu, setCurrentMenu] = useState(current_status[0]);
+    const [is_menu, setIsMenu] = useState(false);
+    const [query_search, setQuerySearch] = useState("");
+    const [current_render, setCurrentRender] = useState("LIST");
+    const [current_tracking, setCurrentTracking] = useState({});
 
     // props
     let isRole = Object.keys(role).length;
@@ -80,7 +97,8 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     // obtener trackings
     const getTracking = async (add = false) => {
         setCurrentLoading(true);
-        await tramite.get(`auth/tracking/${tab}`, { headers: { DependenciaId: query.dependencia_id } })
+        let current_query = `status=${current_menu.filtros.join('&status=')}&query_search=${query_search}`;
+        await tramite.get(`auth/tracking/${tab}?${current_query}`, { headers: { DependenciaId: query.dependencia_id } })
             .then(res => {
                 let { success, trackings, message } = res.data;
                 if (!success) throw new Error(message);
@@ -91,20 +109,14 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
             })
             .catch(err => {});
         setCurrentLoading(false);
+        setIsMenu(false);
+        setIsTab(false);
     }
 
     // más información
-    const information = (slug) => {
-        let { push } = Router;
-        push({ pathname: `${pathname}/${slug}`, query });
-        setTab('YO');
-    }
-
-    // cambiar form
-    const handleInput = ({ name, value }) => {
-        let newForm = Object.assign({}, form);
-        newForm[name] = value;
-        setForm(newForm);
+    const information = (obj) => {
+        setCurrentTracking(obj)
+        setCurrentRender('SHOW');
     }
 
     // seleccionar la primera opción
@@ -142,6 +154,11 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         if (is_tab) getTracking();
     }, [tab]);
 
+    // cambio de menu obtener tracking
+    useEffect(() => {
+        if (is_menu) getTracking();
+    }, [is_menu])
+
     // render
     return (
         <div className="col-md-12">
@@ -155,138 +172,169 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                 </div>
 
                 <div className="card-body">
+                    <div className="card">
+                        <div className="card-body">
+                            <div className="row mb-4">
+                                <div className="col-md-4 mb-2">
+                                    <SelectAuthEntityDependencia
+                                        onReady={dependenciaDefault}
+                                        entity_id={app_context.entity_id || ""}
+                                        name="dependencia_id"
+                                        onChange={(e, obj) => {
+                                            let { push } = Router;
+                                            query.dependencia_id = obj.value || "";
+                                            push({ pathname, query });
+                                        }}
+                                        value={query.dependencia_id || ""}
+                                    />
+                                </div>
 
-                    <div className="row mb-4">
-                        <div className="col-xs mb-2">
-                            <Button color="teal" basic 
-                                onClick={(e) => setOption("CREATE")}
-                                disabled={!query.dependencia_id}
-                            >
-                                <i className="fas fa-plus"></i> Trámite nuevo
-                            </Button>
-                        </div>
-
-                        <div className="col-md-4 mb-2">
-                            <SelectAuthEntityDependencia
-                                onReady={dependenciaDefault}
-                                entity_id={app_context.entity_id || ""}
-                                name="dependencia_id"
-                                onChange={(e, obj) => {
-                                    let { push } = Router;
-                                    query.dependencia_id = obj.value || "";
-                                    push({ pathname, query });
-                                }}
-                                value={query.dependencia_id || ""}
-                            />
-                        </div>
-
-                        <div className="col-md-2 mb-2">
-                            <Button color="blue" basic onClick={(e) => getTracking()}>
-                                <i className="fas fa-sync"></i>
-                            </Button>
+                                <div className="col-md-2 mb-2">
+                                    <Button color="blue" basic onClick={(e) => getTracking()}>
+                                        <i className="fas fa-sync"></i>
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <Show condicion={query.dependencia_id}
-                        predeterminado={
-                            <div>
-                                <hr/>
-                                <Message color="yellow">
-                                    Porfavor seleccione una dependencia!
-                                </Message>
-                            </div>
-                        }
-                    >
-                        <div className="nav-custom-content">
-                            <div className="row">
-                                <div className="col-md-3">
-                                    <div className={`nav-custom ${tab == 'YO' ? 'active' : ''}`} onClick={(e) => {
-                                        setTab("YO")
-                                        setIsTab(true)
-                                    }}>
-                                        <i className="fas fa-inbox"></i>  Yo
+                    <div className="card" style={{ minHeight: '70vh' }}>
+                        <div className="card-body">
+                            <Show condicion={query.dependencia_id}
+                                predeterminado={
+                                    <div>
+                                        <Message color="yellow">
+                                            Porfavor seleccione una dependencia!
+                                        </Message>
                                     </div>
-                                </div>
-
-                                <Show condicion={success && role && role.level && role.level == 'SECRETARY'}>
-                                    <div className="col-md-3">
-                                        <div className={`nav-custom ${tab == 'DEPENDENCIA' ? 'active' : ''}`} onClick={(e) => {
-                                            setTab("DEPENDENCIA")
-                                            setIsTab(true)
-                                        }}>
-                                            <i className="fas fa-building"></i>  Mi Dependencia
+                                }
+                            >
+                                <div className="row">
+                                    <div className="col-xl-2 col-md-3">
+                                        <div className="mb-3">
+                                            <button className="btn waves-effect waves-light btn-rounded btn-outline-primary"
+                                                disabled={!query.dependencia_id}
+                                                onClick={(e) => setOption("CREATE")}
+                                            >
+                                                + Trámite nuevo
+                                            </button>
                                         </div>
-                                    </div>
-                                </Show>
-                            </div>
-                        </div>
 
-                        <div className="table-responsive font-13">
-                            <table className="table">
-                                <tbody>
-                                    {datos.map((d, indexD) => 
-                                        <tr className="table-select table-item" key={`lista-table-${indexD}`}>
-                                            <th width="10%" onClick={(e) => information(d.tramite && d.tramite.slug)}>
-                                                <span className="badge badge-dark font-13">
-                                                    {d.tramite && d.tramite.slug || ""}
-                                                </span>
-                                            </th>
-                                            <td>
-                                                <div className="text-ellipsis cursor-pointer" onClick={(e) => information(d.tramite && d.tramite.slug)}>
-                                                    <b>{d.tramite && d.tramite.asunto || ""}</b>
-                                                </div>
+                                        <ul className="mb-2 nav nav-tab flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                            <li className="nav-item mail-section">
+                                                {current_status.map((s, indexS) => 
+                                                    <a className={`nav-link text-left cursor-pointer ${indexS === current_menu.index ? 'active' : ''}`}
+                                                        key={`item-menu-mail-${indexS}-${s.key}`}
+                                                        onClick={(e) => {
+                                                            setCurrentMenu(s)
+                                                            setCurrentRender('LIST');
+                                                            setIsMenu(true);
+                                                        }}
+                                                    >
+                                                        <span><i className={s.icon}></i> {s.text}</span>
+                                                        <span className="float-right">{s.revisado ? s.revisado : ''}</span>
+                                                    </a>
+                                                )}
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="col-xl-10 col-md-9">
+                                        <div className="row">
+                                            <div className="col-md-8 mb-2 col-9">
+                                                <input type="text" 
+                                                    className="form-control"
+                                                    placeholder="Buscar trámite por código, numero de documento y nombre de archivo"
+                                                    value={query_search || ""}
+                                                    onChange={({ target }) => setQuerySearch(target.value)}
+                                                    disabled={current_loading}
+                                                />
+                                            </div>
+
+                                            <div className="col-xl-2 col-md-2 col-2 mb-2">
+                                                <button className="btn btn-primary"
+                                                    disabled={current_loading || !query_search}
+                                                    onClick={(e) => getTracking()}
+                                                >
+                                                    <i className="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* render list */}
+                                        <Show condicion={current_render == 'LIST'}>
+                                            <div className="nav-custom-content">
                                                 <div className="row">
-                                                    {d.tramite && d.tramite.files.map((f, indexF) => 
-                                                        <div className="col-xs">
-                                                            <ItemFileCircle
-                                                                key={`item-tramite-${indexF}`}
-                                                                id={f.id}
-                                                                url={f.url}
-                                                                is_observation={f.observation ? true : false}
-                                                                name={f.name}
-                                                                extname={f.extname}
-                                                                onClick={(e) => {
+                                                    <div className="col-md-3">
+                                                        <div className={`nav-custom ${tab == 'YO' ? 'active' : ''}`} onClick={(e) => {
+                                                            setTab("YO")
+                                                            setIsTab(true)
+                                                        }}>
+                                                            <i className="fas fa-inbox"></i>  Yo
+                                                        </div>
+                                                    </div>
+
+                                                    <Show condicion={success && role && role.level && role.level == 'SECRETARY'}>
+                                                        <div className="col-md-3">
+                                                            <div className={`nav-custom ${tab == 'DEPENDENCIA' ? 'active' : ''}`} onClick={(e) => {
+                                                                setTab("DEPENDENCIA")
+                                                                setIsTab(true)
+                                                            }}>
+                                                                <i className="fas fa-building"></i>  Mi Dependencia
+                                                            </div>
+                                                        </div>
+                                                    </Show>
+                                                </div>
+                                            </div>
+
+                                            <div className="table-responsive font-13">
+                                                <table className="table">
+                                                    <tbody>
+                                                        {datos.map((d, indexD) => 
+                                                            <ItemTable
+                                                                key={`tr-index-table-item${indexD}`}
+                                                                current={d.current}
+                                                                slug={d.tramite && d.tramite.slug || ""}
+                                                                title={d.tramite && d.tramite.asunto || ""}
+                                                                files={d.tramite && d.tramite.files || []}
+                                                                remitente={d.tramite && d.tramite.person && d.tramite.person.fullname || ""}
+                                                                lugar={d.tramite && d.tramite.dependencia_origen && d.tramite.dependencia_origen.nombre || ""}
+                                                                status={getStatus(d.status).title}
+                                                                statusClassName={getStatus(d.status).className}
+                                                                onClickItem={(e) => information(d)}
+                                                                onClickFile={(e, f) => {
                                                                     e.preventDefault();
+                                                                    setOption("VISUALIZADOR")
                                                                     setCurrentFile(f);
-                                                                    setOption('VISUALIZADOR')
                                                                 }}
                                                             />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <th width="20%" onClick={(e) => information(d.tramite && d.tramite.slug)} className="lowercase">
-                                                <span className="capitalize">{d.tramite && d.tramite.person && d.tramite.person.fullname || ""}</span>
-                                            </th>
-                                            <th width="20%" onClick={(e) => information(d.tramite && d.tramite.slug)} className="lowercase">
-                                                <span className="capitalize">
-                                                    {d.dependencia_origen && d.dependencia_origen.nombre || ""}
-                                                </span>
-                                            </th>
-                                            <th width="15%" onClick={(e) => information(d.tramite && d.tramite.slug)}>
-                                                {moment(d.created_at).format('DD/MM/YYYY hh:ss a')}
-                                            </th>
-                                            <th width="5%" onClick={(e) => information(d.tramite && d.tramite.slug)}>
-                                                <span className={`uppercase badge ${getStatus(d.status).className}`}>{getStatus(d.status).title || ""}</span>
-                                            </th>
-                                        </tr>
-                                    )}
-                                    {/* no hay datos */}
-                                    <Show condicion={!current_loading && !datos.length}>
-                                        <tr className="table-item">
-                                            <th colSpan="6" className="text-center">
-                                                No hay registros disponibles!
-                                            </th>
-                                        </tr>
-                                    </Show>
-                                    {/* loading */}
-                                    <Show condicion={current_loading}>
-                                        <PlaceholderTable/>
-                                    </Show>
-                                </tbody>
-                            </table>
+                                                        )}
+                                                        {/* no hay datos */}
+                                                        <Show condicion={!current_loading && !datos.length}>
+                                                            <tr className="table-item">
+                                                                <th colSpan="6" className="text-center">
+                                                                    No hay registros disponibles!
+                                                                </th>
+                                                            </tr>
+                                                        </Show>
+                                                        {/* loading */}
+                                                        <Show condicion={current_loading}>
+                                                            <PlaceholderTable/>
+                                                        </Show>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </Show>
+
+                                        {/* render show */}
+                                        <Show condicion={current_render == 'SHOW'}>
+                                            <RenderShow tracking={current_tracking}/>
+                                        </Show>
+                                    </div>
+                                </div>
+                            </Show>
                         </div>
-                    </Show>
+                    </div>
                 </div>
             </Body>
 
@@ -312,7 +360,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                     extname={current_file.extname || ""}
                     url={current_file.url || ""}
                     onClose={(e) => setOption("")}
-                    onUpdate={getTracking}
+                    onUpdate={(e) => getTracking()}
                 />
             </Show>
         </div>
