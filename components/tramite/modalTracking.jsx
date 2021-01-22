@@ -130,7 +130,7 @@ const ModalTracking = ({ isClose = null, slug = "", onFile = null }) => {
                                     </button>
                                 </Show>
                                 {/* obtener datos */}
-                                <Show condicion={Object.keys(d.tramite).length}>
+                                <Show condicion={Object.keys(d.tramite || {}).length}>
                                     <button className="btn btn-outline-dark"
                                         onClick={(e) => {
                                             setCurrentTramite(d.tramite);
