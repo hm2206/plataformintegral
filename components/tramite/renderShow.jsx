@@ -116,6 +116,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
 
     // actualizar tracking
     const handleOnSave = async (track) => {
+        setOption("");
         await getTracking(track.id);
     }
 
