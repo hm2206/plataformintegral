@@ -15,7 +15,8 @@ const ItemTable = ({ current = true,
     slug, 
     title, 
     files = [], 
-    remitente, 
+    document_type,
+    document_number, 
     lugar, 
     fecha, 
     day,
@@ -50,15 +51,18 @@ const ItemTable = ({ current = true,
                                     <b>{title || ""}</b>
                                 </div>
                             </td>
-                            <th width="20%" onClick={(e) => handleClick(onClickItem, e)}>
-                                <span className="capitalize">{remitente || ""}</span>
+                            <th width="15%" onClick={(e) => handleClick(onClickItem, e)}>
+                                <span className="capitalize">{document_type || ""}</span>
+                            </th>
+                            <th width="15%" onClick={(e) => handleClick(onClickItem, e)}>
+                                <span className="capitalize">{document_number || ""}</span>
                             </th>
                             <th width="20%" onClick={(e) => handleClick(onClickItem, e)}>
                                 <span className="capitalize">
                                     {lugar || ""}
                                 </span>
                             </th>
-                            <th width="15%" onClick={(e) => handleClick(onClickItem, e)}>
+                            <th width="15%" className="font-10" onClick={(e) => handleClick(onClickItem, e)}>
                                 {fecha ? moment(fecha).format('DD/MM/YYYY hh:ss a') : ''}
                             </th>
                             <th width="5%" onClick={(e) => handleClick(onClickItem, e)}>

@@ -376,6 +376,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                 <ModalTracking 
                     isClose={(e) => setOption("")}
                     slug={current_tramite.slug}
+                    onFile={(f) => typeof onFile == 'function' ? onFile(f) : null}
                 />
             </Show>
             {/* ventana de acciones */}

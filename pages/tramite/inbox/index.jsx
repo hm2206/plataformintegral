@@ -338,8 +338,10 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                                 slug={d.tramite && d.tramite.slug || ""}
                                                                 title={d.tramite && d.tramite.asunto || ""}
                                                                 files={d.tramite && d.tramite.files || []}
-                                                                remitente={d.tramite && d.tramite.person && d.tramite.person.fullname || ""}
+                                                                document_type={d.tramite && d.tramite.tramite_type && d.tramite.tramite_type.description || ""}
+                                                                document_number={d.tramite && d.tramite.document_number || ""}
                                                                 lugar={d.tramite && d.tramite.dependencia_origen && d.tramite.dependencia_origen.nombre || ""}
+                                                                fecha={d.created_at || ""}
                                                                 day={d.day || 0}
                                                                 semaforo={d.semaforo || ""}
                                                                 status={getStatus(d.status).title}

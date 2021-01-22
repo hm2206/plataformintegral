@@ -1,8 +1,5 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Modal from '../modal';
-import atob from 'atob';
-import { Button, Form, List, Image } from 'semantic-ui-react';
-import Router from 'next/router';
 import { tramite } from '../../services/apis';
 import Show from '../show';
 import moment from 'moment';
@@ -17,9 +14,10 @@ import CloseIcon from '@material-ui/icons/Close';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import ChatIcon from '@material-ui/icons/Chat';
 import Swal from 'sweetalert2';
+import ModalInfo from './modalInfo';
 
 
-const ModalTracking = ({ isClose = null, slug = "" }) => {
+const ModalTracking = ({ isClose = null, slug = "", onFile = null }) => {
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -30,6 +28,7 @@ const ModalTracking = ({ isClose = null, slug = "" }) => {
     const [is_error, setIsError] = useState(false);
     const [option, setOption] = useState("");
     const [current_files, setCurrentFiles] = useState([]);
+    const [current_tramite, setCurrentTramite] = useState({});
 
     // obtener linea de tiempo
     const getTracking = async (add = false) => {
@@ -51,38 +50,6 @@ const ModalTracking = ({ isClose = null, slug = "" }) => {
     useEffect(() => {
         getTracking();
     }, []);
-
-    // state = {
-    //     view_file: {
-    //         show: false,
-    //         origen: [],
-    //         tracking: []
-    //     },
-    //     loader: false,
-    //     tracking: {
-    //         total: 0,
-    //         page: 1,
-    //         lastPage: 1,
-    //         data: []
-    //     },
-    //     query_search: ""
-    // }
-    
-    // const handlePage = async (nextPage) => {
-    //     this.setState({ loader: true });
-    //     let { tramite } = this.props;
-    //     await this.getTracking(tramite && tramite.slug, nextPage, true);
-    // }
-
-
-    // openFiles = async (tracking) => {
-    //     this.setState((state, props) => {
-    //         state.view_file.show = true;
-    //         state.view_file.origen = props.tramite.tramite_files;
-    //         state.view_file.tracking = tracking.files;
-    //         return { view_file: state.view_file }
-    //     }); 
-    // }
 
     // obtener meta datos
     const getMetadata = (status) => {
@@ -115,8 +82,13 @@ const ModalTracking = ({ isClose = null, slug = "" }) => {
             });
         this.setState({ loader: false })
     }
- 
 
+    // emitir archivo
+    const handleFile = async (f) => {
+        if (typeof onFile == 'function') onFile(f);
+    }
+ 
+    // renderizar
     return (
         <Modal
             show={true}
@@ -157,6 +129,17 @@ const ModalTracking = ({ isClose = null, slug = "" }) => {
                                         <i className="fas fa-file-alt"></i> Archivos
                                     </button>
                                 </Show>
+                                {/* obtener datos */}
+                                <Show condicion={Object.keys(d.tramite).length}>
+                                    <button className="btn btn-outline-dark"
+                                        onClick={(e) => {
+                                            setCurrentTramite(d.tramite);
+                                            setOption('SHOW_INFO')
+                                        }}
+                                    >
+                                        <i className="fas fa-info-circe"></i> Información
+                                    </button>
+                                </Show>
                             </div>
                         </VerticalTimelineElement>
                     )}
@@ -165,6 +148,14 @@ const ModalTracking = ({ isClose = null, slug = "" }) => {
                 <Show condicion={option == 'SHOW_FILE'}>
                     <ModalFiles files={current_files}
                         isClose={(e) => setOption("")}
+                    />
+                </Show>
+                {/* modal de información */}
+                <Show condicion={option == 'SHOW_INFO'}>
+                    <ModalInfo
+                        current_tramite={current_tramite}
+                        isClose={(e) => setOption("")}
+                        onFile={handleFile}
                     />
                 </Show>
             </div>
