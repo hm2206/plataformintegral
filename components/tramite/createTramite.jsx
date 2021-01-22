@@ -13,7 +13,7 @@ import { SelectAuthEntityDependencia } from '../select/authentication';
 import { SelectTramiteType } from '../select/tramite';
 
 
-const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave = null }) => {
+const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave = null, current_tramite = {} }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -22,6 +22,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const isUser = Object.keys(user).length;
+    const isTramite = Object.keys(current_tramite).length;
     const [current_files, setCurrentFiles] = useState([]);
 
     // cambio de form
@@ -67,6 +68,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
             app_context.fireLoading(true);
             let datos = new FormData;
             datos.append('person_id', user.person_id);
+            if (isTramite) datos.append('tramite_id', current_tramite.id);
             await Object.keys(form).map(key => datos.append(key, form[key]));
             await current_files.map(f => datos.append('files', f));
             await tramite.post(`tramite`, datos, { headers: { DependenciaId: dependencia_id } })
@@ -102,124 +104,186 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
         >
             <div className="card-body">
                 <Form>
-                    <h5>
-                        <i className="fas fa-user"></i> Datos del Remitente
-                        <hr/>
-                    </h5>
+                    <Show condicion={isTramite}>
+                        <div className="card" style={{ border: '1px solid #000' }}>
+                            <div className="card-body">
+                                <h5>
+                                    <i className="fas fa-file-alt"></i> Datos del Trámite raíz
+                                    <hr/>
+                                </h5>
 
-                    <Show condicion={isUser} 
-                        predeterminado={
-                            <div className="text-center">
-                                <b className="text-muted">No se encontró al remitente</b>
+                                <Form.Field className="mb-3">
+                                    <label>Dependencia Origen</label>
+                                    <input type="text"
+                                        className="capitalize"
+                                        readOnly
+                                        value={current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || ""}
+                                    />
+                                </Form.Field>
+
+                                <Form.Field className="mb-3">
+                                    <label>Tipo de Trámite</label>
+                                    <input type="text"
+                                        className="capitalize"
+                                        readOnly
+                                        value={current_tramite.tramite_type && current_tramite.tramite_type.description || ""}
+                                    />
+                                </Form.Field>
+
+                                <Form.Field className="mb-3">
+                                    <label>N° Documento</label>
+                                    <input type="text"
+                                        className="capitalize"
+                                        readOnly
+                                        value={current_tramite.document_number || ""}
+                                    />
+                                </Form.Field>
+
+                                <Form.Field className="mb-3">
+                                    <label>Asunto</label>
+                                    <textarea 
+                                        value={current_tramite.asunto || ""}
+                                        rows={3}
+                                        readOnly
+                                    />
+                                </Form.Field>
+
+                                <Show condicion={tramite.observation}>
+                                    <Form.Field className="mb-3">
+                                        <label>Observación</label>
+                                        <textarea 
+                                            value={current_tramite.observation || ""}
+                                            rows={3}
+                                            readOnly
+                                        />
+                                    </Form.Field>
+                                </Show>
                             </div>
-                        }
-                    >
-                        <Form.Field className="mb-3">
-                            <label htmlFor="">N° Documento</label>
-                            <input type="text" readOnly value={user && user.person && user.person.document_number || ""}/>
-                        </Form.Field>
-
-                        <Form.Field className="mb-3">
-                            <label htmlFor="">Apellidos y Nombres</label>
-                            <input type="text" readOnly className="uppercase" value={user && user.person && user.person.fullname || ""}/>
-                        </Form.Field>
+                        </div>
                     </Show>
-                    <hr/>
 
-                    <h5>
-                        <i className="fas fa-file-alt"></i> Datos del Documento
-                        <hr/>
-                    </h5>
+                    <div className="card">
+                        <div className="card-body">
+                            <h5>
+                                <i className="fas fa-user"></i> Datos del Remitente
+                                <hr/>
+                            </h5>
 
-                    <Form.Field className="mb-3">
-                        <label>Dependencia Origen</label>
-                        <SelectAuthEntityDependencia
-                            entity_id={app_context.entity_id}
-                            value={dependencia_id}
-                            disabled
-                        />
-                    </Form.Field>
+                            <Show condicion={isUser} 
+                                predeterminado={
+                                    <div className="text-center">
+                                        <b className="text-muted">No se encontró al remitente</b>
+                                    </div>
+                                }
+                            >
+                                <Form.Field className="mb-3">
+                                    <label htmlFor="">N° Documento</label>
+                                    <input type="text" readOnly value={user && user.person && user.person.document_number || ""}/>
+                                </Form.Field>
 
-                    <Form.Field className="mb-3" error={errors.type_tramite_id && errors.type_tramite_id[0] || ""}>
-                        <label>Tipo de Trámite <b className="text-danger">*</b></label>
-                        <SelectTramiteType
-                            name="tramite_type_id"
-                            value={form.tramite_type_id}
-                            onChange={(e, target) => handleInput(target)}
-                        />
-                        <label>{errors.tramite_type_id && errors.tramite_type_id[0] || ""}</label>
-                    </Form.Field>
+                                <Form.Field className="mb-3">
+                                    <label htmlFor="">Apellidos y Nombres</label>
+                                    <input type="text" readOnly className="uppercase" value={user && user.person && user.person.fullname || ""}/>
+                                </Form.Field>
+                            </Show>
+                            <hr/>
 
-                    <Form.Field className="mb-3" error={errors.document_number && errors.document_number[0] || ""}>
-                        <label>N° Documento <b className="text-danger">*</b></label>
-                        <input type="text"
-                            name="document_number"
-                            value={form.document_number || ""}
-                            onChange={({ target }) => handleInput(target)}
-                        />
-                        <label>{errors.document_number && errors.document_number[0] || ""}</label>
-                    </Form.Field>
+                            <h5>
+                                <i className="fas fa-file-alt"></i> Datos del Documento
+                                <hr/>
+                            </h5>
 
-                    <Form.Field className="mb-3" error={errors.asunto && errors.asunto[0] || ""}>
-                        <label>Asunto <b className="text-danger">*</b></label>
-                        <textarea 
-                            name="asunto" 
-                            rows="2"
-                            value={form.asunto || ""}
-                            onChange={({ target }) => handleInput(target)}
-                        />
-                        <label>{errors.asunto && errors.asunto[0] || ""}</label>
-                    </Form.Field>
+                            <Form.Field className="mb-3">
+                                <label>Dependencia Origen</label>
+                                <SelectAuthEntityDependencia
+                                    entity_id={app_context.entity_id}
+                                    value={dependencia_id}
+                                    disabled
+                                />
+                            </Form.Field>
 
-                    <Form.Field className="mb-3" error={errors.folio_count && errors.folio_count[0] || ""}>
-                        <label>N° Folio <b className="text-danger">*</b></label>
-                        <input type="number"
-                            name="folio_count"
-                            value={form.folio_count || ""}
-                            onChange={({ target }) => handleInput(target, (value) => {
-                                if (value > 0) return true;
-                                if (value == '') return true;
-                                return false;
-                            })}
-                            min="1"
-                            max="10000"
-                        />
-                        <label>{errors.folio_count && errors.folio_count[0] || ""}</label>
-                    </Form.Field>
+                            <Form.Field className="mb-3" error={errors.type_tramite_id && errors.type_tramite_id[0] || ""}>
+                                <label>Tipo de Trámite <b className="text-danger">*</b></label>
+                                <SelectTramiteType
+                                    name="tramite_type_id"
+                                    value={form.tramite_type_id}
+                                    onChange={(e, target) => handleInput(target)}
+                                />
+                                <label>{errors.tramite_type_id && errors.tramite_type_id[0] || ""}</label>
+                            </Form.Field>
 
-                    <Form.Field className="mb-3" error={errors.observation && errors.observation[0] || ""}>
-                        <label>Observación</label>
-                        <textarea 
-                            name="observation" 
-                            rows="5"
-                            value={form.observation || ""}
-                            onChange={({ target }) => handleInput(target)}
-                        />
-                        <label>{errors.observation && errors.observation[0] || ""}</label>
-                    </Form.Field>
+                            <Form.Field className="mb-3" error={errors.document_number && errors.document_number[0] || ""}>
+                                <label>N° Documento <b className="text-danger">*</b></label>
+                                <input type="text"
+                                    name="document_number"
+                                    value={form.document_number || ""}
+                                    onChange={({ target }) => handleInput(target)}
+                                />
+                                <label>{errors.document_number && errors.document_number[0] || ""}</label>
+                            </Form.Field>
 
-                    <Form.Field className="mb-3" error={errors.files && errors.files[0] || ""}>
-                        <label>Archivos <b className="text-danger">*</b></label>
-                        <DropZone
-                            id="file-tramite-serve"
-                            name="files"
-                            title="Seleccinar PDF"
-                            multiple={false}
-                            accept="application/pdf"
-                            result={current_files}
-                            onSigned={({ file }) => handleFile(file)}
-                            onChange={({ files }) => handleFile(files[0])}
-                            onDelete={handleDeleteFile}
-                        />
-                        <label>{errors.files && errors.files[0] || ""}</label>
-                    </Form.Field>
+                            <Form.Field className="mb-3" error={errors.asunto && errors.asunto[0] || ""}>
+                                <label>Asunto <b className="text-danger">*</b></label>
+                                <textarea 
+                                    name="asunto" 
+                                    rows="2"
+                                    value={form.asunto || ""}
+                                    onChange={({ target }) => handleInput(target)}
+                                />
+                                <label>{errors.asunto && errors.asunto[0] || ""}</label>
+                            </Form.Field>
 
-                    <hr/>
+                            <Form.Field className="mb-3" error={errors.folio_count && errors.folio_count[0] || ""}>
+                                <label>N° Folio <b className="text-danger">*</b></label>
+                                <input type="number"
+                                    name="folio_count"
+                                    value={form.folio_count || ""}
+                                    onChange={({ target }) => handleInput(target, (value) => {
+                                        if (value > 0) return true;
+                                        if (value == '') return true;
+                                        return false;
+                                    })}
+                                    min="1"
+                                    max="10000"
+                                />
+                                <label>{errors.folio_count && errors.folio_count[0] || ""}</label>
+                            </Form.Field>
 
-                    <div className="text-right">
-                        <Button color="teal" onClick={save} disabled={!isUser}>
-                            <i className="fas fa-save"></i> Guardar
-                        </Button>
+                            <Form.Field className="mb-3" error={errors.observation && errors.observation[0] || ""}>
+                                <label>Observación</label>
+                                <textarea 
+                                    name="observation" 
+                                    rows="5"
+                                    value={form.observation || ""}
+                                    onChange={({ target }) => handleInput(target)}
+                                />
+                                <label>{errors.observation && errors.observation[0] || ""}</label>
+                            </Form.Field>
+
+                            <Form.Field className="mb-3" error={errors.files && errors.files[0] || ""}>
+                                <label>Archivos <b className="text-danger">*</b></label>
+                                <DropZone
+                                    id="file-tramite-serve"
+                                    name="files"
+                                    title="Seleccinar PDF"
+                                    multiple={false}
+                                    accept="application/pdf"
+                                    result={current_files}
+                                    onSigned={({ file }) => handleFile(file)}
+                                    onChange={({ files }) => handleFile(files[0])}
+                                    onDelete={handleDeleteFile}
+                                />
+                                <label>{errors.files && errors.files[0] || ""}</label>
+                            </Form.Field>
+
+                            <hr/>
+
+                            <div className="text-right">
+                                <Button color="teal" onClick={save} disabled={!isUser}>
+                                    <i className="fas fa-save"></i> Guardar
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </Form>
             </div>

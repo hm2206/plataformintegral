@@ -33,13 +33,14 @@ const PlaceholderTable = () => {
 
 // menus
 const current_status = [
-    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['ENVIADO', 'PENDIENTE'] },
+    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['ENVIADO'] },
     { key: "DERIVADO", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['DERIVADO', 'RESPONDIDO'] },
-    { key: "REGISTRADO", icon: 'far fa-file', text: 'Regístrados', index: 2, filtros: ['REGISTRADO'] },
-    { key: "ACEPTADO", icon: 'fas fa-check', text: 'Aceptados', index: 3, filtros: ['ACEPTADO'] },
-    { key: "RECHAZADO", icon: 'fas fa-times', text: 'Rechazados', index: 4, filtros: ['RECHAZADO'] },
-    { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 5, filtros: ['ANULADO'] },
-    { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 6, filtros: ['FINALIZADO'] }
+    { key: "PENDIENTE", icon: 'fas fa-thumbtack', text: 'Pendientes', index: 2, filtros: ['PENDIENTE'] },
+    { key: "REGISTRADO", icon: 'far fa-file', text: 'Regístrados', index: 3, filtros: ['REGISTRADO'] },
+    { key: "ACEPTADO", icon: 'fas fa-check', text: 'Aceptados', index: 4, filtros: ['ACEPTADO'] },
+    { key: "RECHAZADO", icon: 'fas fa-times', text: 'Rechazados', index: 5, filtros: ['RECHAZADO'] },
+    { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 6, filtros: ['ANULADO'] },
+    { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 7, filtros: ['FINALIZADO'] }
 ];
 
 const InboxIndex = ({ pathname, query, success, role, boss }) => {
@@ -64,6 +65,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     const [query_search, setQuerySearch] = useState("");
     const [current_render, setCurrentRender] = useState("LIST");
     const [current_tracking, setCurrentTracking] = useState({});
+    const [current_tramite, setCurrentTramite] = useState({});
 
     // props
     let isRole = Object.keys(role).length;
@@ -149,9 +151,10 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     // manejador de creado
     const handleOnSave = () => {
         setOption("");
+        setCurrentTramite({});
         setCurrentRender("LIST");
-        if (current_menu.index == 2) getTracking();
-        else handleSelectMenu(2);
+        if (current_menu.index == 3) getTracking();
+        else handleSelectMenu(3);
     }
 
     // vaciar tab
@@ -337,6 +340,8 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                                 files={d.tramite && d.tramite.files || []}
                                                                 remitente={d.tramite && d.tramite.person && d.tramite.person.fullname || ""}
                                                                 lugar={d.tramite && d.tramite.dependencia_origen && d.tramite.dependencia_origen.nombre || ""}
+                                                                day={d.day || 0}
+                                                                semaforo={d.semaforo || ""}
                                                                 status={getStatus(d.status).title}
                                                                 statusClassName={getStatus(d.status).className}
                                                                 onClickItem={(e) => information(d)}
@@ -375,6 +380,10 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                     setOption("VISUALIZADOR")
                                                     setCurrentFile(f);
                                                 }}
+                                                onCreate={(e) => {
+                                                    setCurrentTramite(e);
+                                                    setOption("CREATE");
+                                                }}
                                             />
                                         </Show>
                                     </div>
@@ -388,8 +397,12 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
             {/* crear tramite */}
             <Show condicion={option == 'CREATE'}>
                 <CreateTramite 
+                    current_tramite={current_tramite}
                     dependencia_id={query.dependencia_id || ""}
-                    isClose={(e) => setOption("")}
+                    isClose={(e) => {
+                        setOption("")
+                        setCurrentTramite({})
+                    }}
                     user={tab == 'DEPENDENCIA' ? boss.user || {} : app_context.auth || {}}
                     onSave={handleOnSave}
                 />

@@ -7,11 +7,11 @@ import { AppContext } from '../../contexts/AppContext';
 import Show from '../show';
 import { Button } from 'semantic-ui-react'
 import { tramite } from '../../services/apis';
-import { DropZone } from '../Utils';
+import { DropZone, BtnFloat } from '../Utils';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 
-const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refresh = false }) => {
+const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refresh = false, onCreate = null }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -22,7 +22,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
     const [option, setOption] = useState("");
     const [action, setAction] = useState("");
     const [current_loading, setCurrentLoading] = useState(false);
-    const [current_qr, setCurrentQr] = useState("http://127.0.0.1:3333/find_file_local?path=/user/img/perfil_admin@unia.jpg&size=50x50");
+    const [current_qr, setCurrentQr] = useState("");
 
     // obtener trámite
     const current_tramite = current_tracking.tramite || {};
@@ -120,6 +120,11 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
         await getTracking(track.id);
     }
 
+    // crear tramite apartir del tracking
+    const handleCreateTramite = async () => {
+        if (typeof onCreate == 'function') onCreate(current_tramite);
+    }
+
     // escuchar refresh
     useEffect(() => {
         setCurrentRefesh(refresh);
@@ -201,12 +206,15 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                         <div className="ml-5 col-xs" key={`item-tramite-${indexF}`}>
                                             <ItemFileCircle
                                                 id={f.id}
-                                                is_observation={f.observation ? true : false}
+                                                is_observation={f.observation}
                                                 className="mb-3"
                                                 key={`item-file-tramite-${indexF}`}
                                                 url={f.url}
                                                 name={f.name}
                                                 extname={f.extname}
+                                                hidden={[ 
+                                                    current_tramite.person_id == app_context.auth.person_id
+                                                ]}
                                                 edit={true}
                                                 onClick={(e) => {
                                                     e.preventDefault();
@@ -266,7 +274,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                         <div className="ml-5 col-xs" key={`item-tracking-${indexF}`}>
                                             <ItemFileCircle
                                                 id={f.id}
-                                                is_observation={f.observation ? true : false}
+                                                is_observation={f.observation}
                                                 className="mb-3"
                                                 key={`item-file-tracking-${indexF}`}
                                                 url={f.url}
@@ -380,6 +388,12 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                     action={action}
                     onSave={handleOnSave}
                 />
+            </Show>
+            {/* boton flotante */}
+            <Show condicion={current_tracking.current && current_tracking.status == 'PENDIENTE'}>
+                <BtnFloat onClick={handleCreateTramite}>
+                    <i className="fas fa-plus"></i>
+                </BtnFloat>
             </Show>
         </div>
     )

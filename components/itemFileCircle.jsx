@@ -9,7 +9,7 @@ import axios from 'axios';
 import PdfView from './pdfView';
 import { PDFDocument } from 'pdf-lib';
 
-const ItemFileCircle = ({ id, url, name, extname, is_observation = false, edit = false, hidden = [], onAction = null, onClick = null }) => {
+const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = false, hidden = [], onAction = null, onClick = null }) => {
 
     // add
     const app_context = useContext(AppContext);
@@ -91,6 +91,11 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = false, edit =
             });
     }
 
+    // mostrar observación
+    const showObservation = async () => {
+        Swal.fire({ icon: 'info', text: is_observation });
+    }
+
     // render
     return (
         <div style={{ position: 'relative', width: '100%' }} className={`${edit ? 'mb-3' : ''}`}>
@@ -121,6 +126,16 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = false, edit =
                         onClick={deleteFile}
                     >
                         <i className="fas fa-times"></i>
+                    </span>
+                </Show>
+
+                <Show condicion={is_observation}>
+                    <span className="text-primary" 
+                        title="Observación de archivo"
+                        style={{ position: 'absolute', bottom: '-18px', right: '20px', cursor: 'pointer' }}
+                        onClick={showObservation}
+                    >
+                        <i className="fas fa-info-circle"></i>
                     </span>
                 </Show>
             </Show>

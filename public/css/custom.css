@@ -486,3 +486,8 @@ a {
     border-color: #ff6f00;
     font-weight: bold;
 }
+
+
+.table-borderless td, .table-borderless th{
+    border: none !important;
+}
