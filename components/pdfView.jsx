@@ -6,6 +6,7 @@ import ListPfx from './listPfx';
 import { signature } from '../services/apis';
 import { AppContext } from '../contexts/AppContext'
 import Swal from 'sweetalert2';
+import { getPositions } from 'node-signature/client';
 
 const PdfView = ({ 
     pdfUrl = "https://www.iaa.csic.es/python/curso-python-para-principiantes", 
@@ -39,27 +40,19 @@ const PdfView = ({
     const [current_select, setCurrentSelect] = useState({});
     const isSelect = Object.keys(current_select).length;
 
-    // config rectangulo
-    const columns = 5;
-    const rows = 25;
-    let cube = (rows * columns);
+    // config page
+    let [current_col, setCurrentCol] = useState(0);
     
     // generar posiciones
     const generatePositions = async () => {
-        let tmpPosition = [];
-        // obtener el margin
-        for(let i = 0; i < rows; i++) {
-            for(let j = columns; j > 0; j--) {
-                let pos = cube - j;
-                if (i % 2 == 0) {
-                    tmpPosition.push(pos);
-                }
-            }
-            // disminuir
-            cube -= columns;
+        let current_page = pdfPages[page - 1 || 0] || {};
+        if (Object.keys(current_page).length) {
+            let { width, height } = current_page.getSize();
+            let datos = await getPositions({ width, height });
+            setPositions(datos.positions);
+            setCurrentPosition(0);
+            setCurrentCol(datos.column);
         }
-        // setting position
-        setPositions(tmpPosition);
     }
 
     const handleInput = ({ name, value }, callback) => {
@@ -137,11 +130,13 @@ const PdfView = ({
         });
     }
 
+    // generar calculos
     useEffect(() => {
         getSignatures();
         generatePositions();
-    }, []);
+    }, [page]);
 
+    // renderizar
     return (
         <div style={{
                 position: 'fixed',
@@ -249,20 +244,20 @@ const PdfView = ({
                                             <Form>
                                                 <Form.Field>
                                                     <div className="card pt-4">
-                                                        <div className="row justify-content-center">
+                                                        <div className="row justify-content-around">
                                                             {positions.map((pos, indexPos) => 
-                                                                <Fragment>
-                                                                    <Show condicion={(indexPos) % 5 == 0}>
-                                                                        <div className="col-md-12"></div>
-                                                                    </Show>
-
-                                                                    <div className={`col-md-2 col-2 mb-3 text-center`}>
+                                                                <Fragment key={`list-point-position-${indexPos}`}>
+                                                                    <div className={`col-xs mb-3 text-center`}>
                                                                         <input type="radio"
-                                                                            value={pos}
-                                                                            checked={pos == current_position ? true : false}
+                                                                            value={pos.value}
+                                                                            checked={pos.value == current_position ? true : false}
                                                                             onChange={({target}) => handleInput(target, setCurrentPosition)}
                                                                         />
-                                                                    </div>  
+                                                                    </div> 
+
+                                                                    <Show condicion={current_col == (pos.column + 1)}>
+                                                                        <div className="col-md-12"></div>
+                                                                    </Show>
                                                                 </Fragment>
                                                             )}
                                                         </div>
