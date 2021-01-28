@@ -104,7 +104,7 @@ const ProgressFile = ({
 
     // validar download
     useEffect(() => {
-        if (download) setTitle("Descargando")
+        if (download) setTitle("Bajando")
     }, [download]);
 
     // render
