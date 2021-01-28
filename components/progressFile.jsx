@@ -112,7 +112,7 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
     // render
     return (
         <div className={`upload-root ${is_success ? 'upload-complete' : ''} ${is_error ? 'upload-error' : ''}`}>
-            <Show condicion={s_paso == next_status.INITIAL || is_paso == "" || is_paso == next_status.ERROR}>
+            <Show condicion={is_paso == next_status.INITIAL || is_paso == "" || is_paso == next_status.ERROR}>
                 <div className={`upload-btn-content`}>
                     <button className={`upload-btn ${is_paso == next_status.INITIAL || is_paso == "" ? 'upload-btn-enabled' : 'upload-btn-none'}`}
                         onClick={(e) => {
