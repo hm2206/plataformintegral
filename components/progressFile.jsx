@@ -11,7 +11,10 @@ const next_status = {
     ERROR: 'ERROR'
 };
 
-const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClose = null, onUpload = null, onCancel = null }) => {
+const ProgressFile = ({ 
+    file = {}, size = 100, message = "", percent = 0, download = false,
+    onClose = null, onUpload = null, onCancel = null 
+}) => {
 
     // estados
     const [is_paso, setIsPaso] = useState("");
@@ -56,8 +59,8 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
                 setIsTimer(timePaso);
                 break;
             case next_status.RELOAD:
-                setTitle("Subido");
-                setDescription("empezar");
+                setTitle("Completado");
+                setDescription("subir");
                 setIsUpload(false);
                 break;
             case next_status.ERROR:
@@ -98,6 +101,11 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
     useEffect(() => {
         validateSize();
     }, [is_file]);
+
+    // validar download
+    useEffect(() => {
+        if (download) setTitle("Descargando")
+    }, [download]);
 
     // render
     return (

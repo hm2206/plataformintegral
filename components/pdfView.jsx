@@ -41,6 +41,7 @@ const PdfView = ({
     const [current_select, setCurrentSelect] = useState({});
     const [errors, setErrors] = useState({});
     const [current_cancel, setCurrentCancel] = useState(null);
+    const [current_download, setCurrentDownload] = useState(false);
     const isSelect = Object.keys(current_select).length;
 
     // config page
@@ -69,9 +70,7 @@ const PdfView = ({
         }
     }
 
-    const handleCancel = async () => {
-        if (current_cancel && current_cancel.cancel("Subida cancelada"));
-    }
+    const handleCancel = async () => current_cancel && current_cancel.cancel("Subida cancelada");
 
     const signer = async () => {
         let response = false;
@@ -106,7 +105,10 @@ const PdfView = ({
         await signature.post(`auth/signer`, datos, { 
             responseType: 'blob',
             onUploadProgress: (evt) => onProgress(evt, setCurrentProgress), 
-            onDownloadProgress: (evt) => onProgress(evt, setCurrentProgress),
+            onDownloadProgress: (evt) => onProgress(evt, (p) => { 
+                setCurrentDownload(true);
+                setCurrentProgress(p);
+            }),
             cancelToken: cancelToken.token,
             headers : { 'Content-Type': 'multipart/form-data' }
         }).then(async res => {
@@ -155,6 +157,7 @@ const PdfView = ({
         });
         // quitar barra de progreso
         setTimeout(() => {
+            setCurrentDownload(false);
             setCurrentLoading(false);
             setCurrentProgress(0);
         }, 1000);
@@ -318,6 +321,7 @@ const PdfView = ({
                                 <Show condicion={isSelect && page > 0}>
                                     <div className="mt-3">
                                         <ProgressFile 
+                                            download={current_download}
                                             message={errors.file && errors.file[0] || ""}
                                             percent={current_progress}
                                             file={pdfBlob}
