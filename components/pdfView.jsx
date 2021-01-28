@@ -8,6 +8,7 @@ import { AppContext } from '../contexts/AppContext'
 import Swal from 'sweetalert2';
 import ProgressFile from './progressFile';
 import { getPositions } from 'node-signature/client';
+import axios from 'axios';
 
 const PdfView = ({ 
     pdfUrl = "https://www.iaa.csic.es/python/curso-python-para-principiantes", 
@@ -42,6 +43,7 @@ const PdfView = ({
     const [positions, setPositions] = useState([]);
     const [current_select, setCurrentSelect] = useState({});
     const [errors, setErrors] = useState({});
+    const [current_cancel, setCurrentCancel] = useState(null);
     const isSelect = Object.keys(current_select).length;
 
     // config page
@@ -70,14 +72,25 @@ const PdfView = ({
         }
     }
 
+    const handleCancel = async () => {
+        if (current_cancel && current_cancel.cancel("Subida cancelada"));
+    }
+
     const onUploadProgress = (progressEvent) => {
         const { loaded, total } = progressEvent;
         let percent = Math.floor(loaded * 100 / total);
         setCurrentProgress(percent);
     }   
 
+    const onDownloadProgress = (progressEvent) => {
+        let { loaded, total } = progressEvent;
+        let percent = Math.floor(loaded * 100 / total);
+        setCurrentProgress(percent);
+    }
+
     const signer = async () => {
         let response = false;
+        let cancelRequest = axios.CancelToken.source();
         setErrors({});
         let payload = {};
         // assign pdfBlob
@@ -96,6 +109,7 @@ const PdfView = ({
         }
         // emitir evento
         setCurrentLoading(true);
+        setCurrentCancel(cancelRequest);
         let datos = new FormData;
         datos.append('reason', payload.reason);
         datos.append('location', payload.location);
@@ -107,9 +121,9 @@ const PdfView = ({
         await signature.post(`auth/signer`, datos, { 
             responseType: 'blob', 
             onUploadProgress, 
-            headers : {
-                'Content-Type': 'multipart/form-data'
-            }
+            onDownloadProgress,
+            cancelToken: cancelRequest.token,
+            headers : { 'Content-Type': 'multipart/form-data' }
         }).then(async res => {
             let { data } = res;
             response = true;
@@ -128,24 +142,27 @@ const PdfView = ({
         }).catch(err => {
             try {
                 response = false;
-                let { data } = err.response;
-                if (typeof data != 'object') throw new Error(err.message);
-                if (typeof data.type != 'undefined') {
-                    const blb = new Blob([data], {type: "text/plain"});
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        let resData = JSON.parse(reader.result) || {};
-                        if (typeof resData != 'object') throw new Error(err.message);
-                        if (typeof resData.errors != 'object') throw new Error(resData.message);
-                        Swal.fire({ icon: 'error', text: resData.message });
-                        setErrors(resData.errors || {});
+                if (axios.isCancel(err)) throw new Error(err.message);
+                else {
+                    let { data } = err.response;
+                    if (typeof data != 'object') throw new Error(err.message);
+                    if (typeof data.type != 'undefined') {
+                        const blb = new Blob([data], {type: "text/plain"});
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            let resData = JSON.parse(reader.result) || {};
+                            if (typeof resData != 'object') throw new Error(err.message);
+                            if (typeof resData.errors != 'object') throw new Error(resData.message);
+                            Swal.fire({ icon: 'error', text: resData.message });
+                            setErrors(resData.errors || {});
+                        }
+                        // executar blob
+                        reader.readAsText(blb);
+                    } else {
+                        if (typeof data.errors != 'object') throw new Error(data.message);
+                        Swal.fire({ icon: 'warning', text: data.message });
+                        setErrors(data.errors || {});
                     }
-                    // executar blob
-                    reader.readAsText(blb);
-                } else {
-                    if (typeof data.errors != 'object') throw new Error(data.message);
-                    Swal.fire({ icon: 'warning', text: data.message });
-                    setErrors(data.errors || {});
                 }
             } catch (error) {
                 Swal.fire({ icon: 'error', text: error.message });
@@ -322,6 +339,7 @@ const PdfView = ({
                                             file={pdfBlob}
                                             onUpload={signer}
                                             onClose={handleClose}
+                                            onCancel={handleCancel}
                                             size={25}
                                         />
                                     </div>

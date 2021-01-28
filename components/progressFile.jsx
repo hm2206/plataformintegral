@@ -10,7 +10,7 @@ const next_status = {
     ERROR: 'ERROR'
 };
 
-const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClose = null, onUpload = null }) => {
+const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClose = null, onUpload = null, onCancel = null }) => {
 
     // estados
     const [is_paso, setIsPaso] = useState("");
@@ -106,7 +106,6 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
     // validar tamaño
     useEffect(() => {
         validateSize();
-        console.log('file');
     }, [is_file]);
 
     // render
@@ -137,13 +136,20 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
             </Show>
 
             <div className="upload-body">
-                <div className="upload-body-text">
-                    <b>{file.name || ""}</b>
-                    <div className="py-0 font-10" style={{ opacity: 0.8 }}>{formatBytes(file.size || 0)}</div>
-                </div>
-                <div className="upload-body-text text-right ml-1">
-                    <b>{title} {is_upload ? `${percent}%` : ''}</b>
-                    <div className="py-0 font-10" style={{ opacity: 0.8 }}>{is_error && message ? message : description}</div>
+                <div className="row">
+                    <div className="col-md-6 col-6">
+                        <div className="upload-body-text">
+                            <b>{file.name || ""}</b>
+                            <div className="py-0 font-10" style={{ opacity: 0.8 }}>{formatBytes(file.size || 0)}</div>
+                        </div>
+                    </div>
+
+                    <div className="col-md-6 col-6">
+                        <div className="upload-body-text text-right ml-1">
+                            <b>{title} {is_upload ? `${percent}%` : ''}</b>
+                            <div className="py-0 font-10" style={{ opacity: 0.8 }}>{is_error && message ? message : description}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -155,10 +161,11 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
                         <i className="fas fa-upload"></i>
                     </button>
 
-                    <button className={`upload-btn ${is_paso == next_status.CANCEL ? 'upload-btn-enabled' : 'upload-btn-none'}`}
+                    <button className={`upload-btn ${percent != 100 && is_paso == next_status.CANCEL ? 'upload-btn-enabled' : 'upload-btn-none'}`}
                         onClick={(e) => {
                             clearTimeout(is_timer);
                             setIsPaso(next_status.INITIAL);
+                            if (typeof onCancel == 'function') onCancel();
                         }}
                     >
                         <Loader size='mini' active inverted indeterminate={is_upload}/>

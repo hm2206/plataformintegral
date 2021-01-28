@@ -524,8 +524,7 @@ a {
 }
 
 .upload-body-text {
-    flex: 1;
-    overflow: ellipsis;
+    overflow: hidden;
     white-space: nowrap;
 }
 
