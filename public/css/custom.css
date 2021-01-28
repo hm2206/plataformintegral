@@ -491,3 +491,86 @@ a {
 .table-borderless td, .table-borderless th{
     border: none !important;
 }
+
+
+/* progress */
+
+.ui.progress .bar {
+    height: 100%!important;
+}
+
+
+/* uploader */
+.upload-root {
+    width: 100%;
+    min-height: 50px;
+    height: 100%;
+    background: linear-gradient(15deg,#6610f2,#2887f3);
+    border-radius: 0.5em;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    padding: 0.7em;
+    box-sizing: inherit;
+    line-height: inherit;
+    display: flex;
+    align-items: center;
+}
+
+.upload-body {
+    flex: 4;
+    height: 100%;
+    display: flex;
+}
+
+.upload-body-text {
+    flex: 1;
+    overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.upload-btn-content {
+    flex: 1;
+    position: relative;
+}
+
+.upload-btn {
+    border: 0px;
+    background-color: #1e2430;
+    border-radius: 100%;
+    padding: 0.1em;
+    width: 30px;
+    height: 30px;
+}
+
+.upload-btn:hover {
+    transition: all ease 0.2s;
+    border: 2px solid #fff;
+}
+
+.upload-btn:focus {
+    outline: none;
+}
+
+.upload-complete {
+    background: #4caf50!important;
+}
+
+.upload-error {
+    background: #e53935!important;
+}
+
+
+.upload-btn-none {
+    display: none;
+    transform: scale(0.3);
+    transition: opacity 0.5s ease-out;
+    opacity: 0;
+}
+
+.upload-btn-enabled {
+    display: inline-block;
+    transform: scale(1);
+    transition: opacity 0.5s ease-out;
+    opacity: 1;
+}

@@ -5,7 +5,7 @@ import Skeleton from 'react-loading-skeleton'
 import { Fragment } from 'react';
 import Show from './show';
 
-const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null }) => {
+const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null, disabled = false }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -43,10 +43,12 @@ const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null }) => 
             <div className={`card-body ${classBody}`} key={`certificate-list-${indexC}`}
                 style={{ cursor: 'pointer' }}
             >
-                <div className={`card ${current_select == indexC ? 'alert alert-success' : ''}`} onClick={(e) => {
-                    setCurrentSelect(indexC)
-                    cer._index = indexC;
-                    typeof onClick == 'function' ? onClick(e, cer) : null
+                <div className={`card ${disabled ? 'disabled' : ''} ${current_select == indexC ? 'alert alert-success' : ''}`} onClick={(e) => {
+                    if (!disabled) {
+                        setCurrentSelect(indexC)
+                        cer._index = indexC;
+                        typeof onClick == 'function' ? onClick(e, cer) : null
+                    }
                 }}>
                     <div className="card-body">
                         <div className="row">

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
-import { Form, Checkbox, Button } from 'semantic-ui-react';
+import { Form, Checkbox, Button, Progress } from 'semantic-ui-react';
 import Show from './show';
 import { Confirm } from '../services/utils';
 import ListPfx from './listPfx';
 import { signature } from '../services/apis';
 import { AppContext } from '../contexts/AppContext'
 import Swal from 'sweetalert2';
+import ProgressFile from './progressFile';
 import { getPositions } from 'node-signature/client';
 
 const PdfView = ({ 
@@ -28,6 +29,8 @@ const PdfView = ({
     let lastPage = pdfPages.length;
 
     // estados
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [current_progress, setCurrentProgress] = useState(0);
     const [reason, setReason] = useState(metaInfo.reason || "");
     const [location, setLocation] = useState(metaInfo.location || "");
     const [current_signature, setCurrentSignature] = useState(false);
@@ -38,6 +41,7 @@ const PdfView = ({
     const [count_signature, setCountSignature] = useState(0);
     const [positions, setPositions] = useState([]);
     const [current_select, setCurrentSelect] = useState({});
+    const [errors, setErrors] = useState({});
     const isSelect = Object.keys(current_select).length;
 
     // config page
@@ -60,64 +64,100 @@ const PdfView = ({
     }
 
     const handleClose = async (e) => {
-        if (typeof onClose == 'function') {
+        if (!current_loading && typeof onClose == 'function') {
             let answer = await Confirm("warning", `¿Deseas cerrar el visualizador de PDF?`, 'Cerrar');
             if (answer) onClose(e);
         }
     }
 
+    const onUploadProgress = (progressEvent) => {
+        const { loaded, total } = progressEvent;
+        let percent = Math.floor(loaded * 100 / total);
+        setCurrentProgress(percent);
+    }   
+
     const signer = async () => {
-        let answer = await Confirm("warning", `¿Estás seguro en firmar el PDF?`, 'Firmar');        
-        if (answer) {
-            let payload = {};
-            // assign pdfBlob
-            payload.pdfBlob = pdfBlob;
-            payload.page = page;
-            payload.visible = false;
-            // validar datos
-            if (!disabledMetaInfo) {
-                payload.reason = reason;
-                payload.location = location;
-            }
-            // firma visible
-            if (current_signature) {
-                payload.position = current_position;
-                payload.visible = true;
-            }
-            // emitir evento
-            app_context.fireLoading(true);
-            let datos = new FormData;
-            datos.append('reason', payload.reason);
-            datos.append('location', payload.location);
-            datos.append('page', payload.page);
-            datos.append('file', payload.pdfBlob);
-            datos.append('visible', payload.visible);
-            datos.append('certificate_id', current_select.id);
-            if (payload.position) datos.append('position', payload.position);
-            await signature.post(`auth/signer`, datos, { responseType: 'blob' })
-                .then(async res => {
-                    let { data } = res;
-                    if (typeof onSigned == 'function') await onSigned(payload, data);
-                    else {
-                        let a = document.createElement('a');
-                        a.href = URL.createObjectURL(data);
-                        a.target = '__blank';
-                        a.download = payload.pdfBlob.name;
-                        await a.click();
-                    }
-                    // cerrar díalogo
-                    if (typeof onClose == 'function') onClose();
-                }).catch(err => {
-                    try {
-                        let { message, errors } = err.response.data;
-                        if (!errors) throw new Error(message || err.message);
-                        Swal.fire({ icon: 'warning', text: message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message });
-                    }
-                });
-            app_context.fireLoading(false);
+        let response = false;
+        setErrors({});
+        let payload = {};
+        // assign pdfBlob
+        payload.pdfBlob = pdfBlob;
+        payload.page = page;
+        payload.visible = false;
+        // validar datos
+        if (!disabledMetaInfo) {
+            payload.reason = reason;
+            payload.location = location;
         }
+        // firma visible
+        if (current_signature) {
+            payload.position = current_position;
+            payload.visible = true;
+        }
+        // emitir evento
+        setCurrentLoading(true);
+        let datos = new FormData;
+        datos.append('reason', payload.reason);
+        datos.append('location', payload.location);
+        datos.append('page', payload.page);
+        datos.append('file', payload.pdfBlob);
+        datos.append('visible', payload.visible);
+        datos.append('certificate_id', current_select.id);
+        if (payload.position) datos.append('position', payload.position);
+        await signature.post(`auth/signer`, datos, { 
+            responseType: 'blob', 
+            onUploadProgress, 
+            headers : {
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(async res => {
+            let { data } = res;
+            response = true;
+            if (typeof onSigned == 'function') await onSigned(payload, data);
+            else {
+                let a = document.createElement('a');
+                a.href = URL.createObjectURL(data);
+                a.target = '__blank';
+                a.download = payload.pdfBlob.name;
+                await a.click();
+                // cerrar díalogo
+                setTimeout(() => {
+                    if (typeof onClose == 'function') onClose();
+                }, 2000);
+            }
+        }).catch(err => {
+            try {
+                response = false;
+                let { data } = err.response;
+                if (typeof data != 'object') throw new Error(err.message);
+                if (typeof data.type != 'undefined') {
+                    const blb = new Blob([data], {type: "text/plain"});
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        let resData = JSON.parse(reader.result) || {};
+                        if (typeof resData != 'object') throw new Error(err.message);
+                        if (typeof resData.errors != 'object') throw new Error(resData.message);
+                        Swal.fire({ icon: 'error', text: resData.message });
+                        setErrors(resData.errors || {});
+                    }
+                    // executar blob
+                    reader.readAsText(blb);
+                } else {
+                    if (typeof data.errors != 'object') throw new Error(data.message);
+                    Swal.fire({ icon: 'warning', text: data.message });
+                    setErrors(data.errors || {});
+                }
+            } catch (error) {
+                Swal.fire({ icon: 'error', text: error.message });
+            }
+        });
+        // quitar barra de progreso
+        setTimeout(() => {
+            setCurrentLoading(false);
+            setCurrentProgress(0);
+        }, 1000);
+        // response
+        return response;
     }
 
     const getSignatures = async () => {
@@ -163,6 +203,7 @@ const PdfView = ({
                             <div className="card-body">
                                 <div className="row">
                                     <ListPfx
+                                        disabled={current_loading}
                                         classBody="col-md-12"
                                         classSkeleton="col-md-12"
                                         onClick={(e, obj) => setCurrentSelect(obj)}
@@ -189,6 +230,7 @@ const PdfView = ({
                                                     <input type="text"
                                                         name="reason"
                                                         value={reason}
+                                                        disabled={current_loading}
                                                         onChange={({target}) => handleInput(target, setReason)}
                                                     />
                                                 </Form.Field>
@@ -198,6 +240,7 @@ const PdfView = ({
                                                     <input type="text"
                                                         name="location"
                                                         value={location}
+                                                        disabled={current_loading}
                                                         onChange={({target}) => handleInput(target, setLocation)}
                                                     />
                                                 </Form.Field>
@@ -208,6 +251,7 @@ const PdfView = ({
                                                 <input type="text"
                                                     value={page}
                                                     name="page"
+                                                    disabled={current_loading}
                                                     onChange={({target}) => handleInput(target, (value) => { 
                                                         let isNumber = /^[0-9]+$/;
                                                         if (isNumber.test(value) && value <= lastPage) {
@@ -225,6 +269,7 @@ const PdfView = ({
                                                 <label htmlFor="">Firma Visible</label>
                                                 <div>
                                                     <Checkbox toggle 
+                                                        disabled={current_loading}
                                                         checked={current_signature}
                                                         name="current_signature"
                                                         onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked }, setCurrentSignature)}
@@ -250,6 +295,7 @@ const PdfView = ({
                                                                     <div className={`col-xs mb-3 text-center`}>
                                                                         <input type="radio"
                                                                             value={pos.value}
+                                                                            disabled={current_loading}
                                                                             checked={pos.value == current_position ? true : false}
                                                                             onChange={({target}) => handleInput(target, setCurrentPosition)}
                                                                         />
@@ -267,15 +313,19 @@ const PdfView = ({
                                         </div>
                                     </div>
                                 </Show>
-                            
-                                <div className="mt-3 text-right">
-                                    <Button color="teal"
-                                        onClick={signer}
-                                        disabled={(current_signature ? !typeof current_position == 'number' || !page : !page) || !isSelect}
-                                    >
-                                        <i className="fas fa-signature"></i> Firmar
-                                    </Button>
-                                </div>
+
+                                <Show condicion={isSelect && page > 0}>
+                                    <div className="mt-3">
+                                        <ProgressFile 
+                                            message={errors.file && errors.file[0] || ""}
+                                            percent={current_progress}
+                                            file={pdfBlob}
+                                            onUpload={signer}
+                                            onClose={handleClose}
+                                            size={25}
+                                        />
+                                    </div>
+                                </Show>
                             </div>
                         </div>
                     </div>
