@@ -7,6 +7,7 @@ import Skeleton from 'react-loading-skeleton';
 import PdfView from './pdfView';
 import { Confirm } from '../services/utils';
 import { PDFDocument } from 'pdf-lib'
+import { formatBytes } from '../services/utils';
 
 const InputFile = ({ id, name, onChange, error = false, children = null, title = "Select", accept = "*", icon = 'image', label = null }) => {
 
@@ -40,7 +41,7 @@ const DropZone = ({
   title = "Select", accept = "*", 
   icon = 'image', label = null, 
   result = [], onDelete = null ,
-  onSigned = null, size = 6, 
+  onSigned = null, size = 100, 
   signerTypes = ['application/pdf'],
   basic = false
 }) => {
@@ -155,7 +156,7 @@ const DropZone = ({
                   <i className="fas fa-times"></i>
                 </span>
                 <hr/>
-                <b>{(f.size / (1024 * 1024)).toFixed(2)}MB</b>
+                <b>{formatBytes(f.size)}</b>
               </div>
             </div>
           </div>  

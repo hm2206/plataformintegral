@@ -3,10 +3,8 @@ import PdfView from '../../components/pdfView';
 import Show from '../../components/show';
 import { Body, DropZone } from '../../components/Utils';
 import { PDFDocument } from 'pdf-lib';
-import { Confirm } from '../../services/utils';
-import { signature } from '../../services/apis';
 import { AppContext } from '../../contexts/AppContext';
-import Swal from 'sweetalert2';
+import { AUTHENTICATE } from '../../services/auth';
 
 const SignerPDF = () => {
 
@@ -78,4 +76,12 @@ const SignerPDF = () => {
     </div>
 }
 
+// server
+SignerPDF.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { query, pathname } = ctx;
+    return { query, pathname }
+}
+
+// exportar
 export default SignerPDF;

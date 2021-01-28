@@ -34,7 +34,6 @@ export const parseOptions = (
     }
 }
 
-
 export const parseUrl = (path = "", replace) => {
     let newPath = path.split('/');
     newPath.splice(-1, 1);
@@ -47,7 +46,6 @@ export const backUrl = (path = "") => {
     newPath.splice(-1, 1);
     return newPath.join("/");
 }
-
 
 export const Confirm = async (icon = null, text = null, btn = null) => {
     const Swal = require('sweetalert2');
@@ -63,7 +61,6 @@ export const Confirm = async (icon = null, text = null, btn = null) => {
     // response
     return value;
 }
-
 
 export const urlStringQuery = (path = "", query = {}) => {
     let newString = path.split("?");
@@ -84,8 +81,6 @@ export const urlStringQuery = (path = "", query = {}) => {
     return newPath.toLocaleLowerCase();
 }
 
-
-
 export const InputCredencias = () => {
     let inputs = [];
     for(let cre in credencials) {
@@ -98,7 +93,6 @@ export const InputCredencias = () => {
     // response
     return inputs;
 }
-
 
 export const InputAuth = () => {
     let input = document.createElement('input');
@@ -114,4 +108,13 @@ export const InputEntity = () => {
     input.value = Cookies.get('EntityId');
     input.hidden = true;
     return input;
+}
+
+export const formatBytes = (bytes, decimals = 2) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }

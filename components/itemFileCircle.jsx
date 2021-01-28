@@ -45,6 +45,20 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
         }
     }
 
+    // generar para pdf
+    const generateVisorPDF = async (file, blob) => {
+        let reader = new FileReader();
+        await reader.readAsArrayBuffer(file);
+        reader.onload = async () => {
+            let url = await URL.createObjectURL(blob);
+            let pdfDoc = await PDFDocument.load(reader.result);
+            setPdfDoc(pdfDoc);
+            setPdfBlob(file);
+            setPdfUrl(url);
+            setShowSigned(true);
+        }
+    }
+
     // generar firma al pdf
     const handleSignaturePDF = async () => {
         app_context.fireLoading(true);
@@ -55,16 +69,7 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
                 blob.lastModifiedDate = new Date();
                 blob.name = name;
                 let file = new File([blob], name);
-                let reader = new FileReader();
-                await reader.readAsArrayBuffer(file);
-                reader.onload = async () => {
-                    let url = await URL.createObjectURL(blob);
-                    let pdfDoc = await PDFDocument.load(reader.result);
-                    setPdfDoc(pdfDoc);
-                    setPdfBlob(file);
-                    setPdfUrl(url);
-                    setShowSigned(true);
-                }
+                await generateVisorPDF(file, blob)
             }).catch(err => {
                 app_context.fireLoading(false);
                 Swal.fire({ icon: 'error', text: 'no se pudó obtener el archivo' })
@@ -83,18 +88,16 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
             .then(async res => {
                 app_context.fireLoading(false);
                 await Swal.fire({ icon: 'success', text: 'El archivo se firmó correctamente!' });
-                if (typeof onAction == 'function') onAction('signature')
+                if (typeof onAction == 'function') onAction('signature', file)
+                await generateVisorPDF(file, blob);
             }).catch(err => {
                 app_context.fireLoading(false);
-                console.log(err);
                 Swal.fire({ icon: 'error', text: 'No se pudo firmar el PDF' })
             });
     }
 
     // mostrar observación
-    const showObservation = async () => {
-        Swal.fire({ icon: 'info', text: is_observation });
-    }
+    const showObservation = async () => Swal.fire({ icon: 'info', text: is_observation });
 
     // render
     return (

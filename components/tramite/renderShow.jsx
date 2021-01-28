@@ -220,7 +220,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                                     e.preventDefault();
                                                     if (typeof onFile == 'function') onFile(f)
                                                 }}
-                                                onAction={(e) => setCurrentRefesh(true)}
+                                                onAction={(e, file) => setCurrentRefesh(true)}
                                             />
                                         </div>
                                     )}

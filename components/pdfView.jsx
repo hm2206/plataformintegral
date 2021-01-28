@@ -1,17 +1,19 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
-import { Form, Checkbox, Button, Progress } from 'semantic-ui-react';
+import { Form, Checkbox } from 'semantic-ui-react';
 import Show from './show';
 import { Confirm } from '../services/utils';
 import ListPfx from './listPfx';
-import { signature } from '../services/apis';
+import { signature, CancelRequest } from '../services/apis';
 import { AppContext } from '../contexts/AppContext'
 import Swal from 'sweetalert2';
 import ProgressFile from './progressFile';
 import { getPositions } from 'node-signature/client';
 import axios from 'axios';
+import { onProgress } from '../services/apis';
+
 
 const PdfView = ({ 
-    pdfUrl = "https://www.iaa.csic.es/python/curso-python-para-principiantes", 
+    pdfUrl = "", 
     pdfBlob,
     pdfDoc,
     defaultImage = "",
@@ -21,9 +23,6 @@ const PdfView = ({
     onClose = null,
     onSigned = null
 }) => {
-
-    // app
-    const app_context = useContext(AppContext);
 
     // obtener metadatos del pdf
     let pdfPages = pdfDoc.getPages(); 
@@ -35,9 +34,7 @@ const PdfView = ({
     const [reason, setReason] = useState(metaInfo.reason || "");
     const [location, setLocation] = useState(metaInfo.location || "");
     const [current_signature, setCurrentSignature] = useState(false);
-    const [image, setImage] = useState(defaultImage || "");
     const [page, setPage] = useState(1);
-    const [select_page, setSelectPage] = useState(pdfPages[page - 1]);
     const [current_position, setCurrentPosition] = useState("");
     const [count_signature, setCountSignature] = useState(0);
     const [positions, setPositions] = useState([]);
@@ -76,21 +73,9 @@ const PdfView = ({
         if (current_cancel && current_cancel.cancel("Subida cancelada"));
     }
 
-    const onUploadProgress = (progressEvent) => {
-        const { loaded, total } = progressEvent;
-        let percent = Math.floor(loaded * 100 / total);
-        setCurrentProgress(percent);
-    }   
-
-    const onDownloadProgress = (progressEvent) => {
-        let { loaded, total } = progressEvent;
-        let percent = Math.floor(loaded * 100 / total);
-        setCurrentProgress(percent);
-    }
-
     const signer = async () => {
         let response = false;
-        let cancelRequest = axios.CancelToken.source();
+        let cancelToken = CancelRequest();
         setErrors({});
         let payload = {};
         // assign pdfBlob
@@ -109,7 +94,7 @@ const PdfView = ({
         }
         // emitir evento
         setCurrentLoading(true);
-        setCurrentCancel(cancelRequest);
+        setCurrentCancel(cancelToken);
         let datos = new FormData;
         datos.append('reason', payload.reason);
         datos.append('location', payload.location);
@@ -119,10 +104,10 @@ const PdfView = ({
         datos.append('certificate_id', current_select.id);
         if (payload.position) datos.append('position', payload.position);
         await signature.post(`auth/signer`, datos, { 
-            responseType: 'blob', 
-            onUploadProgress, 
-            onDownloadProgress,
-            cancelToken: cancelRequest.token,
+            responseType: 'blob',
+            onUploadProgress: (evt) => onProgress(evt, setCurrentProgress), 
+            onDownloadProgress: (evt) => onProgress(evt, setCurrentProgress),
+            cancelToken: cancelToken.token,
             headers : { 'Content-Type': 'multipart/form-data' }
         }).then(async res => {
             let { data } = res;
@@ -191,7 +176,7 @@ const PdfView = ({
     useEffect(() => {
         getSignatures();
         generatePositions();
-    }, [page]);
+    }, [page, pdfUrl]);
 
     // renderizar
     return (
@@ -273,7 +258,6 @@ const PdfView = ({
                                                         let isNumber = /^[0-9]+$/;
                                                         if (isNumber.test(value) && value <= lastPage) {
                                                             setPage(value);
-                                                            setSelectPage(pdfPages[value - 1]);
                                                             setCurrentPosition({ x: 0, y: 0 });
                                                         } else if (value == "") {
                                                             setPage(value);

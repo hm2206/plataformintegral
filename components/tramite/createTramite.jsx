@@ -1,16 +1,15 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
 import Modal from '../modal';
 import { DropZone } from '../Utils';
-import { Confirm } from '../../services/utils';
-import { Form, Button } from 'semantic-ui-react';
-import { signature, tramite } from '../../services/apis';
+import { Confirm, formatBytes } from '../../services/utils';
+import { Form, Button, Progress } from 'semantic-ui-react';
+import { tramite, CancelRequest } from '../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../show';
-import PdfView from '../pdfView';
-import { PDFDocument } from 'pdf-lib/dist/pdf-lib';
 import { AppContext } from '../../contexts/AppContext';
 import { SelectAuthEntityDependencia } from '../select/authentication';
 import { SelectTramiteType } from '../select/tramite';
+import { onProgress } from '../../services/apis';
 
 
 const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave = null, current_tramite = {} }) => {
@@ -24,6 +23,9 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
     const isUser = Object.keys(user).length;
     const isTramite = Object.keys(current_tramite).length;
     const [current_files, setCurrentFiles] = useState([]);
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [percent, setPercent] = useState(0);
+    const [current_cancel, setCurrentCancel] = useState(null);
 
     // cambio de form
     const handleInput = async ({ name, value }, callback = true) => {
@@ -50,8 +52,9 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
         let size = 0;
         // obtener tamaño del archivo
         await current_files.map(f => size += f.size);
-        let limite = 1024 * 6;
+        let limite = 1024 * 25;
         if (limite >= (size / 1024)) setCurrentFiles([...current_files, file]);
+        else Swal.fire({ icon: 'warning', text: `El límite de 25MB fué superado (${formatBytes(size)})` })
     }
 
     // eliminar archivo del array
@@ -61,38 +64,50 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
         setCurrentFiles(newFiles);
     }
 
+    // cancelar solicitud
+    const handleCancel = () => current_cancel && current_cancel.cancel();
+
     // guardar el tramite
     const save = async () => {
-        let answer = await Confirm('warning', `¿Deseas guardar el tramite?`);
-        if (answer) {
-            app_context.fireLoading(true);
-            let datos = new FormData;
-            datos.append('person_id', user.person_id);
-            if (isTramite) datos.append('tramite_id', current_tramite.id);
-            await Object.keys(form).map(key => datos.append(key, form[key]));
-            await current_files.map(f => datos.append('files', f));
-            await tramite.post(`tramite`, datos, { headers: { DependenciaId: dependencia_id } })
-                .then(res => {
-                    app_context.fireLoading(false);
-                    let { success, message, tramite } = res.data;
-                    if (!success) throw new Error(message);
-                    Swal.fire({ icon: 'success', text: message });
-                    setForm({});
-                    setErrors({})
-                    setCurrentFiles([]);
-                    if (typeof onSave == 'function') onSave(tramite);
-                }).catch(err => {
-                    try {
-                        app_context.fireLoading(false);
-                        let { data } = err.response;
-                        if (typeof data != 'object') throw new Error(err.message);
-                        if (typeof data.errors != 'object') throw new Error(data.message);
-                        Swal.fire({ icon: 'warning', text: data.message });
-                        setErrors(data.errors);
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message });
-                    }
-                });
+        if (current_loading) {
+            alert('alert');
+        } else {
+            let answer = await Confirm('warning', `¿Deseas guardar el tramite?`);
+            if (answer) {
+                let cancelToken = CancelRequest();
+                setCurrentLoading(true);
+                let datos = new FormData;
+                datos.append('person_id', user.person_id);
+                if (isTramite) datos.append('tramite_id', current_tramite.id);
+                await Object.keys(form).map(key => datos.append(key, form[key]));
+                await current_files.map(f => datos.append('files', f));
+                await tramite.post(`tramite`, datos, { 
+                    onUploadProgress: (evt) => onProgress(evt, setPercent),
+                    onDownloadProgress: (evt) => onProgress(evt, setPercent),
+                    cancelToken: cancelToken.token,
+                    headers: { DependenciaId: dependencia_id } 
+                }).then(res => {
+                        let { success, message, tramite } = res.data;
+                        if (!success) throw new Error(message);
+                        Swal.fire({ icon: 'success', text: message });
+                        setForm({});
+                        setErrors({})
+                        setCurrentFiles([]);
+                        if (typeof onSave == 'function') onSave(tramite);
+                    }).catch(err => {
+                        try {
+                            let { data } = err.response;
+                            if (typeof data != 'object') throw new Error(err.message);
+                            if (typeof data.errors != 'object') throw new Error(data.message);
+                            Swal.fire({ icon: 'warning', text: data.message });
+                            setErrors(data.errors);
+                        } catch (error) {
+                            Swal.fire({ icon: 'error', text: error.message });
+                        }
+                    });
+                // quitar loader
+                setTimeout(() => setCurrentLoading(false), 1000);
+            }
         }
     }
 
@@ -100,6 +115,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
     return <Fragment>
         <Modal show={true}
             isClose={isClose}
+            disabled={current_loading}
             titulo={<span><i className="fas fa-plus"></i> Trámite nuevo</span>}
         >
             <div className="card-body">
@@ -267,6 +283,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                     name="files"
                                     title="Seleccinar PDF"
                                     multiple={false}
+                                    size={25}
                                     accept="application/pdf"
                                     result={current_files}
                                     onSigned={({ file }) => handleFile(file)}
@@ -278,10 +295,25 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
 
                             <hr/>
 
-                            <div className="text-right">
-                                <Button color="teal" onClick={save} disabled={!isUser}>
-                                    <i className="fas fa-save"></i> Guardar
-                                </Button>
+                            <div className="text-right" style={{ position: 'relative' }}>
+                                <Show condicion={!current_loading}>
+                                    <Button color="teal" onClick={save}
+                                        disabled={!isUser}
+                                    >
+                                        <i className="fas fa-save"></i> Guardar
+                                    </Button>
+                                </Show>
+
+                                <Show condicion={current_loading}>
+                                    <div className="w-100" onClick={handleCancel}>
+                                        <Progress percent={percent} 
+                                            progress
+                                            inverted
+                                            color="blue"
+                                            disabled={percent == 100}
+                                        />
+                                    </div>
+                                </Show>
                             </div>
                         </div>
                     </div>

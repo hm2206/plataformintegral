@@ -33,8 +33,23 @@ const ConfigHeaders = async (ctx = null, config = { }) => {
         newConfig.headers.Authorization = clientHeaders.Authorization
         newConfig.headers.EntityId = clientHeaders.EntityId || "__error";
     };
+    // response
     return newConfig;
 }   
+
+/**
+ * token de cancelación
+ */
+export const CancelRequest = () => axios.CancelToken.source();
+
+/**
+ * upload y download
+ */
+export const onProgress = (progressEvent, callback = null) => {
+    const { loaded, total } = progressEvent;
+    let percent = Math.floor(loaded * 100 / total);
+    return typeof callback == 'function' ? callback(percent) : callback;
+} 
 
 
 /**

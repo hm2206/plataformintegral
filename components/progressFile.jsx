@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader } from 'semantic-ui-react';
 import Show from './show';
+import { formatBytes } from '../services/utils'
 
 // estados
 const next_status = {
@@ -22,16 +23,6 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
     const [is_render, setIsRender] = useState(true);
     const [is_timer, setIsTimer] = useState(null);
     const is_file = Object.keys(file).length;
-
-    // mostrar formateado los campos de bytes
-    const formatBytes = (bytes, decimals = 2) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    }
 
     // validar size
     const validateSize = () => {
@@ -111,8 +102,8 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
     // render
     return (
         <div className={`upload-root ${is_success ? 'upload-complete' : ''} ${is_error ? 'upload-error' : ''}`}>
-            <Show condicion={is_paso == next_status.INITIAL || is_paso == "" || is_paso == next_status.ERROR}>
-                <div className={`upload-btn-content`}>
+            <div className="col-xs w-100">
+                <Show condicion={is_paso == next_status.INITIAL || is_paso == "" || is_paso == next_status.ERROR}>
                     <button className={`upload-btn ${is_paso == next_status.INITIAL || is_paso == "" ? 'upload-btn-enabled' : 'upload-btn-none'}`}
                         onClick={(e) => {
                             if (typeof onClose == 'function') onClose();
@@ -132,19 +123,19 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
                     >
                         <i className="fas fa-times"></i>
                     </button>
-                </div> 
-            </Show>
+                </Show>
+            </div>
 
-            <div className="upload-body">
-                <div className="row">
-                    <div className="col-md-6 col-6">
+            <div className={next_status.ERROR == is_paso ? 'col-md-10 col-xl-11 col-10' : 'col-md-9 col-xl-9 col-9'}>
+                <div className="row w-100">
+                    <div className="col-md-5 col-5">
                         <div className="upload-body-text">
                             <b>{file.name || ""}</b>
                             <div className="py-0 font-10" style={{ opacity: 0.8 }}>{formatBytes(file.size || 0)}</div>
                         </div>
                     </div>
 
-                    <div className="col-md-6 col-6">
+                    <div className="col-md-7 col-7">
                         <div className="upload-body-text text-right ml-1">
                             <b>{title} {is_upload ? `${percent}%` : ''}</b>
                             <div className="py-0 font-10" style={{ opacity: 0.8 }}>{is_error && message ? message : description}</div>
@@ -153,31 +144,33 @@ const ProgressFile = ({ file = {}, size = 100, message = "", percent = 0, onClos
                 </div>
             </div>
 
-            <Show condicion={next_status.ERROR != is_paso}>
-                <div className="upload-btn-content text-right">
-                    <button className={`upload-btn ${is_paso == next_status.INITIAL || is_paso == "" ? 'upload-btn-enabled' : 'upload-btn-none'}`}
-                        onClick={(e) => setIsPaso(next_status.CANCEL)}
-                    >
-                        <i className="fas fa-upload"></i>
-                    </button>
+            <div className="col-xs w-100">
+                <Show condicion={next_status.ERROR != is_paso}>
+                    <div className="text-right">
+                        <button className={`upload-btn ${is_paso == next_status.INITIAL || is_paso == "" ? 'upload-btn-enabled' : 'upload-btn-none'}`}
+                            onClick={(e) => setIsPaso(next_status.CANCEL)}
+                        >
+                            <i className="fas fa-upload"></i>
+                        </button>
 
-                    <button className={`upload-btn ${percent != 100 && is_paso == next_status.CANCEL ? 'upload-btn-enabled' : 'upload-btn-none'}`}
-                        onClick={(e) => {
-                            clearTimeout(is_timer);
-                            setIsPaso(next_status.INITIAL);
-                            if (typeof onCancel == 'function') onCancel();
-                        }}
-                    >
-                        <Loader size='mini' active inverted indeterminate={is_upload}/>
-                    </button>
+                        <button className={`upload-btn ${percent != 100 && is_paso == next_status.CANCEL ? 'upload-btn-enabled' : 'upload-btn-none'}`}
+                            onClick={(e) => {
+                                clearTimeout(is_timer);
+                                setIsPaso(next_status.INITIAL);
+                                if (typeof onCancel == 'function') onCancel();
+                            }}
+                        >
+                            <Loader size='mini' active inverted indeterminate={is_upload}/>
+                        </button>
 
-                    <button className={`upload-btn ${is_paso == next_status.RELOAD ? 'upload-btn-enabled' : 'upload-btn-none'}`}
-                        onClick={(e) => setIsPaso("")}
-                    >
-                        <i className="fas fa-undo-alt"></i>
-                    </button>
-                </div>
-            </Show>
+                        <button className={`upload-btn ${is_paso == next_status.RELOAD ? 'upload-btn-enabled' : 'upload-btn-none'}`}
+                            onClick={(e) => setIsPaso("")}
+                        >
+                            <i className="fas fa-undo-alt"></i>
+                        </button>
+                    </div>
+                </Show>
+            </div>
         </div>
     )
 }
