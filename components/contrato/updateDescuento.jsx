@@ -228,7 +228,10 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
                                         <div className="row">
                                             <div className="col-md-10 col-9">
                                                 <Form.Field>
-                                                    <b><span className="text-red">{obj.key}</span>.-<span className="text-primary">{obj.descripcion}</span></b>
+                                                    <b>
+                                                        <span className={obj.monto > 0 ? 'text-red' : ''}>{obj.key}</span>.-
+                                                        <span className={obj.monto > 0 ? 'text-primary' : ''}>{obj.descripcion}</span>
+                                                    </b>
                                                     <input type="number"
                                                         name="monto"
                                                         value={obj.monto}

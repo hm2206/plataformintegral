@@ -88,15 +88,41 @@ const Descuento = () => {
     }, [!edit]);
 
     // cambiar montos
-    const handleMonto = async (index, value, obj) => {
+    const handleMonto = (index, value, obj) => {
         let newMonto = Object.assign({}, obj);
         let newDescuentos = JSON.parse(JSON.stringify(descuentos));
         newMonto.send = true;
         newMonto.monto = value;
         newDescuentos[index] = newMonto;
-        await setDescuentos(newDescuentos);
+        setDescuentos(newDescuentos);
     }
     
+    // sincronizar descuentos
+    const syncDescuento = async (obj) => {
+        if (!edit) return false;
+        let answer = await Confirm(`warning`, `¿Estas seguro en sincronizar ${obj.descripcion}?`, 'Estoy seguro');
+        if (!answer) return false;
+        const form = {};
+        form.monto = obj.monto;
+        form._method = 'PUT';
+        // send changes
+        app_context.fireLoading(true);
+        await unujobs.post(`descuento/${obj.id}/sync`, form, { headers: { CronogramaID: historial.cronograma_id } })
+        .then(async res => {
+            app_context.fireLoading(false);
+            let { success, message } = res.data;
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            setEdit(false);
+            await findDescuento();
+        }).catch(err => {
+            app_context.fireLoading(false);
+            Swal.fire({ icon: 'error', text: err.message })
+        });
+        setSend(false);
+        setBlock(false);
+    }
+
     // actualizar descuentos
     const updateDescuentos = async () => {
         const form = new FormData();
@@ -218,8 +244,18 @@ const Descuento = () => {
                         <span className={obj.monto > 0 ? 'text-primary' : ''}>
                             {obj.descripcion}
                         </span>
+                        
+                        <Show condicion={obj.edit}>
+                            <span className={`ml-1 ${edit ? 'cursor-pointer' : 'disabled'} font-9 badge badge-${obj.sync ? 'dark' : 'danger'}`}
+                                title={`Sincronizar descuento global ${!obj.sync ? '(Modificado)' : ''}`}
+                                onClick={(e) => syncDescuento(obj)}
+                            >
+                                <i className="fas fa-sync"></i>
+                            </span>
+                        </Show>
+
                         <Form.Field>
-                            <div className="row justify-aligns-center">
+                            <div className="row justify-aligns-center mt-1">
                                 <Show condicion={obj.edit}>
                                     <div className={!cronograma.remanente && edit ? 'col-md-9 col-9' : 'col-md-12 col-12'}>
                                         <input type="number"
