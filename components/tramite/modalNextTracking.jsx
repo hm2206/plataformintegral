@@ -19,6 +19,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
     // estados
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
+    const is_errors = Object.keys(errors).length;
     const [current_files, setCurrentFiles] = useState([]);
     const [option, setOption] = useState("");
     const [user, setUser] = useState({});
@@ -125,21 +126,21 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                     </Form.Field>
 
                     <Show condicion={destino.includes(action) && tracking.revisado}>
-                        <Show condicion={(boss && boss.user_id == app_context.auth.id) || (tracking.modo == 'DEPENDENCIA' && Object.keys(role).length)}>
-                            <Form.Field className="mb-3">
+                        <Show condicion={(Object.keys(boss).length && boss.user_id == app_context.auth.id) || (tracking.modo == 'DEPENDENCIA' && Object.keys(role).length)}>
+                            <Form.Field className="mb-3" errors={is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}>
                                 <label htmlFor="">Dependencia Destino <b className="text-danger">*</b></label>
                                 <SelectDependencia
                                     name="dependencia_destino_id"
                                     value={form.dependencia_destino_id}
                                     onChange={(e, obj) => handleInput(obj)}
                                 />
-                                <label></label>
+                                <label>{is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}</label>
                             </Form.Field>
                         </Show>
                     </Show>
 
                     <Show condicion={destino.includes(action) && tracking.revisado && form.dependencia_destino_id == tracking.dependencia_destino_id}>
-                        <Form.Field className="mb-3">
+                        <Form.Field className="mb-3" errors={is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}>
                             <label htmlFor="">Usuario Destino</label>
                             <div className="row">
                                 <Show condicion={isUser}>
@@ -157,24 +158,24 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                                     </button>
                                 </div>
                             </div>
-                            <label></label>
+                            <label>{is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}</label>
                             <hr/>
                         </Form.Field>
                     </Show>
 
                     <Show condicion={descripcion.includes(action)}>
-                        <Form.Field className="mb-3">
+                        <Form.Field className="mb-3" errors={is_errors && errors.description && errors.description[0] || ""}>
                             <label htmlFor="">Descripción <b className="text-danger">*</b></label>
                             <textarea name="description" rows="5"
                                 value={form.description || ""}
                                 onChange={({ target }) => handleInput(target)}
                             />
-                            <label></label>
+                            <label>{is_errors && errors.description && errors.description[0] || ""}</label>
                         </Form.Field>
                     </Show>
 
                     <Show condicion={archivos.includes(action)}>
-                        <Form.Field className="mb-3" error={errors.files && errors.files[0] || ""}>
+                        <Form.Field className="mb-3" error={is_errors && errors.files && errors.files[0] || ""}>
                             <label>Archivos <b className="text-danger">*</b></label>
                             <DropZone
                                 id="file-tramite-serve-next-tramite"
@@ -187,7 +188,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                                 onChange={({ files }) => handleFile(files[0])}
                                 onDelete={handleDeleteFile}
                             />
-                            <label>{errors.files && errors.files[0] || ""}</label>
+                            <label>{is_errors && errors.files && errors.files[0] || ""}</label>
                         </Form.Field>
                     </Show>
 

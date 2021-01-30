@@ -54,9 +54,9 @@
             "label": "Anular",
             "color": "red"
         },
-        "ENVIADO": {
-            "text": "E",
-            "title": "Enviado",
+        "RECIBIDO": {
+            "text": "R",
+            "title": "Recibido",
             "className": "badge-light",
             "btn": "light",
             "color": "olive"

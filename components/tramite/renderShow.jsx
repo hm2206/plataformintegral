@@ -11,7 +11,7 @@ import { DropZone, BtnFloat } from '../Utils';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 
-const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refresh = false, onCreate = null }) => {
+const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refresh = false, onCreate = null, onRefresh = null }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -118,6 +118,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
     const handleOnSave = async (track) => {
         setOption("");
         await getTracking(track.id);
+        if (typeof onRefresh == 'function') onRefresh(true);
     }
 
     // crear tramite apartir del tracking
@@ -257,7 +258,11 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                 image={current_tracking.person && current_tracking.person.image_images && current_tracking.person.image_images.image_200x200 || ""}
                                 remitente={current_tracking.person && current_tracking.person.fullname || ""}
                                 email={current_tracking.person && current_tracking.person.email_contact || ""}
-                                dependencia={current_tracking.dependencia_destino && current_tracking.dependencia_destino.nombre || ""}
+                                dependencia={
+                                    current_tracking.status == 'RECIBIDO' || current_tracking.status == 'PENDIENTE'
+                                    ? current_tracking.dependencia_origen && current_tracking.dependencia_origen.nombre || ""
+                                    : current_tracking.dependencia_destino && current_tracking.dependencia_destino.nombre || ""
+                                }
                                 status={current_tracking.status}
                                 revisado={current_tracking.revisado}
                         />
@@ -335,7 +340,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                     </Button>
                                 </Show>
 
-                                <Show condicion={current_tracking.status == 'ENVIADO'}>
+                                <Show condicion={current_tracking.status == 'RECIBIDO'}>
                                     <Button color="red" 
                                         basic 
                                         size="mini"
@@ -346,7 +351,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                     </Button>
                                 </Show>
 
-                                <Show condicion={current_tracking.status == 'ENVIADO'}>
+                                <Show condicion={current_tracking.status == 'RECIBIDO'}>
                                     <Button color="green" 
                                         basic 
                                         size="mini"

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { authentication } from '../../services/apis';
-import { Select, Button } from 'semantic-ui-react';
+import { Select, Dropdown } from 'semantic-ui-react';
 import uid from 'uid';
 import Skeleton from 'react-loading-skeleton';
 
@@ -136,6 +135,7 @@ const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, ob
             ?   <Skeleton height="37px"/>
             :   <Select fluid
                     wrapSelection={false}
+                    search
                     disabled={loading || disabled}
                     placeholder={loading ? 'Cargando...' : placeholder}
                     options={defaultDatos.length ? defaultDatos : datos}

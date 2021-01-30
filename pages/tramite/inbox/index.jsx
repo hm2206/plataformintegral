@@ -23,24 +23,20 @@ const PlaceholderTable = () => {
         <tr key={`list-table-placeholder-${indexD}`}>
             <td><Skeleton height="30px"/></td>
             <td><Skeleton height="30px"/></td>
-            <td><Skeleton height="30px"/></td>
-            <td><Skeleton height="30px"/></td>
-            <td><Skeleton height="30px"/></td>
-            <td><Skeleton height="30px"/></td>
         </tr>    
     )
 }
 
 // menus
-const current_status = [
-    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['ENVIADO'] },
-    { key: "DERIVADO", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['DERIVADO', 'RESPONDIDO'] },
-    { key: "PENDIENTE", icon: 'fas fa-thumbtack', text: 'Pendientes', index: 2, filtros: ['PENDIENTE'] },
-    { key: "REGISTRADO", icon: 'far fa-file', text: 'Regístrados', index: 3, filtros: ['REGISTRADO'] },
-    { key: "ACEPTADO", icon: 'fas fa-check', text: 'Aceptados', index: 4, filtros: ['ACEPTADO'] },
-    { key: "RECHAZADO", icon: 'fas fa-times', text: 'Rechazados', index: 5, filtros: ['RECHAZADO'] },
-    { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 6, filtros: ['ANULADO'] },
-    { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 7, filtros: ['FINALIZADO'] }
+const current_status_default = [
+    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['RECIBIDO'], count: 0 },
+    { key: "DERIVADO", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['DERIVADO', 'RESPONDIDO'], count: 0 },
+    { key: "PENDIENTE", icon: 'fas fa-thumbtack', text: 'Pendientes', index: 2, filtros: ['PENDIENTE'], count: 0 },
+    { key: "REGISTRADO", icon: 'far fa-file', text: 'Regístrados', index: 3, filtros: ['REGISTRADO'], count: 0 },
+    { key: "ACEPTADO", icon: 'fas fa-check', text: 'Aceptados', index: 4, filtros: ['ACEPTADO'], count: 0 },
+    { key: "RECHAZADO", icon: 'fas fa-times', text: 'Rechazados', index: 5, filtros: ['RECHAZADO'], count: 0 },
+    { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 6, filtros: ['ANULADO'], count: 0 },
+    { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 7, filtros: ['FINALIZADO'], count: 0 }
 ];
 
 const InboxIndex = ({ pathname, query, success, role, boss }) => {
@@ -49,6 +45,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     const app_context = useContext(AppContext);
 
     // estados
+    const [current_status, setCurrentStatus] = useState(current_status_default);
     const [current_refresh, setCurrentRefresh] = useState(false);
     const [tab, setTab] = useState("YO");
     const [option, setOption] = useState("");
@@ -116,6 +113,28 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         setIsTab(false);
     }
 
+    // obtener tacking_status
+    const getTrackingStatus = async () => {
+        await tramite.get(`auth/status?modo=${tab}`, { headers: { DependenciaId: query.dependencia_id } })
+        .then(async res => {
+            let { success, message, tracking_status } = res.data;
+            if (!success) throw new Error(message);
+            // setting datos
+            let payload = JSON.parse(JSON.stringify(current_status));
+            await payload.map(async (s, indexS) => {
+                let count = 0;
+                await s.filtros.map(f => {
+                    count = typeof tracking_status[f] != 'undefined' ? parseInt(tracking_status[f]) : 0;
+                });
+                // add count
+                s.count = count;
+            });
+            // setting datos
+            setCurrentStatus(payload);
+        })
+        .catch(err => console.log(err))
+    }
+
     // más información
     const information = (obj) => {
         setCurrentTracking(obj)
@@ -163,6 +182,10 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         setCurrentLastPage(0);
         setCurrentTotal(0);
         setDatos([]);
+        if (is_tab) {
+            getTrackingStatus();
+            getTracking();
+        }
     }, [tab]);
 
     // montar componente
@@ -176,23 +199,23 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
             setCurrentPage(1);
             setDatos([]);
             getTracking();
+            getTrackingStatus();
         }
     }, [query.dependencia_id]);
 
-    // montar componente al cambiar el tab
-    useEffect(() => {
-        if (is_tab) getTracking();
-    }, [tab]);
-
     // cambio de menu obtener tracking
     useEffect(() => {
-        if (is_menu) getTracking();
+        if (is_menu) {
+            getTracking();
+            getTrackingStatus();
+        }
     }, [is_menu])
 
     // cambiar de estado
     useEffect(() => {
         if (current_refresh) {
-            if (current_render == 'LIST') getTracking();
+            if (current_render == 'LIST') getTracking(); 
+            getTrackingStatus();  
             setCurrentRefresh(false);
         }
     }, [current_refresh]);
@@ -266,7 +289,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                         onClick={(e) => handleSelectMenu(indexS)}
                                                     >
                                                         <span><i className={s.icon}></i> {s.text}</span>
-                                                        <span className="float-right">{s.revisado ? s.revisado : ''}</span>
+                                                        <span className="badge badge-warning float-right">{s.count ? s.count : ''}</span>
                                                     </a>
                                                 )}
                                             </li>
@@ -357,7 +380,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                         {/* no hay datos */}
                                                         <Show condicion={!current_loading && !datos.length}>
                                                             <tr className="table-item">
-                                                                <th colSpan="6" className="text-center">
+                                                                <th colSpan="2" className="text-center">
                                                                     No hay registros disponibles!
                                                                 </th>
                                                             </tr>
@@ -378,6 +401,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                                 role={role}
                                                 boss={boss}
                                                 refresh={current_refresh}
+                                                onRefresh={(r) => setCurrentRefresh(r)}
                                                 onFile={(f) => {
                                                     setOption("VISUALIZADOR")
                                                     setCurrentFile(f);
@@ -434,7 +458,7 @@ InboxIndex.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
     let { pathname, query } = ctx;
     query.dependencia_id = typeof query.dependencia_id != 'undefined' ? query.dependencia_id : "";
-    // request
+    // request tracking
     let { success, role, boss } = await tramite.get(`auth/role`, { headers: { DependenciaId: query.dependencia_id } }, ctx)
         .then(res => res.data)
         .catch(err => ({ success: false, status: 501, role: {}, boss: {} }));
