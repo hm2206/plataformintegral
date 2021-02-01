@@ -321,19 +321,20 @@ class MyApp extends App {
               {/* precargar imagen de la app */}
               <img src={_app.icon && _app.icon_images && _app.icon_images.icon_200x200 || '/img/base.png'} style={{ display: 'none' }}/>  
               {/* logica de page auth */}
-              <Show condicion={isLoggin}>
-                <Fragment>
-                  <AppContext.Provider value={{ 
-                      isLoading: loading,
-                      fireLoading: this.fireLoading,
-                      app: _app,
-                      entity_id,
-                      fireEntity: this.fireEntity,
-                      auth,
-                      isLoggin,
-                      logout: this.logout
-                    }}
-                  >
+              <Fragment>
+                <AppContext.Provider 
+                  value={{ 
+                    isLoading: loading,
+                    fireLoading: this.fireLoading,
+                    app: _app,
+                    entity_id,
+                    fireEntity: this.fireEntity,
+                    auth,
+                    isLoggin,
+                    logout: this.logout
+                  }}
+                >
+                  <Show condicion={isLoggin}>
                       <div className="full-layout" id="main">
                         <div className="gx-app-layout ant-layout ant-layout-has-sider">
                           <div className="ant-layout">
@@ -389,23 +390,22 @@ class MyApp extends App {
                         </div>
                       </div>
 
-                      <div 
-                        className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
-                        onClick={this.handleToggle}
-                      />
-                  </AppContext.Provider>
-                </Fragment>
-              </Show>
-
-              <Show condicion={!redirect && !isLoggin}>
-                <Component {...pageProps} 
-                  my_app={_app} 
-                  fireLoading={this.fireLoading}
-                  isLoading={loading}
-                />
-              </Show>
+                    <div 
+                      className={`aside-backdrop ${this.state.toggle ? 'show' : ''}`}
+                      onClick={this.handleToggle}
+                    />
+                  </Show>
+                  {/* páginas no authenticadas */}
+                  <Show condicion={!redirect && !isLoggin}>
+                    <Component {...pageProps} 
+                      my_app={_app} 
+                      fireLoading={this.fireLoading}
+                      isLoading={loading}
+                    />
+                  </Show>
+                </AppContext.Provider>
+              </Fragment>
             </Show>
-        
         </Provider>
     </Fragment>
   }

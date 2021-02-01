@@ -1,74 +1,42 @@
-import React, { Component } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState, useContext, useEffect } from 'react';
 import { GUEST } from '../services/auth';
+import { AppContext } from '../contexts/AppContext';
+import Swal from 'sweetalert2';
 import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
 import { BtnFloat } from '../components/Utils';
 import Show from '../components/show';
-import { connect } from 'react-redux';
-import initStore from '../storage/store';
 import { app } from '../env.json';
 import Link from 'next/link';
 import DownloadApps from '../components/downloadApps';
 import VerificarAuthentication from '../components/verificarAuthentication';
 
 
-class Login extends Component
-{
+const Login = ({ pathname, query }) => {
 
-    static getInitialProps = async (ctx) => {
-        let { query, pathname } = ctx;
-        // verificar guest
-        await GUEST(ctx)
-        // response
-        return { query, pathname };
+    // app
+    const app_context = useContext(AppContext);
+
+    // estados
+    const [option, setOption] = useState("VERIFICATION");
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [current_loading, setCurrentLoading] = useState(false); 
+
+    // cambiar form
+    const handleInput = ({ name, value }) => {
+        const newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        const newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-    state = {
-        email: "",
-        password: "",
-        loading: true,
-        errors: {},
-        progress: 0,
-        remember: null,
-        show_app: false,
-        show_verification: true
-    };
-
-    componentDidMount = () => {
-        this.setState({ loading: false });
-        this.setting();
-        this.settingVerification();
-    }
-
-    componentWillReceiveProps(nextProps) {
-        this.setting();
-    }
-
-    settingVerification = () => {
-        let that = this;
-        setTimeout(() => {
-            that.setState({ show_verification: false });
-        }, 3000);
-    }
-
-    setting = () => {
-        let cache = Cookies.getJSON('old_user');
-        this.setState({ remember: cache });
-    }
-
-    handleInput = (e) => {
-        let { name, value } = e.target;
-        this.setState({ [name]: value });
-    }   
-
-    handleSubmit = async (e) => {
-        this.setState({ loading: true });
-        let payload = { 
-            email: this.state.email, 
-            password: this.state.password
-        };
-        await authentication.post('login', payload)
+    // authenticar usuario
+    const login = async (e) => {
+        setCurrentLoading(true);
+        await authentication.post('login', form)
         .then(async res => {
             let { success, message, token } = res.data;
             if (!success) throw new Error(message); 
@@ -76,135 +44,141 @@ class Login extends Component
             localStorage.setItem('auth_token', token);
             history.go('/');
         })
-        .catch(err => Swal.fire({icon: 'error', text: err.message}));
-        this.setState({ loading: false });
+        .catch(err => {
+            setCurrentLoading(false);
+            Swal.fire({icon: 'error', text: err.message})
+        });
     }
 
+    // limpiar verificatión
+    const settingVerification = () => {
+        setTimeout(() => {
+            setOption('')
+        }, 3000);
+    }
 
-    render() {
+    // montar componente
+    useEffect(() => {
+        settingVerification();
+    }, []);
 
-        let { errors, email, password, loading, remember, show_verification } = this.state;
-        let { my_app } = this.props;
+    // validar verificatión
+    if (option == 'VERIFICATION') return <VerificarAuthentication my_app={app_context.app || {}}/>
 
-        if (show_verification) return <VerificarAuthentication my_app={my_app}/>
+    // render
+    return (
+        <div className="auth" style={{ minHeight: "100vh" }}>
 
-        return (
-            <div className="auth" style={{ minHeight: "100vh" }}>
+            <header
+                id="auth-header"
+                className={`auth-header bg-${app.theme}`}
+                style={{ paddingTop: "3em", backgroundImage: `url(${app_context.app.cover && app_context.app.cover || '/img/fondo.jpg'})` }}
+            >
 
-                <header
-                    id="auth-header"
-                    className={`auth-header bg-${app.theme}`}
-                    style={{ paddingTop: "3em", backgroundImage: `url(${my_app.cover && my_app.cover || '/img/fondo.jpg'})` }}
-                >
+                <a href={app_context.app && app_context.app.support}>
+                    <img src={app_context.app && app_context.app.icon_images && app_context.app.icon_images.icon_200x200}
+                        alt={app_context && app_context.app.name || "Integración"}
+                        style={{ width: "120px", borderRadius: "0.5em", padding: '0.5em', background: '#fff' }}
+                    />
+                </a>
+                
+                <h4 style={{ textShadow: "1px 1px #346cb0" }}>{app_context && app_context.app.name || "Integración"}</h4>
 
-                    <a href={my_app && my_app.support}>
-                        <img src={my_app && my_app.icon_images && my_app.icon_images.icon_200x200}
-                            alt={my_app.name || "Integración"}
-                            style={{ width: "120px", borderRadius: "0.5em", padding: '0.5em', background: '#fff' }}
-                        />
-                    </a>
-                    
-                    <h4 style={{ textShadow: "1px 1px #346cb0" }}>{my_app.name || "Integración"}</h4>
-
-                    <h1>
-                        <span className="sr-only">Iniciar Sesión</span>
-                    </h1>
-                    <p>
-                        {" "}
-                    </p>
-                </header>
-
-                <form
-                    className="auth-form"
-                    onSubmit={(e) => e.preventDefault()}
-                >
-                    <div className="form-group">
-                        <div className="form-label-group">
-                        <input
-                            type="text"
-                            id="inputUser"
-                            className={`form-control`}
-                            placeholder="Correo Electrónico"
-                            name="email"
-                            onChange={this.handleInput}
-                            value={email}
-                            disabled={loading}
-                        />{" "}
-                            <label htmlFor="inputUser">Correo</label>
-                        </div>
-                        <b className="text-danger">{errors.email && errors.email[0]}</b>
-                    </div>
-
-                    <div className="form-group">
-                        <div className="form-label-group">
-                        <input
-                            type="password"
-                            id="inputPassword"
-                            className={`form-control`}
-                            placeholder="Contraseña"
-                            name="password"
-                            onChange={this.handleInput}
-                            value={password}
-                            disabled={loading || !email}
-                        />{" "}
-                            <label htmlFor="inputPassword">Contraseña</label>
-                        </div>
-                        <b className="text-danger">{errors.password && errors.password[0]}</b>
-                    </div>
-
-                    <div className="form-group">
-                        <button
-                            disabled={loading || !password || !email}
-                            className={`btn btn-lg btn-primary btn-block btn-${app.theme}`}
-                            onClick={this.handleSubmit}
-                        >
-                            {loading ? "Verificando...." : "Iniciar Sesión"}
-                            <i className="icon-circle-right2 ml-2"></i>
-                        </button>
-                    </div>
-
-                    <div className="text-center pt-0">
-                        <Link href="/recovery_password">
-                            <a className="link">
-                                Recuperar cuenta
-                            </a>
-                        </Link>
-
-                        <br/>
-                        <br/>
-
-                        <a className="link" style={{ cursor: 'pointer' }} onClick={(e) => {
-                            e.preventDefault();
-                            this.setState({ show_app: true })
-                        }}>
-                            <i className="fa fa-box mr-1"></i> Más apps
-                        </a>
-                    </div>
-                </form>
-
-                <footer className="auth-footer text-center">
+                <h1>
+                    <span className="sr-only">Iniciar Sesión</span>
+                </h1>
+                <p>
                     {" "}
-                    © 2019 - {new Date().getFullYear()} {my_app && my_app.name} | Todos Los Derechos Reservados <a href="#">Privacidad</a> y
-                    <a href="#">Terminos</a>
-                </footer>
+                </p>
+            </header>
 
-                <Show condicion={this.state.remember}>
-                    <BtnFloat theme="btn-secundary" disabled={loading}>
-                        <img src={remember && remember.person && remember.person.image ? `${authentication.path}/${remember.person.image}` : '/img/perfil.jpg'} 
-                            alt={remember && remember.username}
-                            style={{ "position": "absolute", top: "0px", left: "0px", width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                    </BtnFloat>
-                </Show>
+            <form
+                className="auth-form"
+                onSubmit={(e) => e.preventDefault()}
+            >
+                <div className="form-group">
+                    <div className="form-label-group">
+                    <input
+                        type="text"
+                        id="inputUser"
+                        className={`form-control`}
+                        placeholder="Correo Electrónico"
+                        name="email"
+                        onChange={({ target }) => handleInput(target)}
+                        value={form.email}
+                        disabled={current_loading}
+                    />{" "}
+                        <label htmlFor="inputUser">Correo</label>
+                    </div>
+                    <b className="text-danger">{errors.email && errors.email[0]}</b>
+                </div>
 
-                <Show condicion={this.state.show_app}>
-                    <DownloadApps isClose={(e) => this.setState({ show_app: false })}/>
-                </Show>
-            </div>
-        )
-    }
+                <div className="form-group">
+                    <div className="form-label-group">
+                    <input
+                        type="password"
+                        id="inputPassword"
+                        className={`form-control`}
+                        placeholder="Contraseña"
+                        name="password"
+                        onChange={({ target }) => handleInput(target)}
+                        value={form.password || ""}
+                        disabled={current_loading || !form.email}
+                    />{" "}
+                        <label htmlFor="inputPassword">Contraseña</label>
+                    </div>
+                    <b className="text-danger">{errors.password && errors.password[0]}</b>
+                </div>
 
+                <div className="form-group">
+                    <button
+                        disabled={current_loading || !form.password || !form.email}
+                        className={`btn btn-lg btn-primary btn-block btn-${app.theme}`}
+                        onClick={login}
+                    >
+                        {current_loading ? "Verificando...." : "Iniciar Sesión"}
+                        <i className="icon-circle-right2 ml-2"></i>
+                    </button>
+                </div>
+
+                <div className="text-center pt-0">
+                    <Link href="/recovery_password">
+                        <a className="link">
+                            Recuperar cuenta
+                        </a>
+                    </Link>
+
+                    <br/>
+                    <br/>
+
+                    <a className="link" style={{ cursor: 'pointer' }} onClick={(e) => {
+                        e.preventDefault();
+                        setOption('APPS')
+                    }}>
+                        <i className="fa fa-box mr-1"></i> Más apps
+                    </a>
+                </div>
+            </form>
+
+            <footer className="auth-footer text-center">
+                {" "}
+                © 2019 - {new Date().getFullYear()} {app_context.app && app_context.app.name} | Todos Los Derechos Reservados <a href="#">Privacidad</a> y
+                <a href="#">Terminos</a>
+            </footer>
+
+            <Show condicion={option == 'APPS'}>
+                <DownloadApps isClose={(e) => setOption("")}/>
+            </Show>
+        </div>
+    )
 }
 
+// server
+Login.getInitialProps = async (ctx) => {
+    await GUEST(ctx);
+    let { query, pathname } = ctx;
+    return { pathname, query };
+}
 
-export default connect(initStore)(Login);
+// exportar
+export default Login;
