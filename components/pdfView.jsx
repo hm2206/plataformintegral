@@ -137,11 +137,15 @@ const PdfView = ({
                         const blb = new Blob([data], {type: "text/plain"});
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            let resData = JSON.parse(reader.result) || {};
-                            if (typeof resData != 'object') throw new Error(err.message);
-                            if (typeof resData.errors != 'object') throw new Error(resData.message);
-                            Swal.fire({ icon: 'error', text: resData.message });
-                            setErrors(resData.errors || {});
+                            try {
+                                let resData = JSON.parse(reader.result) || {};
+                                if (typeof resData != 'object') throw new Error(err.message);
+                                if (typeof resData.errors != 'object') throw new Error(resData.message);
+                                Swal.fire({ icon: 'warning', text: resData.message });
+                                setErrors(resData.errors || {});
+                            } catch (error) {
+                                Swal.fire({ icon: 'error', text: error.message });  
+                            }
                         }
                         // executar blob
                         reader.readAsText(blb);
