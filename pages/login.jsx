@@ -4,12 +4,12 @@ import { AppContext } from '../contexts/AppContext';
 import Swal from 'sweetalert2';
 import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
-import { BtnFloat } from '../components/Utils';
 import Show from '../components/show';
 import { app } from '../env.json';
 import Link from 'next/link';
 import DownloadApps from '../components/downloadApps';
 import VerificarAuthentication from '../components/verificarAuthentication';
+import { Form } from 'semantic-ui-react';
 
 
 const Login = ({ pathname, query }) => {
@@ -45,8 +45,16 @@ const Login = ({ pathname, query }) => {
             history.go('/');
         })
         .catch(err => {
-            setCurrentLoading(false);
-            Swal.fire({icon: 'error', text: err.message})
+            try {
+                setCurrentLoading(false);
+                let { data } = err.response;
+                if (typeof data != 'object') throw new Error(err.message);
+                if (typeof data.errors != 'object') throw new Error(data.message);
+                Swal.fire({ icon: 'warning', text: data.message });
+                setErrors(data.errors || {});
+            } catch (error) {
+                Swal.fire({ icon: 'error', text: err.message })
+            }
         });
     }
 
@@ -96,7 +104,7 @@ const Login = ({ pathname, query }) => {
                 className="auth-form"
                 onSubmit={(e) => e.preventDefault()}
             >
-                <div className="form-group">
+                <Form.Field className="form-group" error={errors.email && errors.email[0] || null}>
                     <div className="form-label-group">
                     <input
                         type="text"
@@ -105,30 +113,30 @@ const Login = ({ pathname, query }) => {
                         placeholder="Correo Electrónico"
                         name="email"
                         onChange={({ target }) => handleInput(target)}
-                        value={form.email}
+                        value={form.email || ""}
                         disabled={current_loading}
                     />{" "}
                         <label htmlFor="inputUser">Correo</label>
                     </div>
-                    <b className="text-danger">{errors.email && errors.email[0]}</b>
-                </div>
+                    <label className="text-danger">{errors.email && errors.email[0]}</label>
+                </Form.Field>
 
-                <div className="form-group">
+                <Form.Field className="form-group" error={ errors.password && errors.password[0] || null}>
                     <div className="form-label-group">
-                    <input
-                        type="password"
-                        id="inputPassword"
-                        className={`form-control`}
-                        placeholder="Contraseña"
-                        name="password"
-                        onChange={({ target }) => handleInput(target)}
-                        value={form.password || ""}
-                        disabled={current_loading || !form.email}
-                    />{" "}
+                        <input
+                            type="password"
+                            id="inputPassword"
+                            className={`form-control`}
+                            placeholder="Contraseña"
+                            name="password"
+                            onChange={({ target }) => handleInput(target)}
+                            value={form.password || ""}
+                            disabled={current_loading || !form.email}
+                        />{" "}
                         <label htmlFor="inputPassword">Contraseña</label>
                     </div>
-                    <b className="text-danger">{errors.password && errors.password[0]}</b>
-                </div>
+                    <label className="text-danger">{errors.password && errors.password[0]}</label>
+                </Form.Field>
 
                 <div className="form-group">
                     <button

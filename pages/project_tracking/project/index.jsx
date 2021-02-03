@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { Body, BtnFloat } from '../../../components/Utils';
-import { AUTHENTICATE } from '../../../services/auth';
+import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
@@ -74,12 +74,15 @@ const IndexProject = ({ success, projects }) => {
 // server rendering
 IndexProject.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
+    // obtener queries y pathname
+    let { pathname, query } = ctx;
+    await VERIFY(ctx, "PROJECT_TRACKING", pathname);
     let { success, projects } = await projectTracking.get(`project`, {}, ctx)
         .then(res => res.data)
         .catch(err => err.response.data)
         .catch(err => ({ success: false }));
     // response
-    return { success, projects: projects || {} };
+    return { pathname, query, success, projects: projects || {} };
 }
 
 export default IndexProject;

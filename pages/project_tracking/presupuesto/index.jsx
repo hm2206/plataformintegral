@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { Body, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
+import { system_store } from '../../../services/verify.json';
 import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
@@ -67,6 +68,7 @@ const IndexPresupuesto = ({ success, presupuestos }) => {
 // server rendering
 IndexPresupuesto.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
+    await VERIFY(ctx, system_store.PROJECT_TRACKING);
     let { query } = ctx;
     query.page = typeof query.page != 'undefined' ? query.page : 1;
     let { success, presupuestos } = await projectTracking.get(`presupuesto?page=${query.page}`, {}, ctx)

@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import Head from 'next/head'
 import { app } from '../env.json';
+import Router from 'next/router';
 
 
 export default class Error extends Component
@@ -10,19 +11,22 @@ export default class Error extends Component
         return (
             <Fragment>
                 <Head>
-                    <title>{app.name} | Error: Página no encontrada!</title>
+                    <title>{app.name} | No Autorizado</title>
                 </Head>
 
                 <div className="col-md-12">
                     <div className="empty-state">
                         <div className="empty-state-container">
                             <div className="state-figure">
-                                <img className="img-fluid" src="/img/not-found.svg" alt="" style={{ maxWidth: "320px" }}/>
+                                <img className="img-fluid" src="/img/not-authorize.png" alt="" style={{ maxWidth: "320px" }}/>
                             </div>
-                            <h3 className="state-header"> Página no encontrada! </h3>
-                            <p className="state-description lead text-muted"> Lo sentimos, Debe ingresar una ruta existente. </p>
+                            <h3 className="state-header"> Usted no está autorizado </h3>
+                            <p className="state-description lead text-muted"> usted no puede ingresar o realizar la siguiente acción </p>
                             <div className="state-action">
-                                <a href="/" className="btn btn-lg btn-light"><i className="fa fa-angle-right"></i> Ir al inicio</a>
+                                <a href="#" className="btn btn-lg btn-light" onClick={(e) => {
+                                    e.preventDefault();
+                                    Router.back();
+                                }}><i className="fa fa-angle-left"></i> Volver</a>
                             </div>
                         </div>
                     </div>

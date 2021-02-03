@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { Body, BtnFloat } from '../../../components/Utils';
-import { AUTHENTICATE } from '../../../services/auth';
+import { AUTHENTICATE, VERIFY } from '../../../services/auth';
+import { system_store } from '../../../services/verify.json';
 import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
@@ -61,6 +62,7 @@ const IndexRubro = ({ success, rubros }) => {
 // server rendering
 IndexRubro.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
+    await VERIFY(ctx, system_store.PROJECT_TRACKING)
     let { success, rubros } = await projectTracking.get(`rubro`, {}, ctx)
         .then(res => res.data)
         .catch(err => err.response.data)

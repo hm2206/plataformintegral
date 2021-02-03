@@ -35,6 +35,7 @@ export default class CardChangePassword extends Component
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             Swal.fire({ icon: 'success', text: message })
+            this.setState({ password_confirm: "", password_new: "", password_validation: "" });
         }).catch(err => {
             try {
                 let response = JSON.parse(err.message);

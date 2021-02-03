@@ -1,6 +1,7 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Body, BtnFloat } from '../../../components/Utils';
-import { AUTHENTICATE } from '../../../services/auth';
+import { AUTHENTICATE, VERIFY } from '../../../services/auth';
+import { system_store } from '../../../services/verify.json';
 import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
@@ -61,6 +62,8 @@ const IndexArea = ({ success, areas }) => {
 // server rendering
 IndexArea.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
+    await VERIFY(ctx, system_store.PROJECT_TRACKING);
+    // request
     let { success, areas } = await projectTracking.get(`area`, {}, ctx)
         .then(res => res.data)
         .catch(err => err.response.data)

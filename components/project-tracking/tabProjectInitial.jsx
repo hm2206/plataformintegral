@@ -157,7 +157,7 @@ const TabActivity = (props) => {
                             <tr key={`tr-project-${indexC}`}>
                                 <td>
                                     <Show condicion={c._edit}
-                                        predeterminado={<span><b>{indexC + 1}.</b> {c.title}</span>}
+                                        predeterminado={<span><b>{c.index}.</b> {c.title}</span>}
                                     >
                                         <textarea rows={2}
                                             name="title"

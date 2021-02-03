@@ -30,25 +30,6 @@ const InformationProject = ({ success, project }) => {
                         <BtnBack onClick={(e) => Router.push({ pathname: backUrl(Router.pathname) })}/> <b className="capitalize text-white">{project && project.title}</b>
                     </div>
                     <div className="card-body">
-                        {/* <div className="mt-5 mb-5">
-                            <DrownSelect text="Opciones"
-                                button
-                                icon="options"
-                                labeled
-                                options={[
-                                    { key: "desc-massive", text: "Descuento Masivo", icon: "cart arrow down" },
-                                    { key: "remu-massive", text: "Remuneración Masiva", icon: "cart arrow down" },
-                                    { key: "sync-remuneracion", text: "Agregar Remuneraciones", icon: "arrow circle down" },
-                                    { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
-                                    { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
-                                    { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
-                                    { key: "change-meta", text: "Cambio de Metas", icon: "exchange" },
-                                    { key: "processing", text: "Procesar Cronograma", icon: "database" },
-                                    { key: "report", text: "Reportes", icon: "file text outline" },
-                                ]}
-                                // onSelect={handleOnSelect}
-                            />
-                        </div> */}
                         <ProjectProvider value={{ project }}>
                             <TabProject/>
                         </ProjectProvider>
