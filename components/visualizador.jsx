@@ -1,16 +1,23 @@
-import React,  { useEffect, useContext, useState } from 'react';
-import { AppContext } from '../contexts/AppContext';
+import React,  { useEffect, useState } from 'react';
 import axios from 'axios';
-import { tramite } from '../services/apis';
+import { tramite, onProgress } from '../services/apis';
 import Show from './show';
 import Swal from 'sweetalert2';
 import { Button } from 'semantic-ui-react';
 
+const options = {
+    IFRAME: 'IFRAME',
+    IMAGE: 'IMAGE',
+}
+
+const actions = {
+    pdf: options.IFRAME,
+    jpg: options.IMAGE,
+    png: options.IMAGE,
+};
+
 
 const Visualizador = ({ id, name, extname, url, observation, onClick = null, onClose = null, onUpdate = null }) => {
-
-    // app
-    const app_context = useContext(AppContext);
 
     // estados
     const [current_url, setCurrentUrl] = useState("");
@@ -20,25 +27,31 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
     const [is_note, setIsNote] = useState(observation ? true : false);
     const [current_observation, setCurrentObservation] = useState(observation);
     const [current_loading, setCurrentLoading] = useState(false);
+    const [current_percent, setCurrentPercent] = useState(0);
+    const action = actions[extname] || {};
 
     // obtener archivo
     const getFile = async () => {
-        app_context.fireLoading(true);
-        await axios.get(url, { responseType: 'blob' })
-            .then(async res => {
-                let type = res.headers['content-type'];
-                let blob = new Blob([res.data], { type });
-                let new_url = await URL.createObjectURL(blob);
-                let file = new File([blob], name);
-                setCurrentFile(file);
-                setCurrentUrl(`${new_url}#toolbar=0`);
-                setIsError(false);
-                setIsDownload(true);
-            }).catch(err => {
-                setIsError(true);
-                setIsDownload(false);
-            })
-        app_context.fireLoading(false);
+        setCurrentLoading(true);
+        await axios.get(url, { responseType: 'blob', onDownloadProgress: (evt) => onProgress(evt, setCurrentPercent)})
+        .then(async res => {
+            let type = res.headers['content-type'];
+            let blob = new Blob([res.data], { type });
+            let new_url = await URL.createObjectURL(blob);
+            let file = new File([blob], name);
+            setCurrentFile(file);
+            setCurrentUrl(`${new_url}#toolbar=0`);
+            setIsError(false);
+            setIsDownload(true);
+        }).catch(err => {
+            setIsError(true);
+            setIsDownload(false);
+        })
+        // obtener datos
+        setTimeout(() => {
+            setCurrentPercent(0);
+            setCurrentLoading(false);
+        }, 1000);
     }
 
     // descargar archivo
@@ -92,7 +105,7 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
                                 if (typeof onClose == 'function') onClose(e);
                             }}
                         >
-                            <i class="fas fa-arrow-left"></i>
+                            <i class="fas fa-times"></i>
                         </a>
                         <i className={`fas fa-file-${extname} mr-3`}></i>
                         <span><b>{name || ""}</b></span>
@@ -113,9 +126,21 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
                         </button>
                     </div>
                 </div>
+
+                <Show condicion={current_loading}>
+                    <div style={{ height: '9px', background: '#cfd8dc', width: `${current_percent}%`, position: 'absolute', left: "0px", bottom: "-9px" }}></div>
+                </Show>
             </div>
             <div class="h-100">
-                <iframe src={current_url} width="100%" height="92%" style={{ border: "0px"}}/>
+                <Show condicion={action == 'IFRAME'}>
+                    <iframe src={current_url} width="100%" height="92%" style={{ border: "0px", objectFit: 'contain' }}/>
+                </Show>
+                <Show condicion={action == 'IMAGE'}>
+                    <div className="row justify-content-center h-100">
+                        <img src={current_url} alt={name} style={{ objectFit: 'contain', maxHeight: "100%" }}/>
+                    </div>
+                </Show>
+                {/* nota */}
                 <Show condicion={is_note}>
                     <div className="content-note">
                         <div className="card h-100 w-100">

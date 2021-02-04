@@ -40,7 +40,7 @@ export default class EditApp extends Component
         let { query } = this.props;
         let id = query.id ? atob(query.id) : "__error";
         this.setState({ loading: true });
-        await authentication.get(`app/${id}/show`)
+        await authentication.get(`app/${id}`)
         .then(res => this.setState({ form: res.data, old: res.data }))
         .catch(err => this.setState({ form: {} }));
         this.setState({ loading: false });

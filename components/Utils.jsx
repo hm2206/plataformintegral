@@ -72,7 +72,7 @@ const DropZone = ({
           let reader = new FileReader();
           await reader.readAsArrayBuffer(file);
           reader.onload = async () => {
-            let pdfDoc = await PDFDocument.load(reader.result);
+            let pdfDoc = await PDFDocument.load(reader.result, { ignoreEncryption: true });
             let url = URL.createObjectURL(file);
             setPdfDoc(pdfDoc);
             setPdfBlob(file);

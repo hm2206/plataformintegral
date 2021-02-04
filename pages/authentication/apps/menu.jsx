@@ -44,7 +44,7 @@ export default class MenuApp extends Component
         let { query } = this.props;
         let id = query.id ? atob(query.id) : "__error";
         this.setState({ loading: true });
-        await authentication.get(`app/${id}/show`)
+        await authentication.get(`app/${id}`)
         .then(res => this.setState({ app: res.data }))
         .catch(err => this.setState({ app: {} }));
         this.setState({ loading: false });
