@@ -612,3 +612,31 @@ svg.icon-inline {
 .icon-inline {
     vertical-align: text-bottom;
 }
+
+.page-expanded {
+    min-height: 100vh;
+}
+
+
+.window-fixed {
+    background: rgba(0,0,0,0.4);
+    width: 100%;
+    height: 100%; 
+    position: fixed; 
+    top: 0px; 
+    left: 0px; 
+    z-index: 1040;
+    visibility: visible;
+}
+
+.fixed-open {
+    visibility: visible;
+    top: 0px;
+    transition: all ease-in 0.2s;
+}
+
+.fixed-close {
+    visibility: hidden;
+    top: -100%;
+    transition: all ease-out 0.2s;
+}

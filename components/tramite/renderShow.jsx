@@ -10,27 +10,27 @@ import { tramite } from '../../services/apis';
 import { DropZone, BtnFloat } from '../Utils';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
+import { TramiteContext } from '../../contexts/TramiteContext';
 
-const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refresh = false, onCreate = null, onRefresh = null }) => {
+const RenderShow = () => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // tramite
+    const tramite_context = useContext(TramiteContext);
     
     // estados
-    const [current_refresh, setCurrentRefesh] = useState(refresh);
-    const [current_tracking, setCurrentTracknig] = useState(tracking);
-    const [option, setOption] = useState("");
+    const [current_tracking, setCurrentTracking] = useState({});
     const [action, setAction] = useState("");
-    const [current_loading, setCurrentLoading] = useState(false);
     const [current_qr, setCurrentQr] = useState("");
-
-    // obtener trámite
-    const current_tramite = current_tracking.tramite || {};
+    const [current_tramite, setCurrentTramite] = useState({});
+    const isTramite = Object.keys(current_tracking || {}).length
 
     // realizar accion
     const handleNext = (act) => {
-        setOption("NEXT")
-        setAction(act)
+        tramite_context.setOption("NEXT");
+        setAction(act);
     }
 
     // verificar tracking
@@ -86,32 +86,18 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
     }
 
     // obtener tracking
-    const getTracking = async (id = current_tracking.id) => {
-        setCurrentLoading(true);
+    const getTracking = async (id = tramite_context.tracking.id) => {
+        tramite_context.setLoading(true);
         await tramite.get(`auth/tramite/${id}/tracking`, {
-            headers: { EntityId: current_tracking.entity_id, DependenciaId: current_tracking.dependencia_id } 
+            headers: { DependenciaId: tramite_context.dependencia_id } 
         }).then(res => {
             let { success, message, tracking } = res.data;
             if (!success) throw new Error(message);
-            setCurrentTracknig(tracking)
+            setCurrentTracking(tracking)
+            setCurrentTramite(tracking.tramite || {});
         }).catch(err => console.log(err));
-        setCurrentLoading(false);
-        setCurrentRefesh(false);
-    }
-
-    // obtener code_qr
-    const getCodeQr = async () => {
-        if (current_tramite && current_tramite.code_qr) {
-            setCurrentQr(current_tramite.code_qr || "");
-        } else {
-            tramite.get(`tramite/${current_tramite.slug || '_error'}/code_qr`, { responseType: 'blob' })
-                .then(async res => {
-                    let type = res.headers['content-type'];
-                    let blob = new Blob([res.data], { type });
-                    let url = await URL.createObjectURL(blob);
-                    setCurrentQr(url);
-                }).catch(err => console.log(err));
-        }
+        tramite_context.setLoading(false);
+        tramite_context.setRefresh(true);
     }
 
     // actualizar tracking
@@ -126,20 +112,15 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
         if (typeof onCreate == 'function') onCreate(current_tramite);
     }
 
-    // escuchar refresh
+    // primera vez
     useEffect(() => {
-        setCurrentRefesh(refresh);
-    }, [refresh]);
+        getTracking();
+    }, []);
 
     // refrescar datos
     useEffect(() => {
-        if (current_refresh) getTracking();
-    }, [current_refresh])
-
-    // obtener code_qr
-    useEffect(() => {
-        if (!current_loading) getCodeQr();
-    }, [current_loading])
+        if (tramite_context.execute) getTracking();
+    }, [tramite_context.execute])
 
     // render
     return (
@@ -187,52 +168,51 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                     <div className="col-md-2 mb-2">
                         <div className="mb-2">
                             <button className="btn btn-outline-primary btn-block"
-                                onClick={(e) => setOption('TIMELINE')}
+                                onClick={(e) => tramite_context.setOption('TIMELINE')}
                             >
                                 <i className="fas fa-search"></i> Seguímiento
                             </button>
                         </div>
 
-                        <img src={current_qr || ""} alt="code_qr"
-                            style={{ width: "100%", objectFit: 'contain' }}
-                        />
+                        <Show condicion={isTramite && current_tramite.code_qr}>
+                            <img src={current_tramite.code_qr} alt="code_qr"
+                                style={{ width: "100%", objectFit: 'contain' }}
+                            />
+                        </Show>
                     </div>
 
                     <div className="col-md-12 mb-2">
                         <hr/>
                         <b><i className="fas fa-clip-paper"></i> Archivos de trámite: </b>
                         <div className="row mt-3">
-                                <Show condicion={current_tramite && current_tramite.files && current_tramite.files.length > 0 || 0}>
-                                    {current_tramite && current_tramite.files.map((f, indexF) => 
-                                        <div className="ml-5 col-xs" key={`item-tramite-${indexF}`}>
-                                            <ItemFileCircle
-                                                id={f.id}
-                                                is_observation={f.observation}
-                                                className="mb-3"
-                                                key={`item-file-tramite-${indexF}`}
-                                                url={f.url}
-                                                name={f.name}
-                                                extname={f.extname}
-                                                hidden={[ 
-                                                    current_tramite.person_id == app_context.auth.person_id
-                                                ]}
-                                                edit={true}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    if (typeof onFile == 'function') onFile(f)
-                                                }}
-                                                onAction={(e, file) => setCurrentRefesh(true)}
-                                            />
-                                        </div>
-                                    )}
-                                </Show>
-                                {/* agregar archivos */}
-                                <Show condicion={
-                                    current_tracking.first && 
-                                    !current_tracking.revisado && 
-                                    (current_tracking.user_id == app_context.auth.id || 
-                                    current_tracking.user_verify_id == app_context.auth.id)
-                                }>
+                            {isTramite && typeof current_tramite.files == 'object' ? current_tramite.files.map((f, indexF) => 
+                                <div className="ml-5 col-xs" key={`item-tramite-${indexF}`}>
+                                    <ItemFileCircle
+                                        id={f.id}
+                                        is_observation={f.observation}
+                                        className="mb-3"
+                                        key={`item-file-tramite-${indexF}`}
+                                        url={f.url}
+                                        name={f.name}
+                                        extname={f.extname}
+                                        hidden={[ current_tramite.person_id == app_context.auth.person_id ]}
+                                        edit={true}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            tramite_context.setFile(f);
+                                            tramite_context.setOption('VISUALIZADOR');
+                                        }}
+                                        onAction={(e, file) => tramite_context.setExecute(true)}
+                                    />
+                                </div>
+                            ) : null}
+                            {/* agregar archivos */}
+                            <Show condicion={
+                                current_tracking.first && 
+                                !current_tracking.revisado && 
+                                (current_tracking.user_id == app_context.auth.id || 
+                                current_tracking.user_verify_id == app_context.auth.id)
+                            }>
                                     <div className="text-right ml-3">
                                         <DropZone
                                             id="file-tramite-datos"
@@ -246,7 +226,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                             onSigned={async ({ name, file }) => await addFile({ name, file })}
                                         />
                                     </div>
-                                </Show>
+                            </Show>
                         </div>
                     </div>
 
@@ -271,10 +251,10 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                 <b>Descripción: </b> {current_tracking.description || 'No hay descripción disponible'}
                             </div>
 
-                            <Show condicion={typeof current_tracking == 'object' && current_tracking.files && current_tracking.files.length || false}>
+                            {/* <Show condicion={typeof current_tracking == 'object' && current_tracking.files && current_tracking.files.length || false}>
                                 <div className="row mt-3">
                                     <div className="col-md-12">Archivos del seguímiento:</div>
-                                    {/* archivos del tracking */}
+                                    archivos del tracking
                                     {current_tracking.files.map((f, indexF) => 
                                         <div className="ml-5 col-xs" key={`item-tracking-${indexF}`}>
                                             <ItemFileCircle
@@ -296,7 +276,7 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                                         </div>
                                     )}
                                 </div>
-                            </Show>
+                            </Show> */}
                         </div>
                     </Show>
 
@@ -377,20 +357,20 @@ const RenderShow = ({ tracking = {}, role = {}, boss = {}, onFile = null, refres
                 </div>
             </div>
             {/* línea de tiempo */}
-            <Show condicion={option == 'TIMELINE'}>
+            <Show condicion={tramite_context.option == 'TIMELINE'}>
                 <ModalTracking 
-                    isClose={(e) => setOption("")}
+                    isClose={(e) => tramite_context.setOption("")}
                     slug={current_tramite.slug}
                     onFile={(f) => typeof onFile == 'function' ? onFile(f) : null}
                 />
             </Show>
             {/* ventana de acciones */}
-            <Show condicion={current_tracking.current && option == 'NEXT'}>
+            <Show condicion={current_tracking.current && tramite_context.option == 'NEXT'}>
                 <ModalNextTracking
                     tracking={current_tracking}
-                    role={role}
-                    boss={boss}
-                    isClose={(e) => setOption("")}
+                    // role={role}
+                    // boss={boss}
+                    isClose={(e) => tramite_context.setOption("")}
                     action={action}
                     onSave={handleOnSave}
                 />

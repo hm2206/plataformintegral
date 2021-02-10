@@ -5,9 +5,11 @@ import Swal from "sweetalert2";
 import Modal from './modal';
 import Skeleton from 'react-loading-skeleton';
 import PdfView from './pdfView';
-import { Confirm } from '../services/utils';
+import { Confirm, backUrl } from '../services/utils';
 import { PDFDocument } from 'pdf-lib'
 import { formatBytes } from '../services/utils';
+import Router from 'next/router';
+import atob from 'atob';
 
 const InputFile = ({ id, name, onChange, error = false, children = null, title = "Select", accept = "*", icon = 'image', label = null }) => {
 
@@ -348,22 +350,34 @@ const BtnFloat = ({ theme, children, onClick, disabled = false, size = 'lg', sty
   </button>);
 };
 
-const BtnBack = ({ title = 'Ir atrás', theme, children, onClick, disabled }) =>  (
-  <button style={{ 
-      borderRadius: '50%', 
-      border: '2px solid #6f42c1', 
-      width: '2.4em', 
-      height: '2.4em',
-      color: '#6f42c1',
-      background: '#fff'
-    }}
-    title={title}
-    onClick={(e) => onClick(e)}
-    disabled={disabled}
-  >
-    <i className="fas fa-arrow-left"></i>
-  </button>
-);
+const BtnBack = ({ title = 'Ir atrás', theme, children, onClick = null, disabled }) =>  {
+
+  // render
+  return (
+    <button style={{ 
+        borderRadius: '50%', 
+        border: '2px solid #6f42c1', 
+        width: '2.4em', 
+        height: '2.4em',
+        color: '#6f42c1',
+        background: '#fff'
+      }}
+      title={title}
+      onClick={(e) => {
+        e.preventDefault();
+        if (typeof onClick == 'function') onClick(e);
+        else {
+          let { push, pathname, query } = Router;
+          let href = query.href ? atob(query.href) : null;
+          push(href ? href : backUrl(pathname));
+        }
+      }}
+      disabled={disabled}
+    >
+      {children ? children : <i className="fas fa-arrow-left"></i>}
+    </button>
+  )
+};
 
 
 const CheckList = ({ id, onAllSelect, onAllUnSelect }) => {

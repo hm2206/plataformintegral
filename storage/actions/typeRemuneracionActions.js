@@ -11,7 +11,10 @@ export const pageTypeRemuneracion = (ctx) => {
     return async (dispatch) => {
         let { query } = ctx;
         await unujobs.get(`type_remuneracion?page=${query.page}`, {}, ctx)
-        .then(res =>  dispatch({ type: typeRemuneracionActionsTypes.PAGE_TYPE_REMUNERACION, payload: res.data }))
+        .then(res =>  {
+            let { type_remuneraciones } = res.data;
+            return dispatch({ type: typeRemuneracionActionsTypes.PAGE_TYPE_REMUNERACION, payload: type_remuneraciones });
+        })
         .catch(err => console.log(err.message));
     }
 }

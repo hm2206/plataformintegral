@@ -24,7 +24,8 @@ const ItemTable = ({ current = true,
     status, 
     statusClassName, 
     onClickItem = null, 
-    onClickFile = null 
+    onClickFile = null,
+    noRead = true,
 }) => {
 
     const handleClick = (onClick, ...args) => {
@@ -37,7 +38,7 @@ const ItemTable = ({ current = true,
     // render
     return (
         <Fragment>
-            <tr className={`table-select table-item ${current ? '' : 'disabled'}`}>
+            <tr className={`table-select table-item ${current ? '' : 'disabled'}`} style={{ background: noRead ? 'rgba(0, 255, 0, 0.05)' : 'transparent' }}>
                 <th width="10%" onClick={(e) => handleClick(onClickItem, e)}>
                     <span className="badge badge-dark font-13">
                         {slug || ""}

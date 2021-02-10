@@ -8,7 +8,6 @@ import Show from '../../../components/show';
 import { getPlame } from '../../../services/requests/cronograma'; 
 import Router from 'next/router';
 import { AppContext } from '../../../contexts/AppContext';
-import Swal from 'sweetalert2';
 
 
 const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
@@ -90,6 +89,18 @@ const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
                                     onClick={handleSearch}
                                 >
                                     <i className="fas fa-search"></i> Buscar
+                                </Button>
+                            </div>
+
+                            <div className="col-md-2 mb-1 col-12 mt-1">
+                                <Button 
+                                    fluid
+                                    color="olive"
+                                    disabled={!success}
+                                    onClick={(e) => handleClick(`pdf/plame/${year}/${mes}?export=1`)}
+                                >
+                                    <i className="fas fa-share mr-1"></i>
+                                    <span>Exportar</span>
                                 </Button>
                             </div>
                         </div>

@@ -56,6 +56,24 @@ const SelectCronogramaTypeCategoria = ({ id = "id", cronograma_id, name, value, 
             />
 }
 
+const SelectTypeRemuneracion = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+                api={unujobs}
+                url={`type_remuneracion`}
+                id={`select-type_remuneracion-${id}-${name}`}
+                value={id}
+                text="descripcion"
+                obj="type_remuneraciones"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Tip. Remuneracion"
+                refresh={refresh}
+                execute={true}
+                disabled={disabled}
+            />
+}
+
 const SelectTypeDescuento = ({ id = "id", name, value, onChange, refresh = false, disabled = false, judicial = "" }) => {
     return <SelectBase 
                 api={unujobs}
@@ -482,5 +500,6 @@ export {
     SelectInfoTypeAportacion,
     SelectInfoTypeDescuento,
     SelectTypeCategoriaTypeDescuento,
-    SelectTypeCategoria
+    SelectTypeCategoria,
+    SelectTypeRemuneracion
 };

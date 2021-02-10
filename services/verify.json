@@ -1,5 +1,6 @@
 {
     "system_store": {
-        "PROJECT_TRACKING": "PROJECT_TRACKING"
+        "PROJECT_TRACKING": "PROJECT_TRACKING",
+        "TRAMITE_DOCUMENTARIO": "TRAMITE_DOC"
     }
 }

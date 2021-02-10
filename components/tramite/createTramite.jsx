@@ -10,18 +10,22 @@ import { AppContext } from '../../contexts/AppContext';
 import { SelectAuthEntityDependencia } from '../select/authentication';
 import { SelectTramiteType } from '../select/tramite';
 import { onProgress } from '../../services/apis';
+import { TramiteContext } from '../../contexts/TramiteContext';
 
 
-const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave = null, current_tramite = {} }) => {
+const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // tramite
+    const tramite_context = useContext(TramiteContext);
 
     // estados
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const isUser = Object.keys(user).length;
-    const isTramite = Object.keys(current_tramite).length;
+    const isTramite = Object.keys(tramite_context.tramite).length;
     const [current_files, setCurrentFiles] = useState([]);
     const [current_loading, setCurrentLoading] = useState(false);
     const [percent, setPercent] = useState(0);
@@ -69,51 +73,48 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
 
     // guardar el tramite
     const save = async () => {
-        if (current_loading) {
-            alert('alert');
-        } else {
-            let answer = await Confirm('warning', `¿Deseas guardar el tramite?`);
-            if (answer) {
-                let cancelToken = CancelRequest();
-                setCurrentLoading(true);
-                let datos = new FormData;
-                datos.append('person_id', user.person_id);
-                if (isTramite) datos.append('tramite_id', current_tramite.id);
-                await Object.keys(form).map(key => datos.append(key, form[key]));
-                await current_files.map(f => datos.append('files', f));
-                await tramite.post(`tramite`, datos, { 
-                    onUploadProgress: (evt) => onProgress(evt, setPercent),
-                    onDownloadProgress: (evt) => onProgress(evt, setPercent),
-                    cancelToken: cancelToken.token,
-                    headers: { DependenciaId: dependencia_id } 
-                }).then(res => {
-                        let { success, message, tramite } = res.data;
-                        if (!success) throw new Error(message);
-                        Swal.fire({ icon: 'success', text: message });
-                        setForm({});
-                        setErrors({})
-                        setCurrentFiles([]);
-                        if (typeof onSave == 'function') onSave(tramite);
-                    }).catch(err => {
-                        try {
-                            let { data } = err.response;
-                            if (typeof data != 'object') throw new Error(err.message);
-                            if (typeof data.errors != 'object') throw new Error(data.message);
-                            Swal.fire({ icon: 'warning', text: data.message });
-                            setErrors(data.errors);
-                        } catch (error) {
-                            Swal.fire({ icon: 'error', text: error.message });
-                        }
-                    });
-                // quitar loader
-                setTimeout(() => setCurrentLoading(false), 1000);
-            }
+        let answer = await Confirm('warning', `¿Deseas guardar el tramite?`);
+        if (answer) {
+            let cancelToken = CancelRequest();
+            setCurrentCancel(cancelToken);
+            setCurrentLoading(true);
+            let datos = new FormData;
+            datos.append('person_id', user.person_id);
+            if (isTramite) datos.append('tramite_id', tramite_context.tramite.id);
+            await Object.keys(form).map(key => datos.append(key, form[key]));
+            await current_files.map(f => datos.append('files', f));
+            await tramite.post(`tramite`, datos, { 
+                onUploadProgress: (evt) => onProgress(evt, setPercent),
+                onDownloadProgress: (evt) => onProgress(evt, setPercent),
+                cancelToken: cancelToken.token,
+                headers: { DependenciaId: tramite_context.dependencia_id } 
+            }).then(res => {
+                let { success, message, tramite } = res.data;
+                if (!success) throw new Error(message);
+                Swal.fire({ icon: 'success', text: message });
+                setForm({});
+                setErrors({})
+                setCurrentFiles([]);
+                if (typeof onSave == 'function') onSave(tramite);
+            }).catch(err => {
+                try {
+                    let { data } = err.response;
+                    if (typeof data != 'object') throw new Error(err.message);
+                    if (typeof data.errors != 'object') throw new Error(data.message);
+                    Swal.fire({ icon: 'warning', text: data.message });
+                    setErrors(data.errors);
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: error.message });
+                }
+            });
+            // quitar loader
+            setTimeout(() => setCurrentLoading(false), 1000);
         }
     }
 
     // render
     return <Fragment>
-        <Modal show={true}
+        <Modal show={show}
             isClose={isClose}
             disabled={current_loading}
             titulo={<span><i className="fas fa-plus"></i> Trámite nuevo</span>}
@@ -133,7 +134,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                     <input type="text"
                                         className="capitalize"
                                         readOnly
-                                        value={current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || ""}
+                                        value={tramite_context.tramite.dependencia_origen && tramite_context.tramite.dependencia_origen.nombre || ""}
                                     />
                                 </Form.Field>
 
@@ -142,7 +143,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                     <input type="text"
                                         className="capitalize"
                                         readOnly
-                                        value={current_tramite.tramite_type && current_tramite.tramite_type.description || ""}
+                                        value={tramite_context.tramite.tramite_type && tramite_context.tramite.tramite_type.description || ""}
                                     />
                                 </Form.Field>
 
@@ -151,24 +152,24 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                     <input type="text"
                                         className="capitalize"
                                         readOnly
-                                        value={current_tramite.document_number || ""}
+                                        value={tramite_context.tramite.document_number || ""}
                                     />
                                 </Form.Field>
 
                                 <Form.Field className="mb-3">
                                     <label>Asunto</label>
                                     <textarea 
-                                        value={current_tramite.asunto || ""}
+                                        value={tramite_context.tramite.asunto || ""}
                                         rows={3}
                                         readOnly
                                     />
                                 </Form.Field>
 
-                                <Show condicion={tramite.observation}>
+                                <Show condicion={tramite_context.tramite.observation}>
                                     <Form.Field className="mb-3">
                                         <label>Observación</label>
                                         <textarea 
-                                            value={current_tramite.observation || ""}
+                                            value={tramite_context.tramite.observation || ""}
                                             rows={3}
                                             readOnly
                                         />
@@ -213,12 +214,12 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                 <label>Dependencia Origen</label>
                                 <SelectAuthEntityDependencia
                                     entity_id={app_context.entity_id}
-                                    value={dependencia_id}
+                                    value={tramite_context.dependencia_id}
                                     disabled
                                 />
                             </Form.Field>
 
-                            <Form.Field className="mb-3" error={errors.type_tramite_id && errors.type_tramite_id[0] || ""}>
+                            <Form.Field className="mb-3" error={errors.type_tramite_id && errors.type_tramite_id[0] ? true : false}>
                                 <label>Tipo de Trámite <b className="text-danger">*</b></label>
                                 <SelectTramiteType
                                     name="tramite_type_id"
@@ -228,7 +229,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                 <label>{errors.tramite_type_id && errors.tramite_type_id[0] || ""}</label>
                             </Form.Field>
 
-                            <Form.Field className="mb-3" error={errors.document_number && errors.document_number[0] || ""}>
+                            <Form.Field className="mb-3" error={errors.document_number && errors.document_number[0] ? true : false}>
                                 <label>N° Documento <b className="text-danger">*</b></label>
                                 <input type="text"
                                     name="document_number"
@@ -238,7 +239,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                 <label>{errors.document_number && errors.document_number[0] || ""}</label>
                             </Form.Field>
 
-                            <Form.Field className="mb-3" error={errors.asunto && errors.asunto[0] || ""}>
+                            <Form.Field className="mb-3" error={errors.asunto && errors.asunto[0] ? true : false}>
                                 <label>Asunto <b className="text-danger">*</b></label>
                                 <textarea 
                                     name="asunto" 
@@ -249,7 +250,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                 <label>{errors.asunto && errors.asunto[0] || ""}</label>
                             </Form.Field>
 
-                            <Form.Field className="mb-3" error={errors.folio_count && errors.folio_count[0] || ""}>
+                            <Form.Field className="mb-3" error={errors.folio_count && errors.folio_count[0] ? true : false}>
                                 <label>N° Folio <b className="text-danger">*</b></label>
                                 <input type="number"
                                     name="folio_count"
@@ -265,7 +266,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                 <label>{errors.folio_count && errors.folio_count[0] || ""}</label>
                             </Form.Field>
 
-                            <Form.Field className="mb-3" error={errors.observation && errors.observation[0] || ""}>
+                            <Form.Field className="mb-3" error={errors.observation && errors.observation[0] ? true : false}>
                                 <label>Observación</label>
                                 <textarea 
                                     name="observation" 
@@ -276,7 +277,7 @@ const CreateTramite = ({ isClose = null, dependencia_id = "", user = {}, onSave 
                                 <label>{errors.observation && errors.observation[0] || ""}</label>
                             </Form.Field>
 
-                            <Form.Field className="mb-3" error={errors.files && errors.files[0] || ""}>
+                            <Form.Field className="mb-3" error={errors.files && errors.files[0] ? true : false}>
                                 <label>Archivos <b className="text-danger">*</b></label>
                                 <DropZone
                                     id="file-tramite-serve"
