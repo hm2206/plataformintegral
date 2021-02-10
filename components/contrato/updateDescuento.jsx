@@ -41,7 +41,7 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
-    const [option, setOption] = useState("");
+    const [is_update, setIsUpdate] = useState(false);
     const [configs, setConfigs] = useState([]);
     const [current_page, setCurrentPage] = useState(1)
     const [old, setOld] = useState([]);
@@ -52,15 +52,15 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
     const getConfig = async (add = false) => {
         setCurrentLoading(true);
         await unujobs.get(`info/${info.id}/type_descuento?page=${current_page}`)
-            .then(async res => {
-                let { type_descuentos } = res.data;
-                let payload = add ? [...configs, ...type_descuentos.data] : type_descuentos.data;
-                // setting datos
-                setConfigs(payload);
-                setOld(JSON.parse(JSON.stringify(payload)));
-                if (type_descuentos.last_page >= type_descuentos.current_page + 1) setCurrentPage(type_descuentos.current_page + 1);
-            })
-            .catch(err => console.log(err));
+        .then(async res => {
+            let { type_descuentos } = res.data;
+            let payload = add ? [...configs, ...type_descuentos.data] : type_descuentos.data;
+            // setting datos
+            setConfigs(payload);
+            setIsUpdate(false);
+            setOld(JSON.parse(JSON.stringify(payload)));
+            if (type_descuentos.last_page >= type_descuentos.current_page + 1) setCurrentPage(type_descuentos.current_page + 1);
+        }).catch(err => console.log(err));
         setCurrentLoading(false);
     }
 
@@ -84,48 +84,48 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
     // crear config
     const createConfig = async () => {
         let answer = await Confirm("warning", `¿Deseas asignar el descuento al contrato?`, 'Asignar');
-        if (answer) {
-            app_context.fireLoading(true);
-            let datos = Object.assign({}, form);
-            datos.info_id = info.id;
-            await unujobs.post(`info_type_descuento`, datos)
-                .then(res => {
-                    app_context.fireLoading(false);
-                    let { message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    setForm({});
-                    setReload(true);
-                    getConfig();
-                }).catch(err => {
-                    app_context.fireLoading(false);
-                    if (typeof err.response != 'object') throw new Error(err.message);
-                    let { message } = err.response.data;
-                    Swal.fire({ icon: 'error', text: message }); 
-                }).catch(err => {
-                    Swal.fire({ icon: 'error', text: err.message });
-                });
-        }
+        if (!answer) return false; 
+        app_context.fireLoading(true);
+        let datos = Object.assign({}, form);
+        datos.info_id = info.id;
+        await unujobs.post(`info_type_descuento`, datos)
+        .then(res => {
+            app_context.fireLoading(false);
+            let { message } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+            setForm({});
+            setReload(true);
+            setCurrentPage(1);
+            setIsUpdate(true);
+        }).catch(err => {
+            app_context.fireLoading(false);
+            if (typeof err.response != 'object') throw new Error(err.message);
+            let { message } = err.response.data;
+            Swal.fire({ icon: 'error', text: message }); 
+        }).catch(err => {
+            Swal.fire({ icon: 'error', text: err.message });
+        });
+        setReload(false);
     }
 
     // eliminar configuracion de pago
     const deleteConfig = async (id, index) => {
         let value = await Confirm("warning", "¿Desea elimnar el descuento?", "Eliminar")
-        if (value) {
-            app_context.fireLoading(true);
-            await unujobs.post(`info_type_descuento/${id}`, { _method: 'DELETE' })
-                .then(async res => {
-                    app_context.fireLoading(false);
-                    let { success, message } = res.data;
-                    if (!success) throw new Error(message);
-                    await Swal.fire({ icon: 'success', text: message });
-                    let newConfig = JSON.parse(JSON.stringify(configs));
-                    newConfig.splice(index, 1);
-                    setConfigs(newConfig);
-                }).catch(err => {
-                    app_context.fireLoading(false);
-                    Swal.fire({ icon: 'error', text: err.message });
-                });
-            }
+        if (!value) return false;
+        app_context.fireLoading(true);
+        await unujobs.post(`info_type_descuento/${id}`, { _method: 'DELETE' })
+        .then(async res => {
+            app_context.fireLoading(false);
+            let { success, message } = res.data;
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            let newConfig = JSON.parse(JSON.stringify(configs));
+            newConfig.splice(index, 1);
+            setConfigs(newConfig);
+        }).catch(err => {
+            app_context.fireLoading(false);
+            Swal.fire({ icon: 'error', text: err.message });
+        });
     }
     
     // actualizar configuraciones de pagos
@@ -167,10 +167,15 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
         if (current_page > 1) getConfig(true)
     }, [current_page]);
 
+    // cargar actualizado
+    useEffect(() => {
+        if (is_update) getConfig();
+    }, [is_update]);
+
     // render
     return (
         <Form>
-            <div className="card">
+            <div className="card-">
                 <div className="card-header">
                     <i className="fas fa-cogs"></i> Configurar Descuentos
                 </div>
@@ -186,7 +191,7 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
                                             value={form.type_descuento_id}
                                             name="type_descuento_id"
                                             refresh={reload}
-                                            except={1}
+                                            except={true}
                                             onChange={(e, obj) => handleForm(obj)}
                                         />
                                     </div>
@@ -224,38 +229,37 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
                                 <div className="col-md-6 mb-2" 
                                     key={`config-item-descuento-${index}`}
                                 >
-                                    <div className="card-body">
-                                        <div className="row">
-                                            <div className="col-md-10 col-9">
-                                                <Form.Field>
-                                                    <b>
-                                                        <span className={obj.monto > 0 ? 'text-red' : ''}>{obj.key}</span>.-
-                                                        <span className={obj.monto > 0 ? 'text-primary' : ''}>{obj.descripcion}</span>
-                                                    </b>
-                                                    <input type="number"
-                                                        name="monto"
-                                                        value={obj.monto}
-                                                        onChange={(e) => handleInput(e.target, index)}
-                                                        disabled={current_loading || !edit}
-                                                        step="any"
-                                                    />
-                                                </Form.Field>
-                                            </div>
-                                                                        
-                                            <div className="col-md-2 col-3">
-                                                <b>Opción</b>
-                                                <Button fluid
-                                                    color="red"
-                                                    disabled={!edit}
-                                                    basic
-                                                    onClick={(e) => deleteConfig(obj.id, index)}
-                                                >
-                                                    <i className="fas fa-trash"></i>
-                                                </Button>
-                                            </div>
-
-                                            <div className="col-md-12">
-                                                <hr/>
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <div className="row">
+                                                <div className="col-md-10 col-9">
+                                                    <Form.Field>
+                                                        <b>
+                                                            <span className={obj.monto > 0 ? 'text-red' : ''}>{obj.key}</span>.-
+                                                            <span className={obj.monto > 0 ? 'text-primary' : ''}>{obj.descripcion}</span>
+                                                        </b>
+                                                        <input type="number"
+                                                            name="monto"
+                                                            value={obj.monto}
+                                                            onChange={(e) => handleInput(e.target, index)}
+                                                            disabled={current_loading || !edit}
+                                                            step="any"
+                                                        />
+                                                    </Form.Field>
+                                                </div>
+                                                                            
+                                                <div className="col-md-2 col-3">
+                                                    <b>Opción</b>
+                                                    <Button fluid
+                                                        color="red"
+                                                        disabled={!edit || obj._loading}
+                                                        basic
+                                                        loading={obj._loading}
+                                                        onClick={(e) => deleteConfig(obj.id, index)}
+                                                    >
+                                                        <i className="fas fa-trash"></i>
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -130,7 +130,7 @@ const UpdateRemuneracion = ({ info, edit, onUpdate }) => {
     // render
     return (
         <Form>
-            <div className="card">
+            <div className="card-">
                 <div className="card-header">
                     <i className="fas fa-cogs"></i> Configurar Remuneraciones
                 </div>
@@ -155,51 +155,49 @@ const UpdateRemuneracion = ({ info, edit, onUpdate }) => {
 
                         <Show condicion={!current_loading}>
                             {configs.map((obj, index) => 
-                                <div className="col-md-12 mb-2" 
+                                <div className="col-md-6 mb-2" 
                                     key={`config-item-${obj.id}`}
                                 >
-                                    <div className="card-body">
-                                        <div className="row">
-                                            <div className="col-md-6">
-                                                <Form.Field>
-                                                    <b><span className="text-red">{obj.key}</span>.-<span className="text-primary">{obj.descripcion}</span></b>
-                                                    <input type="number"
-                                                        name="monto"
-                                                        value={obj.monto}
-                                                        onChange={(e) => handleInput(e.target, index)}
-                                                        disabled={current_loading || !edit}
-                                                        step="any"
-                                                    />
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-4 col-6">
-                                                <b>Base imponible</b>
-                                                <div>
-                                                    <Checkbox
-                                                        toggle
-                                                        name="base"
-                                                        disabled={current_loading || !edit}
-                                                        checked={obj.base == 0 ? true : false}
-                                                        onChange={(e, o) => handleInput({ name: o.name, value: o.checked ? 0 : 1 }, index)}
-                                                    />
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <div className="row">
+                                                <div className="col-md-6 mb-2">
+                                                    <Form.Field>
+                                                        <b><span className="text-red">{obj.key}</span>.-<span className={obj.monto > 0 ? 'text-primary' : ''}>{obj.descripcion}</span></b>
+                                                        <input type="number"
+                                                            name="monto"
+                                                            value={obj.monto}
+                                                            onChange={(e) => handleInput(e.target, index)}
+                                                            disabled={current_loading || !edit}
+                                                            step="any"
+                                                        />
+                                                    </Form.Field>
                                                 </div>
-                                            </div>
-                                                                        
-                                            <div className="col-md-2 col- text-center">
-                                                <b>Opción</b>
-                                                <Button fluid
-                                                    color="red"
-                                                    basic
-                                                    disabled={!edit}
-                                                    onClick={(e) => deleteConfig(obj.id)}
-                                                >
-                                                    <i className="fas fa-trash"></i>
-                                                </Button>
-                                            </div>
 
-                                            <div className="col-md-12">
-                                                <hr/>
+                                                <div className="col-md-4 col-6 mb-2">
+                                                    <b>Base imponible</b>
+                                                    <div>
+                                                        <Checkbox
+                                                            toggle
+                                                            name="base"
+                                                            disabled={current_loading || !edit}
+                                                            checked={obj.base == 0 ? true : false}
+                                                            onChange={(e, o) => handleInput({ name: o.name, value: o.checked ? 0 : 1 }, index)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                                            
+                                                <div className="col-md-2 col- text-center mb-2">
+                                                    <b>Opción</b>
+                                                    <Button fluid
+                                                        color="red"
+                                                        basic
+                                                        disabled={!edit}
+                                                        onClick={(e) => deleteConfig(obj.id)}
+                                                    >
+                                                        <i className="fas fa-trash"></i>
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -224,6 +224,8 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                     setOption: setOption,
                     render: current_render,
                     setRender: setCurrentRender,
+                    role: role,
+                    boss: boss,
                  }}>
                     <div className="card-body">
                         <Form>
@@ -252,7 +254,12 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                 </div>
 
                                 <div className="col-md-2 mb-2">
-                                    <Button color="blue" basic onClick={(e) => setCurrentRefresh(true)}>
+                                    <Button color="blue" basic
+                                        onClick={(e) => {
+                                            setCurrentRefresh(true);
+                                            setCurrentExecute(true);
+                                        }}
+                                    >
                                         <i className="fas fa-sync"></i>
                                     </Button>
                                 </div>
@@ -331,9 +338,11 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                     </div>
 
                     {/* btn crear */}
-                    <BtnFloat onClick={(e) => setOption('CREATE')}>
-                        <i className="fas fa-plus"></i>
-                    </BtnFloat>
+                    <Show condicion={current_render == 'LIST'}>
+                        <BtnFloat onClick={(e) => setOption('CREATE')}>
+                            <i className="fas fa-plus"></i>
+                        </BtnFloat>
+                    </Show>
 
                     {/* crear tramite */}
                     <CreateTramite 

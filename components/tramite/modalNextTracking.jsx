@@ -9,12 +9,17 @@ import { Confirm } from '../../services/utils';
 import { AppContext } from '../../contexts/AppContext';
 import { tramite } from '../../services/apis';
 import Swal from 'sweetalert2';
-import SearchUserToDependencia from '../authentication/user/searchUserToDependencia'
+import SearchUserToDependencia from '../authentication/user/searchUserToDependencia';
+import { TramiteContext } from '../../contexts/TramiteContext';
 
-const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, action = "", onSave = null }) => {
+
+const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // tramite
+    const tramite_context = useContext(TramiteContext);
 
     // estados
     const [form, setForm] = useState({});
@@ -29,6 +34,10 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
     const destino = ['DERIVADO'];
     const descripcion = ['ANULADO', 'DERIVADO', 'ACEPTADO', 'RECHAZADO', 'RESPONDIDO', 'FINALIZADO'];
     const archivos = ['DERIVADO', 'RESPONDIDO'];
+
+    const current_tracking = tramite_context.tracking || {};
+    const current_role = tramite_context.role || {};
+    const current_boss = tramite_context.boss || {};
 
     // combiar form
     const handleInput = ({ name, value }) => {
@@ -79,7 +88,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
             // agregar files
             await current_files.map(f => datos.append('files', f));
             // request
-            await tramite.post(`tracking/${tracking.id}/next`, datos, { headers: { DependenciaId: tracking.dependencia_id } })
+            await tramite.post(`tracking/${current_tracking.id}/next`, datos, { headers: { DependenciaId: tramite_context.dependencia_id } })
                 .then(async res => {
                     app_context.fireLoading(false);
                     let { success, message, current_tracking } = res.data;
@@ -103,7 +112,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
 
     // seleccionar dependencia destino predeterminado
     useEffect(() => {
-        setForm({ dependencia_destino_id: tracking.dependencia_id });
+        setForm({ dependencia_destino_id: tramite_context.dependencia_id });
     }, []);
 
     // render
@@ -116,18 +125,20 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                 <Form>
                     <Form.Field className="mb-3">
                         <label htmlFor="">Dependencia Origen</label>
-                        <span className="lowercase">
+                        <span className="uppercase">
                             <input type="text" 
                                 readOnly 
-                                className="capitalize" 
-                                value={tracking.dependencia_origen && tracking.dependencia_origen.nombre || ""}
+                                className="uppercase" 
+                                value={current_tracking.dependencia_origen && current_tracking.dependencia_origen.nombre || ""}
                             />
                         </span>
                     </Form.Field>
 
-                    <Show condicion={destino.includes(action) && tracking.revisado}>
-                        <Show condicion={(Object.keys(boss).length && boss.user_id == app_context.auth.id) || (tracking.modo == 'DEPENDENCIA' && Object.keys(role).length)}>
-                            <Form.Field className="mb-3" errors={is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}>
+                    <Show condicion={destino.includes(action) && current_tracking.revisado}>
+                        <Show condicion={(Object.keys(current_boss).length && current_boss.user_id == app_context.auth.id) || 
+                            (current_tracking.modo == 'DEPENDENCIA' && Object.keys(current_role).length)}
+                        >
+                            <Form.Field className="mb-3" errors={is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] ? true : false}>
                                 <label htmlFor="">Dependencia Destino <b className="text-danger">*</b></label>
                                 <SelectDependencia
                                     name="dependencia_destino_id"
@@ -139,7 +150,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                         </Show>
                     </Show>
 
-                    <Show condicion={destino.includes(action) && tracking.revisado && form.dependencia_destino_id == tracking.dependencia_destino_id}>
+                    <Show condicion={destino.includes(action) && current_tracking.revisado && form.dependencia_destino_id == tramite_context.dependencia_id}>
                         <Form.Field className="mb-3" errors={is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}>
                             <label htmlFor="">Usuario Destino</label>
                             <div className="row">
@@ -164,7 +175,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                     </Show>
 
                     <Show condicion={descripcion.includes(action)}>
-                        <Form.Field className="mb-3" errors={is_errors && errors.description && errors.description[0] || ""}>
+                        <Form.Field className="mb-3" errors={is_errors && errors.description && errors.description[0] ? true : false}>
                             <label htmlFor="">Descripción <b className="text-danger">*</b></label>
                             <textarea name="description" rows="5"
                                 value={form.description || ""}
@@ -208,7 +219,7 @@ const ModalNextTracking = ({ tracking, role = {}, boss = {}, isClose = null, act
                         isClose={(e) => setOption("")}
                         getAdd={handleAdd}
                         entity_id={app_context.entity_id}
-                        dependencia_id={tracking.dependencia_id}
+                        dependencia_id={tramite_context.dependencia_id}
                     />
                 </Show>
             </div>

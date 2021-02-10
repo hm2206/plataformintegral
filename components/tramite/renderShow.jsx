@@ -11,6 +11,46 @@ import { DropZone, BtnFloat } from '../Utils';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 import { TramiteContext } from '../../contexts/TramiteContext';
+import Skeleton from 'react-loading-skeleton';
+
+const PlaceholderShow = () => {
+
+    return (
+        <div className="row">
+            <div className="col-md-2"><Skeleton height="20px"/></div>
+            <div className="col-md-10"><Skeleton height="20px"/></div>
+            <div className="col-md-12"><hr/></div>
+            <div className="col-md-2">
+                <Skeleton height="120px" className="mb-3"/>
+                <Skeleton height="10px"/>
+                <Skeleton height="10px"/>
+                <Skeleton height="10px"/>
+                <Skeleton height="10px" className="mb-2"/>
+                <Skeleton height="30px"/>
+            </div>
+            <div className="col-md-3">
+                <Skeleton height="15px"/>
+                <Skeleton height="10px"/>
+                <Skeleton height="10px"/>
+                <Skeleton height="20px" width="30px"/>
+            </div>
+            <div className="col-md-5"></div>
+            <div className="col-md-2">
+                <Skeleton height="30px" className="mb-3"/>
+                <Skeleton height="130px"/>
+            </div>
+            
+            <div className="col-md-12">
+                <hr/>
+            </div>
+
+            <div className="col-md-2">
+                <Skeleton height="15px" className="mb-2"/>
+                <Skeleton height="30px" circle="100px"/>
+            </div>
+        </div>
+    )
+}
 
 const RenderShow = () => {
 
@@ -23,7 +63,6 @@ const RenderShow = () => {
     // estados
     const [current_tracking, setCurrentTracking] = useState({});
     const [action, setAction] = useState("");
-    const [current_qr, setCurrentQr] = useState("");
     const [current_tramite, setCurrentTramite] = useState({});
     const isTramite = Object.keys(current_tracking || {}).length
 
@@ -38,23 +77,24 @@ const RenderShow = () => {
         let answer = await Confirm(`warning`, `¿Estás seguro en revisar el trámite?`, 'Revisar');    
         if (answer) {
             app_context.fireLoading(true);
-            await tramite.post(`tracking/${tracking.id}/verify`, {}, { headers: { DependenciaId: tracking.dependencia_id } })
-                .then(async res => {
+            await tramite.post(`tracking/${current_tracking.id}/verify`, {}, { headers: { DependenciaId: tramite_context.dependencia_id } })
+            .then(async res => {
+                app_context.fireLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                tramite_context.setRefresh(true);
+                tramite_context.setExecute(true);
+            }).catch(err => {
+                try {
                     app_context.fireLoading(false);
-                    let { success, message } = res.data;
-                    if (!success) throw new Error(message);
-                    await Swal.fire({ icon: 'success', text: message });
-                    setCurrentRefesh(true);
-                }).catch(err => {
-                    try {
-                        app_context.fireLoading(false);
-                        let { data } = err.response;
-                        if (typeof data != 'object') throw new Error(err.message);
-                        throw new Error(data.message);
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message });
-                    }
-                });
+                    let { data } = err.response;
+                    if (typeof data != 'object') throw new Error(err.message);
+                    throw new Error(data.message);
+                } catch (error) {
+                    Swal.fire({ icon: 'error', text: error.message });
+                }
+            });
         }
     }
     
@@ -102,9 +142,9 @@ const RenderShow = () => {
 
     // actualizar tracking
     const handleOnSave = async (track) => {
-        setOption("");
+        tramite_context.setOption("");
         await getTracking(track.id);
-        if (typeof onRefresh == 'function') onRefresh(true);
+        tramite_context.setRefresh(true);
     }
 
     // crear tramite apartir del tracking
@@ -121,6 +161,9 @@ const RenderShow = () => {
     useEffect(() => {
         if (tramite_context.execute) getTracking();
     }, [tramite_context.execute])
+
+    // holder
+    if (tramite_context.loading) return <PlaceholderShow/>
 
     // render
     return (
@@ -251,11 +294,11 @@ const RenderShow = () => {
                                 <b>Descripción: </b> {current_tracking.description || 'No hay descripción disponible'}
                             </div>
 
-                            {/* <Show condicion={typeof current_tracking == 'object' && current_tracking.files && current_tracking.files.length || false}>
+                            <Show condicion={Object.keys(current_tracking || {}).length && current_tracking.files && current_tracking.files.length}>
                                 <div className="row mt-3">
                                     <div className="col-md-12">Archivos del seguímiento:</div>
                                     archivos del tracking
-                                    {current_tracking.files.map((f, indexF) => 
+                                    {current_tracking.files ? current_tracking.files.map((f, indexF) => 
                                         <div className="ml-5 col-xs" key={`item-tracking-${indexF}`}>
                                             <ItemFileCircle
                                                 id={f.id}
@@ -274,9 +317,9 @@ const RenderShow = () => {
                                                 onAction={(e) => setCurrentRefesh(true)}
                                             />
                                         </div>
-                                    )}
+                                    ): null}
                                 </div>
-                            </Show> */}
+                            </Show>
                         </div>
                     </Show>
 
@@ -367,9 +410,6 @@ const RenderShow = () => {
             {/* ventana de acciones */}
             <Show condicion={current_tracking.current && tramite_context.option == 'NEXT'}>
                 <ModalNextTracking
-                    tracking={current_tracking}
-                    // role={role}
-                    // boss={boss}
                     isClose={(e) => tramite_context.setOption("")}
                     action={action}
                     onSave={handleOnSave}

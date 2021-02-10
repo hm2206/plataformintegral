@@ -32,12 +32,13 @@ const Contrato = ({ success, infos, query }) => {
 
     // opciones
     const handleOption = (obj, key, index) => {
-        let { pathname, push } = Router;
+        let { pathname, push, asPath } = Router;
         switch (key) {
             case 'pay':
             case 'edit':
                 let id = btoa(obj.id);
-                let query = { clickb: 'Info', id };
+                let href = btoa(asPath || "");
+                let query = { clickb: 'Info', id, href };
                 push({ pathname: `${pathname}/${key}`, query });
                 break;
             default:
@@ -185,9 +186,7 @@ const Contrato = ({ success, infos, query }) => {
                 </Form>
 
                 <Show condicion={option == 'UPDATE_REMUNERACION_MASSIVE'}>
-                    <UpdateRemuneracionMassive
-                        isClose={(e) => setOption("")}
-                    />
+                    <UpdateRemuneracionMassive isClose={(e) => setOption("")}/>
                 </Show>
             </BoardSimple>
     </div>)
