@@ -18,6 +18,7 @@ const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
     // estados
     const [year, setYear] = useState(2020);
     const [mes, setMes] = useState(10);
+    const [ids, setIds] = useState([]);
 
     // config page
     useEffect(() => {
@@ -47,7 +48,16 @@ const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
         let { push } = Router;
         query.year = year;
         query.mes = mes;
+        setIds([]);
         push({ pathname, query });
+    }
+
+    const handleCronograma = (id) => {
+        let newIds = JSON.parse(JSON.stringify(ids));
+        let index = newIds.indexOf(id);
+        if (index >= 0) newIds.splice(index, 1);
+        else newIds.push(id);
+        setIds(newIds);
     }
 
     // render() {
@@ -97,7 +107,7 @@ const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
                                     fluid
                                     color="olive"
                                     disabled={!success}
-                                    onClick={(e) => handleClick(`pdf/plame/${year}/${mes}?export=1`)}
+                                    onClick={(e) => handleClick(`pdf/plame/${year}/${mes}?export=1&cronograma_id[]=${ids.join('&cronograma_id[]=')}`)}
                                 >
                                     <i className="fas fa-share mr-1"></i>
                                     <span>Exportar</span>
@@ -127,7 +137,7 @@ const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
                                             <div 
                                                 className="card card-body text-primary"
                                                 style={{ cursor: 'pointer'  }}
-                                                onClick={(e) => handleClick(`pdf/plame/${year}/${mes}`)}
+                                                onClick={(e) => handleClick(`pdf/plame/${year}/${mes}?cronograma_id[]=${ids.join('&cronograma_id[]=')}`)}
                                             >
                                                 <span><i className="fas fa-users mr-1"></i> Reporte PLAME</span>
                                             </div>
@@ -174,8 +184,10 @@ const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
                                         </Show>
                                         {/* cronogramas */}
                                         {cronogramas.map((cro, indexC) => 
-                                            <div className="col-md-3">
-                                                <div className="card" style={{  cursor: 'pointer'  }}>
+                                            <div className={`col-md-3`} key={`list-cronograma-id-${indexC}`}
+                                                onClick={(e) => handleCronograma(cro.id)}
+                                            >
+                                                <div className={`card ${ids.includes(cro.id) ? 'alert alert-success' : ''}`} style={{  cursor: 'pointer'  }}>
                                                     <div className="card-body">
                                                         <b>#{cro.id} - {cro.planilla && cro.planilla.nombre || ""}</b>
                                                         <hr/>
