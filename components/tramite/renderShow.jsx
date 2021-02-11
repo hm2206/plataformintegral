@@ -13,6 +13,9 @@ import Swal from 'sweetalert2';
 import { TramiteContext } from '../../contexts/TramiteContext';
 import Skeleton from 'react-loading-skeleton';
 
+const hidden = ['RECIBIDO', 'RECHAZADO', 'FINALIZADO'];
+const nothing = ['FINALIZADO', 'ANULADO'];
+
 const PlaceholderShow = () => {
 
     return (
@@ -103,7 +106,7 @@ const RenderShow = () => {
         let datos = new FormData;
         app_context.fireLoading(true);
         datos.append('files', file);
-        datos.append('object_id', tracking.first ? current_tramite.id : tracking.id);
+        datos.append('object_id', current_tracking.first ? current_tramite.id : current_tracking.id);
         datos.append('object_type', object_type);
         await tramite.post(`file`, datos)
             .then(async res => {
@@ -111,7 +114,7 @@ const RenderShow = () => {
                 let { success, message, files } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
-                setCurrentRefesh(true);
+                tramite_context.setExecute(true);
             }).catch(err => {
                 try {
                     app_context.fireLoading(false);
@@ -133,7 +136,8 @@ const RenderShow = () => {
         }).then(res => {
             let { success, message, tracking } = res.data;
             if (!success) throw new Error(message);
-            setCurrentTracking(tracking)
+            tramite_context.setTracking(tracking);
+            setCurrentTracking(tracking);
             setCurrentTramite(tracking.tramite || {});
         }).catch(err => console.log(err));
         tramite_context.setLoading(false);
@@ -150,6 +154,17 @@ const RenderShow = () => {
     // crear tramite apartir del tracking
     const handleCreateTramite = async () => {
         if (typeof onCreate == 'function') onCreate(current_tramite);
+    }
+
+    // validar firma
+    const validateFile = () => {
+        if (!current_tramite.state) return ['delete', 'signature']; 
+        // validar si es el dueño del documento
+        if (app_context.auth.person_id == current_tramite.person_id || app_context.auth.id == current_tramite.user_id) return [];
+        // validar a otros usuarios
+        if (hidden.includes(current_tracking.status)) return ['delete', 'signature'];
+        // response default
+        return ['delete'];
     }
 
     // primera vez
@@ -238,7 +253,7 @@ const RenderShow = () => {
                                         url={f.url}
                                         name={f.name}
                                         extname={f.extname}
-                                        hidden={[ current_tramite.person_id == app_context.auth.person_id ]}
+                                        hidden={validateFile()}
                                         edit={true}
                                         onClick={(e) => {
                                             e.preventDefault();
@@ -251,10 +266,9 @@ const RenderShow = () => {
                             ) : null}
                             {/* agregar archivos */}
                             <Show condicion={
-                                current_tracking.first && 
-                                !current_tracking.revisado && 
-                                (current_tracking.user_id == app_context.auth.id || 
-                                current_tracking.user_verify_id == app_context.auth.id)
+                                current_tramite.state &&
+                                (current_tramite.user_id == app_context.auth.id || 
+                                current_tramite.person_id == app_context.auth.person_id)
                             }>
                                     <div className="text-right ml-3">
                                         <DropZone
@@ -296,8 +310,9 @@ const RenderShow = () => {
 
                             <Show condicion={Object.keys(current_tracking || {}).length && current_tracking.files && current_tracking.files.length}>
                                 <div className="row mt-3">
-                                    <div className="col-md-12">Archivos del seguímiento:</div>
-                                    archivos del tracking
+                                    <div className="col-md-12 mb-3">
+                                        <b>Archivos del seguímiento:</b>
+                                    </div>
                                     {current_tracking.files ? current_tracking.files.map((f, indexF) => 
                                         <div className="ml-5 col-xs" key={`item-tracking-${indexF}`}>
                                             <ItemFileCircle
@@ -312,7 +327,8 @@ const RenderShow = () => {
                                                 hidden={['delete']}
                                                 onClick={(e) => {
                                                     e.preventDefault();
-                                                    if (typeof onFile == 'function') onFile(f)
+                                                    tramite_context.setFile(f);
+                                                    tramite_context.setOption('VISUALIZADOR');
                                                 }}
                                                 onAction={(e) => setCurrentRefesh(true)}
                                             />
@@ -405,6 +421,7 @@ const RenderShow = () => {
                     isClose={(e) => tramite_context.setOption("")}
                     slug={current_tramite.slug}
                     onFile={(f) => typeof onFile == 'function' ? onFile(f) : null}
+                    current={current_tracking.id}
                 />
             </Show>
             {/* ventana de acciones */}
@@ -417,7 +434,10 @@ const RenderShow = () => {
             </Show>
             {/* boton flotante */}
             <Show condicion={current_tracking.current && current_tracking.status == 'PENDIENTE'}>
-                <BtnFloat onClick={handleCreateTramite}>
+                <BtnFloat onClick={(e) => {
+                    tramite_context.setTramite(current_tramite)
+                    tramite_context.setOption('CREATE');
+                }}>
                     <i className="fas fa-plus"></i>
                 </BtnFloat>
             </Show>

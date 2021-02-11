@@ -1,16 +1,19 @@
 import React, { Component, useState, useEffect, useContext } from 'react'
 import Modal from '../modal';
 import { Button, Form, Dropdown, Tab } from 'semantic-ui-react';
-import Router from 'next/router';
 import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
-import { tramite } from '../../services/apis';
-import Swal from 'sweetalert2';
-import { Confirm } from '../../services/utils';
-import { DropZone } from '../Utils';
+import { TramiteContext } from '../../contexts/TramiteContext';
+import Visualizador from '../visualizador';
 
+const ModalInfo = ({ current_tramite = {}, isClose = null }) => {
 
-const ModalInfo = ({ current_tramite = {}, isClose = null, onFile = null }) => {
+    // state
+    const [option, setOption] = useState("");
+    const [current_file, setCurrentFile] = useState({});
+
+    // tramite
+    const tramite_context = useContext(TramiteContext);
 
     // response
     return (
@@ -83,12 +86,26 @@ const ModalInfo = ({ current_tramite = {}, isClose = null, onFile = null }) => {
                     {current_tramite.files.map((f, indexF) => 
                         <div className="" key={`list-tramite-files-${indexF}`}>
                             <div className="card card-body cursor-pointer"
-                                onClick={(e) => typeof onFile == 'function' ? onFile(f) : null}
+                                onClick={(e) => {
+                                    setCurrentFile(f);
+                                    setOption('VISUALIZADOR');
+                                }}
                             >
                                 {f.name}
                             </div>
                         </div>
                     )}
+                </Show>
+
+                {/* visualizador */}
+                <Show condicion={option == 'VISUALIZADOR'}>
+                    <Visualizador
+                        id="visualizador-info"
+                        name={current_file.name}
+                        extname={current_file.extname}
+                        url={current_file.url}
+                        onClose={(e) => setOption("")}
+                    />
                 </Show>
             </Form>
         </Modal>

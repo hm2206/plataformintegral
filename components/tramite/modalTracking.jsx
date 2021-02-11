@@ -17,7 +17,7 @@ import Swal from 'sweetalert2';
 import ModalInfo from './modalInfo';
 
 
-const ModalTracking = ({ isClose = null, slug = "", onFile = null }) => {
+const ModalTracking = ({ isClose = null, slug = "", onFile = null, current = null }) => {
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -113,7 +113,9 @@ const ModalTracking = ({ isClose = null, slug = "", onFile = null }) => {
                             contentArrowStyle={{ borderRight: `10px solid ${getMetadata(d.status).color || '#78909c'}` }}
                             contentStyle={{ border: `4px solid ${getMetadata(d.status).color || '#78909c'}` }}
                         >
-                            <h3 className="vertical-timeline-element-title text-center mb-3">{getMetadata(d.status).name || d.status}</h3>
+                            <h3 className="vertical-timeline-element-title text-center mb-3">
+                                {getMetadata(d.status).name || d.status} {current == d.id ? <i className="text-success fas fa-check-circle"></i> : null}
+                            </h3>
                             <h4 className="vertical-timeline-element-subtitle">Lugar de destino: <span className="badge badge-dark mr-1">{`${d.dependencia_destino && d.dependencia_destino.nombre}`.toUpperCase()}</span></h4>
                             <h4 className="vertical-timeline-element-subtitle">Persona: <span className="badge badge-dark mr-1">{`${d.person && d.person.fullname || ""}`.toUpperCase()}</span></h4>
                             <p className="text-center">

@@ -130,7 +130,10 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         setOption("");
         setCurrentTramite({});
         setCurrentRender("LIST");
-        if (current_menu.index == 3) setCurrentRefresh(true);
+        if (current_menu.index == 3) {
+            setCurrentRefresh(true);
+            setCurrentExecute(true);
+        }
         else handleSelectMenu(3);
     }
 
@@ -256,8 +259,8 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                 <div className="col-md-2 mb-2">
                                     <Button color="blue" basic
                                         onClick={(e) => {
-                                            setCurrentRefresh(true);
                                             setCurrentExecute(true);
+                                            if (current_render == 'LIST') setCurrentRefresh(true);
                                         }}
                                     >
                                         <i className="fas fa-sync"></i>
