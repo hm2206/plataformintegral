@@ -161,7 +161,10 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
 
     // cambio de tab
     useEffect(() => {
-        if (is_tab) setCurrentRefresh(true);
+        if (is_tab) {
+            setCurrentRefresh(true);
+            setCurrentExecute(true);
+        }
     }, [is_tab]);
 
     // cambiar de estado
@@ -183,6 +186,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
             <BoardSimple 
                 bg="primary"
                 prefix="TD"
+                options={[]}
                 title={
                     <span>Bandeja de Entrada 
                         <i className="fas fa-arrow-right ml-2 mr-2"></i> 

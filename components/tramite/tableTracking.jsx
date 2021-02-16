@@ -12,6 +12,12 @@ const PlaceholderTable = () => {
         <tr key={`list-table-placeholder-${indexD}`}>
             <td><Skeleton height="30px"/></td>
             <td><Skeleton height="30px"/></td>
+            <td><Skeleton height="30px"/></td>
+            <td><Skeleton height="30px"/></td>
+            <td><Skeleton height="30px"/></td>
+            <td><Skeleton height="30px"/></td>
+            <td><Skeleton height="30px"/></td>
+            <td><Skeleton height="30px"/></td>
         </tr>    
     )
 }
@@ -61,6 +67,18 @@ const TableTracking = () => {
     // render
     return (
         <table className="table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Asunto</th>
+                    <th>T. Documento</th>
+                    <th>N° Documento</th>
+                    <th>Dependencia</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Ver</th>
+                </tr>
+            </thead>
             <tbody>
                 {tramite_context.datos.map((d, indexD) => 
                     <ItemTable
@@ -79,7 +97,10 @@ const TableTracking = () => {
                         status={getStatus(d.status).title}
                         statusClassName={getStatus(d.status).className}
                         onClickItem={(e) => {
-                            console.log('obj', d);
+                            tramite_context.setTracking(d);
+                            tramite_context.setRender('SHOW')
+                        }}
+                        onButton={(e) => {
                             tramite_context.setTracking(d);
                             tramite_context.setRender('SHOW')
                         }}
@@ -88,12 +109,15 @@ const TableTracking = () => {
                             tramite_context.setFile(f);
                             tramite_context.setOption("VISUALIZADOR")
                         }}
+                        buttons={[
+                            { key: "go", title: "Ver más", icon: "fas fa-eye", className: "btn-primary" }
+                        ]}
                     />
                 )}
                 {/* no hay datos */}
                 <Show condicion={!tramite_context.loading && !tramite_context.datos.length}>
                     <tr className="table-item">
-                        <th colSpan="2" className="text-center">
+                        <th colSpan="8" className="text-center">
                             No hay registros disponibles!
                         </th>
                     </tr>

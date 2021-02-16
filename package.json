@@ -64,6 +64,7 @@
     "next-redux-wrapper": "^4.0.1",
     "node-fetch": "^2.6.0",
     "node-signature": "^1.0.17",
+    "node-xlsx": "^0.16.1",
     "nookies": "^2.0.8",
     "oh-snap": "0.0.2",
     "pdf-lib": "^1.11.1",

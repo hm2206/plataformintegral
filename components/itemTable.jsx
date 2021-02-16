@@ -11,6 +11,14 @@ const datos = {
 };
 
 
+const templateButton = {
+    key: "",
+    title: "",
+    icon: "",
+    className: ""
+}
+
+
 const ItemTable = ({ current = true, 
     slug, 
     title, 
@@ -26,6 +34,8 @@ const ItemTable = ({ current = true,
     onClickItem = null, 
     onClickFile = null,
     noRead = true,
+    buttons = [templateButton],
+    onButton = null,
 }) => {
 
     const handleClick = (onClick, ...args) => {
@@ -44,7 +54,7 @@ const ItemTable = ({ current = true,
                         {slug || ""}
                     </span>
                 </th>
-                <td width="90%">
+                <td width="90%" colSpan="7">
                     <table className="w-100 table table-borderless">
                         <tr>
                             <td>
@@ -72,11 +82,24 @@ const ItemTable = ({ current = true,
                             <th width="5%" onClick={(e) => handleClick(onClickItem, e)}>
                                 <span className={`uppercase badge ${getSemaforo()}`}>{day}</span>
                             </th>
+                            <th>
+                                <div className="btn-group text-center">
+                                    {buttons.map((b, indexB) => 
+                                        <button className={`btn btn-sm btn-light ${b.className || ""}`}
+                                            key={`list-btn-${indexB}`}
+                                            title={b.title || ""}
+                                            onClick={(e) => typeof onButton == 'function' ? onButton(e, indexB, b) : null}
+                                        >
+                                            <i className={b.icon}></i>
+                                        </button>
+                                    )}
+                                </div>
+                            </th>
                         </tr>
                         {/* mostrar archivos */}
                         <Show condicion={files && files.length}>
                             <tr>
-                                <td colSpan="5">
+                                <td colSpan="7">
                                     <div className="row">
                                         {files.map((f, indexF) => 
                                             <div className="col-xs" key={`item-tramite-${indexF}`}>

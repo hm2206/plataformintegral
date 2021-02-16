@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../../modal';
 import { Form, Select, Button } from 'semantic-ui-react';
-import { SelectEntityUser, SelectEntityDependenciaNotUser } from '../../select/authentication';
+import { SelectEntityUser, SelectEntityDependenciaUser } from '../../select/authentication';
 import { authentication } from '../../../services/apis';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
@@ -23,7 +23,7 @@ const ConfigEntityDependencia = ({ user, isClose }) => {
 
     const getDependencias = async (nextPage = 1, add = false) => {
         setLoading(true);
-        await authentication.get(`user/${user.id}/dependencia/${entity_id}?page=${nextPage}`)
+        await authentication.get(`user/${user.id}/entity/${entity_id}/dependencia?page=${nextPage}`)
             .then(async res => {
                 let { success, message, dependencia } = res.data;
                 if (!success) throw new Error(message);
@@ -60,7 +60,7 @@ const ConfigEntityDependencia = ({ user, isClose }) => {
         let answer = await Confirm('warning', `¿Deseas eliminar al dependencia?`, 'Eliminar');
         if (answer) {
             setLoading(true);
-            await authentication.post(`config_entity_dependencia/${id}/delete`)
+            await authentication.post(`config_entity_dependencia/${id}?_method=DELETE`)
                 .then(async res => {
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
@@ -107,11 +107,15 @@ const ConfigEntityDependencia = ({ user, isClose }) => {
                     </div>
 
                     <div className="col-md-4 mb-1">
-                        <SelectEntityDependenciaNotUser
+                        <SelectEntityDependenciaUser
                             user_id={user && user.id}
                             entity_id={entity_id || ""}
+                            execute={false}
+                            disabled={!entity_id}
                             name="dependencia_id"
-                            value={dependencia_id || ""}
+                            value={dependencia_id}
+                            refresh={entity_id}
+                            except={1}
                             onChange={(e, obj) => setDependenciaId(obj.value)}
                         />
                     </div>

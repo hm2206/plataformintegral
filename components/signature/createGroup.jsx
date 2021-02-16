@@ -1,12 +1,13 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
 import Modal from '../modal';
-import { Confirm, formatBytes } from '../../services/utils';
+import { Confirm } from '../../services/utils';
 import { Form, Button, Progress } from 'semantic-ui-react';
 import { signature, CancelRequest, onProgress } from '../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
 import { SignatureContext } from '../../contexts/SignatureContext';
+import { DropZone } from '../Utils';
 
 const rules = ['title', 'description'];
 
@@ -50,6 +51,11 @@ const CreateGroup = ({ isClose = null }) => {
         let answer = await Confirm('warning', `¿Estas seguro en crear el grupo?`, 'Estoy seguro');
         if (!answer) return false;
         setCurrentLoading(true);
+        // agregar form data
+        const datos = new FormData;
+        await Object.keys(form).filter(key => {
+            datos.append(key, form[key]);
+        });
         // cancel toker
         const cancelToken = CancelRequest();
         setCurrentCancel(cancelToken);
@@ -57,10 +63,11 @@ const CreateGroup = ({ isClose = null }) => {
         let options = {
             headers: { DependenciaId: signature_context.dependencia_id },
             onUploadProgress: (evt) => onProgress(evt, setPercent),
+            onDownloadProgress: (evt) => onProgress(evt, setPercent),
             cancelToken: cancelToken.token
         }
         // request
-        await signature.post(`auth/group`, form, options)
+        await signature.post(`auth/group`, datos, options)
         .then(res => {
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
@@ -112,6 +119,34 @@ const CreateGroup = ({ isClose = null }) => {
                                     value={form.description || ""}
                                     onChange={({ target }) => handleInput(target)}
                                 />
+                            </Form.Field>
+
+                            <Form.Field>
+                                <label>PDF base</label>
+                                <Show condicion={form.files}
+                                    predeterminado={
+                                        <DropZone
+                                            id="files-base"
+                                            name="files"
+                                            multiple={false}
+                                            title="Seleccionar PDF base"
+                                            accept="application/pdf"
+                                            onChange={({ name, files }) => handleInput({ name, value: files[0] })}
+                                        />
+                                    }
+                                >
+                                    <div className="card card-body" style={{ position: 'relative' }}>
+                                        {form.files && form.files.name}
+                                        <i className="fas fa-times cursor-pointer" 
+                                            style={{ position: 'absolute', top: 'calc(50% - 5px)', right: '10px' }}
+                                            onClick={(e) => {
+                                                let newForm = Object.assign({}, form);
+                                                delete newForm.files;
+                                                setForm(newForm);
+                                            }}
+                                        />
+                                    </div>
+                                </Show>
                             </Form.Field>
 
                             <hr/>

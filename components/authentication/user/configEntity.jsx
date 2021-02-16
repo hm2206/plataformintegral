@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../../modal';
-import { Form, Select, Button } from 'semantic-ui-react';
-import { SelectEntityNotUser } from '../../select/authentication';
+import { Form, Button } from 'semantic-ui-react';
+import { SelectEntityNotUser, SelectEntityUser } from '../../select/authentication';
 import { authentication } from '../../../services/apis';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
@@ -84,7 +84,7 @@ const ConfigEntity = ({ user, isClose }) => {
             <Form loading={loading}>
                 <div className="row">
                     <div className="col-md-8 mb-1">
-                        <SelectEntityNotUser 
+                        <SelectEntityUser 
                             user_id={user && user.id}
                             name="entity_id"
                             value={entity_id}

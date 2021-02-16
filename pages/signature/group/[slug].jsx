@@ -4,7 +4,9 @@ import CardReflow from '../../../components/cardReflow';
 import { BtnBack, DropZone } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import { signature } from '../../../services/apis';
-import AddTeam from '../../../components/signature/addTeam'
+import { GroupProvider } from '../../../contexts/SignatureContext';
+import AddTeam from '../../../components/signature/addTeam';
+import AddValidation from '../../../components/signature/addValidation';
 
 const SlugGroup = ({ pathname, query, success, group }) => {
 
@@ -14,6 +16,7 @@ const SlugGroup = ({ pathname, query, success, group }) => {
     const handleOption = (e, index, obj) => {
         switch (obj.key) {
             case 'ADD_TEAM':
+            case 'ADD_VALIDATION':
                 setOption(obj.key);
                 break;
             default:
@@ -26,51 +29,57 @@ const SlugGroup = ({ pathname, query, success, group }) => {
     // render
     return (
         <div className="col-md-12">
-            <BoardSimple
-                bg="light"
-                title={group.title || ""}
-                info={[group.description || '']}
-                prefix={<BtnBack className="mr-2"/>}
-                onOption={handleOption}
-                options={[
-                    { key: 'ADD_TEAM', title: 'Agregar usuarios', icon: 'fas fa-user-plus' },
-                    { key: 'CONFIG', title: 'Configurar Firma', icon: 'fas fa-cog' },
-                ]}
-            >
-                <div className="row">
-                    <div className="col-md-8">
-                        <div className="card-body">
-                            <div className="row">
-                                <div className="col-md-12 mt-4">
-                                    <DropZone
-                                        id={`file-upload-signer`}
-                                        name="files"
-                                        multiple
-                                        accept="application/pdf"
-                                        title="Seleccionar PDF"
-                                    />
-                                    <hr/>
+            <GroupProvider value={{ group }}>
+                <BoardSimple
+                    bg="light"
+                    title={group.title || ""}
+                    info={[group.description || '']}
+                    prefix={<BtnBack className="mr-2"/>}
+                    onOption={handleOption}
+                    options={[
+                        { key: 'ADD_TEAM', title: 'Agregar al equipo de firma', icon: 'fas fa-user-plus' },
+                        { key: 'ADD_VALIDATION', title: 'Agregar las validaciones', icon: 'fas fa-user-cog' },
+                    ]}
+                >
+                    <div className="row">
+                        <div className="col-md-8">
+                            <div className="card-body">
+                                <div className="row">
+                                    <div className="col-md-12 mt-4">
+                                        <DropZone
+                                            id={`file-upload-signer`}
+                                            name="files"
+                                            multiple
+                                            accept="application/pdf"
+                                            title="Seleccionar PDF"
+                                        />
+                                        <hr/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div className="col-md-4">
+                            <CardReflow
+                                items={[]}
+                                start={0}
+                                over={0}
+                                title={`Firmantes`}
+                                info={`Equipo`}
+                            />
+                        </div>
                     </div>
-                    <div className="col-md-4">
-                        <CardReflow
-                            items={[]}
-                            start={0}
-                            over={0}
-                            title={`Firmantes`}
-                            info={`Equipo`}
-                        />
-                    </div>
-                </div>
-            </BoardSimple>
-            {/* agregar equipo */}
-            <AddTeam 
-                show={option == 'ADD_TEAM'}
-                checked={[1, 2]}
-                onClose={(e) => setOption('')}
-            />
+                </BoardSimple>
+                {/* agregar equipo */}
+                <AddTeam 
+                    show={option == 'ADD_TEAM'}
+                    onClose={(e) => setOption('')}
+                />
+                {/* agregar configuraciones */}
+                <AddValidation
+                    show={option == 'ADD_VALIDATION'}
+                    onClose={(e) => setOption('')}
+                />
+            </GroupProvider>
         </div>
     )
 }

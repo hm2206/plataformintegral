@@ -17,6 +17,7 @@ const BoardSimple = ({
     info = ['Información'], addUser = false ,
     expand = false, config = false,
     options = [optionDefault], onOption = null,
+    classNameInfo = null,
 }) => {
 
     // render
@@ -40,7 +41,7 @@ const BoardSimple = ({
                     </div>
                     <div className="account-summary">
                         <h1 className="card-title">{title || ""}</h1>
-                        <h6 className="card-subtitle text-muted">{info.join(' . ')}</h6>
+                        <h6 className={`card-subtitle text-muted ${classNameInfo}`}>{info.join(' . ')}</h6>
                     </div>
                 </a> 
                 {/* <!-- right actions --> */}

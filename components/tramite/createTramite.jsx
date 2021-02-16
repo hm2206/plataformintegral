@@ -139,7 +139,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                                 </Form.Field>
 
                                 <Form.Field className="mb-3">
-                                    <label>Tipo de Trámite</label>
+                                    <label>Tipo de Documento</label>
                                     <input type="text"
                                         className="capitalize"
                                         readOnly
@@ -220,7 +220,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                             </Form.Field>
 
                             <Form.Field className="mb-3" error={errors.type_tramite_id && errors.type_tramite_id[0] ? true : false}>
-                                <label>Tipo de Trámite <b className="text-danger">*</b></label>
+                                <label>Tipo de Documento <b className="text-danger">*</b></label>
                                 <SelectTramiteType
                                     name="tramite_type_id"
                                     value={form.tramite_type_id}

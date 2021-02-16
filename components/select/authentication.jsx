@@ -37,17 +37,18 @@ const SelectEntityUser = ({ id = "id", user_id, name, value, onChange, refresh }
     />
 }
 
-const SelectEntityDependenciaUser = ({ id = "id", user_id, entity_id, name, value, onChange, refresh }) => {
+const SelectEntityDependenciaUser = ({ id = "id", user_id, entity_id, name, value, onChange, refresh = false, execute = true, disabled = false, except = 0 }) => {
     return <SelectBase 
-        execute={user_id}
+        execute={execute}
         api={authentication}
-        url={`user/${user_id}/dependencia/${entity_id}`}
+        url={`user/${user_id}/entity/${entity_id}/dependencia?except=${except}`}
         id={`select-user-dependencia-${name}`}
         value={id}
-        text="name"
-        obj="entities"
+        text="nombre"
+        obj="dependencia"
         name={name}
         valueChange={value || ""}
+        disabled={disabled}
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
         placeholder="Seleccionar Dependencia"
         refresh={refresh}
