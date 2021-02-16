@@ -287,6 +287,36 @@ const RenderShow = () => {
                         </div>
                     </div>
 
+                    <Show condicion={isTramite && current_tramite.old_files && current_tramite.old_files.length}>
+                        <div className="col-md-12 mb-2">
+                            <hr/>
+                            <b><i className="fas fa-clip-paper"></i> Archivos anidados: </b>
+                            <div className="row mt-3">
+                                {isTramite && typeof current_tramite.old_files == 'object' ? current_tramite.old_files.map((f, indexF) => 
+                                    <div className="ml-5 col-xs" key={`item-old-tramite-${indexF}`}>
+                                        <ItemFileCircle
+                                            id={f.id}
+                                            is_observation={f.observation}
+                                            className="mb-3"
+                                            key={`item-file-old-tramite-${indexF}`}
+                                            url={f.url}
+                                            name={f.name}
+                                            extname={f.extname}
+                                            hidden={['delete']}
+                                            edit={true}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                tramite_context.setFile(f);
+                                                tramite_context.setOption('VISUALIZADOR');
+                                            }}
+                                            onAction={(e, file) => tramite_context.setExecute(true)}
+                                        />
+                                    </div>
+                                ) : null}
+                            </div>
+                        </div>
+                    </Show>
+
                     {/* meta datos */}
                     <Show condicion={!current_tracking.first}>
                         <div className="col-md-12 mt-3">

@@ -176,7 +176,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
                     <Show condicion={descripcion.includes(action)}>
                         <Form.Field className="mb-3" errors={is_errors && errors.description && errors.description[0] ? true : false}>
-                            <label htmlFor="">Descripción <b className="text-danger">*</b></label>
+                            <label htmlFor="">Descripción</label>
                             <textarea name="description" rows="5"
                                 value={form.description || ""}
                                 onChange={({ target }) => handleInput(target)}
@@ -187,7 +187,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
                     <Show condicion={archivos.includes(action)}>
                         <Form.Field className="mb-3" error={is_errors && errors.files && errors.files[0] || ""}>
-                            <label>Archivos <b className="text-danger">*</b></label>
+                            <label>Archivos</label>
                             <DropZone
                                 id="file-tramite-serve-next-tramite"
                                 name="files"
