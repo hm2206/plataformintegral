@@ -15,7 +15,7 @@ const SelectTramiteType = ({ id = "id", name, value, onChange, refresh }) => {
         name={name}
         valueChange={`${value || ""}`}
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-        placeholder="Seleccionar Tip. Trámite"
+        placeholder="Seleccionar Tip. Documento"
         refresh={refresh}
     />
 }

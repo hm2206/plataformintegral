@@ -75,8 +75,9 @@ const TableTracking = () => {
                     <th>N° Documento</th>
                     <th>Dependencia</th>
                     <th>Fecha</th>
-                    <th>Estado</th>
-                    <th>Ver</th>
+                    <th className="text-center">Estado</th>
+                    <th className="text-center">Dias</th>
+                    <th className="text-center">Ver</th>
                 </tr>
             </thead>
             <tbody>
@@ -117,7 +118,7 @@ const TableTracking = () => {
                 {/* no hay datos */}
                 <Show condicion={!tramite_context.loading && !tramite_context.datos.length}>
                     <tr className="table-item">
-                        <th colSpan="8" className="text-center">
+                        <th colSpan="9" className="text-center">
                             No hay registros disponibles!
                         </th>
                     </tr>

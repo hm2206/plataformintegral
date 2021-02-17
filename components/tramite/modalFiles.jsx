@@ -43,7 +43,7 @@ const FileInfo = ({ files = [] }) => {
 }
 
 
-const ModalFiles  = ({ files = [], isClose = null }) => {
+const ModalFiles  = ({ files = [], isClose = null, onFile = null }) => {
 
     // render
     return (
@@ -70,7 +70,9 @@ const ModalFiles  = ({ files = [], isClose = null }) => {
                                         <i className={`fas fa-${f.extname}`}></i> {f.name}
                                     </th>
                                     <th>
-                                        <a href={f.url} target="_blank" rel="noopener noreferrer">
+                                        <a href="#"
+                                            onClick={(e) => typeof onFile == 'function' ? onFile(e, f) : null}
+                                        >
                                             Ver
                                         </a>
                                     </th>

@@ -15,6 +15,7 @@ import DoneAllIcon from '@material-ui/icons/DoneAll';
 import ChatIcon from '@material-ui/icons/Chat';
 import Swal from 'sweetalert2';
 import ModalInfo from './modalInfo';
+import Visualizador from '../visualizador';
 
 
 const ModalTracking = ({ isClose = null, slug = "", onFile = null, current = null }) => {
@@ -29,6 +30,8 @@ const ModalTracking = ({ isClose = null, slug = "", onFile = null, current = nul
     const [option, setOption] = useState("");
     const [current_files, setCurrentFiles] = useState([]);
     const [current_tramite, setCurrentTramite] = useState({});
+    const [current_file, setCurrentFile] = useState({});
+    const [is_visualizador, setIsVisualizador] = useState(false);
 
     // obtener linea de tiempo
     const getTracking = async (add = false) => {
@@ -81,11 +84,6 @@ const ModalTracking = ({ isClose = null, slug = "", onFile = null, current = nul
                 Swal.fire({ icon: 'error', text: err.message });
             });
         this.setState({ loader: false })
-    }
-
-    // emitir archivo
-    const handleFile = async (f) => {
-        if (typeof onFile == 'function') onFile(f);
     }
  
     // renderizar
@@ -150,6 +148,10 @@ const ModalTracking = ({ isClose = null, slug = "", onFile = null, current = nul
                 <Show condicion={option == 'SHOW_FILE'}>
                     <ModalFiles files={current_files}
                         isClose={(e) => setOption("")}
+                        onFile={(e, f) => {
+                            setCurrentFile(f);
+                            setIsVisualizador(true);
+                        }}
                     />
                 </Show>
                 {/* modal de información */}
@@ -157,7 +159,20 @@ const ModalTracking = ({ isClose = null, slug = "", onFile = null, current = nul
                     <ModalInfo
                         current_tramite={current_tramite}
                         isClose={(e) => setOption("")}
-                        onFile={handleFile}
+                        onFile={(e, f) => {
+                            setCurrentFile(f);
+                            setIsVisualizador(true);
+                        }}
+                    />
+                </Show>
+                {/* visualizador */}
+                <Show condicion={is_visualizador}>
+                    <Visualizador
+                        id="visualizador-info"
+                        name={current_file.name}
+                        extname={current_file.extname}
+                        url={current_file.url}
+                        onClose={(e) => setIsVisualizador(false)}
                     />
                 </Show>
             </div>
