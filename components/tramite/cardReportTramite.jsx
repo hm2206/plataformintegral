@@ -71,6 +71,10 @@ const CardReportTramite = ({ object = {} }) => {
                         key: "Observación", 
                         value: object.observation
                     },
+                    { 
+                        key: "Estado", 
+                        value: <span className={`badge badge-${object.state ? 'warning' : 'success'}`}>{object.state ? 'En curso' : 'Terminado'}</span>
+                    },
                 ]}
                 buttons={[
                     { key: "timeline", icon: 'fas fa-search', title: 'Seguímiento', className: "btn-outline-dark" }
