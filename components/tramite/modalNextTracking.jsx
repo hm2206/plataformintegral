@@ -91,10 +91,10 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
             await tramite.post(`tracking/${current_tracking.id}/next`, datos, { headers: { DependenciaId: tramite_context.dependencia_id } })
                 .then(async res => {
                     app_context.fireLoading(false);
-                    let { success, message, current_tracking } = res.data;
+                    let { success, message, tracking } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
-                    if (typeof onSave == 'function') onSave(current_tracking);
+                    if (typeof onSave == 'function') onSave(tracking);
                 }).catch(err => {
                     try {
                         app_context.fireLoading(false);
@@ -123,55 +123,56 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
         >
             <div className="card-body font-13">
                 <Form>
-                    <Form.Field className="mb-3">
-                        <label htmlFor="">Dependencia Origen</label>
-                        <span className="uppercase">
-                            <input type="text" 
-                                readOnly 
-                                className="uppercase" 
-                                value={current_tracking.dependencia_origen && current_tracking.dependencia_origen.nombre || ""}
+                    <Show condicion={current_tracking.next && current_tracking.current && current_tracking.revisado}>
+                        <Form.Field className="mb-3">
+                            <label htmlFor="">Dependencia Destino</label>
+                            <input type="text"
+                                readOnly
+                                value={current_tracking.tracking && current_tracking.tracking.dependencia && current_tracking.tracking.dependencia.nombre || ""}
                             />
-                        </span>
-                    </Form.Field>
-
-                    <Show condicion={destino.includes(action) && current_tracking.revisado}>
-                        <Show condicion={(Object.keys(current_boss).length && current_boss.user_id == app_context.auth.id) || 
-                            (current_tracking.modo == 'DEPENDENCIA' && Object.keys(current_role).length)}
-                        >
-                            <Form.Field className="mb-3" errors={is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] ? true : false}>
-                                <label htmlFor="">Dependencia Destino <b className="text-danger">*</b></label>
-                                <SelectDependencia
-                                    name="dependencia_destino_id"
-                                    value={form.dependencia_destino_id}
-                                    onChange={(e, obj) => handleInput(obj)}
-                                />
-                                <label>{is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}</label>
-                            </Form.Field>
-                        </Show>
+                        </Form.Field>
                     </Show>
 
-                    <Show condicion={destino.includes(action) && current_tracking.revisado && form.dependencia_destino_id == tramite_context.dependencia_id}>
-                        <Form.Field className="mb-3" errors={is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}>
-                            <label htmlFor="">Usuario Destino</label>
-                            <div className="row">
-                                <Show condicion={isUser}>
-                                    <div className="col-md-10 col-lg-11">
-                                        <input type="text"
-                                            className="uppercase"
-                                            disabled
-                                            value={`${user.document_number} - ${user.fullname || ""}`}
-                                        />
+                    <Show condicion={!current_tracking.next}>
+                        <Show condicion={destino.includes(action) && current_tracking.revisado}>
+                            <Show condicion={(Object.keys(current_boss).length && current_boss.user_id == app_context.auth.id) || 
+                                (current_tracking.modo == 'DEPENDENCIA' && Object.keys(current_role).length)}
+                            >
+                                <Form.Field className="mb-3" errors={is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] ? true : false}>
+                                    <label htmlFor="">Dependencia Destino <b className="text-danger">*</b></label>
+                                    <SelectDependencia
+                                        name="dependencia_destino_id"
+                                        value={form.dependencia_destino_id}
+                                        onChange={(e, obj) => handleInput(obj)}
+                                    />
+                                    <label>{is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}</label>
+                                </Form.Field>
+                            </Show>
+                        </Show>
+
+                        <Show condicion={destino.includes(action) && current_tracking.revisado && form.dependencia_destino_id == tramite_context.dependencia_id}>
+                            <Form.Field className="mb-3" errors={is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}>
+                                <label htmlFor="">Usuario Destino</label>
+                                <div className="row">
+                                    <Show condicion={isUser}>
+                                        <div className="col-md-10 col-lg-11">
+                                            <input type="text"
+                                                className="uppercase"
+                                                disabled
+                                                value={`${user.document_number} - ${user.fullname || ""}`}
+                                            />
+                                        </div>
+                                    </Show>
+                                    <div className="col-md-2 col-lg-1">
+                                        <button className="btn btn-sm btn-outline-dark mb-2" onClick={(e) => setOption("ASSIGN")}>
+                                            {isUser ? <i className="fas fa-sync"></i> : <i className="fas fa-plus"></i>}
+                                        </button>
                                     </div>
-                                </Show>
-                                <div className="col-md-2 col-lg-1">
-                                    <button className="btn btn-sm btn-outline-dark mb-2" onClick={(e) => setOption("ASSIGN")}>
-                                        {isUser ? <i className="fas fa-sync"></i> : <i className="fas fa-plus"></i>}
-                                    </button>
                                 </div>
-                            </div>
-                            <label>{is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}</label>
-                            <hr/>
-                        </Form.Field>
+                                <label>{is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}</label>
+                                <hr/>
+                            </Form.Field>
+                        </Show>
                     </Show>
 
                     <Show condicion={descripcion.includes(action)}>

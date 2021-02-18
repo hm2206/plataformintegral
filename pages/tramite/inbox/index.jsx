@@ -53,6 +53,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     const [current_render, setCurrentRender] = useState("LIST");
     const [current_tramite, setCurrentTramite] = useState({});
     const [current_tracking, setCurrentTracking] = useState({});
+    const [current_next, setCurrentNext] = useState("");
 
     // props
     let isRole = Object.keys(role).length;
@@ -233,6 +234,8 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                     setRender: setCurrentRender,
                     role: role,
                     boss: boss,
+                    setNext: setCurrentNext,
+                    next: current_next,
                  }}>
                     <div className="card-body">
                         <Form>
@@ -357,6 +360,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                         isClose={(e) => {
                             setOption("")
                             setCurrentTramite({})
+                            setCurrentNext("");
                         }}
                         user={tab == 'DEPENDENCIA' ? boss.user || {} : app_context.auth || {}}
                         onSave={handleOnSave}

@@ -18,7 +18,77 @@ import ModalInfo from './modalInfo';
 import Visualizador from '../visualizador';
 
 
-const ModalTracking = ({ isClose = null, slug = "", onFile = null, current = null }) => {
+const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null, current = null }) => {
+
+    // obtener meta datos
+    const getMetadata = (status) => {
+        let icons = {
+            REGISTRADO: { icon: <FileCopy/> },
+            DERIVADO: { icon: <CallMissedOutgoingRoundedIcon style={{ color: '#5e35b1' }} />, message: "La dependencia ha derivado el documento a: " , color: '#5e35b1' },
+            ACEPTADO: { icon: <CheckCircleOutlineOutlinedIcon fontSize="large" style={{ color: '#346cb0' }} />, message: "Fue Aceptado en: ", color: '#346cb0' },
+            RECHAZADO: { icon: <CloseIcon style={{ color: '#b76ba3' }} />, message: "", color: '#b76ba3' },
+            ANULADO: { icon: <DeleteForeverIcon style={{ color: '#ea6759' }} />, message: "", color: '#ea6759' },
+            ENVIADO: { icon: <SendRoundedIcon style={{ color: '#f7c46c' }} />, message: "", color: '#f7c46c' },
+            FINALIZADO: { icon: <DoneAllIcon style={{ color: '#00a28a' }} />, message: "Puede ir a recoger su Documento en: ", color: '#00a28a' },
+            RESPONDIDO: { icon: <ChatIcon style={{ color: '#ec935e' }} />, message: "La Oficina respondió a: ", name: "RESPUESTA", color: '#ec935e' }
+        };
+        // response
+        return icons[status] || {};
+    }
+
+    // metadata actual
+    const info = getMetadata(current_tracking.status);
+    const { dependencia, person } = current_tracking;
+
+    // render 
+    return (
+        <VerticalTimelineElement
+            className="vertical-timeline-element--work mb-3"
+            date={moment(current_tracking.created_at).lang('es').format('h:mm a')}
+            iconStyle={{ background: '#fff', color: info.color, border: `2px solid ${info.color || '#78909c'}` }}
+            icon={info.icon || <i className="fas fa-file-alt"></i>}
+            contentArrowStyle={{ borderRight: `10px solid ${info.color || '#78909c'}` }}
+            contentStyle={{ border: `4px solid ${info.color || '#78909c'}` }}
+        >
+            <h3 className="vertical-timeline-element-title text-center mb-3">
+                {info.name || current_tracking.status} {current == current_tracking.id ? <i className="text-success fas fa-check-circle"></i> : null}
+            </h3>
+            <h4 className="vertical-timeline-element-subtitle">
+                Lugar de destino: 
+                <span className="badge badge-dark mr-1 ml-1 capitalize">
+                    {dependencia && dependencia.nombre || ""}
+                </span>
+            </h4>
+            <h4 className="vertical-timeline-element-subtitle">
+                Persona: <span className="badge badge-dark mr-1 capitalize">{person && person.fullname || ""}</span>
+            </h4>
+            <p className="text-center">
+                {moment(current_tracking.created_at).lang('es').format('LL')}
+            </p>
+            <hr/>
+            <div className="text-center">
+                <Show condicion={current_tracking.files && current_tracking.files.length}>
+                    <button className="btn btn-sm btn-dark"
+                        onClick={(e) => typeof onFiles == 'function' ? onFiles(e, files || []) : null}
+                    >
+                        <i className="fas fa-file-alt"></i> Archivos
+                    </button>
+                </Show>
+                {/* obtener datos */}
+                <Show condicion={Object.keys(current_tracking.tramite || {}).length}>
+                    <button className="btn btn-outline-dark"
+                        onClick={(e) => typeof onTramite == 'function' ? onTramite(e, current_tracking.tramite || {}) : null}
+                    >
+                        <i className="fas fa-info-circe"></i> Información
+                    </button>
+                </Show>
+            </div>
+        </VerticalTimelineElement>
+    )
+}
+
+
+const ModalTracking = ({ isClose = null, slug = "", current = null }) => {
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -54,26 +124,9 @@ const ModalTracking = ({ isClose = null, slug = "", onFile = null, current = nul
         getTracking();
     }, []);
 
-    // obtener meta datos
-    const getMetadata = (status) => {
-        let icons = {
-            REGISTRADO: { icon: <FileCopy/> },
-            DERIVADO: { icon: <CallMissedOutgoingRoundedIcon style={{ color: '#5e35b1' }} />, message: "La dependencia ha derivado el documento a: " , color: '#5e35b1' },
-            ACEPTADO: { icon: <CheckCircleOutlineOutlinedIcon fontSize="large" style={{ color: '#346cb0' }} />, message: "Fue Aceptado en: ", color: '#346cb0' },
-            RECHAZADO: { icon: <CloseIcon style={{ color: '#b76ba3' }} />, message: "", color: '#b76ba3' },
-            ANULADO: { icon: <DeleteForeverIcon style={{ color: '#ea6759' }} />, message: "", color: '#ea6759' },
-            ENVIADO: { icon: <SendRoundedIcon style={{ color: '#f7c46c' }} />, message: "", color: '#f7c46c' },
-            FINALIZADO: { icon: <DoneAllIcon style={{ color: '#00a28a' }} />, message: "Puede ir a recoger su Documento en: ", color: '#00a28a' },
-            RESPONDIDO: { icon: <ChatIcon style={{ color: '#ec935e' }} />, message: "La Oficina respondió a: ", name: "RESPUESTA", color: '#ec935e' }
-        };
-        // response
-        return icons[status] || {};
-    }
-
     // imprimir tracking
     const getPrint = async () => {
         this.setState({ loader: true })
-        console.log(this.props.tramite);
         await tramite.get(`report/tracking/${this.props.tramite.tramite_id}`, { responseType: 'blob' })
             .then(({data}) => {
                 let a = document.createElement('a');
@@ -102,46 +155,18 @@ const ModalTracking = ({ isClose = null, slug = "", onFile = null, current = nul
             <div className="card-body">
                 <VerticalTimeline className="line-gray timeline-h-100">
                     {datos.map((d, indexD) => 
-                        <VerticalTimelineElement
-                            key={`tracking-timeline-${indexD}`}
-                            className="vertical-timeline-element--work mb-3"
-                            date={moment(d.created_at).lang('es').format('h:mm a')}
-                            iconStyle={{ background: '#fff', color: getMetadata(d.status).color, border: `2px solid ${getMetadata(d.status).color || '#78909c'}` }}
-                            icon={getMetadata(d.status).icon || <i className="fas fa-file-alt"></i>}
-                            contentArrowStyle={{ borderRight: `10px solid ${getMetadata(d.status).color || '#78909c'}` }}
-                            contentStyle={{ border: `4px solid ${getMetadata(d.status).color || '#78909c'}` }}
-                        >
-                            <h3 className="vertical-timeline-element-title text-center mb-3">
-                                {getMetadata(d.status).name || d.status} {current == d.id ? <i className="text-success fas fa-check-circle"></i> : null}
-                            </h3>
-                            <h4 className="vertical-timeline-element-subtitle">Lugar de destino: <span className="badge badge-dark mr-1">{`${d.dependencia_destino && d.dependencia_destino.nombre}`.toUpperCase()}</span></h4>
-                            <h4 className="vertical-timeline-element-subtitle">Persona: <span className="badge badge-dark mr-1">{`${d.person && d.person.fullname || ""}`.toUpperCase()}</span></h4>
-                            <p className="text-center">
-                                {moment(d.created_at).lang('es').format('LL')}
-                            </p>
-                            <hr/>
-                            <div className="text-center">
-                                <Show condicion={d.files && d.files.length}>
-                                    <button className="btn btn-sm btn-dark" onClick={(e) => {
-                                        setCurrentFiles(d.files || [])
-                                        setOption("SHOW_FILE")
-                                    }}>
-                                        <i className="fas fa-file-alt"></i> Archivos
-                                    </button>
-                                </Show>
-                                {/* obtener datos */}
-                                <Show condicion={Object.keys(d.tramite || {}).length}>
-                                    <button className="btn btn-outline-dark"
-                                        onClick={(e) => {
-                                            setCurrentTramite(d.tramite);
-                                            setOption('SHOW_INFO')
-                                        }}
-                                    >
-                                        <i className="fas fa-info-circe"></i> Información
-                                    </button>
-                                </Show>
-                            </div>
-                        </VerticalTimelineElement>
+                       <ItemTracking key={`tracking-timeline-${indexD}`}
+                            current={current}
+                            current_tracking={d}
+                            onFiles={(e, files) => {
+                                setCurrentFiles(files)
+                                setOption("SHOW_FILE")
+                            }}
+                            onTramite={(e, info) => {
+                                setCurrentTramite(info);
+                                setOption('SHOW_INFO')
+                            }}
+                       />
                     )}
                 </VerticalTimeline>
                 {/* modal de archivos */}

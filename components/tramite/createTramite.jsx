@@ -80,6 +80,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
             setCurrentLoading(true);
             let datos = new FormData;
             datos.append('person_id', user.person_id);
+            datos.append('next', tramite_context.next);
             if (isTramite) datos.append('tramite_id', tramite_context.tramite.id);
             await Object.keys(form).map(key => datos.append(key, form[key]));
             await current_files.map(f => datos.append('files', f));

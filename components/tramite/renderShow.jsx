@@ -102,11 +102,11 @@ const RenderShow = () => {
     }
     
     // agregar archivo
-    const addFile = async ({ name, file }, object_type = 'App/Models/Tramite') => {
+    const addFile = async ({ name, file }, object_id, object_type = 'App/Models/Tramite') => {
         let datos = new FormData;
         app_context.fireLoading(true);
         datos.append('files', file);
-        datos.append('object_id', current_tracking.first ? current_tramite.id : current_tracking.id);
+        datos.append('object_id', object_id);
         datos.append('object_type', object_type);
         await tramite.post(`file`, datos)
             .then(async res => {
@@ -240,7 +240,6 @@ const RenderShow = () => {
                     </div>
 
                     <div className="col-md-12 mb-2">
-                        <hr/>
                         <b><i className="fas fa-clip-paper"></i> Archivos de trámite: </b>
                         <div className="row mt-3">
                             {isTramite && typeof current_tramite.files == 'object' ? current_tramite.files.map((f, indexF) => 
@@ -279,8 +278,8 @@ const RenderShow = () => {
                                             size={6}
                                             basic={true}
                                             icon="fas fa-plus"
-                                            onChange={async ({ files, name }) => await addFile({ name, file: files[0] })}
-                                            onSigned={async ({ name, file }) => await addFile({ name, file })}
+                                            onChange={async ({ files, name }) => await addFile({ name, file: files[0] }, current_tramite.id)}
+                                            onSigned={async ({ name, file }) => await addFile({ name, file }, current_tracking.id)}
                                         />
                                     </div>
                             </Show>
@@ -325,11 +324,7 @@ const RenderShow = () => {
                                 image={current_tracking.person && current_tracking.person.image_images && current_tracking.person.image_images.image_200x200 || ""}
                                 remitente={current_tracking.person && current_tracking.person.fullname || ""}
                                 email={current_tracking.person && current_tracking.person.email_contact || ""}
-                                dependencia={
-                                    current_tracking.status == 'RECIBIDO' || current_tracking.status == 'PENDIENTE'
-                                    ? current_tracking.dependencia_origen && current_tracking.dependencia_origen.nombre || ""
-                                    : current_tracking.dependencia_destino && current_tracking.dependencia_destino.nombre || ""
-                                }
+                                dependencia={current_tracking.dependencia && current_tracking.dependencia.nombre || ""}
                                 status={current_tracking.status}
                                 revisado={current_tracking.revisado}
                         />
@@ -387,58 +382,75 @@ const RenderShow = () => {
                                     </Button>
                                 </Show>
                                                                 
-                                <Show condicion={current_tracking.status == 'PENDIENTE'}>
-                                    <Button color="orange" 
-                                        basic 
-                                        size="mini"
-                                        disabled={!current_tracking.revisado}
-                                        onClick={() => handleNext('RESPONDIDO')}
-                                    >
-                                        Responder <i class="fas fa-reply"></i>
-                                    </Button>
-                                </Show>
+                                <Show condicion={!current_tracking.next}
+                                    predeterminado={
+                                        <Button color="teal" 
+                                            basic 
+                                            size="mini"
+                                            disabled={!current_tracking.revisado}
+                                            onClick={() => handleNext(current_tracking.next)}
+                                        >
+                                            Enviar <i class="fas fa-paper-plane"></i>
+                                        </Button>
+                                    }
+                                >
+                                    <Show condicion={!current_tracking.alert && current_tracking.status == 'PENDIENTE'}>
+                                        <Button color="orange" 
+                                            basic 
+                                            size="mini"
+                                            disabled={!current_tracking.revisado}
+                                            onClick={() => {
+                                                tramite_context.setNext("RESPONDIDO");
+                                                tramite_context.setTramite(current_tramite)
+                                                tramite_context.setOption('CREATE');
+                                            }}
+                                        >
+                                            Responder <i class="fas fa-reply"></i>
+                                        </Button>
+                                    </Show>
 
-                                <Show condicion={current_tracking.status == 'REGISTRADO' || current_tracking.status == 'PENDIENTE'}>
-                                    <Button color="purple" 
-                                        basic 
-                                        size="mini"
-                                        disabled={!current_tracking.revisado}
-                                        onClick={() => handleNext('DERIVADO')}
-                                    >
-                                        Derivar <i class="fas fa-paper-plane"></i>
-                                    </Button>
-                                </Show>
+                                    <Show condicion={current_tracking.status == 'REGISTRADO' || current_tracking.status == 'PENDIENTE'}>
+                                        <Button color="purple" 
+                                            basic 
+                                            size="mini"
+                                            disabled={!current_tracking.revisado}
+                                            onClick={() => handleNext('DERIVADO')}
+                                        >
+                                            Derivar <i class="fas fa-paper-plane"></i>
+                                        </Button>
+                                    </Show>
 
-                                <Show condicion={current_tracking.status == 'RECIBIDO'}>
-                                    <Button color="red" 
-                                        basic 
-                                        size="mini"
-                                        disabled={!current_tracking.revisado}
-                                        onClick={() => handleNext('RECHAZADO')}
-                                    >
-                                        Rechazar <i class="fas fa-times"></i>
-                                    </Button>
-                                </Show>
+                                    <Show condicion={current_tracking.status == 'RECIBIDO'}>
+                                        <Button color="red" 
+                                            basic 
+                                            size="mini"
+                                            disabled={!current_tracking.revisado}
+                                            onClick={() => handleNext('RECHAZADO')}
+                                        >
+                                            Rechazar <i class="fas fa-times"></i>
+                                        </Button>
+                                    </Show>
 
-                                <Show condicion={current_tracking.status == 'RECIBIDO'}>
-                                    <Button color="green" 
-                                        basic 
-                                        size="mini"
-                                        disabled={!current_tracking.revisado}
-                                        onClick={() => handleNext('ACEPTADO')}
-                                    >
-                                        Aceptar <i class="fas fa-check"></i>
-                                    </Button>
-                                </Show>
+                                    <Show condicion={current_tracking.status == 'RECIBIDO'}>
+                                        <Button color="green" 
+                                            basic 
+                                            size="mini"
+                                            disabled={!current_tracking.revisado}
+                                            onClick={() => handleNext('ACEPTADO')}
+                                        >
+                                            Aceptar <i class="fas fa-check"></i>
+                                        </Button>
+                                    </Show>
 
-                                <Show condicion={current_tracking.status == 'PENDIENTE'}>
-                                    <Button color="teal" 
-                                        size="mini"
-                                        disabled={!current_tracking.revisado}
-                                        onClick={() => handleNext('FINALIZADO')}
-                                    >
-                                        Finalizar <i class="fas fa-check"></i>
-                                    </Button>
+                                    <Show condicion={!current_tracking.alert && current_tracking.status == 'PENDIENTE'}>
+                                        <Button color="teal" 
+                                            size="mini"
+                                            disabled={!current_tracking.revisado}
+                                            onClick={() => handleNext('FINALIZADO')}
+                                        >
+                                            Finalizar <i class="fas fa-check"></i>
+                                        </Button>
+                                    </Show>
                                 </Show>
                             </div>
                         </Show>
@@ -463,8 +475,9 @@ const RenderShow = () => {
                 />
             </Show>
             {/* boton flotante */}
-            <Show condicion={current_tracking.current && current_tracking.status == 'PENDIENTE'}>
+            <Show condicion={current_tracking.revisado && current_tracking.current && current_tracking.status == 'PENDIENTE'}>
                 <BtnFloat onClick={(e) => {
+                    tramite_context.setNext("");
                     tramite_context.setTramite(current_tramite)
                     tramite_context.setOption('CREATE');
                 }}>
