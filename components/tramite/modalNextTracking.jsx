@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Modal from '../modal';
-import { Form, Button } from 'semantic-ui-react';
+import { Form, Button , Checkbox } from 'semantic-ui-react';
 import { SelectDependencia } from '../select/authentication';
 import Show from '../show';
 import { DropZone } from '../Utils';
@@ -11,6 +11,8 @@ import { tramite } from '../../services/apis';
 import Swal from 'sweetalert2';
 import SearchUserToDependencia from '../authentication/user/searchUserToDependencia';
 import { TramiteContext } from '../../contexts/TramiteContext';
+import SelectMultipleDependencia from './selectMultipleDependencia';
+import SelectMultitleDependencia from './selectMultipleDependencia';
 
 
 const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
@@ -29,6 +31,8 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     const [option, setOption] = useState("");
     const [user, setUser] = useState({});
     const isUser = Object.keys(user).length;
+    const [current_dependencias, setCurrentDependencias] = useState([]);
+    const [current_multiple, setCurrentMultiple] = useState([]);
 
     // mostrar componentes
     const destino = ['DERIVADO'];
@@ -110,10 +114,43 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
         }
     }
 
+    // obtener dependencias
+    const handleDependencias = async(datos = []) => {
+        datos.splice(0, 1);
+        let payload = [];
+        // setting data
+        await datos.filter(d => {
+            let { obj } = d;
+            // add payload
+            payload.push({
+                id: `${obj.id}`,
+                nombre: obj.nombre,
+                type: obj.type
+            });
+        });
+        // set datos
+        setCurrentDependencias(payload)
+    } 
+
+    // eliminar item multiple
+    const deleteMultiple = async (index) => {
+        let answer = await Confirm('warning', `¿Estás seguro en eliminar?`, 'Eliminar');
+        if (!answer) return false;
+        let newMultiple = JSON.parse(JSON.stringify(current_multiple));
+        newMultiple.splice(index, 1);
+        setCurrentMultiple(newMultiple);
+        if (!newMultiple.length) handleInput({ name: 'multiple', value: false });
+    }
+
     // seleccionar dependencia destino predeterminado
     useEffect(() => {
         setForm({ dependencia_destino_id: tramite_context.dependencia_id });
     }, []);
+
+    // clear multiple files
+    useEffect(() => {
+        if (!form.multiple) setCurrentMultiple([]);
+    }, [form.multiple]);
 
     // render
     return (
@@ -144,9 +181,42 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
                                         name="dependencia_destino_id"
                                         value={form.dependencia_destino_id}
                                         onChange={(e, obj) => handleInput(obj)}
+                                        onReady={handleDependencias}
+                                        disabled={form.multiple ? true : false}
                                     />
                                     <label>{is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] || ""}</label>
                                 </Form.Field>
+
+                                {/* muliple dependencias solo derivado */}
+                                <Show condicion={tramite_context.dependencia_id != form.dependencia_destino_id}>
+                                    <Form.Field>
+                                        <label htmlFor="">Dependencia Multiple</label>
+                                        <div>
+                                            <Checkbox 
+                                                toggle
+                                                name="multiple"
+                                                checked={form.multiple ? true : false}
+                                                onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked })}
+                                            />
+                                        </div>
+                                    </Form.Field>
+                                    {/* mostrar al selecionar el multiple dependencia */}
+                                    <Show condicion={!current_multiple.length && form.multiple}>
+                                        <SelectMultitleDependencia
+                                            dependencias={current_dependencias}
+                                            disabled={[form.dependencia_destino_id]}
+                                            onReady={(datos) => setCurrentMultiple(datos)}
+                                        />
+                                    </Show>
+                                    {/* mostrar dependencias multiples a enviar */}
+                                    {current_multiple.map((m, indexM) => 
+                                        <span className="capitalize badge badge-primary ml-1 mb-1"
+                                            key={`list-badge-item-${indexM}`}
+                                        >
+                                            {m.nombre} <i className="fas fa-times cursor-pointer" onClick={deleteMultiple}></i>
+                                        </span>    
+                                    )}
+                                </Show>
                             </Show>
                         </Show>
 

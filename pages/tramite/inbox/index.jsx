@@ -349,7 +349,10 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
 
                     {/* btn crear */}
                     <Show condicion={current_render == 'LIST'}>
-                        <BtnFloat onClick={(e) => setOption('CREATE')}>
+                        <BtnFloat onClick={(e) => {
+                            setCurrentNext('');
+                            setOption('CREATE')
+                        }}>
                             <i className="fas fa-plus"></i>
                         </BtnFloat>
                     </Show>
