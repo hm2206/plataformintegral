@@ -76,9 +76,11 @@ const Contratos = ({ work }) => {
                         <div className="row">
                             <div className="col-md-10">
                                 <div><b>Tip. Categoría:</b> {i.type_categoria && i.type_categoria.descripcion}</div>
+                                <div><b>Fecha de Resolución:</b> {i.fecha_de_resolucion}</div>
+                                <div><b>Resolución:</b> {i.resolucion}</div>
                                 <div><b>Fecha de Ingreso:</b> {i.fecha_de_ingreso}</div>
                                 <div><b>Fecha de Cese:</b> {i.fecha_de_cese}</div>
-                                <div><b>Plaza:</b> {i.fecha_de_cese}</div>
+                                <div><b>Plaza:</b> {i.plaza}</div>
                                 <div><b>P.A.P:</b> {i.pap}</div>
                             </div>
                             <div className="col-md-2 text-right">

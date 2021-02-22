@@ -87,6 +87,8 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
             let datos = new FormData;
             datos.append('status', action);
             await Object.keys(form).map(key => datos.append(key, form[key]));
+            datos.delete('multiple');
+            datos.append('multiple', JSON.stringify(current_multiple));
             // agregar usuario destino
             if (isUser) datos.append('user_destino_id', user.id);
             // agregar files

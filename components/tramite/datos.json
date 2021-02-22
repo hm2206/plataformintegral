@@ -68,6 +68,14 @@
             "btn": "info",
             "label": "Responder",
             "color": "orange"
+        },
+        "COPIA": {
+            "text": "C",
+            "title": "Copia",
+            "className": "badge-dark",
+            "btn": "info",
+            "label": "Copia",
+            "color": "dark"
         }
     }
 }

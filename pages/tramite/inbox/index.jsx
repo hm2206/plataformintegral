@@ -19,7 +19,7 @@ const Visualizador = dynamic(() => import('../../../components/visualizador'), {
 
 // menus
 const current_status_default = [
-    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['RECIBIDO'], count: 0 },
+    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['RECIBIDO', 'COPIA'], count: 0 },
     { key: "DERIVADO", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['DERIVADO', 'RESPONDIDO'], count: 0 },
     { key: "PENDIENTE", icon: 'fas fa-thumbtack', text: 'Pendientes', index: 2, filtros: ['PENDIENTE'], count: 0 },
     { key: "REGISTRADO", icon: 'far fa-file', text: 'Regístrados', index: 3, filtros: ['REGISTRADO'], count: 0 },

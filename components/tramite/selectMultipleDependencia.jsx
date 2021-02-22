@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Checkbox, Button } from 'semantic-ui-react';
+import { Checkbox, Button, Input } from 'semantic-ui-react';
 import Show from '../show';
 import collect from 'collect.js';
 
@@ -50,6 +50,8 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
     // checkeds
     const [checked, setChecked] = useState(collect([]));
     const ids = checked.pluck('id').toArray();
+    const [current_check, setCurrentCheck] = useState(false);
+    const [current_action, setCurrentAction] = useState(false);
 
     // manejador de checked
     const handleChecked = (action, obj) => {
@@ -61,6 +63,35 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
         if (!action && index >= 0) newCheck.splice(index, 1);
         // setting
         setChecked(newCheck);
+        setCurrentCheck(false);
+        setCurrentAction(false);
+    }
+
+    // seleccionar todo
+    const checkAll = (check = false) => {
+        let payload = collect([]);
+        if (check) {
+            dependencias.filter(dep => {
+                let is_disabled = disabled.includes(dep.id);
+                if (is_disabled) return false;
+                payload.push(dep);
+            });
+        }
+        setChecked(payload);
+        setCurrentCheck(check);
+        setCurrentAction(checked);
+    }
+
+    // seleccionar todas las acciones
+    const actionAll = (check = false) => {
+        let payload = JSON.parse(JSON.stringify(current_action));
+        payload.map(p => {
+            p.action = check;
+            return p;
+        });
+        // setting
+        console.log(payload);
+        setCurrentAction(payload);
     }
 
     // manejador de acción
@@ -77,6 +108,27 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
         <div className="card card-body">
             <table className="table">
                 <thead>
+                    <tr>
+                        <th>
+                            <Checkbox checked={current_check}
+                                onChange={(e, obj) => checkAll(obj.checked)}
+                            />
+                        </th>
+                        <th>
+                            <Input fluid
+                                name="search"
+
+                            />
+                        </th>
+                        <th>
+                            <Show condicion={current_check}>
+                                <Checkbox toggle
+                                    onChange={(e, obj) => actionAll(obj.checked)}
+                                    value={current_action}
+                                />
+                            </Show>
+                        </th>
+                    </tr>
                     <tr>
                         <th>#</th>
                         <th>Dependencia</th>
