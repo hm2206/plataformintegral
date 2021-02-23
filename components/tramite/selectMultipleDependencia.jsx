@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Checkbox, Button, Input } from 'semantic-ui-react';
+import { Checkbox, Button, Input, Icon } from 'semantic-ui-react';
 import Show from '../show';
 import collect from 'collect.js';
 
@@ -28,8 +28,7 @@ const ItemTable = ({ dependencia, disabled = false, onCheck = null, checked = fa
                         <Checkbox toggle
                             onChange={(e, obj) => typeof onAction == 'function' ? onAction(obj.checked, dependencia) : null}
                             checked={dependencia.action ? true : false} 
-                        >
-                        </Checkbox>
+                        />
                     </Show>
                 </Show>
             </td>
@@ -52,6 +51,7 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
     const ids = checked.pluck('id').toArray();
     const [current_check, setCurrentCheck] = useState(false);
     const [current_action, setCurrentAction] = useState(false);
+    const [current_dependencias, setCurrentDependencias] = useState(JSON.parse(JSON.stringify(dependencias)));
 
     // manejador de checked
     const handleChecked = (action, obj) => {
@@ -68,10 +68,11 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
     }
 
     // seleccionar todo
-    const checkAll = (check = false) => {
+    const checkAll = async (check = false) => {
+        if (!check) await actionAll(false);
         let payload = collect([]);
         if (check) {
-            dependencias.filter(dep => {
+            await current_dependencias.filter(dep => {
                 let is_disabled = disabled.includes(dep.id);
                 if (is_disabled) return false;
                 payload.push(dep);
@@ -79,19 +80,22 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
         }
         setChecked(payload);
         setCurrentCheck(check);
-        setCurrentAction(checked);
     }
 
     // seleccionar todas las acciones
     const actionAll = (check = false) => {
-        let payload = JSON.parse(JSON.stringify(current_action));
+        let payload = collect(JSON.parse(JSON.stringify(checked)));
         payload.map(p => {
             p.action = check;
             return p;
         });
+        // select dependencias
+        current_dependencias.map(dep => {
+            dep.action = check;
+        });
         // setting
-        console.log(payload);
-        setCurrentAction(payload);
+        setChecked(payload);
+        setCurrentAction(true);
     }
 
     // manejador de acción
@@ -101,6 +105,7 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
         obj.action = action;
         newCheck.put(index, obj);
         setChecked(newCheck);
+        setCurrentAction(false);
     }
     
     // render
@@ -117,7 +122,7 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
                         <th>
                             <Input fluid
                                 name="search"
-
+                                icon={<Icon name="circle search"/>}
                             />
                         </th>
                         <th>
@@ -136,8 +141,8 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
                     </tr>
                 </thead>
                 <tbody>
-                    <Show condicion={dependencias.length}>
-                        {dependencias.map((dep, indexD) => 
+                    <Show condicion={current_dependencias.length}>
+                        {current_dependencias.map((dep, indexD) => 
                             <ItemTable
                                 key={`list-table-tr-${indexD}`}
                                 dependencia={dep}
@@ -161,7 +166,7 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
                             </Show>
                         </tr>
                     </Show>
-                    <Show condicion={!dependencias.length}>
+                    <Show condicion={!current_dependencias.length}>
                         <tr>
                             <td colSpan="3" className="text-center">
                                 No hay dependencias disponibles!
