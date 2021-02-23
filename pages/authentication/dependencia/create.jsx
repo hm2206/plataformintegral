@@ -1,156 +1,162 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, parseOptions } from '../../../services/utils';
+import React, { useState } from 'react';
+import { BtnBack } from '../../../components/Utils';
 import Router from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
-import { auth, authentication } from '../../../services/apis';
+import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
+import BoardSimple from '../../../components/boardSimple'
+import atob from 'atob';
+import ContentControl from '../../../components/contentControl';
+import { Fragment } from 'react';
+import Show from '../../../components/show';
+import { Confirm } from '../../../services/utils';
 
 
-export default class CreateDependencia extends Component
-{
+const EditDependencia = ({ pathname, query }) => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [current_loading, setCurrentLoading] = useState(false);
+
+    // cambiar dependencia
+    const handleInput = ({ name, value }, obj = 'form') => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-    state = {
-        loading: false,
-        planillas: [],
-        type_cargos: [],
-        form: {
-            type: "OTRO"
-        },
-        errors: {}
-    }
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors };
-        });
-    }
-
-    save = async () => {
-        this.props.fireLoading(true);
-        await authentication.post('dependencia', this.state.form)
+    // actualizar dependencia
+    const save = async () => {
+        let answer = await Confirm('warning', `¿Estas seguro en guardar los datos?`, 'Estoy seguro');
+        if (!answer) return false;
+        setCurrentLoading(true);
+        await authentication.post(`dependencia`, form)
         .then(async res => {
-            this.props.fireLoading(false);
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
+            let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
-            if (success) this.setState({ form: {}, errors: {} });
-        })
-        .catch(async err => {
+            setErrors({});
+            setForm({});
+        }).catch(async err => {
             try {
-                this.props.fireLoading(false);
-                let response = JSON.parse(err.message);
-                this.setState({ errors: response.errors });
-                Swal.fire({ icon: 'warning', text: response.message })
+                let { data } = err.response;
+                if (typeof data != 'object') throw new Error(err.message);
+                if (typeof data.errors != 'object') throw new Error(data.message || err.message);
+                setErrors(data.errors || {});
+                Swal.fire({ icon: 'warning', text: data.message });
             } catch (error) {
-                await Swal.fire({ icon: 'error', text: err.message });
+                await Swal.fire({ icon: 'error', text: error.message });
             }
-        });
-        this.props.fireLoading(false);
+        }); 
+        setCurrentLoading(false);
     }
 
-    render() {
-
-        let { pathname, query } = this.props;
-        let { form, errors } = this.state;
-
-        return (
+    // renderizar
+    return (
+        <Fragment>
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Dependencia
-                    </div>
-                    <div className="card-body">
+                <BoardSimple
+                    title={<span className="capitalize">Nueva Dependencia</span>}
+                    info={[`Crear dependencia`]}
+                    bg="light"
+                    prefix={<BtnBack/>}
+                    options={[]}
+                >
+                    <div className="card-body mt-5">
                         <Form className="row justify-content-center">
-                            <div className="col-md-10">
+                            <div className="col-md-9">
                                 <div className="row justify-content-end">
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.nombre && errors.nombre[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.nombre && errors.nombre[0] ? true : false}>
                                             <label htmlFor="">Nombre <b className="text-red">*</b></label>
                                             <input type="text" 
                                                 name="nombre"
                                                 placeholder="Ingrese un nombre"
                                                 value={form.nombre || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.nombre && errors.nombre[0]}</label>
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field  error={errors && errors.descripcion && errors.descripcion[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field  error={errors && errors.descripcion && errors.descripcion[0] ? true : false}>
                                             <label htmlFor="">Descripción <b className="text-red">*</b></label>
                                             <input type="text"
                                                 name="descripcion"
                                                 value={form.descripcion || ""}
                                                 placeholder="Ingrese una descripción de la dependencia"
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.descripcion && errors.descripcion[0]}</label>
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field  error={errors && errors.ubicacion && errors.ubicacion[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field  error={errors && errors.ubicacion && errors.ubicacion[0] ? true : false}>
                                             <label htmlFor="">Ubicación <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese la ubicación"
                                                 name="ubicacion"
                                                 value={form.ubicacion || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.ubicacion && errors.ubicacion[0]}</label>
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field  error={errors && errors.type && errors.type[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field  error={errors && errors.type && errors.type[0] ? true : false}>
                                             <label htmlFor="">Tipo <b className="text-red">*</b></label>
                                             <Select
                                                 placeholder="Selec. Tipo de Dependencia"
                                                 name="type"
-                                                value={form.type}
+                                                value={form.type || ""}
                                                 options={[
                                                     { key: 'OTRO', value: 'OTRO', text: 'Otro' },
                                                     { key: 'ESCUELA', value: 'ESCUELA', text: 'Escuela' },
                                                     { key: 'FACULTAD', value: 'FACULTAD', text: 'Facultad' },
                                                     { key: 'OFICINA', value: 'OFICINA', text: 'Oficina' }
                                                 ]}
-                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                onChange={(e, obj) => handleInput(obj)}
                                             />
                                             <label>{errors && errors.type && errors.type[0]}</label>
                                         </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-2">
-                                        <Button color="teal" fluid
-                                            loading={this.state.loading}
-                                            onClick={this.save}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
                                     </div>
                                 </div>
                             </div>
                         </Form>
                     </div>
-                </Body>
+                </BoardSimple>
             </div>
-        )
-    }
-    
+
+            {/* panel de control */}
+            <ContentControl>
+                <div className="col-lg-2 col-6">
+                    <Button fluid 
+                        color="teal"
+                        disabled={current_loading}
+                        onClick={save}
+                    >
+                        <i className="fas fa-save"></i> Guardar
+                    </Button>
+                </div>
+            </ContentControl>
+        </Fragment>
+    )
 }
+
+// server
+EditDependencia.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // response
+    return { pathname, query }
+}
+
+// export 
+export default EditDependencia;
