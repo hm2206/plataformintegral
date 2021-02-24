@@ -89,8 +89,8 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
             let payload = JSON.parse(JSON.stringify(current_status));
             await payload.map(async (s, indexS) => {
                 let count = 0;
-                await s.filtros.map(f => {
-                    count = typeof tracking_status[f] != 'undefined' ? parseInt(tracking_status[f]) : 0;
+                await s.filtros.map(async f => {
+                    count += typeof tracking_status[f] != 'undefined' ? parseInt(tracking_status[f]) : 0;
                 });
                 // add count
                 s.count = count;
