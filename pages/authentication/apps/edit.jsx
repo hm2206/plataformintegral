@@ -1,6 +1,6 @@
 import React, { useState, Fragment } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, Confirm, parseOptions } from '../../../services/utils';
+import { Confirm } from '../../../services/utils';
 import Router from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';

@@ -1,276 +1,288 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, parseOptions } from '../../../services/utils';
-import Router from 'next/router';
-import { Form, Button, Select, Checkbox, List, Image } from 'semantic-ui-react'
+import React, { useState, useEffect } from 'react';
+import { BtnBack } from '../../../components/Utils';
+import { Form, Button, Select, Checkbox, List } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
 import atob from 'atob';
 import Show from '../../../components/show';
+import BoardSimple from '../../../components/boardSimple';
+import { Confirm } from '../../../services/utils'
 
+const ItemMethod = ({ current_app, block, current_loading, method }) => {
 
-export default class BlockApp extends Component
-{
+    const [is_render, setIsRender] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
-    }
-
-    state = {
-        loading: false,
-        edit: false,
-        block: 1,
-        query_search: "",
-        planillas: [],
-        method: {
-            next: false,
-            page: 1,
-            last_page: 1,
-            data: []
-        },
-        old: {},
-        form: {},
-        files: {},
-        errors: {},
-        check: false,
-        person: {}
-    }
-
-    componentWillMount = async () => {
-        await this.getApp();
-        this.getMethodApp();
-    }
-
-    componentDidUpdate = async (prevProps, prevState) => {
-        let { block } = this.state;
-        if (block != prevState.block) this.getMethodApp(true);
-    }
-
-    getApp = async () => {
-        let { query } = this.props;
-        let id = query.id ? atob(query.id) : "__error";
-        this.setState({ loading: true });
-        await authentication.get(`app/${id}/show`)
-        .then(res => this.setState({ form: res.data, old: res.data }))
-        .catch(err => this.setState({ form: {} }));
-        this.setState({ loading: false });
-    }
-
-    getMethodApp = async (changed = false) => {
-        this.setState({ loading: true });
-        if (changed) await this.setState({ method: { next: false, page: 1, last_page: 1, data: [] } });
-        let { form, block, method, query_search } = this.state;
-        await authentication.get(`app/${form.id}/block?block=${block}&page=${method.page}&query_search=${query_search}`)
-        .then(res => {
-            let { data, lastPage, page } = res.data;
-            this.setState(state => {
-                state.method.data = changed ? data : [...state.method.data, ...data];
-                state.method.page = page + 1;
-                state.method.last_page = lastPage;
-                state.method.next = lastPage > page;
-                return { method: state.method };
-            });
-        }).catch(err => console.log(err.message))
-        this.setState({ loading: false });
-    }
-
-    add = async (obj, index) => {
-        await  this.handleRequest(`block_method_app`, obj, index);
-    }
-
-    delete = async (obj, index) => {
-        await this.handleRequest(`block_method_app/${obj.id}/delete`, obj, index);
-    }
-
-    handleRequest = async (path, obj, index) => {
-        this.setState({ loading: true });
-        let { form } = this.state;
+    const handleAction = async (is_delete = false) => {
+        let answer = await Confirm(`warning`, `¿Estas seguro?`, 'Estoy seguro');
+        if (!answer) return false;
+        setLoading(true);
+        let payload = {
+            app_id: current_app.id,
+            method_id: method.id
+        }
+        // generar ruta
+        let path = is_delete ? `block_method_app/${method.id}?_method=DELETE` : 'block_method_app';
         // request
-        await authentication.post(path, {
-            app_id: form.id,
-            method_id: obj.id
-        })
+        await authentication.post(path, payload)
         .then(res => {
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
+            let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            this.setState(state => {
-                state.method.data.splice(index, 1);
-                return { method: state.method }
-            });
-        }).catch(err => Swal.fire({ icon: 'error', text: message }));
-        this.setState({ loading: false });
+            setIsRender(false);
+        }).catch(err => {
+            try {
+                let { data } = err.response;
+                if (typeof data != 'object') throw new Error(err.message);
+                if (typeof data.errors != 'object') throw new Error(data.message || err.message);
+                Swal.fire({ icon: 'warning', text: data.message || err.message });
+            } catch (error) {
+                Swal.fire({ icon: 'error', text: error.message })
+            }
+        });
+        setLoading(false);
     }
 
-    render() {
 
-        let { pathname, query } = this.props;
-        let { form, errors, files, loading, method } = this.state;
+    if (!is_render) return null;
 
-        return (
-            <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Restricciones de la App
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
-                            <div className="col-md-9">
-                                <div className="row justify-content-end">
-                                    <div className="col-md-12">
-                                        <h4><i className="fas fa-box"></i> Datos de la App</h4>
-                                        <hr/>
-                                    </div>
+    // render
+    return (
+        <List.Item>
+            <List.Content floated='right'>
+                <Show condicion={block}>
+                    <Button color={'green'}
+                        className="mt-1"
+                        title={'Permitir'}
+                        disabled={current_loading || loading}
+                        loading={loading}
+                        onClick={(e) => handleAction(true)}
+                    >
+                        <i className="fas fa-check"></i>
+                    </Button>
+                </Show>
 
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.name && errors.name[0] || false}>
-                                            <label htmlFor="">Nombre</label>
-                                            <input type="text" 
-                                                name="name"
-                                                placeholder="Ingrese un nombre"
-                                                value={form.name || ""}
-                                                disabled={true}
-                                                readOnly
+                <Show condicion={!block}>
+                    <Button color={'red'}
+                        className="mt-1"
+                        title={'Bloquear'}
+                        disabled={current_loading || loading}
+                        loading={loading}
+                        onClick={(e) => handleAction(false)}
+                    >
+                        <i className="fas fa-ban"></i>
+                    </Button>
+                </Show>
+            </List.Content>
+            
+            <List.Content>
+                <span className="uppercase mt-1">{method.system}</span>
+                <br/>
+                <span className="badge badge-dark mt-1 mb-2">
+                    {method.name} - {method.action_type}
+                </span>
+                <br/>
+                <span className="badge badge-warning ml-1 mt-1 mb-2">
+                    {method.url}
+                </span>
+                <br/>
+                {method.description}
+            </List.Content>
+        </List.Item>
+    )
+}
+
+const BlockApp = ({ pathname, query, success, current_app }) => {
+
+    // estados
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [datos, setDatos] = useState([]);
+    const [block, setBlock] = useState(false);
+    const [current_page, setCurrentPage] = useState(1);
+    const [current_last_page, setCurrentLastPage] = useState(0);
+    const [current_total, setCurrentTotal] = useState(0);
+    const [query_search, setQuerySearch] = useState("");
+    const [is_search, setIsSearch] = useState();
+
+    // obtener metodos
+    const getMethodApp = async (add = false) => {
+        setCurrentLoading(true);
+        await authentication.get(`app/${current_app.id}/block?block=${block ? 1 : 0}&page=${current_page}&query_search=${query_search}`)
+        .then(res => {
+            let { methods } = res.data;
+            setDatos(add ? [...datos, ...methods.data] : methods.data);
+            setCurrentTotal(methods.total || 0);
+            setCurrentLastPage(methods.lastPage || 0);
+        }).catch(err => console.log(err.message))
+        setCurrentLoading(false);
+    }
+    
+    // cambio de block
+    useEffect(() => {
+        getMethodApp();
+    }, [block]);
+    
+    // cargar por búsqueda
+    useEffect(() => {
+        if (is_search) {
+            getMethodApp();
+            setIsSearch(false);
+        }
+    }, [is_search]);
+
+    // seguiente página
+    useEffect(() => {
+        if (current_page > 1) getMethodApp(true);
+    }, [current_page]);
+
+    // render
+    return (
+        <div className="col-md-12">
+            <BoardSimple
+                options={[]}
+                bg="light"
+                prefix={<BtnBack/>}
+                title={<span>Aplicación: {current_app && current_app.name || ""}</span>}
+                info={['Restricciones de la Aplicación']}
+            >
+                <div className="card-body">
+                    <Form className="row justify-content-center">
+                        <div className="col-md-9">
+                            <div className="row justify-content-end">
+                                <div className="col-md-12">
+                                    <h4><i className="fas fa-box"></i> Datos de la App</h4>
+                                    <hr/>
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field>
+                                        <label htmlFor="">Nombre</label>
+                                        <input type="text" 
+                                            name="name"
+                                            placeholder="Ingrese un nombre"
+                                            value={current_app.name || ""}
+                                            readOnly
+                                        />
+                                    </Form.Field>
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field>
+                                        <label htmlFor="">Cliente</label>
+                                        <Select
+                                            placeholder="Select. Tip. Cliente"
+                                            name="client_device"
+                                            value={current_app.client_device || ""}
+                                            disabled
+                                            options={[
+                                                { key: 'android', value: 'ANDROID', text: 'Android' },
+                                                { key: 'ios', value: 'IOS', text: 'IOS' },
+                                                { key: 'app_desktop', value: 'APP_DESKTOP', text: 'Desktop' },
+                                                { key: 'app_web', value: 'APP_WEB', text: 'App Web' },
+                                                { key: 'otro', value: 'OTRO', text: 'Otro' },
+                                            ]}
+                                        />
+                                    </Form.Field>
+                                </div>
+
+                                <div className="col-md-12 mt-4">
+                                    <hr/>
+                                    <div className="row">
+                                        <div className="col-md-10 col-10">
+                                            <i className={`fas ${!block ? 'fa-shield-alt text-success' : 'fa-ban text-red'}`}></i> Metodos {!block ? 'Permitidos' : 'Bloqueados'}
+                                        </div>
+                                        
+                                        <div className="col-md-2 col-2">
+                                            <Checkbox 
+                                                toggle 
+                                                name="block" 
+                                                checked={block ? false : true}
+                                                onChange={(e, obj) => {
+                                                    setQuerySearch("");
+                                                    setBlock(obj.checked ? 0 : 1);
+                                                }}
+                                                disabled={current_loading}
                                             />
-                                            <label>{errors && errors.name && errors.name[0]}</label>
-                                        </Form.Field>
-                                    </div>
+                                        </div>
 
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field>
-                                            <label htmlFor="">Cliente</label>
-                                            <Select
-                                                placeholder="Select. Tip. Cliente"
-                                                name="client_device"
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                                value={form.client_device || ""}
-                                                disabled={true}
-                                                options={[
-                                                    { key: 'android', value: 'ANDROID', text: 'Android' },
-                                                    { key: 'ios', value: 'IOS', text: 'IOS' },
-                                                    { key: 'app_desktop', value: 'APP_DESKTOP', text: 'Desktop' },
-                                                    { key: 'app_web', value: 'APP_WEB', text: 'App Web' },
-                                                    { key: 'otro', value: 'OTRO', text: 'Otro' },
-                                                ]}
-                                            />
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12 mt-4">
-                                        <hr/>
-                                        <div className="row">
-                                            <div className="col-md-10 col-10">
-                                                <i className={`fas ${!this.state.block ? 'fa-shield-alt text-success' : 'fa-ban text-red'}`}></i> Metodos {!this.state.block ? 'Permitidos' : 'Bloqueados'}
-                                            </div>
-                                            
-                                            <div className="col-md-2 col-2">
-                                                <Checkbox 
-                                                    toggle 
-                                                    name="block" 
-                                                    checked={this.state.block ? false : true}
-                                                    onChange={(e, obj) => this.setState({ block: obj.checked ? 0 : 1 })}
-                                                    disabled={loading}
+                                        <div className="col-md-10 col-10">
+                                            <Form.Field>
+                                                <input type="text"
+                                                    placeholder="Buscar Método por: Nombre, URL y Sistema"
+                                                    name="query_search"
+                                                    value={query_search || ""}
+                                                    onChange={({ target }) => setQuerySearch(target.value)}
                                                 />
-                                            </div>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-10 col-10">
-                                                <Form.Field>
-                                                    <input type="text"
-                                                        placeholder="Buscar Método por: Nombre, URL y Sistema"
-                                                        name="query_search"
-                                                        value={this.state.query_search || ""}
-                                                        onChange={({ target }) => this.setState({ [target.name]: target.value })}
+                                        <div className="col-md-2 col-2">
+                                            <Button fluid
+                                                disabled={current_loading}
+                                                onClick={(e) => {
+                                                    setCurrentPage(1);
+                                                    setIsSearch(true)
+                                                }}
+                                            >
+                                                <i className="fas fa-search"></i>
+                                            </Button>
+                                        </div>
+
+                                        <div className="col-md-12">
+                                            <hr/>
+                                        </div>
+
+                                        <div className="col-md-12">
+                                            <List divided verticalAlign='middle'>
+                                                {datos.map((obj, index) => 
+                                                    <ItemMethod key={`list-people-${obj.id}`}
+                                                        current_app={current_app}
+                                                        method={obj}
+                                                        current_loading={current_loading}
+                                                        block={block}
                                                     />
-                                                </Form.Field>
-                                            </div>
+                                                )}
+                                            </List>    
+                                        </div>
 
-                                            <div className="col-md-2 col-2">
+                                        <div className="col-md-12 mt-4">
+                                            <hr/>
+                                            <Show condicion={!current_loading}>
                                                 <Button fluid
-                                                    disabled={loading}
-                                                    onClick={(e) => {
-                                                        this.getMethodApp(true);
-                                                    }}
+                                                    disabled={!(current_last_page >= (current_page + 1))}
+                                                    onClick={(e) => setCurrentPage(current_page + 1)}
                                                 >
-                                                    <i className="fas fa-search"></i>
-                                                </Button>
-                                            </div>
-
-                                            <div className="col-md-12">
-                                                <hr/>
-                                            </div>
-
-                                            <div className="col-md-12">
-                                                <List divided verticalAlign='middle'>
-                                                    {method.data.map((obj, index) => 
-                                                        <List.Item key={`list-people-${obj.id}`}>
-                                                            <List.Content floated='right'>
-                                                                <Show condicion={this.state.block}>
-                                                                    <Button color={'olive'}
-                                                                        className="mt-1"
-                                                                        title="Permitir"
-                                                                        disabled={loading}
-                                                                        onClick={(e) => this.delete(obj, index)}
-                                                                    >
-                                                                        <i className={`fas fa-check`}></i>
-                                                                    </Button>
-                                                                </Show>
-
-                                                                <Show condicion={!this.state.block}>
-                                                                    <Button color={'red'}
-                                                                        className="mt-1"
-                                                                        title={'Bloquear'}
-                                                                        disabled={loading}
-                                                                        onClick={(e) => this.add(obj, index)}
-                                                                    >
-                                                                        <i className="fas fa-ban"></i>
-                                                                    </Button>
-                                                                </Show>
-                                                            </List.Content>
-                                                            <List.Content>
-                                                                <span className="uppercase mt-1">{obj.system}</span>
-                                                                <br/>
-                                                                <span className="badge badge-dark mt-1 mb-2">
-                                                                    {obj.name} - {obj.action_type}
-                                                                </span>
-                                                                <br/>
-                                                                <span className="badge badge-warning ml-1 mt-1 mb-2">
-                                                                    {obj.url}
-                                                                </span>
-                                                                <br/>
-                                                                {obj.description}
-                                                            </List.Content>
-                                                        </List.Item>
-                                                    )}
-                                                </List>    
-                                            </div>
-
-                                            <div className="col-md-12 mt-4">
-                                                <hr/>
-                                                <Button fluid
-                                                    disabled={!method.next}
-                                                    onClick={(e) => this.getMethodApp()}
-                                                >
-                                                    <Show condicion={method.next}>
+                                                    <Show condicion={current_last_page >= (current_page + 1)}
+                                                        predeterminado={<span><i className="fas fa-ban"></i> No hay más registros</span>}
+                                                    >
                                                         <i className="fas fa-arrow-down"></i> Obtener más registros
                                                     </Show>
-
-                                                    <Show condicion={!method.next}>
-                                                        <i className="fas fa-ban"></i> No hay más registros
-                                                    </Show>
                                                 </Button>
-                                            </div>
+                                            </Show>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </Form>
-                    </div>
-                </Body>
-            </div>
-        )
-    }
-    
+                        </div>
+                    </Form>
+                </div>
+            </BoardSimple>
+        </div>
+    )
 }
+
+// server
+BlockApp.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    let id = atob(query.id) || '_error';
+    // request
+    let { success, app } = await authentication.get(`app/${id}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({ success: false, app: {} }));
+    // render
+    return { pathname, query, success, current_app: app };
+}
+
+// exportar
+export default BlockApp;
