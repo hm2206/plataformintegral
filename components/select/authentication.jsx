@@ -3,6 +3,41 @@ import { SelectBase } from './utils';
 import { authentication } from '../../services/apis';
 import { Select } from 'semantic-ui-react';
 
+const SelectSystem = ({ id = "id", name, value, onChange, refresh }) => {
+    return <SelectBase 
+        execute={true}
+        api={authentication}
+        url={`system`}
+        id={`select-system-${name}`}
+        value={id}
+        text="name"
+        obj="systems"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Sistema"
+        refresh={refresh}
+    />
+}
+
+const SelectSystemModule = ({ system_id, id = "id", name, value, onChange, refresh, disabled = false }) => {
+    return <SelectBase 
+        execute={false}
+        api={authentication}
+        url={`system/${system_id}/module`}
+        id={`select-system-module-${name}`}
+        value={id}
+        text="name"
+        obj="modules"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Sistema"
+        refresh={refresh}
+        disabled={disabled}
+    />
+}
+
 const SelectEntityNotUser = ({ id = "id", user_id, name, value, onChange, refresh }) => {
     return <SelectBase 
         execute={user_id}
@@ -172,6 +207,8 @@ const SelectAuthEntityDependencia = ({ entity_id, id = "id", name, value, onChan
 }
 
 export { 
+    SelectSystem,
+    SelectSystemModule,
     SelectDependencia,
     SelectDependenciaPerfilLaboral,
     SelectLaboral,

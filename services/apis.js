@@ -2,6 +2,7 @@ import axios from 'axios';
 import { url, credencials } from '../env.json';
 import Cookies from 'js-cookie';
 import NextCookies from 'next-cookies';
+import Swal from 'sweetalert2';
 
 
 let headers = async () => ({
@@ -51,6 +52,23 @@ export const onProgress = (progressEvent, callback = null) => {
     return typeof callback == 'function' ? callback(percent) : callback;
 } 
 
+
+/**
+ * Manejador de error de axíos
+ * @param {*} err 
+ * @param {*} callback 
+ */
+export const handleErrorRequest = (err, callback = null) => {
+    try {
+        let { data } = err.response;
+        if (typeof data != 'object') throw new Error(err.message);
+        if (typeof data.errors != 'object') throw new Error(data.message || err.message);
+        Swal.fire({ icon: 'warning', text: data.message || err.message });
+        return typeof callback == 'function' ? callback(data.errors || {}) : null;
+    } catch (error) {
+        Swal.fire({ icon: 'error', text: error.message });
+    }
+}
 
 /**
  *  api para consumir el authenticador
