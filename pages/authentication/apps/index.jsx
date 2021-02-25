@@ -1,220 +1,240 @@
-import React, {Component, Fragment} from 'react';
-import {Button, Form} from 'semantic-ui-react';
+import React, { useState, useContext } from 'react';
+import { Button, Form , Pagination } from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import {authentication} from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
-import {BtnFloat, Body} from '../../../components/Utils';
-import { AUTHENTICATE, AUTH } from '../../../services/auth';
-import { pageApps } from '../../../storage/actions/appsActions';
+import { BtnFloat } from '../../../components/Utils';
+import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { Confirm } from '../../../services/utils';
+import { system_store } from '../../../services/verify.json'; 
 import Swal from 'sweetalert2';
+import BoardSimple from '../../../components/boardSimple';
+import { AppContext } from '../../../contexts/AppContext';
 
-export default class SystemIndex extends Component {
+const AppIndex = ({ pathname, query, apps }) => {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            page: false,
-            loading: false,
-            estado: "1",
-            query_search: ""
-        }
+    // app
+    const app_context = useContext(AppContext)
 
-        this.getOption = this.getOption.bind(this);
+    // estados
+    const [form, setForm] = useState(JSON.parse(JSON.stringify(query)));
+
+    // cambiar filtros
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
     }
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let {query, pathname, store} = ctx;
-        query.page = query.page || 1;
-        query.query_search = query.query_search || "";
-        await store.dispatch(pageApps(ctx));
-        let { page_apps } = store.getState().apps;
-        return {query, pathname, page_apps}
-    }
-
-    componentDidMount = () => {
-        this.setting(this.props.query || {});
-    }
-
-    componentWillReceiveProps = (nextProps) => {
-        this.setState({ loading: false });
-    }
-
-    setting = (query = {}) => {
-        this.setState({
-            query_search: query.query_search || ""
-        })
-    }
-
-    handleInput = ({ name, value }) => {
-        this.setState({ [name]: value })
-    }
-
-    getOption = async (obj, key, index) => {
+    // opciones
+    const getOption = async (obj, key, index) => {
         let {pathname, push} = Router;
         let id = btoa(obj.id);
-        this.setState({ loading: true });
         switch (key) {
             case "edit":
             case "menu":
             case "block":
-                await push({ pathname: `${pathname}/${key}`, query: { id } });
+                let newQuery =  {};
+                newQuery.id = btoa(obj.id);
+                newQuery.href = btoa(location.href);
+                await push({ pathname: `${pathname}/${key}`, query: newQuery });
                 break;
             case "delete":
-                this.changeState(obj, 0);
+                changeState(obj, 0);
                 break;
             case "restore":
-                this.changeState(obj, 1);
+                changeState(obj, 1);
                 break;
             default:
                 break;
         }
-        this.setState({ loading: false });
     }
 
-    handleSearch = () => {
-        this.setState({ loading: true });
-        let { pathname, query, push } = Router;
+    // realizar búsqueda
+    const handleSearch = () => {
+        let { push } = Router;
         query.page = 1;
-        query.query_search = this.state.query_search;
+        query.query_search = form.query_search;
         push({ pathname, query });
     }
 
-    changeState = async (obj, condicion = 0) => {
-        let answer = await Confirm("warning", `¿Desea ${condicion ? 'restaurar' : 'desactivar'} al aplicación "${obj.name}"?`, `${condicion ? 'Restaurar' : 'Desactivar'}`);
-        if (answer) {
-            this.setState({ loading: true });
-            await authentication.post(`app/${obj.id}/state`, { state: condicion })
-            .then(async res => {
-                let { success, message } = res.data;
-                if (!success) throw new Error(message);
-                await  Swal.fire({ icon: 'success', text: message });
-                let { push, pathname } = Router;
-                await push({ pathname });
-            }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
-            this.setState({ loading: false });
-        }
+    // siguiente página
+    const handlePage = async (e, { activePage }) => {
+        let { push } = Router;
+        query.page = activePage;
+        await push({ pathname, query });
     }
 
-    render() {
+    // crear dependencia
+    const handleCreate = async () => {
+        let { push } = Router;
+        let newQuery = {};
+        newQuery.href = btoa(`${location.href}`)
+        push({ pathname: `${pathname}/create`, query: newQuery });
+    }
 
-        let {loading} = this.state;
-        let { page_apps } = this.props;
+    // cambiar estado
+    const changeState = async (obj, condicion = 0) => {
+        let answer = await Confirm("warning", `¿Desea ${condicion ? 'restaurar' : 'desactivar'} al aplicación "${obj.name}"?`, `${condicion ? 'Restaurar' : 'Desactivar'}`);
+        if (!answer) return false;
+        app_context.fireLoading(true);
+        await authentication.post(`app/${obj.id}/state?_method=PUT`, { state: condicion })
+        .then(async res => {
+            app_context.fireLoading(false);
+            let { message } = res.data;
+            await  Swal.fire({ icon: 'success', text: message });
+            Router.push(location.href);
+        }).catch(err => {
+            try {
+                app_context.fireLoading(false);
+                let { data } = err.response;
+                if (typeof data != 'object') throw new Error(err.message);
+                if (typeof data.errors != 'object') throw new Error(data.message || err.message);
+                Swal.fire({ icon: 'warning', text: err.message });
+            } catch (error) {
+                Swal.fire({ icon: 'error', text: error.message })
+            }
+        });
+    }
 
-        return (
-                <Form className="col-md-12">
-                    <Body>
-                        <Datatable titulo="Lista de Apps"
-                        isFilter={false}
-                        loading={loading}
-                        headers={
-                            ["#ID", "Nombre", "ClientID", "ClientSecret"]
+
+    return (
+        <Form className="col-md-12">
+            <BoardSimple
+                title="Aplicaciones"
+                info={["Lista de Aplicaciones"]}
+                bg="danger"
+                prefix={"AP"}
+                options={[]}
+            >
+                <Datatable isFilter={false} 
+                    headers={["#ID", "Nombre", "ClientID", "ClientSecret"]}
+                    index={[
+                        {
+                            key: "id",
+                            type: "text"
+                        },
+                        {
+                            key: "name",
+                            type: "text"
+                        }, 
+                        {
+                            key: "client_id",
+                            type: "icon"
+                        },
+                        {
+                            key: "client_secret",
+                            type: "icon",
+                            bg: "dark"
                         }
-                        index={
-                            [
-                                {
-                                    key: "id",
-                                    type: "text"
-                                }, {
-                                    key: "name",
-                                    type: "text"
-                                }, {
-                                    key: "client_id",
-                                    type: "icon"
-                                }, {
-                                    key: "client_secret",
-                                    type: "icon",
-                                    bg: "dark"
-                                }
-                            ]
+                    ]}
+                    options={[
+                        {
+                            key: "edit",
+                            icon: "fas fa-pencil-alt",
+                            title: "Editar Aplicación",
+                            rules: {
+                                key: "state",
+                                value: 1
+                            }
+                        },
+                        {
+                            key: "menu",
+                            icon: "fas fa-list",
+                            title: "Agregar Menus",
+                            rules: {
+                                key: "state",
+                                value: 1
+                            }
+                        },
+                        {
+                            key: "block",
+                            icon: "fas fa-ban",
+                            title: "Restricciones",
+                        },
+                        {
+                            key: "delete",
+                            icon: "fas fa-times",
+                            title: "Desactivar Aplicación",
+                            rules: {
+                                key: "state",
+                                value: 1
+                            }
+                        },
+                        {
+                            key: "restore",
+                            icon: "fas fa-sync",
+                            title: "Restaurar Aplicación",
+                            rules: {
+                                key: "state",
+                                value: 0
+                            }
                         }
-                        options={
-                            [
-                                {
-                                    key: "edit",
-                                    icon: "fas fa-pencil-alt",
-                                    title: "Editar Aplicación",
-                                    rules: {
-                                        key: "state",
-                                        value: 1
-                                    }
-                                },
-                                {
-                                    key: "menu",
-                                    icon: "fas fa-list",
-                                    title: "Agregar Menus",
-                                    rules: {
-                                        key: "state",
-                                        value: 1
-                                    }
-                                },
-                                {
-                                    key: "block",
-                                    icon: "fas fa-ban",
-                                    title: "Restricciones",
-                                },
-                                {
-                                    key: "delete",
-                                    icon: "fas fa-times",
-                                    title: "Desactivar Aplicación",
-                                    rules: {
-                                        key: "state",
-                                        value: 1
-                                    }
-                                },
-                                {
-                                    key: "restore",
-                                    icon: "fas fa-sync",
-                                    title: "Restaurar Aplicación",
-                                    rules: {
-                                        key: "state",
-                                        value: 0
-                                    }
-                                }
-                            ]
-                        }
-                        optionAlign="text-center"
-                        getOption={this.getOption}
-                        data={page_apps.data || []}>
-                        <div className="form-group">
-                            <div className="row">
+                    ]}
+                    optionAlign="text-center"
+                    getOption={getOption}
+                    data={apps.data || []}
+                >
+                    <div className="form-group">
+                        <div className="row">
+                            <div className="col-md-4 mb-1">
+                                <input type="text"
+                                    value={form.query_search || ""}
+                                    name="query_search"
+                                    onChange={({ target }) => handleInput(target)}
+                                    placeholder="Buscar por: nombre"
+                                />
+                            </div>
 
-                                <div className="col-md-4 mb-1">
-                                    <input type="text"
-                                        value={this.state.query_search || ""}
-                                        name="query_search"
-                                        onChange={(e) => this.handleInput(e.target)}
-                                        placeholder="Buscar por: nombre"
-                                    />
-                                </div>
+                            <div className="col-md-2">
+                                <Button onClick={handleSearch}
+                                    color="blue"
+                                >
+                                    <i className="fas fa-search mr-1"></i>
+                                    <span>Buscar</span>
+                                </Button>
+                            </div>
 
-                                <div className="col-md-2">
-                                    <Button onClick={this.handleSearch}
-                                        disabled={this.state.loading}
-                                        color="blue"
-                                    >
-                                        <i className="fas fa-search mr-1"></i>
-                                        <span>Buscar</span>
-                                    </Button>
-                                </div>
+                            <div className="col-md-12">
+                                <hr/>
                             </div>
                         </div>
-                    </Datatable>
-                </Body>
+                    </div>
+                </Datatable>
+                {/* paginacion */}
+                <div className="text-center">
+                    <hr/>
+                    <Pagination activePage={apps && apps.page || 1} 
+                        totalPages={apps && apps.lastPage || 1}
+                        onPageChange={handlePage}
+                    />
+                </div>
+            </BoardSimple>
 
-                <BtnFloat
-                    onClick={async (e) => {
-                        await this.setState({ loading: true });
-                        let { pathname, push } = Router;
-                        push({ pathname: `${pathname}/create` });
-                    }}
-                >
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
-            </Form>
-        )
-    }
-
+            <BtnFloat onClick={handleCreate}>
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
+        </Form>
+    )
 }
+
+// server 
+AppIndex.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx; 
+    // verificar 
+    await VERIFY(ctx, system_store.AUTHENTICATION, pathname);
+    query.page = typeof query.page == 'undefined' ? 1 : query.page;
+    query.query_search = typeof query.query_search == 'undefined' ? "" : query.query_search;
+    let query_string = `page=${query.page}&query_search=${query.query_search}`;
+    // listar apps
+    let { success, apps } = await authentication.get(`app?${query_string}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({ success: false, apps: {} }));
+    // response
+    return { pathname, query, success, apps };
+}
+
+// exportar
+export default AppIndex;
