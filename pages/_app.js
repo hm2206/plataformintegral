@@ -283,6 +283,7 @@ class MyApp extends App {
             <link rel="stylesheet" href="/css/page_loading.css" />
             {!isLoggin ?  <link rel="stylesheet" href="/css/no_auth_page_loading.css" /> : null}
             {/* custom */}
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
             <link rel="stylesheet" href="/css/custom.css" />
 
             {/* WPA */}
