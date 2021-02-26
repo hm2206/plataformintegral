@@ -76,11 +76,16 @@ const SystemModule = ({ pathname, query, success, system }) => {
         getModules();
     }, []);
 
+    // next page
+    useEffect(() => {
+        if (current_page > 1) getModules(true);
+    }, [current_page]);
+
     // renderizar
     return (
             <div className="col-md-12">
                 <BoardSimple
-                    title={<span>Sistem: {system && system.name || ""}</span>}
+                    title={<span>Sistema: {system && system.name || ""}</span>}
                     info={[`Agregar módulos`]}
                     prefix={<BtnBack/>}
                     bg="light"
@@ -182,17 +187,18 @@ const SystemModule = ({ pathname, query, success, system }) => {
                                         <div className="col-md-12">
                                             <Button fluid
                                                 disabled={!(current_last_page >= (current_page + 1))}
+                                                onClick={(e) => setCurrentPage(current_page + 1)}
                                             >
                                                 <i className="fas fa-arrow-down"></i> Obtener más datos
                                             </Button>
-                                    </div>
+                                        </div>
                                     </Show>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </Form>
-            </BoardSimple>
-        </div>
+                    </Form>
+                </BoardSimple>
+            </div>
     )
 }
     
