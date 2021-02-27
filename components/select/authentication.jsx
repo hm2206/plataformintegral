@@ -3,6 +3,78 @@ import { SelectBase } from './utils';
 import { authentication } from '../../services/apis';
 import { Select } from 'semantic-ui-react';
 
+const SelectDocumentType = ({ id = "id", name, value, onChange, refresh, disabled = false }) => {
+    return <SelectBase 
+        execute={true}
+        api={authentication}
+        url={`document_type`}
+        id={`select-documen_type-${name}`}
+        value={id}
+        text="name"
+        obj="document_type"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar tip. Documento"
+        refresh={refresh}
+        disabled={disabled}
+    />
+}
+
+const SelectDepartamento = ({ id = "id", name, value, onChange, refresh, disabled = false }) => {
+    return <SelectBase 
+        execute={true}
+        api={authentication}
+        url={`departamento`}
+        id={`select-departamento-${name}`}
+        value={id}
+        text="departamento"
+        obj="departamento"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Departamento"
+        refresh={refresh}
+        disabled={disabled}
+    />
+}
+
+const SelectProvincia = ({ id = "id", departamento_id,  name, value, onChange, refresh, disabled = false }) => {
+    return <SelectBase 
+        execute={false}
+        api={authentication}
+        url={`departamento/${departamento_id}/provincia`}
+        id={`select-departamento-provincia-${name}`}
+        value={id}
+        text="provincia"
+        obj="provincia"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Provincia"
+        refresh={refresh}
+        disabled={disabled}
+    />
+}
+
+const SelectDistrito = ({ id = "id", departamento_id, provincia_id,  name, value, onChange, refresh, disabled = false }) => {
+    return <SelectBase 
+        execute={false}
+        api={authentication}
+        url={`departamento/${departamento_id}/provincia/${provincia_id}/distrito`}
+        id={`select-departamento-provincia-distrito-${name}`}
+        value={id}
+        text="distrito"
+        obj="distrito"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Distrito"
+        refresh={refresh}
+        disabled={disabled}
+    />
+}
+
 const SelectSystem = ({ id = "id", name, value, onChange, refresh }) => {
     return <SelectBase 
         execute={true}
@@ -207,6 +279,10 @@ const SelectAuthEntityDependencia = ({ entity_id, id = "id", name, value, onChan
 }
 
 export { 
+    SelectDocumentType,
+    SelectDepartamento,
+    SelectProvincia,
+    SelectDistrito,
     SelectSystem,
     SelectSystemModule,
     SelectDependencia,

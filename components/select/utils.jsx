@@ -142,6 +142,7 @@ const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, ob
                     name={name}
                     onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
                     value={`${valueChange || ""}`}
+                    compact
                 />
 }
 
