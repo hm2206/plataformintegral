@@ -1,125 +1,150 @@
-import React, { Component } from 'react'
+import React, { useEffect, useState } from 'react'
 import Modal from '../../modal';
-import atob from 'atob';
-import { Button, Form, List, Image, Pagination } from 'semantic-ui-react';
-import Swal from 'sweetalert2';
-import Router from 'next/router';
+import { Button, Form, List, Image, } from 'semantic-ui-react';
 import { authentication } from '../../../services/apis';
+import Show from '../../show'
+import Skeleton from 'react-loading-skeleton';
 
-export default class AssignPerson extends Component
-{
+const PlaceholderItem = () => {
+    // render
+    return (
+        <List.Item>
+            <List.Content>
+                <div className="mb-1">
+                    <Skeleton height="40px"/>
+                </div>
+                <div className="mb-1">
+                    <Skeleton height="40px"/>
+                </div>
+                <div className="mb-1">
+                    <Skeleton height="40px"/>
+                </div>
+                <div className="mb-1">
+                    <Skeleton height="40px"/>
+                </div>
+            </List.Content>
+        </List.Item>
+    )
+}
 
-    state = {
-        loader: false,
-        people: {
-            data: []
-        },
-        query_search: ""
-        
+const AssignPerson = ({ isClose, getAdd = null }) => {
+
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [query_search, setQuerySearch] = useState("");
+    const [datos, setDatos] = useState([]);
+    const [current_page, setCurrentPage] = useState(1);
+    const [current_last_page, setCurrentLastPage] = useState(0);
+    const [current_total, setCurrentTotal] = useState(0);
+    const [is_search, setIsSearch] = useState(false);
+
+    const getDatos = async (add = false) => {
+        setCurrentLoading(true);
+        await authentication.get(`person?page=${current_page}&query_search=${query_search}`)
+        .then(res => {
+            let { people } = res.data;
+            setDatos(add ? [...datos, ...people.data] : people.data);
+            setCurrentTotal(people.total || 0);
+            setCurrentLastPage(people.lastPage || 0);
+        }).catch(err => console.log(err));
+        setCurrentLoading(false);
     }
 
-    componentDidMount = async () => {
-        await this.getPeople(1, this.state);
-    }
+    // primera carga
+    useEffect(() => {
+        getDatos();
+    }, []);
 
-    getPeople = async (page = 1, state, update = false) => {
-        this.setState({ loader: true });
-        await authentication.get(`person?page=${page}&query_search=${state.query_search || ""}`)
-        .then(res => this.setState(state => {
-            let { data, lastPage, page, total } = res.data;
-            state.people.data = update ? data : [...state.people.data, ...data];
-            state.people.lastPage = lastPage;
-            state.people.page = page;
-            state.people.total = total;
-            return { people: state.people };
-        }))
-        .catch(err => console.log(err.message));
-        this.setState({ loader: false });
-    }
-
-    handlePage = async (nextPage) => {
-        this.setState({ loader: true });
-        await this.getPeople(nextPage, this.state);
-    }
-
-    handleAdd = async (obj) => {
-        let { getAdd, local } = this.props;
-        if (typeof getAdd == 'function') {
-            let { push, pathname, query } = Router;
-            await getAdd(obj);
-            if (!local) {
-                query.assign = "";
-                push({ pathname, query });
-            }
+    // buscador
+    useEffect(() => {
+        if (is_search) {
+            getDatos();
+            setIsSearch(false);
         }
-    }
+    }, [is_search]);
 
-    render() {
+    // next page
+    useEffect(() => {
+        if (current_page > 1) getDatos(true);
+    }, [current_page]);
 
-        let { loader, people, query_search } = this.state;
-
-        return (
-            <Modal
-                show={true}
-                {...this.props}
-                titulo={<span><i className="fas fa-user"></i> Asignar Persona</span>}
-            >
-                <Form className="card-body" loading={loader}>
-
-                    <div className="row justify-content-center pl-4 pr-4">
-                        <div className="col-md-10 mb-2 text-left">
-                            <Form.Field>
-                                <input type="text"
-                                    placeholder="Buscar persona por: Nombre Completos"
-                                    value={query_search || ""}
-                                    name="query_search"
-                                    onChange={({ target }) => this.setState({ [target.name]: target.value })}
-                                />
-                            </Form.Field>
-                        </div>
-
-                        <div className="col-md-2">
-                            <Button fluid
-                                onClick={async (e) => {
-                                    await this.getPeople(1, this.state, true)
-                                }}
-                            >
-                                <i className="fas fa-search"></i>
-                            </Button>
-                        </div>
+    // render
+    return (
+        <Modal
+            show={true}
+            isClose={isClose}
+            titulo={<span><i className="fas fa-user"></i> Asignar Persona</span>}
+        >
+            <Form className="card-body">
+                <div className="row justify-content-center pl-4 pr-4">
+                    <div className="col-md-10 mb-2 text-left">
+                        <Form.Field>
+                            <input type="text"
+                                placeholder="Buscar persona por: Nombre Completos"
+                                value={query_search || ""}
+                                name="query_search"
+                                onChange={({ target }) => setQuerySearch(target.value)}
+                            />
+                        </Form.Field>
                     </div>
 
-                    <div className="pl-4 mt-4 pr-4">
-                        <List divided verticalAlign='middle'>
-                            {people && people.data && people.data.map(obj => 
-                                <List.Item key={`list-people-${obj.id}`}>
-                                    <List.Content floated='right'>
-                                        <Button color="blue"
-                                            onClick={(e) => this.handleAdd(obj)}
-                                        >
-                                            <i className="fas fa-plus"></i>
-                                        </Button>
-                                    </List.Content>
-                                    <Image avatar src={obj.image ? `${obj.image && obj.image_images && obj.image_images.image_50x50}` : '/img/base.png'} 
-                                        style={{ objectFit: 'cover' }}
-                                    />
-                                    <List.Content><span className="uppercase">{obj.fullname}</span></List.Content>
-                                </List.Item>
-                            )}
-                        </List>    
-                    </div>
-
-                    <div className="col-md-12 mt-3">
+                    <div className="col-md-2">
                         <Button fluid
-                            disabled={loader || people.lastPage == people.page}
-                            onClick={(e) => this.handlePage(people.page + 1)}
+                            onClick={(e) => {
+                                setCurrentPage(1);
+                                setIsSearch(true);
+                            }}
                         >
-                            Obtener más registros
+                            <i className="fas fa-search"></i>
                         </Button>
                     </div>
-                </Form>
-            </Modal>
-        );
-    }
+                </div>
 
+                <div className="pl-4 mt-4 pr-4">
+
+                    <List divided verticalAlign='middle'>
+                        {datos.map(obj => 
+                            <List.Item key={`list-people-${obj.id}`}>
+                                <List.Content floated='right'>
+                                    <Button color="blue"
+                                        onClick={(e) => typeof getAdd == 'function' ? getAdd(obj) : null}
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                    </Button>
+                                </List.Content>
+                                <Image avatar src={obj.image ? `${obj.image && obj.image_images && obj.image_images.image_50x50}` : '/img/base.png'} 
+                                    style={{ objectFit: 'cover' }}
+                                />
+                                <List.Content><span className="uppercase">{obj.fullname}</span></List.Content>
+                            </List.Item>
+                        )}
+
+                        {/* no hay registros */}
+                        <Show condicion={!current_loading && !datos.length}>
+                            <List.Item>
+                                <List.Content>
+                                    <div className="text-center text-muted"><b>No hay datos disponibles</b></div>
+                                </List.Content>
+                            </List.Item>
+                        </Show>
+
+                        {/* preloader */}
+                        <Show condicion={current_loading}>
+                            <PlaceholderItem/>
+                        </Show>
+                    </List>    
+                </div>
+
+                <div className="col-md-12 mt-3">
+                    <Button fluid
+                        disabled={current_loading || !(current_last_page >= (current_page + 1))}
+                        onClick={(e) => setCurrentPage(current_page + 1)}
+                    >
+                        <i className="fas fa-arrow-down"></i> Obtener más registros
+                    </Button>
+                </div>
+            </Form>
+        </Modal>
+    );
 }
+
+export default AssignPerson;

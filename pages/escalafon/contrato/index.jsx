@@ -2,19 +2,22 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Button, Form, Select, Pagination } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import DataTable from '../../../components/datatable';
-import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
 import btoa from 'btoa';
-import { Body } from '../../../components/Utils';
 import { unujobs } from '../../../services/apis';
 import { SelectCargo } from '../../../components/select/cronograma';
 import { AppContext } from '../../../contexts/AppContext';
 import Show from '../../../components/show';
+import BoardSimple from '../../../components/boardSimple';
+import UpdateRemuneracionMassive from '../../../components/contrato/updateRemuneracionMassive';
 
 const Contrato = ({ success, infos, query }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // estados
+    const [option, setOption] = useState("");
 
     // estados
     const [form, setForm] = useState({ 
@@ -29,12 +32,12 @@ const Contrato = ({ success, infos, query }) => {
 
     // opciones
     const handleOption = (obj, key, index) => {
-        let { pathname, push } = Router;
+        let { pathname, push, asPath } = Router;
         switch (key) {
-            case 'pay':
             case 'edit':
                 let id = btoa(obj.id);
-                let query = { clickb: 'Info', id };
+                let href = btoa(asPath || "");
+                let query = { clickb: 'Info', id, href };
                 push({ pathname: `${pathname}/${key}`, query });
                 break;
             default:
@@ -74,10 +77,16 @@ const Contrato = ({ success, infos, query }) => {
     // render
     return (
         <div className="col-md-12">
-            <Body>
+            <BoardSimple
+                prefix="CN"
+                title="Contratos y Nombramientos"
+                info={["Listado de contratos"]}
+                bg="danger"
+                options={[]}
+            >
                 <Form>
                     <div className="col-md-12">
-                        <DataTable titulo={<span>Lista de Contratos</span>}
+                        <DataTable
                             headers={["#ID", "Apellidos y Nombres", "Planilla", "Part. Pres", "Estado"]}
                             data={infos.data || []}
                             index={[
@@ -159,14 +168,12 @@ const Contrato = ({ success, infos, query }) => {
                             />
                         </div>
                     </div>
-
-                    <BtnFloat
-                        onClick={(e) => Router.push({ pathname: `${Router.pathname}/register` })}
-                    >
-                        <i className="fas fa-plus"></i>
-                    </BtnFloat>
                 </Form>
-            </Body>
+
+                <Show condicion={option == 'UPDATE_REMUNERACION_MASSIVE'}>
+                    <UpdateRemuneracionMassive isClose={(e) => setOption("")}/>
+                </Show>
+            </BoardSimple>
     </div>)
 }
 

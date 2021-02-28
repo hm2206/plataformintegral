@@ -1,266 +1,282 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, parseOptions } from '../../../services/utils';
+import React, { useEffect, useState } from 'react';
+import { BtnBack } from '../../../components/Utils';
+import { Confirm } from '../../../services/utils';
 import Router from 'next/router';
 import { Form, Button, Select, Checkbox, List, Image } from 'semantic-ui-react'
-import { authentication } from '../../../services/apis';
+import { authentication, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
 import atob from 'atob';
 import Show from '../../../components/show';
+import BoardSimple from '../../../components/boardSimple'
 
+const ItemMethod = ({ user, block, disabled, method, onAction = null }) => {
 
-export default class BlockUserb extends Component
-{
+    const [is_render, setIsRender] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
-    }
-
-    state = {
-        loading: false,
-        edit: false,
-        block: 1,
-        query_search: "",
-        planillas: [],
-        method: {
-            next: false,
-            page: 1,
-            last_page: 1,
-            data: []
-        },
-        old: {},
-        form: {},
-        files: {},
-        errors: {},
-        check: false,
-        person: {}
-    }
-
-    componentWillMount = async () => {
-        await this.findUser();
-        this.getMethodApp();
-    }
-
-    componentDidUpdate = async (prevProps, prevState) => {
-        let { block } = this.state;
-        if (block != prevState.block) this.getMethodApp(true);
-    }
-
-    findUser = async () => {
-        let { query } = this.props;
-        let id = query.id ? atob(query.id) : "__error";
-        this.setState({ loading: true });
-        await authentication.get(`user/${id}`)
-        .then(res => this.setState({ form: res.data }))
-        .catch(err => console.log(err));
-        this.setState({ loading: false });
-    }
-
-    getMethodApp = async (changed = false) => {
-        this.setState({ loading: true });
-        if (changed) await this.setState({ method: { next: false, page: 1, last_page: 1, data: [] } });
-        let { form, block, method, query_search } = this.state;
-        await authentication.get(`user/${form.id}/block?block=${block}&page=${method.page}&query_search=${query_search}`)
-        .then(res => {
-            let { data, lastPage, page } = res.data;
-            this.setState(state => {
-                state.method.data = changed ? data : [...state.method.data, ...data];
-                state.method.page = page + 1;
-                state.method.last_page = lastPage;
-                state.method.next = lastPage > page;
-                return { method: state.method };
-            });
-        }).catch(err => console.log(err.message))
-        this.setState({ loading: false });
-    }
-
-    add = async (obj, index) => {
-        await  this.handleRequest(`block_method_user`, obj, index);
-    }
-
-    delete = async (obj, index) => {
-        await this.handleRequest(`block_method_user/${obj.id}/delete`, obj, index);
-    }
-
-    handleRequest = async (path, obj, index) => {
-        this.setState({ loading: true });
-        let { form } = this.state;
+    const handleAction = async (is_delete = false) => {
+        let answer = await Confirm(`warning`, `¿Estas seguro?`, 'Estoy seguro');
+        if (!answer) return false;
+        setLoading(true);
+        let payload = {
+            user_id: user.id,
+            method_id: method.id
+        }
+        // generar ruta
+        let path = is_delete ? `block_method_user/${method.id}?_method=DELETE` : 'block_method_user';
         // request
-        await authentication.post(path, {
-            user_id: form.id,
-            method_id: obj.id
-        })
+        await authentication.post(path, payload)
         .then(res => {
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
+            let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            this.setState(state => {
-                state.method.data.splice(index, 1);
-                return { method: state.method }
-            });
-        }).catch(err => Swal.fire({ icon: 'error', text: message }));
-        this.setState({ loading: false });
+            setIsRender(false);
+            if (typeof onAction == 'function') onAction(method);
+        }).catch(err => handleErrorRequest(err));
+        setLoading(false);
     }
 
-    render() {
+    if (!is_render) return null;
 
-        let { pathname, query } = this.props;
-        let { form, loading, method } = this.state;
+    // render
+    return (
+        <List.Item>
+            <List.Content floated='right'>
+                <Show condicion={block}>
+                    <Button color={'green'}
+                        className="mt-1"
+                        title={'Permitir'}
+                        disabled={disabled || loading}
+                        loading={loading}
+                        onClick={(e) => handleAction(true)}
+                    >
+                        <i className="fas fa-check"></i>
+                    </Button>
+                </Show>
 
-        return (
-            <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Restricciones del Usuario
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
-                            <div className="col-md-9">
-                                <div className="row justify-content-end">
-                                    <div className="col-md-12">
-                                        <h4><i className="fas fa-user"></i> Datos de Usuario</h4>
-                                        <hr/>
-                                    </div>
+                <Show condicion={!block}>
+                    <Button color={'red'}
+                        className="mt-1"
+                        title={'Bloquear'}
+                        disabled={disabled || loading}
+                        loading={loading}
+                        onClick={(e) => handleAction(false)}
+                    >
+                        <i className="fas fa-ban"></i>
+                    </Button>
+                </Show>
+            </List.Content>
+            
+            <List.Content>
+                <span className="uppercase mt-1">{method.system}</span>
+                <br/>
+                <span className="badge badge-dark mt-1 mb-2">
+                    {method.name} - {method.action_type}
+                </span>
+                <br/>
+                <span className="badge badge-warning ml-1 mt-1 mb-2">
+                    {method.url}
+                </span>
+                <br/>
+                {method.description}
+            </List.Content>
+        </List.Item>
+    )
+}
 
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field>
-                                            <label htmlFor="">Username</label>
-                                            <input type="text" 
-                                                name="name"
-                                                placeholder="Ingrese un nombre"
-                                                value={form.username || ""}
-                                                disabled={true}
-                                                readOnly
+const BlockUser = ({ pathname, query, success, user }) => {
+
+    const [block, setBlock] = useState(false);
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [query_search, setQuerySearch] = useState("");
+    const [is_search, setIsSearch] = useState(false);
+    const [datos, setDatos] = useState([]);
+    const [current_page, setCurrentPage] = useState(1);
+    const [current_last_page, setCurrentLastPage] = useState(0);
+    const [current_total, setCurrentTotal] = useState(0);
+
+    // obtener métodos del usuario
+    const getMethodApp = async (add = false) => {
+        setCurrentLoading(true);
+        let query_string = `block=${block ? 1 : 0}&page=${current_page}&query_search=${query_search}`;
+        await authentication.get(`user/${user.id}/block?${query_string}`)
+        .then(res => {
+            let { methods } = res.data;
+            setCurrentLastPage(methods.lastPage || 0);
+            setCurrentTotal(methods.total || 0);
+            setDatos(add ? [...datos, ...methods.data] : methods.data);
+        }).catch(err => console.log(err.message))
+        setCurrentLoading(false);
+    }
+
+    // eliminar item
+    const handleDeleteItem = (index) => {
+        let newDatos = JSON.parse(JSON.stringify(datos));
+        newDatos.splice(index, 1);
+        setDatos(newDatos);
+    }
+
+    // primera carga
+    useEffect(() => {
+        getMethodApp();
+    }, []);
+
+    // realizar busqueda
+    useEffect(() => {
+        if (is_search) {
+            getMethodApp();
+            setIsSearch(false);
+        }
+    }, [is_search]);
+
+    // next page
+    useEffect(() => {
+        if (current_page > 1) getMethodApp(true);
+    }, [current_page]);
+
+    // renderizar
+    return (
+        <div className="col-md-12">
+            <BoardSimple
+                options={[]}
+                title={<span>Usuario: <b className="capitalize">{user.username}</b></span>}
+                info={["Restricciones del Usuario"]}
+                prefix={<BtnBack/>}
+                bg="light"
+            >
+                <div className="card-body">
+                    <Form className="row justify-content-center">
+                        <div className="col-md-9">
+                            <div className="row justify-content-end">
+                                <div className="col-md-12">
+                                    <h4><i className="fas fa-user"></i> Datos de Usuario</h4>
+                                    <hr/>
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field>
+                                        <label htmlFor="">Username</label>
+                                        <input type="text" 
+                                            name="name"
+                                            placeholder="Ingrese un nombre"
+                                            value={user.username || ""}
+                                            readOnly
+                                        />
+                                    </Form.Field>
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field>
+                                        <label htmlFor="">Email</label>
+                                        <input type="text" 
+                                            value={user.email || ""}
+                                            readOnly
+                                        />
+                                    </Form.Field>
+                                </div>
+
+                                <div className="col-md-12 mt-4">
+                                    <hr/>
+                                    <div className="row">
+                                        <div className="col-md-10 col-10">
+                                            <i className={`fas ${!block ? 'fa-shield-alt text-success' : 'fa-ban text-red'}`}></i> Metodos {!block ? 'Permitidos' : 'Bloqueados'}
+                                        </div>
+                                        
+                                        <div className="col-md-2 col-2">
+                                            <Checkbox 
+                                                toggle 
+                                                name="block" 
+                                                checked={block ? false : true}
+                                                onChange={(e, obj) => {
+                                                    setBlock(obj.checked ? false : true)
+                                                    setCurrentPage(1);
+                                                    setIsSearch(true);
+                                                }}
+                                                disabled={current_loading}
                                             />
-                                        </Form.Field>
-                                    </div>
+                                        </div>
 
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field>
-                                            <label htmlFor="">Email</label>
-                                            <input type="text" 
-                                                value={form.email || ""}
-                                                disabled={true}
-                                                readOnly
-                                            />
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12 mt-4">
-                                        <hr/>
-                                        <div className="row">
-                                            <div className="col-md-10 col-10">
-                                                <i className={`fas ${!this.state.block ? 'fa-shield-alt text-success' : 'fa-ban text-red'}`}></i> Metodos {!this.state.block ? 'Permitidos' : 'Bloqueados'}
-                                            </div>
-                                            
-                                            <div className="col-md-2 col-2">
-                                                <Checkbox 
-                                                    toggle 
-                                                    name="block" 
-                                                    checked={this.state.block ? false : true}
-                                                    onChange={(e, obj) => this.setState({ block: obj.checked ? 0 : 1 })}
-                                                    disabled={loading}
+                                        <div className="col-md-10 col-10">
+                                            <Form.Field>
+                                                <input type="text"
+                                                    placeholder="Buscar Método por: Nombre, URL y Sistema"
+                                                    name="query_search"
+                                                    value={query_search || ""}
+                                                    onChange={({ target }) => setQuerySearch(target.value)}
                                                 />
-                                            </div>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-10 col-10">
-                                                <Form.Field>
-                                                    <input type="text"
-                                                        placeholder="Buscar Método por: Nombre, URL y Sistema"
-                                                        name="query_search"
-                                                        value={this.state.query_search || ""}
-                                                        onChange={({ target }) => this.setState({ [target.name]: target.value })}
+                                        <div className="col-md-2 col-2">
+                                            <Button fluid
+                                                disabled={current_loading}
+                                                onClick={(e) => {
+                                                    setCurrentPage(1);
+                                                    setIsSearch(true)
+                                                }}
+                                            >
+                                                <i className="fas fa-search"></i>
+                                            </Button>
+                                        </div>
+
+                                        <div className="col-md-12">
+                                            <hr/>
+                                        </div>
+
+                                        <div className="col-md-12">
+                                            <List divided verticalAlign='middle'>
+                                                {datos.map((obj, index) => 
+                                                    <ItemMethod key={`list-people-${obj.id}`}
+                                                        user={user}
+                                                        method={obj}
+                                                        disabled={current_loading}
+                                                        block={block}
+                                                        onAction={handleDeleteItem}
                                                     />
-                                                </Form.Field>
-                                            </div>
+                                                )}
+                                                {/* no hay datos */}
+                                                <Show condicion={!current_loading && !datos.length}>
+                                                    <List.Item>
+                                                        <List.Content>
+                                                            <div className="text-center text-muted">No hay datos disponibles</div>
+                                                        </List.Content>
+                                                    </List.Item>
+                                                </Show>
+                                            </List>    
+                                        </div>
 
-                                            <div className="col-md-2 col-2">
-                                                <Button fluid
-                                                    disabled={loading}
-                                                    onClick={(e) => {
-                                                        this.getMethodApp(true);
-                                                    }}
-                                                >
-                                                    <i className="fas fa-search"></i>
-                                                </Button>
-                                            </div>
-
-                                            <div className="col-md-12">
-                                                <hr/>
-                                            </div>
-
-                                            <div className="col-md-12">
-                                                <List divided verticalAlign='middle'>
-                                                    {method.data.map((obj, index) => 
-                                                        <List.Item key={`list-people-${obj.id}`}>
-                                                            <List.Content floated='right'>
-                                                                <Show condicion={this.state.block}>
-                                                                    <Button color={'olive'}
-                                                                        className="mt-1"
-                                                                        title="Permitir"
-                                                                        disabled={loading}
-                                                                        onClick={(e) => this.delete(obj, index)}
-                                                                    >
-                                                                        <i className={`fas fa-check`}></i>
-                                                                    </Button>
-                                                                </Show>
-
-                                                                <Show condicion={!this.state.block}>
-                                                                    <Button color={'red'}
-                                                                        className="mt-1"
-                                                                        title={'Bloquear'}
-                                                                        disabled={loading}
-                                                                        onClick={(e) => this.add(obj, index)}
-                                                                    >
-                                                                        <i className="fas fa-ban"></i>
-                                                                    </Button>
-                                                                </Show>
-                                                            </List.Content>
-                                                            <List.Content>
-                                                                <span className="uppercase mt-1">{obj.system}</span>
-                                                                <br/>
-                                                                <span className="badge badge-dark mt-1 mb-2">
-                                                                    {obj.name} - {obj.action_type}
-                                                                </span>
-                                                                <br/>
-                                                                <span className="badge badge-warning ml-1 mt-1 mb-2">
-                                                                    {obj.url}
-                                                                </span>
-                                                                <br/>
-                                                                {obj.description}
-                                                            </List.Content>
-                                                        </List.Item>
-                                                    )}
-                                                </List>    
-                                            </div>
-
-                                            <div className="col-md-12 mt-4">
-                                                <hr/>
-                                                <Button fluid
-                                                    disabled={!method.next}
-                                                    onClick={(e) => this.getMethodApp()}
-                                                >
-                                                    <Show condicion={method.next}>
-                                                        <i className="fas fa-arrow-down"></i> Obtener más registros
-                                                    </Show>
-
-                                                    <Show condicion={!method.next}>
-                                                        <i className="fas fa-ban"></i> No hay más registros
-                                                    </Show>
-                                                </Button>
-                                            </div>
+                                        <div className="col-md-12 mt-4">
+                                            <hr/>
+                                            <Button fluid
+                                                disabled={current_loading || !(current_last_page >= (current_page + 1))}
+                                                onClick={(e) => setCurrentPage(current_page + 1)}
+                                            >
+                                                <i className="fas fa-arrow-down"></i> Obtener más registros
+                                            </Button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </Form>
-                    </div>
-                </Body>
-            </div>
-        )
-    }
-    
+                        </div>
+                    </Form>
+                </div>
+            </BoardSimple>
+        </div>
+    )
 }
+
+// server 
+BlockUser.getInitialProps = async (ctx) => {
+    await AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // obtener usuario
+    let id = query.id ? atob(query.id) : "__error";
+    const { success, user } = await authentication.get(`user/${id}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({ success: false, user: {} }));
+    // response
+    return { query, pathname, success, user };
+}
+
+// exportar
+export default BlockUser;

@@ -92,7 +92,7 @@ const Contrato = ({ success, infos, query }) => {
             <BoardSimple
                 prefix="CN"
                 title="Contratos y Nombramientos"
-                info={["Listado de contratos y nombramientos de los trabajadores"]}
+                info={["Listado de contratos"]}
                 bg="danger"
                 options={[
                     { key: "UPDATE_REMUNERACION_MASSIVE", title: 'Actualizar masivamente', icon: 'fas fa-coins' }

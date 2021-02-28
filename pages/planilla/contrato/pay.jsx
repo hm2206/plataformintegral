@@ -68,8 +68,8 @@ const Pay = ({ success, info, query }) => {
             <BoardSimple
                 bg="light"
                 prefix={<BtnBack/>}
-                title="Configuración de contrato"
-                info={['Configurar remuneraciones, descuentos y aportaciones']}
+                title="Contrato"
+                info={['Configuración de contrato']}
                 onOption={handleOption}
                 options={[
                     { key: 'sync', title: 'Sincronizar contrato', icon: 'fas fa-sync' }

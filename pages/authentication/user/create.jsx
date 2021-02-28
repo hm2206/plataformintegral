@@ -1,92 +1,71 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl } from '../../../services/utils';
+import React, { useState } from 'react';
+import { BtnBack } from '../../../components/Utils';
 import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
-import { authentication } from '../../../services/apis';
+import { Form, Button } from 'semantic-ui-react'
+import { authentication, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
 import AssignPerson from '../../../components/authentication/user/assignPerson';
-import { tipo_documento } from '../../../services/storage.json';
 import {  AUTHENTICATE } from '../../../services/auth';
+import BoardSimple from '../../../components/boardSimple';
+import ContentControl from '../../../components/contentControl'
+import { Confirm } from '../../../services/utils';
 
 
-export default class CreateUser extends Component
-{
+const CreateUser = ({ pathname, query }) => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    // estados
+    const [person, setPerson] = useState({});
+    const isPerson = Object.keys(person).length;
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [form, setForm] = useState({});
+    const [option, setOption] = useState("");
+
+    // manejador de cambio del form
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-    state = {
-        loading: false,
-        planillas: [],
-        type_cargos: [],
-        form: {},
-        errors: {},
-        check: false,
-        person: {},
-    }
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors };
-        });
-    }
-
-    handleAssign = () => {
-        let { push, pathname, query } = Router;
-        query.assign = "true";
-        push({ pathname, query });
-    }
-
-    save = async () => {
-        this.setState({ loading: true });
-        await this.handleInput({ name: 'redirect', value: `${location.origin}/login` });
-        let { person, form } = this.state;
-        form.person_id = person.id
-        await authentication.post('register', form)
+    // guardar datos
+    const save = async () => {
+        let answer = await Confirm('warning', '¿Estas seguro en guardar los datos?', 'Estoy seguro')
+        if (!answer) return false;
+        let payload = Object.assign({}, form);
+        payload.redirect = `${location.origin}/login`;
+        payload.person_id = person.id
+        await authentication.post('register', payload)
         .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) this.setState({ form: {}, errors: {} });
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            setErrors({});
+            setForm({});
+            setPerson({});
         })
-        .catch(async err => {
-            try {
-                let { data } = err.response
-                let { message, errors } = data;
-                this.setState({ errors });
-            } catch (error) {
-                await Swal.fire({ icon: 'error', text: 'Algo salió mal' });
-            }
-        });
-        this.setState({ loading: false });
+        .catch(async err => handleErrorRequest(err, setErrors));
+        setCurrentLoading(false);
     }
 
 
-    getAdd = async (obj) => {
-        this.setState({
-            person: obj,
-            check: true
-        })
-        // generar usuario
-        this.handleInput({ name: 'username', value: obj.document_number });
+    const getAdd = async (obj) => {
+        setPerson(obj)
+        setOption("");
     }
 
-    validate = () => {
-        let { username, email, password, confirm_password } = this.state.form;
+    // validar envio
+    const validate = () => {
+        let { username, email, password, confirm_password } = form;
         return username && email && password && password == confirm_password;
     }
 
-
-    validatePassword = () => {
-        let { password } = this.state.form;
+    // validar contraseña
+    const validatePassword = () => {
+        let { password } = form;
         let message = "";
         if (password && password.length < 8) message =  "La contraseña debe contener al menos 8 caracteres!";
         else if(password && password.length >= 8) {
@@ -97,174 +76,182 @@ export default class CreateUser extends Component
         return message;
     }
 
-    validateConfirmPassword = () => {
-        let { password, confirm_password } = this.state.form;
+    // validar contraseña de confirmación
+    const validateConfirmPassword = () => {
+        let { password, confirm_password } = form;
         let message = "";
         if (password != confirm_password) return "La confirmación es incorrecta!";
         return message;
     }
 
-    render() {
+    // render
+    return (
+        <div className="col-md-12">
+            <BoardSimple
+                prefix={<BtnBack/>}
+                title="Usuario"
+                info={["Crear usuario"]}
+                bg="light"
+                options={[]}
+            >
+                <Form className="card-body">
+                    <div className="row justify-content-center">
+                        <div className="col-md-9">
+                            <div className="row justify-content-end">
+                                <div className="col-md-12 mb-4">
+                                    <h4><i className="fas fa-fingerprint"></i> Seleccionar Persona</h4>
+                                    <hr/>
 
-        let { pathname, query } = this.props;
-        let { form, errors, person } = this.state;
+                                    <div className="row">
+                                        <Show condicion={!isPerson}>
+                                            <div className="col-md-4">
+                                                <Button
+                                                    disabled={current_loading}
+                                                    onClick={(e) => setOption("ASSIGN")}
+                                                >
+                                                    <i className="fas fa-plus"></i> Asignar
+                                                </Button>
+                                            </div>
+                                        </Show>
 
-        return (
-            <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Nuevo Usuario
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
-                            <div className="col-md-9">
-                                <div className="row justify-content-end">
-                                    <div className="col-md-12 mb-4">
-                                        <h4><i className="fas fa-fingerprint"></i> Seleccionar Persona</h4>
-                                        <hr/>
+                                        <Show condicion={isPerson}>
+                                            <div className="col-md-4 mb-3">
+                                                <Form.Field>
+                                                    <label htmlFor="">Tip. Documento</label>
+                                                    <input value={person.document_type && person.document_type.name || ""} readOnly/>
+                                                </Form.Field>
+                                            </div>
 
-                                        <div className="row">
-                                            <Show condicion={!this.state.check}>
-                                                <div className="col-md-4">
-                                                    <Button
-                                                        disabled={this.state.loading}
-                                                        onClick={this.handleAssign}
-                                                    >
-                                                        <i className="fas fa-plus"></i> Asignar
-                                                    </Button>
-                                                </div>
-                                            </Show>
+                                            <div className="col-md-4">
+                                                <Form.Field>
+                                                    <label htmlFor="">N° Documento</label>
+                                                    <input type="text"
+                                                        value={person.document_number || ""}
+                                                        readOnly
+                                                    />
+                                                </Form.Field>
+                                            </div>
 
-                                            <Show condicion={this.state.check}>
-                                                <div className="col-md-4 mb-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Tip. Documento</label>
-                                                        <input value={person.document_type} readOnly/>
-                                                    </Form.Field>
-                                                </div>
+                                            <div className="col-md-4">
+                                                <Form.Field>
+                                                    <label htmlFor="">Apellidos y Nombres</label>
+                                                    <input type="text"
+                                                        className="capitalize"
+                                                        value={person.fullname || ""}
+                                                        readOnly
+                                                    />
+                                                </Form.Field>
+                                            </div>
 
-                                                <div className="col-md-4">
-                                                    <Form.Field>
-                                                        <label htmlFor="">N° Documento</label>
-                                                        <input type="text"
-                                                            value={person.document_number || ""}
-                                                            readOnly
-                                                        />
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Apellidos y Nombres</label>
-                                                        <input type="text"
-                                                            value={person.fullname || ""}
-                                                            readOnly
-                                                        />
-                                                    </Form.Field>
-                                                </div>
-
-                                                <div className="col-md-4">
-                                                    <Button
-                                                        onClick={this.handleAssign}
-                                                        disabled={this.state.loading}
-                                                    >
-                                                        <i className="fas fa-plus"></i> Cambiar
-                                                    </Button>
-                                                </div>
-                                            </Show>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                        <h4><i className="fas fa-user"></i> Datos del usuario</h4>
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.username && errors.username[0]}>
-                                            <label htmlFor="">Username <b className="text-red">*</b></label>
-                                            <input type="text" 
-                                                name="username"
-                                                disabled
-                                                placeholder="Ingrese un username"
-                                                value={form.username || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
-                                            />
-                                            <label>{errors && errors.username && errors.username[0]}</label>
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field  error={errors && errors.email && errors.email[0]}>
-                                            <label htmlFor="">Email <b className="text-red">*</b></label>
-                                            <input type="text"
-                                                name="email"
-                                                value={form.email || ""}
-                                                placeholder="Ingrese un correo eléctronico válido"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                            />
-                                            <label>{errors && errors.email && errors.email[0]}</label>
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field  error={errors && errors.password && errors.password[0] || this.validatePassword()}>
-                                            <label htmlFor="">Contraseña <b className="text-red">*</b></label>
-                                            <input type="password"
-                                                placeholder="Ingrese una contraseña"
-                                                name="password"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                value={form.password || ""}
-                                            />
-                                            <label>{errors && errors.password && errors.password[0] || this.validatePassword()}</label>
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field  error={errors && errors.confirm_password && errors.confirm_password[0] || this.validateConfirmPassword()}>
-                                            <label htmlFor="">Confirmar Contraseña <b className="text-red">*</b></label>
-                                            <input type="password"
-                                                placeholder="Confirme la contraseña"
-                                                name="confirm_password"
-                                                value={form.confirm_password || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
-                                            />
-                                            <label>{errors && errors.confirm_password && errors.confirm_password[0] || this.validateConfirmPassword()}</label>
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-2">
-                                        <Button color="teal" fluid
-                                            disabled={this.state.loading || !this.validate() || !this.state.check}
-                                            onClick={this.save}
-                                            loading={this.state.loading}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
+                                            <div className="col-md-4">
+                                                <Button
+                                                    onClick={(e) => setOption("ASSIGN")}
+                                                    disabled={current_loading}
+                                                >
+                                                    <i className="fas fa-sync"></i> Cambiar
+                                                </Button>
+                                            </div>
+                                        </Show>
                                     </div>
                                 </div>
-                            </div>
-                        </Form>
-                    </div>
-                </Body>
 
-                <Show condicion={query && query.assign}>
-                    <AssignPerson
-                        getAdd={this.getAdd}
-                        isClose={(e) => {
-                            let { push, pathname, query } = Router;
-                            query.assign = "";      
-                            push({ pathname, query })
-                        }}
-                    />
-                </Show>
-            </div>
-        )
-    }
-    
+                                <div className="col-md-12">
+                                    <hr/>
+                                    <h4><i className="fas fa-user"></i> Datos del usuario</h4>
+                                    <hr/>
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field error={errors && errors.username && errors.username[0]}>
+                                        <label htmlFor="">Username <b className="text-red">*</b></label>
+                                        <input type="text" 
+                                            name="username"
+                                            disabled={current_loading}
+                                            placeholder="Ingrese un username"
+                                            value={form.username || ""}
+                                            onChange={(e) => handleInput(e.target)}
+                                        />
+                                        <label>{errors && errors.username && errors.username[0]}</label>
+                                    </Form.Field>
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field  error={errors && errors.email && errors.email[0]}>
+                                        <label htmlFor="">Email <b className="text-red">*</b></label>
+                                        <input type="text"
+                                            name="email"
+                                            value={form.email || ""}
+                                            disabled={current_loading}
+                                            placeholder="Ingrese un correo eléctronico válido"
+                                            onChange={(e) => handleInput(e.target)}
+                                        />
+                                        <label>{errors && errors.email && errors.email[0]}</label>
+                                    </Form.Field>
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field  error={errors && errors.password && errors.password[0] || validatePassword()}>
+                                        <label htmlFor="">Contraseña <b className="text-red">*</b></label>
+                                        <input type="password"
+                                            placeholder="Ingrese una contraseña"
+                                            name="password"
+                                            disabled={current_loading}
+                                            onChange={(e) => handleInput(e.target)}
+                                            value={form.password || ""}
+                                        />
+                                        <label>{errors && errors.password && errors.password[0] || validatePassword()}</label>
+                                    </Form.Field>
+                                </div>
+
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field  error={errors && errors.confirm_password && errors.confirm_password[0] || validateConfirmPassword()}>
+                                        <label htmlFor="">Confirmar Contraseña <b className="text-red">*</b></label>
+                                        <input type="password"
+                                            placeholder="Confirme la contraseña"
+                                            name="confirm_password"
+                                            disabled={current_loading}
+                                            value={form.confirm_password || ""}
+                                            onChange={(e) => handleInput(e.target)}
+                                        />
+                                        <label>{errors && errors.confirm_password && errors.confirm_password[0] || validateConfirmPassword()}</label>
+                                    </Form.Field>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Form>
+            </BoardSimple>
+
+            {/* panel de control */}
+            <ContentControl>
+                <div className="col-lg-2 col-6">
+                    <Button color="teal" fluid
+                        disabled={current_loading || !validate() || !isPerson}
+                        onClick={save}
+                        loading={current_loading}
+                    >
+                        <i className="fas fa-save"></i> Guardar
+                    </Button>
+                </div>
+            </ContentControl>
+
+            <Show condicion={option == 'ASSIGN'}>
+                <AssignPerson
+                    getAdd={getAdd}
+                    isClose={(e) => setOption("")}
+                />
+            </Show>
+        </div>
+    )
 }
+
+// server
+CreateUser.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // response
+    return { pathname, query }
+}
+
+// exportar
+export default CreateUser;

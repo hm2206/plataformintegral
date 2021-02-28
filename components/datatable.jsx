@@ -211,9 +211,11 @@ export default class DataTable extends Component {
 
     return (
       <div className="car card-fluid" style={{ position: "relative" }}>
-        <div className="card-header">
-          {titulo}
-        </div>
+        <Show condicion={titulo}>
+          <div className="card-header">
+            {titulo}
+          </div>
+        </Show>
         <div className="card-body">
           {children}
           {filters && filters.length > 0 

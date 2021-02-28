@@ -5,36 +5,35 @@ import CardProfile from '../components/cardProfile';
 import CardToken from '../components/cardToken';
 import CardChangePassword from '../components/cardChangePassword';
 
-export default class Index extends Component
-{
+const Index = () => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname } = ctx;
-        return { query, pathname }
-    }
-
-    
-    render() {
-
-        return (
-            <div className="col-md-12">
-                <Body>
-                    <div className="row">
-                        <div className="col-md-7">
-                            <div className="card">
-                                <CardProfile {...this.props}/>
-                            </div>
-                        </div>
-
-                        <div className="col-md-5">
-                            <CardChangePassword {...this.props}/>
-                            <CardToken/>
+    // renderizar
+    return (
+        <div className="col-md-12">
+            <Body>
+                <div className="row">
+                    <div className="col-md-7">
+                        <div className="card">
+                            <CardProfile/>
                         </div>
                     </div>
-                </Body>
-            </div>
-        )
-    }
 
+                    <div className="col-md-5">
+                        <CardChangePassword/>
+                        {/* <CardToken/> */}
+                    </div>
+                </div>
+            </Body>
+        </div>
+    )
 }
+
+// server 
+Index.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { query, pathname } = ctx;
+    return { query, pathname }
+}
+
+// exportar
+export default Index;

@@ -566,7 +566,7 @@ const DrownSelect = ({ button, icon, text, direction, disabled, options = [], on
 }
 
 
-const LoadFile = ({ id = 'select-file', defaultImg = '/img/base.png', accept = '*/*', info = 'No documents are listed for this customer.', isClose, onSave, upload = false, porcentaje = 0 }) => {
+const LoadFile = ({ id = 'select-file', defaultImg = '/img/base.png', disabled = false, accept = '*/*', info = 'No documents are listed for this customer.', isClose, onSave, upload = false, porcentaje = 0 }) => {
 
   const [file, setFile] = useState();
 
@@ -583,7 +583,9 @@ const LoadFile = ({ id = 'select-file', defaultImg = '/img/base.png', accept = '
   }
 
   return (
-      <Modal show={true}  isClose={isClose}>
+      <Modal show={true}  isClose={isClose}
+        disabled={disabled}
+      >
         <div className="text-center" style={{ paddingTop: '3em' }}>
 
           <div>
@@ -597,20 +599,22 @@ const LoadFile = ({ id = 'select-file', defaultImg = '/img/base.png', accept = '
           </Header>
           <div className="text-center pb-3">
             <label htmlFor={id} className="ui primary button" style={{ background: 'transparent', border: '2px solid #2185D0', color: '#2185D0' }}>
-              <input type="file" id={id} accept={accept} disabled={upload} hidden onChange={(e) => handleFile(e.target)}/> <i className="fas fa-folder-open"></i> Seleccionar Archivo
+              <input type="file" id={id} accept={accept} disabled={upload || disabled} hidden onChange={(e) => handleFile(e.target)}/> <i className="fas fa-folder-open"></i> Seleccionar Archivo
             </label>
             <Button primary 
               onClick={(e) => typeof onSave == 'function' ? onSave(file) : null}
               style={{ border: '2px solid #2185D0' }} 
-              disabled={!file || upload}>
+              disabled={!file || upload || disabled}>
                 Guardar Archivo
             </Button>
           </div>
 
-          <div className="py-3 ml-3 mr-3 load-none" style={{ display: porcentaje ? 'block' : 'none' }}>
-            <Progress inverted percent={porcentaje} active progress style={{ height: '50px' }} success={porcentaje == 100}>
-              Subiendo archivo...
-            </Progress>
+          <div className="py-3 ml-3 mr-3 load-none">
+            <Show condicion={porcentaje}>
+              <Progress inverted percent={porcentaje} active progress success={porcentaje == 100}>
+                Subiendo archivo...
+              </Progress>
+            </Show>
           </div>
         </div>
       </Modal>

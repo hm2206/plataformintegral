@@ -143,7 +143,7 @@ const Work = () => {
                             <label>Edad</label>
                             <input type="text" 
                                 name="age"
-                                value={moment(historial && historial.person && historial.person.date_of_birth, "YYYY/MM/DD").fromNow() || ''}
+                                value={`${historial && historial.person && historial.person.edad || ""}`}
                                 readOnly
                             />
                         </Form.Field> 

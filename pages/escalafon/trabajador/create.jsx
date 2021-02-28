@@ -1,303 +1,286 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, parseOptions, Confirm } from '../../../services/utils';
-import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
-import { authentication, unujobs } from '../../../services/apis';
+import React, { Fragment, useState } from 'react';
+import {  BtnBack } from '../../../components/Utils';
+import { Confirm } from '../../../services/utils';
+import { Form, Button, Checkbox, Message } from 'semantic-ui-react'
+import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
 import AssignPerson from '../../../components/authentication/user/assignPerson';
-import { tipo_documento } from '../../../services/storage.json';
 import {  AUTHENTICATE } from '../../../services/auth';
 import { SelectAfp, SelectBanco } from '../../../components/select/cronograma';
+import BoardSimple from '../../../components/boardSimple'
+import ContentControl from '../../../components/contentControl';
 
 
-export default class CreateWork extends Component
-{
+const CreateWork = ({ pathname, query }) => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    // estados
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [option, setOption] = useState("");
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [person, setPerson] = useState({});
+    let isPerson = Object.keys(person).length;
+
+    // manejador de cambios del form
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-    state = {
-        loading: false,
-        afps: [],
-        bancos: [],
-        form: {
-            banco_id: 1,
-            afp_id: 1
-        },
-        errors: {},
-        check: false,
-        person: {},
+    // obtener persona
+    const handleAdd = async (obj) => {
+        setPerson(obj)
+        setOption("");
+        setErrors({ ...errors, person_id: [] });
     }
 
-    componentDidMount = () => {
-        this.getAfps();
-        this.getBancos();
-    }
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors };
-        });
-    }
-
-    handleAssign = () => {
-        let { push, pathname, query } = Router;
-        query.assign = "true";
-        push({ pathname, query });
-    }
-
-    getAfps = async () => {
-        this.setState({ loader: true });
-        await unujobs.get(`afp`)
-        .then(res => {
-            this.setState({ afps: res.data });
-        }).catch(err => console.log(err.message));
-        this.setState({ loader: false });
-    }
-
-    getBancos = async () => {
-        this.setState({ loader: true });
-        await unujobs.get(`banco`)
-        .then(res => {
-            this.setState({ bancos: res.data });
-        }).catch(err => console.log(err.message));
-        this.setState({ loader: false });
-    }
-
-    getAdd = async (obj) => {
-        this.setState({
-            person: obj,
-            check: true
+    // guardar datos
+    const save = async () => {
+        let answer = await Confirm('warning', '¿Desea guardar los datos?', 'Aceptar');
+        if (!answer) return false;
+        setCurrentLoading(true);
+        let payload = Object.assign({}, form);
+        payload.person_id = person.id;
+        payload.orden = person.fullname;
+        await unujobs.post('work', payload)
+        .then(async res => {
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            setForm({});
+            setErrors({});
         })
-        // generar usuario
-        this.handleInput({ name: 'username', value: obj.document_number });
+        .catch(err => handleErrorRequest(err, setErrors))
+        setCurrentLoading(false);
     }
 
-    create = async () => {
-        let safe = await Confirm('warning', '¿Desea guardar los datos?', 'Aceptar');
-        if (safe) {
-            this.setState({ loader: true });
-            let { form, person } = this.state;
-            let newForm = Object.assign({}, form);
-            newForm.person_id = person.id;
-            newForm.orden = person.fullname;
-            await unujobs.post('work', newForm)
-            .then(async res => {
-                let { success, message, body } = res.data;
-                if (!success) throw new Error(message);
-                await Swal.fire({ icon: 'success', text: message });
-            })
-            .catch(err => Swal.fire({ icon: 'error', text: err.message }))
-            this.setState({ loader: false });
-        }
-    }
-
-    render() {
-
-        let { pathname, query } = this.props;
-        let { form, errors, person } = this.state;
-
+    // renderizado
         return (
-            <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Agregar Información del trabajador
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
-                            <div className="col-md-9">
-                                <div className="row justify-content-end">
-                                    <div className="col-md-12 mb-4">
-                                        <h4><i className="fas fa-fingerprint"></i> Seleccionar Persona</h4>
-                                        <hr/>
+            <Fragment>
+                <div className="col-md-12">
+                    <BoardSimple
+                        title={<span>Trabajador</span>}
+                        info={["Crear trabajador"]}
+                        options={[]}
+                        prefix={<BtnBack/>}
+                        bg="light"
+                    >
+                        <div className="card-body">
+                            <Form className="row justify-content-center">
+                                <div className="col-md-9">
+                                    <div className="row justify-content-end">
+                                        <div className="col-md-12 mb-4">
+                                            <h4><i className="fas fa-fingerprint"></i> Seleccionar Persona</h4>
+                                            <hr/>
 
-                                        <div className="row">
-                                            <Show condicion={!this.state.check}>
-                                                <div className="col-md-4">
-                                                    <Button
-                                                        disabled={this.state.loading}
-                                                        onClick={this.handleAssign}
-                                                    >
-                                                        <i className="fas fa-plus"></i> Asignar
-                                                    </Button>
-                                                </div>
-                                            </Show>
+                                            <div className="row">
+                                                <Show condicion={!isPerson}>
+                                                    <div className="col-md-4">
+                                                        <Button
+                                                            disabled={current_loading}
+                                                            onClick={(e) => setOption("ASSIGN")}
+                                                        >
+                                                            <i className="fas fa-plus"></i> Asignar
+                                                        </Button>
+                                                    </div>
+                                                </Show>
 
-                                            <Show condicion={this.state.check}>
-                                                <div className="col-md-4 mb-3">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Tip. Documento</label>
-                                                        <Select fluid
-                                                            disabled
-                                                            options={tipo_documento}
-                                                            value={person.document_type || '01'}
-                                                        />
-                                                    </Form.Field>
-                                                </div>
+                                                <Show condicion={isPerson}>
+                                                    <div className="col-md-4 mb-3">
+                                                        <Form.Field>
+                                                            <label htmlFor="">Tip. Documento</label>
+                                                            <input
+                                                                readOnly
+                                                                value={person.document_type && person.document_type.name || ""}
+                                                            />
+                                                        </Form.Field>
+                                                    </div>
 
-                                                <div className="col-md-4">
-                                                    <Form.Field>
-                                                        <label htmlFor="">N° Documento</label>
-                                                        <input type="text"
-                                                            value={person.document_number || ""}
-                                                            disabled
-                                                            readOnly
-                                                        />
-                                                    </Form.Field>
-                                                </div>
+                                                    <div className="col-md-4 mb-3">
+                                                        <Form.Field>
+                                                            <label htmlFor="">N° Documento</label>
+                                                            <input type="text"
+                                                                value={person.document_number || ""}
+                                                                readOnly
+                                                            />
+                                                        </Form.Field>
+                                                    </div>
 
-                                                <div className="col-md-4">
-                                                    <Form.Field>
-                                                        <label htmlFor="">Apellidos y Nombres</label>
-                                                        <input type="text"
-                                                            className="uppercase"
-                                                            value={person.fullname || ""}
-                                                            disabled
-                                                            readOnly
-                                                        />
-                                                    </Form.Field>
-                                                </div>
+                                                    <div className="col-md-4 mb-3">
+                                                        <Form.Field>
+                                                            <label htmlFor="">Apellidos y Nombres</label>
+                                                            <input type="text"
+                                                                className="uppercase"
+                                                                value={person.fullname || ""}
+                                                                readOnly
+                                                            />
+                                                        </Form.Field>
+                                                    </div>
 
-                                                <div className="col-md-4">
-                                                    <Button
-                                                        onClick={this.handleAssign}
-                                                        disabled={this.state.loading}
-                                                    >
-                                                        <i className="fas fa-sync"></i> Cambiar
-                                                    </Button>
-                                                </div>
+                                                    <div className="col-md-4 mb-3">
+                                                        <Button
+                                                            onClick={(e) => setOption("ASSIGN")}
+                                                            disabled={current_loading}
+                                                        >
+                                                            <i className="fas fa-sync"></i> Cambiar
+                                                        </Button>
+                                                    </div>
+                                                </Show>
+                                            </div>
+                                        </div>
+
+                                        {/* mensaje */}
+                                        <div className="col-md-12">
+                                            <Show condicion={errors.person_id && errors.person_id[0]}>
+                                                <Message color="red">
+                                                    <Message.Header>
+                                                        {errors.person_id && errors.person_id[0]}
+                                                    </Message.Header>
+                                                </Message>
                                             </Show>
                                         </div>
-                                    </div>
 
-                                    <div className="col-md-12">
-                                        <hr/>
-                                        <h4><i className="fas fa-praying-hands"></i> Datos del Trabajador</h4>
-                                        <hr/>
-                                    </div>
+                                        <div className="col-md-12">
+                                            <hr/>
+                                            <h4><i className="fas fa-praying-hands"></i> Datos del Trabajador</h4>
+                                            <hr/>
+                                        </div>
 
-                                    <div className="col-md-6 mb-2">
-                                        <Form.Field>
-                                            <label htmlFor="">N° de Essalud</label>
-                                            <input type="text" 
-                                                placeholder="Ingrese su autogenerado de essalud"
-                                                value={form.numero_de_essalud || ""} 
-                                                name="numero_de_essalud"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                            />
-                                        </Form.Field>
-                                    </div>
+                                        <div className="col-md-6 mb-2">
+                                            <Form.Field error={errors.numero_de_essalud && errors.numero_de_essalud[0] ? true : false}>
+                                                <label htmlFor="">N° de Essalud</label>
+                                                <input type="text" 
+                                                    placeholder="Ingrese su autogenerado de essalud"
+                                                    value={form.numero_de_essalud || ""} 
+                                                    name="numero_de_essalud"
+                                                    onChange={(e) => handleInput(e.target)}
+                                                    disabled={current_loading}
+                                                />
+                                                <label>{errors.numero_de_essalud && errors.numero_de_essalud[0]}</label>
+                                            </Form.Field>
+                                        </div>
 
-                                    <div className="col-md-6 mb-2">
-                                        <Form.Field>
-                                            <label htmlFor="">Tip. Banco <b className="text-red">*</b></label>
+                                        <div className="col-md-6 mb-3">
+                                            <Form.Field error={errors.banco_id && errors.banco_id[0] ? true : false}>
+                                                <label htmlFor="">Tip. Banco <b className="text-red">*</b></label>
                                                 <SelectBanco
                                                     name="banco_id"
                                                     value={form.banco_id || ""}
-                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                    disabled={current_loading}
                                                 />
-                                        </Form.Field>
+                                                <label>{errors.banco_id && errors.banco_id[0]}</label>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-6 mb-3">
+                                            <Form.Field error={errors.numero_de_cuenta && errors.numero_de_cuenta[0] ? true : false}>
+                                                <label htmlFor="">N° Cuenta</label>
+                                                <input
+                                                    type="text"
+                                                    name="numero_de_cuenta"
+                                                    value={form.numero_de_cuenta || ""}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                    disabled={current_loading}
+                                                />
+                                                <label>{errors.numero_de_cuenta && errors.numero_de_cuenta[0]}</label>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-6 mb-3">
+                                            <Form.Field error={errors.afp_id && errors.afp_id[0] ? true : false}>
+                                                <label htmlFor="">Tip. AFP <b className="text-red">*</b></label>
+                                                <SelectAfp
+                                                    name="afp_id"
+                                                    value={form.afp_id}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                    disabled={current_loading}
+                                                />
+                                                <label>{errors.afp_id && errors.afp_id[0]}</label>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-6 mb-3">
+                                            <Form.Field error={errors.numero_de_cussp && errors.numero_de_cussp[0] ? true : false}>
+                                                <label htmlFor="">N° de Cussp</label>
+                                                <input type="text"
+                                                    name="numero_de_cussp"
+                                                    value={form.numero_de_cussp}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                    disabled={current_loading}
+                                                />
+                                                <label>{errors.numero_de_cussp && errors.numero_de_cussp[0]}</label>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-6 mb-3">
+                                            <Form.Field error={errors.fecha_de_afiliacion && errors.fecha_de_afiliacion[0] ? true : false}>
+                                                <label htmlFor="">Fecha de Afiliación</label>
+                                                <input type="date" 
+                                                    name="fecha_de_afiliacion"
+                                                    value={form.fecha_de_afiliacion}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                    disabled={current_loading}
+                                                />
+                                                <label>{errors.fecha_de_afiliacion && errors.fecha_de_afiliacion[0]}</label>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-6 mb-3">
+                                            <Form.Field error={errors.prima_seguro && errors.prima_seguro[0] ? true : false}>
+                                                <label htmlFor="">Prima Seguro</label>
+                                                <Checkbox
+                                                    toggle
+                                                    name="prima_seguro"
+                                                    disabled={current_loading}
+                                                    checked={form.prima_seguro ? true : false}
+                                                    onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
+                                                />
+                                                <label>{errors.prima_seguro && errors.prima_seguro[0]}</label>
+                                            </Form.Field>
+                                        </div>
                                     </div>
-
-                                    <div className="col-md-6 mb-2">
-                                        <Form.Field>
-                                            <label htmlFor="">N° Cuenta</label>
-                                            <input
-                                                type="text"
-                                                name="numero_de_cuenta"
-                                                value={form.numero_de_cuenta || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
-                                            />
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-6 mb-2">
-                                        <Form.Field>
-                                            <label htmlFor="">Tip. AFP <b className="text-red">*</b></label>
-                                            <SelectAfp
-                                                name="afp_id"
-                                                value={form.afp_id}
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                            />
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-6 mb-2">
-                                        <Form.Field>
-                                            <label htmlFor="">N° de Cussp</label>
-                                            <input type="text"
-                                            name="numero_de_cussp"
-                                            value={form.numero_de_cussp}
-                                             onChange={(e) => this.handleInput(e.target)}
-                                         />
-                                    </Form.Field>
                                 </div>
-
-                                <div className="col-md-6 mb-2">
-                                    <Form.Field>
-                                        <label htmlFor="">Fecha de Afiliación</label>
-                                        <input type="date" 
-                                            name="fecha_de_afiliacion"
-                                            value={form.fecha_de_afiliacion}
-                                            onChange={(e) => this.handleInput(e.target)}
-                                        />
-                                    </Form.Field>
-                                </div>
-
-                                <div className="col-md-6 mb-2">
-                                    <Form.Field>
-                                        <label htmlFor="">Prima Seguro</label>
-                                        <Select
-                                            options={[
-                                                {key: "no-afecto", value: 0, text: "No afecto"},
-                                                {key: "afecto", value: 1, text: "afecto" }
-                                            ]}
-                                            name="prima_seguro"
-                                            value={form.prima_seguro}
-                                            onChange={(e, obj) => this.handleInput(obj)}
-                                        />
-                                    </Form.Field>
-                                </div>
-
-                                <div className="col-md-12">
-                                    <hr/>
-                                </div>
-
-                                <div className="col-md-2">
-                                    <Button color="teal" fluid
-                                        disabled={this.state.loading || !this.state.check}
-                                        onClick={this.create}
-                                        loading={this.state.loading}
-                                    >
-                                        <i className="fas fa-save"></i> Guardar
-                                    </Button>
-                                </div>
-                            </div>
+                            </Form>
                         </div>
-                    </Form>
-                </div>
-            </Body>
+                    </BoardSimple>
 
-            <Show condicion={query && query.assign}>
-                <AssignPerson
-                    getAdd={this.getAdd}
-                    isClose={(e) => {
-                        let { push, pathname, query } = Router;
-                        query.assign = "";      
-                        push({ pathname, query })
-                    }}
-                />
-            </Show>
-        </div>
-        )
-    }
-    
+                    <Show condicion={option == 'ASSIGN'}>
+                        <AssignPerson
+                            getAdd={handleAdd}
+                            isClose={(e) => setOption("")}
+                        />
+                    </Show>
+                </div>
+
+                {/* panel de control */}
+                <ContentControl>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="teal"
+                            disabled={current_loading}
+                            onClick={save}
+                            loading={current_loading}
+                        >
+                            <i className="fas fa-save"></i> Guardar
+                        </Button>
+                    </div>
+                </ContentControl>
+        </Fragment>
+    )
 }
+
+// server
+CreateWork.getInititalProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // response
+    return { pathname, query }
+}
+
+// exportar
+export default CreateWork;

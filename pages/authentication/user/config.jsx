@@ -137,7 +137,7 @@ ConfigUser.getInitialProps = async (ctx) => {
     // obtener usuario
     let id = query.id ? atob(query.id) : "__error";
     const { success, user } = await authentication.get(`user/${id}`, {}, ctx)
-    .then(res => ({ success: true, user: res.data }))
+    .then(res => res.data)
     .catch(err => ({ success: false, user: {} }));
     // response
     return { query, pathname, success, user };
