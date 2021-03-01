@@ -35,10 +35,10 @@ const ModalRightUser = ({ title, show, onClose = null, onCheck = null, children 
         setCurrentLoading(true);
         await authentication.get(`person?page=${current_page}&query_search=${query_search}`)
         .then(async res => {
-            let { data } = res;
-            setCurrentLastPage(data.lastPage);
-            setCurrentTotal(data.total);
-            let payload = data.data || [];
+            let { people } = res.data;
+            setCurrentLastPage(people.lastPage);
+            setCurrentTotal(people.total);
+            let payload = people.data || [];
             await payload.map(p => {
                 let check = checked.includes(p.id) ? true : false;
                 p.check = check;

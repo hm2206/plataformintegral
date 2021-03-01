@@ -23,9 +23,19 @@ const extensions = {
     mp4: icons.video,
 };
 
-const FileSimple = ({ name = "archivo.tmp", size = 0, extname = "tmp", date = '2021-02-04 11:20:01' }) => {
+const FileSimple = ({ name = "archivo.tmp", url = null, size = 0, extname = "tmp", date = '2021-02-04 11:20:01' }) => {
 
     const extension = extensions[extname] || {}
+
+    // generar link
+    const handleLink = (e) => {
+        e.preventDefault();
+        if (!url) return false;
+        let a = document.createElement('a');
+        a.target = '_blank';
+        a.href = url;
+        a.click();
+    }
 
     // render
     return (
@@ -33,7 +43,9 @@ const FileSimple = ({ name = "archivo.tmp", size = 0, extname = "tmp", date = '2
             <div href="#" className={`filemgr-thumb ${extension.className || 'text-dark'}`}>
                 <i className={extension.icon || 'far fa-file'}></i>
             </div>
-            <a href="#" 
+            <a href="#"
+                onClick={handleLink}
+                target="__blank" 
                 className="stretched-link card-title card-link text-body font-size-sm d-block font-13 text-ellipsis"
                 title={name}
             >

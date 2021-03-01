@@ -27,7 +27,7 @@ const MenuApp = ({ current_app }) => {
     // obtener módulos
     const getConfigModules = async (add = false) => {
         setCurrentLoading(true);
-        await authentication.get(`app/${current_app.id}/config_module`)
+        await authentication.get(`app/${current_app.id}/config_module?page=${current_page}`)
         .then(res => {
             let { menus } = res.data;
             setDatos(add ? [...datos, ...menus.data] : menus.data);

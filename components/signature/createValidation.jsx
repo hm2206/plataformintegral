@@ -1,10 +1,10 @@
 import React, { useContext, useState } from 'react';
 import Modal from '../modal';
-import { Form, Button } from 'semantic-ui-react';
+import { Form, Button, Progress } from 'semantic-ui-react';
 import { DropZone } from '../Utils';
 import Show from '../show';
 import { Confirm } from '../../services/utils';
-import { signature } from '../../services/apis';
+import { signature, onProgress } from '../../services/apis';
 import Swal from 'sweetalert2';
 import { GroupContext } from '../../contexts/SignatureContext';
 
@@ -17,6 +17,7 @@ const CreateValidation = ({ person = {}, onClose = null }) => {
     const [current_file, setCurrentFile] = useState(null);
     const [current_loading, setCurrentLoading] = useState(false);
     const [current_error, setCurrentError] = useState({}); 
+    const [percent, setPercent] = useState(0);
 
     // crear
     const create = async () => {
@@ -27,7 +28,8 @@ const CreateValidation = ({ person = {}, onClose = null }) => {
             headers: { 
                 DependenciaId: group_context.group.dependencia_id,
                 GroupId: group_context.group.id,
-            }
+            },
+            onUploadProgress: (evt) => onProgress(evt, setPercent)
         };
         // send
         let datos = new FormData;
@@ -49,7 +51,10 @@ const CreateValidation = ({ person = {}, onClose = null }) => {
                 Swal.fire({ icon: 'error', text: error.message });
             }
         });
-        setTimeout(() => setCurrentLoading(false), 1000);
+        setTimeout(() => {
+            setCurrentLoading(false)
+            setPercent(0);
+        }, 1000);
     }
 
     // render
@@ -63,7 +68,7 @@ const CreateValidation = ({ person = {}, onClose = null }) => {
                     <label>Tipo Documento</label>
                     <input type="text"
                         readOnly
-                        value={person.document_type || ""}
+                        value={person.document_type && person.document_type.name || ""}
                     />
                 </Form.Field>
 
@@ -146,13 +151,24 @@ const CreateValidation = ({ person = {}, onClose = null }) => {
 
                 <hr/>
 
-                <div className="text-right">
-                    <Button color="teal"
-                        onClick={create}
-                    >
-                        <i className="fas fa-save"></i> Guardar
-                    </Button>
-                </div>
+                <Show condicion={!current_loading}
+                    predeterminado={
+                        <Progress
+                            percent={percent}
+                            inverted
+                            color="blue"
+                            progress
+                        />   
+                    }
+                >
+                    <div className="text-right">
+                        <Button color="teal"
+                            onClick={create}
+                        >
+                            <i className="fas fa-save"></i> Guardar
+                        </Button>
+                    </div>
+                </Show>
             </Form>
         </Modal>
     );

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Body, DrownSelect, BtnFloat } from '../../../components/Utils';
+import { DrownSelect, BtnFloat, BtnBack } from '../../../components/Utils';
 import { Button, Form, Message, Icon } from 'semantic-ui-react';
 import { Row } from 'react-bootstrap';
 import Show from '../../../components/show';
 import dynamic from 'next/dynamic';
-import HeaderCronograma from '../../../components/cronograma/headerCronograma';
 import { CronogramaProvider } from '../../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../../contexts/AppContext';
 import { unujobs } from '../../../services/apis';
@@ -26,6 +25,8 @@ import { credencials } from '../../../env.json';
 import ModalReport from '../../../components/cronograma/modalReport';
 import ChangeMeta from '../../../components/cronograma/changeMeta';
 import { AUTHENTICATE } from '../../../services/auth';
+import BoardSimple from '../../../components/boardSimple';
+import HeaderCronograma from '../../../components/cronograma/headerCronograma';
 
 const FooterCronograma = dynamic(() => import('../../../components/cronograma/footerCronograma'), { ssr: false });
 
@@ -33,7 +34,7 @@ const FooterCronograma = dynamic(() => import('../../../components/cronograma/fo
 const PlaceholderAvatar = () => <Skeleton circle={true} height="75px" width="75px"/>
 
 
-const InformacionCronograma = ({ cronograma, success }) => {
+const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
 
     // context app
     const app_context = useContext(AppContext);
@@ -160,6 +161,15 @@ const InformacionCronograma = ({ cronograma, success }) => {
         }
     }
 
+    // seleccionar cronograma
+    const handleSelect = async (cro) => {
+        let { push } = Router;
+        let id = btoa(cro.id);
+        query.id = id;
+        setOption("");
+        await push({ pathname, query });
+    }
+
     // sincronizar remuneraciones
     const syncRemuneracion = async () => {
         let response = await Confirm("warning", "¿Desea agregar las remuneraciones a los trabajadores?", "Confirmar");
@@ -198,6 +208,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
         }
     }
 
+    // sincronizar descuentos
     const syncDescuentos = async () => {
         let response = await Confirm("warning", "¿Desea agregar los descuentos a los trabajadores?", "Confirmar");
         if (response) {
@@ -443,14 +454,14 @@ const InformacionCronograma = ({ cronograma, success }) => {
             }}
         >
             <div className="col-md-12 form ui">
-                <Body>
-                    
-                    {/* Header */}
-                    <HeaderCronograma/>
-
+                <BoardSimple
+                    options={[]}
+                    title={<HeaderCronograma cronograma={cronograma}/>}
+                    info={["Información del cronograma"]}
+                    prefix={<BtnBack/>}
+                    bg="light"
+                >
                     <div className="col-md-12 mt-3">
-                        <hr/>
-
                         <Show condicion={cronograma.plame}>
                             <Message className="disable">
                                 <div><b>El cronograma aplica para el</b> <span className="badge badge-dark">PDT-PLAME</span></div>
@@ -660,7 +671,7 @@ const InformacionCronograma = ({ cronograma, success }) => {
                             </div>
                         </Show>
                     </div>
-                </Body>
+                </BoardSimple>
             </div>
 
             {/* footer */}
@@ -669,8 +680,9 @@ const InformacionCronograma = ({ cronograma, success }) => {
             </Show>
 
         
-            <BtnFloat style={{ bottom: '120px', background: "#cecece" }}
+            <BtnFloat style={{ bottom: '120px' }}
                 size="md"
+                theme="btn-warning"
                 onClick={(e) => setOption('search_cronograma')}
                 loading={loading}
                 disabled={loading || edit || block}
@@ -706,11 +718,13 @@ const InformacionCronograma = ({ cronograma, success }) => {
                 />
             </Show>
 
-            <Show condicion={option == 'search_cronograma'}> 
-                <SearchCronograma cronograma={cronograma}
-                    isClose={e => setOption("")}
-                />
-            </Show>
+            {/* cambiar de cronograma */}
+            <SearchCronograma 
+                cronograma={cronograma}
+                isClose={e => setOption("")}
+                show={option == 'search_cronograma' ? true : false}
+                onSelect={handleSelect}
+            />
 
             <Show condicion={option == 'report'}>
                 <ModalReport

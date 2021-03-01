@@ -7,6 +7,7 @@ import { signature } from '../../../services/apis';
 import { GroupProvider } from '../../../contexts/SignatureContext';
 import AddTeam from '../../../components/signature/addTeam';
 import AddValidation from '../../../components/signature/addValidation';
+import ListValidation from '../../../components/signature/listValidation';
 
 const SlugGroup = ({ pathname, query, success, group }) => {
 
@@ -54,6 +55,16 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                                             title="Seleccionar PDF"
                                         />
                                         <hr/>
+                                    </div>
+
+                                    <div className="col-md-12">
+                                        <h5><i className="fas fa-check"></i> Lista de validaciones</h5>
+                                        <hr/>
+                                        <div className="mb-3">
+                                            <i className="fas fa-filter"></i> Filtros
+                                        </div>
+                                        {/* listar validaciones */}
+                                        <ListValidation/>
                                     </div>
                                 </div>
                             </div>

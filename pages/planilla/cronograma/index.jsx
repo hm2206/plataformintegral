@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
 import { AUTHENTICATE } from '../../../services/auth';
-import { Form, Button } from 'semantic-ui-react';
+import { Form, Button, Pagination } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import { allCronograma } from '../../../storage/actions/cronogramaActions';
@@ -11,68 +11,36 @@ import { Body } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import { AppContext } from '../../../contexts/AppContext';
+import BoardSimple from '../../../components/boardSimple'
 
 
-export default class Cronograma extends Component {
+const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            page: false,
-            loading: true,
-            block: false
-        }
+    // app
+    const app_context = useContext(AppContext);
 
-        this.handleInput = this.handleInput.bind(this);
-        this.getOption = this.getOption.bind(this);
-    }
+    // estados
+    const [year, setYear] = useState(query.year || "");
+    const [mes, setMes] = useState(query.mes || "");
+    const [block, setBlock] = useState(false);
 
-    static getInitialProps  = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let date = new Date;
-        let {query, pathname} = ctx;
-        query.year = query.year ? query.year : date.getFullYear();
-        query.mes = query.mes ? query.mes : date.getMonth() + 1;
-        await ctx.store.dispatch(allCronograma(ctx));
-        let { cronogramas } = ctx.store.getState().cronograma;
-        return {query, pathname, cronogramas }
-    }
+    // setting entity
+    useEffect(() => {
+        app_context.fireEntity({ render: true });
+    }, []);
 
-    componentDidMount = () => {
-        this.props.fireEntity({ render: true });
-        this.setting(this.props);
-    }
-
-    componentWillReceiveProps(nextProps) {
-        let { query } = this.props;
-        if (query.mes != nextProps.query.mes || query.year != nextProps.query.year) {
-            this.setting(nextProps);
-        }
-    }
-
-    setting = (props) => {
-        this.setState({ 
-            year: props.query.year,
-            mes: props.query.mes
-        })
-    }
-
-    handleInput(e) {
-        let {name, value} = e.target;
-        this.setState({[name]: value});
-    }
-
-    handleCronograma = async () => {
-        let { push, query, pathname } = Router;
-        query.year = this.state.year;
-        query.mes = this.state.mes;
+    // búscar
+    const handleSearch = async () => {
+        let { push } = Router;
+        query.year = year;
+        query.mes = mes;
         await push({ pathname, query });
     }
 
-    async getOption(obj, key, index) {
-        let {pathname, query} = Router;
-        let id = btoa(obj.id);
-        query[key] = id;
+    // obtener opciones
+    const getOption = async (obj, key, index) => {
+        let { push } = Router;
         // verificar
         switch (key) {
             case 'informacion':
@@ -82,318 +50,295 @@ export default class Cronograma extends Component {
             case 'edit':
             case 'email':
             case 'edit':
-                query = { id };
-                pathname = `${pathname}/${key}`;
-                // execute
-                Router.push({pathname, query});
-                break;
-            case 'restore':
-                await this.restore(obj);
-                break;
-            case 'error':
-                await this.fixedBug(obj.id);
+                let newQuery =  {};
+                newQuery.id = btoa(obj.id);
+                newQuery.href = btoa(location.href);
+                await push({ pathname: `${pathname}/${key}`, query: newQuery });
                 break;
             default:
                 break;
         }
     }
 
-    processing = async (id) => {
-        await unujobs.post(`cronograma/${id}/processing`, {}, { headers: { CronogramaId: id } })
-            .then(async res => {
-                let { success, message } = res.data;
-                if (!success) throw new Error(message);
-            })
-    }
-
-    syncConfigs = async (id) => {
-        await unujobs.post(`cronograma/${id}/sync_configs`, {}, { headers: { CronogramaId: id } })
-            .then(async res => {
-                let { success, message } = res.data;
-                if (!success) throw new Error(message);
-            })
-    }
-
-    fixedBug = async (id) => {
-        let response = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
-        if (response) {
-            try {
-                this.props.fireLoading(true);
-                await this.syncConfigs(id);
-                await this.processing(id);
-                // todo correcto
-                this.props.fireLoading(false);
-                await Swal.fire({ icon: 'success', text: 'Los errores se corrigieron correctamente' });
-                let { push, pathname, query } = Router;
-                await push({ pathname, query });
-            } catch (error) {
-                this.props.fireLoading(false);
-                await Swal.fire({ icon: 'error', text: error.message });
-            }
-        }
-    }
-
-    restore = async (obj) => {
-        let answer = await Confirm('warning', `¿Estas Seguro en restaurar le cronograma?`);
-        if (answer) {
-            this.props.fireLoading(true);
-            await unujobs.post(`cronograma/${obj.id}/restore`)
-                .then(async res => {
-                    this.props.fireLoading(false);
-                    let { success, message } = res.data;
-                    if (!success) throw new Error(message);
-                    obj.estado = 1;
-                    await Swal.fire({ icon: 'success', text: message });
-                    this.handleCronograma();
-                }).catch(err => {
-                    this.props.fireLoading(false);
-                    Swal.fire({ icon: 'error', text: err.message })
-                });
-        }
-    }
-
-    handleExport = async () => {
+    // exportar datos
+    const handleExport = async () => {
         let answer = await Confirm("warning", "¿Deseas exportar los cronogramas a excel?")
-        if (answer) {
-            this.props.fireLoading(true);
-            let { year, mes } = this.props.query;
-            await unujobs.fetch(`exports/personal/${year}/${mes}`)
-            .then(resdata => resdata.blob())
-            .then(blob => {
-                let a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `report_${year}_${mes}.xlsx`;
-                a.target = "_blank";
-                a.click();
-            })
-            .catch(err => Swal.fire({ icon: 'error', text: err.message }));
-            this.props.fireLoading(false);
-        }
+        if (!answer) return false;
+        app_context.fireLoading(true);
+        await unujobs.fetch(`exports/personal/${year}/${mes}`)
+        .then(resdata => resdata.blob())
+        .then(blob => {
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `report_${year}_${mes}.xlsx`;
+            a.target = "_blank";
+            a.click();
+        }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
+        app_context.fireLoading(false);
     }
 
-    render() {
+    // siguiente página
+    const handlePage = async (e, { activePage }) => {
+        let { push } = Router;
+        query.page = activePage;
+        query.query_search = query_search;
+        await push({ pathname, query });
+    }
 
-        let {query, pathname, cronogramas} = this.props;
+    // crear dependencia
+    const handleCreate = async () => {
+        let { push } = Router;
+        let newQuery = {};
+        newQuery.href = btoa(`${location.href}`)
+        push({ pathname: `${pathname}/register`, query: newQuery });
+    }
 
-        return (
-            <div className="col-md-12">
-                <Body>
-                    <Datatable titulo="Lista de Planillas x Mes"
-                        isFilter={false}
-                        headers={ ["#ID", "Planilla", "Sede", "F. Creado", "N° Trabajadores", "Estado"]}
-                        index={
-                            [
-                                {
-                                    key: "id",
-                                    type: "text"
-                                }, 
-                                {
-                                    key: "planilla.nombre",
-                                    type: "text",
-                                    children: [
-                                        {
-                                            key: "adicional",
-                                            type: "icon",
-                                            prefix: "Adicional"
-                                        }
-                                    ]
-                                }, 
-                                {
-                                    key: "sede.descripcion",
-                                    type: "text"
-                                }, 
-                                {
-                                    key: "created_at",
-                                    type: "date"
-                                },
-                                {
-                                    key: "historial_count",
-                                    type: "icon",
-                                    bg: 'dark'
-                                },
-                                {
-                                    key: "estado",
-                                    type: "option",
-                                    data: [
-                                        { key: 1, text: "En Curso", className: "badge-success" },
-                                        { key: 0, text: "Cerrada", className: "badge-danger" },
-                                        { key: 2, text: "Anulada", className: "badge-red" }
-                                    ]
-                                }
-                            ]
-                        }
-                        options={
-                            [
-                                {
+    // renderizado
+    return (
+        <div className="col-md-12">
+            <BoardSimple
+                prefix="C"
+                bg="danger"
+                options={[]}
+                title="Cronograma"
+                info={["Lista de planillas por mes"]}
+            >
+                <Datatable
+                    isFilter={false}
+                    headers={ ["#ID", "Planilla", "Sede", "F. Creado", "N° Trabajadores", "Estado"]}
+                    index={
+                        [
+                            {
+                                key: "id",
+                                type: "text"
+                            }, 
+                            {
+                                key: "planilla.nombre",
+                                type: "text",
+                                children: [
+                                    {
+                                        key: "adicional",
+                                        type: "icon",
+                                        prefix: "Adicional"
+                                    }
+                                ]
+                            }, 
+                            {
+                                key: "sede.descripcion",
+                                type: "text"
+                            }, 
+                            {
+                                key: "created_at",
+                                type: "date"
+                            },
+                            {
+                                key: "historial_count",
+                                type: "icon",
+                                bg: 'dark'
+                            },
+                            {
+                                key: "estado",
+                                type: "option",
+                                data: [
+                                    { key: 1, text: "En Curso", className: "badge-success" },
+                                    { key: 0, text: "Cerrada", className: "badge-danger" },
+                                    { key: 2, text: "Anulada", className: "badge-red" }
+                                ]
+                            }
+                        ]
+                    }
+                    options={
+                        [
+                            {
+                                key: "error",
+                                icon: "fas fa-bug",
+                                className: "bg-red",
+                                title: "Corregir errores",
+                                rules: {
                                     key: "error",
-                                    icon: "fas fa-bug",
-                                    className: "bg-red",
-                                    title: "Corregir errores",
-                                    rules: {
+                                    value: 1
+                                }
+                            },
+                            {
+                                key: "edit",
+                                icon: "fas fa-pencil-alt",
+                                title: "Editar cronograma",
+                                rules: {
+                                    key: "estado",
+                                    value: 1,
+                                    or: {
                                         key: "error",
-                                        value: 1
-                                    }
-                                },
-                                {
-                                    key: "edit",
-                                    icon: "fas fa-pencil-alt",
-                                    title: "Editar cronograma",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1,
-                                        or: {
-                                            key: "error",
-                                            value: 0
-                                        }
-                                    }
-                                }, 
-                                {
-                                    key: "informacion",
-                                    icon: "fas fa-info",
-                                    title: "Visualizar cronograma detalladamente",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1,
-                                        or: {
-                                            key: "error",
-                                            value: 0
-                                        }
-                                    }
-                                }, 
-                                {
-                                    key: "informacion",
-                                    icon: "fas fa-info",
-                                    title: "Visualizar cronograma detalladamente",
-                                    rules: {
-                                        key: "estado",
-                                        value: 0,
-                                        or: {
-                                            key: "error",
-                                            value: 0
-                                        }
-                                    }
-                                },
-                                {
-                                    key: "add",
-                                    icon: "fas fa-user-plus",
-                                    title: "Agregar trabajadores al cronograma",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1,
-                                        or: {
-                                            key: "error",
-                                            value: 0
-                                        }
-                                    }
-                                }, 
-                                {
-                                    key: "remove",
-                                    icon: "fas fa-user-minus",
-                                    title: "Eliminar trabajadores al cronograma",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1,
-                                        or: {
-                                            key: "error",
-                                            value: 0
-                                        }
-                                    }
-                                }, 
-                                {
-                                    key: "email",
-                                    icon: "fas fa-paper-plane",
-                                    title: "Enviar correo",
-                                    rules: {
-                                        key: "estado",
                                         value: 0
                                     }
-                                }, 
-                                {
-                                    key: "restore",
-                                    icon: "fas fa-sync",
-                                    title: "Restaurar Cronograma",
-                                    rules: {
-                                        key: "estado",
-                                        value: 2
-                                    }
-                                },
-                                {
-                                    key: "report",
-                                    icon: "fas fa-file-alt",
-                                    title: "Reportes"
                                 }
-                            ]
-                        }
-                        getOption={this.getOption}
-                        data={cronogramas.data}>
-                        <Form className="mb-3">
-                            <div className="row">
-                                <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
-                                    <Form.Field>
-                                        <input type="number" 
-                                            placeholder="Año" 
-                                            name="year"
-                                            value={this.state.year}
-                                            disabled={this.props.isLoading}
-                                            onChange={this.handleInput}
-                                        />
-                                    </Form.Field>
-                                </div>
-                                <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
-                                    <Form.Field>
-                                        <input type="number" 
-                                            min="1" 
-                                            max="12" 
-                                            placeholder="Mes" 
-                                            name="mes"
-                                            value={this.state.mes}
-                                            onChange={this.handleInput}
-                                            disabled={this.props.isLoading}
-                                        />
-                                    </Form.Field>
-                                </div>
-                                <div className="col-md-3 col-6 col-sm-12 col-xl-2 mb-1">
+                            }, 
+                            {
+                                key: "informacion",
+                                icon: "fas fa-info",
+                                title: "Visualizar cronograma detalladamente",
+                                rules: {
+                                    key: "estado",
+                                    value: 1,
+                                    or: {
+                                        key: "error",
+                                        value: 0
+                                    }
+                                }
+                            }, 
+                            {
+                                key: "informacion",
+                                icon: "fas fa-info",
+                                title: "Visualizar cronograma detalladamente",
+                                rules: {
+                                    key: "estado",
+                                    value: 0,
+                                    or: {
+                                        key: "error",
+                                        value: 0
+                                    }
+                                }
+                            },
+                            {
+                                key: "add",
+                                icon: "fas fa-user-plus",
+                                title: "Agregar trabajadores al cronograma",
+                                rules: {
+                                    key: "estado",
+                                    value: 1,
+                                    or: {
+                                        key: "error",
+                                        value: 0
+                                    }
+                                }
+                            }, 
+                            {
+                                key: "remove",
+                                icon: "fas fa-user-minus",
+                                title: "Eliminar trabajadores al cronograma",
+                                rules: {
+                                    key: "estado",
+                                    value: 1,
+                                    or: {
+                                        key: "error",
+                                        value: 0
+                                    }
+                                }
+                            }, 
+                            {
+                                key: "email",
+                                icon: "fas fa-paper-plane",
+                                title: "Enviar correo",
+                                rules: {
+                                    key: "estado",
+                                    value: 0
+                                }
+                            }, 
+                            {
+                                key: "restore",
+                                icon: "fas fa-sync",
+                                title: "Restaurar Cronograma",
+                                rules: {
+                                    key: "estado",
+                                    value: 2
+                                }
+                            },
+                            {
+                                key: "report",
+                                icon: "fas fa-file-alt",
+                                title: "Reportes"
+                            }
+                        ]
+                    }
+                    getOption={getOption}
+                    data={cronogramas.data || []}>
+                    <Form className="mb-3">
+                        <div className="row">
+                            <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
+                                <Form.Field>
+                                    <input type="number" 
+                                        placeholder="Año" 
+                                        name="year"
+                                        value={year || ""}
+                                        onChange={({ target }) => setYear(target.value)}
+                                    />
+                                </Form.Field>
+                            </div>
+                            <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
+                                <Form.Field>
+                                    <input type="number" 
+                                        min="1" 
+                                        max="12" 
+                                        placeholder="Mes" 
+                                        name="mes"
+                                        value={mes || ""}
+                                        onChange={({ target }) => setMes(target.value)}
+                                    />
+                                </Form.Field>
+                            </div>
+                            <div className="col-md-3 col-6 col-sm-12 col-xl-2 mb-1">
+                                <Button 
+                                    fluid
+                                    onClick={handleSearch}
+                                    color="blue"
+                                >
+                                    <i className="fas fa-search mr-1"></i>
+                                    <span>Buscar</span>
+                                </Button>
+                            </div>
+
+                            <Show condicion={!block}>
+                                <div className="col-md-3 col-6 col-sm-12 col-xl-2">
                                     <Button 
                                         fluid
-                                        onClick={this.handleCronograma}
-                                        disabled={this.props.isLoading}
-                                        color="blue"
+                                        disabled={!cronogramas.total}
+                                        color="olive"
+                                        onClick={handleExport}
                                     >
-                                        <i className="fas fa-search mr-1"></i>
-                                        <span>Buscar</span>
+                                        <i className="fas fa-share mr-1"></i>
+                                        <span>Exportar</span>
                                     </Button>
                                 </div>
-
-                                <Show condicion={!this.state.block}>
-                                    <div className="col-md-3 col-6 col-sm-12 col-xl-2">
-                                        <Button 
-                                            fluid
-                                            disabled={this.props.isLoading || !cronogramas.total}
-                                            color="olive"
-                                            onClick={this.handleExport}
-                                        >
-                                            <i className="fas fa-share mr-1"></i>
-                                            <span>Exportar</span>
-                                        </Button>
-                                    </div>
-                                </Show>
-                            </div>
-                            <hr/>
-                        </Form>
-                    </Datatable>
-                    {/* event create cronograma */}
-                    <BtnFloat
-                        disabled={this.props.isLoading}
-                        onClick={(e) => {
-                            this.setState({ loading: true });
-                            Router.push({ pathname: `${pathname}/register`, query:  { clickb: "cronograma" }});
-                        }}
-                    >
-                        <i className="fas fa-plus"></i>
-                    </BtnFloat>
-                </Body>
-            </div>
-        )
-    }
-
+                            </Show>
+                        </div>
+                        <hr/>
+                    </Form>
+                </Datatable>
+                {/* paginación */}
+                <div className="text-center">
+                    <hr/>
+                    <Pagination activePage={query.page || 1} 
+                        totalPages={cronogramas.last_page || 1}
+                        onPageChange={handlePage}
+                    />
+                </div>
+                {/* event create cronograma */}
+                <BtnFloat
+                    onClick={handleCreate}
+                >
+                    <i className="fas fa-plus"></i>
+                </BtnFloat>
+            </BoardSimple>
+        </div>
+    )
 }
+
+// server
+CronogramaIndex.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // filtros
+    let fecha = new Date();
+    query.page = typeof query.page != 'undefined' ? query.page : 1;
+    query.year = typeof query.year != 'undefined' ? query.year : fecha.getFullYear();
+    query.mes = typeof query.mes != 'undefined' ? query.mes : fecha.getMonth() + 1;
+    // obtener datos
+    let query_string = `page=${query.page}&year=${query.year}&mes=${query.mes}`;
+    let { success, cronogramas } = await unujobs.get(`cronograma?${query_string}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({ success: false, cronogramas: {} }))
+    // response
+    return { pathname, query, success, cronogramas }; 
+}
+
+// exportar
+export default CronogramaIndex;

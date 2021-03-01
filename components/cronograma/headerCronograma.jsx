@@ -1,73 +1,29 @@
-import React, { useContext } from 'react';
-import Skeleton from 'react-loading-skeleton';
-import { BtnBack } from '../Utils';
-import { Form, Select } from 'semantic-ui-react';
-import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
-import { backUrl } from '../../services/utils';
+import React from 'react';
 import Show from '../show';
-import Router from 'next/router';
 
+const HeaderCronograma = ({ cronograma = {} }) => {
 
-const HeaderCronograma = () => {
-
-    const { cronograma, loading } = useContext(CronogramaContext);
-    
-    const handleBack = () => {
-        let goBack = backUrl(Router.pathname);
-        Router.push({ pathname: goBack, query: { year: cronograma.year, mes: cronograma.mes } });
-    }
-
+    // render
     return (
-        <div className="row pl-2 pr-2">
-            <div className="col-md-2 col-4">
-                <BtnBack
-                    onClick={handleBack}
-                    disabled={loading}
-                />
-            </div>
-
-            <div className="col-md-2 col-4 mb-1">
-                <Form.Field>
-                    <input type="number" 
-                        placeholder="Año"
-                        value={cronograma.year || ""}
-                        readOnly
-                    /> 
-                </Form.Field>
-            </div>
-
-            <div className="col-md-2 col-4 mb-1">
-                <Form.Field>
-                    <input type="number" 
-                        placeholder="Mes"
-                        value={cronograma.mes || ""}
-                        readOnly
-                    />
-                </Form.Field>
-            </div>
-
-            <div className="col-md-3 col-12 mb-1 col-sm-3">
-                <Form.Field>
-                    <input type="text"
-                        placeholder="Planilla"
-                        value={cronograma.planilla && cronograma.planilla.nombre || ""}
-                        readOnly
-                    />
-                </Form.Field>
-            </div>
-
+        <span>
+            Cronograma: 
+            <span className={`ml-1 badge badge-${cronograma.remanente ? 'danger' : 'primary'}`}>
+                Planilla {cronograma.remanente ? 'Remanente' : ''} 
+                : {cronograma.planilla && cronograma.planilla.nombre || ""}
+            </span>
+            <i className="fas fa-arrow-right ml-2 mr-1"></i>
+            <span className="ml-1 badge badge-dark">{cronograma.year || ""}</span>
+            <span className="ml-1">/</span>
+            <span className="ml-1 badge badge-dark">{cronograma.mes || ""}</span>
             <Show condicion={cronograma.adicional}>
-                <div className="col-md-3 col-12 mb-1">
-                    <Form.Field>
-                        <input type="text" 
-                            value={`Adicional ${cronograma.adicional}`}
-                            readOnly
-                        />
-                    </Form.Field>
-                </div>
+                <i className="fas fa-arrow-right ml-2 mr-1"></i>
+                <span className="badge badge-warning ml-1">
+                    Adicional {cronograma.adicional}
+                </span>
             </Show>
-        </div>
-    );
+        </span>
+    )
 }
 
+// exportar
 export default HeaderCronograma;

@@ -35,10 +35,10 @@ const ModalRightUser = ({ title, show, onClose = null, onCheck = null, checked =
         setCurrentLoading(true);
         await authentication.get(`user?page=${current_page}&query_search=${query_search}`)
         .then(async res => {
-            let { data } = res;
-            setCurrentLastPage(data.lastPage);
-            setCurrentTotal(data.total);
-            let payload = data.data || [];
+            let { users } = res.data;
+            setCurrentLastPage(users.lastPage);
+            setCurrentTotal(users.total);
+            let payload = users.data || [];
             await payload.map(p => {
                 let check = checked.includes(p.id) ? true : false;
                 p.check = check;
@@ -94,7 +94,7 @@ const ModalRightUser = ({ title, show, onClose = null, onCheck = null, checked =
                         {datos.map((d, indexD) => 
                             <ItemCheck
                                 key={`list-team-${indexD}`}
-                                title={d.fullname || ''}
+                                title={d.person && d.person.fullname || ''}
                                 checked={d._check}
                                 image={d.image_images && d.image_images.image_50x50 || ''}
                                 classNameTitle="capitalize"
