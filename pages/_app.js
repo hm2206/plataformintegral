@@ -12,6 +12,7 @@ import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
 import { clearStorage } from '../storage/clear';
 import LoadingGlobal from '../components/loadingGlobal';
+import env from '../env.json';
 
 // config redux
 import { Provider } from 'react-redux';
@@ -263,7 +264,7 @@ class MyApp extends App {
                <meta key={`meta-headers-custom-${indexH}`} {...h}/>
             )}
             {/* titulo */}
-            <title>{_app.name || "Integración"}</title>
+            <title>{_app.name || env.app.name || "Integracion"}</title>
             <link rel="shortcut icon" href={_app.icon_images && _app.icon_images.icon_50x50}></link>
             <meta name="theme-color" content="#3063A0"></meta>
             <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,600,700,900" rel="stylesheet" type="text/css" />
