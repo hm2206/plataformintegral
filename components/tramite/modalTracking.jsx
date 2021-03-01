@@ -82,6 +82,12 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
                         <i className="fas fa-info-circe"></i> Información
                     </button>
                 </Show>
+                {/* tracking multiple */}
+                <Show condicion={current_tracking.multiple}>
+                    <button className="btn btn-primary">
+                        <i className="fas fa-chart-line"></i> Multiples
+                    </button>
+                </Show>
             </div>
         </VerticalTimelineElement>
     )
