@@ -183,7 +183,7 @@ const Login = ({ pathname, query }) => {
 
 // server
 Login.getInitialProps = async (ctx) => {
-    await GUEST(ctx);
+    GUEST(ctx);
     let { query, pathname } = ctx;
     return { pathname, query };
 }

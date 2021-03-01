@@ -1,19 +1,41 @@
 import React, { Component } from 'react';
+import Router from 'next/router';
 
 
-export default class LoaderPage extends Component
-{
+const LoaderPage = ({ message }) => {
 
-    render() {
-
-        let { message, app } = this.props;
-
-        return <div style={{ position: 'fixed', top: '0px', left: '0px', width: "100%", height: "100%", fontFamily: "arial" }}>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width:"100%", height: "100%", flexDirection: "column" }}>
-                <img src="/img/loading_page.png" alt="soporte"/>
-                <h3 style={{ color: "#455a64" }}>{message || ""}</h3>
-            </div>
-        </div>
+    // recargar página
+    const reloadPage = () => {
+        let { push } = Router;
+        push(location.href);
     }
 
+    // render
+    return (
+        <div class="empty-state">
+            {/* <!-- .empty-state-container --> */}
+            <div class="empty-state-container">
+                {/* <!-- .card --> */}
+                <div class="card border border-primary">
+                    {/* <!-- .card-body --> */}
+                    <div class="card-body">
+                        <div class="state-figure">
+                            <img class="img-fluid w-75" src="/img/mantenimiento.png" alt=""/>
+                        </div>
+                        <h3 class="state-header"> Estamos trabajando en algunas actualizaciones </h3>
+                        <p class="state-description"> {message} </p>
+                        <div className="text-center">
+                            <button className="btn btn-primary"
+                                onClick={reloadPage}
+                            >
+                                Volver a cargar 
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
 }
+
+export default LoaderPage;
