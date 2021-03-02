@@ -365,7 +365,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                             setCurrentTramite({})
                             setCurrentNext("");
                         }}
-                        user={tab == 'DEPENDENCIA' ? boss.user || {} : app_context.auth || {}}
+                        user={tab == 'DEPENDENCIA' ? boss.user : app_context.auth || {}}
                         onSave={handleOnSave}
                     />
 
