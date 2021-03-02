@@ -11,6 +11,9 @@ import { SelectCargo, SelectCargoTypeCategoria } from '../../../components/selec
 import { AUTHENTICATE } from '../../../services/auth';
 import { AppContext } from '../../../contexts/AppContext';
 import Skeletor from 'react-loading-skeleton';
+import BoardSimple from '../../../components/boardSimple'
+import HeaderCronograma from '../../../components/cronograma/headerCronograma'
+
 
 const PlaceholderInput = ({ height = '38px', width = "100%", circle = false }) => <Skeletor height={height} width={width} circle={circle}/>
 
@@ -172,16 +175,14 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
     return (
             <Fragment>
                 <div className="col-md-12">
-                    <Body>
-                        <BtnBack onClick={handleBack}/> 
-                        <span className="ml-2">Agregar Trabajador al Cronograma <b>#{cronograma && cronograma.id} - {cronograma.planilla && cronograma.planilla.nombre} </b></span>
-                        <hr/>
-                    </Body>
-                </div>
-
-                <div className="col-md-12">
-                    <Body>
-                        <Form>
+                    <BoardSimple
+                        title={<HeaderCronograma cronograma={cronograma}/>}
+                        info={["Agregar trabajadores al cronograma"]}
+                        prefix={<BtnBack/>}
+                        bg="light"
+                        options={[]}
+                    >
+                        <Form className="card-body">
                             <div className="row">
                                 <div className="col-md-3 mb-1">
                                     <Form.Field>
@@ -286,7 +287,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
                                 </div>
                             </div>
                         </Form>
-                    </Body>
+                    </BoardSimple>
                 </div>
 
                 <Show condicion={rows.length}>

@@ -1,121 +1,97 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
+import React, { useState, useContext, useEffect, Fragment } from 'react';
+import { BtnBack } from '../../../components/Utils';
 import { backUrl, Confirm } from '../../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
-import { unujobs } from '../../../services/apis';
+import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Router from 'next/router';
 import Swal from 'sweetalert2'
 import { AUTHENTICATE } from '../../../services/auth';
 import Show from '../../../components/show';
+import atob from 'atob';
+import BoardSimple from '../../../components/boardSimple';
+import HeaderCronograma from '../../../components/cronograma/headerCronograma'
+import { AppContext } from '../../../contexts/AppContext';
+import ContentControl from '../../../components/contentControl';
 
-export default class EditCronograma extends Component
-{
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname } = ctx;
-        return { query, pathname }
+const EditCronograma = ({ pathname, query, success, cronograma }) => {
+
+    // app
+    const app_context = useContext(AppContext);
+
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [edit, setEdit] = useState(false);
+
+    // habilitar edición
+    useEffect(() => {
+        if (!edit) setForm(JSON.parse(JSON.stringify(cronograma)));
+    }, [edit]);
+
+    // cambiar form
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-    state = {
-        id: "",
-        loader: false,
-        cronograma: {}
-    }
-
-
-    componentDidMount = async () => {
-        await this.setState((state, props) => ({ id: props.query.id ? atob(props.query.id) : "" }));
-        this.getCronograma();
-    }
-
-    handleBack = (e) => {
-        let { cronograma } = this.state;
-        let { pathname, push } = Router;
-        push({ pathname: backUrl(pathname), query: { mes: cronograma.mes, year: cronograma.year } });
-    }
-
-    getCronograma = async () => {
-        this.props.fireLoading(true);
-        await unujobs.get(`cronograma/${this.state.id}`)
-        .then(res => {
-            let { cronograma } = res.data;
-            // add entity
-            this.props.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
-            // datos
-            this.setState({ cronograma })
-        })
-        .catch(err => {
-            this.props.fireLoading(true);
-            Swal.fire({ icon: 'error', text: err.message })
-        });
-        this.props.fireLoading(false);
-    }
-
-    handleInput = ({ name, value }) => {
-        let newObj = Object.assign({}, this.state.cronograma);
-        newObj[name] = value;
-        this.setState({ cronograma: newObj });
-    }
-
-    update = async () => {
-        this.props.fireLoading(true);
-        let form = new FormData;
-        form.append('descripcion', this.state.cronograma.descripcion);
-        form.append('observacion', this.state.cronograma.observacion);
-        form.append('sello', this.state.cronograma.sello);
-        form.append('token_verify', this.state.cronograma.token_verify);
-        form.append('_method', 'PUT');
-        await unujobs.post(`cronograma/${this.state.id}`, form)
+    // actualizar cronograma
+    const update = async () => {
+        let answer = await Confirm('warning', '¿Estas seguro en guardar los datos?', 'Estoy suguro')
+        if (!answer) return false;
+        app_context.fireLoading(true);
+        let datos = new FormData;
+        datos.append('descripcion', form.descripcion || "");
+        datos.append('observacion', form.observacion || "");
+        datos.append('sello', form.sello || "");
+        datos.append('token_verify', form.token_verify || "");
+        datos.append('_method', 'PUT');
+        await unujobs.post(`cronograma/${cronograma.id}`, datos)
         .then(async res => {
-            this.props.fireLoading(false);
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) this.getCronograma();
+            app_context.fireLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            await Router.push(location.href);
+            setEdit(false);
         })
-        .catch(err => {
-            this.props.fireLoading(false);
-            Swal.fire({ icon: 'error', text: err.message })
-        });
+        .catch(err => handleErrorRequest(err, setErrors, () => app_context.fireLoading(false)));
     }
 
-    destroy = async () => {
+    // eliminando cronograma
+    const destroy = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en eliminar el cronograma permanentemente?`, 'Eliminar');
-        if (answer) {
-            // let conf = await Confirm('warning', `¿Deseas anular los contratos de está planilla?`, 'Confirmar');
-            let anulado = 0;
-            this.props.fireLoading(true);
-            let form = new FormData;
-            form.append('_method', 'DELETE');
-            form.append('anulado', anulado);
-            await unujobs.post(`cronograma/${this.state.id}`, form)
-                .then(async res => {
-                    this.props.fireLoading(false);
-                    let { success, message } = res.data;
-                    if (!success) throw new Error(message);
-                    await Swal.fire({ icon: 'success', text: message })
-                    let { push, pathname } = Router;
-                    push(backUrl(pathname));
-                }).catch(err => {
-                    this.props.fireLoading(false);
-                    Swal.fire({ icon: 'error', text: err.message });
-                });
-        }
+        if (answer) return false;
+        let anulado = 0;
+        app_context.fireLoading(true);
+        let datos = Object.assign({}, form);
+        datos._method  = 'DELETE';
+        datos.anulado = anulado;
+        await unujobs.post(`cronograma/${cronograma.id}`, datos)
+        .then(async res => {
+            app_context.fireLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message })
+            let { push } = Router;
+            push(backUrl(pathname));
+        }).catch(err => handleErrorRequest(err, null,  () => app_context.fireLoading(false)));
     }
 
-    render() {
-        
-        let { cronograma, loader } = this.state;
-
-        return (
+    // renderizar
+    return (
+        <Fragment>
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={this.handleBack}/> 
-                        <span className="ml-2">Editar Cronograma <b>#{cronograma && cronograma.id}</b></span>
-                        <hr/>
-                    </div>
-                    <Form className="card-body" loading={this.state.loader}>
+                <BoardSimple
+                    title={<HeaderCronograma cronograma={cronograma}/>}
+                    info={["Editar cronograma"]}
+                    prefix={<BtnBack/>}
+                    options={[]}
+                    bg="light"
+                >
+                    <Form className="card-body">
                         <div className="row">
                             <div className="col-md-12">
                                 <b>( <b className="text-red">*</b> ) Campos obligatorios</b>
@@ -126,7 +102,7 @@ export default class EditCronograma extends Component
                                 <Form.Field>
                                     <label htmlFor="">Planilla</label>
                                     <input type="text"
-                                        disabled
+                                        readOnly
                                         defaultValue={cronograma.planilla && cronograma.planilla.nombre}
                                     />
                                 </Form.Field>
@@ -135,7 +111,7 @@ export default class EditCronograma extends Component
                                     <label htmlFor="">Adicional</label>
                                     <input type="text" 
                                         defaultValue={cronograma.adicional ? cronograma.adicional : ' No'}
-                                        disabled={true}
+                                        readOnly
                                     />
                                 </Form.Field>
                             </div>
@@ -145,7 +121,7 @@ export default class EditCronograma extends Component
                                     <label htmlFor="">Año</label>
                                     <input type="text"
                                         defaultValue={cronograma.year}
-                                        disabled
+                                        readOnly
                                     />
                                 </Form.Field>
 
@@ -153,7 +129,7 @@ export default class EditCronograma extends Component
                                     <label htmlFor="">Remanente</label>
                                     <input type="text"
                                         defaultValue={cronograma.remanente ? 'Si' : 'No'}
-                                        disabled
+                                        readOnly
                                     />
                                 </Form.Field>
                             </div>
@@ -163,7 +139,7 @@ export default class EditCronograma extends Component
                                     <label htmlFor="">Mes</label>
                                     <input type="text"
                                         defaultValue={cronograma.mes}
-                                        disabled
+                                        readOnly
                                     />
                                 </Form.Field>
 
@@ -171,7 +147,7 @@ export default class EditCronograma extends Component
                                     <label htmlFor="">Dias</label>
                                     <input type="text"
                                         defaultValue={cronograma.dias}
-                                        disabled
+                                        readOnly
                                     />
                                 </Form.Field>
                             </div>
@@ -180,10 +156,11 @@ export default class EditCronograma extends Component
                                 <Form.Field>
                                     <label htmlFor="">Descripción <b className="text-red">*</b></label>
                                     <input type="text"
-                                        value={cronograma.descripcion ? cronograma.descripcion : ''}
-                                        disabled={loader}
+                                        value={form.descripcion || ""}
+                                        disabled={current_loading}
+                                        readOnly={!edit}
                                         name="descripcion"
-                                        onChange={({ target }) => this.handleInput(target)}
+                                        onChange={({ target }) => handleInput(target)}
                                     />
                                 </Form.Field>
                             </div>
@@ -198,7 +175,8 @@ export default class EditCronograma extends Component
                                             id="sello"
                                             hidden
                                             name="sello"
-                                            onChange={({ target }) => this.handleInput({ name: target.name, value: target.files[0] })}
+                                            readOnly={!edit}
+                                            onChange={({ target }) => handleInput({ name: target.name, value: target.files[0] })}
                                         />
                                     </label>
                                 </Form.Field>
@@ -208,41 +186,90 @@ export default class EditCronograma extends Component
                                 <Form.Field>
                                     <label htmlFor="">Observación <b className="text-red">*</b></label>
                                     <textarea name="" id="" cols="30" rows="10"
-                                        value={cronograma.observacion}
+                                        value={form.observacion || ""}
                                         name="observacion"
-                                        onChange={({ target }) => this.handleInput(target)}
+                                        readOnly={!edit}
+                                        onChange={({ target }) => handleInput(target)}
                                     />
                                 </Form.Field>
                             </div>
 
-                            <div className="col-md-6 mt-3 text-center">
-                                <b><i className="fas fa-image"></i> Imagen del Sello</b> <br/>
-                                <img src={cronograma.sello} alt="sello"
-                                    style={{ border: "1px solid #000", width: "300px", height: "200px", objectFit: "contain" }}
-                                />
-                            </div>
-
-                            <div className="col-md-12 text-right">
-                                <hr/>
-                                <Show condicion={cronograma.estado}>
-                                    <Button color="red"
-                                        onClick={this.destroy}
-                                    >
-                                        <i className="fas fa-trash"></i> Eliminar Cronograma
-                                    </Button>
-
-                                </Show>
-                                <Button color="teal"
-                                    onClick={this.update}
-                                >
-                                    <i className="fas fa-save"></i> Guardar cambios
-                                </Button>
-                            </div>
+                            <Show condicion={typeof form.sello == 'string'}>
+                                <div className="col-md-6 mt-3 text-center">
+                                    <b><i className="fas fa-image"></i> Imagen del Sello</b> <br/>
+                                    <img src={form.sello} alt="sello"
+                                        style={{ border: "1px solid #000", width: "300px", height: "200px", objectFit: "contain" }}
+                                    />
+                                </div>
+                            </Show>
                         </div>
                     </Form>
-                </Body>
+                </BoardSimple>
             </div>
-        )
-    }
+            {/* panel de control */}
+            <ContentControl>
+                {/* sin editar */}
+                <Show condicion={!edit}>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="blue"
+                            basic
+                            onClick={(e) => setEdit(true)}
+                        >
+                            <i className="fas fa-pencil-alt"></i>
+                        </Button>
+                    </div>
 
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="red"
+                            onClick={destroy}
+                        >
+                            <i className="fas fa-trash"></i>
+                        </Button>
+                    </div>
+                </Show>
+                {/* editar */}
+                <Show condicion={edit}>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="red"
+                            disabled={current_loading}
+                            onClick={(e) => setEdit(false)}
+                        >
+                            <i className="fas fa-times"></i>
+                        </Button>
+                    </div>
+
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="blue"
+                            disabled={current_loading}
+                            onClick={update}
+                            loading={current_loading}
+                        >
+                            <i className="fas fa-sync"></i>
+                        </Button>
+                    </div>
+                </Show>
+            </ContentControl>
+        </Fragment>
+    )
 }
+
+// server
+EditCronograma.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // obtener id
+    let id = atob(query.id) || "__error";
+    //find cronograma
+    let { success, cronograma } = await unujobs.get(`cronograma/${id}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({ success: false }));
+    // response
+    return { pathname, query, success, cronograma };
+}
+
+// export 
+export default EditCronograma;
