@@ -1,157 +1,143 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl } from '../../../services/utils';
+import React, { Fragment, useEffect, useState } from 'react';
+import { BtnBack } from '../../../components/Utils';
 import Router from 'next/router';
-import { Form, Button, Select, Checkbox } from 'semantic-ui-react'
-import { unujobs, tramite } from '../../../services/apis';
+import { Form, Button } from 'semantic-ui-react'
+import { handleErrorRequest, tramite } from '../../../services/apis';
 import Swal from 'sweetalert2';
-import Show from '../../../components/show';
 import { AUTHENTICATE } from '../../../services/auth';
+import BoardSimple from '../../../components/boardSimple'
+import ContentControl from '../../../components/contentControl';
+import { Confirm } from '../../../services/utils';
+import atob from 'atob';
+import Show from '../../../components/show';
 
 
-export default class EditTypeDescuento extends Component
-{
+const CreateTramiteType = ({ pathname, query, success, tramite_type }) => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [edit, setEdit] = useState(false);
+
+    // cambio de form
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
+        setEdit(true);
     }
 
-    state = {
-        loading: false,
-        edit: false,
-        old: {},
-        form: { 
-            plame: 0,
-            edit: 0
-        },
-        errors: {}
-    }
-
-    componentDidMount = async () => {
-        await this.findTramiteType();
-    }
-
-    findTramiteType = async () => {
-        this.setState({ loading: true });
-        let { query } = this.props;
-        let id = query.id ? atob(query.id) : '__error';
-        await tramite.get(`tramite_type/${id}`)
-        .then(res => {
-            let { success, tramite_type, message } = res.data;
-            if (!success) throw new Error(message);
-            this.setState({ form: tramite_type, old: tramite_type })
-        })
-        .catch(err => {
-            Swal.fire({ icon: 'error', text: err.message });
-            this.setState({ form: {}, old: {} })
-        });
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors, edit: true };
-        });
-    }
-
-    save = async () => {
-        this.setState({ loading: true });
-        let { form } = this.state;
-        await tramite.post(`tramite_type/${form.id}/update`, form)
+    // actualizar datos
+    const save = async () => {
+        let answer = await Confirm('warning', '¿Estas seguro en guardar los datos?', 'Estoy seguro');
+        if (!answer) return false;
+        setCurrentLoading(true);
+        await tramite.post(`tramite_type/${tramite_type.id}?_method=PUT`, form)
         .then(async res => {
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
+            let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
-            this.setState(state => ({ old: state.form, errors: {}, edit: false }));
-        })
-        .catch(async err => {
-            try {
-                let { message, errors } = JSON.parse(err.message);
-                this.setState({ errors });
-                Swal.fire({ icon: 'warning', text: message });
-            } catch (error) {
-                await Swal.fire({ icon: 'error', text: err.message });
-            }
-        });
-        this.setState({ loading: false });
+            await Router.push(location.href);
+            setErrors({});
+            setEdit(false);
+        }).catch(err => handleErrorRequest(err, setErrors));
+        setCurrentLoading(false);
     }
 
-    render() {
+    // cancelar edicion
+    useEffect(() => {
+        if (!edit) setForm(JSON.parse(JSON.stringify(tramite_type || {})));
+    }, [edit]);
 
-        let { pathname, query } = this.props;
-        let { form, errors, edit } = this.state;
-
-        return (
+    // renderizar
+    return (
+        <Fragment>
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Tip. Trámite
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
+                <BoardSimple
+                    title="Tipo Documento"
+                    info={["Crear tipo de documento"]}
+                    prefix={<BtnBack/>}
+                    options={[]}
+                    bg="light"
+                >
+                    <Form className="card-body mt-4">
+                        <div className="row justify-content-center">
                             <div className="col-md-7">
                                 <div className="row justify-center">
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.short_name && errors.short_name[0]}>
+                                        <Form.Field error={errors.short_name && errors.short_name[0] ? true :  false}>
                                             <label htmlFor="">Nombre Corto <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese una nombre corto"
                                                 name="short_name"
                                                 value={form.short_name || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                className="uppercase"
+                                                onChange={(e) => handleInput(e.target)}
                                             />
-                                            <label>{errors && errors.short_name && errors.short_name[0]}</label>
+                                            <label>{errors.short_name && errors.short_name[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.description && errors.description[0]}>
+                                        <Form.Field error={errors.description && errors.description[0] ? true : false}>
                                             <label htmlFor="">Descripción <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese una descripción"
                                                 name="description"
                                                 value={form.description || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                className="uppercase"
+                                                onChange={(e) => handleInput(e.target)}
                                             />
-                                            <label>{errors && errors.description && errors.description[0]}</label>
+                                            <label>{errors.description && errors.description[0]}</label>
                                         </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <div className="text-right">
-                                            <Button color="red"
-                                                disabled={!this.state.edit}
-                                                onClick={(e) => this.setState(state => ({ form: state.old, edit: false }))}
-                                            >
-                                                <i className="fas fa-times"></i> Cancelar
-                                            </Button>
-
-                                            <Button color="teal"
-                                                disabled={!this.state.edit}
-                                                onClick={this.save}
-                                            >
-                                                <i className="fas fa-save"></i> Guardar
-                                            </Button>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </Form>
-                    </div>
-                </Body>
+                        </div>
+                    </Form>
+                </BoardSimple>
             </div>
-        )
-    }
-    
+            {/* panel de control */}
+            <Show condicion={edit}>
+                <ContentControl>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="red"
+                            disabled={current_loading}
+                            onClick={(e) => setEdit(false)}
+                        >
+                            <i className="fas fa-times"></i> Cancelar
+                        </Button>
+                    </div>
+
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="blue"
+                            disabled={current_loading}
+                            onClick={save}
+                            loading={current_loading}
+                        >
+                            <i className="fas fa-sync"></i> Actualizar
+                        </Button>
+                    </div>
+                </ContentControl>
+            </Show>
+        </Fragment>
+    )
 }
+
+// server
+CreateTramiteType.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    let id = atob(query.id || "") || '_error';
+    let { success, tramite_type } = await tramite.get(`tramite_type/${id}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({ success: false, tramite_type: {} }));
+    // response
+    return { pathname, query, success, tramite_type };
+} 
+
+// exportar
+export default CreateTramiteType;
