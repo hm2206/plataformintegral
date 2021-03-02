@@ -249,7 +249,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
                     <Show condicion={descripcion.includes(action)}>
                         <Form.Field className="mb-3" errors={is_errors && errors.description && errors.description[0] ? true : false}>
-                            <label htmlFor="">Descripción</label>
+                            <label htmlFor="">proveído</label>
                             <textarea name="description" rows="5"
                                 value={form.description || ""}
                                 onChange={({ target }) => handleInput(target)}

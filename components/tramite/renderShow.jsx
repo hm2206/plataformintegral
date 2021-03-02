@@ -12,6 +12,7 @@ import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 import { TramiteContext } from '../../contexts/TramiteContext';
 import Skeleton from 'react-loading-skeleton';
+import InfoMultiple from './infoMultiple';
 
 const hidden = ['RECIBIDO', 'RECHAZADO', 'FINALIZADO'];
 const nothing = ['FINALIZADO', 'ANULADO'];
@@ -455,6 +456,17 @@ const RenderShow = () => {
                             </div>
                         </Show>
                     </div>
+                    {/* multiple */}
+                    <Show condicion={current_tracking.multiple}>
+                        <div className="col-md-12 mt-4">
+                            <hr/>
+                            <button className="btn btn-primary"
+                                onClick={(e) => setAction("MULTIPLE")}
+                            >
+                                <i className="fas fa-chart-line"></i> Multiples
+                            </button>
+                        </div>
+                    </Show>
                 </div>
             </div>
             {/* línea de tiempo */}
@@ -483,6 +495,13 @@ const RenderShow = () => {
                 }}>
                     <i className="fas fa-plus"></i>
                 </BtnFloat>
+            </Show>
+            {/* multiple tracking */}
+            <Show condicion={current_tracking.multiple && action == 'MULTIPLE'}>
+                <InfoMultiple
+                    current_tracking={current_tracking}
+                    isClose={(e) => setAction("")}
+                />
             </Show>
         </div>
     )

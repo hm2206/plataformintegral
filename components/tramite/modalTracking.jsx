@@ -16,9 +16,10 @@ import ChatIcon from '@material-ui/icons/Chat';
 import Swal from 'sweetalert2';
 import ModalInfo from './modalInfo';
 import Visualizador from '../visualizador';
+import InfoMultiple from './infoMultiple';
 
 
-const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null, current = null }) => {
+const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null, current = null, onMultiple = null }) => {
 
     // obtener meta datos
     const getMetadata = (status) => {
@@ -84,7 +85,9 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
                 </Show>
                 {/* tracking multiple */}
                 <Show condicion={current_tracking.multiple}>
-                    <button className="btn btn-primary">
+                    <button className="btn btn-primary"
+                        onClick={(e) => typeof onMultiple == 'function' ? onMultiple(current_tracking) : null}
+                    >
                         <i className="fas fa-chart-line"></i> Multiples
                     </button>
                 </Show>
@@ -108,6 +111,7 @@ const ModalTracking = ({ isClose = null, slug = "", current = null }) => {
     const [current_tramite, setCurrentTramite] = useState({});
     const [current_file, setCurrentFile] = useState({});
     const [is_visualizador, setIsVisualizador] = useState(false);
+    const [multiple, setMultiple] = useState({});
 
     // obtener linea de tiempo
     const getTracking = async (add = false) => {
@@ -172,6 +176,10 @@ const ModalTracking = ({ isClose = null, slug = "", current = null }) => {
                                 setCurrentTramite(info);
                                 setOption('SHOW_INFO')
                             }}
+                            onMultiple={(m) => {
+                                setMultiple(m);
+                                setOption('MULTIPLE');
+                            }}
                        />
                     )}
                 </VerticalTimeline>
@@ -204,6 +212,13 @@ const ModalTracking = ({ isClose = null, slug = "", current = null }) => {
                         extname={current_file.extname}
                         url={current_file.url}
                         onClose={(e) => setIsVisualizador(false)}
+                    />
+                </Show>
+                {/* mostrar envio multiple */}
+                <Show condicion={option == 'MULTIPLE'}>
+                    <InfoMultiple
+                        current_tracking={multiple}
+                        isClose={(e) => setOption("")}
                     />
                 </Show>
             </div>
