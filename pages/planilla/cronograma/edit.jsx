@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
-import { BtnBack } from '../../../components/Utils';
+import { BtnBack, funcBack } from '../../../components/Utils';
 import { backUrl, Confirm } from '../../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
 import { unujobs, handleErrorRequest } from '../../../services/apis';
@@ -64,7 +64,7 @@ const EditCronograma = ({ pathname, query, success, cronograma }) => {
     // eliminando cronograma
     const destroy = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en eliminar el cronograma permanentemente?`, 'Eliminar');
-        if (answer) return false;
+        if (!answer) return false;
         let anulado = 0;
         app_context.fireLoading(true);
         let datos = Object.assign({}, form);
@@ -76,7 +76,7 @@ const EditCronograma = ({ pathname, query, success, cronograma }) => {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message })
             let { push } = Router;
-            push(backUrl(pathname));
+            push(funcBack());
         }).catch(err => handleErrorRequest(err, null,  () => app_context.fireLoading(false)));
     }
 

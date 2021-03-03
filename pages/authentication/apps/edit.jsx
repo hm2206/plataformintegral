@@ -197,7 +197,7 @@ const EditApp = ({ pathname, query, success, current_app }) => {
                                                 name="support_link"
                                                 value={form.support_link || ""}
                                                 disabled={current_loading}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                                 placeholder="Página web del Soporte. Ejm http://ejemplo.com"
                                             />
                                             <label>{errors.support_link && errors.support_link[0] || ""}</label>
@@ -218,7 +218,7 @@ const EditApp = ({ pathname, query, success, current_app }) => {
                                                 id="file" 
                                                 name="file"
                                                 disabled={current_loading}
-                                                onChange={(e) => this.handleFile(e.target)}
+                                                onChange={(e) => handleFile(e.target)}
                                                 hidden
                                             />
                                         </label>

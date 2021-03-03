@@ -350,6 +350,12 @@ const BtnFloat = ({ theme, children, onClick, disabled = false, size = 'lg', sty
   </button>);
 };
 
+const funcBack = () => {
+  let { pathname, query } = Router;
+  let href = query.href ? atob(query.href) : backUrl(pathname);
+  return href;
+}
+
 const BtnBack = ({ title = 'Ir atrás', theme, children, onClick = null, disabled }) =>  {
 
   // render
@@ -692,5 +698,6 @@ export {
   Cardinfo,
   DropZone,
   SimpleListContent,
-  SimpleList
+  SimpleList,
+  funcBack
 };
