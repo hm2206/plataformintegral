@@ -1,12 +1,12 @@
 import React, { Fragment, useEffect, useState, useContext } from 'react';
-import { Form, Button, Select, Checkbox } from 'semantic-ui-react';
+import { Form, Button, Select, Checkbox, Message } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
-import { Body, BtnBack } from '../../../components/Utils';
-import { unujobs } from '../../../services/apis';
+import { BtnBack, funcBack } from '../../../components/Utils';
+import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
-import { Confirm, backUrl } from '../../../services/utils'
+import { Confirm } from '../../../services/utils'
 import ContentControl from '../../../components/contentControl';
 import atob from 'atob';
 import btoa from 'btoa';
@@ -14,6 +14,7 @@ import { AppContext } from '../../../contexts/AppContext';
 import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta, SelectSitacionLaboral } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
 import storage from '../../../services/storage.json';
+import BoardSimple from '../../../components/boardSimple';
 
 const Edit = ({ success, info, query }) => {
 
@@ -53,81 +54,108 @@ const Edit = ({ success, info, query }) => {
     // actualizar contrato 
     const updateInfo = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en guardar los datos?`, 'Confirmar');
-        if (answer) {
-            app_context.fireLoading(true)
-            let datos = new FormData;
-            await Object.keys(form).map(key => datos.append(key, form[key]));
-            datos.append('_method', 'PUT');
-            // actualizar
-            await unujobs.post(`info/${info.id}`, datos)
-                .then(async res => {
-                    app_context.fireLoading(false)
-                    let { success, message } = res.data;
-                    if (!success) throw new Error(message);
-                    await Swal.fire({ icon: 'success', text: message });
-                    setErrors({});
-                    setEdit(false);
-                    setOld(JSON.parse(JSON.stringify(form)));
-                    Router.push({ pathname: Router.pathname, query: Router.query });
-                }).catch(async err => {
-                    try {
-                        app_context.fireLoading(false)
-                        let { data } = err.response;
-                        if (typeof data != 'object') throw new Error(err.message);
-                        if (typeof data.errors != 'object') throw new Error(data.message);
-                        await Swal.fire({ icon: 'warning', text: data.message });
-                        setErrors(data.errors);
-                    } catch (error) {
-                        app_context.fireLoading(false)
-                        Swal.fire({ icon: 'error', message: error.message });
-                    }
-                });
-        }
+        if (!answer) return false;
+        app_context.fireLoading(true)
+        let datos = new FormData;
+        await Object.keys(form).map(key => datos.append(key, form[key] || ""));
+        datos.append('_method', 'PUT');
+        // actualizar
+        await unujobs.post(`info/${info.id}`, datos)
+        .then(async res => {
+            app_context.fireLoading(false)
+            let { success, message } = res.data;
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            setErrors({});
+            setEdit(false);
+            setOld(JSON.parse(JSON.stringify(form)));
+            Router.push({ pathname: Router.pathname, query: Router.query });
+        }).catch(async err => handleErrorRequest(err, setErrors, () => app_context.fireLoading(false)));
     }
 
     // restaurar contrato
     const restaurar = async () => {
-        let answer = await Confirm("warning", `¿Deseas restaurar el contrato?`, 'Restaurar');
-        if (answer) {
-            app_context.fireLoading(true);
-            await unujobs.post(`info/${info.id}/restore`)
-                .then(async res => {
-                    app_context.fireLoading(false);
-                    let { success, message, restore } = res.data; 
-                    if (!success) throw new Error(message);
-                    await Swal.fire({ icon: 'success', text: message });
-                    let { push, pathname } = Router;
-                    query.id = btoa(restore.id);
-                    push({ pathname, query });
-                }).catch(err => {
-                    app_context.fireLoading(false);
-                    Swal.fire({ icon: 'error', text: err.message });
-                });
+        let answer = await Confirm("warning", `¿Deseas en clonar el contrato?`, 'Clonar');
+        if (!answer) return false;
+        app_context.fireLoading(true);
+        await unujobs.post(`info/${info.id}/restore`)
+        .then(async res => {
+            app_context.fireLoading(false);
+            let { success, message, restore } = res.data; 
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            let { push, pathname } = Router;
+            query.id = btoa(restore.id);
+            push({ pathname, query });
+        }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
+    }
+
+    // elimnar
+    const destroy = async () => {
+        let answer = await Confirm("warning", `¿Deseas eliminar el contrato?`, 'Eliminar');
+        if (!answer) return false;
+        app_context.fireLoading(true);
+        await unujobs.post(`info/${info.id}?`, { _method: 'DELETE' })
+        .then(async res => {
+            app_context.fireLoading(false);
+            let { success, message, restore } = res.data; 
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            Router.push(funcBack());
+        }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
+    }
+
+    // manejador de optiones
+    const handleOption = async (e, index, obj) => {
+        switch (obj.key) {
+            case 'restaurar':
+                restaurar();
+                break;
+            default:
+                break;
         }
     }
 
-    // handle back
-    const handleBack = () => {
-        let { query, pathname, push } = Router;
-        let href = query.href ? atob(query.href || "") : "";
-        if (href) push(href);
-        else push({ pathname: backUrl(pathname), query: { query_search: `${success ? info.person.fullname : ''}` }}) 
-    }
+    if (!success) return null;
 
+    // renderizar
     return (
-    <Fragment>
-        <div className="col-md-12">
-            <Body>
-                <div className="card-">
-                    <div className="card-header">
-                        <BtnBack 
-                            onClick={handleBack}
-                        /> <span className="ml-4">Editar Contrato</span>
-                    </div>
-
+        <Fragment>
+            <div className="col-md-12">
+                <BoardSimple
+                    prefix={<BtnBack/>}
+                    title="Contrato"
+                    info={["Editar contrato"]}
+                    bg="light"
+                    onOption={handleOption}
+                    options={[
+                        { key: "restaurar", title: "Clonar contrato", icon: "fas fa-clone" }
+                    ]}
+                >
                     <div className="card-body">
                         <Form>
                             <div className="row">
+                                <div className="col-md-12 mb-3">
+                                    <div>
+                                        <Message color={form.estado ? 'green' : 'red'}>
+                                            <div className="row">
+                                                <div className="col-md-10">
+                                                    <b>El contrato está {info.estado ? 'habilitado' : 'deshabilitado'}</b>
+                                                </div>
+                                                <div className="col-md-2 text-right">
+                                                    <Checkbox toggle
+                                                        checked={form.estado ? true : false}
+                                                        onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
+                                                        disabled={!edit}
+                                                        name="estado"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </Message>
+                                    </div>
+                                    <hr/>
+                                </div>
+
                                 <div className="col-md-4 mt-3 text-center">
                                     <img src={info && info.person && info.person.image_images && info.person.image_images.image_200x200 || '/img/perfil.jpg'}
                                         style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "50%" }}
@@ -141,10 +169,8 @@ const Edit = ({ success, info, query }) => {
                                         <div className="col-md-12 mt-5 text-left">
                                             <label>Tip. Documento</label>
                                             <input type="text"
-                                                disabled
                                                 readOnly
                                                 value={info && info.person && info.person.document_type || ""}
-                                                disabled
                                             />
                                         </div>
 
@@ -152,7 +178,6 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field>
                                                 <label>N° Documento</label>
                                                 <input type="text"
-                                                    disabled
                                                     readOnly
                                                     value={info && info.person && info.person.document_number || ""}
                                                 />
@@ -169,7 +194,7 @@ const Edit = ({ success, info, query }) => {
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectPlanilla name="planilla_id" value={form.planilla_id} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
-                                                    <input type="text" disabled value={form.planilla || ""} readOnly/>
+                                                    <input type="text" value={form.planilla || ""} readOnly/>
                                                 </Show>
                                                 <label>{errors.planilla_id && errors.planilla_id[0] || ""}</label>
                                             </Form.Field>
@@ -181,7 +206,7 @@ const Edit = ({ success, info, query }) => {
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectCargo name="cargo_id" value={form.cargo_id} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
-                                                    <input type="text" disabled value={form.cargo || ""} readOnly/>
+                                                    <input type="text" value={form.cargo || ""} readOnly/>
                                                 </Show>
                                                 <label>{errors.cargo_id && errors.cargo_id[0] || ""}</label>
                                             </Form.Field>
@@ -190,7 +215,7 @@ const Edit = ({ success, info, query }) => {
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">Ext. Presupuestal</label>
-                                                <input type="text" disabled value={info.ext_pptto || ""} readOnly/>
+                                                <input type="text" value={info.ext_pptto || ""} readOnly/>
                                             </Form.Field>
                                         </div>
 
@@ -200,7 +225,7 @@ const Edit = ({ success, info, query }) => {
                                                 <Show condicion={!edit}
                                                     predeterminado={<Select name="pap" value={form.pap} options={storage.pap} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
-                                                    <input type="text" disabled value={info.pap}/>
+                                                    <input type="text" value={info.pap}/>
                                                 </Show>
                                                 <label>{errors.pap && errors.pap[0] || ""}</label>
                                             </Form.Field>
@@ -219,7 +244,7 @@ const Edit = ({ success, info, query }) => {
                                                             />
                                                         }
                                                 >
-                                                    <input type="text" disabled value={info.categoria} readOnly/>
+                                                    <input type="text" value={info.categoria} readOnly/>
                                                 </Show>
                                                 <label>{errors.type_categoria_id && errors.type_categoria_id[0] || ""}</label>
                                             </Form.Field>
@@ -235,7 +260,7 @@ const Edit = ({ success, info, query }) => {
                                                         onChange={(e, obj) => handleInput(obj)}
                                                     />}
                                                 >
-                                                    <input type="text" disabled value={info.metaID}/>
+                                                    <input type="text" value={info.metaID}/>
                                                 </Show>
                                                 <label>{errors.meta_id && errors.meta_id[0] || ""}</label>
                                             </Form.Field>
@@ -244,14 +269,14 @@ const Edit = ({ success, info, query }) => {
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">ActividadID</label>
-                                                <input type="text" disabled defaultValue={info.actividadID}/>
+                                                <input type="text" value={info.actividadID} readOnly/>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">Meta</label>
-                                                <input type="text" disabled value={info.meta} readOnly/>
+                                                <input type="text" value={info.meta} readOnly/>
                                             </Form.Field>
                                         </div>
 
@@ -264,7 +289,7 @@ const Edit = ({ success, info, query }) => {
                                                         onChange={(e, obj) => handleInput(obj)}
                                                     />}
                                                 >
-                                                    <input type="text" disabled value={info.dependencia && info.dependencia.nombre}/>
+                                                    <input type="text" readOnly value={info.dependencia && info.dependencia.nombre}/>
                                                 </Show>
                                                 <label>{errors.dependencia_id && errors.dependencia_id[0] || ""}</label>
                                             </Form.Field>
@@ -282,7 +307,7 @@ const Edit = ({ success, info, query }) => {
                                                         onChange={(e, obj) => handleInput(obj)}
                                                     />}
                                                 >
-                                                    <input type="text" disabled value={info.perfil_laboral && info.perfil_laboral.nombre || ""}/>
+                                                    <input type="text" readOnly value={info.perfil_laboral && info.perfil_laboral.nombre || ""}/>
                                                 </Show>
                                                 <label>{errors.perfil_laboral_id && errors.perfil_laboral_id[0] || ""}</label>
                                             </Form.Field>
@@ -297,7 +322,7 @@ const Edit = ({ success, info, query }) => {
                                                         onChange={(e, obj) => handleInput(obj)}
                                                     />}
                                                 >
-                                                    <input type="text" disabled value={form.situacion_laboral || ""}/>
+                                                    <input type="text" readOnly value={form.situacion_laboral || ""}/>
                                                 </Show>
                                                 <label>{errors.situacion_laboral_id && errors.situacion_laboral_id[0] || ""}</label>
                                             </Form.Field>
@@ -319,7 +344,7 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field>
                                                 <label htmlFor="">Plaza</label>
                                                 <input type="text" 
-                                                    disabled={!edit} 
+                                                    readOnly={!edit} 
                                                     name="plaza" 
                                                     value={form.plaza || ""}
                                                     onChange={({target}) => handleInput(target)}
@@ -331,7 +356,7 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field error={errors.resolucion && errors.resolucion[0] || ""}>
                                                 <label htmlFor="">N° Resolución</label>
                                                 <input type="text" 
-                                                    disabled={!edit}
+                                                    readOnly={!edit}
                                                     value={form.resolucion || ""}
                                                     name="resolucion" 
                                                     onChange={({target}) => handleInput(target)}
@@ -344,7 +369,7 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field error={errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || ""}>
                                                 <label htmlFor="">Fecha de Resolución</label>
                                                 <input type="date" 
-                                                    disabled={!edit}
+                                                    readOnly={!edit}
                                                     value={form.fecha_de_resolucion || ""}
                                                     name="fecha_de_resolucion" 
                                                     onChange={({target}) => handleInput(target)}
@@ -357,7 +382,7 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field error={errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] || ""}>
                                                 <label htmlFor="">Fecha de Ingreso</label>
                                                 <input type="date" 
-                                                    disabled={!edit}
+                                                    readOnly={!edit}
                                                     value={form.fecha_de_ingreso || ""}
                                                     name="fecha_de_ingreso" 
                                                     onChange={({target}) => handleInput(target)}
@@ -370,7 +395,7 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field error={errors.fecha_de_cese && errors.fecha_de_cese[0] || ""}>
                                                 <label htmlFor="">Fecha de Cese</label>
                                                 <input type="date" 
-                                                    disabled={!edit}
+                                                    readOnly={!edit}
                                                     name="fecha_de_cese" 
                                                     value={form.fecha_de_cese || ""} 
                                                     onChange={({target}) => handleInput(target)}
@@ -383,8 +408,8 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field>
                                                 <label htmlFor="">Ley Social</label>
                                                 <input type="text" 
-                                                    disabled={true}
-                                                    defaultValue={info.afp || ""} 
+                                                    readOnly
+                                                    value={info.afp || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -393,8 +418,8 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field>
                                                 <label htmlFor="">Fecha de Afiliación</label>
                                                 <input type="date" 
-                                                    disabled={true} 
-                                                    defaultValue={info.fecha_de_afiliacion || ""} 
+                                                    readOnly
+                                                    value={info.fecha_de_afiliacion || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -403,8 +428,8 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field>
                                                 <label htmlFor="">N° CUSSP</label>
                                                 <input type="text" 
-                                                    disabled={true} 
-                                                    defaultValue={info.numero_de_cussp || ""} 
+                                                    readOnly 
+                                                    value={info.numero_de_cussp || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -413,8 +438,8 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field>
                                                 <label htmlFor="">N° Essalud</label>
                                                 <input type="text" 
-                                                    disabled={true} 
-                                                    defaultValue={info.numero_de_essalud || ""} 
+                                                    readOnly
+                                                    value={info.numero_de_essalud || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -423,8 +448,8 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field>
                                                 <label htmlFor="">Banco</label>
                                                 <input type="text" 
-                                                    disabled={true} 
-                                                    defaultValue={info.banco || ""} 
+                                                    readOnly
+                                                    value={info.banco || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -433,8 +458,8 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field>
                                                 <label htmlFor="">N° Cuenta</label>
                                                 <input type="text" 
-                                                    disabled={true} 
-                                                    defaultValue={info.numero_de_cuenta || ""} 
+                                                    readOnly
+                                                    value={info.numero_de_cuenta || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -442,7 +467,10 @@ const Edit = ({ success, info, query }) => {
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">Prima Seguro</label>
-                                                <Checkbox toggle checked={info.prima_seguro ? true : false} readOnly disabled/>
+                                                <Checkbox toggle 
+                                                    checked={info.prima_seguro ? true : false} 
+                                                    disabled
+                                                />
                                             </Form.Field>
                                         </div>
 
@@ -450,7 +478,7 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field error={errors.observacion && errors.observacion[0] || ""}>
                                                 <label htmlFor="">Observación</label>
                                                 <textarea type="text" 
-                                                    disabled={!edit} 
+                                                    readOnly={!edit} 
                                                     value={form.observacion || ""}
                                                     name="observacion"
                                                     onChange={({target}) => handleInput(target)}
@@ -476,44 +504,51 @@ const Edit = ({ success, info, query }) => {
                             </div>
                         </Form>
                     </div>
-                </div>
-            </Body>
-        </div>
+                </BoardSimple>
+            </div>
 
-        <Show condicion={success}>
-            <ContentControl>
-                <Show condicion={info.estado && edit}>
-                    <div className="col-lg-2 col-6">
-                        <Button fluid color="red" onClick={cancelInfo}>
-                            <i className="fas fa-times"></i> Cancelar
-                        </Button>
-                    </div>
+            <Show condicion={success}>
+                <ContentControl>
+                    <Show condicion={edit}>
+                        <div className="col-lg-2 col-6">
+                            <Button fluid color="blue" onClick={updateInfo}
+                                title="Actualizar"
+                            >
+                                <i className="fas fa-sync"></i>
+                            </Button>
+                        </div>
 
-                    <div className="col-lg-2 col-6">
-                        <Button fluid color="blue" onClick={updateInfo}>
-                            <i className="fas fa-save"></i> Guardar
-                        </Button>
-                    </div>
-                </Show>
+                        <div className="col-lg-2 col-6">
+                            <Button fluid color="red" onClick={cancelInfo}
+                                title="Cancelar"
+                            >
+                                <i className="fas fa-times"></i>
+                            </Button>
+                        </div>
+                    </Show>
 
-                <Show condicion={info.estado && !edit}>
-                    <div className="col-lg-2 col-6">
-                        <Button fluid color="teal" onClick={(e) => setEdit(true)}>
-                            <i className="fas fa-pencil-alt"></i> Editar
-                        </Button>
-                    </div>
-                </Show>
+                    <Show condicion={!edit}>
+                        <div className="col-lg-2 col-6">
+                            <Button fluid color="red" onClick={destroy}
+                                title="Eliminar"
+                            >
+                                <i className="fas fa-trash"></i>
+                            </Button>
+                        </div>
 
-                <Show condicion={!info.estado}>
-                    <div className="col-lg-2">
-                        <Button fluid color="blue" onClick={restaurar}>
-                            <i className="fas fa-sync"></i> Restaurar
-                        </Button>
-                    </div>
-                </Show>
-            </ContentControl>
-        </Show>
-    </Fragment>)
+                        <div className="col-lg-2 col-6">
+                            <Button fluid color="blue" basic 
+                                onClick={(e) => setEdit(true)}
+                                title="Editar"
+                            >
+                                <i className="fas fa-pencil-alt"></i>
+                            </Button>
+                        </div>
+                    </Show>
+                </ContentControl>
+            </Show>
+        </Fragment>
+    )
 }
 
 // server rendering

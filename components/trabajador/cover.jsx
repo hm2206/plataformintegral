@@ -9,7 +9,7 @@ export default class Cover extends Component {
         return (
             <div class="page-cover">
                 <Show condicion={this.props.back}>
-                    <BtnBack onClick={(e) => Router.push({ pathname: this.props.back })}/>
+                    <BtnBack/>
                 </Show>
                 <div class="text-center">
                     <a href={this.props.image} target="_blank" class="user-avatar user-avatar-xl"

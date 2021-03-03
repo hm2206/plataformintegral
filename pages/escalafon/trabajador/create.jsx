@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import {  BtnBack } from '../../../components/Utils';
-import { Confirm } from '../../../services/utils';
+import { Confirm, parseUrl } from '../../../services/utils';
 import { Form, Button, Checkbox, Message } from 'semantic-ui-react'
 import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -10,6 +10,7 @@ import {  AUTHENTICATE } from '../../../services/auth';
 import { SelectAfp, SelectBanco } from '../../../components/select/cronograma';
 import BoardSimple from '../../../components/boardSimple'
 import ContentControl from '../../../components/contentControl';
+import Router from 'next/router';
 
 
 const CreateWork = ({ pathname, query }) => {
@@ -49,10 +50,18 @@ const CreateWork = ({ pathname, query }) => {
         payload.orden = person.fullname;
         await unujobs.post('work', payload)
         .then(async res => {
-            let { message } = res.data;
+            let { message, work } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             setForm({});
             setErrors({});
+            setPerson({});
+            if (Object.keys(work || {}).length) {
+                let idWork = btoa(work.id);
+                let href = btoa(location.href);
+                let newQuery = { id: idWork, href };
+                let newPath = parseUrl(pathname, `profile`);
+                Router.push({ pathname: newPath, query: newQuery })
+            }
         })
         .catch(err => handleErrorRequest(err, setErrors))
         setCurrentLoading(false);

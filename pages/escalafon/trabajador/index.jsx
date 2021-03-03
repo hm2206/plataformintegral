@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react'
+import React, { useState } from 'react'
 import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -6,137 +6,140 @@ import { Button, Form, Pagination } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
-import { responsive } from '../../../services/storage.json';
-import { Body } from '../../../components/Utils';
-import { pageWork } from '../../../storage/actions/workActions';
-import Show from '../../../components/show';
+import BoardSimple from '../../../components/boardSimple';
 
-export default class IndexPerson extends Component
-{
+const IndexWork = ({ pathname, query, success, works }) => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        query.page = query.page || 1;
-        query.query_search = query.query_search || "";
-        await ctx.store.dispatch(pageWork(ctx));
-        let { page_work } = ctx.store.getState().work;
-        return { pathname, query, page_work };
+    // estados
+    const [query_search, setQuerySearch] = useState(query.query_search || "");
+
+    // obtener opciones
+    const handleOption = async (obj, key, index) => {
+        switch (key) {
+            case 'profile':
+                let newQuery =  {};
+                newQuery.id = btoa(obj.id);
+                newQuery.href = btoa(location.href);
+                await Router.push({ pathname: `${pathname}/${key}`, query: newQuery });
+                break
+            default:
+                break;
+        }
     }
 
-    state = {
-        loading: false,
-        query_search: ""
+    // realizar búsqueda
+    const handleSearch = () => {
+        let { push } = Router;
+        query.page = 1;
+        query.query_search = query_search;
+        push({ pathname, query });
     }
 
-    componentDidMount = async () => {
-        this.setting(this.props);
-    }
-
-    componentWillReceiveProps = async (nextProps) => {
-       if (nextProps.query || this.props.query) this.setting(nextProps);
-    }
-
-    setting = (props) => {
-        this.setState({ query_search: props.query.query_search || "" });
-    }
-
-    handleInput = ({ name, value }, url = false) => {
-        this.setState({ [name]: value });
-    }
-
-    
-    handlePage = async (e, { activePage }) => {
-        this.setState({ loading: true });
-        let { pathname, query, push } = Router;
+    // siguiente página
+    const handlePage = async (e, { activePage }) => {
+        let { push } = Router;
         query.page = activePage;
         await push({ pathname, query });
-        this.setState({ loading: false });
     }
 
-    handleOption = async (obj, key, index) => {
-        this.setState({ loading: true });
-        let { query, pathname, push } = Router;
-        let id = await btoa(obj.id);
-        query.id = id;
-        if (key == 'info') push({ pathname: `${pathname}/profile`, query });
+    // crear trabajador
+    const handleCreate = async () => {
+        let { push } = Router;
+        let newQuery = {};
+        newQuery.href = btoa(`${location.href}`)
+        push({ pathname: `${pathname}/create`, query: newQuery });
     }
 
-    render() {
+    if (!success) return null;
 
-        let { page_work, query } = this.props || {};
+    // renderizar
+    return (
+        <div className="col-md-12">
+            <BoardSimple
+                prefix="T"
+                title="Trabajadores"
+                info={["Listado de trabajadores"]}
+                bg="danger"
+                options={[]}
+            >
+                <Form>
+                    <div className="col-md-12">
+                        <DataTable
+                            headers={["#ID", "Imagen", "Apellidos y Nombres", "N° Documento", "N° Cussp"]}
+                            data={works.data || []}
+                            index={[
+                                { key: "person.id", type: "text" },
+                                { key: "person.image_images.image_50x50", type: 'cover' },
+                                { key: "person.fullname", type: "text", className: "uppercase" },
+                                { key: "person.document_number", type: "icon" },
+                                { key: "numero_de_cussp", type: "icon", bg: 'dark' }
+                            ]}
+                            options={[
+                                { key: "profile", icon: "fas fa-info" }
+                            ]}
+                            getOption={handleOption}
+                        >
+                            <div className="col-md-12 mt-2">
+                                <div className="row">
+                                    <div className="col-md-7 mb-1 col-10">
+                                        <Form.Field>
+                                            <input type="text" 
+                                                placeholder="Buscar trabajador por: Apellidos y Nombres"
+                                                name="query_search"
+                                                value={query_search || ""}
+                                                onChange={({ target }) => setQuerySearch(target.value)}
+                                            />
+                                        </Form.Field>
+                                    </div>
 
-        return (
-            <div className="col-md-12">
-                <Body>
-                    <Form loading={this.state.loading}>
-                        <div className="col-md-12">
-                            <DataTable titulo={<span>Lista de Trabajadores</span>}
-                                headers={["#ID", "Imagen", "Apellidos y Nombres", "N° Documento", "N° Cussp"]}
-                                data={page_work && page_work.data}
-                                index={[
-                                    { key: "person.id", type: "text" },
-                                    { key: "person.image_images.image_50x50", type: 'cover' },
-                                    { key: "person.fullname", type: "text", className: "uppercase" },
-                                    { key: "person.document_number", type: "icon" },
-                                    { key: "numero_de_cussp", type: "icon", bg: 'dark' }
-                                ]}
-                                options={[
-                                    { key: "info", icon: "fas fa-info" }
-                                ]}
-                                getOption={this.handleOption}
-                            >
-                                <div className="col-md-12 mt-2">
-                                    <div className="row">
-                                        <div className="col-md-7 mb-1 col-10">
-                                            <Form.Field>
-                                                <input type="text" 
-                                                    placeholder="Buscar trabajador por: Apellidos y Nombres"
-                                                    name="query_search"
-                                                    value={this.state.query_search}
-                                                    onChange={(e) => this.handleInput(e.target)}
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-xs col-2">
-                                            <Button color="blue"
-                                                fluid
-                                                onClick={ async (e) => Router.push({ pathname: Router.pathname, query: { query_search: this.state.query_search } })}
-                                            >
-                                                <i className="fas fa-search"></i> {responsive.md < this.props.screenX ? 'Buscar' : ''}
-                                            </Button>
-                                        </div>
+                                    <div className="col-xs col-2">
+                                        <Button color="blue"
+                                            fluid
+                                            onClick={handleSearch}
+                                        >
+                                            <i className="fas fa-search"></i>
+                                        </Button>
                                     </div>
                                 </div>
-
-                                <div className="card-body mt-4">
-                                    <h4>Resultados: {page_work && page_work.total || 0}</h4>
-                                </div>
-
-                            </DataTable>
-                            <div className="text-center">
-                                <Show condicion={page_work&& page_work.data && page_work.data.length > 0}>
-                                    <hr/>
-                                    <Pagination defaultActivePage={query.page} 
-                                        totalPages={page_work.last_page || 0}
-                                        enabled={this.state.loading}
-                                        onPageChange={this.handlePage}
-                                    />
-                                </Show>
                             </div>
+
+                            <div className="card-body mt-4">
+                                <h4>Resultados: {works.data.length || 0} de {works.total || 0}</h4>
+                            </div>
+
+                        </DataTable>
+                        <div className="text-center">
+                            <hr/>
+                            <Pagination activePage={query.page} 
+                                totalPages={works.last_page || 0}
+                                onPageChange={handlePage}
+                            />
                         </div>
+                    </div>
 
-                        <BtnFloat
-                            disabled={this.state.loading}
-                            onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })}
-                        >
-                            <i className="fas fa-plus"></i>
-                        </BtnFloat>
-                    </Form>
-                </Body>
-            </div>
-        )
-    }
-
+                    <BtnFloat onClick={handleCreate}>
+                        <i className="fas fa-plus"></i>
+                    </BtnFloat>
+                </Form>
+            </BoardSimple>
+        </div>
+    )
 }
+
+// server
+IndexWork.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // filtros
+    query.page = typeof query.page != 'undefined' ? query.page : 1;
+    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
+    // request
+    let { success, works } = await unujobs.get(`work?page=${query.page}&query_search=${query.query_search}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({ success: false, works: {} }));
+    // response
+    return { pathname, query, success, works };
+}
+
+// exportar
+export default IndexWork;

@@ -9,9 +9,9 @@ import { SelectCargo } from '../../../components/select/cronograma';
 import { AppContext } from '../../../contexts/AppContext';
 import Show from '../../../components/show';
 import BoardSimple from '../../../components/boardSimple';
-import UpdateRemuneracionMassive from '../../../components/contrato/updateRemuneracionMassive';
+import { BtnFloat } from '../../../components/Utils';
 
-const Contrato = ({ success, infos, query }) => {
+const Contrato = ({ pathname, query, success, infos }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -72,6 +72,14 @@ const Contrato = ({ success, infos, query }) => {
         query.estado = form.estado || 0;
         query.cargo_id = form.cargo_id || "";
         await push({ pathname, query });
+    }
+
+    // crear trabajador
+    const handleCreate = async () => {
+        let { push } = Router;
+        let newQuery = {};
+        newQuery.href = btoa(`${location.href}`)
+        push({ pathname: `${pathname}/register`, query: newQuery });
     }
 
     // render
@@ -170,9 +178,9 @@ const Contrato = ({ success, infos, query }) => {
                     </div>
                 </Form>
 
-                <Show condicion={option == 'UPDATE_REMUNERACION_MASSIVE'}>
-                    <UpdateRemuneracionMassive isClose={(e) => setOption("")}/>
-                </Show>
+                <BtnFloat onClick={handleCreate}>
+                    <i className="fas fa-plus"></i>
+                </BtnFloat>
             </BoardSimple>
     </div>)
 }
@@ -180,7 +188,7 @@ const Contrato = ({ success, infos, query }) => {
 // server rendering
 Contrato.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
-    let { query } = ctx;
+    let { pathname, query } = ctx;
     query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
     query.page = typeof query.page != 'undefined' ? query.page : 1;
     query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
@@ -191,7 +199,7 @@ Contrato.getInitialProps = async (ctx) => {
     .catch(err => ({ success: false }))
     console.log(success);
     // response
-    return { success, infos: infos || {}, query };
+    return { pathname, success, infos: infos || {}, query };
 }
 
 // export 

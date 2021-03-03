@@ -32,7 +32,7 @@ const TrabajadorID = ({ work, pathname, query }) => {
     return <Fragment>
         <div className="col-md-12">
             <Cover
-                back={backUrl(pathname)}
+                back
                 titulo={work && work.person && work.person.fullname}
                 email={work && work.person && work.person.email_contact}
                 image={work && work.person && work.person.image ? `${work.person.image && work.person.image_images && work.person.image_images.image_200x200}` : '/img/perfil.jpg'}
@@ -100,7 +100,7 @@ TrabajadorID.getInitialProps = async (ctx) => {
     let { query, pathname } = ctx;
     let id = atob(query.id || "") || "";
     let { success, work} = await unujobs.get(`work/${id}`, {}, ctx)
-        .then(res => ({ success: true, work: res.data }))
+        .then(res => res.data)
         .catch(err => ({ success: false, work: {} }));
     // response
     return { pathname, query, success, work }

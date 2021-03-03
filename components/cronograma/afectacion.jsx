@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { unujobs } from '../../services/apis';
-import { Form, Select, Button, Radio } from 'semantic-ui-react';
+import { Form, Select, Button, Radio, Checkbox } from 'semantic-ui-react';
 import Show from '../show';
 import { Confirm } from '../../services/utils';
 import storage from '../../services/storage.json';
@@ -100,7 +100,6 @@ const Afectacion = () => {
                             </Show>
                             <Show condicion={!edit}>
                                 <input type="text"
-                                    disabled={true}
                                     value={historial.afp ? historial.afp : ''}
                                     readOnly
                                 />
@@ -117,7 +116,6 @@ const Afectacion = () => {
                                 type="date" 
                                 name="fecha_de_ingreso"
                                 value={historial.fecha_de_ingreso || ""}
-                                disabled={true}
                                 readOnly
                             />
                         </Show>
@@ -140,7 +138,6 @@ const Afectacion = () => {
                             </Show>
                             <Show condicion={!edit}>
                                 <input type="text" name="meta_id"
-                                    disabled={true}
                                     value={historial.meta ? historial.meta : ''}
                                     readOnly
                                 />
@@ -155,7 +152,6 @@ const Afectacion = () => {
                             <label><h5>Planilla</h5></label>
                             <input type="text"
                                 value={historial.planilla ? historial.planilla : ''}
-                                disabled={true}
                                 readOnly
                             />
                         </Show>
@@ -168,7 +164,6 @@ const Afectacion = () => {
                             <label><h5>Tip. Cuenta</h5></label>
                             <input type="text"
                                 value={historial.banco ? historial.banco : 'B NACIÓN'}
-                                disabled={true}
                                 readOnly
                             />
                         </Show>
@@ -187,7 +182,7 @@ const Afectacion = () => {
                                 min="8"
                                 value={historial.numero_de_cussp ? historial.numero_de_cussp : ''}
                                 onChange={(e) => handleInput(e.target)}
-                                disabled={!edit}
+                                readOnly={!edit}
                             />
                         </Show>
                     </Form.Field>
@@ -200,7 +195,6 @@ const Afectacion = () => {
                             <input type="date" 
                                 name="fecha_de_cese"
                                 value={historial.fecha_de_cese ? historial.fecha_de_cese : ''}
-                                disabled={true}
                                 readOnly
                             />
                         </Show>
@@ -224,7 +218,6 @@ const Afectacion = () => {
                             <Show condicion={!edit}>
                                 <input type="text" 
                                     value={historial.cargo ? historial.cargo : ''}
-                                    disabled={true}
                                     readOnly
                                 />
                             </Show>
@@ -237,7 +230,7 @@ const Afectacion = () => {
                         >
                             <label><h5>Dependencia/Oficina <b className="text-red">*</b></h5></label>
                             <Show condicion={edit}
-                                predeterminado={<input value={historial.dependencia && historial.dependencia.nombre || ""} readOnly disabled/>}
+                                predeterminado={<input value={historial.dependencia && historial.dependencia.nombre || ""} readOnly/>}
                             >
                                 <SelectDependencia
                                     name="dependencia_id"
@@ -257,7 +250,7 @@ const Afectacion = () => {
                             <label><h5>N° Cuenta</h5></label>
                             <input type="text"
                                 value={historial.numero_de_cuenta ? historial.numero_de_cuenta : ''}
-                                disabled={!edit}
+                                readOnly={!edit}
                                 name="numero_de_cuenta"
                                 onChange={({target}) => handleInput(target)}
                             />
@@ -275,7 +268,7 @@ const Afectacion = () => {
                                 name="fecha_de_afiliacion"
                                 value={historial.fecha_de_afiliacion ? historial.fecha_de_afiliacion : ''}
                                 onChange={(e) => handleInput(e.target)}
-                                disabled={!edit}
+                                readOnly={!edit}
                             />
                         </Show>
                     </Form.Field>
@@ -286,7 +279,6 @@ const Afectacion = () => {
                         >
                             <label><h5>Tipo Categoría</h5></label>
                             <input type="text"
-                                disabled={true}
                                 name="type_categoria_id"
                                 readOnly
                                 value={historial.type_categoria ? historial.type_categoria : ''}
@@ -314,31 +306,30 @@ const Afectacion = () => {
                                 <input type="text" 
                                 name="ext_pptto" 
                                 value={historial.ext_pptto} 
-                                disabled
                                 readOnly/>
                             </Show>
                         </Show>
                     </Form.Field>
 
-                    <Form.Field error={errors._laboral_id && errors._laboral_id[0]}>
+                    <Form.Field error={errors.perfil_laboral_id && errors.perfil_laboral_id[0]}>
                         <Show condicion={!loading}
                             predeterminado={<PlaceHolderInput/>}
                         >
-                            <label><h5> Laboral <b className="text-red">*</b></h5></label>
+                            <label><h5>Perfil Laboral <b className="text-red">*</b></h5></label>
                             <Show condicion={edit}
-                                predeterminado={<input value={historial._laboral && historial._laboral.nombre || ""} disabled readOnly/>}
+                                predeterminado={<input value={historial.perfil_laboral && historial.perfil_laboral.nombre || ""} readOnly/>}
                             >
                                 <SelectDependenciaPerfilLaboral
                                     disabled={!edit}
                                     dependencia_id={historial.dependencia_id}
                                     refresh={historial.dependencia_id}
-                                    value={historial._laboral_id}
-                                    name="_laboral_id"
+                                    value={historial.perfil_laboral_id}
+                                    name="perfil_laboral_id"
                                     onChange={(e, obj) => handleInput(obj)}
-                                    error={errors._laboral_id && errors._laboral_id[0]}
+                                    error={errors.perfil_laboral_id && errors.perfil_laboral_id[0]}
                                 />
                             </Show>
-                            <label>{errors._laboral_id && errors._laboral_id[0]}</label>
+                            <label>{errors.perfil_laboral_id && errors.perfil_laboral_id[0]}</label>
                         </Show>
                     </Form.Field>
 
@@ -348,7 +339,7 @@ const Afectacion = () => {
                         >
                             <label className="mb-2"><h5>Situación Laboral <b className="text-red">*</b></h5></label>
                             <Show condicion={edit}
-                                predeterminado={<input type="text" disabled readOnly value={historial.situacion_laboral || ""}/>}
+                                predeterminado={<input type="text" readOnly value={historial.situacion_laboral || ""}/>}
                             >
                                 <SelectSitacionLaboral
                                     value={historial.situacion_laboral_id}
@@ -371,7 +362,7 @@ const Afectacion = () => {
                                 name="numero_de_essalud"
                                 value={historial.numero_de_essalud ? historial.numero_de_essalud : ''}
                                 onChange={(e) => handleInput(e.target)}
-                                disabled={!edit}
+                                readOnly={!edit}
                             />
                         </Show>
                     </Form.Field>
@@ -385,7 +376,7 @@ const Afectacion = () => {
                                 name="plaza"
                                 value={historial.plaza ? historial.plaza : ''}
                                 onChange={(e) => handleInput(e.target)}
-                                disabled={!edit}
+                                readOnly={!edit}
                             />
                         </Show>
                     </Form.Field>
@@ -412,15 +403,10 @@ const Afectacion = () => {
                             predeterminado={<PlaceHolderInput/>}
                         >
                             <label><h5>Prima Seguros</h5></label>
-                            <Select
-                                options={[
-                                    {key: "n", value: 0, text: "No Afecto"},
-                                    {key: "a", value: 1, text: "Afecto"}
-                                ]}
-                                placeholder="Select. Prima Seguro"
-                                value={historial.prima_seguro || 0}
+                            <Checkbox toggle
+                                checked={historial.prima_seguro ? true : false}
                                 name="prima_seguro"
-                                onChange={(e, obj) => handleInput(obj)}
+                                onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
                                 disabled={!edit}
                             />
                         </Show>
@@ -436,7 +422,7 @@ const Afectacion = () => {
                                 step="any"
                                 value={historial.dias || ""}
                                 onChange={({target}) => handleInput(target)}
-                                disabled={!edit}
+                                readOnly={!edit}
                             />
                         </Show>
                     </Form.Field>
@@ -453,7 +439,7 @@ const Afectacion = () => {
                                 rows="8"
                                 style={{width: "100%"}}
                                 value={historial.observacion ? historial.observacion : ''}
-                                disabled={!edit}
+                                readOnly={!edit}
                                 onChange={(e) => handleInput(e.target)}
                             />
                             <label>{errors.observacion && errors.observacion[0]}</label>

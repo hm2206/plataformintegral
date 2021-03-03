@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useContext, useEffect } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
-import { Body, BtnBack } from '../../../components/Utils';
+import { BtnBack } from '../../../components/Utils';
 import ContentControl from '../../../components/contentControl';
 import Show from '../../../components/show';
 import { unujobs } from '../../../services/apis';
@@ -13,6 +13,7 @@ import AssignTrabajador from '../../../components/contrato/assingTrabajador';
 import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
 import { AppContext } from '../../../contexts/AppContext';
+import BoardSimple from '../../../components/boardSimple';
 
 const Register = () => {
 
@@ -30,12 +31,6 @@ const Register = () => {
     useEffect(() => {
         app_context.fireEntity({ render: true });
     }, []);
-
-    // volver atrás
-    const handleBack = () => {
-        let { push, pathname } = Router;
-        push({ pathname: backUrl(pathname) });
-    }
 
     // cambios del form
     const handleInput = ({ name, value }) => {
@@ -100,393 +95,393 @@ const Register = () => {
     
     // render
     return (
-            <Fragment>
-                <div className="col-md-12">
-                    <Body>
-                        <div className="card-header">
-                            <BtnBack onClick={handleBack}/> <span className="ml-3">Crear contrato de trabajo</span>
-                        </div>
-                    </Body>
-                </div>
+        <Fragment>
+            <div className="col-md-12">
+                <BoardSimple 
+                    title="Contrato"
+                    info={["Crear contrato de trabajo"]}
+                    prefix={<BtnBack/>}
+                    bg="light"
+                    options={[]}
+                >
+                    <Form className="card-body">
+                        <div onSubmit={(e) => e.preventDefault()} className="row justify-content-center">
 
-                <div className="col-md-12 mt-3">
-                    <Body>
-                        <div className="card-body">
-                            <Form onSubmit={(e) => e.preventDefault()} className="row justify-content-center">
+                            <div className="col-md-12 mb-4">
+                                <h4><i className="fas fa-fingerprint"></i> Seleccionar Trabajador</h4>
+                                <hr/>
 
-                                <div className="col-md-12 mb-4">
-                                    <h4><i className="fas fa-fingerprint"></i> Seleccionar Trabajador</h4>
+                                <div className="row">
+                                    <Show condicion={!isWork}>
+                                        <div className="col-md-4">
+                                            <Button
+                                                onClick={(e) => setOption("assign")}
+                                            >
+                                                <i className="fas fa-plus"></i> Asignar
+                                            </Button>
+                                        </div>
+                                    </Show>
+
+                                    <Show condicion={isWork}>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Tip. Documento</label>
+                                                <input type="text"
+                                                    value={work.person && work.person.document_type  || ""}
+                                                    disabled
+                                                    readOnly
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4">
+                                            <Form.Field>
+                                                <label htmlFor="">N° Documento</label>
+                                                <input type="text"
+                                                    value={work.person && work.person.document_number  || ""}
+                                                    disabled
+                                                    readOnly
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4">
+                                            <Form.Field>
+                                                <label htmlFor="">Apellidos y Nombres</label>
+                                                <input type="text"
+                                                    className="uppercase"
+                                                    value={work.person && work.person.fullname || ""}
+                                                    disabled
+                                                    readOnly
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4">
+                                            <Button
+                                                onClick={(e) => setOption('assign')}
+                                            >
+                                                <i className="fas fa-plus"></i> Cambiar
+                                            </Button>
+                                        </div>
+                                    </Show>
+                                </div>
+                            </div>
+
+                            <div className="col-md-12">
+                                <div>
                                     <hr/>
-
-                                    <div className="row">
-                                        <Show condicion={!isWork}>
-                                            <div className="col-md-4">
-                                                <Button
-                                                    onClick={(e) => setOption("assign")}
-                                                >
-                                                    <i className="fas fa-plus"></i> Asignar
-                                                </Button>
-                                            </div>
-                                        </Show>
-
-                                        <Show condicion={isWork}>
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field>
-                                                    <label htmlFor="">Tip. Documento</label>
-                                                    <input type="text"
-                                                        value={work.person && work.person.document_type  || ""}
-                                                        disabled
-                                                        readOnly
-                                                    />
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-4">
-                                                <Form.Field>
-                                                    <label htmlFor="">N° Documento</label>
-                                                    <input type="text"
-                                                        value={work.person && work.person.document_number  || ""}
-                                                        disabled
-                                                        readOnly
-                                                    />
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-4">
-                                                <Form.Field>
-                                                    <label htmlFor="">Apellidos y Nombres</label>
-                                                    <input type="text"
-                                                        className="uppercase"
-                                                        value={work.person && work.person.fullname || ""}
-                                                        disabled
-                                                        readOnly
-                                                    />
-                                                </Form.Field>
-                                            </div>
-
-                                            <div className="col-md-4">
-                                                <Button
-                                                    onClick={(e) => setOption('assign')}
-                                                >
-                                                    <i className="fas fa-plus"></i> Cambiar
-                                                </Button>
-                                            </div>
-                                        </Show>
-                                    </div>
+                                    <i className="fas fa-info-circle mr-1"></i> Información del Contrato
+                                    <hr/>
                                 </div>
 
-                                <div className="col-md-12">
-                                    <div>
-                                        <hr/>
-                                        <i className="fas fa-info-circle mr-1"></i> Información del Contrato
-                                        <hr/>
-                                    </div>
+                                <div className="card-body">
+                                    <div className="row w-100">
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field>
+                                                <label htmlFor="">ID</label>
+                                                <input type="text"
+                                                    disabled
+                                                    value="AUTOGENERADO"
+                                                />
+                                            </Form.Field>
+                                        </div>
 
-                                    <div className="card-body">
-                                        <div className="row w-100">
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field>
-                                                    <label htmlFor="">ID</label>
-                                                    <input type="text"
-                                                        disabled
-                                                        value="AUTOGENERADO"
-                                                    />
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.planilla_id && errors.planilla_id[0] || ""}>
+                                                <label htmlFor="">Planilla <b className="text-red">*</b></label>
+                                                <SelectPlanilla
+                                                    name="planilla_id"
+                                                    value={form.planilla_id}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                                <label>{errors && errors.planilla_id && errors.planilla_id[0]}</label>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.planilla_id && errors.planilla_id[0] || ""}>
-                                                    <label htmlFor="">Planilla <b className="text-red">*</b></label>
-                                                    <SelectPlanilla
-                                                        name="planilla_id"
-                                                        value={form.planilla_id}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                    />
-                                                    <label>{errors && errors.planilla_id && errors.planilla_id[0]}</label>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.dependencia_id && errors.dependencia_id[0] || ""}>
+                                                <label htmlFor="">Dependencia/Oficina <b className="text-red">*</b></label>
+                                                <SelectDependencia
+                                                    name="dependencia_id"
+                                                    value={form.dependencia_id || ""}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                                <b className="text-red">{errors && errors.dependencia_id && errors.dependencia_id[0]}</b>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.dependencia_id && errors.dependencia_id[0] || ""}>
-                                                    <label htmlFor="">Dependencia/Oficina <b className="text-red">*</b></label>
-                                                    <SelectDependencia
-                                                        name="dependencia_id"
-                                                        value={form.dependencia_id || ""}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                    />
-                                                    <b className="text-red">{errors && errors.dependencia_id && errors.dependencia_id[0]}</b>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
+                                                <label htmlFor="">MetaID <b className="text-red">*</b></label>
+                                                <SelectMeta
+                                                    name="meta_id"
+                                                    value={form.meta_id}
+                                                    year={new Date().getFullYear()}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                                <label>{errors && errors.meta_id && errors.meta_id[0]}</label>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
-                                                    <label htmlFor="">MetaID <b className="text-red">*</b></label>
-                                                    <SelectMeta
-                                                        name="meta_id"
-                                                        value={form.meta_id}
-                                                        year={new Date().getFullYear()}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                    />
-                                                    <label>{errors && errors.meta_id && errors.meta_id[0]}</label>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
+                                                <label htmlFor="">ActividadID <b className="text-red">*</b></label>
+                                                <SelectMeta
+                                                    name="meta_id"
+                                                    text="actividadID"
+                                                    value={form.meta_id}
+                                                    year={new Date().getFullYear()}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                                <label>{errors && errors.meta_id && errors.meta_id[0]}</label>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
-                                                    <label htmlFor="">ActividadID <b className="text-red">*</b></label>
-                                                    <SelectMeta
-                                                        name="meta_id"
-                                                        text="actividadID"
-                                                        value={form.meta_id}
-                                                        year={new Date().getFullYear()}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                    />
-                                                    <label>{errors && errors.meta_id && errors.meta_id[0]}</label>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
+                                                <label htmlFor="">Meta <b className="text-red">*</b></label>
+                                                <SelectMeta
+                                                    name="meta_id"
+                                                    text="meta"
+                                                    value={form.meta_id}
+                                                    year={new Date().getFullYear()}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                                <label>{errors && errors.meta_id && errors.meta_id[0]}</label>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
-                                                    <label htmlFor="">Meta <b className="text-red">*</b></label>
-                                                    <SelectMeta
-                                                        name="meta_id"
-                                                        text="meta"
-                                                        value={form.meta_id}
-                                                        year={new Date().getFullYear()}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                    />
-                                                    <label>{errors && errors.meta_id && errors.meta_id[0]}</label>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.cargo_id && errors.cargo_id[0] || ""}>
+                                                <label htmlFor="">Partición Presupuestal. <b className="text-red">*</b></label>
+                                                <SelectCargo
+                                                    name="cargo_id"
+                                                    value={form.cargo_id}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                                <b className="text-red">{errors && errors.cargo_id && errors.cargo_id[0]}</b>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.cargo_id && errors.cargo_id[0] || ""}>
-                                                    <label htmlFor="">Partición Presupuestal. <b className="text-red">*</b></label>
-                                                    <SelectCargo
-                                                        name="cargo_id"
-                                                        value={form.cargo_id}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                    />
-                                                    <b className="text-red">{errors && errors.cargo_id && errors.cargo_id[0]}</b>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors.cargo_id && errors.cargo_id[0] || ""}>
+                                                <label htmlFor="">Ext pptto <b className="text-red">*</b></label>
+                                                <SelectCargo
+                                                    name="cargo_id"
+                                                    text="ext_pptto"
+                                                    value={form.cargo_id}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                                <label htmlFor="">{errors.cargo_id && errors.cargo_id[0] || ""}</label>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors.cargo_id && errors.cargo_id[0] || ""}>
-                                                    <label htmlFor="">Ext pptto <b className="text-red">*</b></label>
-                                                    <SelectCargo
-                                                        name="cargo_id"
-                                                        text="ext_pptto"
-                                                        value={form.cargo_id}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                    />
-                                                    <label htmlFor="">{errors.cargo_id && errors.cargo_id[0] || ""}</label>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors.type_categoria_id && errors.type_categoria_id[0] || ""}>
+                                                <label htmlFor="">Tip. Categoría <b className="text-red">*</b></label>
+                                                <SelectCargoTypeCategoria
+                                                    cargo_id={form.cargo_id}
+                                                    execute={false}
+                                                    disabled={!form.cargo_id}
+                                                    refresh={form.cargo_id}
+                                                    name="type_categoria_id"
+                                                    value={form.type_categoria_id}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                                <b className="text-red">{errors && errors.type_categoria_id && errors.type_categoria_id[0]}</b>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors.type_categoria_id && errors.type_categoria_id[0] || ""}>
-                                                    <label htmlFor="">Tip. Categoría <b className="text-red">*</b></label>
-                                                    <SelectCargoTypeCategoria
-                                                        cargo_id={form.cargo_id}
-                                                        execute={false}
-                                                        disabled={!form.cargo_id}
-                                                        refresh={form.cargo_id}
-                                                        name="type_categoria_id"
-                                                        value={form.type_categoria_id}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                    />
-                                                    <b className="text-red">{errors && errors.type_categoria_id && errors.type_categoria_id[0]}</b>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field>
+                                                <label htmlFor="">P.A.P <b className="text-red">*</b></label>
+                                                <Select
+                                                    options={pap}
+                                                    placeholder="Select. P.A.P"
+                                                    name="pap"
+                                                    value={form.pap}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                    error={errors && errors.pap && errors.pap[0]}
+                                                />
+                                                <b className="text-red">{errors && errors.pap && errors.pap[0]}</b>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field>
-                                                    <label htmlFor="">P.A.P <b className="text-red">*</b></label>
-                                                    <Select
-                                                        options={pap}
-                                                        placeholder="Select. P.A.P"
-                                                        name="pap"
-                                                        value={form.pap}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                        error={errors && errors.pap && errors.pap[0]}
-                                                    />
-                                                    <b className="text-red">{errors && errors.pap && errors.pap[0]}</b>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Plaza</label>
+                                                <input type="text" 
+                                                    name="plaza"
+                                                    value={form.plaza}
+                                                    placeholder="Plaza"
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field>
-                                                    <label htmlFor="">Plaza</label>
-                                                    <input type="text" 
-                                                        name="plaza"
-                                                        value={form.plaza}
-                                                        placeholder="Plaza"
-                                                        onChange={(e) => handleInput(e.target)}
-                                                    />
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.perfil_laboral_id && errors.perfil_laboral_id[0] || ""}>
+                                                <label htmlFor="">Perfil Laboral <b className="text-red">*</b></label>
+                                                <SelectDependenciaPerfilLaboral
+                                                    disabled={!form.dependencia_id}
+                                                    execute={false}
+                                                    refresh={form.dependencia_id}
+                                                    dependencia_id={form.dependencia_id}
+                                                    name="perfil_laboral_id"
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                    value={form.perfil_laboral_id}
+                                                />
+                                                <b className="text-red">{errors && errors.perfil_laboral_id && errors.perfil_laboral_id[0]}</b>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.perfil_laboral && errors.perfil_laboral[0] || ""}>
-                                                    <label htmlFor="">Perfil Laboral <b className="text-red">*</b></label>
-                                                    <SelectDependenciaPerfilLaboral
-                                                        disabled={!form.dependencia_id}
-                                                        execute={false}
-                                                        refresh={form.dependencia_id}
-                                                        dependencia_id={form.dependencia_id}
-                                                        name="perfil_laboral_id"
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                        value={form.perfil_laboral_id}
-                                                    />
-                                                    <b className="text-red">{errors && errors.perfil_laboral && errors.perfil_laboral[0]}</b>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.resolucion && errors.resolucion[0] || ""}>
+                                                <label htmlFor="">Resolución <b className="text-red">*</b></label>
+                                                <input type="text" 
+                                                    name="resolucion"
+                                                    placeholder="N° Resolución"
+                                                    value={form.resolucion || ""}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                                <b className="text-red">{errors && errors.resolucion && errors.resolucion[0]}</b>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.resolucion && errors.resolucion[0] || ""}>
-                                                    <label htmlFor="">Resolución <b className="text-red">*</b></label>
-                                                    <input type="text" 
-                                                        name="resolucion"
-                                                        placeholder="N° Resolución"
-                                                        value={form.resolucion || ""}
-                                                        onChange={(e) => handleInput(e.target)}
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || ""}>
+                                                <label htmlFor="">Fecha de Resolución <b className="text-red">*</b></label>
+                                                <input type="date" 
+                                                    name="fecha_de_resolucion"
+                                                    placeholder="Fecha de resolucion"
+                                                    value={form.fecha_de_resolucion || ""}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                                <b className="text-red">{errors && errors.fecha_de_resolucion && errors.fecha_de_resolucion[0]}</b>
+                                            </Form.Field>
+                                        </div>
+                                        
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.file && errors.file[0] || ""}>
+                                                <label htmlFor="file">Archivo de Regístro</label>
+                                                <label htmlFor="file" className="btn btn-outline-dark">
+                                                    <i className="fas fa-file-alt"></i>
+                                                    <input type="file" 
+                                                        id="file"
+                                                        onChange={(e) => handleFile(e.target)}
+                                                        name="file"
+                                                        hidden 
+                                                        placeholder="Archivo de Regístro"
+                                                        accept="application/pdf"
                                                     />
-                                                    <b className="text-red">{errors && errors.resolucion && errors.resolucion[0]}</b>
-                                                </Form.Field>
-                                            </div>
+                                                </label>
+                                                <label>{errors && errors.file && errors.file[0]}</label>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || ""}>
-                                                    <label htmlFor="">Fecha de Resolución <b className="text-red">*</b></label>
-                                                    <input type="date" 
-                                                        name="fecha_de_resolucion"
-                                                        placeholder="Fecha de resolucion"
-                                                        value={form.fecha_de_resolucion || ""}
-                                                        onChange={(e) => handleInput(e.target)}
-                                                    />
-                                                    <b className="text-red">{errors && errors.fecha_de_resolucion && errors.fecha_de_resolucion[0]}</b>
-                                                </Form.Field>
-                                            </div>
-                                            
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.file && errors.file[0] || ""}>
-                                                    <label htmlFor="file">Archivo de Regístro</label>
-                                                    <label htmlFor="file" className="btn btn-outline-dark">
-                                                        <i className="fas fa-file-alt"></i>
-                                                        <input type="file" 
-                                                            id="file"
-                                                            onChange={(e) => handleFile(e.target)}
-                                                            name="file"
-                                                            hidden 
-                                                            placeholder="Archivo de Regístro"
-                                                            accept="application/pdf"
-                                                        />
-                                                    </label>
-                                                    <label>{errors && errors.file && errors.file[0]}</label>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] || ""}>
+                                                <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
+                                                <input type="date" 
+                                                    name="fecha_de_ingreso"
+                                                    placeholder="Fecha de ingreso"
+                                                    value={form.fecha_de_ingreso || ""}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                                <b className="text-red">{errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0]}</b>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] || ""}>
-                                                    <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
-                                                    <input type="date" 
-                                                        name="fecha_de_ingreso"
-                                                        placeholder="Fecha de ingreso"
-                                                        value={form.fecha_de_ingreso || ""}
-                                                        onChange={(e) => handleInput(e.target)}
-                                                    />
-                                                    <b className="text-red">{errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0]}</b>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field error={errors && errors.fecha_de_cese && errors.fecha_de_cese[0] || ""}>
+                                                <label htmlFor="">Fecha de Cese </label>
+                                                <input type="date" 
+                                                    placeholder="Fecha de cese"
+                                                    name="fecha_de_cese"
+                                                    value={form.fecha_de_cese || ""}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                                <label htmlFor="">{errors && errors.fecha_de_cese && errors.fecha_de_cese[0]}</label>
+                                            </Form.Field>
+                                        </div>
+                                        
+                                        <div className="col-md-8 mb-3">
+                                            <Form.Field error={errors && errors.observacion && errors.observacion[0] || ""}>
+                                                <label htmlFor="">Observación <b className="text-red">*</b></label>
+                                                <textarea name="observacion" 
+                                                    value={form.observacion || ""}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                                <label>{errors && errors.observacion && errors.observacion[0]}</label>
+                                            </Form.Field>
+                                        </div>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field error={errors && errors.fecha_de_cese && errors.fecha_de_cese[0] || ""}>
-                                                    <label htmlFor="">Fecha de Cese </label>
-                                                    <input type="date" 
-                                                        placeholder="Fecha de cese"
-                                                        name="fecha_de_cese"
-                                                        value={form.fecha_de_cese || ""}
-                                                        onChange={(e) => handleInput(e.target)}
-                                                    />
-                                                    <label htmlFor="">{errors && errors.fecha_de_cese && errors.fecha_de_cese[0]}</label>
-                                                </Form.Field>
-                                            </div>
-                                            
-                                            <div className="col-md-8 mb-3">
-                                                <Form.Field error={errors && errors.observacion && errors.observacion[0] || ""}>
-                                                    <label htmlFor="">Observación <b className="text-red">*</b></label>
-                                                    <textarea name="observacion" 
-                                                        value={form.observacion || ""}
-                                                        onChange={(e) => handleInput(e.target)}
-                                                    />
-                                                    <label>{errors && errors.observacion && errors.observacion[0]}</label>
-                                                </Form.Field>
-                                            </div>
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field>
+                                                <label htmlFor="">N° Ruc</label>
+                                                <input type="text" 
+                                                    placeholder="N° Ruc"
+                                                    name="ruc"
+                                                    value={form.ruc || ""}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                            </Form.Field>
 
-                                            <div className="col-md-4 mb-3">
-                                                <Form.Field>
-                                                    <label htmlFor="">N° Ruc</label>
-                                                    <input type="text" 
-                                                        placeholder="N° Ruc"
-                                                        name="ruc"
-                                                        value={form.ruc || ""}
-                                                        onChange={(e) => handleInput(e.target)}
-                                                    />
-                                                </Form.Field>
-
-                                                <Form.Field>
-                                                    <label htmlFor="">¿ Agregar aportación empleador: ESSALUD ?</label>
-                                                    <Select
-                                                        placeholder="Select. Aportación"
-                                                        name="is_aportacion"
-                                                        options={[
-                                                            { key: "0", value: "0", text: "No" },
-                                                            { key: "1", value: "1", text: "Si" }
-                                                        ]}
-                                                        value={`${form.is_aportacion || ""}`}
-                                                        onChange={(e, obj) => handleInput(obj)}
-                                                    />
-                                                </Form.Field>
-                                            </div>
+                                            <Form.Field>
+                                                <label htmlFor="">¿ Agregar aportación empleador: ESSALUD ?</label>
+                                                <Select
+                                                    placeholder="Select. Aportación"
+                                                    name="is_aportacion"
+                                                    options={[
+                                                        { key: "0", value: "0", text: "No" },
+                                                        { key: "1", value: "1", text: "Si" }
+                                                    ]}
+                                                    value={`${form.is_aportacion || ""}`}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                            </Form.Field>
                                         </div>
                                     </div>
                                 </div>
-                            </Form>
+                            </div>
                         </div>
-                    </Body>
+                    </Form>
+                </BoardSimple>
+            </div>
+
+            <ContentControl>
+                <div className="col-lg-2 col-6">
+                    <Button fluid color="red" disabled={!isWork}
+                        onClick={(e) => {
+                            setWork({});
+                            setForm({});
+                            setErrors({});
+                        }}
+                    >
+                        <i className="fas fa-times"></i> Cancelar
+                    </Button>
                 </div>
 
-                <ContentControl>
-                    <div className="col-lg-2 col-6">
-                        <Button fluid color="red" disabled={!isWork}
-                            onClick={(e) => {
-                                setWork({});
-                                setForm({});
-                            }}
-                        >
-                            <i className="fas fa-times"></i> Cancelar
-                        </Button>
-                    </div>
+                <div className="col-lg-2 col-6">
+                    <Button fluid color="blue" 
+                        disabled={!isWork}
+                        onClick={createInfo}
+                    >
+                        <i className="fas fa-save"></i> Guardar
+                    </Button>
+                </div>
+            </ContentControl>
 
-                    <div className="col-lg-2 col-6">
-                        <Button fluid color="blue" 
-                            disabled={!isWork}
-                            onClick={createInfo}
-                        >
-                            <i className="fas fa-save"></i> Guardar
-                        </Button>
-                    </div>
-                </ContentControl>
-
-                <Show condicion={option == 'assign'}>
-                    <AssignTrabajador
-                        getAdd={getAdd}
-                        local={true}
-                        isClose={(e) => setOption('')}
-                    />
-                </Show>
-    </Fragment>)
+            <Show condicion={option == 'assign'}>
+                <AssignTrabajador
+                    getAdd={getAdd}
+                    local={true}
+                    isClose={(e) => setOption('')}
+                />
+            </Show>
+        </Fragment>
+    )
 }
 
 // server rendering
