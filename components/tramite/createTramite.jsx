@@ -3,7 +3,7 @@ import Modal from '../modal';
 import { DropZone } from '../Utils';
 import { Confirm, formatBytes } from '../../services/utils';
 import { Form, Button, Progress } from 'semantic-ui-react';
-import { tramite, CancelRequest } from '../../services/apis';
+import { tramite, CancelRequest, handleErrorRequest } from '../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
@@ -97,17 +97,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                 setErrors({})
                 setCurrentFiles([]);
                 if (typeof onSave == 'function') onSave(tramite);
-            }).catch(err => {
-                try {
-                    let { data } = err.response;
-                    if (typeof data != 'object') throw new Error(err.message);
-                    if (typeof data.errors != 'object') throw new Error(data.message);
-                    Swal.fire({ icon: 'warning', text: data.message });
-                    setErrors(data.errors);
-                } catch (error) {
-                    Swal.fire({ icon: 'error', text: error.message });
-                }
-            });
+            }).catch(err => handleErrorRequest(err, setErrors));
             // quitar loader
             setTimeout(() => setCurrentLoading(false), 1000);
         }
@@ -226,6 +216,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                                     name="tramite_type_id"
                                     value={form.tramite_type_id}
                                     onChange={(e, target) => handleInput(target)}
+                                    error={errors.tramite_type_id && errors.tramite_type_id[0] ? true : false}
                                 />
                                 <label>{errors.tramite_type_id && errors.tramite_type_id[0] || ""}</label>
                             </Form.Field>

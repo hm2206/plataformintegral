@@ -3,7 +3,7 @@ import { SelectBase } from './utils';
 import { tramite } from '../../services/apis';
 
 
-const SelectTramiteType = ({ id = "id", name, value, onChange, refresh }) => {
+const SelectTramiteType = ({ id = "id", name, value, onChange, refresh, error = false }) => {
     return <SelectBase 
         execute={true}
         api={tramite}
@@ -17,6 +17,7 @@ const SelectTramiteType = ({ id = "id", name, value, onChange, refresh }) => {
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
         placeholder="Seleccionar Tip. Documento"
         refresh={refresh}
+        error={error}
     />
 }
 

@@ -54,7 +54,10 @@ const ButtonRefresh = ({ message, onClick = null }) => {
 }
 
 
-const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, obj, id, value, text, name, onChange, valueChange, placeholder = 'Seleccionar', disabled = false }) => {
+const SelectBase = ({ 
+    onReady, defaultDatos = [], execute, refresh, url, api, 
+    obj, id, value, text, name, onChange, valueChange, 
+    placeholder = 'Seleccionar', disabled = false, error = false }) => {
 
     const [datos, setDatos] = useState([])
     const [is_error, setIsError] = useState(false);
@@ -143,6 +146,7 @@ const SelectBase = ({ onReady, defaultDatos = [], execute, refresh, url, api, ob
                     onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
                     value={`${valueChange || ""}`}
                     compact
+                    error={error}
                 />
 }
 
