@@ -61,7 +61,7 @@ export const onProgress = (progressEvent, callback = null) => {
 export const handleErrorRequest = (err, callback = null, custom = null) => {
     try {
         if (typeof custom == 'function') custom(err);
-        let { data } = err.response;
+        let { data } = err.response || {};
         if (typeof data != 'object') throw new Error(err.message);
         if (typeof data.errors != 'object') throw new Error(data.message || err.message);
         Swal.fire({ icon: 'warning', text: data.message || err.message });

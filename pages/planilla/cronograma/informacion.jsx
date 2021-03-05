@@ -27,6 +27,7 @@ import ChangeMeta from '../../../components/cronograma/changeMeta';
 import { AUTHENTICATE } from '../../../services/auth';
 import BoardSimple from '../../../components/boardSimple';
 import HeaderCronograma from '../../../components/cronograma/headerCronograma';
+import SyncConfigDescuento from '../../../components/cronograma/syncConfigDescuento'
 
 const FooterCronograma = dynamic(() => import('../../../components/cronograma/footerCronograma'), { ssr: false });
 
@@ -382,6 +383,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
             case 'remu-massive':
             case 'imp-descuento':
             case 'change-meta':
+            case 'sync-config-desct':
             case 'report':
                 setOption(name);
                 break;
@@ -557,6 +559,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                                         { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
                                                         { key: 'sync-obligacion', text: "Agregar Obl. Judiciales", icon: "arrow circle arrow down" },
                                                         { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
+                                                        { key: "sync-config-desct", text: "Sync. Desc. Global", icon: "cloud upload" },
                                                         { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
                                                         { key: "change-meta", text: "Cambio de Metas", icon: "exchange" },
                                                         { key: "processing", text: "Procesar Cronograma", icon: "database" },
@@ -694,6 +697,10 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                 <UpdateDesctMassive isClose={(e) => setOption("")}/>
             </Show>
 
+            <Show condicion={option == 'sync-config-desct'}>
+                <SyncConfigDescuento isClose={(e) => setOption("")}/>
+            </Show>
+
             <Show condicion={option == 'remu-massive'}>
                     <UpdateRemuMassive isClose={(e) => setOption("")}/>
             </Show>
@@ -718,14 +725,6 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                 />
             </Show>
 
-            {/* cambiar de cronograma */}
-            <SearchCronograma 
-                cronograma={cronograma}
-                isClose={e => setOption("")}
-                show={option == 'search_cronograma' ? true : false}
-                onSelect={handleSelect}
-            />
-
             <Show condicion={option == 'report'}>
                 <ModalReport
                     cronograma={cronograma}
@@ -739,6 +738,21 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                     isClose={(e) => setOption("")}
                 />
             </Show>
+    
+            <Show condicion={option == 'sync-config-desc'}>
+                <ChangeMeta
+                    cronograma={cronograma}
+                    isClose={(e) => setOption("")}
+                />
+            </Show>
+
+            {/* cambiar de cronograma */}
+            <SearchCronograma 
+                cronograma={cronograma}
+                isClose={e => setOption("")}
+                show={option == 'search_cronograma' ? true : false}
+                onSelect={handleSelect}
+            />
     </CronogramaProvider>
 }
 

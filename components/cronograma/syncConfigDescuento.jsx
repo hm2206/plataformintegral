@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import Modal from '../modal';
-import { Icon, Form, Button, Checkbox } from 'semantic-ui-react';
+import { Icon, Form, Button } from 'semantic-ui-react';
 import { unujobs, handleErrorRequest } from '../../services/apis';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
@@ -8,7 +8,7 @@ import { SelectCronogramaTypeDescuento, SelectCronogramaMeta, SelectCronogramaCa
 import { AppContext } from '../../contexts/AppContext';
 import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 
-const UpdateDesctMassive = (props) => {
+const SyncConfigDescuento = (props) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -28,27 +28,25 @@ const UpdateDesctMassive = (props) => {
     
     // actualizar
     const update = async () => {
-        let answer = await Confirm("warning", "¿Estas seguró en actualizar el descuento masivamente?", "Confirmar")
-        if (answer) {
-            app_context.fireLoading(true);
-            let datos = Object.assign({}, form);
-            datos._method = 'PUT';
-            await unujobs.post(`cronograma/${cronograma.id}/update_descuento`, datos, { headers: { CronogramaID: cronograma.id } })
-            .then(async res => {
-                app_context.fireLoading(false);
-                let { success, message } = res.data;
-                if (!success) throw new Error(message);
-                await Swal.fire({ icon: 'success', text: message });
-                setForm({});
-                setRefresh(true);
-            }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
-        }
+        let answer = await Confirm("warning", "¿Estas seguro en sincronizar los descuentos globales?", "Confirmar")
+        if (!answer) return false;
+        app_context.fireLoading(true);
+        let datos = Object.assign({}, form);
+        datos._method = 'PUT';
+        await unujobs.post(`cronograma/${cronograma.id}/sync_config_descuento`, datos, { headers: { CronogramaID: cronograma.id } })
+        .then(async res => {
+            app_context.fireLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            setForm({});
+            setRefresh(true);
+        }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
     }
 
     // render
     return (
         <Modal show={true} {...props}
-            titulo={<span><Icon name="cart arrow down"/> Descuento Masivo</span>}
+            titulo={<span><Icon name="cart arrow up"/> Sincronizar descuentos globales</span>}
         >
             <div className="card-body">
                 <Form>
@@ -108,19 +106,6 @@ const UpdateDesctMassive = (props) => {
                                         />
                                     </Form.Field>
                                 </div>
-
-                                <div className="col-md-6 mb-2">
-                                    <Form.Field>
-                                        <label htmlFor="">Sincronizar</label>
-                                        <div>
-                                            <Checkbox toggle
-                                                name="sync"
-                                                value={form.sync ? true : false}
-                                                onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
-                                            />
-                                        </div>
-                                    </Form.Field>
-                                </div>
                             </div>
                         </div>
 
@@ -130,20 +115,10 @@ const UpdateDesctMassive = (props) => {
 
                         <div className="col-md-12 mb-5 text-center">
                             <b><u>IMPORTANTE.</u></b> <br/>
-                            Al actualizar un descuento masivamente, <br/> se desactivará el calculo automático del descuento!!!
+                            Al sincronizar los descuentos globales, <br/> no sera posible revertir los cambios!!!
                         </div>
 
-                        <div className="col-md-9 mb-1">
-                            <Form.Field>
-                                <input type="number" step="any"
-                                    placeholder="Ingrese un monto. Ejem. 0.00"
-                                    name="monto"
-                                    value={form.monto || ""}
-                                    onChange={(e) => handleInput(e.target)}
-                                    disabled={!form.type_descuento_id}
-                                />
-                            </Form.Field>
-                        </div>
+                        <div className="col-md-9 mb-1"></div>
 
                         <div className="col-md-3 mb-1">
                             <Button fluid color="blue"
@@ -160,5 +135,5 @@ const UpdateDesctMassive = (props) => {
     )
 }
 
-export default UpdateDesctMassive;
+export default SyncConfigDescuento;
 
