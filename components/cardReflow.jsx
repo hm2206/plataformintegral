@@ -6,7 +6,8 @@ const defaultItem = {
     info: 'details',
     description: '12/21/2018 – 12:42 PM',
     check: false,
-    delete: true
+    classNameTitle: null,
+    _delete: true,
 };
 
 const CardReflow = ({ 
@@ -52,11 +53,11 @@ const CardReflow = ({
                                 {/* <!-- .timeline-body --> */}
                                 <div className="timeline-body">
                                     <h6 className="timeline-heading"> 
-                                        {i.title} <a href="#" className="text-muted"><small>{i.info}</small></a>
+                                        <span className={i.classNameTitle || ""}>{i.title}</span> <a href="#" className="text-muted"><small>{i.info}</small></a>
                                     </h6>
                                     <span className="timeline-date">{i.description}</span>
                                 </div>
-                                <Show condicion={i.delete}>
+                                <Show condicion={i._delete}>
                                     <button className="close"
                                         onClick={(e) => typeof onDelete == 'function' ? onDelete(indexI, i) : null}
                                     >

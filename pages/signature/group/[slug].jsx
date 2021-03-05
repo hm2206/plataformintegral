@@ -1,6 +1,5 @@
 import React , { useState } from 'react';
 import BoardSimple from '../../../components/boardSimple';
-import CardReflow from '../../../components/cardReflow';
 import { BtnBack, DropZone } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import { signature } from '../../../services/apis';
@@ -8,6 +7,8 @@ import { GroupProvider } from '../../../contexts/SignatureContext';
 import AddTeam from '../../../components/signature/addTeam';
 import AddValidation from '../../../components/signature/addValidation';
 import ListValidation from '../../../components/signature/listValidation';
+import ListTeam from '../../../components/signature/listTeam';
+
 
 const SlugGroup = ({ pathname, query, success, group }) => {
 
@@ -58,11 +59,6 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                                     </div>
 
                                     <div className="col-md-12">
-                                        <h5><i className="fas fa-check"></i> Lista de validaciones</h5>
-                                        <hr/>
-                                        <div className="mb-3">
-                                            <i className="fas fa-filter"></i> Filtros
-                                        </div>
                                         {/* listar validaciones */}
                                         <ListValidation/>
                                     </div>
@@ -70,13 +66,8 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                             </div>
                         </div>
                         <div className="col-md-4">
-                            <CardReflow
-                                items={[]}
-                                start={0}
-                                over={0}
-                                title={`Firmantes`}
-                                info={`Equipo`}
-                            />
+                            {/* listar team */}
+                            <ListTeam/>
                         </div>
                     </div>
                 </BoardSimple>

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { signature } from '../../services/apis';
-import ModalRightUser from '../authentication/modalRightUser';
+import ModalRightPerson from '../authentication/modalRightPerson';
 import { Confirm } from '../../services/utils';
 import { GroupContext } from '../../contexts/SignatureContext';
 
@@ -30,7 +30,7 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
 
     // render
     return (
-        <ModalRightUser
+        <ModalRightPerson
             show={show}
             title="Equipo"
             onClose={onClose}

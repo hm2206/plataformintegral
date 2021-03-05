@@ -68,13 +68,6 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
             </p>
             <hr/>
             <div className="text-center">
-                <Show condicion={current_tracking.files && current_tracking.files.length}>
-                    <button className="btn btn-sm btn-dark"
-                        onClick={(e) => typeof onFiles == 'function' ? onFiles(e, files || []) : null}
-                    >
-                        <i className="fas fa-file-alt"></i> Archivos
-                    </button>
-                </Show>
                 {/* obtener datos */}
                 <Show condicion={Object.keys(current_tracking.tramite || {}).length}>
                     <button className="btn btn-outline-dark"
@@ -82,6 +75,17 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
                     >
                         <i className="fas fa-info-circe"></i> Información
                     </button>
+                </Show>
+                {/* obtener info */}
+                <Show condicion={Object.keys(current_tracking.info || {}).length}>
+                    <p>{current_tracking.info && current_tracking.info.description || ""}</p>
+                    <Show condicion={current_tracking.info.files && current_tracking.info.files.length}>
+                        <button className="btn btn-sm btn-dark"
+                            onClick={(e) => typeof onFiles == 'function' ? onFiles(e, current_tracking.info.files || []) : null}
+                        >
+                            <i className="fas fa-file-alt"></i> Archivos
+                        </button>
+                    </Show>
                 </Show>
                 {/* tracking multiple */}
                 <Show condicion={current_tracking.multiple}>
@@ -91,6 +95,7 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
                         <i className="fas fa-chart-line"></i> Multiples
                     </button>
                 </Show>
+                
             </div>
         </VerticalTimelineElement>
     )

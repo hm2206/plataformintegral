@@ -330,37 +330,39 @@ const RenderShow = () => {
                                 revisado={current_tracking.revisado}
                         />
 
-                            <div className="mt-3">
-                                <b>Descripción: </b> {current_tracking.description || 'No hay descripción disponible'}
-                            </div>
-
-                            <Show condicion={Object.keys(current_tracking || {}).length && current_tracking.files && current_tracking.files.length}>
-                                <div className="row mt-3">
-                                    <div className="col-md-12 mb-3">
-                                        <b>Archivos del seguímiento:</b>
-                                    </div>
-                                    {current_tracking.files ? current_tracking.files.map((f, indexF) => 
-                                        <div className="ml-5 col-xs" key={`item-tracking-${indexF}`}>
-                                            <ItemFileCircle
-                                                id={f.id}
-                                                is_observation={f.observation}
-                                                className="mb-3"
-                                                key={`item-file-tracking-${indexF}`}
-                                                url={f.url}
-                                                name={f.name}
-                                                extname={f.extname}
-                                                edit={true}
-                                                hidden={['delete']}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    tramite_context.setFile(f);
-                                                    tramite_context.setOption('VISUALIZADOR');
-                                                }}
-                                                onAction={(e) => setCurrentRefesh(true)}
-                                            />
-                                        </div>
-                                    ): null}
+                            <Show condicion={Object.keys(current_tracking.info || {}).length}>
+                                <div className="mt-3">
+                                    <b>Descripción: </b> {current_tracking.info && current_tracking.info.description || 'No hay descripción disponible'}
                                 </div>
+
+                                <Show condicion={current_tracking.info && current_tracking.info.files && current_tracking.info.files.length}>
+                                    <div className="row mt-3">
+                                        <div className="col-md-12 mb-3">
+                                            <b>Archivos del seguímiento:</b>
+                                        </div>
+                                        {current_tracking.info && current_tracking.info.files ? current_tracking.info.files.map((f, indexF) => 
+                                            <div className="ml-5 col-xs" key={`item-tracking-${indexF}`}>
+                                                <ItemFileCircle
+                                                    id={f.id}
+                                                    is_observation={f.observation}
+                                                    className="mb-3"
+                                                    key={`item-file-tracking-${indexF}`}
+                                                    url={f.url}
+                                                    name={f.name}
+                                                    extname={f.extname}
+                                                    edit={true}
+                                                    hidden={['delete']}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        tramite_context.setFile(f);
+                                                        tramite_context.setOption('VISUALIZADOR');
+                                                    }}
+                                                    onAction={(e) => setCurrentRefesh(true)}
+                                                />
+                                            </div>
+                                        ): null}
+                                    </div>
+                                </Show>
                             </Show>
                         </div>
                     </Show>
