@@ -1,12 +1,11 @@
 import React, { useContext, useState, Fragment } from 'react';
 import { Body, BtnSelect } from '../Utils';
-import { backUrl, InputCredencias, InputAuth, InputEntity } from '../../services/utils';
+import { InputCredencias, InputAuth, InputEntity } from '../../services/utils';
 import Router from 'next/dist/client/router';
 import { Form, Select } from 'semantic-ui-react';
 import Show from '../show';
 import ContentControl from '../contentControl';
 import { handleErrorRequest, unujobs } from '../../services/apis';
-import Swal from 'sweetalert2';
 import {
     SelectCronogramaAfp, SelectCronogramaMeta, SelectCronogramaCargo, SelectCronogramaTypeCategoria, 
     SelectCronogramaTypeRemuneracion, SelectCronogramaTypeDescuento, SelectCronogramaTypeDetalle,
@@ -70,7 +69,7 @@ const getButtons = async (names = []) => {
         {value: "remuneracion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/remuneracion/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "descuento", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/descuento/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "descuento-csv", text: "Exportar a Excel", color: "olive", icon: "file text excel", url: "pdf/descuento/{id}?format=excel", params: ["id"], action: "link" },
-        {value: "descuento-consolidado", text: "Consolidado", color: "olive", icon: "file text excel", url: "exports/cronograma/{id}/descuento_consolidado", params: ["id"], action: "link"},
+        {value: "descuento-consolidado", text: "Consolidado", color: "olive", icon: "file text excel", url: "exports/cronograma/{id}/descuento_consolidado", params: ["id"], action: "link" },
         {value: "judicial", text: "Lista Beneficiarios", color: "red", icon: "file text outline", url: "pdf/judicial/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "judicial-pay", text: "Generar Pagos", color: "red", icon: "file text outline", url: "pdf/judicial/{id}/pago", params: ["id"], action: "blob", type: "text/html"},
         {value: "judicial-pay-txt", text: "Generar txt Pagos", color: "gray", icon: "download", url: "pdf/judicial/{id}/pago?format=txt", params: ["id"], action: "blob", type: "text/plain", download: true},
@@ -190,7 +189,7 @@ const BasicReport = ({ cronograma, basic }) => {
                 let { message } = res.data;
                 if (message) throw new Error(message);
                 let array = res.headers['content-type'].split(';');
-                let filename = array.length == 0 ? null : array[array.length == 1 ? 0 : array.length - 1];
+                let filename = array.length == 0 ? obj.name || null : array[array.length == 1 ? 0 : array.length - 1];
                 let a = document.createElement('a');
                 let type = obj.type;
                 let blob = new Blob([res.data], { type });
