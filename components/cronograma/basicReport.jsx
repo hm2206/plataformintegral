@@ -5,7 +5,7 @@ import Router from 'next/dist/client/router';
 import { Form, Select } from 'semantic-ui-react';
 import Show from '../show';
 import ContentControl from '../contentControl';
-import { unujobs } from '../../services/apis';
+import { handleErrorRequest, unujobs } from '../../services/apis';
 import Swal from 'sweetalert2';
 import {
     SelectCronogramaAfp, SelectCronogramaMeta, SelectCronogramaCargo, SelectCronogramaTypeCategoria, 
@@ -69,6 +69,8 @@ const getButtons = async (names = []) => {
         {value: "afp-net", text: "Descargar AFP NET", color: "olive", icon: "download", url: "pdf/afp_net/{id}", params: ["id"], action: "link"},
         {value: "remuneracion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/remuneracion/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "descuento", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/descuento/{id}", params: ["id"], action: "blob", type: "text/html"},
+        {value: "descuento-csv", text: "Exportar a Excel", color: "olive", icon: "file text excel", url: "pdf/descuento/{id}?format=excel", params: ["id"], action: "link" },
+        {value: "descuento-consolidado", text: "Consolidado", color: "olive", icon: "file text excel", url: "exports/cronograma/{id}/descuento_consolidado", params: ["id"], action: "link"},
         {value: "judicial", text: "Lista Beneficiarios", color: "red", icon: "file text outline", url: "pdf/judicial/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "judicial-pay", text: "Generar Pagos", color: "red", icon: "file text outline", url: "pdf/judicial/{id}/pago", params: ["id"], action: "blob", type: "text/html"},
         {value: "judicial-pay-txt", text: "Generar txt Pagos", color: "gray", icon: "download", url: "pdf/judicial/{id}/pago?format=txt", params: ["id"], action: "blob", type: "text/plain", download: true},
@@ -117,7 +119,7 @@ const reports = [
     {key: "pago", value: "pago", text: "Reporte Medio de Pago", icon: "file text outline", filtros: ['pago_id', 'type_categoria_id'], buttons: ['pay', 'pay-txt', 'pay-csv']},
     {key: "afp", value: "afp", text: "Reporte de AFP y ONP", icon: "file text outline", filtros: ['afp_id'], buttons: ['afp', 'afp-net']},
     {key: "remuneracion", value: "remuneracion", text: "Reporte de Remuneraciones", icon: "file text outline", filtros: ['type_remuneracion_id', 'cargo_id', 'type_categoria_id', 'meta_id', 'negativo'], buttons: ['remuneracion']},
-    {key: "descuento", value: "descuento", text: "Reporte de Descuentos", icon: "file text outline", filtros: ['type_descuento_id'], buttons: ['descuento']},
+    {key: "descuento", value: "descuento", text: "Reporte de Descuentos", icon: "file text outline", filtros: ['type_descuento_id'], buttons: ['descuento', 'descuento-csv', 'descuento-consolidado']},
     {key: "obligacion", value: "obligacion", text: "Reporte de Obl. Judiciales", icon: "file text outline", filtros: ['pago_id', 'type_categoria_id'], buttons: ['judicial', 'judicial-pay', 'judicial-pay-txt']},
     {key: "detallado", value: "detallado", text: "Reporte de Descuentos Detallados", icon: "file text outline", filtros: ['type_detalle_id'], buttons: ['detalle']},
     {key: "aportacion", value: "aportacion", text: "Reporte de Aportaciones", icon: "file text outline", filtros: ['type_aportacion_id'], buttons: ['aportacion']},
@@ -172,7 +174,8 @@ const BasicReport = ({ cronograma, basic }) => {
             form_current.appendChild(InputEntity());
             // add form al body
             document.body.appendChild(form_current);
-            form_current.action = `${unujobs.path}/${link}?${query}`;
+            let simbol = await /[?]/.test(link)  ? '&' : '?';
+            form_current.action = `${unujobs.path}/${link}${simbol}${query}`;
             form_current.method = 'POST';
             form_current.target = '_blank';
             form_current.submit();
@@ -195,10 +198,7 @@ const BasicReport = ({ cronograma, basic }) => {
                 obj.download ? a.download = filename : null;
                 a.target = '_blank';
                 a.click();
-            }).catch(async err => {
-                app_context.fireLoading(false);
-                await Swal.fire({ icon: 'error', text: err.message })
-            });
+            }).catch(err => handleErrorRequest(err, null, (e) => app_context.fireLoading(false)));
         }   
     }
 
@@ -217,7 +217,6 @@ const BasicReport = ({ cronograma, basic }) => {
 
     const genetateQuery = (_string = true) => {
         let query = ``;
-        let regex = /_id$/;
         let index = 0;
         let payload = {};
         for(let obj in form) {
