@@ -1,208 +1,230 @@
-import React, { Component } from 'react';
-import Datatable from '../../components/datatable';
+import React, { useContext, useEffect, useState } from 'react';
+import Show from '../../components/show';
 import Router from 'next/router';
-import { AUTHENTICATE, AUTH } from '../../services/auth';
-import { Form, Button, Pagination} from 'semantic-ui-react';
-import { allHistorial } from '../../storage/actions/historialActions';
-import { unujobs, authentication } from '../../services/apis';
+import { AUTHENTICATE } from '../../services/auth';
+import { Form, Button, Pagination } from 'semantic-ui-react';
+import { unujobs } from '../../services/apis';
 import Swal from 'sweetalert2';
-import { Body } from '../../components/Utils';
-import Show from '../../components/show'
+import BoardSimple from '../../components/boardSimple';
+import { AppContext } from '../../contexts/AppContext';
+import { BtnFloat } from '../../components/Utils';
+import { Confirm } from '../../services/utils';
+
+const ItemBoleta = ({ data, is_check = false, onClick = null }) => {
+
+    // estados
+    const [history, setHistory] = useState({});
+
+    useEffect(() => {
+        setHistory(data || {});
+    }, [data]);
+
+    // renderizado
+    return (
+        <tr>
+            <td>{history.id || ""}</td>
+            <td className="capitalize">{history.person && history.person.fullname || ""}</td>
+            <td>
+                <span className="badge badge-primary">{history.cronograma && history.cronograma.year || ""}</span>
+            </td>
+            <td>
+                <span className="badge badge-dark">{history.cronograma && history.cronograma.mes || ""}</span>
+            </td>
+            <td>
+                <span className="badge badge-dark">{history.cargo && history.cargo.alias || ""}</span>
+            </td>
+            <td className="text-center">
+                <span className="badge badge-warning">{history.type_categoria && history.type_categoria.descripcion || ""}</span>
+            </td>
+            <td className="text-center">
+                <div className="btn-group">
+                    <Show condicion={!is_check}
+                        predeterminado={
+                            <button className="btn btn-sm btn-danger"
+                                onClick={(e) => typeof onClick == 'function' ? onClick(e, 'DELETE') : null}
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        }
+                    >
+                        <button className="btn btn-sm btn-outline-success"
+                            onClick={(e) => typeof onClick == 'function' ? onClick(e, 'ADD') : null}
+                        >
+                            <i className="fas fa-check"></i>
+                        </button>
+                    </Show>
+                </div>
+            </td>
+        </tr>
+    )
+}
 
 
-export default class DuplicadoBoleta extends Component {
+const IndexBoleta = ({ pathname, query, success, historial }) => {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            loading: true,
-            block: false,
-            query_search: "",
-            historial: [],
-            total: 0,
-            stop: false
-        }
+    // app
+    const app_context = useContext(AppContext);
 
-        this.handleInput = this.handleInput.bind(this);
-    }
+    // estados
+    const [query_search, setQuerySearch] = useState("");
+    const [historial_select, setHistorialSelect] = useState([]);
 
-    static getInitialProps  = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let {query, pathname, store} = ctx;
-        query.page = query.page ? query.page : 1;
-        query.query_search = await query.query_search ? query.query_search : "";
-        await store.dispatch(allHistorial(ctx));
-        let { page_historial } = store.getState().historial;
-        let auth_token = await AUTH(ctx);
-        return {query, pathname, page_historial, auth_token }
-    }
-
-    componentDidMount = () => {
-        this.props.fireEntity({ render: true });
-        this.setting(this.props);
-    }
-
-    componentWillReceiveProps = async (nextProps) => {
-        let { query, page_historial } = this.props;
-        if (nextProps.query.query_search != query.query_search || nextProps.page_historial != page_historial) {
-            await this.setting(nextProps);
-        }
-    }
-
-    setting = (props) => {
-        this.setState(state => ({ 
-            query_search: props.query.query_search ? props.query.query_search : "",
-            loading: false,
-            historial: props.page_historial.data,
-        }))
-    }
-
-    handleInput(e) {
-        let {name, value} = e.target;
-        this.setState({[name]: value});
-    }
-
-    handleSearch = async () => {
-        this.setState({ loading: true });
-        let { push, pathname, query } = Router;
-        query.query_search = this.state.query_search;
+    // realizar busqueda
+    const handleSearch = async () => {
+        let { push } = Router;
+        query.query_search = query_search;
         query.page = 1;
-        await push({ pathname, query })
-        this.setState({ loading: false, stop: false });
-    }
-
-    handlePage = async (e, { activePage }) => {
-        this.setState({ loading: true });
-        let { pathname, query, push } = Router;
-        query.page = activePage;
         await push({ pathname, query });
-        this.setState({ loading: false });
     }
 
-    handleBoleta = async (obj, generatePdf = false) => {
-        this.props.fireLoading(true);
-        let path = `pdf/boleta/${obj.cronograma_id}?meta_id=${obj.meta_id}&historial_id=${obj.id}`;
+    // obtener boleta
+    const handleBoleta = async () => {
+        let answer = await Confirm("warning", `¿Estas seguro en generar las boletas?`, 'Generar');
+        if (!answer) return false;
+        app_context.fireLoading(true);
+        let path = `pdf/boleta?historial_id[]=${historial_select.join('&historial_id[]=')}&edit=1&zoom=98.5%`;
         await unujobs.post(path)
         .then(async ({ data }) => {
-            if (!generatePdf) {
-                this.props.fireLoading(false);
-                let blob = new Blob([data], { type: 'text/html' });
-                let newPrint = window.open(URL.createObjectURL(blob))
-                newPrint.onload = () => newPrint.print();
-            } else {
-                // config api pdf
-                let payload = {
-                    data,
-                    format: 'A3'
-                };
-                // generate pdf
-                await authentication.post(`pdf`, payload, { responseType: 'blob' })
-                    .then(blob => {
-                        this.props.fireLoading(false);
-                        let filename = `${obj.person && obj.person.fullname}_${obj.cronograma && obj.cronograma.year}_${obj.cronograma && obj.cronograma.mes}.pdf`
-                        let a = document.createElement('a');
-                        a.href = URL.createObjectURL(blob.data);
-                        a.target = '_black';
-                        a.download = filename;
-                        a.click();
-                    }).catch(err => {
-                        this.props.fireLoading(false);
-                        Swal.fire({ icon: 'error', text: err.message });
-                    });            
-            }
+            app_context.fireLoading(false);
+            let blob = new Blob([data], { type: 'text/html' });
+            let newPrint = window.open(URL.createObjectURL(blob))
+            newPrint.onload = () => newPrint.print();
+            setHistorialSelect([]);
         }).catch(err => {
-            this.props.fireLoading(false);
+            app_context.fireLoading(false);
             Swal.fire({ icon: 'error', text: 'No se pudó generar la boleta' })
         })
     }
 
-    getOption = (obj, key, index) => {
-        switch (key) {
-            case 'report':
-                this.handleBoleta(obj);
+    // toggle select
+    const toggleSelect = (obj, option) => {
+        switch (option) {
+            case 'ADD':
+                setHistorialSelect([...historial_select, obj.id]);
                 break;
-            case 'download':
-                this.handleBoleta(obj, true);
+            case 'DELETE':
+                let index = historial_select.indexOf(obj.id);
+                if (index >= 0) {
+                    let newDatos = historial_select.filter(h => h != obj.id);
+                    setHistorialSelect(newDatos);
+                }
                 break;
             default:
                 break;
         }
     }
 
-
-    render() {
-
-        let { loading, historial } = this.state;
-        let {query, pathname, page_historial} = this.props;
-
-        return (
-            <div className="col-md-12">
-                <div id="render-pdf"></div>
-                <Body>
-                    <Datatable titulo={<span> Lista histórica de boletas de pago</span>}
-                        isFilter={false}
-                        loading={loading}
-                        headers={ ["#ID", "Apellidos y Nombres", "Año", "Mes", "Cargo", 'Tip. Categoría']}
-                        index={[
-                            { key: "id", type: "text" },
-                            { key: "person.fullname", type: "text", className: 'uppercase' },
-                            { key: "cronograma.year", type: "icon" },
-                            { key: "cronograma.mes", type: "icon", bg: "dark" },
-                            { key: "cargo.alias", type: "icon", bg: "dark" },
-                            { key: "type_categoria.descripcion", type: "icon", bg: "success" }
-                        ]}
-                        options={
-                            [
-                                {
-                                    key: "report",
-                                    icon: "fas fa-file-pdf",
-                                    title: "Reporte de Boleta"
-                                }
-                            ]
-                        }
-                        getOption={this.getOption}
-                        data={historial}
-                    >
-                        <Form className="mb-3">
-                            <div className="row">
-                                <div className="col-md-6 mb-1 col-6 col-sm-6 col-xl-5">
-                                    <Form.Field>
-                                        <input type="text"  
-                                            placeholder="Buscar Boletas: Apellidos y Nombres" 
-                                            name="query_search"
-                                            value={this.state.query_search}
-                                            disabled={this.state.loading}
-                                            onChange={this.handleInput}
-                                        />
-                                    </Form.Field>
-                                </div>
-                                <div className="col-md-3 col-6 col-sm-12 col-xl-2 mb-1">
-                                    <Button 
-                                        fluid
-                                        disabled={this.state.loading}
-                                        color="blue"
-                                        onClick={this.handleSearch}
-                                    >
-                                        <i className="fas fa-search mr-1"></i>
-                                        <span>Buscar</span>
-                                    </Button>
-                                </div>
-                            </div>
-                            <hr/>
-                        </Form>
-                    </Datatable>
-                    <div className="text-center">
-                        <hr/>
-                        <Pagination activePage={query.page || 1} 
-                            totalPages={page_historial.last_page || 0}
-                            enabled={loading}
-                            onPageChange={this.handlePage}
-                            activePage={query.page || 1}
-                        />
-                    </div>
-                </Body>
-            </div>
-        )
+    // siguiente página
+    const handlePage = async (e, { activePage }) => {
+        let { push } = Router;
+        query.page = activePage;
+        query.query_search = query_search;
+        await push({ pathname, query });
     }
 
+    // obtener entity
+    useEffect(() => {
+        app_context.fireEntity({ render: true });
+    }, [])
+
+    // renderizar
+    return (
+        <div className="col-md-12">
+            <BoardSimple
+                title="Boleta"
+                info={["Historial de boletas"]}
+                prefix="B"
+                bg="danger"
+                options={[]}
+            >
+                <div className="card-body">
+                    <Form className="mb-3">
+                        <div className="row">
+                            <div className="col-md-6 mb-1 col-6 col-sm-6 col-xl-5">
+                                <Form.Field>
+                                    <input type="text"  
+                                        placeholder="Buscar Boletas: Apellidos y Nombres" 
+                                        name="query_search"
+                                        value={query_search || ""}
+                                        onChange={({ target }) => setQuerySearch(target.value || "")}
+                                    />
+                                </Form.Field>
+                            </div>
+                            <div className="col-md-3 col-6 col-sm-12 col-xl-2 mb-1">
+                                <Button 
+                                    fluid
+                                    color="blue"
+                                    onClick={handleSearch}
+                                >
+                                    <i className="fas fa-search mr-1"></i>
+                                    <span>Buscar</span>
+                                </Button>
+                            </div>
+                        </div>
+                        <hr/>
+                    </Form>
+
+                    <div className="table-responsive">
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>#ID</th>
+                                    <th>Apellidos y Nombre</th>
+                                    <th>Año</th>
+                                    <th>Mes</th>
+                                    <th>Cargo</th>
+                                    <th className="text-center">Tip. Categoría</th>
+                                    <th className="text-center">Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <Show condicion={historial.data && historial.data.length}>
+                                    {historial.data.map((d, indexD) => 
+                                        <ItemBoleta 
+                                            key={`list-boleta-history-${indexD}`}
+                                            data={d}
+                                            onClick={(e, option) => toggleSelect(d, option)}
+                                            is_check={historial_select.includes(d.id) ? true : false}
+                                        />
+                                    )}
+                                </Show>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="text-center">
+                    <hr/>
+                    <Pagination activePage={query.page || 1} 
+                        totalPages={historial.last_page || 0}
+                        onPageChange={handlePage}
+                    />
+                </div>
+
+                {/* botton flotante */}
+                <Show condicion={historial_select.length}>
+                    <BtnFloat onClick={handleBoleta}>
+                        <i className="fas fa-paper-plane"></i>
+                    </BtnFloat>
+                </Show>
+            </BoardSimple>
+        </div>
+    )
 }
+
+IndexBoleta.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // filtros
+    query.page = typeof query.page != 'undefined' ? query.page : 1;
+    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
+    // request
+    let query_string = `page=${query.page}&query_search=${query.query_search}`;
+    let { success, historial } = await unujobs.get(`historial?${query_string}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({ success: false, historial: {} }));
+    // response
+    return { pathname, query, success, historial };
+}
+
+export default IndexBoleta;

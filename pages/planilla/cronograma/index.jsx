@@ -85,7 +85,7 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
         await push({ pathname, query });
     }
 
-    // crear dependencia
+    // crear cronograma
     const handleCreate = async () => {
         let { push } = Router;
         let newQuery = {};
