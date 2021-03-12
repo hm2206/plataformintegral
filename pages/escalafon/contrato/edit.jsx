@@ -16,17 +16,30 @@ import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../comp
 import storage from '../../../services/storage.json';
 import BoardSimple from '../../../components/boardSimple';
 import NotFoundData from '../../../components/notFoundData'
+import { EntityContext } from '../../../contexts/EntityContext';
 
 const Edit = ({ success, info, query }) => {
+
+    // validar datos
+    if (!success) return <NotFoundData/>;
 
     // app
     const app_context = useContext(AppContext);
     
+    // entity
+    const entity_context = useContext(EntityContext);
+
     // estados
     const [edit, setEdit] = useState(false);
     const [form, setForm] = useState({});
     const [old, setOld] = useState({});
     const [errors, setErrors] = useState({});
+
+     // cargar entity
+     useEffect(() => {
+        entity_context.fireEntity({ render: true, disabled: true, entity_id: info.entity_id });
+        return () => entity_context.fireEntity({ render: false, disabled: false });
+    }, []);
 
     // primera carga
     useEffect(() => {
@@ -116,8 +129,6 @@ const Edit = ({ success, info, query }) => {
                 break;
         }
     }
-
-    if (!success) return <NotFoundData/>;
 
     // renderizar
     return (

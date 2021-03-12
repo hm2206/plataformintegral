@@ -1,97 +1,83 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, parseOptions } from '../../../services/utils';
-import Router from 'next/router';
+import React, { useState, useContext, useEffect } from 'react';
+import { BtnBack } from '../../../components/Utils';
+import { Confirm } from '../../../services/utils';
 import { Form, Button, Select } from 'semantic-ui-react'
-import { unujobs } from '../../../services/apis';
+import { handleErrorRequest, unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
+import { AppContext } from '../../../contexts/AppContext';
 import { SelectTypeDescuento } from '../../../components/select/cronograma';
+import BoardSimple from '../../../components/boardSimple';
+import ContentControl from '../../../components/contentControl';
+import atob from 'atob';
+import Router from 'next/router';
+import NotFoundData from '../../../components/notFoundData';
 
+const EditAfp = ({ pathname, query, success, afp }) => {
 
-export default class CreateAfp extends Component
-{
+    // verificar datos
+    if (!success) return <NotFoundData/>
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    // estados
+    const [form, setForm] = useState({ private: 0 });
+    const [block, setBlock] = useState(false);
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [edit, setEdit] = useState(false);
+
+    // app
+    const app_context = useContext(AppContext);
+
+    // cambiar input
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
+        setEdit(true);
     }
 
-    state = {
-        type_descuentos: [],
-        block: false,
-        edit: false,
-        loading: false,
-        errors: {},
-        old: {},
-        form: { 
-            private: 0
+    // guardar
+    const save = async () => {
+        let answer = await Confirm('warning', `¿Deseas guardar los cambios?`, 'Estoy Seguro');
+        if (answer) {
+            app_context.setCurrentLoading(true);
+            let payload = Object.assign({}, form);
+            payload._method = 'PUT';
+            await unujobs.post(`afp/${afp.id}`, payload)
+            .then(async res => {
+                app_context.setCurrentLoading(false);
+                let { success, message } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                await Router.push(location.href);
+                setErrors({});
+                setEdit(false);
+            }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
         }
     }
 
-    componentDidMount = async () => {
-        this.findAfp();
-    }
+    // obtener el object
+    useEffect(() => {
+        if (!edit) setForm(Object.assign({}, afp));
+    }, [edit]);
 
-    findAfp = async () => {
-        this.setState({ loading: true });
-        let { query } = this.props;
-        let id = query.id ? atob(query.id) : '__error';
-        await unujobs.get(`afp/${id}`)
-        .then(res => {
-            let { success, message, afp } = res.data;
-            if (!success) throw new Error(message);
-            this.setState({ form: afp, old: afp })
-        })
-        .catch(err => this.setState({ form: {}, old: {} }));
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }) => {
-        this.setState(state => {
-            state.form[name] = value;
-            state.errors[name] = null;
-            return { form: state.form, errors: state.errors, edit: true };
-        });
-    }
-
-    save = async () => {
-        this.setState({ loading: true });
-        let { form } = this.state;
-        form._method = 'PUT';
-        await unujobs.post(`afp/${form.id}`, form)
-        .then(async res => {
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
-            Swal.fire({ icon: 'success', text: message });
-            await this.setState(state => ({ errors: {}, old: state.form, edit: false }));
-        }).catch(err => {
-            try {
-                let response = err.response.data;
-                Swal.fire({ icon: 'warning', text: response.message });
-                this.setState({ errors: response.errors });
-            } catch (error) {
-                Swal.fire({ icon: 'error', text: err.message });
-            }
-        });
-        this.setState({ loading: false });
-    }
-
-    render() {
-
-        let { pathname, query } = this.props;
-        let { form, ley, block, type_descuentos, loading, errors } = this.state;
-
-        return (
+    // render
+    return (
+        <>
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Ley Social
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
+                <BoardSimple
+                    title="Ley Social"
+                    info={["Editar Ley social"]}
+                    prefix={<BtnBack/>}
+                    bg="light"
+                    options={[]}
+                >
+                    <div className="card-body mt-4">
+                        <Form className="row justify-content-center mb-5">
                             <div className="col-md-10">
                                 <div className="row justify-content-end">
                                     <div className="col-md-4 mb-3">
@@ -101,8 +87,8 @@ export default class CreateAfp extends Component
                                                 name="afp_id"
                                                 value={form.afp_id || ""}
                                                 placeholder="Ingrese un identificador para la Ley Social"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                disabled
+                                                onChange={(e) => handleInput(e.target)}
+                                                disabled={current_loading}
                                             />
                                             <label>{errors.afp_id && errors.afp_id[0]}</label>
                                         </Form.Field>
@@ -115,8 +101,8 @@ export default class CreateAfp extends Component
                                                 name="afp"
                                                 value={form.afp || ""}
                                                 placeholder="Ingrese una descripción de la Ley Social"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                disabled
+                                                onChange={(e) => handleInput(e.target)}
+                                                disabled={current_loading}
                                             />
                                             <label>{errors.afp && errors.afp[0]}</label>
                                         </Form.Field>
@@ -129,8 +115,8 @@ export default class CreateAfp extends Component
                                                 name="type_afp_id"
                                                 value={form.type_afp_id || ""}
                                                 placeholder="Ingrese un identificador para el Tipo de Ley Social"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                disabled
+                                                onChange={(e) => handleInput(e.target)}
+                                                disabled={current_loading}
                                             />
                                             <label>{errors.type_afp_id && errors.type_afp_id[0]}</label>
                                         </Form.Field>
@@ -143,8 +129,8 @@ export default class CreateAfp extends Component
                                                 name="type_afp"
                                                 value={form.type_afp || ""}
                                                 placeholder="Ingrese un descripción para el Tipo de Ley Social"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                disabled={loading}
+                                                onChange={(e) => handleInput(e.target)}
+                                                disabled={current_loading}
                                             />
                                             <label>{errors.type_afp && errors.type_afp[0]}</label>
                                         </Form.Field>
@@ -156,8 +142,8 @@ export default class CreateAfp extends Component
                                             <SelectTypeDescuento
                                                 name="type_descuento_id"
                                                 value={form.type_descuento_id || ""}
-                                                disabled
-                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                disabled={block || current_loading}
+                                                onChange={(e, obj) => handleInput(obj)}
                                             />
                                             <label>{errors.type_descuento_id && errors.type_descuento_id[0]}</label>
                                         </Form.Field>
@@ -170,8 +156,8 @@ export default class CreateAfp extends Component
                                                 name="porcentaje"
                                                 value={form.porcentaje || ""}
                                                 placeholder="Ingrese el porcentaje"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                disabled={loading}
+                                                onChange={(e) => handleInput(e.target)}
+                                                disabled={current_loading}
                                             />
                                         </Form.Field>
                                     </div>
@@ -185,10 +171,10 @@ export default class CreateAfp extends Component
                                                     { key: "private", value: true, text: "Privado" },
                                                     { key: "no-private", value: false, text: "Público" }
                                                 ]}
-                                                onChange={(e, obj) => this.handleInput({ name: obj.name, value: obj.value ? 1 : 0 })}
+                                                onChange={(e, obj) => handleInput({ name: obj.name, value: obj.value ? 1 : 0 })}
                                                 value={form.private ? true : false}
                                                 name="private"
-                                                disabled
+                                                disabled={current_loading}
                                             />
                                         </Form.Field>
                                     </div>
@@ -206,8 +192,8 @@ export default class CreateAfp extends Component
                                                 <SelectTypeDescuento
                                                     name="aporte_descuento_id"
                                                     value={form.aporte_descuento_id || ""}
-                                                    disabled={block || loading}
-                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                    disabled={block || current_loading}
+                                                    onChange={(e, obj) => handleInput(obj)}
                                                 />
                                             </Form.Field>
                                         </div>
@@ -218,9 +204,9 @@ export default class CreateAfp extends Component
                                                 <input type="number"
                                                     name="aporte"
                                                     placeholder="Ingrese el Porcentaje"
-                                                    disabled={loading}
                                                     value={form.aporte || ""}
-                                                    onChange={(e) => this.handleInput(e.target)}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                    disabled={current_loading}
                                                 />
                                             </Form.Field>
                                         </div>
@@ -231,14 +217,14 @@ export default class CreateAfp extends Component
                                             <hr/>
                                         </h5>
 
-                                        <div className="col-md-8 mb-3">
+                                        <div className="col-md-4 mb-3">
                                             <Form.Field>
                                                 <label htmlFor="">Tip. Descuento</label>
                                                 <SelectTypeDescuento
                                                     name="prima_descuento_id"
                                                     value={form.prima_descuento_id || ""}
-                                                    disabled={block || loading}
-                                                    onChange={(e, obj) => this.handleInput(obj)}
+                                                    disabled={block || current_loading}
+                                                    onChange={(e, obj) => handleInput(obj)}
                                                 />
                                             </Form.Field>
                                         </div>
@@ -250,8 +236,8 @@ export default class CreateAfp extends Component
                                                     name="prima"
                                                     placeholder="Ingrese el Porcentaje"
                                                     value={form.prima || ""}
-                                                    disabled={loading}
-                                                    onChange={(e) => this.handleInput(e.target)}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                    disabled={current_loading}
                                                 />
                                             </Form.Field>
                                         </div>
@@ -263,42 +249,57 @@ export default class CreateAfp extends Component
                                                     name="prima_limite"
                                                     placeholder="Ingrese el monto Limite de la Prima Seguro"
                                                     value={form.prima_limite || ""}
-                                                    disabled={loading}
-                                                    onChange={(e) => this.handleInput(e.target)}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                    disabled={current_loading}
                                                 />
                                             </Form.Field>
                                         </div>
                                     </Show>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-4 text-right">
-                                        <Show condicion={this.state.edit}>
-                                            <Button color="red" 
-                                                disabled={this.state.loading}
-                                                onClick={(e) => this.setState(state => ({ form: state.old, errors: {}, edit: false }))}
-                                            >
-                                                <i className="fas fa-times"></i> Cancelar
-                                            </Button>
-                                        </Show>
-
-                                        <Button color="teal"
-                                            loading={this.state.loading}
-                                            onClick={this.save}
-                                            disabled={!this.state.edit}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
-                                    </div>
                                 </div>
                             </div>
                         </Form>
                     </div>
-                </Body>
+                </BoardSimple>
             </div>
-        )
-    }
-    
+            {/* panel de control */}
+            <Show condicion={edit}>
+                <ContentControl>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="red"
+                            onClick={(e) => setEdit(false)}
+                        >
+                            <i className="fas fa-times"></i> Cancelar
+                        </Button>
+                    </div>
+
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="blue"
+                            onClick={save}
+                        >
+                            <i className="fas fa-sync"></i> Actualizar
+                        </Button>
+                    </div>
+                </ContentControl>
+            </Show>
+        </>
+    )
 }
+
+// precargador server
+EditAfp.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // get id
+    let id = atob(query.id || "") || "_error";
+    // request
+    let { success, afp } = await unujobs.get(`afp/${id}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({ success: false, afp: {} }));
+    // responser
+    return { pathname, query, success, afp }; 
+}
+
+// exportar
+export default EditAfp;

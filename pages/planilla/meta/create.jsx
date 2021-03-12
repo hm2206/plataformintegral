@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
-import { Form, Button, Select } from 'semantic-ui-react'
+import { Form, Button } from 'semantic-ui-react'
 import { handleErrorRequest, unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';

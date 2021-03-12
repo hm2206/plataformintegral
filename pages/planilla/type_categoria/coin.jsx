@@ -1,8 +1,8 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, parseOptions, Confirm } from '../../../services/utils';
+import { BtnBack } from '../../../components/Utils';
+import { Confirm } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select, List } from 'semantic-ui-react'
+import { Form, Button, List } from 'semantic-ui-react'
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
@@ -11,6 +11,8 @@ import { AUTHENTICATE } from '../../../services/auth';
 import atob from 'atob';
 import Skeleton from 'react-loading-skeleton';
 import { AppContext } from '../../../contexts/AppContext';
+import BoardSimple from '../../../components/boardSimple';
+import NotFoundData from '../../../components/notFoundData';
 
 const PlaceholderInput = ({ height = '38px' }) => <Skeleton height={height}/>
 
@@ -38,6 +40,9 @@ const PlaceholderCategorias = () => {
 }
 
 const  CoinTypeCategoria = ({ success, query, pathname, type_categoria }) => {
+
+    // validar datos
+    if (!success) return <NotFoundData/>
 
     // app
     const app_context = useContext(AppContext);
@@ -154,12 +159,15 @@ const  CoinTypeCategoria = ({ success, query, pathname, type_categoria }) => {
 
         return (
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Configurar Pago de Tip. Categoría
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
+                <BoardSimple
+                    title="Tip. Categoría"
+                    info={["Configurar Pago de Tip. Categoría"]}
+                    prefix={<BtnBack/>}
+                    bg="light"
+                    options={[]}
+                >
+                    <Form className="card-body">
+                        <div className="row justify-content-center">
                             <div className="col-md-10">
                                 <div className="row justify-content-start">
                                     <div className="col-md-8 mb-3">
@@ -328,9 +336,9 @@ const  CoinTypeCategoria = ({ success, query, pathname, type_categoria }) => {
                                     </Show>
                                 </div>
                             </div>
-                        </Form>
-                    </div>
-                </Body>
+                        </div>
+                    </Form>
+                </BoardSimple>
             </div>
     )
 }

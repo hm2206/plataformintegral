@@ -4,12 +4,12 @@ import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
-import { AUTHENTICATE, AUTH } from '../../../services/auth';
-import Show from '../../../components/show';
+import { AUTHENTICATE } from '../../../services/auth';
 import { Confirm } from '../../../services/utils';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
+import BoardSimple from '../../../components/boardSimple';
 
 const TypeSindicato = ({ success, type_sindicatos, query }) => {
 
@@ -65,101 +65,107 @@ const TypeSindicato = ({ success, type_sindicatos, query }) => {
 
 
     return (
-                <Form className="col-md-12">
-                    <Body>
-                        <Datatable titulo="Lista de Tip. Afiliaciones"
-                        isFilter={false}
-                        headers={
-                            ["#ID", "Descripción", "Tip. Descuento", "Monto", "Porcentaje", "Estado"]
-                        }
-                        index={
-                            [
-                                {
-                                    key: "id",
-                                    type: "text"
-                                }, 
-                                {
-                                    key: "nombre",
-                                    type: "text"
-                                },
-                                {
-                                    key: "type_descuento.descripcion",
-                                    type: "icon",
-                                    bg: "dark",
-                                    justify: "center"
-                                },
-                                {
-                                    key: "monto",
-                                    type: "text"
-                                },
-                                {
-                                    key: "porcentaje",
-                                    type: "text"
-                                },
-                                {
+        <Form className="col-md-12">
+            <BoardSimple
+                title="Tip. Afiliaciones"
+                info={["Lista de Tip. Afiliaciones"]}
+                prefix="A"
+                bg="danger"
+                options={[]}
+            >
+                <Datatable
+                    isFilter={false}
+                    headers={
+                        ["#ID", "Descripción", "Tip. Descuento", "Monto", "Porcentaje", "Estado"]
+                    }
+                    index={
+                        [
+                            {
+                                key: "id",
+                                type: "text"
+                            }, 
+                            {
+                                key: "nombre",
+                                type: "text"
+                            },
+                            {
+                                key: "type_descuento.descripcion",
+                                type: "icon",
+                                bg: "dark",
+                                justify: "center"
+                            },
+                            {
+                                key: "monto",
+                                type: "text"
+                            },
+                            {
+                                key: "porcentaje",
+                                type: "text"
+                            },
+                            {
+                                key: "estado",
+                                type: "switch",
+                                justify: "center",
+                                is_true: "Activo",
+                                is_false: "Eliminado"
+                            }
+                        ]
+                    }
+                    options={
+                        [
+                            {
+                                key: "edit",
+                                icon: "fas fa-pencil-alt",
+                                title: "Editar Tip. Afiliación",
+                                rules: {
                                     key: "estado",
-                                    type: "switch",
-                                    justify: "center",
-                                    is_true: "Activo",
-                                    is_false: "Eliminado"
+                                    value: 1
                                 }
-                            ]
-                        }
-                        options={
-                            [
-                                {
-                                    key: "edit",
-                                    icon: "fas fa-pencil-alt",
-                                    title: "Editar Tip. Afiliación",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
-                                }, 
-                                {
-                                    key: "restore",
-                                    icon: "fas fa-sync",
-                                    title: "Restaurar Tip. Afiliación",
-                                    rules: {
-                                        key: "estado",
-                                        value: 0
-                                    }
-                                }, 
-                                {
-                                    key: "delete",
-                                    icon: "fas fa-times",
-                                    title: "Eliminar Tip. Afiliación",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
+                            }, 
+                            {
+                                key: "restore",
+                                icon: "fas fa-sync",
+                                title: "Restaurar Tip. Afiliación",
+                                rules: {
+                                    key: "estado",
+                                    value: 0
                                 }
-                            ]
-                        }
-                        optionAlign="text-center"
-                        getOption={getOption}
-                        data={type_sindicatos.data || []}
-                    />
-                </Body>
-
+                            }, 
+                            {
+                                key: "delete",
+                                icon: "fas fa-times",
+                                title: "Eliminar Tip. Afiliación",
+                                rules: {
+                                    key: "estado",
+                                    value: 1
+                                }
+                            }
+                        ]
+                    }
+                    optionAlign="text-center"
+                    getOption={getOption}
+                    data={type_sindicatos.data || []}
+                />
+                {/* paginate */}
                 <div className="table-responsive text-center">
                     <Pagination
-                        activePage={query.page}
+                        activePage={query.page || 1}
                         onPageChange={handlePage}
                         totalPages={type_sindicatos.lastPage || 1}
                     />
                 </div>
+            </BoardSimple>
 
-                <BtnFloat
-                    onClick={async (e) => {
-                        let { pathname, push } = Router;
-                        push({ pathname: `${pathname}/create` });
-                    }}
-                >
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
-            </Form>
-        )
+            <BtnFloat
+                onClick={async (e) => {
+                    let { pathname, push } = Router;
+                    push({ pathname: `${pathname}/create` });
+                }}
+            >
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
+        </Form>
+    )
 }
 
 // server rendering

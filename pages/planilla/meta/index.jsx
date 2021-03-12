@@ -13,7 +13,7 @@ import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 
 
-const Meta = ({ success, metas, query }) => {
+const Meta = ({ pathname, success, metas, query }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -96,6 +96,14 @@ const Meta = ({ success, metas, query }) => {
         query.year = year;
         query.estado = estado;
         await push({ pathname, query });
+    }
+
+    // crear meta
+    const handleCreate = async () => {
+        let { push } = Router;
+        let newQuery = {};
+        newQuery.href = btoa(`${location.href}`)
+        push({ pathname: `${pathname}/create`, query: newQuery });
     }
 
     // render 
@@ -225,12 +233,7 @@ const Meta = ({ success, metas, query }) => {
                 </div>
             </BoardSimple>
 
-            <BtnFloat
-                onClick={async (e) => {
-                    let { pathname, push } = Router;
-                    push({ pathname: `${pathname}/create` });
-                }}
-            >
+            <BtnFloat onClick={handleCreate}>
                 <i className="fas fa-plus"></i>
             </BtnFloat>
         </Form>
@@ -239,16 +242,16 @@ const Meta = ({ success, metas, query }) => {
 
 // server rending
 Meta.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
+    AUTHENTICATE(ctx);
     let { query } = ctx;
     query.page = typeof query.page != 'undefined' ? query.page : 1;
     query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
     query.year = typeof query.year != 'undefined' ? query.year : new Date().getFullYear();
     let { success, metas } = await unujobs.get(`meta?page=${query.page}&estado=${query.estado}&year=${query.year}`, {}, ctx)
         .then(res => res.data)
-        .catch(err =>  ({ success: false }));
+        .catch(err =>  ({ success: false, metas: {} }));
     // response
-    return { success, metas: metas || {}, query };
+    return { pathname, success, metas: metas || {}, query };
 }
 
 

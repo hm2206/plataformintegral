@@ -1,117 +1,97 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, parseOptions } from '../../../services/utils';
+import React, { useState, useContext, useEffect } from 'react';
+import { BtnBack } from '../../../components/Utils';
+import { Confirm } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select, Checkbox } from 'semantic-ui-react'
-import { unujobs } from '../../../services/apis';
+import { Form, Button, Select } from 'semantic-ui-react'
+import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
+import { SelectTypeDescuento } from '../../../components/select/cronograma';
+import { AUTHENTICATE } from '../../../services/auth';
+import BoardSimple from '../../../components/boardSimple';
+import ContentControl from '../../../components/contentControl';
+import { AppContext } from '../../../contexts/AppContext';
+import atob  from 'atob';
+import NotFoundData from '../../../components/notFoundData';
 
 
-export default class EditTypeSindicato extends Component
-{
+const EditTypeSindicato = ({ pathname, query, success, type_sindicato }) => {
+    
+    // verificar
+    if (!success) return <NotFoundData/>
 
-    static getInitialProps = (ctx) => {
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    // app
+    const app_context = useContext(AppContext);
+    
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [edit, setEdit] = useState(false);
+
+    // manejar estado del form
+    const handleInput = ({ name, value }, obj = 'form') => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
+        setEdit(true);
     }
 
-    state = {
-        loading: false,
-        edit: false,
-        type_descuentos: [],
-        old: {},
-        form: {
-            modo: 0
-        },
-        errors: {}
-    }
-
-    componentDidMount = async () => {
-        this.getTypeDescuento();
-        await this.findTypeSindicato();
-    }
-
-    findTypeSindicato = async () => {
-        this.setState({ loading: true });
-        let { query } = this.props;
-        let id = query.id ? atob(query.id) : '__error';
-        await unujobs.get(`type_sindicato/${id}`)
-        .then(res => this.setState({ form: res.data, old: res.data }))
-        .catch(err => this.setState({ form: {}, old: {} }));
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors, edit: true };
-        });
-    }
-
-    getTypeDescuento = async () => {
-        this.setState({ loading: true });
-        await unujobs.get('type_descuento?paginate=0')
-        .then(res => this.setState({ type_descuentos: res.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
-
-    save = async () => {
-        this.setState({ loading: true });
-        let { form } = this.state;
-        form._method = 'PUT';
-        await unujobs.post(`type_sindicato/${form.id}`, form)
+    // guardar datos
+    const save = async () => {
+        let answer = await Confirm("warning", "¿Estás seguro en guardar los datos?", "Estoy seguro");
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        let payload = Object.assign({}, form);
+        payload._method = 'PUT';
+        await unujobs.post(`type_sindicato/${type_sindicato.id}`, payload)
         .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) this.setState(state => ({ old: state.form, errors: {}, edit: false }));
+            app_context.setCurrentLoading(false)
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            await Router.push(location.href);
+            setErrors({});
+            setEdit(false);
         })
-        .catch(async err => {
-            try {
-                let { data } = err.response
-                let { message, errors } = data;
-                this.setState({ errors });
-            } catch (error) {
-                await Swal.fire({ icon: 'error', text: 'Algo salió mal' });
-            }
-        });
-        this.setState({ loading: false });
+        .catch(async err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
-    render() {
+    // obtener el object
+    useEffect(() => {
+        if (!edit) setForm(Object.assign({}, type_sindicato));
+    }, [edit]);
 
-        let { pathname, query } = this.props;
-        let { form, errors, edit } = this.state;
-
-        return (
+    // renderizar
+    return (
+        <>
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Tip. Afiliación
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
-                            <div className="col-md-10">
+                <BoardSimple
+                    title="Tip. Afiliación"
+                    info={["Editar Tip. Afiliación"]}
+                    prefix={<BtnBack/>}
+                    bg="light"
+                    options={[]}
+                >
+                    <Form className="card-body mt-4">
+                        <div className="row justify-content-center">
+                            <div className="col-md-8">
                                 <div className="row justify-content-end">
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.nombre && errors.nombre[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.nombre && errors.nombre[0] ? true : false}>
                                             <label htmlFor="">Descripción</label>
                                             <input type="text"
                                                 placeholder="Ingrese una descripción"
                                                 name="nombre"
                                                 value={form.nombre || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                disabled
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.nombre && errors.nombre[0]}</label>  
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-3">
+                                    <div className="col-md-6 mb-3">
                                         <Form.Field>
                                             <label htmlFor="">Modo</label>
                                             <Select
@@ -122,88 +102,95 @@ export default class EditTypeSindicato extends Component
                                                 ]}
                                                 value={form.is_porcentaje ? true : false}
                                                 name="is_porcentaje"
-                                                onChange={(e, obj) => this.handleInput(obj)}
-                                                disabled={this.state.loading}
+                                                onChange={(e, obj) => handleInput({ name: obj.name, value: obj.value ? 1 : 0 })}
                                             />
                                         </Form.Field>
                                     </div>
 
-                                    <Show condicion={form && !form.is_porcentaje}>
-                                        <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.monto && errors.monto[0]}>
+                                    <Show condicion={!form.is_porcentaje}>
+                                        <div className="col-md-6 mb-3">
+                                            <Form.Field error={errors && errors.monto && errors.monto[0] ? true : false}>
                                                 <label htmlFor="">Monto</label>
                                                 <input type="number"
                                                     placeholder="Ingrese el monto"
                                                     name="monto"
                                                     value={form.monto || ""}
-                                                    onChange={(e) => this.handleInput(e.target)}
-                                                    disabled={this.state.loading}
+                                                    onChange={(e) => handleInput(e.target)}
                                                 />
                                                 <label>{errors && errors.monto && errors.monto[0]}</label> 
                                             </Form.Field>
                                         </div>
                                     </Show>
 
-                                    <Show condicion={form && form.is_porcentaje}>
-                                        <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.porcentaje && errors.porcentaje[0]}>
+                                    <Show condicion={form.is_porcentaje}>
+                                        <div className="col-md-6 mb-3">
+                                            <Form.Field error={errors && errors.porcentaje && errors.porcentaje[0] ? true : false}>
                                                 <label htmlFor="">Porcentaje</label>
                                                 <input type="number"
                                                     placeholder="Ingrese el porcentaje"
                                                     name="porcentaje"
                                                     value={form.porcentaje || ""}
-                                                    onChange={(e) => this.handleInput(e.target)}
-                                                    disabled={this.state.loading}
+                                                    onChange={(e) => handleInput(e.target)}
                                                 />
                                                 <label>{errors && errors.porcentaje && errors.porcentaje[0]}</label> 
                                             </Form.Field>
                                         </div>
                                     </Show>
 
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.type_descuento_id && errors.type_descuento_id[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors && errors.type_descuento_id && errors.type_descuento_id[0] ? true : false}>
                                             <label htmlFor="">Descuento</label>
-                                            <Select
-                                                disabled
-                                                placeholder="Select. Descripcion Descuento"
-                                                options={parseOptions(this.state.type_descuentos, ["sel-descripcion", "", "Select. Descripcion"], ["id", "id", "descripcion"])}
+                                            <SelectTypeDescuento
                                                 value={form.type_descuento_id || ""}
                                                 name="type_descuento_id"
-                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                onChange={(e, obj) => handleInput(obj)}
                                             />
                                             <label>{errors && errors.type_descuento_id && errors.type_descuento_id[0]}</label>  
                                         </Form.Field>
                                     </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-4 text-right">
-                                        <Show condicion={edit}>
-                                            <Button color="red"
-                                                disabled={this.state.loading}
-                                                onClick={(e) => this.setState(state => ({ errors: {}, edit: false, form: state.old }))}
-                                            >
-                                                <i className="fas fa-times"></i> Cancelar
-                                            </Button>
-                                        </Show>
-                                        
-                                        <Button color="teal"
-                                            disabled={!edit || this.state.loading}
-                                            loading={this.state.loading}
-                                            onClick={this.save}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
-                                    </div>
                                 </div>
                             </div>
-                        </Form>
-                    </div>
-                </Body>
+                        </div>
+                    </Form>
+                </BoardSimple>
             </div>
-        )
-    }
-    
+            {/* panel de control */}
+            <Show condicion={edit}>
+                <ContentControl>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="red"
+                            onClick={(e) => setEdit(false)}
+                        >
+                            <i className="fas fa-times"></i> Cancelar
+                        </Button>
+                    </div>
+
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="blue"
+                            onClick={save}
+                        >
+                            <i className="fas fa-sync"></i> Actualizar
+                        </Button>
+                    </div>
+                </ContentControl>
+            </Show>
+        </>
+    )
 }
+
+// server
+EditTypeSindicato.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let {pathname, query } = ctx;
+    // request 
+    let id = atob(query.id) || '__error';
+    let { success, type_sindicato } = await unujobs.get(`type_sindicato/${id}`, {}, ctx)
+        .then(res => res.data)
+        .catch(err => ({ success: false, type_sindicato: {} }));
+    return { query, pathname, success, type_sindicato }
+}
+
+// exportar
+export default EditTypeSindicato;

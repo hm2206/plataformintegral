@@ -1,144 +1,144 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl } from '../../../services/utils';
-import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
-import { unujobs } from '../../../services/apis';
+import React, { useContext, useState } from 'react';
+import { BtnBack } from '../../../components/Utils';
+import { AUTHENTICATE } from '../../../services/auth';
+import { Confirm } from '../../../services/utils' 
+import { Form, Button } from 'semantic-ui-react'
+import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
+import { AppContext } from '../../../contexts';
+import ContentControl from '../../../components/contentControl';
+import BoardSimple from '../../../components/boardSimple';
 
 
-export default class CreateTypeCategoria extends Component
-{
+const CreateTypeCategoria = ({ pathname, query }) => {
 
-    static getInitialProps = (ctx) => {
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    // app
+    const app_context = useContext(AppContext);
+
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+
+    // manejar estado del form
+    const handleInput = ({ name, value }, obj = 'form') => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-    state = {
-        loading: false,
-        form: {},
-        errors: {}
-    }
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors };
-        });
-    }
-
-    save = async () => {
-        this.props.fireLoading(true);
-        await unujobs.post('type_categoria', this.state.form)
+    // guardar datos
+    const save = async () => {
+        let answer = await Confirm("warning", "¿Estás seguro en guardar los datos?", "Estoy seguro");
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        await unujobs.post('type_categoria', form)
         .then(async res => {
-            this.props.fireLoading(false);
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) this.setState({ form: {}, errors: {} })
+            app_context.setCurrentLoading(false)
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            setForm({});
+            setErrors({});
         })
-        .catch(async err => {
-            try {
-                this.props.fireLoading(false);
-                let { data } = err.response
-                let { message, errors } = data;
-                this.setState({ errors });
-            } catch (error) {
-                await Swal.fire({ icon: 'error', text: 'Algo salió mal' });
-            }
-        });
-        this.setState({ loading: false });
+        .catch(async err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
-    render() {
-
-        let { pathname, isLoading } = this.props;
-        let { form, errors } = this.state;
-
-        return (
+    // renderizado
+    return (
+        <>
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Tip. Categoría
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
-                            <div className="col-md-10">
+                <BoardSimple
+                    title="Tip. Categoría"
+                    info={["Crear Tip. Categoría"]}
+                    prefix={<BtnBack/>}
+                    bg="light"
+                    options={[]}
+                >
+                    <Form className="card-body mt-4">
+                        <div className="row justify-content-center">
+                            <div className="col-md-8">
                                 <div className="row justify-content-end">
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field  error={errors && errors.descripcion && errors.descripcion[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field  error={errors.descripcion && errors.descripcion[0] ? true : false}>
                                             <label htmlFor="">Descripción</label>
                                             <input type="text"
                                                 placeholder="Ingrese una descripción"
                                                 name="descripcion"
                                                 value={form.descripcion || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
-                                            <label>{errors && errors.descripcion && errors.descripcion[0]}</label>  
+                                            <label>{errors.descripcion && errors.descripcion[0]}</label>  
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.dedicacion && errors.dedicacion[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors.dedicacion && errors.dedicacion[0] ? true : false}>
                                             <label htmlFor="">Dedicación</label>
                                             <input type="text"
                                                 placeholder="Ingrese la dedicación"
                                                 name="dedicacion"
                                                 value={form.dedicacion || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
-                                            <label>{errors && errors.dedicacion && errors.dedicacion[0]}</label>  
+                                            <label>{errors.dedicacion && errors.dedicacion[0]}</label>  
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.export_key && errors.export_key[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors.export_key && errors.export_key[0] ? true : false}>
                                             <label htmlFor="">Export Key Plame</label>
                                             <input type="text"
                                                 placeholder="Ingrese la clave para exportar el txt PLAME. Ejm 07"
                                                 name="export_key"
                                                 value={form.export_key || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
-                                            <label>{errors && errors.export_key && errors.export_key[0]}</label> 
+                                            <label>{errors.export_key && errors.export_key[0]}</label> 
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.export_value && errors.export_value[0]}>
+                                    <div className="col-md-6 mb-3">
+                                        <Form.Field error={errors.export_value && errors.export_value[0] ? true : false}>
                                             <label htmlFor="">Export Value Plame</label>
                                             <input type="text"
                                                 placeholder="Ingrese el valor de exportación del txt PLAME. Ejm 0002"
                                                 name="export_value"
                                                 value={form.export_value || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
-                                            <label>{errors && errors.export_value && errors.export_value[0]}</label>
+                                            <label>{errors.export_value && errors.export_value[0]}</label>
                                         </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-2">
-                                        <Button color="teal" fluid
-                                            disabled={isLoading}
-                                            onClick={this.save}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
                                     </div>
                                 </div>
                             </div>
-                        </Form>
-                    </div>
-                </Body>
+                        </div>
+                    </Form>
+                </BoardSimple>
             </div>
-        )
-    }
-    
+            {/* panel de control */}
+            <ContentControl>
+                <div className="col-lg-2 col-6">
+                    <Button fluid 
+                        color="teal"
+                        onClick={save}
+                    >
+                        <i className="fas fa-save"></i> Guardar
+                    </Button>
+                </div>
+            </ContentControl>
+        </>
+    )
 }
+
+// server
+CreateTypeCategoria.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let {pathname, query } = ctx;
+    // responser
+    return { pathname, query };
+}
+
+// exportar
+export default CreateTypeCategoria;
