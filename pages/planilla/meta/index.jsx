@@ -24,11 +24,13 @@ const Meta = ({ success, metas, query }) => {
 
     // optener opciones
     const getOption = async (obj, key, index) => {
-        let {pathname, push} = Router;
-        let id = btoa(obj.id);
+        let { push } = Router;
         switch (key) {
             case 'edit':
-                await push({pathname: `${pathname}/${key}`, query: { id }});
+                let newQuery =  {};
+                newQuery.id = btoa(obj.id);
+                newQuery.href = btoa(location.href);
+                await push({ pathname: `${pathname}/${key}`, query: newQuery });
                 break;
             case 'delete':
                 await changedState(obj, 0);

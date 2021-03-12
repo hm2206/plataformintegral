@@ -1,131 +1,117 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl } from '../../../services/utils';
+import React, { useContext, useState, useEffect } from 'react';
+import { BtnBack } from '../../../components/Utils';
+import { Confirm } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select, Checkbox } from 'semantic-ui-react'
-import { unujobs } from '../../../services/apis';
+import { Form, Button, Checkbox } from 'semantic-ui-react'
+import { handleErrorRequest, unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
-import atob from 'atob';
-import Show from '../../../components/show';
+import ContentControl from '../../../components/contentControl';
 import { AUTHENTICATE } from '../../../services/auth';
+import BoardSimple from '../../../components/boardSimple';
+import { AppContext } from '../../../contexts';
+import Show from '../../../components/show';
+import atob from 'atob'
+import NotFoundData from '../../../components/notFoundData'
 
 
-export default class EditTypeRemuneracion extends Component
-{
+const EditTypeRemuneracion = ({ pathname, query, success, type_remuneracion }) => {
+    
+    // validar data
+    if (!success) return <NotFoundData/>
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    // app
+    const app_context = useContext(AppContext);
+
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [edit, setEdit] = useState(false);
+
+    // manejar estados
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
+        setEdit(true);
     }
 
-    state = {
-        loading: false,
-        edit: false,
-        old: {},
-        form: { 
-            base: 0,
-            bonificacion: 0
-        },
-        errors: {}
-    }
-
-    componentWillMount = async () => {
-        await this.findTypeRemuneracion();
-    }
-
-    findTypeRemuneracion = async () => {
-        let { query } = this.props;
-        let id = query.id ? atob(query.id) : "__error";
-        this.setState({ loading: true });
-        await unujobs.get(`type_remuneracion/${id}`)
-        .then(res => this.setState({ form: res.data, old: res.data }))
-        .catch(err => this.setState({ form: {} }));
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors, edit: true };
-        });
-    }
-
-    save = async () => {
-        this.setState({ loading: true });
-        let { form } = this.state;
-        form._method = 'PUT';
-        await unujobs.post(`type_remuneracion/${form.id}`, form)
+    // guardar datos
+    const save = async () => {
+        let answer = await Confirm("warning", "¿Estás seguro en guardar los cambios?", "Estoy seguro");
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        let payload = Object.assign({}, form);
+        payload._method = 'PUT';
+        await unujobs.post(`type_remuneracion/${type_remuneracion.id}`, payload)
         .then(async res => {
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) this.setState(state => ({ old: state.form, errors: {}, edit: false }));
+            if (!success) throw  new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            await Router.push(location.href);
+            setErrors({});
+            setEdit(false);
         })
-        .catch(async err => {
-            try {
-                let { data } = err.response
-                let { message, errors } = data;
-                this.setState({ errors });
-            } catch (error) {
-                await Swal.fire({ icon: 'error', text: 'Algo salió mal' });
-            }
-        });
-        this.setState({ loading: false });
+        .catch(async err => handleErrorRequest(err, setErrors, app_context.setCurrentLoading(false)));
     }
 
-    render() {
+    // obtener el object
+    useEffect(() => {
+        if (!edit) setForm(Object.assign({}, type_remuneracion));
+    }, [edit]);
 
-        let { pathname, query } = this.props;
-        let { form, errors } = this.state;
-
-        return (
+    // renderizado
+    return (
+        <>
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Tip. Remuneración
-                    </div>
-                    <div className="card-body">
+                <BoardSimple
+                    title="Tip. Remuneración"
+                    info={["Crear Tip. Remuneración"]}
+                    prefix={<BtnBack/>}
+                    bg="light"
+                    options={[]}
+                >
+                    <div className="card-body mt-4">
                         <Form className="row justify-content-center">
                             <div className="col-md-10">
                                 <div className="row justify-content-end">
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.key && errors.key[0]}>
+                                        <Form.Field error={errors && errors.key && errors.key[0] ? true : false}>
                                             <label htmlFor="">ID-MANUAL <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese un identificador único"
                                                 name="key"
-                                                disabled
                                                 value={form.key || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.key && errors.key[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.descripcion && errors.descripcion[0]}>
+                                        <Form.Field error={errors && errors.descripcion && errors.descripcion[0] ? true : false}>
                                             <label htmlFor="">Descripción <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese una descripción"
                                                 name="descripcion"
                                                 value={form.descripcion || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.descripcion && errors.descripcion[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.alias && errors.alias[0]}>
+                                        <Form.Field error={errors && errors.alias && errors.alias[0] ? true : false}>
                                             <label htmlFor="">Alias <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese una descripción corta(Alias)"
                                                 name="alias"
                                                 value={form.alias || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.alias && errors.alias[0]}</label>
                                         </Form.Field>
@@ -138,7 +124,7 @@ export default class EditTypeRemuneracion extends Component
                                                 placeholder="Ingrese una extensión presupuestal(Opcional)"
                                                 name="ext_pptto"
                                                 value={form.ext_pptto || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                         </Form.Field>
                                     </div>
@@ -146,56 +132,73 @@ export default class EditTypeRemuneracion extends Component
                                     <div className="col-md-4 mb-3">
                                         <Form.Field>
                                             <label htmlFor="">¿Aplica a la Base Imponible?</label>
-                                            <Checkbox toggle
-                                                name="base"
-                                                checked={form.base ? false : true}
-                                                disabled={this.state.loading}
-                                                onChange={(e, obj) => this.handleInput({ name: obj.name, value: obj.checked ? 0 : 1 })}
-                                            />
+                                            <div>
+                                                <Checkbox toggle
+                                                    name="base"
+                                                    checked={form.base ? false : true}
+                                                    onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 0 : 1 })}
+                                                />
+                                            </div>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
                                         <Form.Field>
                                             <label htmlFor="">¿Es una Bonificación/Gratificación?</label>
-                                            <Checkbox toggle
-                                                name="bonificacion"
-                                                checked={form.bonificacion ? true : false}
-                                                disabled={this.state.loading}
-                                                onChange={(e, obj) => this.handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
-                                            />
+                                            <div>
+                                                <Checkbox toggle
+                                                    name="bonificacion"
+                                                    checked={form.bonificacion ? true : false}
+                                                    onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
+                                                />
+                                            </div>
                                         </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-4 text-right">
-                                        <Show condicion={this.state.edit}>
-                                            <Button color="red"
-                                                disabled={this.state.loading}
-                                                onClick={(e) => this.setState(state => ({ edit: false, form: state.old, errors: {} }))}
-                                            >
-                                                <i className="fas fa-times"></i> Cancelar
-                                            </Button>
-                                        </Show>
-
-                                        <Button color="teal"
-                                            loading={this.state.loading}
-                                            onClick={this.save}
-                                            disabled={!this.state.edit || this.state.loading}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
                                     </div>
                                 </div>
                             </div>
                         </Form>
                     </div>
-                </Body>
+                </BoardSimple>
             </div>
-        )
-    }
-    
+            {/* panel de control */}
+            <Show condicion={edit}>
+                <ContentControl>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="red"
+                            onClick={(e) => setEdit(false)}
+                        >
+                            <i className="fas fa-times"></i> Cancelar
+                        </Button>
+                    </div>
+
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="blue"
+                            onClick={save}
+                        >
+                            <i className="fas fa-sync"></i> Actualizar
+                        </Button>
+                    </div>
+                </ContentControl>
+            </Show>
+        </>
+    )
 }
+
+// server
+EditTypeRemuneracion.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // get id
+    let id = atob(query.id || "") || "_error";
+    // request
+    let { success, type_remuneracion } = await unujobs.get(`type_remuneracion/${id}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({ success: false, type_remuneracion: {} }));
+    // responser
+    return { pathname, query, success, type_remuneracion };
+}
+
+// exportar
+export default EditTypeRemuneracion;

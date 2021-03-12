@@ -11,7 +11,7 @@ import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 
-const TypeAportacion = ({ query, success, type_aportaciones }) => {
+const TypeAportacion = ({ pathname, query, success, type_aportaciones }) => {
 
     // contexto
     const app_context = useContext(AppContext);
@@ -25,12 +25,14 @@ const TypeAportacion = ({ query, success, type_aportaciones }) => {
 
     // obtener opciones
     const getOption = async (obj, key, index) => {
-        let { pathname, push } = Router;
-        let id = btoa(`${obj.id || ""}`);
+        let { push } = Router;
         switch (key) {
             case 'edit':
             case 'config_max':
-                await push({ pathname: `${pathname}/${key}`, query: { id } });
+                let newQuery =  {};
+                newQuery.id = btoa(obj.id);
+                newQuery.href = btoa(location.href);
+                await push({ pathname: `${pathname}/${key}`, query: newQuery });
                 break;
             case 'delete':
                 await changedState(obj, 0);
@@ -43,6 +45,7 @@ const TypeAportacion = ({ query, success, type_aportaciones }) => {
         }
     }
 
+    // cambiar estado
     const changedState = async (obj, estado = 1) => {
         let answer = await Confirm("warning", `¿Deseas ${estado ? 'restaurar' : 'desactivar'} el Tip. Aportación "${obj.descripcion}"?`);
         if (answer) {
@@ -59,6 +62,14 @@ const TypeAportacion = ({ query, success, type_aportaciones }) => {
                 Swal.fire({ icon: 'error', text: err.message })
             });
         }
+    }
+
+    // crear aportacion
+    const handleCreate = async () => {
+        let { push } = Router;
+        let newQuery = {};
+        newQuery.href = btoa(`${location.href}`)
+        push({ pathname: `${pathname}/create`, query: newQuery });
     }
 
     return (
@@ -162,10 +173,7 @@ const TypeAportacion = ({ query, success, type_aportaciones }) => {
             </div>
 
             <BtnFloat
-                onClick={async (e) => {
-                    let { pathname, push } = Router;
-                    push({ pathname: `${pathname}/create` });
-                }}
+                onClick={handleCreate}
             >
                 <i className="fas fa-plus"></i>
             </BtnFloat>
