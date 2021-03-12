@@ -1,5 +1,5 @@
 import React from 'react';
-import AppIconCube from './AppIconCube';
+import AppIconCube from './appIconCube';
 
 
 const VerificarAuthentication = () => {
