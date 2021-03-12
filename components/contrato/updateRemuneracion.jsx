@@ -79,16 +79,16 @@ const UpdateRemuneracion = ({ info, edit, onUpdate }) => {
     const deleteConfig = async (id) => {
         let value = await Confirm("warning", "¿Desea elimnar la remuneración?", "Confirmar")
         if (value) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`info/${info.id}/delete_config`, { _method: 'DELETE', config_id: id })
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
                     await getConfig();
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     Swal.fire({ icon: 'error', text: err.message });
                 });
             }
@@ -98,20 +98,20 @@ const UpdateRemuneracion = ({ info, edit, onUpdate }) => {
     const updateConfig = async () => {
         let answer = await Confirm('warning', `¿Deseas actualizar la configuración?`, 'Confirmar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let form = new FormData;
             form.append('configs', JSON.stringify(configs));
             form.append('_method', 'PUT');
             await unujobs.post(`info/${info.id}/config`, form)
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
                     setOld(configs);
                     if (typeof onUpdate == 'function') onUpdate();
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     Swal.fire({ icon: 'error', text: err.message })
                 })
         }

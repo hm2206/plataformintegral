@@ -70,14 +70,14 @@ const IndexTypeTramite = ({ pathname, query, success, tramite_type }) => {
     const changedState = async (obj, state = 1) => {
         let answer = await Confirm("warning", `¿Deseas ${state ? 'restaurar' : 'desactivar'} el Tip. Trámite "${obj.description}"?`);
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await tramite.post(`tramite_type/${obj.id}/state?_method=PUT`, { state })
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             handleSearch();
-        }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
+        }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
     // renderizar

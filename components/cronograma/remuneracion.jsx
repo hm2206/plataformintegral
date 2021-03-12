@@ -101,10 +101,10 @@ const Remuneracion = () => {
         // valdiar que se modificarón los datos
         if (!datos.length)  await Swal.fire({ icon: 'warning', text: 'No se encontraron cambios' });
         // send changes
-        else {app_context.fireLoading(true);
+        else {app_context.setCurrentLoading(true);
             await unujobs.post(`remuneracion/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -112,7 +112,7 @@ const Remuneracion = () => {
                 await findRemuneracion();
             })
             .catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
         }   

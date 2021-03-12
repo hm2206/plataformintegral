@@ -27,6 +27,9 @@ const Ficha = () => {
     // app
     const app_context = useContext(AppContext);
 
+    // entity
+    const entity_context = useContext(EntityContext);
+
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
     const [option, setOption] = useState("");
@@ -39,7 +42,8 @@ const Ficha = () => {
 
     // setting
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: fales });
     }, []);
 
     const getAdd = async (obj) => {
@@ -52,15 +56,15 @@ const Ficha = () => {
     const getFicha = async () => {
         let form = new FormData;
         await argumentos.map(par => form.append('argumentos[]', par));
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await escalafon.post(`report/ficha_escalafonaria/${info.id}?is_pdf=0`, form, { responseType: 'blob' })
             .then(res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let blob = new Blob([res.data], { type: 'text/html' });
                 let link = URL.createObjectURL(blob);
                 setPdf(link);
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
             

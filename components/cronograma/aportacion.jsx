@@ -87,14 +87,14 @@ const Aportacion = () => {
     const createAportacion = async () => {
         let answer = await Confirm("warning", `¿Deseas agregar la aportación de empleador?`, 'Aceptar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             setBlock(true);
             await unujobs.post('aportacion', {
                 historial_id: historial.id,
                 type_aportacion_id: form.type_aportacion_id || ""
             })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -102,7 +102,7 @@ const Aportacion = () => {
                 setEdit(false);
             })
             .catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
             setBlock(false);
@@ -113,11 +113,11 @@ const Aportacion = () => {
     const deleteAportacion = async (id, index) => {
         let answer = await Confirm("warning", `¿Deseas elminar la aportacion del empleador?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             setBlock(true);
             await unujobs.post(`aportacion/${id}`, { _method: "DELETE" })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -127,7 +127,7 @@ const Aportacion = () => {
                 setOld(JSON.parse(JSON.stringify(newAportaciones)));
                 setEdit(false);
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message });
             });
             setBlock(false);

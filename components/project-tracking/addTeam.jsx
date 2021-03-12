@@ -45,13 +45,13 @@ const AddTeam = (props) => {
     const createTeam = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, form);
             datos.person_id = person.id;
             datos.project_id = project.id;
             await projectTracking.post(`team`, datos)
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     await Swal.fire({ icon: 'success', text: message });
                     setPerson({});
@@ -59,7 +59,7 @@ const AddTeam = (props) => {
                     if (typeof props.onCreate == 'function') props.onCreate();
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { errors, message } = err.response.data;
                         Swal.fire({ icon: 'warning', text: message });
                         setErrors(errors);

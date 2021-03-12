@@ -79,17 +79,17 @@ const FooterCronograma = () => {
     const sendEmail = async () => {
         let answer = await Confirm("warning", `¿Deseas enviar la boleta a su correo?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             setBlock(true);
             await unujobs.post(`historial/${historial.id}/send_boleta`)
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
             }).catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = err.response.data;
                     Swal.fire({ icon: 'error', text: message });
                 } catch (error) {

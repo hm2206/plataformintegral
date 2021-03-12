@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
 import { BtnBack, funcBack } from '../../../components/Utils';
-import { backUrl, Confirm } from '../../../services/utils';
+import { Confirm } from '../../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
 import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Router from 'next/router';
@@ -12,17 +12,31 @@ import BoardSimple from '../../../components/boardSimple';
 import HeaderCronograma from '../../../components/cronograma/headerCronograma'
 import { AppContext } from '../../../contexts/AppContext';
 import ContentControl from '../../../components/contentControl';
+import { EntityContext } from '../../../contexts/EntityContext';
+import NotFoundData from '../../../components/notFoundData';
 
 const EditCronograma = ({ pathname, query, success, cronograma }) => {
 
+    // validar data
+    if (!success) return <NotFoundData/>
+
     // app
     const app_context = useContext(AppContext);
+    
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
     const [edit, setEdit] = useState(false);
+
+    // handle entity
+    useEffect(() => {
+        entity_context.fireEntity({ render: true, disabled: true });
+        return () => entity_context.fireEntity({ render: false, disabled: false });
+    }, []);
 
     // habilitar edición
     useEffect(() => {
@@ -43,7 +57,7 @@ const EditCronograma = ({ pathname, query, success, cronograma }) => {
     const update = async () => {
         let answer = await Confirm('warning', '¿Estas seguro en guardar los datos?', 'Estoy suguro')
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         let datos = new FormData;
         datos.append('descripcion', form.descripcion || "");
         datos.append('observacion', form.observacion || "");
@@ -52,13 +66,13 @@ const EditCronograma = ({ pathname, query, success, cronograma }) => {
         datos.append('_method', 'PUT');
         await unujobs.post(`cronograma/${cronograma.id}`, datos)
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             await Router.push(location.href);
             setEdit(false);
         })
-        .catch(err => handleErrorRequest(err, setErrors, () => app_context.fireLoading(false)));
+        .catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
     // eliminando cronograma
@@ -66,18 +80,18 @@ const EditCronograma = ({ pathname, query, success, cronograma }) => {
         let answer = await Confirm('warning', `¿Estas seguro en eliminar el cronograma permanentemente?`, 'Eliminar');
         if (!answer) return false;
         let anulado = 0;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         let datos = Object.assign({}, form);
         datos._method  = 'DELETE';
         datos.anulado = anulado;
         await unujobs.post(`cronograma/${cronograma.id}`, datos)
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message })
             let { push } = Router;
             push(funcBack());
-        }).catch(err => handleErrorRequest(err, null,  () => app_context.fireLoading(false)));
+        }).catch(err => handleErrorRequest(err, null,  () => app_context.setCurrentLoading(false)));
     }
 
     // renderizar

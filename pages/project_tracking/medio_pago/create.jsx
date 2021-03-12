@@ -8,17 +8,22 @@ import Router from "next/router";
 import { Button, Form, Checkbox } from "semantic-ui-react";
 import Show from "../../../components/show";
 import Swal from "sweetalert2";
+import { EntityContext } from "../../../contexts/EntityContext";
 
 const CreateMedioPago = () => {
   // app
   const app_context = useContext(AppContext);
+
+  // entity
+  const entity_context = useContext(EntityContext);
 
   // datos
   const [form, setForm] = useState({});
 
   // primera carga
   useEffect(() => {
-    app_context.fireEntity({ render: true });
+    entity_context.fireEntity({ render: true });
+    return () => entity_context.fireEntity({ render: false });
   }, []);
 
   // change form
@@ -32,18 +37,18 @@ const CreateMedioPago = () => {
   const saveMedioPago = async () => {
     let answer = await Confirm("warning", `¿Estas seguro en guardar el Medio de Pago`);
     if (answer) {
-      app_context.fireLoading(true);
+      app_context.setCurrentLoading(true);
       let newForm = Object.assign({}, form);
       await projectTracking
         .post("medio_pago", newForm)
         .then((res) => {
-          app_context.fireLoading(false);
+          app_context.setCurrentLoading(false);
           let { message } = res.data;
           Swal.fire({ icon: "success", text: message });
           setForm({});
         })
         .catch((err) => {
-          app_context.fireLoading(false);
+          app_context.setCurrentLoading(false);
           let { message, errors } = err.response.data;
           Swal.fire({ icon: "warning", text: message });
         })

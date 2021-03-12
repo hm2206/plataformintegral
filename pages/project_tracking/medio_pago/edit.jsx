@@ -9,10 +9,14 @@ import { Button, Form, Checkbox } from "semantic-ui-react";
 import Show from "../../../components/show";
 import Swal from "sweetalert2";
 import atob from "atob";
+import { EntityContext } from "../../../contexts/EntityContext";
 
 const EditMedioPago = ({ success, mediopago }) => {
   // app
   const app_context = useContext(AppContext);
+
+  // entity
+  const entity_context = useContext(EntityContext);
 
   // datos
   const [form, setForm] = useState(mediopago);
@@ -20,7 +24,8 @@ const EditMedioPago = ({ success, mediopago }) => {
 
   // primera carga
   useEffect(() => {
-    app_context.fireEntity({ render: true });
+    entity_context.fireEntity({ render: true });
+    return () => entity_context.fireEntity({ render: false });
   }, []);
 
   // change form
@@ -39,19 +44,19 @@ const EditMedioPago = ({ success, mediopago }) => {
       `¿Estas seguro en guardar el Medio de Pago?`
     );
     if (answer) {
-      app_context.fireLoading(true);
+      app_context.setCurrentLoading(true);
       let newForm = Object.assign({}, form);
       await projectTracking
         .post("medio_pago/" + newForm.id, newForm)
         .then((res) => {
-          app_context.fireLoading(false);
+          app_context.setCurrentLoading(false);
           let { message } = res.data;
           Swal.fire({ icon: "success", text: message });
           // setForm({});
           setdeshabilitar(true);
         })
         .catch((err) => {
-          app_context.fireLoading(false);
+          app_context.setCurrentLoading(false);
           let { message, errors } = err.response.data;
           Swal.fire({ icon: "warning", text: message });
         })

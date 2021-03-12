@@ -28,6 +28,8 @@ import { AUTHENTICATE } from '../../../services/auth';
 import BoardSimple from '../../../components/boardSimple';
 import HeaderCronograma from '../../../components/cronograma/headerCronograma';
 import SyncConfigDescuento from '../../../components/cronograma/syncConfigDescuento'
+import { EntityContext } from '../../../contexts/EntityContext';
+import NotFoundData from '../../../components/notFoundData';
 
 const FooterCronograma = dynamic(() => import('../../../components/cronograma/footerCronograma'), { ssr: false });
 
@@ -37,8 +39,14 @@ const PlaceholderAvatar = () => <Skeleton circle={true} height="75px" width="75p
 
 const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
 
+    // validar data
+    if (!success) return <NotFoundData/>
+
     // context app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     const [option, setOption] = useState('');
     const [refresh, setRefresh] = useState(false);
@@ -98,9 +106,14 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
         setLoading(false);
     } 
 
+    // configurar entity
+    useEffect(() => {
+        entity_context.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
+        return () => entity_context.fireEntity({ render: false, disabled: false });
+    }, []);
+
     // cambiar historial por page
     useEffect(() => {
-        app_context.fireEntity({ render: true, disabled:true, entity_id: cronograma.entity_id });
         if (!refresh && change_page) {
             findHistorial();
             setChangePage(false);
@@ -145,18 +158,18 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     const handleExport = async () => {
         let answer = await Confirm('warning', '¿Deseas exportar?', 'Exportar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let query = `cronograma_id=${cronograma.id}&cargo_id=${form.cargo_id || ""}&type_categoria_id=${form.type_categoria_id || ""}&query_search=${form.like || ""}`;
             await unujobs.fetch(`exports/personal/${cronograma.year}/${cronograma.mes}?${query}`)
             .then(resData => resData.blob())
             .then(blob => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.target = "_blank";
                 a.click();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             })
         }
@@ -175,16 +188,16 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     const syncRemuneracion = async () => {
         let response = await Confirm("warning", "¿Desea agregar las remuneraciones a los trabajadores?", "Confirmar");
         if (response) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`cronograma/${cronograma.id}/add_remuneracion`, {}, { headers: getHeaders() })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 findHistorial();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             })
         }
@@ -194,16 +207,16 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     const syncAportacion = async () => {
         let response = await Confirm("warning", "¿Desea agregar las aportaciones a los trabajadores?", "Confirmar");
         if (response) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`cronograma/${cronograma.id}/add_aportacion`, {}, { headers: getHeaders() })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 findHistorial();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             })
         }
@@ -213,16 +226,16 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     const syncDescuentos = async () => {
         let response = await Confirm("warning", "¿Desea agregar los descuentos a los trabajadores?", "Confirmar");
         if (response) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`cronograma/${cronograma.id}/add_descuento`, {}, { headers: getHeaders() })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 findHistorial();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             })
         }
@@ -232,15 +245,15 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     const syncObligaciones = async () => {
         let response = await Confirm("warning", "¿Desea agregar las obligaciones judiciales a los trabajadores?", "Confirmar");
         if (response) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`cronograma/${cronograma.id}/add_obligacion`, {}, { headers: getHeaders() })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             })
         }
@@ -250,16 +263,16 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     const processing = async () => {
         let response = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
         if (response) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`cronograma/${cronograma.id}/processing`, {}, { headers: getHeaders() })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 findHistorial();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             })
         }
@@ -269,16 +282,16 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     const syncConfigs = async () => {
         let response = await Confirm("warning", "¿Desea Sincronizar las Configuraciones?", "Confirmar");
         if (response) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`cronograma/${cronograma.id}/sync_configs`, {}, { headers: getHeaders() })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 await findHistorial();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             })
         }
@@ -288,16 +301,16 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     const generateToken = async () => {
         let response = await Confirm("warning", "¿Desea Generar los tokens de las boletas?", "Confirmar");
         if (response) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`cronograma/${cronograma.id}/generate_token`, {}, { headers: getHeaders() })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(messsage);
                 await Swal.fire({ icon: 'success', text: message });
                 await findHistorial();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             })
         }
@@ -308,7 +321,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
         e.preventDefault();
         let answer = await Confirm('warning', '¿Desea visualizar la boleta verificada del trabajador actual?', 'Ir');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             // payload
             let payload = {
                 token_verify: historial && historial.token_verify || "",
@@ -318,13 +331,13 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
             // request
             await unujobs.post(`my_boleta`, payload)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { data } = res;
                     let blob = new Blob([data], { type: 'text/html' });
                     let newPrint = window.open(URL.createObjectURL(blob))
                     newPrint.onload = () => newPrint.print();
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     Swal.fire({ icon: 'error', text: 'No se pudo obtener la boleta verificada!' })
                 });
         }
@@ -334,11 +347,11 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     const togglePlame = async () => {
         let answer = await Confirm('warning', `¿Estás seguro en ${cronograma.plame ? 'quitar de ' : 'aplicar al'} PDF-PLAME?`, 'Confirmar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             // request
             await unujobs.post(`cronograma/${cronograma.id}/plame`, {}, { headers: getHeaders() })
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
@@ -346,7 +359,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                     await push({ pathname, query });
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { data } = err.response;
                         if (typeof data != 'object') throw new Error(err.message);
                         throw new Error(data.message);

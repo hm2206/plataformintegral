@@ -1,17 +1,17 @@
 import NextCookie from 'next-cookies';
-import { setCookie, destroyCookie } from 'nookies';
+import { setCookie, destroyCookie, get } from 'nookies';
 import Router from 'next/router';
 import { authentication } from './apis';
 
-export const AUTH =  (ctx) => {
-    return NextCookie(ctx)['auth_token'] || false;
+export const AUTH = (ctx) => {
+    return NextCookie(ctx)['auth_token'] || "";
 };
 
 export const AUTHENTICATE = (ctx) => {
     // authorize
     if (AUTH(ctx)) return true;
     // not authorize
-    if (ctx.isServer) {
+    if (ctx.res) {
         ctx.res.writeHead(301, { Location: '/login' })
         ctx.res.end();
     } else {
@@ -24,7 +24,7 @@ export const GUEST = (ctx) => {
     // is guest
     if (!AUTH(ctx)) return true;
     // is AUTHENTICATE
-    if (ctx.isServer) {
+    if (ctx.res) {
         ctx.res.writeHead(301, { Location: '/' });
         ctx.res.end();
     } else {

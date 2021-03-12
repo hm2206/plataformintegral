@@ -10,12 +10,16 @@ import { AUTHENTICATE } from '../../../services/auth';
 import { SignatureProvider } from '../../../contexts/SignatureContext';
 import ListarGroup from '../../../components/signature/listarGroup';
 import BoardSimple from '../../../components/boardSimple';
+import { EntityContext } from '../../../contexts/EntityContext';
  
 
 const GroupPdf = ({ pathname, query }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [current_refresh, setCurrentRefresh] = useState(false);
@@ -43,7 +47,8 @@ const GroupPdf = ({ pathname, query }) => {
 
     // montar componente
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, [query.dependencia_id]);
 
     // cambiar de estado
@@ -95,7 +100,7 @@ const GroupPdf = ({ pathname, query }) => {
                                     <div className="col-md-4 mb-2">
                                         <SelectAuthEntityDependencia
                                             onReady={dependenciaDefault}
-                                            entity_id={app_context.entity_id || ""}
+                                            entity_id={entity_context.entity_id || ""}
                                             name="dependencia_id"
                                             onChange={(e, obj) => {
                                                 let { push } = Router;

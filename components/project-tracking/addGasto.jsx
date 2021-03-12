@@ -35,12 +35,12 @@ const AddGasto = ({ isClose, activity, onCreate }) => {
     const createGasto = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, form);
             datos.activity_id = activity.id;
             await projectTracking.post(`gasto`, datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message, gasto } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setForm({});
@@ -48,7 +48,7 @@ const AddGasto = ({ isClose, activity, onCreate }) => {
                     if (typeof onCreate == 'function') onCreate(gasto);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { errors, message, status } = err.response.data;
                         Swal.fire({ icon: status == 402 ? 'warning' : 'error', text: message });
                         if (status == 402) setErrors(errors);

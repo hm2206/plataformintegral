@@ -13,12 +13,16 @@ import SearchUserToDependencia from '../authentication/user/searchUserToDependen
 import { TramiteContext } from '../../contexts/TramiteContext';
 import SelectMultipleDependencia from './selectMultipleDependencia';
 import SelectMultitleDependencia from './selectMultipleDependencia';
+import { EntityContext } from '../../contexts/EntityContext';
 
 
 const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // tramite
     const tramite_context = useContext(TramiteContext);
@@ -82,7 +86,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     const execute = async () => {
         let answer = await Confirm('warning', `¿Estás seguro en realizar la acción?`, 'Estoy seguro');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             // setting datos
             let datos = new FormData;
             datos.append('status', action);
@@ -96,14 +100,14 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
             // request
             await tramite.post(`tracking/${current_tracking.id}/next`, datos, { headers: { DependenciaId: tramite_context.dependencia_id } })
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message, tracking } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
                     if (typeof onSave == 'function') onSave(tracking);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { data } = err.response;
                         if (typeof data != 'object') throw new Error(err.message);
                         if (typeof data.errors != 'object') throw new Error(data.message);
@@ -291,7 +295,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
                     <SearchUserToDependencia
                         isClose={(e) => setOption("")}
                         getAdd={handleAdd}
-                        entity_id={app_context.entity_id}
+                        entity_id={entity_context.entity_id}
                         dependencia_id={tramite_context.dependencia_id}
                     />
                 </Show>

@@ -1,13 +1,11 @@
-import React, { Component } from 'react';
-import Router from 'next/router';
+import React from 'react';
 
 
-const LoaderPage = ({ message }) => {
+const Maintenance = () => {
 
     // recargar página
     const reloadPage = () => {
-        let { push } = Router;
-        push(location.href);
+        history.go(location.href);
     }
 
     // render
@@ -22,8 +20,8 @@ const LoaderPage = ({ message }) => {
                         <div class="state-figure">
                             <img class="img-fluid w-75" src="/img/mantenimiento.png" alt=""/>
                         </div>
-                        <h3 class="state-header"> Estamos trabajando en algunas actualizaciones </h3>
-                        <p class="state-description"> {message} </p>
+                        <h2 class="state-header"> Estamos trabajando en algunas actualizaciones </h2>
+                        <p class="state-description"> Porfavor vuelva más tarde! </p>
                         <div className="text-center">
                             <button className="btn btn-primary"
                                 onClick={reloadPage}
@@ -38,4 +36,4 @@ const LoaderPage = ({ message }) => {
     )
 }
 
-export default LoaderPage;
+export default Maintenance;

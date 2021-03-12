@@ -72,15 +72,15 @@ const UserIndex = ({ pathname, query, success, users }) => {
     const setChangeState = async (obj, condicion) => {
         let answer = await Confirm("warning", `¿Deseas ${condicion ? 'restaurar' : 'desactivar'} la Cuenta ${obj.email}?`);
         if (!answer) return false; 
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await authentication.post(`user/${obj.id}/state?_method=PUT`, { state: condicion })
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             let { push } = Router;
             push(location.href);
-        }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
+        }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
     // render

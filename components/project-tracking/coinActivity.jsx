@@ -107,10 +107,10 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
     const handleDeleteGasto = async (index, obj, indexParent, parent) => {
         let answer = await Confirm('warning', '¿Estas seguro en eliminar el gasto?');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await projectTracking.post(`gasto/${obj.id}/delete`, obj)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     let newGastos = JSON.parse(JSON.stringify(gastos));
@@ -123,7 +123,7 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                     setActivity(newActividad);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = err.response.data;
                         if (!errors) throw new Error(message);
                         Swal.fire({ icon: 'warning', text: message });
@@ -138,10 +138,10 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
     const updateGasto = async (index, obj) => {
         let answer = await Confirm('warning', '¿Estas seguro en actualizar el gasto?')
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await projectTracking.post(`gasto/${obj.id}/update`, obj)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message, gasto } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     obj = gasto;
@@ -150,7 +150,7 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                     setGastos(newGastos);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = err.response.data;
                         if (!errors) throw new Error(message);
                         Swal.fire({ icon: 'warning', text: message });

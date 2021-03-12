@@ -1,9 +1,8 @@
 import React, { Fragment, useEffect, useState, useContext } from 'react';
 import { Button } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
-import Router from 'next/router';
 import { BtnBack } from '../../../components/Utils';
-import { unujobs } from '../../../services/apis';
+import { handleErrorRequest, unujobs } from '../../../services/apis';
 import { Confirm } from '../../../services/utils';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
@@ -15,10 +14,11 @@ import UpdateDescuento from '../../../components/contrato/updateDescuento';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 import CardInfo from '../../../components/contrato/cardInfo';
+import NotFoundData from '../../../components/notFoundData';
 
 
 // componente principal
-const Pay = ({ success, info, query }) => {
+const Pay = ({ pathname, query, success, info }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -36,19 +36,14 @@ const Pay = ({ success, info, query }) => {
     const syncConfig = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en sincronizar las configuraciones?`, 'Estoy seguro');
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await unujobs.post(`info/${info.id}/sync_config`)
         .then(res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
             Swal.fire({ icon: 'success', text: message });
-        }).catch(err => {
-            try {
-                app_context.fireLoading(false);
-            } catch (error) {
-                Swal.fire({ icon: 'error', text: error.message });
-            }
-        });
+            history.go(location.href);
+        }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
     
     // manejador de acciones
@@ -62,6 +57,9 @@ const Pay = ({ success, info, query }) => {
         }
     }
 
+    if (!success) return <NotFoundData/>
+
+    // renderizar
     return (
     <Fragment>
         <div className="col-md-12">
@@ -132,13 +130,14 @@ const Pay = ({ success, info, query }) => {
 // server rendering
 Pay.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
-    let id = atob(ctx.query.id || "");
+    let { pathname, query } = ctx;
+    let id = atob(query.id || "") || "__error";
     // request
     let { success, info } = await unujobs.get(`info/${id}`, {}, ctx)
     .then(res => res.data)
     .catch(err => ({ success: false }));
     // response
-    return { success, info: info || {}, query: ctx.query };
+    return { pathname, query, success, info };
 }
 
 export default Pay;

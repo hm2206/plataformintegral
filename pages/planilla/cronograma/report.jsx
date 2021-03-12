@@ -9,9 +9,13 @@ import atob from 'atob'
 import BasicReport from '../../../components/cronograma/basicReport';
 import HeaderCronograma from '../../../components/cronograma/headerCronograma';
 import BoardSimple from '../../../components/boardSimple';
+import NotFoundData from '../../../components/notFoundData';
 
 
 const Report = ({ pathname, query, success, cronograma }) => {
+
+    // validar data
+    if (!success) return <NotFoundData/>
 
     // estado
     const [option, setOption] = useState("");

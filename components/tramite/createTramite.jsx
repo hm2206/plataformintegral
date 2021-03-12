@@ -11,12 +11,16 @@ import { SelectAuthEntityDependencia } from '../select/authentication';
 import { SelectTramiteType } from '../select/tramite';
 import { onProgress } from '../../services/apis';
 import { TramiteContext } from '../../contexts/TramiteContext';
+import { EntityContext } from '../../contexts/EntityContext';
 
 
 const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // tramite
     const tramite_context = useContext(TramiteContext);
@@ -204,7 +208,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                             <Form.Field className="mb-3">
                                 <label>Dependencia Origen</label>
                                 <SelectAuthEntityDependencia
-                                    entity_id={app_context.entity_id}
+                                    entity_id={entity_context.entity_id}
                                     value={tramite_context.dependencia_id}
                                     disabled
                                 />

@@ -5,11 +5,12 @@ import { unujobs } from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
-import { AUTHENTICATE, AUTH } from '../../../services/auth';
+import { AUTHENTICATE } from '../../../services/auth';
 import Swal from 'sweetalert2';
 import { Confirm } from '../../../services/utils';
+import BoardSimple from '../../../components/boardSimple';
 
-const CargoIndex = ({ success, cargos, query }) => {
+const CargoIndex = ({ pathname, query, success, cargos }) => {
 
     const [form, setForm] = useState({ estado: query.estado });
 
@@ -72,111 +73,119 @@ const CargoIndex = ({ success, cargos, query }) => {
 
     // render
     return (
-        <Form className="col-md-12">
-            <Body>
-                <Datatable titulo="Lista de Particiones Presupuestales"
-                    isFilter={false}
-                    headers={
-                        ["#ID", "Descripcion", "Planilla", "Ext Presupuestal", "Estado"]
-                    }
-                    index={
-                        [
-                            {
-                                key: "id",
-                                type: "text"
-                            }, {
-                                key: "descripcion",
-                                type: "text"
-                            }, {
-                                key: "planilla.nombre",
-                                type: "icon"
-                            }, {
-                                key: "ext_pptto",
-                                type: "icon",
-                                bg: "dark",
-                                justify: "center"
-                            }, {
-                                key: "estado",
-                                type: "switch",
-                                justify: "center",
-                                is_true: "Activo",
-                                is_false: "Eliminado"
-                            }
-                        ]
-                    }
-                    options={
-                        [
-                            {
-                                key: "edit",
-                                icon: "fas fa-pencil-alt",
-                                title: "Editar Partición Presup.",
-                                rules: {
+        <div className="col-md-12">
+            <BoardSimple
+                title="Partición Presupuestal"
+                info={["Listar Partición Pres."]}
+                prefix="P"
+                bg="danger"
+                options={[]}
+            >
+                <Form className="card-body">
+                    <Datatable
+                        isFilter={false}
+                        headers={
+                            ["#ID", "Descripcion", "Planilla", "Ext Presupuestal", "Estado"]
+                        }
+                        index={
+                            [
+                                {
+                                    key: "id",
+                                    type: "text"
+                                }, {
+                                    key: "descripcion",
+                                    type: "text"
+                                }, {
+                                    key: "planilla.nombre",
+                                    type: "icon"
+                                }, {
+                                    key: "ext_pptto",
+                                    type: "icon",
+                                    bg: "dark",
+                                    justify: "center"
+                                }, {
                                     key: "estado",
-                                    value: 1
+                                    type: "switch",
+                                    justify: "center",
+                                    is_true: "Activo",
+                                    is_false: "Eliminado"
                                 }
-                            }, 
-                            {
-                                key: "type_categoria",
-                                icon: "fas fa-cogs",
-                                title: "Agregar tip. Categorías",
-                                rules: {
-                                    key: "estado",
-                                    value: 1
+                            ]
+                        }
+                        options={
+                            [
+                                {
+                                    key: "edit",
+                                    icon: "fas fa-pencil-alt",
+                                    title: "Editar Partición Presup.",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
+                                    }
+                                }, 
+                                {
+                                    key: "type_categoria",
+                                    icon: "fas fa-cogs",
+                                    title: "Agregar tip. Categorías",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
+                                    }
+                                },
+                                {
+                                    key: "restore",
+                                    icon: "fas fa-sync",
+                                    title: "Restaurar Partición Presup.",
+                                    rules: {
+                                        key: "estado",
+                                        value: 0
+                                    }
+                                }, {
+                                    key: "delete",
+                                    icon: "fas fa-times",
+                                    title: "Eliminar Partición Presup.",
+                                    rules: {
+                                        key: "estado",
+                                        value: 1
+                                    }
                                 }
-                            },
-                            {
-                                key: "restore",
-                                icon: "fas fa-sync",
-                                title: "Restaurar Partición Presup.",
-                                rules: {
-                                    key: "estado",
-                                    value: 0
-                                }
-                            }, {
-                                key: "delete",
-                                icon: "fas fa-times",
-                                title: "Eliminar Partición Presup.",
-                                rules: {
-                                    key: "estado",
-                                    value: 1
-                                }
-                            }
-                        ]
-                    }
-                    optionAlign="text-center"
-                    getOption={getOption}
-                    data={cargos.data || []}
-                >
-                    <div className="form-group">
-                        <div className="row">
-                            <div className="col-md-4 mb-1">
-                                <Select  
-                                    name="estado"
-                                    fluid
-                                    placeholder="Todos"
-                                    value={`${form.estado || ""}`}
-                                    options={[
-                                        { key: "ALL", value: "", text: "Todos" },
-                                        { key: "ACTIVO", value: "1", text: "Activos" },
-                                        { key: "DESACTIVO", value: "0", text: "Desactivos" },
-                                    ]}
-                                    onChange={(e, obj) => handleInput(obj)}
-                                />
-                            </div>
+                            ]
+                        }
+                        optionAlign="text-center"
+                        getOption={getOption}
+                        data={cargos.data || []}
+                    >
+                        <div className="form-group">
+                            <div className="row">
+                                <div className="col-md-4 mb-1">
+                                    <Select  
+                                        name="estado"
+                                        fluid
+                                        placeholder="Todos"
+                                        value={`${form.estado || ""}`}
+                                        options={[
+                                            { key: "ALL", value: "", text: "Todos" },
+                                            { key: "ACTIVO", value: "1", text: "Activos" },
+                                            { key: "DESACTIVO", value: "0", text: "Desactivos" },
+                                        ]}
+                                        onChange={(e, obj) => handleInput(obj)}
+                                    />
+                                </div>
 
-                            <div className="col-md-2">
-                                <Button 
-                                    onClick={handleSearch}
-                                    color="blue"
-                                >
-                                    <i className="fas fa-search mr-1"></i>
-                                    <span>Buscar</span>
-                                </Button>
+                                <div className="col-md-2">
+                                    <Button 
+                                        onClick={handleSearch}
+                                        color="blue"
+                                    >
+                                        <i className="fas fa-search mr-1"></i>
+                                        <span>Buscar</span>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </Datatable>
-            </Body>
+                    </Datatable>
+                </Form>
+            </BoardSimple>
 
             <div className="table-responsive text-center">
                 <hr/>
@@ -187,15 +196,15 @@ const CargoIndex = ({ success, cargos, query }) => {
                 />
             </div>
 
-            <BtnFloat
-                onClick={async (e) => {
-                let { pathname, push } = Router;
-                push({ pathname: `${pathname}/create` });
-            }}
-        >
-            <i className="fas fa-plus"></i>
-        </BtnFloat>
-    </Form>)
+            <BtnFloat onClick={async (e) => {
+                    let { pathname, push } = Router;
+                    push({ pathname: `${pathname}/create` });
+                }}
+            >
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
+        </div>
+    )
 }
 
 // server rendering
@@ -206,9 +215,9 @@ CargoIndex.getInitialProps = async (ctx) => {
     query.estado = typeof query.estado != 'undefined' ? query.estado : "";
     let { success, cargos } = await unujobs.get(`cargo?page=${query.page}&estado=${query.estado}`, {}, ctx)
         .then(res => res.data)
-        .catch(err => ({ success: false }));
+        .catch(err => ({ success: false, cargos: {} }));
     // response
-    return { success, cargos: cargos || {}, query };
+    return { success, query, cargos: cargos };
 }
 
 export default CargoIndex;

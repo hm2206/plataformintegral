@@ -20,6 +20,9 @@ const Register = () => {
     // app
     const app_context = useContext(AppContext);
 
+    // entity
+    const entity_context = useContext(EntityContext);
+
     // estados
     const [option, setOption] = useState("");
     const [work, setWork] = useState({});
@@ -29,7 +32,8 @@ const Register = () => {
 
     // primera carga
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, []);
 
     // cambios del form
@@ -59,7 +63,7 @@ const Register = () => {
     const createInfo = async () => {
         let answer = await Confirm("warning", "¿Estas seguro en guardar el contrato?", "Estoy Seguro");
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let newForm = new FormData;
             newForm.append('work_id', work.id);
             for(let key in form) {
@@ -67,7 +71,7 @@ const Register = () => {
             }
             await unujobs.post('info', newForm)
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message, info } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -80,7 +84,7 @@ const Register = () => {
                 Router.push({ pathname: `${backUrl(Router.pathname)}/edit`, query });
             }).catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { data } = err.response;
                     if (typeof data != 'object') throw new Error(err.message);
                     if (typeof data.errors != 'object') throw new Error(data.message || "");

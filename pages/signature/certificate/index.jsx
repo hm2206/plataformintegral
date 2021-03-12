@@ -53,10 +53,10 @@ const IndexCertificate = ({ query, success, certificates }) => {
     const download = async (obj) => {
         let answer = await Confirm("warning", `¿Estás seguro en descargar el PFX?`, 'Descargar')
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await signature.post(`certificate/${obj.id}/download`, {}, { responseType: 'blob' })
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { data } = res;
                     let a = document.createElement('a');
                     a.target = '__blank';
@@ -64,7 +64,7 @@ const IndexCertificate = ({ query, success, certificates }) => {
                     a.href = URL.createObjectURL(data);
                     a.click();
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     Swal.fire({ icon: 'error', text: err.message })
                 })
         }

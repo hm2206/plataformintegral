@@ -52,18 +52,18 @@ const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true })
             datos.append('object_id', object_id);
             datos.append('object_type', object_type);
             for(let f of files) datos.append('files', f);
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             // request
             await projectTracking.post(`file`, datos)
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message, files } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
                     setData([...data, ...files]);
                     if (typeof afterSave == 'function') await afterSave(files);
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = err.response.data;
                     Swal.fire({ icon: 'error', text: message || err.message });
                 })

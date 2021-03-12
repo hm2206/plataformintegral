@@ -40,10 +40,10 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
     const handleVerify = async (indexO, indexA, obj) => {
         let answer = await Confirm('warning', '¿Estas seguro en verificar financieramente la actividad?')
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await projectTracking.post(`activity/${obj.id}/verify`)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     let newObjectives = JSON.parse(JSON.stringify(current_objectives));
@@ -54,7 +54,7 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                     setCurrentObjectives(newObjectives);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = err.response.data;
                         if (!errors) throw new Error(message);
                         Swal.fire({ icon: 'warning', text: message });
@@ -69,10 +69,10 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
     const handleVerifyTecnica = async (indexO, indexA, obj) => {
         let answer = await Confirm('warning', '¿Estas seguro en verificar técnicamente la actividad?')
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await projectTracking.post(`activity/${obj.id}/verify_tecnica`)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     let newObjectives = JSON.parse(JSON.stringify(current_objectives));
@@ -83,7 +83,7 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                     setCurrentObjectives(newObjectives);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = err.response.data;
                         if (!errors) throw new Error(message);
                         Swal.fire({ icon: 'warning', text: message });

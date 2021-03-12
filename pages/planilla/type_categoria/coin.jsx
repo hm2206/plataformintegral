@@ -96,12 +96,12 @@ const  CoinTypeCategoria = ({ success, query, pathname, type_categoria }) => {
     }
 
     const saveCategoria = async () => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         let datos = Object.assign({}, form);
         datos.type_categoria_id = type_categoria.id;
         await unujobs.post('categoria', datos)
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             Swal.fire({ icon: 'success', text: message });
@@ -109,7 +109,7 @@ const  CoinTypeCategoria = ({ success, query, pathname, type_categoria }) => {
             setForm({ planilla_id: datos.planilla_id });
         }).catch(err => {
             try {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { errors, message } = err.response.data;
                 setErrors(errors);
                 Swal.fire({ icon: 'warning', text: 'Datos incorrectos!' });

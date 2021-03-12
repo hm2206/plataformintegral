@@ -1,115 +1,107 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment, useContext, useState } from "react";
 import Navigation from "./navigation";
 import { authentication } from '../services/apis';
 import Router from 'next/router';
-import { connect } from 'react-redux';
-import initStore from '../storage/store';
 import Link from 'next/link';
+import { AppContext } from "../contexts";
+import { ScreenContext } from "../contexts/ScreenContext";
+import { AuthContext } from "../contexts/AuthContext";
 
 
-class Sidebar extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      options: [],
-      pathname: "/"
-    };
-  }
+const Sidebar = () => {
 
-  async componentDidMount() {
-    this.getProfile();
-    if (typeof Router == 'object') await this.setState({ pathname: Router.pathname });
-  }
+	// screen 
+	const { toggle, fullscreen } = useContext(ScreenContext);
 
-  componentWillReceiveProps = (nextProps) => {
-    if (nextProps.refresh && nextProps.refresh != this.props.refresh) this.getProfile();
-  }
+	// app
+	const { app, pathname } = useContext(AppContext);
 
-  getProfile =  async () => {
-    await authentication.get(`auth/menu`)
-    .then(res => {
-      this.setState({ options: res.data });
-      if (res.data.success == false) {
-        this.setState({ options: [] });
-        this.props.logout();
-      };
-    }).catch(err => this.setState({ options: [] }));
-  }
+	// auth
+	const auth_context = useContext(AuthContext);
+	const { auth } = auth_context;
 
-  render() {
+	// render
+	return (
+		<Fragment>   
+			<aside className={`app-aside app-aside-expand-md app-aside-light ${toggle ? 'show' : ''}`} style={{ display: fullscreen ? 'none' : 'block' }}>
+				<div className="aside-content">
+					<header className="aside-header d-block d-md-none">
+						<button
+							className="btn-account"
+							type="button"
+							data-toggle="collapse"
+							data-target="#dropdown-aside"
+						>
+							<span className="user-avatar user-avatar-lg">
+								<img src={auth.image ? auth.image && auth.image_images && auth.image_images.image_50x50 : '/img/.jpg'} 
+									alt={auth.person && auth.person.fullname} 
+								/>
+							</span>{" "}
+							<span className="account-icon">
+								<span className="fa fa-caret-down fa-lg"></span>
+							</span>{" "}
+							<span className="account-summary">
+								<span className="account-name">{!auth_context.loading ? auth.username || "" : 'fetching...'}</span>{" "}
+								<span className="account-description">{!auth_context.loading ? auth.person && auth.person.fullname || "" : 'fetching...'}</span>
+							</span>
+						</button>
 
-    let { screen_lg, my_app, logout, auth } = this.props;
+						<div id="dropdown-aside" className="dropdown-aside collapse">
+							<div className="pb-3">
+								<a className="dropdown-item" href="#"
+									onClick={(e) => {
+										e.preventDefault();
+										Router.push({ pathname: '/notify', query: { tab: 'all_notify' } });
+									}}
+								>
+									<span className="fas fa-bell"></span> Notificaciones
+								</a>{" "}
+								
+								<a className="dropdown-item" href="/">
+									<span className="fas fa-user"></span> Perfil
+								</a>{" "}
 
-    return (
-        <Fragment>   
-          <aside className={`app-aside app-aside-expand-md app-aside-light ${this.props.toggle ? 'show' : ''}`} style={{ display: screen_lg ? 'none' : 'block' }}>
-          <div className="aside-content">
-            <header className="aside-header d-block d-md-none">
-              <button
-                className="btn-account"
-                type="button"
-                data-toggle="collapse"
-                data-target="#dropdown-aside"
-              >
-                <span className="user-avatar user-avatar-lg">
-                  <img src={auth && auth.image ? auth.image && auth.image_images && auth.image_images.image_50x50 : '/img/.jpg'} alt={auth && auth.person && auth.person.fullname} />
-                </span>{" "}
-                <span className="account-icon">
-                  <span className="fa fa-caret-down fa-lg"></span>
-                </span>{" "}
-                <span className="account-summary">
-                  <span className="account-name">{auth && auth.username ? auth.username : 'fetching...'}</span>{" "}
-                  <span className="account-description">{auth && auth.person ? auth.person.fullname : 'fetching...'}</span>
-                </span>
-              </button>
-              <div id="dropdown-aside" className="dropdown-aside collapse">
-                <div className="pb-3">
-                  <a className="dropdown-item" href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      Router.push({ pathname: '/notify', query: { tab: 'all_notify' } });
-                    }}
-                  >
-                    <span className="fas fa-bell"></span> Notificaciones
-                  </a>{" "}
-                  <a className="dropdown-item" href="/">
-                    <span className="fas fa-user"></span> Perfil
-                  </a>{" "}
-                  <a className="dropdown-item" href="#" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      logout();
-                    }}
-                  >
-                    <span className="fas fa-sign"></span>{" "}
-                    Cerrar Sesión
-                  </a>
-                </div>
-              </div>
-            </header>
-            <div className="aside-menu --overflow-hidden">
-              <nav id="stacked-menu" className="stacked-menu">
-                <ul className="menu">
-                  <li className={`menu-item ${this.state.pathname == '/' ? 'has-active' : ''}`}>
-                    <a className="menu-link"
-                      href="/"
-                    >
-                      <span className="menu-icon fas fa-user"></span>{" "}
-                      <span className="menu-text">Perfil</span>
-                    </a>
-                  </li>
-                  <Navigation options={this.state.options}/>
-                </ul>
-              </nav>
-            </div>
-            <footer className="aside-footer border-top p-3">
-              <a className="text-dark text-center" href={my_app.support_link} target="_blank"><b className="badge badge-dark w-100">Soporte: {my_app && my_app.support_name}</b></a>
-            </footer>
-          </div>
-        </aside>
-      </Fragment>
-    );
-  }
+								<a className="dropdown-item" href="#" 
+									onClick={(e) => {
+										e.preventDefault();
+										auth_context.logout();
+									}}
+								>
+									<span className="fas fa-sign"></span>{" "}
+									Cerrar Sesión
+								</a>
+							</div>
+						</div>
+					</header>
+					{/* menu lateral version desktop */}
+					<div className="aside-menu --overflow-hidden">
+						<nav id="stacked-menu" className="stacked-menu">
+							<ul className="menu">
+								<li className={`menu-item ${pathname == '/' ? 'has-active' : ''}`}>
+									<a className="menu-link"
+										href="/"
+									>
+										<span className="menu-icon fas fa-user"></span>{" "}
+										<span className="menu-text">Perfil</span>
+									</a>
+								</li>
+								<Navigation/>
+							</ul>
+						</nav>
+					</div>
+					{/* pie de página */}
+					<footer className="aside-footer border-top p-3">
+						<a className="text-dark text-center" 
+							href={app.support_link || ""} 
+							target="_blank"
+						>
+							<b className="badge badge-dark w-100">Soporte: {app.support_name || ""}</b>
+						</a>
+					</footer>
+				</div>
+			</aside>
+		</Fragment>
+	);
 }
 
 export default Sidebar;

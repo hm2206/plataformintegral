@@ -33,12 +33,12 @@ const InfoPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
     const createConfigActivity = async () => {
         let answer = await Confirm("warning", `¿Deseas guardar los datos?`)
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, form);
             datos.plan_trabajo_id = plan_trabajo.id;
             await projectTracking.post(`config_activity`, datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     Swal.fire({ icon: 'success', text: message });
@@ -46,7 +46,7 @@ const InfoPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
                     setRefresh(true);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = err.response.data;
                         if (!message) throw new Error(err.message);
                         if (!errors) throw new Error(message);

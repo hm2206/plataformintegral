@@ -139,17 +139,17 @@ const AddMedioVerification = ({ isClose, meta, editable = true }) => {
 
     // crear
     const create = async () => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await projectTracking.post(`medio_verification`, { description, meta_id: meta.id })
             .then(res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { message, medio_verification } = res.data;
                 Swal.fire({ icon: 'success', text: message });
                 setDescription("");
                 setDatos([...datos, medio_verification]);
             }).catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { data } = err.response;
                     console.log(data);
                     if (typeof data != 'object') throw new Error(err.message);

@@ -94,7 +94,7 @@ const ModalVerify = (props) =>{
     const onSignature = async (obj) => {
         let answer = await Confirm("warning", `¿Estás seguro en firmar el PDF?`, 'Firmar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = new FormData();
             datos.append('location', obj.location)
             datos.append('page', obj.page)
@@ -105,7 +105,7 @@ const ModalVerify = (props) =>{
             // firmar pdf
             await signature.post(`auth/signer`, datos, { responseType: 'blob' })
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let blob = res.data;
                     blob.lastModifiedDate = new Date();
                     blob.name = obj.pdfBlob.name;
@@ -124,7 +124,7 @@ const ModalVerify = (props) =>{
                     Swal.fire({ icon: 'success', text: 'El pdf se firmó correctamente!' });
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message } = err.response.data;
                         Swal.fire({ icon: 'error', text: message });
                     } catch (error) {
@@ -146,7 +146,7 @@ const ModalVerify = (props) =>{
     const verification = async () => {
         let answer = await Confirm(`warning`, `¿Deseas continuar?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let { id, dependencia_destino_id } = props.tramite;
             let datos = new FormData;
             // assing form
@@ -160,7 +160,7 @@ const ModalVerify = (props) =>{
             // send next
             await tramite.post(`tramite/${props.tramite.tramite_id}/verify`, datos, { headers: { DependenciaId: dependencia_destino_id } })
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
@@ -169,7 +169,7 @@ const ModalVerify = (props) =>{
                     props.isClose(true);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let response = JSON.parse(err.message);
                         Swal.fire({ icon: 'warning', text: response.message });
                         setErrors(response.errors);

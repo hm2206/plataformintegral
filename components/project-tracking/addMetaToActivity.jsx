@@ -27,14 +27,14 @@ const AddMetaToActivity = ({ objective }) => {
     const addMeta = async () => {
         let answer = await Confirm('warning', `¿Deseas guardar el indicador?`, 'Guardar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = {};
             datos.object_id = objective.id;
             datos.object_type = 'App/Models/Objective';
             datos.description = description;
             await projectTracking.post(`meta`, datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message, meta } = res.data;
                     if (!success) throw new Error(message);
                     Swal.fire({ icon: 'success', text: message });
@@ -42,7 +42,7 @@ const AddMetaToActivity = ({ objective }) => {
                     getMetas();
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = res.response.data;
                         if (!errors) throw new Error(message);
                         Swal.fire({ icon: 'warning', text: message });
@@ -57,10 +57,10 @@ const AddMetaToActivity = ({ objective }) => {
     const deleteMeta = async (index, obj) => {
         let answer = await Confirm('warning', `¿Deseas eliminar el indicador?`, 'Eliminar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await projectTracking.post(`meta/${obj.id}/delete`)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message, success } = res.data;
                     if (!success) throw new Error(message);
                     Swal.fire({ icon: 'success', text: message });
@@ -68,7 +68,7 @@ const AddMetaToActivity = ({ objective }) => {
                     newMetas.splice(index, 1);
                     setCurrentMeta(newMetas);
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = err.response.data;
                     Swal.fire({ icon: 'error', text: message || err.message });
                 });
@@ -112,11 +112,11 @@ const AddMetaToActivity = ({ objective }) => {
     const updateMeta = async (obj, index) => {
         let answer = await Confirm('warning', `¿Deseas actualizar el indicador?`, 'Actualizar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, obj);
             await projectTracking.post(`meta/${obj.id}/update`, datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message, meta } = res.data;
                     if (!success) throw new Error(message);
                     Swal.fire({ icon: 'success', text: message });
@@ -125,7 +125,7 @@ const AddMetaToActivity = ({ objective }) => {
                     setCurrentMeta(newMetas);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = res.response.data;
                         if (!errors) throw new Error(message);
                         Swal.fire({ icon: 'warning', text: message });

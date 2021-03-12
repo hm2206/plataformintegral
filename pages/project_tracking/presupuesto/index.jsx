@@ -7,16 +7,12 @@ import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
 import Router from 'next/router';
 import btoa from 'btoa';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 const IndexPresupuesto = ({ success, presupuestos }) => {
 
     // app
     const app_context = useContext(AppContext);
-
-    // quitar entity filter
-    useEffect(() => {
-        app_context.fireEntity({ render: false });
-    }, []);
 
     // handle options
     const getOption = async (obj, key, index) => {

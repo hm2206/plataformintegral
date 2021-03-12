@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useContext } from 'react';
 import { Form, Select, Button, Icon, Checkbox } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import { handleErrorRequest, unujobs } from '../../../services/apis';
@@ -10,6 +10,7 @@ import { Body, BtnBack } from '../../../components/Utils';
 import { SelectPlanilla } from '../../../components/select/cronograma';
 import BoardSimple from '../../../components/boardSimple';
 import ContentControl from '../../../components/contentControl';
+import { AppContext } from '../../../contexts';
 
 const schemaDefault = {
     year: (new Date).getFullYear(), 
@@ -19,9 +20,10 @@ const schemaDefault = {
     type_id: 0,
 }
 
-console.log(schemaDefault);
-
 const RegisterCronograma = () => {
+
+    // app
+    const app_context = useContext(AppContext);
 
     // estados
     const [is_ready, setIsReady] = useState(false);
@@ -63,14 +65,14 @@ const RegisterCronograma = () => {
     const save = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en crear el cronograma?`, 'Crear')
         if (!answer) return false;
-        setCurrentLoading(true);
+        app_context.setCurrentLoading(true);
         await unujobs.post('cronograma', form)
         .then(async res => {
+            app_context.setCurrentLoading(false);
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             setForm({ ...schemaDefault })
-        }).catch(err => handleErrorRequest(err, setErrors));
-        setCurrentLoading(false);
+        }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
     // renderizado

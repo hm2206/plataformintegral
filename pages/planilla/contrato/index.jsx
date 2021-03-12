@@ -10,11 +10,15 @@ import { AppContext } from '../../../contexts/AppContext';
 import Show from '../../../components/show';
 import BoardSimple from '../../../components/boardSimple';
 import UpdateRemuneracionMassive from '../../../components/contrato/updateRemuneracionMassive';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 const Contrato = ({ success, infos, query }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [option, setOption] = useState("");
@@ -27,7 +31,8 @@ const Contrato = ({ success, infos, query }) => {
     })
 
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, []);
 
     // opciones

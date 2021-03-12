@@ -78,16 +78,16 @@ const AppIndex = ({ pathname, query, apps }) => {
     const changeState = async (obj, condicion = 0) => {
         let answer = await Confirm("warning", `¿Desea ${condicion ? 'restaurar' : 'desactivar'} al aplicación "${obj.name}"?`, `${condicion ? 'Restaurar' : 'Desactivar'}`);
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await authentication.post(`app/${obj.id}/state?_method=PUT`, { state: condicion })
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { message } = res.data;
             await  Swal.fire({ icon: 'success', text: message });
             Router.push(location.href);
         }).catch(err => {
             try {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { data } = err.response;
                 if (typeof data != 'object') throw new Error(err.message);
                 if (typeof data.errors != 'object') throw new Error(data.message || err.message);

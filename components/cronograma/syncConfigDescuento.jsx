@@ -30,17 +30,17 @@ const SyncConfigDescuento = (props) => {
     const update = async () => {
         let answer = await Confirm("warning", "¿Estas seguro en sincronizar los descuentos globales?", "Confirmar")
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         let datos = Object.assign({}, form);
         datos._method = 'PUT';
         await unujobs.post(`cronograma/${cronograma.id}/sync_config_descuento`, datos, { headers: { CronogramaID: cronograma.id } })
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             setForm({});
             setRefresh(true);
-        }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
+        }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
     // render

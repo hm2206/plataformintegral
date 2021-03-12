@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { AUTH, AUTHENTICATE } from '../services/auth';
+import React, { useContext } from 'react';
+import { AUTHENTICATE } from '../services/auth';
 import { Body } from '../components/Utils';
 import CardProfile from '../components/cardProfile';
 import CardToken from '../components/cardToken';

@@ -1,329 +1,332 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl } from '../../../services/utils';
-import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
-import { unujobs } from '../../../services/apis';
+import React, { useContext, useEffect, useState } from 'react';
+import { BtnBack } from '../../../components/Utils';
+import { Confirm } from '../../../services/utils';
+import { Form, Button } from 'semantic-ui-react'
+import { handleErrorRequest, unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
+import { AppContext } from '../../../contexts';
+import ContentControl from '../../../components/contentControl';
+import BoardSimple from '../../../components/boardSimple';
+import atob from 'atob';
 import Show from '../../../components/show';
+import NotFoundData from '../../../components/notFoundData';
+import Router from 'next/router';
 
+const EditMeta = ({ pathname, query, success, meta }) => {
 
-export default class EditMeta extends Component
-{
+    if (!success) return <NotFoundData/>
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
-    }
-
-    state = {
-        loading: false,
-        form: {},
-        errors: {},
-        old: {},
-        edit: false
-    }
-
-    componentWillMount = async () => {
-        await this.findMeta();
-    }
-
-    findMeta = async () => {
-        let { query } = this.props;
-        let id = query.id ? atob(query.id) : "_error";
-        this.setState({ loading: true });
-        await unujobs.get(`meta/${id}`)
-        .then(res => this.setState({ form: res.data, old: res.data }))
-        .catch(err => this.setState({ form: {} }));
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors, edit: true };
-        });
-    }
-
-    save = async () => {
-        this.setState({ loading: true });
-        let { form } = this.state;
-        form._method = 'PUT';
-        await unujobs.post(`meta/${form.id}`, form)
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
-            if (success) this.setState({ errors: {}, edit: false });
-        })
-        .catch(async err => {
-            try {
-                let { data } = err.response
-                let { message, errors } = data;
-                this.setState({ errors });
-            } catch (error) {
-                await Swal.fire({ icon: 'error', text: 'Algo salió mal' });
-            }
-        });
-        this.setState({ loading: false });
-    }
+    // app
+    const app_context = useContext(AppContext);
     
-    render() {
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [edit, setEdit] = useState(false);
 
-        let { pathname, query } = this.props;
-        let { form, errors } = this.state;
+    // manejar estado del form
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
+        setEdit(true);
+    }
 
-        return (
+    // guardar datos
+    const save = async () => {
+        let answer = await Confirm("warning", "¿Estás seguro en guardar los cambios?", "Estoy seguro");
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        let payload = Object.assign({}, form);
+        payload._method = 'PUT';
+        await unujobs.post(`meta/${meta.id}`, payload)
+        .then(async res => {
+            app_context.setCurrentLoading(false)
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            setErrors({});
+            await Router.push(location.href);
+            setEdit(false);
+        })
+        .catch(async err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
+    }
+
+    // obtener el object
+    useEffect(() => {
+        if (!edit) setForm(Object.assign({}, meta));
+    }, [edit]);
+
+    // renderizar
+    return (
+        <>
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Meta Presupuestal
-                    </div>
-                    <div className="card-body">
+                <BoardSimple
+                    prefix={<BtnBack/>}
+                    bg="light"
+                    title="Metas"
+                    info={["Crear Meta presupuestal"]}
+                    options={[]}
+                >
+                    <div className="card-body mt-4">
                         <Form className="row justify-content-center">
                             <div className="col-md-10">
                                 <div className="row justify-content-end">
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.metaID && errors.metaID[0]}>
+                                        <Form.Field error={errors && errors.metaID && errors.metaID[0] ? true : false}>
                                             <label htmlFor="">MetaID <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese el ID de la meta"
                                                 name="metaID"
                                                 value={form.metaID || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.metaID && errors.metaID[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.meta && errors.meta[0]}>
+                                        <Form.Field error={errors && errors.meta && errors.meta[0] ? true : false}>
                                             <label htmlFor="">Meta <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese la descripcion de la Meta"
                                                 name="meta"
                                                 value={form.meta || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.meta && errors.meta[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.sectorID && errors.sectorID[0]}>
+                                        <Form.Field error={errors && errors.sectorID && errors.sectorID[0] ? true : false}>
                                             <label htmlFor="">SectorID <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese el ID del sector"
                                                 name="sectorID"
                                                 value={form.sectorID || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.sectorID && errors.sectorID[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.sector && errors.sector[0]}>
+                                        <Form.Field error={errors && errors.sector && errors.sector[0] ? true : false}>
                                             <label htmlFor="">Sector <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese la descripción del sector"
                                                 name="sector"
                                                 value={form.sector || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.sector && errors.sector[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.pliegoID && errors.pliegoID[0]}>
+                                        <Form.Field error={errors && errors.pliegoID && errors.pliegoID[0] ? true : false}>
                                             <label htmlFor="">PliegoID <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese el ID del pliego"
                                                 name="pliegoID"
                                                 value={form.pliegoID || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.pliegoID && errors.pliegoID[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.pliego && errors.pliego[0]}>
+                                        <Form.Field error={errors && errors.pliego && errors.pliego[0] ? true : false}>
                                             <label htmlFor="">Pliego <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese la descripción del pliego"
                                                 name="pliego"
                                                 value={form.pliego || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.pliego && errors.pliego[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.unidadID && errors.unidadID[0]}>
+                                        <Form.Field error={errors && errors.unidadID && errors.unidadID[0] ? true : false}>
                                             <label htmlFor="">UnidadID <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese el ID de la unidad"
                                                 name="unidadID"
                                                 value={form.unidadID || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.unidadID && errors.unidadID[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.unidad_ejecutora && errors.unidad_ejecutora[0]}>
+                                        <Form.Field error={errors && errors.unidad_ejecutora && errors.unidad_ejecutora[0] ? true : false}>
                                             <label htmlFor="">Unidad Ejecutora <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese la descripción de la unidad ejecutora"
                                                 name="unidad_ejecutora"
                                                 value={form.unidad_ejecutora || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.unidad_ejecutora && errors.unidad_ejecutora[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.programaID && errors.programaID[0]}>
+                                        <Form.Field error={errors && errors.programaID && errors.programaID[0] ? true : false}>
                                             <label htmlFor="">ProgramaID <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese el ID del programa"
                                                 name="programaID"
                                                 value={form.programaID || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.programaID && errors.programaID[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.programa && errors.programa[0]}>
+                                        <Form.Field error={errors && errors.programa && errors.programa[0] ? true : false}>
                                             <label htmlFor="">Programa <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese la descripción del programa"
                                                 name="programa"
                                                 value={form.programa || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.programa && errors.programa[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.funcionID && errors.funcionID[0]}>
+                                        <Form.Field error={errors && errors.funcionID && errors.funcionID[0] ? true : false}>
                                             <label htmlFor="">FuncionID <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese el ID de la funcion"
                                                 name="funcionID"
                                                 value={form.funcionID || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.funcionID && errors.funcionID[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.funcion && errors.funcion[0]}>
+                                        <Form.Field error={errors && errors.funcion && errors.funcion[0] ? true : false}>
                                             <label htmlFor="">Funcion <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese la descripción de la funcion"
                                                 name="funcion"
                                                 value={form.funcion || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.funcion && errors.funcion[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.subProgramaID && errors.subProgramaID[0]}>
+                                        <Form.Field error={errors && errors.subProgramaID && errors.subProgramaID[0] ? true : false}>
                                             <label htmlFor="">Sub-ProgramaID <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese el ID de la Sub-Programa"
                                                 name="subProgramaID"
                                                 value={form.subProgramaID || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.subProgramaID && errors.subProgramaID[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.sub_programa && errors.sub_programa[0]}>
+                                        <Form.Field error={errors && errors.sub_programa && errors.sub_programa[0] ? true : false}>
                                             <label htmlFor="">Sub-Programa <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese la descripción del Sub-Programa"
                                                 name="sub_programa"
                                                 value={form.sub_programa || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.sub_programa && errors.sub_programa[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.actividadID && errors.actividadID[0]}>
+                                        <Form.Field error={errors && errors.actividadID && errors.actividadID[0] ? true : false}>
                                             <label htmlFor="">ActividadID <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese el ID de la Actividad"
                                                 name="actividadID"
                                                 value={form.actividadID || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.actividadID && errors.actividadID[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.actividad && errors.actividad[0]}>
+                                        <Form.Field error={errors && errors.actividad && errors.actividad[0] ? true : false}>
                                             <label htmlFor="">Actividad <b className="text-red">*</b></label>
                                             <input type="text"
                                                 placeholder="Ingrese la descripción de la Actividad"
                                                 name="actividad"
                                                 value={form.actividad || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.actividad && errors.actividad[0]}</label>
                                         </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-4 text-right">
-                                        <Show condicion={this.state.edit}>
-                                            <Button color="red"
-                                                disabled={this.state.loading}
-                                                onClick={(e) => this.setState(state => ({ edit: false, errors: {}, form: state.old }))}
-                                            >
-                                                <i className="fas fa-times"></i> Cancelar
-                                            </Button>
-                                        </Show>
-
-                                        <Button color="teal" 
-                                            disabled={!this.state.edit}
-                                            loading={this.state.loading}
-                                            onClick={this.save}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
                                     </div>
                                 </div>
                             </div>
                         </Form>
                     </div>
-                </Body>
+                </BoardSimple>
             </div>
-        )
-    }
-    
+            {/* panel de control */}
+            <Show condicion={edit}>
+                <ContentControl>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="red"
+                            onClick={(e) => setEdit(false)}
+                        >
+                            <i className="fas fa-times"></i> Cancelar
+                        </Button>
+                    </div>
+
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="blue"
+                            onClick={save}
+                        >
+                            <i className="fas fa-sync"></i> Actualizar
+                        </Button>
+                    </div>
+                </ContentControl>
+            </Show>
+        </>
+    )
 }
+
+// server
+EditMeta.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    // get id
+    let id = atob(query.id || "") || "_error";
+    // request
+    let { success, meta } = await unujobs.get(`meta/${id}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({ success: false, meta: {} }));
+    // responser
+    return { pathname, query, success, meta };
+}
+
+// exportar
+export default EditMeta;

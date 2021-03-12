@@ -106,12 +106,12 @@ const  DiscountTypeCategoria = ({ success, query, pathname, type_categoria }) =>
     }
 
     const saveCategoria = async () => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         let datos = Object.assign({}, form);
         datos.type_categoria_id = type_categoria.id;
         await unujobs.post('planilla_type_descuento', datos)
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             Swal.fire({ icon: 'success', text: message });
@@ -119,7 +119,7 @@ const  DiscountTypeCategoria = ({ success, query, pathname, type_categoria }) =>
             setForm({ planilla_id: datos.planilla_id });
         }).catch(err => {
             try {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { errors, message } = err.response.data;
                 setErrors(errors);
                 Swal.fire({ icon: 'warning', text: 'Datos incorrectos!' });
@@ -133,16 +133,16 @@ const  DiscountTypeCategoria = ({ success, query, pathname, type_categoria }) =>
         let answer = await Confirm("warning", `¿Estas seguro en eliminar la configuración?`, "Eliminar");
         if (answer) {
             setBlock(true);
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`planilla_type_descuento/${id}`, { _method: 'DELETE' })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
                 getCategorias()
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
             setBlock(false)
@@ -152,17 +152,17 @@ const  DiscountTypeCategoria = ({ success, query, pathname, type_categoria }) =>
     const updateCategoria = async (obj) => {
         setCurrentLoading(true);
         setBlock(true);
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         obj._method = 'PUT';
         await unujobs.post(`planilla_type_descuento/${obj.id}`, obj)
         .then(res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             Swal.fire({ icon: 'success', text: message });
             getCategorias();
         }).catch(err => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'error', text: err.message });
         });
         setCurrentLoading(false);

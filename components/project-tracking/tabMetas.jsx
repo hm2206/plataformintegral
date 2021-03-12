@@ -42,15 +42,15 @@ const TabTeam = () => {
     const deleteTeam = async (id) => {
         let answer = await Confirm('warning', `¿Deseas eliminar del equipo?`, 'Eliminar')
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await projectTracking.post(`team/${id}/delete`, {})
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     getTeam();
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     Swal.fire({ icon: 'error', text: err.message });
                 })
         }

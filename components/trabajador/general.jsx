@@ -44,12 +44,12 @@ const  General = ({ work }) => {
     const updateWork = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`, 'Estoy Seguro')
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let form = Object.assign({}, current_work);
             form._method = 'PUT';
             await unujobs.post(`work/${work.id}`, form)
             .then(res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 setEdit(false);
@@ -57,7 +57,7 @@ const  General = ({ work }) => {
             })
             .catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { data } = err.response;
                     if (!data) throw new Error(err.message);
                     let { message, errors } = data;

@@ -35,12 +35,12 @@ const Afectacion = () => {
 
     // actualizar historial
     const updateHistorial = async () => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         let form = Object.assign({}, historial);
         form._method = 'PUT';
         await unujobs.post(`historial/${historial.id}`, form, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -49,7 +49,7 @@ const Afectacion = () => {
                 setRefresh(true);
             }).catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message, errors } = err.response.data;
                     setErrors(errors);
                     Swal.fire({ icon: 'warning', text: 'Datos incorrectos' });

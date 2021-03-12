@@ -36,10 +36,10 @@ const CreateAfp = ({ pathname, query }) => {
     const save = async () => {
         let answer = await Confirm('warning', `¿Deseas guardar los datos?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post('afp', form)
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
@@ -48,7 +48,7 @@ const CreateAfp = ({ pathname, query }) => {
                 setLey({});
             }).catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { data } = err.response;
                     if (typeof data != 'object') throw new Error(err.message);
                     if (typeof data.errors != 'object') throw new Error(data.message || ""); 

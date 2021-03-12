@@ -18,15 +18,16 @@ import Merito from '../../../components/trabajador/merito';
 import Licencia from '../../../components/trabajador/licencia';
 import Permiso from '../../../components/trabajador/permiso';
 import Vacacion from '../../../components/trabajador/vacacion';
+import NotFoundData from '../../../components/notFoundData';
 
 
-const TrabajadorID = ({ work, pathname, query }) => {
+const TrabajadorID = ({ pathname, query, success, work }) => {
 
-    // app
-    const app_context = useContext(AppContext);
 
     // estados
     const [option, setOption] = useState("general");
+
+    if (!success) return <NotFoundData/>
 
     // render
     return <Fragment>
@@ -98,8 +99,8 @@ const TrabajadorID = ({ work, pathname, query }) => {
 TrabajadorID.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
     let { query, pathname } = ctx;
-    let id = atob(query.id || "") || "";
-    let { success, work} = await unujobs.get(`work/${id}`, {}, ctx)
+    let id = atob(query.id || "") || "_error";
+    let { success, work } = await unujobs.get(`work/${id}`, {}, ctx)
         .then(res => res.data)
         .catch(err => ({ success: false, work: {} }));
     // response

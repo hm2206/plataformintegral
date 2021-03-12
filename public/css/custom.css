@@ -640,3 +640,17 @@ svg.icon-inline {
     top: -100%;
     transition: all ease-out 0.2s;
 }
+
+.selection {
+    display: block!important;
+    word-break: keep-all!important;
+    word-wrap: normal!important;
+    text-overflow: ellipsis!important;
+}
+
+.selection > .text{
+    display: block!important;
+    overflow: hidden!important;
+    word-wrap: normal!important;
+    text-overflow: ellipsis;
+}

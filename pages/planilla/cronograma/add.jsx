@@ -13,6 +13,8 @@ import { AppContext } from '../../../contexts/AppContext';
 import Skeletor from 'react-loading-skeleton';
 import BoardSimple from '../../../components/boardSimple'
 import HeaderCronograma from '../../../components/cronograma/headerCronograma'
+import { EntityContext } from '../../../contexts/EntityContext';
+import NotFoundData from '../../../components/notFoundData';
 
 
 const PlaceholderInput = ({ height = '38px', width = "100%", circle = false }) => <Skeletor height={height} width={width} circle={circle}/>
@@ -42,8 +44,14 @@ const PlaceholderInfos = () => {
 
 const AddCronograma = ({ query, pathname, success, cronograma }) => {
 
+    // validar data
+    if (!success) return <NotFoundData/>
+
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [form, setForm] = useState({ 
@@ -61,12 +69,6 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
     const [change_page, setChangePage] = useState(false);
     const [is_filter, setIsFilter] = useState(false);
     const [is_check_all, setCheckAll] = useState(false);
-
-    // volver al listado del cronograma
-    const handleBack = (e) => {
-        let { pathname, push } = Router;
-        push({ pathname: backUrl(pathname), query: { mes: cronograma.mes, year: cronograma.year } });
-    }
 
     // cambiar form
     const handleInput = ({ name, value }) => {
@@ -124,7 +126,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
     const add = async (all = 0) => {
         let answer = await Confirm("warning", `¿Está seguro en agregar a los trabajadores(${all ? total : rows.length}) al cronograma #${cronograma.id}?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = new FormData();
             let payload = [];
             // preparar envio
@@ -136,7 +138,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
             datos.append('type_categoria_id', form.type_categoria_id);
             await unujobs.post(`cronograma/${cronograma.id}/add_all`, datos, { headers: { CronogramaID: cronograma.id } })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -145,7 +147,7 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
                 setCheckAll(false);
             })
             .catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
         }
@@ -155,7 +157,8 @@ const AddCronograma = ({ query, pathname, success, cronograma }) => {
     useEffect(() => {
         if (success) {
             getinfos(false);
-            app_context.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
+            entity_context.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
+            return entity_context.fireEntity({ render: false, disabled: false });
         }
     }, []);
 

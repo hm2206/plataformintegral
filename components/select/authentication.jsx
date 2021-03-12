@@ -110,6 +110,25 @@ const SelectSystemModule = ({ system_id, id = "id", name, value, onChange, refre
     />
 }
 
+
+const SelectEntity = ({ id = "id", name, value, onChange, refresh }) => {
+    return <SelectBase 
+        execute={true}
+        api={authentication}
+        url={`entity`}
+        id={`select-entity-${name}`}
+        value={id}
+        text="name"
+        obj="entities"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Entidad"
+        refresh={refresh}
+    />
+}
+
+
 const SelectEntityNotUser = ({ id = "id", user_id, name, value, onChange, refresh }) => {
     return <SelectBase 
         execute={user_id}
@@ -127,7 +146,7 @@ const SelectEntityNotUser = ({ id = "id", user_id, name, value, onChange, refres
     />
 }
 
-const SelectEntityUser = ({ id = "id", user_id, name, value, onChange, refresh }) => {
+const SelectEntityUser = ({ id = "id", user_id, name, value, onChange, refresh, onReady = null, disabled = false }) => {
     return <SelectBase 
         execute={user_id}
         api={authentication}
@@ -141,6 +160,8 @@ const SelectEntityUser = ({ id = "id", user_id, name, value, onChange, refresh }
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
         placeholder="Seleccionar Entidad"
         refresh={refresh}
+        onReady={onReady}
+        disabled={disabled}
     />
 }
 
@@ -288,6 +309,7 @@ export {
     SelectDependencia,
     SelectDependenciaPerfilLaboral,
     SelectLaboral,
+    SelectEntity,
     SelectEntityNotUser,
     SelectEntityUser,
     SelectEntityDependenciaUser,

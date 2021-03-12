@@ -94,7 +94,7 @@ const Sindicato = () => {
     const createSindicato = async () => {
         let answer = await Confirm('warning', '¿Deseas guardar el Sindicato/Afiliación?');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let payload = {
                 historial_id: historial.id,
                 type_sindicato_id: form.type_sindicato_id
@@ -102,7 +102,7 @@ const Sindicato = () => {
             // send
             await unujobs.post('sindicato', payload, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -110,7 +110,7 @@ const Sindicato = () => {
                 setEdit(false);
                 setForm({});
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
             setBlock(false);
@@ -121,11 +121,11 @@ const Sindicato = () => {
     const deleteSindicato = async (id, index) => {
         let answer = await Confirm('warning', '¿Deseas eliminar el Sindicato/Afiliación?');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             setBlock(true);
             await unujobs.post(`sindicato/${id}`, { _method: 'DELETE' }, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -135,7 +135,7 @@ const Sindicato = () => {
                 setOld(JSON.parse(JSON.stringify(newSindicatos)));
             })
             .catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
             setBlock(false);

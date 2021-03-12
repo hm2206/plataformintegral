@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Form, Checkbox, Button } from 'semantic-ui-react';
+import { Form, Button } from 'semantic-ui-react';
 import Show from '../show';
 import Skeleton from 'react-loading-skeleton';
 import { AppContext } from '../../contexts/AppContext';
@@ -85,12 +85,12 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
     const createConfig = async () => {
         let answer = await Confirm("warning", `¿Deseas asignar el descuento al contrato?`, 'Asignar');
         if (!answer) return false; 
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         let datos = Object.assign({}, form);
         datos.info_id = info.id;
         await unujobs.post(`info_type_descuento`, datos)
         .then(res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
             setForm({});
@@ -98,7 +98,7 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
             setCurrentPage(1);
             setIsUpdate(true);
         }).catch(err => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             if (typeof err.response != 'object') throw new Error(err.message);
             let { message } = err.response.data;
             Swal.fire({ icon: 'error', text: message }); 
@@ -112,18 +112,19 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
     const deleteConfig = async (id, index) => {
         let value = await Confirm("warning", "¿Desea elimnar el descuento?", "Eliminar")
         if (!value) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await unujobs.post(`info_type_descuento/${id}`, { _method: 'DELETE' })
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
             let newConfig = JSON.parse(JSON.stringify(configs));
             newConfig.splice(index, 1);
             setConfigs(newConfig);
+            setOld(newConfig);
         }).catch(err => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'error', text: err.message });
         });
     }
@@ -132,21 +133,21 @@ const UpdateDescuento = ({ info, edit, onUpdate }) => {
     const updateConfig = async () => {
         let answer = await Confirm('warning', `¿Deseas actualizar la configuración?`, 'Confirmar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let form = new FormData;
             let datos = await configs.filter(c => c.edit);
             form.append('configs', JSON.stringify(datos));
             form.append('_method', 'PUT');
             await unujobs.post(`info_type_descuento/${info.id}/update_all`, form)
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
                     setOld(configs);
                     if (typeof onUpdate == 'function') onUpdate();
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     Swal.fire({ icon: 'error', text: err.message })
                 })
         }

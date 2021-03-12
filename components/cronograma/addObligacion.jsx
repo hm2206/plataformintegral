@@ -13,7 +13,7 @@ import moment from 'moment';
 
 const AddObligacion = (props) => {
 
-    // app
+    // entity
     const app_context = useContext(AppContext);
 
     // estados
@@ -46,13 +46,13 @@ const AddObligacion = (props) => {
     const addObligacion = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en agregar la obligación judicial?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, form);
             datos.person_id = person.id;
             datos.info_id = props.info_id;
             await unujobs.post('type_obligacion', datos)
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message, type_obligacion } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
@@ -61,7 +61,7 @@ const AddObligacion = (props) => {
                     await addCurrentObligacion(type_obligacion);
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = err.response.data;
                         Swal.fire({ icon: 'warning', text: message });
                         setErrors(errors);
@@ -72,7 +72,7 @@ const AddObligacion = (props) => {
 
     // agregar obligacion al cronograma
     const addCurrentObligacion = async (type_obligacion) => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         // obtener datos de las props
         let { onSave, historial_id } = props;
         let paylaod = {
@@ -82,13 +82,13 @@ const AddObligacion = (props) => {
         // request  
         await unujobs.post('obligacion', paylaod)
             .then(res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
                 if (typeof onSave == 'function') onSave(type_obligacion);
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message });
             })
     }

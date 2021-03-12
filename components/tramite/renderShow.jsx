@@ -80,10 +80,10 @@ const RenderShow = () => {
     const verifyTracking = async () => {
         let answer = await Confirm(`warning`, `¿Estás seguro en revisar el trámite?`, 'Revisar');    
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await tramite.post(`tracking/${current_tracking.id}/verify`, {}, { headers: { DependenciaId: tramite_context.dependencia_id } })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -91,7 +91,7 @@ const RenderShow = () => {
                 tramite_context.setExecute(true);
             }).catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { data } = err.response;
                     if (typeof data != 'object') throw new Error(err.message);
                     throw new Error(data.message);
@@ -105,20 +105,20 @@ const RenderShow = () => {
     // agregar archivo
     const addFile = async ({ name, file }, object_id, object_type = 'App/Models/Tramite') => {
         let datos = new FormData;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         datos.append('files', file);
         datos.append('object_id', object_id);
         datos.append('object_type', object_type);
         await tramite.post(`file`, datos)
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message, files } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 tramite_context.setExecute(true);
             }).catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { data } = err.response;
                     if (typeof data != 'object') throw new Error(err.message);
                     if (typeof data.errors != 'object') throw Error(data.message);

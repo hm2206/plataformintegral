@@ -61,16 +61,16 @@ const DependenciaIndex = ({ pathname, query, success, dependencia }) => {
     const changeState = async (id, estado) => {
         let answer = await Confirm("warning", `¿Deseas ${estado} la dependencia?`);
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         return await authentication.post(`dependencia/${id}/${estado}`)
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
             return true;
         }).catch(async err => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             await Swal.fire({ icon: 'error', text: err.message });
             return false;
         });

@@ -12,6 +12,8 @@ import { SelectCargo } from '../../../components/select/cronograma';
 import moment from 'moment';
 import Skeletor from 'react-loading-skeleton';
 import { Fragment } from 'react';
+import BoardSimple from '../../../components/boardSimple';
+import NotFoundData from '../../../components/notFoundData';
 
 const Placeholder = () => {
     const datos = [1, 2];
@@ -156,6 +158,9 @@ const ItemConfig = ({ obj = {}, index, disabled = false, onUpdate = null }) => {
 
 const TypeAportacionConfigMax = ({ success, type_aportacion, pathname, query }) => {
 
+    // validar datos
+    if (!success) return <NotFoundData/>
+
     // app
     const app_context = useContext(AppContext);
 
@@ -186,12 +191,12 @@ const TypeAportacionConfigMax = ({ success, type_aportacion, pathname, query }) 
     const save = async () => {
         let answer = await Confirm('warning', `¿Deseas agregar configuración?`, 'Crear');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, form);
             datos.type_aportacion_id = type_aportacion.id;
             await unujobs.post(`config_aporte`, datos)
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
@@ -201,7 +206,7 @@ const TypeAportacionConfigMax = ({ success, type_aportacion, pathname, query }) 
                 })
                 .catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { data } = err.response;
                         if (typeof data != 'object') throw new Error(err.message);  
                         if (typeof data.errors != 'object') throw new Error(data.message);
@@ -245,10 +250,13 @@ const TypeAportacionConfigMax = ({ success, type_aportacion, pathname, query }) 
     // render
     return (
         <div className="col-md-12">
-            <Body>
-                <div className="card-header">
-                    <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Configuración Aportación Máxima
-                </div>
+            <BoardSimple
+                title="Tip. Aportación"
+                info={["Configuración Aportación Máxima"]}
+                prefix={<BtnBack/>}
+                bg="light"
+                options={[]}
+            >
                 <div className="card-body">
                     <Form className="row justify-content-center">
                         <div className="col-md-10">
@@ -442,7 +450,7 @@ const TypeAportacionConfigMax = ({ success, type_aportacion, pathname, query }) 
                         </div>
                     </Form>
                 </div>
-            </Body>
+            </BoardSimple>
         </div>
     )
 }

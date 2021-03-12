@@ -3,14 +3,14 @@ import {Button, Form, Select} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
-import {BtnFloat, Body} from '../../../components/Utils';
-import { AUTHENTICATE, AUTH } from '../../../services/auth';
+import { BtnFloat } from '../../../components/Utils';
+import { AUTHENTICATE } from '../../../services/auth';
 import { Pagination } from 'semantic-ui-react';
-import Show from '../../../components/show';
 import { Confirm } from '../../../services/utils';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
+import BoardSimple from '../../../components/BoardSimple';
 
 
 const Meta = ({ success, metas, query }) => {
@@ -45,16 +45,16 @@ const Meta = ({ success, metas, query }) => {
     const changedState = async (obj, estado) => {
         let answer = await Confirm("warning", `¿Deseas ${estado ? 'restaurar' : 'desactivar' } la meta "${obj.metaID}"?`)
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`meta/${obj.id}/estado`, { estado })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 await handleSearch();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
         }
@@ -69,19 +69,19 @@ const Meta = ({ success, metas, query }) => {
     }
 
     // aperturar metas desde un año anterior
-    const aperturarMetas = async (obj, estado) => {
+    const aperturarMetas = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en aperturar las metas desde un año anterior?`)
         if (answer) {
-            app_context.fireLoading(true);
-            await unujobs.post(`meta/apertura`, { estado })
+            app_context.setCurrentLoading(true);
+            await unujobs.post(`meta/apertura`)
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 await handleSearch();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
         }
@@ -98,140 +98,140 @@ const Meta = ({ success, metas, query }) => {
 
     // render 
     return (
-                <Form className="col-md-12">
-                    <Body>
-                        <Datatable titulo="Lista de Metas Presupuestales"
-                        isFilter={false}
-                        headers={
-                            ["#metaID", "Descripción", "#actividadID", "Actividad", "Estado"]
-                        }
-                        index={
-                            [
-                                {
-                                    key: "metaID",
-                                    type: "text"
-                                }, 
-                                {
-                                    key: "meta",
-                                    type: "text"
-                                },
-                                {
-                                    key: "actividadID",
-                                    type: "text"
-                                },
-                                {
-                                    key: "actividad",
-                                    type: "text"
-                                },
-                                {
+        <Form className="col-md-12">
+            <BoardSimple
+                title="Metas"
+                info={["Listado de Metas Presp."]}
+                prefix="M"
+                bg="danger"
+                options={[
+                    { key: "apertura", title: "Aperturar metas", icon: "fas fa-arrow-down" }
+                ]}
+                onOption={aperturarMetas}
+            >
+                <Datatable
+                    isFilter={false}
+                    headers={
+                        ["#metaID", "Descripción", "#actividadID", "Actividad", "Estado"]
+                    }
+                    index={
+                        [
+                            {
+                                key: "metaID",
+                                type: "text"
+                            }, 
+                            {
+                                key: "meta",
+                                type: "text"
+                            },
+                            {
+                                key: "actividadID",
+                                type: "text"
+                            },
+                            {
+                                key: "actividad",
+                                type: "text"
+                            },
+                            {
+                                key: "estado",
+                                type: "switch",
+                                justify: "center",
+                                is_true: "Activo",
+                                is_false: "Eliminado"
+                            }
+                        ]
+                    }
+                    options={
+                        [
+                            {
+                                id: 1,
+                                key: "edit",
+                                icon: "fas fa-pencil-alt",
+                                title: "Editar Meta",
+                                rules: {
                                     key: "estado",
-                                    type: "switch",
-                                    justify: "center",
-                                    is_true: "Activo",
-                                    is_false: "Eliminado"
+                                    value: 1
                                 }
-                            ]
-                        }
-                        options={
-                            [
-                                {
-                                    id: 1,
-                                    key: "edit",
-                                    icon: "fas fa-pencil-alt",
-                                    title: "Editar Meta",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
-                                }, {
-                                    id: 1,
-                                    key: "restore",
-                                    icon: "fas fa-sync",
-                                    title: "Restaurar Meta",
-                                    rules: {
-                                        key: "estado",
-                                        value: 0
-                                    }
-                                }, {
-                                    id: 1,
-                                    key: "delete",
-                                    icon: "fas fa-times",
-                                    title: "Desactivar Meta",
-                                    rules: {
-                                        key: "estado",
-                                        value: 1
-                                    }
+                            }, {
+                                id: 1,
+                                key: "restore",
+                                icon: "fas fa-sync",
+                                title: "Restaurar Meta",
+                                rules: {
+                                    key: "estado",
+                                    value: 0
                                 }
-                            ]
-                        }
-                        optionAlign="text-center"
-                        getOption={getOption}
-                        data={metas && metas.data}
-                    >
-                        <div className="card-body">
-                            <div className="row">
-                                <div className="col-md-3 mb-2">
-                                    <Form.Field>
-                                        <input type="number" 
-                                            name="year"
-                                            value={year}
-                                            onChange={({target}) => setYear(target.value)}
-                                        />
-                                    </Form.Field>
-                                </div>
-                                <div className="col-md-4 mb-2">
-                                    <Form.Field>
-                                        <Select
-                                            fluid
-                                            options={[
-                                                {key: "active", value: "1", text: "Activo"},
-                                                {key: "des-active", value: "0", text: "Desactivado"}
-                                            ]}
-                                            name="estado"
-                                            value={`${estado}`}
-                                            onChange={(e, obj) => setEstado(obj.value)}
-                                        />
-                                    </Form.Field>
-                                </div>
-                                <div className="col-md-2 mb-2">
-                                    <Button fluid
-                                        color="blue"
-                                        onClick={handleSearch}
-                                    >
-                                        <i className="fas fa-search"></i>
-                                    </Button>
-                                </div>
-
-                                <div className="col-md-2 mb-2">
-                                    <Button fluid
-                                        color="purple"
-                                        onClick={aperturarMetas}
-                                    >
-                                        Aperturar
-                                    </Button>
-                                </div>
+                            }, {
+                                id: 1,
+                                key: "delete",
+                                icon: "fas fa-times",
+                                title: "Desactivar Meta",
+                                rules: {
+                                    key: "estado",
+                                    value: 1
+                                }
+                            }
+                        ]
+                    }
+                    optionAlign="text-center"
+                    getOption={getOption}
+                    data={metas && metas.data}
+                >
+                    <div className="card-body">
+                        <div className="row">
+                            <div className="col-md-3 mb-2">
+                                <Form.Field>
+                                    <input type="number" 
+                                        name="year"
+                                        value={year}
+                                        onChange={({target}) => setYear(target.value)}
+                                    />
+                                </Form.Field>
+                            </div>
+                            <div className="col-md-4 mb-2">
+                                <Form.Field>
+                                    <Select
+                                        fluid
+                                        options={[
+                                            {key: "active", value: "1", text: "Activo"},
+                                            {key: "des-active", value: "0", text: "Desactivado"}
+                                        ]}
+                                        name="estado"
+                                        value={`${estado}`}
+                                        onChange={(e, obj) => setEstado(obj.value)}
+                                    />
+                                </Form.Field>
+                            </div>
+                            <div className="col-md-2 mb-2">
+                                <Button fluid
+                                    color="blue"
+                                    onClick={handleSearch}
+                                >
+                                    <i className="fas fa-search"></i>
+                                </Button>
                             </div>
                         </div>
-                    </Datatable>
-                        
-                    <div className="text-center">
-                        <hr/>
-                        <Pagination activePage={query.page} 
-                            totalPages={metas.last_page || 1}
-                            onPageChange={handlePage}
-                        />
                     </div>
-                </Body>
+                </Datatable>
+                    
+                <div className="text-center">
+                    <hr/>
+                    <Pagination activePage={query.page} 
+                        totalPages={metas.last_page || 1}
+                        onPageChange={handlePage}
+                    />
+                </div>
+            </BoardSimple>
 
-                <BtnFloat
-                    onClick={async (e) => {
-                        let { pathname, push } = Router;
-                        push({ pathname: `${pathname}/create` });
-                    }}
-                >
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
-            </Form>
+            <BtnFloat
+                onClick={async (e) => {
+                    let { pathname, push } = Router;
+                    push({ pathname: `${pathname}/create` });
+                }}
+            >
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
+        </Form>
     )
 }
 

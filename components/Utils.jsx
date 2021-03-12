@@ -1,4 +1,4 @@
-import React, { Fragment, useState, Component, useEffect } from "react";
+import React, { Fragment, useState, Component, useEffect, useContext } from "react";
 import Show from "./show";
 import { Dropdown, Button, Icon, Form, Header, Progress } from 'semantic-ui-react';
 import Swal from "sweetalert2";
@@ -10,6 +10,9 @@ import { PDFDocument } from 'pdf-lib'
 import { formatBytes } from '../services/utils';
 import Router from 'next/router';
 import atob from 'atob';
+import { ScreenContext } from '../contexts/ScreenContext'
+import { EntityContext } from "../contexts/EntityContext";
+import { AppContext } from "../contexts";
 
 const InputFile = ({ id, name, onChange, error = false, children = null, title = "Select", accept = "*", icon = 'image', label = null }) => {
 
@@ -178,17 +181,24 @@ const DropZone = ({
 }
 
 
-const Content = props => (
-  <Fragment>
-    <div className={props.screen_lg ? 'app-main-extend' : 'app-main'}>
-      <div className="wrapper">
-        <div className="page mb-5">
-          <div className={`page-inner- row`}>{props.children}</div>
+const Content = ({ children }) => {
+  
+  // screen
+  const { fullscreen } = useContext(ScreenContext)
+
+  // render
+  return (
+    <Fragment>
+      <div className={fullscreen ? 'app-main-extend' : 'app-main'}>
+        <div className="wrapper">
+          <div className="page mb-5">
+            <div className={`page-inner- row`}>{children}</div>
+          </div>
         </div>
       </div>
-    </div>
-  </Fragment>
-);
+    </Fragment>
+  )
+};
 
 const Body = props => (
   <Fragment>

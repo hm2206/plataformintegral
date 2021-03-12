@@ -10,11 +10,15 @@ import { AppContext } from '../../../contexts/AppContext';
 import Show from '../../../components/show';
 import BoardSimple from '../../../components/boardSimple';
 import { BtnFloat } from '../../../components/Utils';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 const Contrato = ({ pathname, query, success, infos }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [option, setOption] = useState("");
@@ -27,7 +31,8 @@ const Contrato = ({ pathname, query, success, infos }) => {
     })
 
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, []);
 
     // opciones

@@ -35,12 +35,12 @@ const AddPlanTrabajo = (props) => {
     const cratePlanTrabajo = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en guardar el proyecto?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, form);
             datos.project_id = project.id;
             await projectTracking.post('plan_trabajo', datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setForm({})
@@ -48,7 +48,7 @@ const AddPlanTrabajo = (props) => {
                     let { onSave } = props;
                     if (typeof onSave == 'function') onSave();
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { data } = err.response;
                     if (typeof data != 'object') throw new Error(err.message);
                     if (typeof data.errors != 'object') throw new Error(data.message);

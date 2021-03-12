@@ -6,19 +6,21 @@ import { AUTHENTICATE } from '../../../services/auth';
 import { Form, Button, Pagination } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
-import { allCronograma } from '../../../storage/actions/cronogramaActions';
-import { Body } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
-import BoardSimple from '../../../components/boardSimple'
+import BoardSimple from '../../../components/boardSimple';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 
 const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [year, setYear] = useState(query.year || "");
@@ -27,7 +29,8 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
 
     // setting entity
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, []);
 
     // búscar
@@ -64,7 +67,7 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
     const handleExport = async () => {
         let answer = await Confirm("warning", "¿Deseas exportar los cronogramas a excel?")
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await unujobs.fetch(`exports/personal/${year}/${mes}`)
         .then(resdata => resdata.blob())
         .then(blob => {
@@ -74,7 +77,7 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
             a.target = "_blank";
             a.click();
         }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        app_context.fireLoading(false);
+        app_context.setCurrentLoading(false);
     }
 
     // siguiente página
@@ -165,11 +168,7 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
                                 title: "Editar cronograma",
                                 rules: {
                                     key: "estado",
-                                    value: 1,
-                                    or: {
-                                        key: "error",
-                                        value: 0
-                                    }
+                                    value: 1
                                 }
                             }, 
                             {
@@ -231,15 +230,6 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
                                 rules: {
                                     key: "estado",
                                     value: 0
-                                }
-                            }, 
-                            {
-                                key: "restore",
-                                icon: "fas fa-sync",
-                                title: "Restaurar Cronograma",
-                                rules: {
-                                    key: "estado",
-                                    value: 2
                                 }
                             },
                             {

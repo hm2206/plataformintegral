@@ -104,7 +104,7 @@ const Detalle = () => {
     const createDetalle = async () => {
         let answer = await Confirm("warning", `¿Deseas guardar el detalle?`, 'Guardar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             setBlock(true);
             // setting payload
             let payload = {
@@ -115,7 +115,7 @@ const Detalle = () => {
             // request
             await unujobs.post('detalle', payload)
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -123,7 +123,7 @@ const Detalle = () => {
                 setEdit(false);
                 await findDetallado();
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message });
             });
             setBlock(false);
@@ -148,13 +148,13 @@ const Detalle = () => {
 
     // actualizar detalle
     const updateDetalle = async () => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         setBlock(true);
         let form = new FormData;
         form.append('detalles', JSON.stringify(payload));
         await unujobs.post(`detalle/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
             if(!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
@@ -163,7 +163,7 @@ const Detalle = () => {
             setSend(false);
             setOld(JSON.parse(JSON.stringify(detalles)));
         }).catch(err => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             setBlock(false);
             setSend(false);
             Swal.fire({ icon: 'error', text: err.message })

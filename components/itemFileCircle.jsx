@@ -1,5 +1,4 @@
 import React, { useState, useContext } from 'react';
-import Router from 'next/router';
 import { tramite } from '../services/apis';
 import Show from './show';
 import { AppContext } from '../contexts/AppContext';
@@ -24,17 +23,17 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
     const deleteFile = async () => {
         let answer = await Confirm(`warning`, `¿Estás seguro en eliminar el archivo "${name}"?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await tramite.post(`file/${id}/destroy`)
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
                     if (typeof onAction == 'function') onAction('delete');
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { data } = err.response;
                         if (typeof data != 'object') throw new Error(err.message);
                         throw new Error(data.message);
@@ -61,17 +60,17 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
 
     // generar firma al pdf
     const handleSignaturePDF = async () => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await axios.get(url, { responseType: 'blob' })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let blob = res.data;
                 blob.lastModifiedDate = new Date();
                 blob.name = name;
                 let file = new File([blob], name);
                 await generateVisorPDF(file, blob)
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: 'no se pudó obtener el archivo' })
                 setShowSigned(false);
             });
@@ -79,19 +78,19 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
 
     // actualizar pdf firmado
     const signaturePDF = async (payload, blob) => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         blob.lastModifiedDate = new Date();
         let file = new File([blob], name);
         let datos = new FormData();
         datos.append('file', file);
         await tramite.post(`file/${id}/update`, datos)
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 await Swal.fire({ icon: 'success', text: 'El archivo se firmó correctamente!' });
                 if (typeof onAction == 'function') onAction('signature', file)
                 await generateVisorPDF(file, blob);
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: 'No se pudo firmar el PDF' })
             });
     }

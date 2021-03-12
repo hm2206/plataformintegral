@@ -6,15 +6,20 @@ import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
 import Router from 'next/router';
 import btoa from 'btoa';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 const IndexProject = ({ success, projects }) => {
 
     // app
     const app_context = useContext(AppContext);
 
+    // entity
+    const entity_context = useContext(EntityContext);
+
     // primara carga
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, []);
 
     // handle options

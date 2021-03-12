@@ -9,6 +9,7 @@ import { Body, BtnBack } from '../../../components/Utils';
 import { ProjectProvider } from '../../../contexts/project-tracking/ProjectContext';
 import atob from 'atob';
 import Router from 'next/router';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 //  componente principal
 const InformationProject = ({ success, project }) => {
@@ -16,9 +17,13 @@ const InformationProject = ({ success, project }) => {
     // app
     const app_context = useContext(AppContext);
     
+    // entity
+    const entity_context = useContext(EntityContext);
+
     // primera carga
     useEffect(() => {
-        app_context.fireEntity({ render: true, disabled: true });
+        entity_context.fireEntity({ render: true, disabled: true, entity_id: project.entity_id });
+        return () => entity_context.fireEntity({ render: false, disabled: false });
     }, []);
 
     // render

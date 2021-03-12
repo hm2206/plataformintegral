@@ -50,19 +50,19 @@ const TabTracking = () => {
     const addTracking = async () => {
         let answer = await Confirm("warning", `¿Deseas guardar el código?`, 'Guardar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = {};
             datos.project_id = project.id;
             datos.code = code;
             await projectTracking.post(`tracking`, datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setCode("");
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = err.response.data;
                         if (!errors) throw new Error(message);
                         Swal.fire({ icon: 'warning', text: message })

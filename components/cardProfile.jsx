@@ -4,14 +4,13 @@ import { authentication, handleErrorRequest, onProgress } from '../services/apis
 import Show from '../components/show';
 import Swal from "sweetalert2";
 import { LoadFile } from '../components/Utils';
-import Router from "next/router";
-import { AppContext } from '../contexts/AppContext';
 import { SelectDepartamento, SelectProvincia, SelectDistrito } from '../components/select/authentication';
+import { AuthContext } from "../contexts/AuthContext";
 
 const CardProfile = () => {
 
     // app
-    const app_context = useContext(AppContext);
+    const { auth, setAuth } = useContext(AuthContext);
 
     // estados
     const [current_person, setCurrentPerson] = useState({});
@@ -22,14 +21,22 @@ const CardProfile = () => {
     const [errors, setErrors] = useState({});
     const [percent, setPercent] = useState(0);
 
+    // setting auth
+    const settingAuth = () => {
+        const { person } = auth || {};
+        setCurrentUser(JSON.parse(JSON.stringify(auth || {})));
+        setCurrentPerson(JSON.parse(JSON.stringify(person || {})));
+    }
+
+    
+    // primera carga
+    useEffect(() => {
+        if (auth) settingAuth();
+    }, [auth]);
+
     // cancelar edición
     useEffect(() => {
-        if (!edit) {
-            const { auth } = app_context || {};
-            const { person } = auth || {};
-            setCurrentUser(JSON.parse(JSON.stringify(auth || {})));
-            setCurrentPerson(JSON.parse(JSON.stringify(person || {})));
-        }
+        if (!edit) settingAuth();
     }, [edit]);
 
     // manejador de cambio del person
@@ -99,8 +106,8 @@ const CardProfile = () => {
         .then(async res => {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
-            await Router.push(location.href);
             setEdit(false);
+            setAuth({ ...auth, ...current_user, person: current_person });
         }).catch(async err => handleErrorRequest(err, setErrors));
         setCurrentLoading(false);
     }

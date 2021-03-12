@@ -9,11 +9,15 @@ import { Button, Form, Checkbox } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import { SelectPresupuesto } from '../../../components/select/project_tracking';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 const CreatePresupuesto = () => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // datos
     const [form, setForm] = useState({});
@@ -21,7 +25,8 @@ const CreatePresupuesto = () => {
 
     // primera carga
     useEffect(() => {
-        app_context.fireEntity({ render: false });
+        entity_context.fireEntity({ render: false });
+        return () => entity_context.fireEntity({ render: false });
     }, []);
 
     // validar presupuesto_id
@@ -43,17 +48,17 @@ const CreatePresupuesto = () => {
     const savePresupuesto = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en guardar el presupuesto?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let newForm = Object.assign({}, form);
             await projectTracking.post('presupuesto', newForm)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setForm({});
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = err.response.data;
                         console.log(err.response.data);
                         if (typeof errors != 'object') throw new Error(message);

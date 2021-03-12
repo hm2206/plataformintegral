@@ -1,18 +1,18 @@
-import React, { Component } from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from '../contexts';
 
-export default class Logo extends Component
-{
+const Logo = () => {
 
-    render() {
+    // app context
+    const { app, env } = useContext(AppContext);
 
-        let { my_app } = this.props;
-
-        return (
-            <h3>
-                <img src={my_app && my_app.icon && my_app.icon_images && my_app.icon_images.icon_50x50} alt={my_app.name} style={{ width: "30px", marginRight: "0.3em", borderRadius: '0.2em' }}/>
-                {my_app.name || "Integración"}
-            </h3>
-        );
-    }
-
+    // render
+    return (
+        <h3>
+            <img src={app.icon && app.icon_images && app.icon_images.icon_50x50} alt={app.name} style={{ width: "30px", marginRight: "0.3em", borderRadius: '0.2em' }}/>
+            {app.name || env.app.name || ""}
+        </h3>
+    );
 }
+
+export default Logo;

@@ -32,7 +32,7 @@ const CierreProject = ({ isClose, afterSave }) => {
         e.preventDefault();
         let answer = await Confirm("warning", `¿Estas seguro en cerrar el proyecto?`, 'Cerrar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = new FormData();
             for (let attr in form) {
                 datos.append(attr, form[attr]);
@@ -40,14 +40,14 @@ const CierreProject = ({ isClose, afterSave }) => {
             // request
             await projectTracking.post(`project/${project.id}/cierre`, datos)
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     await Swal.fire({ icon: 'success', text: message });
                     if (typeof afterSave == 'function') afterSave();
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message, errors } = err.response.data;
                         if (!errors) throw new Error(message);
                         Swal.fire({ icon: 'warning', text: message });

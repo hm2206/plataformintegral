@@ -1,31 +1,25 @@
-import React, { Component } from 'react';
+import React from 'react';
+import AppIconCube from './appIconCube';
 
-export default class LoadingGlobal extends Component
-{
+const LoadingGlobal = ({ display, id }) => {
 
-    render() {
-
-        let { display, id, app } = this.props;
-
-        return (
-            <div style={{
-                width: "100%", 
-                height: "100%", 
-                background: 'rgba(255, 255, 255, 0.8)', 
-                position: 'fixed', 
-                top: '0px', 
-                left: '0px',
-                zIndex: '5000',
-                display: display ? display : 'block'
-            }}  id={id ? id : 'id-loading-brand'}>
-                <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <img src={app && app.icon && app.icon_images && app.icon_images.icon_200x200 || '/img/loading_page.png'} 
-                        alt="loader" className="loading-brand"
-                        style={{ width: "150px", height: "150px", objectFit: 'contain' }}
-                    />
-                </div>
+    // render
+    return (
+        <div style={{
+            width: "100%", 
+            height: "100%", 
+            background: 'rgba(255, 255, 255, 0.8)', 
+            position: 'fixed', 
+            top: '0px', 
+            left: '0px',
+            zIndex: '5000',
+            display: display ? display : 'block'
+        }}  id={id ? id : 'id-loading-brand'}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <AppIconCube className="loading-brand"/>
             </div>
-        )
-    }
-
+        </div>
+    )
 }
+
+export default LoadingGlobal;

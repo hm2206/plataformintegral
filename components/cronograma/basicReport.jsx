@@ -160,7 +160,7 @@ const BasicReport = ({ cronograma, basic }) => {
 
     // acciones
     const handleClick = async (e, obj) => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         if (obj.action == 'link') {
             let query = await genetateQuery();
             let link = await handleUrl(obj.url, obj.params);
@@ -179,13 +179,13 @@ const BasicReport = ({ cronograma, basic }) => {
             form_current.target = '_blank';
             form_current.submit();
             document.body.removeChild(form_current);
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
         } else if (obj.action == 'blob') {
             let params = await genetateQuery(false);
             let link = await handleUrl(obj.url, obj.params);
             await unujobs.post(link, params)
             .then(res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { message } = res.data;
                 if (message) throw new Error(message);
                 let array = res.headers['content-type'].split(';');
@@ -197,7 +197,7 @@ const BasicReport = ({ cronograma, basic }) => {
                 obj.download ? a.download = filename : null;
                 a.target = '_blank';
                 a.click();
-            }).catch(err => handleErrorRequest(err, null, (e) => app_context.fireLoading(false)));
+            }).catch(err => handleErrorRequest(err, null, (e) => app_context.setCurrentLoading(false)));
         }   
     }
 

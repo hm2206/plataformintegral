@@ -106,17 +106,17 @@ const Descuento = () => {
         form.monto = obj.monto;
         form._method = 'PUT';
         // send changes
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await unujobs.post(`descuento/${obj.id}/sync`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
             setEdit(false);
             await findDescuento();
         }).catch(err => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'error', text: err.message })
         });
         setSend(false);
@@ -133,10 +133,10 @@ const Descuento = () => {
         if (!datos.length) return await Swal.fire({ icon: 'warning', text: 'No se encontraron cambios' });
         // send changes
         else {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`descuento/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -144,7 +144,7 @@ const Descuento = () => {
                 await findDescuento();
             })
             .catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
         }
@@ -156,18 +156,18 @@ const Descuento = () => {
     const handleEdit = async (obj, edit = 0) => {
         let answer = await Confirm("warning", `Deseas ${edit ? 'Desactivar' : 'Activar'} el calculo automático para "${obj.descripcion}"`, "Confirmar");
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             setBlock(true);
             await unujobs.post(`descuento/${obj.id}/edit`, { _method: 'PUT', edit }, { headers: { CronogramaID: cronograma.id, EntityId: cronograma.entity_id } })
             .then(async res => { 
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 setEdit(false);
                 setRefresh(true);
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             })
             setSend(false);

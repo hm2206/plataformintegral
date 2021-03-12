@@ -53,14 +53,14 @@ const SystemIndex = ({ pathname, query, success, systems }) => {
     const generateToken = async (obj, index) => {
         let answer = await Confirm("warning", `¿Deseas generar el Token a sistema de ${obj.name}?`);
         if (!answer) return false; 
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await authentication.post(`system/${obj.id}/generate_token`)
         .then(res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
             handleSearch();
-        }).catch(err => handleErrorRequest(err, null, (error) => app_context.fireLoading(false)));
+        }).catch(err => handleErrorRequest(err, null, (error) => app_context.setCurrentLoading(false)));
     }
 
     // siguiente página

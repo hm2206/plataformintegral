@@ -20,6 +20,25 @@ const SelectPlanilla = ({ id = "id", name, value, onChange, refresh = false, dis
             />
 }
 
+
+const SelectTypeCargo = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+                api={unujobs}
+                url={`type_cargo`}
+                id={`select-tyep_cargo-${id}-${name}`}
+                value={id}
+                text="nombre"
+                obj="type_cargos"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar Tip. Cargo"
+                refresh={refresh}
+                execute={true}
+                disabled={disabled}
+            />
+}
+
 const SelectCronogramaCargo = ({ text = 'alias', id = "id", cronograma_id, name, value, onChange, execute = true, refresh = false, disabled = false, defaultDatos = [] }) => {
     return <SelectBase 
                 api={unujobs}
@@ -477,6 +496,7 @@ const SelectInfoTypeDescuento = ({ id = "id", info_id, except = 0, name, value, 
 // exportables
 export { 
     SelectPlanilla,
+    SelectTypeCargo,
     SelectCronogramaCargo,
     SelectCronogramaTypeCategoria,
     SelectTypeDetalle,

@@ -1,191 +1,192 @@
-import React, { Component } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
-import { backUrl, parseOptions } from '../../../services/utils';
+import React, { useEffect, useState, useContext } from 'react';
+import { BtnBack } from '../../../components/Utils';
+import { Confirm } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
-import { unujobs } from '../../../services/apis';
+import { Form, Button } from 'semantic-ui-react'
+import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
-import { SelectPlanilla } from '../../../components/select/cronograma';
+import { SelectPlanilla, SelectTypeCargo } from '../../../components/select/cronograma';
+import BoardSimple from '../../../components/boardSimple';
+import { AppContext } from '../../../contexts';
+import ContentControl from '../../../components/contentControl';
+import atob from 'atob';
+import NotFoundData from '../../../components/notFoundData';
+import Show from '../../../components/show';
 
 
-export default class EditCargo extends Component
-{
+const EditCargo = ({ pathname, query, success, cargo }) => {
 
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
+    if (!success) return <NotFoundData/>
+
+    // app
+    const app_context = useContext(AppContext);
+
+    // estados
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+    const [edit, setEdit] = useState(false);
+
+    // manejar estado del form
+    const handleInput = ({ name, value }, obj = 'form') => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
+        setEdit(true);
     }
 
-    state = {
-        loading: false,
-        planillas: [],
-        type_cargos: [],
-        form: {},
-        errors: {}
-    }
-
-    componentWillMount = async () => {
-        await this.findCargo();
-    }
-
-    componentDidMount = () => {
-        this.getTypeCargos();
-    }
-
-    findCargo = async () => {
-        this.setState({ loading: true });
-        let { query } = this.props;
-        let id = query.id ? atob(query.id) : "_error";
-        await unujobs.get(`cargo/${id}`)
-        .then(res => this.setState({ form: res.data }))
-        .catch(err => this.setState({ form: {} }));
-        this.setState({ loading: false });
-    }
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors };
-        });
-    }
-
-    getTypeCargos = async () => {
-        this.setState({ loading: true });
-        await unujobs.get('type_cargo')
-        .then(res => this.setState({ type_cargos: res.data }))
-        .catch(err => console.log(err.message));
-        this.setState({ loading: false });
-    }
-
-    save = async () => {
-        this.setState({ loading: true });
-        let { form } = this.state;
-        form._method = "PUT";
-        await unujobs.post(`cargo/${form.id}`, form)
+    // guardar cambios
+    const save = async () => {
+        let answer = await Confirm("warning", "¿Estás seguro en guardar los cambios?", "Estoy seguro");
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        let payload = Object.assign({}, form);
+        payload._method = 'PUT';
+        await unujobs.post(`cargo/${cargo.id}`, payload)
         .then(async res => {
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
-            await Swal.fire({ icon: "success", text: message });
+            app_context.setCurrentLoading(false)
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            await Router.push(location.href);
+            setErrors({});
+            setEdit(false);
         })
-        .catch(async err => {
-            try {
-                let { data } = err.response
-                let { message, errors } = data;
-                this.setState({ errors });
-            } catch (error) {
-                await Swal.fire({ icon: 'error', text: err.message });
-            }
-        });
-        this.setState({ loading: false });
+        .catch(async err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
-    render() {
+    // cancel edit
+    useEffect(() => {
+        if (!edit) {
+            setForm(Object.assign({}, cargo));
+            setEdit(false);
+        }
+    }, [edit]);
 
-        let { pathname, query } = this.props;
-        let { form, errors } = this.state;
-
-        return (
+    // renderizar
+    return (
+        <>
             <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Editar Partición Presupuestal
-                    </div>
-                    <div className="card-body">
+                <BoardSimple
+                    title="Partición Presupuestal"
+                    info={["Crear Partición Presp."]}
+                    prefix={<BtnBack/>}
+                    bg="light"
+                    options={[]}
+                >
+                    <div className="card-body mt-5">
                         <Form className="row justify-content-center">
                             <div className="col-md-10">
                                 <div className="row justify-content-end">
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.alias && errors.alias[0]}>
+                                        <Form.Field error={errors && errors.alias && errors.alias[0] ? true : false}>
                                             <label htmlFor="">Alias <b className="text-red">*</b></label>
                                             <input type="text" 
                                                 name="alias"
                                                 placeholder="Ingrese un alias"
-                                                disabled={this.state.loading}
                                                 value={form.alias || ""}
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.alias && errors.alias[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field  error={errors && errors.descripcion && errors.descripcion[0]}>
+                                        <Form.Field  error={errors && errors.descripcion && errors.descripcion[0] ? true : false}>
                                             <label htmlFor="">Descripción <b className="text-red">*</b></label>
                                             <input type="text"
                                                 name="descripcion"
+                                                placeholder="Ingrese una descripción"
+                                                onChange={(e) => handleInput(e.target)}
                                                 value={form.descripcion || ""}
-                                                disabled={this.state.loading}
-                                                placeholder="Ingrese una descripción, similar al alias"
-                                                onChange={(e) => this.handleInput(e.target)}
                                             />
                                             <label>{errors && errors.descripcion && errors.descripcion[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field  error={errors && errors.ext_pptto && errors.ext_pptto[0]}>
-                                            <label htmlFor="">Exp Presupuestal</label>
+                                        <Form.Field  error={errors && errors.ext_pptto && errors.ext_pptto[0] ? true : false}>
+                                            <label htmlFor="">Exp Presupuestal <b className="text-red">*</b></label>
                                             <input type="text"
-                                                disabled={this.state.loading}
-                                                value={form.ext_pptto || ""}
                                                 placeholder="Ingrese una extensión presupuestal"
                                                 name="ext_pptto"
-                                                onChange={(e) => this.handleInput(e.target)}
+                                                value={form.ext_pptto || ""}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                             <label>{errors && errors.ext_pptto && errors.ext_pptto[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.planilla_id && errors.planilla_id[0]}>
-                                            <label htmlFor="">Planilla</label>
+                                        <Form.Field error={errors && errors.planilla_id && errors.planilla_id[0] ? true : false}>
+                                            <label htmlFor="">Planilla <b className="text-red">*</b></label>
                                             <SelectPlanilla
-                                                disabled
                                                 name="planilla_id"
                                                 value={form.planilla_id || ""}
+                                                onChange={(e, obj) => handleInput(obj)}
                                             />
                                             <label>{errors && errors.planilla_id && errors.planilla_id[0]}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-4 mb-3">
-                                        <Form.Field error={errors && errors.type_cargo_id && errors.type_cargo_id[0]}>
-                                            <label htmlFor="">Tip. Cargo</label>
-                                            <Select
-                                                disabled
-                                                placeholder="Select. Descuento"
-                                                options={parseOptions(this.state.type_cargos, ["sel-pla", "", "Select. Tip. Cargo"], ["id", "id", "nombre"])}
+                                        <Form.Field error={errors && errors.type_cargo_id && errors.type_cargo_id[0] ? true : false}>
+                                            <label htmlFor="">Tip. Cargo <b className="text-red">*</b></label>
+                                            <SelectTypeCargo
                                                 value={form.type_cargo_id || ""}
                                                 name="type_cargo_id"
-                                                onChange={(e, obj) => this.handleInput(obj)}
+                                                onChange={(e, obj) => handleInput(obj)}
                                             />
                                             <label>{errors && errors.type_cargo_id && errors.type_cargo_id[0]}</label>
                                         </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-2">
-                                        <Button color="teal" fluid
-                                            loading={this.state.loading}
-                                            onClick={this.save}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
                                     </div>
                                 </div>
                             </div>
                         </Form>
                     </div>
-                </Body>
+                </BoardSimple>
             </div>
-        )
-    }
-    
+            {/* panel de control */}
+            <Show condicion={edit}>
+                <ContentControl>
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="red"
+                            onClick={(e) => setEdit(false)}
+                        >
+                            <i className="fas fa-times"></i> Cancelar
+                        </Button>
+                    </div>
+
+                    <div className="col-lg-2 col-6">
+                        <Button fluid 
+                            color="blue"
+                            onClick={save}
+                        >
+                            <i className="fas fa-sync"></i> Actualizar
+                        </Button>
+                    </div>
+                </ContentControl>
+            </Show>
+        </>
+    )
 }
+
+// server
+EditCargo.getInitialProps = async (ctx) => {
+    AUTHENTICATE(ctx);
+    let {pathname, query } = ctx;
+    // get id
+    let id = atob(query.id || "") || "__error";
+    // request
+    let { success, cargo } = await unujobs.get(`cargo/${id}`, {}, ctx)
+    .then(res => res.data)
+    .catch(err => ({ success: false, cargo: {} }));
+    // responser
+    return { pathname, query, success, cargo };
+}
+
+// exportar
+export default EditCargo;

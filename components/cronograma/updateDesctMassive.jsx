@@ -30,18 +30,18 @@ const UpdateDesctMassive = (props) => {
     const update = async () => {
         let answer = await Confirm("warning", "¿Estas seguró en actualizar el descuento masivamente?", "Confirmar")
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, form);
             datos._method = 'PUT';
             await unujobs.post(`cronograma/${cronograma.id}/update_descuento`, datos, { headers: { CronogramaID: cronograma.id } })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 setForm({});
                 setRefresh(true);
-            }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
+            }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
         }
     }
 

@@ -95,17 +95,17 @@ const TabTeam = () => {
             let datos = {};
             datos.area_id = value;
             datos.project_id = project.id;
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await projectTracking.post(`config_project_area`, datos)
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     setIsAddArea(false);
                     await Swal.fire({ icon: 'success', text: message });
                     getAreas();
                 }).catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = err.response.data;
                     Swal.fire({ icon: 'error', text: message || err.message });
                 });
@@ -118,10 +118,10 @@ const TabTeam = () => {
         if (project.state != 'OVER' && project.state != 'PREOVER') {
             let answer = await Confirm("warning", "¿Estás seguro en eliminar la línea de investigación?");
             if (answer) {
-                app_context.fireLoading(true);
+                app_context.setCurrentLoading(true);
                 await projectTracking.post(`config_project_area/${obj.id}/delete`)
                     .then(res => {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { success, message } = res.data;
                         if (!success) throw new Error(message);
                         let newArea = Object.assign({}, area);
@@ -129,11 +129,11 @@ const TabTeam = () => {
                         setArea(newArea);
                         Swal.fire({ icon: 'success', text: message });
                     }).catch(err => {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message } = err.response.data;
                         Swal.fire({ icon: 'error', text: message || err.message });
                     });
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
             }
         }
     }

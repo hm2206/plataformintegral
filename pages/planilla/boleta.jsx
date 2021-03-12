@@ -9,6 +9,7 @@ import BoardSimple from '../../components/boardSimple';
 import { AppContext } from '../../contexts/AppContext';
 import { BtnFloat } from '../../components/Utils';
 import { Confirm } from '../../services/utils';
+import { EntityContext } from '../../contexts/EntityContext';
 
 const ItemBoleta = ({ data, is_check = false, onClick = null }) => {
 
@@ -65,6 +66,9 @@ const IndexBoleta = ({ pathname, query, success, historial }) => {
     // app
     const app_context = useContext(AppContext);
 
+    // entity
+    const entity_context = useContext(EntityContext);
+
     // estados
     const [query_search, setQuerySearch] = useState("");
     const [historial_select, setHistorialSelect] = useState([]);
@@ -81,17 +85,17 @@ const IndexBoleta = ({ pathname, query, success, historial }) => {
     const handleBoleta = async () => {
         let answer = await Confirm("warning", `¿Estas seguro en generar las boletas?`, 'Generar');
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         let path = `pdf/boleta?historial_id[]=${historial_select.join('&historial_id[]=')}&edit=1&zoom=98.5%`;
         await unujobs.post(path)
         .then(async ({ data }) => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let blob = new Blob([data], { type: 'text/html' });
             let newPrint = window.open(URL.createObjectURL(blob))
             newPrint.onload = () => newPrint.print();
             setHistorialSelect([]);
         }).catch(err => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'error', text: 'No se pudó generar la boleta' })
         })
     }
@@ -124,7 +128,8 @@ const IndexBoleta = ({ pathname, query, success, historial }) => {
 
     // obtener entity
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, [])
 
     // renderizar

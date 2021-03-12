@@ -8,6 +8,7 @@ import { tramite } from '../../services/apis';
 import Skeleton from 'react-loading-skeleton';
 import Show from '../../components/show';
 import CardReportTramite from '../../components/tramite/cardReportTramite';
+import { EntityContext } from '../../contexts/EntityContext';
 
 const PlaceholderTramite = () => {
     const datos = [1, 2, 3, 4];
@@ -26,6 +27,9 @@ const ReportIndex = () => {
     // app
     const app_context = useContext(AppContext);
 
+    // entity
+    const entity_context = useContext(EntityContext);
+
     // estados
     const [form, setForm] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
@@ -37,7 +41,8 @@ const ReportIndex = () => {
 
     // cargar entity
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, []);
 
     // cambiar form
@@ -135,7 +140,7 @@ const ReportIndex = () => {
                                 <SelectAuthEntityDependencia
                                     onReady={dependenciaDefault}
                                     name="dependencia_id"
-                                    entity_id={app_context.entity_id}
+                                    entity_id={entity_context.entity_id}
                                     onChange={(e, obj) => {
                                         handleInput(obj)
                                         clearTramites();

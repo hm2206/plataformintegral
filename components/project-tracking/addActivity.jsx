@@ -86,13 +86,13 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
     const createActivity = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, form);
             datos.objective_id = objective.id;
             datos.programado = JSON.stringify(form.programado);
             await projectTracking.post(`activity`, datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setForm({});
@@ -102,7 +102,7 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
                     if (typeof onCreate == 'function') onCreate();
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { errors, message } = err.response.data;
                         Swal.fire({ icon: 'warning', text: message });
                         setErrors(errors);
@@ -140,12 +140,12 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
     const updateActivity = async (index, obj) => {
         let answer = await Confirm("warning", `¿Deseas guardar los datos?`, 'Guardar');
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, obj);
             datos.programado = JSON.stringify(datos.programado);
             await projectTracking.post(`activity/${obj.id}/update`,  datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     let newActivity = JSON.parse(JSON.stringify(activity));
@@ -157,7 +157,7 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
                 })
                 .catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { message } = err.response.data;
                         Swal.fire({ icon: 'error', text: message });
                     } catch (error) {

@@ -14,6 +14,7 @@ import RenderShow from '../../../components/tramite/renderShow';
 import BoardSimple from '../../../components/boardSimple';
 import { TramiteProvider } from '../../../contexts/TramiteContext';
 import dynamic from 'next/dynamic';
+import { EntityContext } from '../../../contexts/EntityContext';
 const Visualizador = dynamic(() => import('../../../components/visualizador'), { ssr: false });
 
 
@@ -33,6 +34,9 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [current_status, setCurrentStatus] = useState(current_status_default);
@@ -140,7 +144,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
 
     // montar componente
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
         if (success) {
             setTab("YO")
             setCurrentRender("LIST");
@@ -150,6 +154,8 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
             setDatos([]);
             getTrackingStatus();
         }
+        // desmontar
+        return () => entity_context.fireEntity({ render: false });
     }, [query.dependencia_id]);
 
     // cambio de menu obtener tracking
@@ -243,7 +249,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                                 <div className="col-md-4 mb-2">
                                     <SelectAuthEntityDependencia
                                         onReady={dependenciaDefault}
-                                        entity_id={app_context.entity_id || ""}
+                                        entity_id={entity_context.entity_id || ""}
                                         name="dependencia_id"
                                         onChange={(e, obj) => {
                                             let { push } = Router;

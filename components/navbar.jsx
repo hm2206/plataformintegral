@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment, useContext } from "react";
 import SkullAuth from "../components/loaders/skullAuth";
 import Logo from "../components/logo";
 import { authentication } from '../services/apis';
@@ -12,214 +12,189 @@ import Router from "next/router";
 import Link from "next/link";
 import btoa from 'btoa';
 import { Confirm } from '../services/utils';
+import { AppContext } from "../contexts";
+import { SelectEntityUser } from '../components/select/authentication';
+import { ScreenContext } from '../contexts/ScreenContext';
+import { AuthContext } from "../contexts/AuthContext";
+import { EntityContext } from "../contexts/EntityContext";
+
+const extendView = ['medium', 'long', 'x-long'];
 
 
-class Navbar extends Component {
+const Navbar = () => {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      show: true,
-      config: false,
-      loading: true,
-      auth: { },
-      entities: [],
-      entity_id: "",
-    };
+	// app context
+	const { env } = useContext(AppContext);
 
-    this.handleConfig = this.handleConfig.bind(this);
-  }
+	// screen context
+	const { mode, toggle, setToggle, fullscreen, setFullscreen } = useContext(ScreenContext);
 
+	// auth context
+	const auth_context = useContext(AuthContext);
 
-  async componentDidMount() {
-    await this.getEntities();
-    this.settingEntity();
-  }
+	// entity context
+	const { entity_id, setEntityId, render, disabled } = useContext(EntityContext);
 
-  componentDidUpdate = (prevProps, prevState) => {
-    let { entity_id } = this.state;
-    if (entity_id != prevState.entity_id) this.props.onFireEntityId(entity_id);
-  }
+	// entity default
+	const entityDefault = (options = []) => {
+		let count = options.length;
+		if (!entity_id && count >= 2) handleEntity({ value: options[1].value });
+	}
 
-  handleNavBar = () => {
-    if (typeof this.props.onToggle == 'function') {
-      this.props.onToggle();
-    }
-  }
+	// seleccionar entidad
+	const handleEntity = async ({ value }) => {
+		setEntityId(value);
+		Cookies.set('EntityId', value);
+		let { push, pathname, query } = Router;
+		push({ pathname, query });
+	}
 
-  handleConfig(e) {
-    this.setState(state => ({ config: !state.config }));
-  }
+	// refrescar página
+	const handleRefreshPage = async (e) => {
+		e.preventDefault();
+		let answer = await Confirm(`warning`, '¿Estás seguro en actualizar la página?', 'Actualizar');
+		if (answer) location.href = location.href;
+	}
 
-  handleExtends = () => {
-    let { setScreenLg } = this.props;
-    if (typeof setScreenLg == 'function') setScreenLg();
-  }
-
-  getEntities = async (page = 1) => {
-    await authentication.get(`auth/entity?page=${page}`)
-    .then(res => {
-      let { lastPage, data } = res.data;
-      this.setState(state => ({ entities: [...state.entities, ...data] }))
-      if (page < lastPage) this.getEntities(page + 1);
-    }).catch(err => console.log(err.message))
-  }
-
-  settingEntity = async () => {
-    await this.setState({ entity_id: parseInt(await Cookies.get('EntityId')) || "" });
-    let { entities, entity_id } = this.state;
-    // validate
-    if (!entity_id && entities.length) {
-      let entity_id = entities[0].id;
-      await this.handleEntity({ name: 'entity_id', value: entity_id });
-    }
-  }
-
-  handleEntity = async ({ name, value }) => {
-    await this.setState({ [name]: value });
-    await Cookies.set('EntityId', value);
-    let { push, pathname, query } = Router;
-    query.entity_id = btoa(value);
-    push({ pathname, query });
-  }
-
-  handleRefreshPage = async (e) => {
-    e.preventDefault();
-    let answer = await Confirm(`warning`, '¿Estás seguro en actualizar la página?', 'Actualizar');
-    if (answer) location.href = location.href;
-  }
-
-  render() {
-
-    let { screen_lg, screenX, my_app, logout, config_entity, auth, notification, no_read } = this.props;
-    let isAuth = Object.keys(auth).length
-
+	// renderizar
     return (
-      <Fragment>
-        <header className={`app-header app-header-dark bg-${app.theme}`}>
-          <div className="top-bar">
-            <div className="top-bar-brand" style={{ display: screen_lg || screenX < 767 ? 'none' : 'flex' }}>
-              <a href="/">
-                <Logo my_app={my_app}/>
-              </a>
-            </div>
-            <div className="top-bar-list">
-              <Show condicion={screenX > 767}>
-                <div className="top-bar-item px-2">
-                  <button className="btn text-white"
-                    style={{ fontSize: '1.15em' }}
-                    onClick={this.handleExtends}
-                  >
-                    <i className={`fas fa-${screen_lg ? 'times' : 'bars'}`}></i>
-                  </button>
-                </div>
-              </Show>
+		<Fragment>
+			<header className={`app-header app-header-dark bg-${env.app.theme}`}>
+				<div className="top-bar">
+					<div className="top-bar-brand" 
+						style={{ display: fullscreen || !extendView.includes(mode) ? 'none' : 'flex' }}
+					>
+						<a href="/">
+							<Logo/>
+						</a>
+					</div>
 
-              <Show condicion={config_entity.render}>
-                <div className="col-md-5 capitalize">
-                  <Select
-                    options={parseOptions(this.state.entities, ['select-enti-nav', '', 'Select. Entidad'], ['id', 'id', 'name'])}
-                    fluid
-                    placeholder="Select. Entidad"
-                    value={this.state.entity_id}
-                    name="entity_id"
-                    onChange={(e, obj) => this.handleEntity(obj)}
-                    disabled={config_entity.disabled}
-                  />
-                </div>
-              </Show>
-              
-              <div className="top-bar-item px-2 d-md-none d-lg-none d-xl-none">
-                <button
-                  className={`hamburger hamburger-squeeze ${this.props.toggle ? 'active' : ''}`}
-                  type="button"
-                  data-toggle="aside"
-                  aria-label="toggle menu"
-                  onClick={this.handleNavBar}
-                >
-                  <span className="hamburger-box">
-                    <span className="hamburger-inner"></span>
-                  </span>
-                </button>
-              </div>
-              <div className="top-bar-item top-bar-item-right px-0 d-none d-sm-flex">
-                <ul className="header-nav nav">
-                  <li className="nav-item">
-                    <a href="" className="nav-link" onClick={this.handleRefreshPage}>
-                      <i className="fas fa-sync"></i>
-                    </a>
-                  </li>
-                  <Notification notification={notification} no_read={no_read}/>
-                </ul>
+					<div className="top-bar-list">
+						<Show condicion={extendView.includes(mode)}>
+							<div className="top-bar-item px-2">
+								<button className="btn text-white"
+									style={{ fontSize: '1.15em' }}
+									onClick={(e) => setFullscreen(!fullscreen)}
+								>
+									<i className={`fas fa-${fullscreen ? 'times' : 'bars'}`}></i>
+								</button>
+							</div>
+						</Show>
 
-                      <div className="dropdown d-flex">
-                        {isAuth ? (
-                          <button
-                            className="btn-account d-none d-md-flex"
-                            type="button"
-                            data-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                          >
-                            <span className="user-avatar user-avatar-md">
-                              <img
-                                src={auth.person && auth.image ? `${auth.image && auth.image_images && auth.image_images.image_50x50}` : '/img/perfil.jpg'}
-                                alt=""
-                              />
-                              <span className="avatar-badge online" title="online"></span>
-                            </span>{" "}
-                            <span className="account-summary pr-lg-4 d-none d-lg-block">
-                              <span className="account-name" style={{ textTransform: 'capitalize' }}>
-                                {auth && auth.username}
-                              </span>{" "}
-                              <span className="account-description">
-                                {auth && auth.email}
-                              </span>
-                            </span>
-                          </button>
-                        ) : (
-                          <SkullAuth />
-                        )}
+						<Show condicion={!auth_context.loading && render}>
+							<div className="col-md-5 capitalize">
+							<SelectEntityUser
+								user_id={auth_context.auth && auth_context.auth.id}
+								value={entity_id}
+								name="entity_id"
+								disabled={disabled}
+								onChange={(e, obj) => handleEntity(obj)}
+								onReady={entityDefault}
+							/>
+							</div>
+						</Show>
+					
+						<div className="top-bar-item px-2 d-md-none d-lg-none d-xl-none">
+							<button
+								className={`hamburger hamburger-squeeze ${toggle ? 'active' : ''}`}
+								type="button"
+								data-toggle="aside"
+								aria-label="toggle menu"
+								onClick={(e) => setToggle(!toggle)}
+							>
+								<span className="hamburger-box">
+									<span className="hamburger-inner"></span>
+								</span>
+							</button>
+						</div>
 
-                        <div className="dropdown-menu">
-                          <div className="dropdown-arrow ml-3"></div>
-                          <h6 className="dropdown-header d-none d-md-block d-lg-none">
-                            {auth && auth.username}
-                          </h6>
-                          <a className="dropdown-item" href="/">
-                            <span className="fas fa-user"></span>{" "}
-                            Perfil
-                          </a>{" "}
+						<div className="top-bar-item top-bar-item-right px-0 d-none d-sm-flex">
+							<ul className="header-nav nav">
+								<Show condicion={extendView.includes(mode)}>
+									<li className="nav-item">
+										<a href="" 
+											className="nav-link" 
+											onClick={handleRefreshPage}
+										>
+											<i className="fas fa-sync"></i>
+										</a>
+									</li>
+								</Show>
+								{/* notificaciones */}
+								{/* <Notification notification={notification} no_read={no_read}/> */}
+							</ul>
 
-                          <Link href="/docs">
-                            <a className="dropdown-item">
-                              <span className="fas fa-info-circle"></span>{" "}
-                              Ayuda
-                            </a>
-                          </Link>
+							<div className="dropdown d-flex">
+								<Show condicion={!auth_context.loading}
+									predeterminado={<SkullAuth />}
+								>
+									<button
+										className="btn-account d-none d-md-flex"
+										type="button"
+										data-toggle="dropdown"
+										aria-haspopup="true"
+										aria-expanded="false"
+									>
+										<span className="user-avatar user-avatar-md">
+										<img src={
+												auth_context.auth && auth_context.auth.image_images &&auth_context.auth.image_images.image_50x50 || 
+												auth_context.auth && auth_context.auth.image || 
+												'/img/perfil.jpg'
+											}
+											alt="perfil"
+											style={{ background: '#fff' }}
+										/>
+										<span className="avatar-badge online" title="online"></span>
+										</span>{" "}
+										<span className="account-summary pr-lg-4 d-none d-lg-block">
+										<span className="account-name" style={{ textTransform: 'capitalize' }}>
+											{auth_context.auth && auth_context.auth.username || ""}
+										</span>{" "}
+										<span className="account-description">
+											{auth_context.auth && auth_context.auth && auth_context.auth.email || ""}
+										</span>
+										</span>
+									</button>
+								</Show>
 
-                                <a
-                                  href="#logout"
-                                  className="dropdown-item"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    logout();
-                                  }}
-                                >
-                                  <span className="fas fa-sign"></span>{" "}
-                                  Cerrar Cuenta
-                                </a>
+								<div className="dropdown-menu">
+								
+								<div className="dropdown-arrow ml-3"></div>
 
-                        </div>
-                      </div>
+								<h6 className="dropdown-header d-none d-md-block d-lg-none">
+									{auth_context.auth && auth_context.auth.username || ""}
+								</h6>
 
-              </div>
-            </div>
-          </div>
-        </header>
-      </Fragment>
+								<a className="dropdown-item" href="/">
+									<span className="fas fa-user"></span>{" "}
+									Perfil
+								</a>{" "}
+
+								<Link href="/docs">
+									<a className="dropdown-item">
+										<span className="fas fa-info-circle"></span>{" "}
+										Ayuda
+									</a>
+								</Link>
+
+									<a href="#logout"
+										className="dropdown-item"
+										onClick={(e) => {
+											e.preventDefault();
+											auth_context.logout();
+										}}
+									>
+										<span className="fas fa-sign"></span>{" "}
+										Cerrar Cuenta
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</header>
+		</Fragment>
     );
-  }
 }
 
 export default Navbar;

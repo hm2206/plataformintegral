@@ -10,12 +10,16 @@ import Swal from 'sweetalert2';
 import AssignPerson from '../../../components/authentication/user/assignPerson'
 import AssignTrabajador from '../../../components/contrato/assingTrabajador';
 import { AppContext } from '../../../contexts/AppContext';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 
 const RegisterFamiliar = () => {
     
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [work, setWork] = useState({});
@@ -31,11 +35,12 @@ const RegisterFamiliar = () => {
         setForm({});
         setWork({});
         setFamiliar({});
-    }, [app_context.entity_id])
+    }, [entity_context.entity_id])
 
     // setting
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, [])
 
     // obtener datos del trabajador
@@ -64,7 +69,7 @@ const RegisterFamiliar = () => {
     const create = async () => {
         let answer = await Confirm("warning", "¿Estas seguro en guardar el familiar?", "Estoy Seguro");
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let newForm = new FormData;
             newForm.append('work_id', work.id);
             newForm.append('person_id', familiar.id);
@@ -74,7 +79,7 @@ const RegisterFamiliar = () => {
             // send
             await escalafon.post('familiar', newForm)
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -83,7 +88,7 @@ const RegisterFamiliar = () => {
                 setForm({});
             }).catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message, errors } = err.response.data;
                     if (!errors) throw new Error(message || err.message);
                     Swal.fire({ icon: 'warning', text: message });

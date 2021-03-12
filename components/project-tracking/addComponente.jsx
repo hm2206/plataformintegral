@@ -35,12 +35,12 @@ const AddComponente = (props) => {
     const createComponente = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = Object.assign({}, form);
             datos.project_id = project.id;
             await projectTracking.post(`objective`, datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setForm({});
@@ -48,7 +48,7 @@ const AddComponente = (props) => {
                     if (typeof props.onCreate == 'function') props.onCreate();
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { errors, message, status } = err.response.data;
                         Swal.fire({ icon: status == 402 ? 'warning' : 'error', text: message });
                         if (status == 402) setErrors(errors);

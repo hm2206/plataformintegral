@@ -38,7 +38,7 @@ const AddDetalle = (props) => {
     const createDetalle = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let datos = new FormData();
             for(let attr in form) {
                 datos.append(attr, form[attr]);
@@ -48,14 +48,14 @@ const AddDetalle = (props) => {
             // request
             await projectTracking.post(`detalle`, datos)
                 .then(res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setForm({});
                     if (typeof props.onCreate == 'function') props.onCreate();
                 }).catch(err => {
                     try {
-                        app_context.fireLoading(false);
+                        app_context.setCurrentLoading(false);
                         let { errors, message } = err.response.data;
                         if (!errors) throw new Error(message);
                         Swal.fire({ icon: 'warning', text: message });

@@ -15,6 +15,7 @@ import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta, Sele
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
 import storage from '../../../services/storage.json';
 import BoardSimple from '../../../components/boardSimple';
+import NotFoundData from '../../../components/notFoundData'
 
 const Edit = ({ success, info, query }) => {
 
@@ -55,14 +56,14 @@ const Edit = ({ success, info, query }) => {
     const updateInfo = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en guardar los datos?`, 'Confirmar');
         if (!answer) return false;
-        app_context.fireLoading(true)
+        app_context.setCurrentLoading(true)
         let datos = new FormData;
         await Object.keys(form).map(key => datos.append(key, form[key] || ""));
         datos.append('_method', 'PUT');
         // actualizar
         await unujobs.post(`info/${info.id}`, datos)
         .then(async res => {
-            app_context.fireLoading(false)
+            app_context.setCurrentLoading(false)
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
@@ -70,39 +71,39 @@ const Edit = ({ success, info, query }) => {
             setEdit(false);
             setOld(JSON.parse(JSON.stringify(form)));
             Router.push({ pathname: Router.pathname, query: Router.query });
-        }).catch(async err => handleErrorRequest(err, setErrors, () => app_context.fireLoading(false)));
+        }).catch(async err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
     // restaurar contrato
     const restaurar = async () => {
         let answer = await Confirm("warning", `¿Deseas en clonar el contrato?`, 'Clonar');
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await unujobs.post(`info/${info.id}/restore`)
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message, restore } = res.data; 
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
             let { push, pathname } = Router;
             query.id = btoa(restore.id);
             push({ pathname, query });
-        }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
+        }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
     // elimnar
     const destroy = async () => {
         let answer = await Confirm("warning", `¿Deseas eliminar el contrato?`, 'Eliminar');
         if (!answer) return false;
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         await unujobs.post(`info/${info.id}?`, { _method: 'DELETE' })
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message, restore } = res.data; 
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
             Router.push(funcBack());
-        }).catch(err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
+        }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
     // manejador de optiones
@@ -116,7 +117,7 @@ const Edit = ({ success, info, query }) => {
         }
     }
 
-    if (!success) return null;
+    if (!success) return <NotFoundData/>;
 
     // renderizar
     return (
@@ -553,14 +554,15 @@ const Edit = ({ success, info, query }) => {
 
 // server rendering
 Edit.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let id = atob(ctx.query.id);
+    AUTHENTICATE(ctx);
+    let { pathname, query } = ctx;
+    let id = atob(query.id) || '__error';
     // request
     let { success, info } = await unujobs.get(`info/${id}`, {}, ctx)
     .then(res => res.data)
-    .catch(err => ({ success: false }));
+    .catch(err => ({ success: false, info: {} }));
     // response
-    return { success, info: info || {}, query: ctx.query };
+    return { pathname, query, success, info };
 }
 
 export default Edit;

@@ -10,12 +10,16 @@ import Swal from 'sweetalert2';
 import AssignContrato from '../../../components/contrato/assingContrato';  
 import { AppContext } from '../../../contexts/AppContext';
 import { SelectSitacionLaboral } from '../../../components/select/cronograma';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 
 const RegisterLicencia = () => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [person, setPerson] = useState({});
@@ -28,11 +32,12 @@ const RegisterLicencia = () => {
     useEffect(() => {
         setForm({});
         setPerson({});
-    }, [app_context.entity_id])
+    }, [entity_context.entity_id])
 
     // setting
     useEffect(() => {
-        app_context.fireEntity({ render: true });
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
     }, [])
 
     // obtener datos del trabajador
@@ -55,7 +60,7 @@ const RegisterLicencia = () => {
     const create = async () => {
         let answer = await Confirm("warning", "¿Estas seguro en guardar el desplazamiento?", "Estoy Seguro");
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             let newForm = new FormData;
             newForm.append('info_id', person.id);
             for(let key in form) {
@@ -64,7 +69,7 @@ const RegisterLicencia = () => {
             // send
             await escalafon.post('licencia', newForm)
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
@@ -72,7 +77,7 @@ const RegisterLicencia = () => {
                 setForm({});
             }).catch(err => {
                 try {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { message, errors } = err.response.data;
                     if (!errors) throw new Error(message || err.message);
                     Swal.fire({ icon: 'warning', text: message });

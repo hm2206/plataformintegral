@@ -99,12 +99,12 @@ const Obligacion = () => {
 
     // actualizar las obligaciones del cronograma
     const updateObligacion = async () => {
-        app_context.fireLoading(true);
+        app_context.setCurrentLoading(true);
         let form = new FormData;
         form.append('obligaciones', JSON.stringify(obligaciones));
         await unujobs.post(`obligacion/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
         .then(async res => {
-            app_context.fireLoading(false);
+            app_context.setCurrentLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
@@ -112,7 +112,7 @@ const Obligacion = () => {
             setEdit(false);
         })
         .catch(err => {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             Swal.fire({ icon: 'error', text: err.message })
         });
         setBlock(false);
@@ -128,17 +128,17 @@ const Obligacion = () => {
     const deleteObligacion = async (id) => {
         let answer = await Confirm('warning', '¿Deseas eliminar la obligación judicial?', 'Confirmar')
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`obligacion/${id}`, { _method: 'DELETE' }, { headers: { CronogramaID: historial.cronograma_id } })
             .then(async res => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);
                 await Swal.fire({ icon: 'success', text: message });
                 findObligaciones();
                 setEdit(false);
             }).catch(err => {
-                app_context.fireLoading(false);
+                app_context.setCurrentLoading(false);
                 Swal.fire({ icon: 'error', text: err.message })
             });
             setBlock(false);

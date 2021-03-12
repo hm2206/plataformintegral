@@ -6,7 +6,6 @@ import { SelectCronogramaMeta, SelectCronogramaCargo, SelectMeta } from '../sele
 import { AppContext } from '../../contexts/AppContext';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
-import uid from 'uid';
 
 const ChangeMeta = ({ cronograma, isClose }) => {
 
@@ -28,10 +27,10 @@ const ChangeMeta = ({ cronograma, isClose }) => {
     const changeMeta = async () => {
         let answer = await Confirm("warning", `¿Deseas cambiar de meta?`);
         if (answer) {
-            app_context.fireLoading(true);
+            app_context.setCurrentLoading(true);
             await unujobs.post(`cronograma/${cronograma.id}/change_meta`, form, { headers: { CronogramaID: cronograma.id }})
                 .then(async res => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     setForm({});
@@ -40,7 +39,7 @@ const ChangeMeta = ({ cronograma, isClose }) => {
                     setReload(false);
                 })
                 .catch(err => {
-                    app_context.fireLoading(false);
+                    app_context.setCurrentLoading(false);
                     Swal.fire({ icon: 'error', text: err.message });
                 });
         }
