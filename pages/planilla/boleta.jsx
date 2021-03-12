@@ -184,7 +184,7 @@ const IndexBoleta = ({ pathname, query, success, historial }) => {
                             </thead>
                             <tbody>
                                 <Show condicion={historial.data && historial.data.length}>
-                                    {historial.data.map((d, indexD) => 
+                                    {historial.data && historial.data.map((d, indexD) => 
                                         <ItemBoleta 
                                             key={`list-boleta-history-${indexD}`}
                                             data={d}
