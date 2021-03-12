@@ -10,7 +10,7 @@ import { Confirm } from '../../../services/utils';
 import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
-import BoardSimple from '../../../components/BoardSimple';
+import BoardSimple from '../../../components/boardSimple';
 
 
 const Meta = ({ success, metas, query }) => {
