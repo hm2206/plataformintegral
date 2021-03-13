@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import io from 'socket.io-client';
 
-const useSocket = (serverPath) => {
+const useSocket = ({ host, path }) => {
 
     // estados
     const [online, setOnline] = useState(false);
@@ -9,13 +9,14 @@ const useSocket = (serverPath) => {
 
     // conectar socket
     const connectSocket = useCallback(() => {
-        const socketTemp = io.connect(serverPath, { 
+        const socketTemp = io.connect(host, { 
+            path,
             transports: ['websocket'],
             autoConnect: true,
             forceNew: true
         });
         setSocket(socketTemp);
-    }, [serverPath]);
+    }, [host]);
 
     // desconectar socket
     const disconnectSocket = useCallback(() => {
@@ -31,8 +32,7 @@ const useSocket = (serverPath) => {
     }, [socket])
 
     useEffect( () => {
-        socket?.on('disconnect', () => setOnline( false ))
-
+        socket?.on('disconnect', () => setOnline(false))
     }, [socket])
 
     return { socket, online, connectSocket, disconnectSocket };

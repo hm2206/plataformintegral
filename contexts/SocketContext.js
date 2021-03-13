@@ -7,11 +7,14 @@ export const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
 
+    // config socket
+    const { host, path } = ws.API_SOCKET;
+
     // auth
     const { auth, is_logged } = useContext(AuthContext);
 
     // hooks
-    const { socket, online, connectSocket, disconnectSocket } = useSocket(ws.API_SOCKET);
+    const { socket, online, connectSocket, disconnectSocket } = useSocket({ host, path });
 
     // connectar
     useEffect(() => {
