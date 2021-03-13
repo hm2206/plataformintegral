@@ -14,12 +14,16 @@ import { TramiteContext } from '../../contexts/TramiteContext';
 import SelectMultipleDependencia from './selectMultipleDependencia';
 import SelectMultitleDependencia from './selectMultipleDependencia';
 import { EntityContext } from '../../contexts/EntityContext';
+import { AuthContext } from '../../contexts/AuthContext';
 
 
 const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // auth
+    const { auth } = useContext(AuthContext);
 
     // entity
     const entity_context = useContext(EntityContext);
@@ -178,7 +182,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
                     <Show condicion={!current_tracking.next}>
                         <Show condicion={destino.includes(action) && current_tracking.revisado}>
-                            <Show condicion={(Object.keys(current_boss).length && current_boss.user_id == app_context.auth.id) || 
+                            <Show condicion={(Object.keys(current_boss).length && current_boss.user_id == auth.id) || 
                                 (current_tracking.modo == 'DEPENDENCIA' && Object.keys(current_role).length)}
                             >
                                 <Form.Field className="mb-3" errors={is_errors && errors.dependencia_destino_id && errors.dependencia_destino_id[0] ? true : false}>

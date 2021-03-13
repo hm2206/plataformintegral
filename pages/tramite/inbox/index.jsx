@@ -15,25 +15,29 @@ import BoardSimple from '../../../components/boardSimple';
 import { TramiteProvider } from '../../../contexts/TramiteContext';
 import dynamic from 'next/dynamic';
 import { EntityContext } from '../../../contexts/EntityContext';
+import { AuthContext } from '../../../contexts/AuthContext';
 const Visualizador = dynamic(() => import('../../../components/visualizador'), { ssr: false });
 
 
 // menus
 const current_status_default = [
-    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['RECIBIDO', 'COPIA'], count: 0 },
-    { key: "DERIVADO", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['DERIVADO', 'RESPONDIDO'], count: 0 },
-    { key: "PENDIENTE", icon: 'fas fa-thumbtack', text: 'Pendientes', index: 2, filtros: ['PENDIENTE'], count: 0 },
-    { key: "REGISTRADO", icon: 'far fa-file', text: 'Regístrados', index: 3, filtros: ['REGISTRADO'], count: 0 },
-    { key: "ACEPTADO", icon: 'fas fa-check', text: 'Aceptados', index: 4, filtros: ['ACEPTADO'], count: 0 },
-    { key: "RECHAZADO", icon: 'fas fa-times', text: 'Rechazados', index: 5, filtros: ['RECHAZADO'], count: 0 },
-    { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 6, filtros: ['ANULADO'], count: 0 },
-    { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 7, filtros: ['FINALIZADO'], count: 0 }
+    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['RECIBIDO', 'COPIA', 'ACEPTADO'], count: 0 },
+    { key: "SENT", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['DERIVADO', 'RESPONDIDO', 'PENDIENTE', 'REGISTRADO', 'RECHAZADO'], count: 0 },
+    // { key: "PENDIENTE", icon: 'fas fa-thumbtack', text: 'Pendientes', index: 2, filtros: ['PENDIENTE'], count: 0 },
+    // { key: "REGISTRADO", icon: 'far fa-file', text: 'Regístrados', index: 3, filtros: ['REGISTRADO'], count: 0 },
+    // { key: "ACEPTADO", icon: 'fas fa-check', text: 'Aceptados', index: 4, filtros: ['ACEPTADO'], count: 0 },
+    // { key: "RECHAZADO", icon: 'fas fa-times', text: 'Rechazados', index: 5, filtros: ['RECHAZADO'], count: 0 },
+    { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 2, filtros: ['ANULADO'], count: 0 },
+    { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 3, filtros: ['FINALIZADO'], count: 0 }
 ];
 
 const InboxIndex = ({ pathname, query, success, role, boss }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // auth
+    const { auth } = useContext(AuthContext);
 
     // entity
     const entity_context = useContext(EntityContext);
@@ -135,11 +139,11 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         setOption("");
         setCurrentTramite({});
         setCurrentRender("LIST");
-        if (current_menu.index == 3) {
+        if (current_menu.index == 1) {
             setCurrentRefresh(true);
             setCurrentExecute(true);
         }
-        else handleSelectMenu(3);
+        else handleSelectMenu(1);
     }
 
     // montar componente
@@ -371,7 +375,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                             setCurrentTramite({})
                             setCurrentNext("");
                         }}
-                        user={tab == 'DEPENDENCIA' ? boss.user : app_context.auth || {}}
+                        user={tab == 'DEPENDENCIA' ? boss.user : auth || {}}
                         onSave={handleOnSave}
                     />
 

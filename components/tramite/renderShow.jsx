@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 import { TramiteContext } from '../../contexts/TramiteContext';
 import Skeleton from 'react-loading-skeleton';
 import InfoMultiple from './infoMultiple';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const hidden = ['RECIBIDO', 'RECHAZADO', 'FINALIZADO'];
 const nothing = ['FINALIZADO', 'ANULADO'];
@@ -60,6 +61,9 @@ const RenderShow = () => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // auth
+    const { auth } = useContext(AuthContext);
 
     // tramite
     const tramite_context = useContext(TramiteContext);
@@ -161,7 +165,7 @@ const RenderShow = () => {
     const validateFile = () => {
         if (!current_tramite.state) return ['delete', 'signature']; 
         // validar si es el dueño del documento
-        if (app_context.auth.person_id == current_tramite.person_id || app_context.auth.id == current_tramite.user_id) return [];
+        if (auth.person_id == current_tramite.person_id || auth.id == current_tramite.user_id) return [];
         // validar a otros usuarios
         if (hidden.includes(current_tracking.status)) return ['delete', 'signature'];
         // response default
@@ -212,7 +216,7 @@ const RenderShow = () => {
                             <br/>
                             <b>N° Folio: </b> {current_tramite.folio_count || 0}
                             <br/>
-                            <Show condicion={!current_tracking.revisado && current_tracking.user_verify_id == app_context.auth.id}>
+                            <Show condicion={!current_tracking.revisado && current_tracking.user_verify_id == auth.id}>
                                 <div className="mb-3 mt-3">
                                     <button className="btn btn-outline-success"
                                         onClick={verifyTracking}
@@ -267,8 +271,8 @@ const RenderShow = () => {
                             {/* agregar archivos */}
                             <Show condicion={
                                 current_tramite.state &&
-                                (current_tramite.user_id == app_context.auth.id || 
-                                current_tramite.person_id == app_context.auth.person_id)
+                                (current_tramite.user_id == auth.id || 
+                                current_tramite.person_id == auth.person_id)
                             }>
                                     <div className="text-right ml-3">
                                         <DropZone
@@ -373,7 +377,7 @@ const RenderShow = () => {
                             <div className="col-md-12 mt-4">
                                 <Show condicion={
                                     !current_tracking.revisado && 
-                                    app_context.auth.id == current_tracking.user_verify_id && 
+                                    auth.id == current_tracking.user_verify_id && 
                                     current_tracking.status == 'REGISTRADO'
                                 }>
                                     <Button color="red" 

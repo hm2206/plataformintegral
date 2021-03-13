@@ -35,6 +35,7 @@ const PdfView = ({
     const [location, setLocation] = useState(metaInfo.location || "");
     const [current_signature, setCurrentSignature] = useState(false);
     const [page, setPage] = useState(1);
+    const [all_page, setAllPage] = useState(false);
     const [current_position, setCurrentPosition] = useState("");
     const [count_signature, setCountSignature] = useState(0);
     const [positions, setPositions] = useState([]);
@@ -97,10 +98,12 @@ const PdfView = ({
         let datos = new FormData;
         datos.append('reason', payload.reason);
         datos.append('location', payload.location);
-        datos.append('page', payload.page);
+        datos.append('page', all_page ? 1 : payload.page);
+        datos.append('last_page', lastPage);
         datos.append('file', payload.pdfBlob);
         datos.append('visible', payload.visible);
         datos.append('certificate_id', current_select.id);
+        datos.append('all_page', all_page);
         if (payload.position) datos.append('position', payload.position);
         await signature.post(`auth/signer`, datos, { 
             responseType: 'blob',
@@ -256,22 +259,37 @@ const PdfView = ({
                                             </Show>
 
                                             <Form.Field>
-                                                <label htmlFor="">Página {page || 0} de {lastPage || 1}</label>
-                                                <input type="text"
-                                                    value={page}
-                                                    name="page"
-                                                    disabled={current_loading}
-                                                    onChange={({target}) => handleInput(target, (value) => { 
-                                                        let isNumber = /^[0-9]+$/;
-                                                        if (isNumber.test(value) && value <= lastPage) {
-                                                            setPage(value);
-                                                            setCurrentPosition({ x: 0, y: 0 });
-                                                        } else if (value == "") {
-                                                            setPage(value);
-                                                        }
-                                                    })}
-                                                />
+                                                <label htmlFor="">Todas las hojas</label>
+                                                <div>
+                                                    <Checkbox toggle 
+                                                        disabled={current_loading}
+                                                        checked={all_page}
+                                                        name="all_page"
+                                                        onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked }, setAllPage)}
+                                                    />
+                                                </div>
                                             </Form.Field>
+
+                                            {/* posición de firma en la página */}
+                                            <Show condicion={!all_page}>
+                                                <Form.Field>
+                                                    <label htmlFor="">Página {page || 0} de {lastPage || 1}</label>
+                                                    <input type="text"
+                                                        value={page}
+                                                        name="page"
+                                                        disabled={current_loading}
+                                                        onChange={({target}) => handleInput(target, (value) => { 
+                                                            let isNumber = /^[0-9]+$/;
+                                                            if (isNumber.test(value) && value <= lastPage) {
+                                                                setPage(value);
+                                                                setCurrentPosition({ x: 0, y: 0 });
+                                                            } else if (value == "") {
+                                                                setPage(value);
+                                                            }
+                                                        })}
+                                                    />
+                                                </Form.Field>
+                                            </Show>
                                             
                                             <Form.Field>
                                                 <label htmlFor="">Firma Visible</label>

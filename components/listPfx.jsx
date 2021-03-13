@@ -4,11 +4,12 @@ import { AppContext } from '../contexts/AppContext'
 import Skeleton from 'react-loading-skeleton'
 import { Fragment } from 'react';
 import Show from './show';
+import { AuthContext } from '../contexts/AuthContext';
 
 const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null, disabled = false }) => {
 
-    // app
-    const app_context = useContext(AppContext);
+    // auth
+    const { auth } = useContext(AuthContext);
 
     // estatos
     const [current_loading, setCurrentLoading] = useState(false);
@@ -34,7 +35,7 @@ const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null, disab
 
     // primera carga
     useEffect(() => {
-        if (app_context.auth && app_context.auth.id) getCertificate();
+        if (auth && auth.id) getCertificate();
     }, []);
 
     // render
