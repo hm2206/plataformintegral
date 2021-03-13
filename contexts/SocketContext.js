@@ -20,8 +20,8 @@ export const SocketProvider = ({ children }) => {
 
     // desconnectar
     useEffect(() => {
-        if (!is_logged) disconnectSocket();
-    }, [auth, disconnectSocket]);
+        return () => disconnectSocket();
+    }, [disconnectSocket]);
 
     // render
     return <SocketContext.Provider value={{ socket, online }}>
