@@ -1,15 +1,30 @@
-import { createContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import useSocket from '../hooks/useSocket';
 import { ws } from '../env.json';
+import { AuthContext } from '../contexts/AuthContext';
 
-const SocketContext = createContext();
+export const SocketContext = createContext();
 
-const SocketProvider = ({ children }) => {
+export const SocketProvider = ({ children }) => {
 
-    const { socket, online } = useSocket(ws.API_SOCKET);
+    // auth
+    const { auth, is_logged } = useContext(AuthContext);
+
+    // hooks
+    const { socket, online, connectSocket, disconnectSocket } = useSocket(ws.API_SOCKET);
+
+    // connectar
+    useEffect(() => {
+        if (is_logged) connectSocket();
+    }, [auth, connectSocket]);
+
+    // desconnectar
+    useEffect(() => {
+        if (!is_logged) disconnectSocket();
+    }, [auth, disconnectSocket]);
 
     // render
-    return <SocketContext.Provider >
+    return <SocketContext.Provider value={{ socket, online }}>
         {children}
     </SocketContext.Provider>
 }

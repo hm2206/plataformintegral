@@ -7,6 +7,7 @@ import { Content } from '../components/Utils';
 import Show from '../components/show';
 import SkullContent from '../components/loaders/skullContent';
 import { EntityProvider } from '../contexts/EntityContext';
+import { SocketProvider } from '../contexts/SocketContext';
 
 export const AuthContext = createContext();
 
@@ -36,28 +37,30 @@ export const AuthProvider = ({ children }) => {
     // response
     return (
         <AuthContext.Provider value={{ logout, is_logged, auth, setAuth, loading }}>
-            <EntityProvider>
-                {/* navbar */}
-                <Navbar/>
-                <div className="gx-layout-content ant-layout-content">
-                    <div className="gx-main-content-wrapper">
-                        {/* sidebar */}
-                        <Sidebar/>
-                        {/* pages auth */}
-                        <Content>
-                            <Show condicion={!loading && is_logged}
-                                predeterminado={
-                                    <div className="col-md-12">
-                                        <SkullContent/>
-                                    </div>
-                                }
-                            >
-                                {children}
-                            </Show>
-                        </Content>
+            <SocketProvider>
+                <EntityProvider>
+                    {/* navbar */}
+                    <Navbar/>
+                    <div className="gx-layout-content ant-layout-content">
+                        <div className="gx-main-content-wrapper">
+                            {/* sidebar */}
+                            <Sidebar/>
+                            {/* pages auth */}
+                            <Content>
+                                <Show condicion={!loading && is_logged}
+                                    predeterminado={
+                                        <div className="col-md-12">
+                                            <SkullContent/>
+                                        </div>
+                                    }
+                                >
+                                    {children}
+                                </Show>
+                            </Content>
+                        </div>
                     </div>
-                </div>
-            </EntityProvider>
+                </EntityProvider>
+            </SocketProvider>
         </AuthContext.Provider>
     );
 }

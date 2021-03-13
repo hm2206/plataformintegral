@@ -17,6 +17,7 @@ import { SelectEntityUser } from '../components/select/authentication';
 import { ScreenContext } from '../contexts/ScreenContext';
 import { AuthContext } from "../contexts/AuthContext";
 import { EntityContext } from "../contexts/EntityContext";
+import { SocketContext } from "../contexts/SocketContext";
 
 const extendView = ['medium', 'long', 'x-long'];
 
@@ -31,6 +32,9 @@ const Navbar = () => {
 
 	// auth context
 	const auth_context = useContext(AuthContext);
+
+	// socket context
+	const { online } = useContext(SocketContext);
 
 	// entity context
 	const { entity_id, setEntityId, render, disabled } = useContext(EntityContext);
@@ -136,23 +140,23 @@ const Navbar = () => {
 										aria-expanded="false"
 									>
 										<span className="user-avatar user-avatar-md">
-										<img src={
-												auth_context.auth && auth_context.auth.image_images &&auth_context.auth.image_images.image_50x50 || 
-												auth_context.auth && auth_context.auth.image || 
-												'/img/perfil.jpg'
-											}
-											alt="perfil"
-											style={{ background: '#fff' }}
-										/>
-										<span className="avatar-badge online" title="online"></span>
+											<img src={
+													auth_context.auth && auth_context.auth.image_images &&auth_context.auth.image_images.image_50x50 || 
+													auth_context.auth && auth_context.auth.image || 
+													'/img/perfil.jpg'
+												}
+												alt="perfil"
+												style={{ background: '#fff' }}
+											/>
+											<span className={`avatar-badge ${online ? 'online' : 'offline'}`} title={online ? 'online' : 'offline'}/>
 										</span>{" "}
 										<span className="account-summary pr-lg-4 d-none d-lg-block">
-										<span className="account-name" style={{ textTransform: 'capitalize' }}>
-											{auth_context.auth && auth_context.auth.username || ""}
-										</span>{" "}
-										<span className="account-description">
-											{auth_context.auth && auth_context.auth && auth_context.auth.email || ""}
-										</span>
+											<span className="account-name" style={{ textTransform: 'capitalize' }}>
+												{auth_context.auth && auth_context.auth.username || ""}
+											</span>{" "}
+											<span className="account-description">
+												{auth_context.auth && auth_context.auth && auth_context.auth.email || ""}
+											</span>
 										</span>
 									</button>
 								</Show>
