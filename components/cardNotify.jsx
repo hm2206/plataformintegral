@@ -17,7 +17,7 @@ const CardNotify = ({ username, title, date, description, icon, image, read = fa
                     
                 </span>
                 <Show condicion={image}>
-                    <a href="#" className="user-avatar">
+                    <a href="#" className="user-avatar" style={{ objectFit: 'contain', width: "35px", height: "35px" }}>
                         <img src={image} alt=""/>
                     </a> 
                 </Show>

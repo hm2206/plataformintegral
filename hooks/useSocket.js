@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import io from 'socket.io-client';
+import { credencials } from '../env.json';
 
 const useSocket = ({ host, path }) => {
 
@@ -9,11 +10,16 @@ const useSocket = ({ host, path }) => {
 
     // conectar socket
     const connectSocket = useCallback(() => {
-        const socketTemp = io.connect(host, { 
+        const socketTemp = io(host, { 
             path,
             transports: ['websocket'],
             autoConnect: true,
-            forceNew: true
+            forceNew: true,
+            withCrentials: true,
+            query: {
+                ClientId: credencials.ClientId,
+                ClientSecret: credencials.ClientSecret, 
+            }
         });
         setSocket(socketTemp);
     }, [host]);

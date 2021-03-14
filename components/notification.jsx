@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import Router from 'next/router';
 import Show from '../components/show';
 import moment from 'moment';
@@ -33,7 +33,7 @@ const Notification = () => {
                             Marcar todas como leídas
                         </a>
                     </h6>
-                    <div className="dropdown-scroll perfect-scrollbar">
+                    <div className="dropdown-scroll perfect-scrollbar" style={{ overflowY: 'auto' }}>
                         {notification.map((notify, indexN) => 
                             <Link href={`/notify?id=${notify.id}`} key={`notification-alert-${notify.id}-index-${indexN}`}>
                                 <a className={`dropdown-item ${notify.read_at ? 'read' : 'unread'}`}>
@@ -43,7 +43,7 @@ const Notification = () => {
                                         </div>
                                     </Show>
                                     <Show condicion={notify.image}>
-                                        <div className="user-avatar">
+                                        <div className="user-avatar" style={{ objectFit: 'contain' }}>
                                             <img src={notify.image}/>
                                         </div>
                                     </Show>
