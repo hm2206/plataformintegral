@@ -88,7 +88,7 @@ const CardChangePassword = () => {
                         <Button color="teal"
                             disabled={!password_validation || !password_new || !password_confirm || !val_password_confimation()}
                             onClick={changePassword}
-                            loading={current_loading}
+                            loading={current_loading ? true : false}
                         >
                             <i className="fas fa-save"></i> Guardar
                         </Button>

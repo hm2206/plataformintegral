@@ -2,7 +2,13 @@ import React from 'react';
 import moment from 'moment'
 import Show from '../components/show';
 
-const CardNotify = ({ username, title, date, description, icon, image, read = false }) => {
+const schemaNotify = [
+    { key: "mark_as_read", text: "Marcar como leído" },
+    { key: "mark_as_unread", text: "Marcar como no leído" }
+];
+
+const CardNotify = ({ username, title, date, description, icon, image, read = false, options = schemaNotify, onOption = null }) => {
+
     return (
         <div className={`list-group-item ${read ? '' : 'unread-important'}`}>
             {/* <!-- message figure --> */}
@@ -55,10 +61,13 @@ const CardNotify = ({ username, title, date, description, icon, image, read = fa
                     </button> 
                     <div className="dropdown-menu dropdown-menu-right">
                         <div className="dropdown-arrow mr-n1"></div>
-                        <a href="#" className="dropdown-item">Mark as read</a> 
-                        <a href="#" className="dropdown-item">Mark as unread</a> 
-                        <a href="#" className="dropdown-item">Toggle star</a> 
-                        <a href="#" className="dropdown-item">Trash</a>
+                        {options.map((opt, indexO) => 
+                            <a href="#" className="dropdown-item" key={`list-notification-${indexO}-${opt.key}`}
+                                onClick={(e) => typeof onOption == 'function' ? onOption(e, indexO, opt) : null}
+                            >
+                                {opt.text}
+                            </a> 
+                        )}
                     </div>
                 </div>
             </div>                  

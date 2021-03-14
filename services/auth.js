@@ -12,11 +12,13 @@ export const AUTHENTICATE = (ctx) => {
     if (AUTH(ctx)) return true;
     // not authorize
     if (ctx.res) {
-        ctx.res.writeHead(301, { Location: '/login' })
+        ctx.res.writeHead(302, { Location: '/login' })
         ctx.res.end();
-    } else {
-        Router.replace("/login");
-    }
+        return { };
+    } 
+    // client
+    Router.replace("/login");
+    return { };
 };
 
 
@@ -25,11 +27,13 @@ export const GUEST = (ctx) => {
     if (!AUTH(ctx)) return true;
     // is AUTHENTICATE
     if (ctx.res) {
-        ctx.res.writeHead(301, { Location: '/' });
+        ctx.res.writeHead(302, { Location: '/' });
         ctx.res.end();
-    } else {
-        Router.replace("/login");
+        return { };
     }
+    // client
+    Router.replace("/login");
+    return { };
 };
 
 

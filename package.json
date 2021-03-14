@@ -72,6 +72,7 @@
     "pdf-viewer-reactjs": "^2.0.2",
     "pdfassembler": "0.1.0-beta.8",
     "precise-ui": "^1.4.1",
+    "push.js": "^1.0.12",
     "qrcode": "^1.4.4",
     "rasterizehtml": "^1.3.0",
     "react": "^16.12.0",
@@ -99,6 +100,7 @@
     "socket.io-client": "^4.0.0",
     "sweetalert2": "^9.5.4",
     "table-to-json": "^1.0.0",
+    "toastify-js": "^1.9.3",
     "uid": "^1.0.0",
     "validator-error-adonis": "^1.0.0"
   },

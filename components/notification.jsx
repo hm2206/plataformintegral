@@ -1,29 +1,20 @@
-import React, { Component } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Router from 'next/router';
 import Show from '../components/show';
 import moment from 'moment';
 import Link from 'next/link';
-import { markAsReadAll } from '../services/notify';
-import Swal from 'sweetalert2';
+import toast from 'toastify-js';
+import { NotificationContext } from '../contexts/NotificationContext';
 
+const Notification = () => {
 
-export default class Notification extends Component
-{
+    // notification
+    const { notification, loading } = useContext(NotificationContext);
 
-    markAsReadAll = async (e) => {
-        e.preventDefault();
-        let { success, message } = await markAsReadAll();
-        let icon = success ? 'success' : 'error';
-        Swal.fire({ icon, text: message });
-        if (success) history.go(location.toString())
-    }
-
-    render() {
-
-        let { no_read, notification } = this.props;
- 
-        return (
-            <li className={`nav-item dropdown header-nav-dropdown ${no_read ? 'has-notified' : ''}`}>
+    // response
+    return (
+        <>
+            <li className={`nav-item dropdown header-nav-dropdown ${true ? 'has-notified' : ''}`}>
                 <a
                     className="nav-link"
                     href="#"
@@ -37,36 +28,38 @@ export default class Notification extends Component
                 <div className="dropdown-menu dropdown-menu-rich dropdown-menu-right">
                     <div className="dropdown-arrow"></div>
                     <h6 className="dropdown-header ">
-                        <span>Notificaciones</span> <a href="#" onClick={this.markAsReadAll}>Marcar todas como leídas</a>
+                        <span>Notificaciones</span>
+                        <a href="#">
+                            Marcar todas como leídas
+                        </a>
                     </h6>
                     <div className="dropdown-scroll perfect-scrollbar">
-                        {notification && notification.data.map(no => 
-                            <Link href={`/notify?id=${no.id}`} key={`notification-alert-${no.id}`}>
-                                <a 
-                                    className={`dropdown-item ${no.read_at ? 'read' : 'unread'}`} 
-                                >
-                                    <Show condicion={!no.image}>
+                        {notification.map((notify, indexN) => 
+                            <Link href={`/notify?id=${notify.id}`} key={`notification-alert-${notify.id}-index-${indexN}`}>
+                                <a className={`dropdown-item ${notify.read_at ? 'read' : 'unread'}`}>
+                                    <Show condicion={!notify.image}>
                                         <div className="notify-icon">
-                                            <i className={no.icon}></i>
+                                            <i className={notify.icon}></i>
                                         </div>
                                     </Show>
-                                    <Show condicion={no.image}>
+                                    <Show condicion={notify.image}>
                                         <div className="user-avatar">
-                                            <img src={no.image}/>
+                                            <img src={notify.image}/>
                                         </div>
                                     </Show>
                                     <div className="dropdown-item-body">
-                                        <p className="subject"> {no.send && no.send.username} </p>
+                                        <p className="subject"> {notify.send && notify.send.username} </p>
                                         <p className="text text-truncate">
                                         {" "}
-                                        {no.title}
+                                        {notify.title}
                                         </p>
-                                        <span className="date">{moment(no.created_at, "YYYY/MM/DD HH:mm:ss").fromNow()}</span>
+                                        <span className="date">{moment(notify.created_at, "YYYY/MM/DD HH:mm:ss").fromNow()}</span>
                                     </div>
                                 </a>  
-                            </Link>  
+                            </Link>      
                         )}
-                        <Show condicion={notification && !notification.total}>
+                        {/* no hay notificaciones */}
+                        <Show condicion={!loading && !notification.length}>
                             <div className={`dropdown-item text-center`}>
                                 <div className="dropdown-item-body">
                                     <p className="subject"> </p>
@@ -82,7 +75,7 @@ export default class Notification extends Component
                     <a href="#" className="dropdown-footer"
                         onClick={(e) => {
                             e.preventDefault();
-                            Router.push({ pathname: '/notify', query: { tab: 'all_notify' } });
+                            Router.push({ pathname: '/notify', query: { tab: 'nav-bar' } });
                         }}
                     >
                         Todas las notificaciones
@@ -90,7 +83,8 @@ export default class Notification extends Component
                     </a>
                 </div>
             </li>
-        );
-    }
-
+        </>
+    )
 }
+
+export default Notification;

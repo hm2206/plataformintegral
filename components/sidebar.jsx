@@ -1,11 +1,10 @@
-import React, { Component, Fragment, useContext, useState } from "react";
+import React, { Fragment, useContext } from "react";
 import Navigation from "./navigation";
-import { authentication } from '../services/apis';
 import Router from 'next/router';
-import Link from 'next/link';
 import { AppContext } from "../contexts";
 import { ScreenContext } from "../contexts/ScreenContext";
 import { AuthContext } from "../contexts/AuthContext";
+import { SocketContext } from "../contexts/SocketContext";
 
 
 const Sidebar = () => {
@@ -19,6 +18,9 @@ const Sidebar = () => {
 	// auth
 	const auth_context = useContext(AuthContext);
 	const { auth } = auth_context;
+
+	// socket
+	const { online } = useContext(SocketContext);
 
 	// render
 	return (
@@ -36,6 +38,7 @@ const Sidebar = () => {
 								<img src={auth.image ? auth.image && auth.image_images && auth.image_images.image_50x50 : '/img/.jpg'} 
 									alt={auth.person && auth.person.fullname} 
 								/>
+								<span className={`avatar-badge ${online ? 'online' : 'offline'}`} title={online ? 'online' : 'offline'}/>
 							</span>{" "}
 							<span className="account-icon">
 								<span className="fa fa-caret-down fa-lg"></span>

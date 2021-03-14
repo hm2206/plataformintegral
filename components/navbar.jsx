@@ -1,16 +1,11 @@
-import React, { Component, Fragment, useContext } from "react";
+import React, { Fragment, useContext } from "react";
+import dynamic from 'next/dynamic';
 import SkullAuth from "../components/loaders/skullAuth";
 import Logo from "../components/logo";
-import { authentication } from '../services/apis';
-import Notification from './notification';
-import { app } from '../env.json';
 import Show from "./show";
-import { Select } from 'semantic-ui-react';
-import { parseOptions } from '../services/utils'
 import Cookies from 'js-cookie';
 import Router from "next/router";
 import Link from "next/link";
-import btoa from 'btoa';
 import { Confirm } from '../services/utils';
 import { AppContext } from "../contexts";
 import { SelectEntityUser } from '../components/select/authentication';
@@ -19,6 +14,7 @@ import { AuthContext } from "../contexts/AuthContext";
 import { EntityContext } from "../contexts/EntityContext";
 import { SocketContext } from "../contexts/SocketContext";
 
+const Notification = dynamic(() => import('./notification'), { ssr: false });
 const extendView = ['medium', 'long', 'x-long'];
 
 
@@ -125,7 +121,7 @@ const Navbar = () => {
 									</li>
 								</Show>
 								{/* notificaciones */}
-								{/* <Notification notification={notification} no_read={no_read}/> */}
+								<Notification/>
 							</ul>
 
 							<div className="dropdown d-flex">

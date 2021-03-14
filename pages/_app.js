@@ -6,12 +6,15 @@ import { AuthProvider } from '../contexts/AuthContext';
 import Router from 'next/router';
 import { AUTH } from '../services/auth';
 import { authentication } from '../services/apis';
+import moment from 'moment';
+moment.locale('es');
 
 // component utils
 import Show from '../components/show';
 
 // css
 import 'react-vertical-timeline-component/style.min.css';
+import "toastify-js/src/toastify.css"
 import { AppProvider } from '../contexts';
 
 
