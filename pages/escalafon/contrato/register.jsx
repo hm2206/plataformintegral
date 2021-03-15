@@ -14,6 +14,7 @@ import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta } fro
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 const Register = () => {
 
@@ -192,7 +193,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.planilla_id && errors.planilla_id[0] || ""}>
+                                            <Form.Field error={errors && errors.planilla_id && errors.planilla_id[0] ? true : false}>
                                                 <label htmlFor="">Planilla <b className="text-red">*</b></label>
                                                 <SelectPlanilla
                                                     name="planilla_id"
@@ -204,7 +205,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.dependencia_id && errors.dependencia_id[0] || ""}>
+                                            <Form.Field error={errors && errors.dependencia_id && errors.dependencia_id[0] ? true : false}>
                                                 <label htmlFor="">Dependencia/Oficina <b className="text-red">*</b></label>
                                                 <SelectDependencia
                                                     name="dependencia_id"
@@ -216,7 +217,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
+                                            <Form.Field error={errors && errors.meta_id && errors.meta_id[0] ? true : false}>
                                                 <label htmlFor="">MetaID <b className="text-red">*</b></label>
                                                 <SelectMeta
                                                     name="meta_id"
@@ -229,7 +230,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
+                                            <Form.Field error={errors && errors.meta_id && errors.meta_id[0] ? true : false}>
                                                 <label htmlFor="">ActividadID <b className="text-red">*</b></label>
                                                 <SelectMeta
                                                     name="meta_id"
@@ -243,7 +244,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.meta_id && errors.meta_id[0] || ""}>
+                                            <Form.Field error={errors && errors.meta_id && errors.meta_id[0] ? true : false}>
                                                 <label htmlFor="">Meta <b className="text-red">*</b></label>
                                                 <SelectMeta
                                                     name="meta_id"
@@ -257,7 +258,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.cargo_id && errors.cargo_id[0] || ""}>
+                                            <Form.Field error={errors && errors.cargo_id && errors.cargo_id[0] ? true : false}>
                                                 <label htmlFor="">Partición Presupuestal. <b className="text-red">*</b></label>
                                                 <SelectCargo
                                                     name="cargo_id"
@@ -269,7 +270,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors.cargo_id && errors.cargo_id[0] || ""}>
+                                            <Form.Field error={errors.cargo_id && errors.cargo_id[0] ? true : false}>
                                                 <label htmlFor="">Ext pptto <b className="text-red">*</b></label>
                                                 <SelectCargo
                                                     name="cargo_id"
@@ -277,12 +278,12 @@ const Register = () => {
                                                     value={form.cargo_id}
                                                     onChange={(e, obj) => handleInput(obj)}
                                                 />
-                                                <label htmlFor="">{errors.cargo_id && errors.cargo_id[0] || ""}</label>
+                                                <label htmlFor="">{errors.cargo_id && errors.cargo_id[0] ? true : false}</label>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors.type_categoria_id && errors.type_categoria_id[0] || ""}>
+                                            <Form.Field error={errors.type_categoria_id && errors.type_categoria_id[0] ? true : false}>
                                                 <label htmlFor="">Tip. Categoría <b className="text-red">*</b></label>
                                                 <SelectCargoTypeCategoria
                                                     cargo_id={form.cargo_id}
@@ -325,7 +326,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.perfil_laboral_id && errors.perfil_laboral_id[0] || ""}>
+                                            <Form.Field error={errors && errors.perfil_laboral_id && errors.perfil_laboral_id[0] ? true : false}>
                                                 <label htmlFor="">Perfil Laboral <b className="text-red">*</b></label>
                                                 <SelectDependenciaPerfilLaboral
                                                     disabled={!form.dependencia_id}
@@ -341,7 +342,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.resolucion && errors.resolucion[0] || ""}>
+                                            <Form.Field error={errors && errors.resolucion && errors.resolucion[0] ? true : false}>
                                                 <label htmlFor="">Resolución <b className="text-red">*</b></label>
                                                 <input type="text" 
                                                     name="resolucion"
@@ -354,7 +355,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || ""}>
+                                            <Form.Field error={errors && errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] ? true : false}>
                                                 <label htmlFor="">Fecha de Resolución <b className="text-red">*</b></label>
                                                 <input type="date" 
                                                     name="fecha_de_resolucion"
@@ -367,7 +368,7 @@ const Register = () => {
                                         </div>
                                         
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.file && errors.file[0] || ""}>
+                                            <Form.Field error={errors && errors.file && errors.file[0] ? true : false}>
                                                 <label htmlFor="file">Archivo de Regístro</label>
                                                 <label htmlFor="file" className="btn btn-outline-dark">
                                                     <i className="fas fa-file-alt"></i>
@@ -385,7 +386,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] || ""}>
+                                            <Form.Field error={errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] ? true : false}>
                                                 <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
                                                 <input type="date" 
                                                     name="fecha_de_ingreso"
@@ -398,7 +399,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.fecha_de_cese && errors.fecha_de_cese[0] || ""}>
+                                            <Form.Field error={errors && errors.fecha_de_cese && errors.fecha_de_cese[0] ? true : false}>
                                                 <label htmlFor="">Fecha de Cese </label>
                                                 <input type="date" 
                                                     placeholder="Fecha de cese"
@@ -411,7 +412,7 @@ const Register = () => {
                                         </div>
                                         
                                         <div className="col-md-8 mb-3">
-                                            <Form.Field error={errors && errors.observacion && errors.observacion[0] || ""}>
+                                            <Form.Field error={errors && errors.observacion && errors.observacion[0] ? true : false}>
                                                 <label htmlFor="">Observación <b className="text-red">*</b></label>
                                                 <textarea name="observacion" 
                                                     value={form.observacion || ""}
