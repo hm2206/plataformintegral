@@ -8,7 +8,7 @@ import Show from '../components/show';
 import SkullContent from '../components/loaders/skullContent';
 import { EntityProvider } from '../contexts/EntityContext';
 import { SocketProvider } from '../contexts/SocketContext';
-import { NotificationProvider } from '../contexts/NotificationContext';
+import { NotificationProvider } from '../contexts/notification/NotificationContext';
 
 export const AuthContext = createContext();
 

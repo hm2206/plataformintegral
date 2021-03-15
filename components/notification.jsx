@@ -1,20 +1,25 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Router from 'next/router';
 import Show from '../components/show';
 import moment from 'moment';
 import Link from 'next/link';
 import toast from 'toastify-js';
-import { NotificationContext } from '../contexts/NotificationContext';
+import { NotificationContext } from '../contexts/notification/NotificationContext';
 
 const Notification = () => {
 
+    // estado
+    const [show, setShow] = useState(false);
+
     // notification
-    const { notification, loading } = useContext(NotificationContext);
+    const { notificationes, loading, count_unread } = useContext(NotificationContext);
 
     // response
     return (
         <>
-            <li className={`nav-item dropdown header-nav-dropdown ${true ? 'has-notified' : ''}`}>
+            <li className={`nav-item dropdown header-nav-dropdown ${count_unread ? 'has-notified' : ''} ${show ? 'show' : ''}`}
+                onClick={(e) => setShow(!show)}
+            >
                 <a
                     className="nav-link"
                     href="#"
@@ -25,7 +30,7 @@ const Notification = () => {
                     <span className="fas fa-bell"></span>
                 </a>
                 
-                <div className="dropdown-menu dropdown-menu-rich dropdown-menu-right">
+                <div className={`dropdown-menu dropdown-menu-rich dropdown-menu-right ${show ? 'show' : ''}`}>
                     <div className="dropdown-arrow"></div>
                     <h6 className="dropdown-header ">
                         <span>Notificaciones</span>
@@ -34,7 +39,7 @@ const Notification = () => {
                         </a>
                     </h6>
                     <div className="dropdown-scroll perfect-scrollbar" style={{ overflowY: 'auto' }}>
-                        {notification.map((notify, indexN) => 
+                        {notificationes.map((notify, indexN) => 
                             <Link href={`/notify?id=${notify.id}`} key={`notification-alert-${notify.id}-index-${indexN}`}>
                                 <a className={`dropdown-item ${notify.read_at ? 'read' : 'unread'}`}>
                                     <Show condicion={!notify.image}>
@@ -59,7 +64,7 @@ const Notification = () => {
                             </Link>      
                         )}
                         {/* no hay notificaciones */}
-                        <Show condicion={!loading && !notification.length}>
+                        <Show condicion={!loading && !notificationes.length}>
                             <div className={`dropdown-item text-center`}>
                                 <div className="dropdown-item-body">
                                     <p className="subject"> </p>
