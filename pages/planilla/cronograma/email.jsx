@@ -65,6 +65,7 @@ const CronogramaEmail = ({ pathname, query, success, cronograma }) => {
     const [no_enviados, setNoEnviados] = useState(0);
     const [is_search, setIsSearch] = useState(false);
     const [errors, setErrors] = useState([]);
+    const [is_next, setIsNext] = useState(false);
 
     // setting entity
     useEffect(() => {
@@ -118,7 +119,7 @@ const CronogramaEmail = ({ pathname, query, success, cronograma }) => {
             app_context.setCurrentLoading(false);
             let { success, message, next } = res.data;
             if (!success) throw new Error(message);
-            if (next) await this.send();
+            if (next) setIsNext(true);
             else {
                 let message = "El envio de correos a terminado correctamente";
                 await Swal.fire({ icon: 'success', text: message });
@@ -127,6 +128,14 @@ const CronogramaEmail = ({ pathname, query, success, cronograma }) => {
         })
         .catch(async err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
+
+    // next 
+    useEffect(() => {
+        if (is_next) {
+            send();
+            setIsNext(false);
+        }
+    }, [is_next]);
 
     // renderizar
     return (
