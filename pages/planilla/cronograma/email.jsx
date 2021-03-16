@@ -125,7 +125,7 @@ const CronogramaEmail = ({ pathname, query, success, cronograma }) => {
                 getSentEmail();
             }
         })
-        .catch(async err => handleErrorRequest(err, null, () => app_context.fireLoading(false)));
+        .catch(async err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
     // renderizar

@@ -21,8 +21,14 @@ export const NotificationReducer = (state, action = { type: "init", payload: {} 
     // condicion
     switch (action.type) {
         case types.NOTIFICATION_ALL:
-            let { notification } = action.payload;
+            let { notification, count_read, count_unread } = action.payload;
             newState.notificationes = notification.data;
+            newState.count_read = count_read;
+            newState.count_unread = count_unread;
+            newState.last_page = notification.last_page || 0;
+            newState.total = notification.total || 0;
+            newState.page = notification.page || 1;
+            newState.is_next = newState.last_page >= (newState.page + 1);
             return newState;
         case types.NOTIFICATION_ADD:
             let new_notification = action.payload;

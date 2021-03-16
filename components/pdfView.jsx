@@ -106,7 +106,7 @@ const PdfView = ({
         datos.append('all_page', all_page);
         if (payload.position) datos.append('position', payload.position);
         await signature.post(`auth/signer`, datos, { 
-            responseType: 'blob',
+            responseType: all_page ? 'json' : 'blob',
             onUploadProgress: (evt) => onProgress(evt, setCurrentProgress), 
             onDownloadProgress: (evt) => onProgress(evt, (p) => { 
                 setCurrentDownload(true);
@@ -116,6 +116,11 @@ const PdfView = ({
             headers : { 'Content-Type': 'multipart/form-data' }
         }).then(async res => {
             let { data } = res;
+            if (all_page) {
+                Swal.fire({ icon: 'info', text: "El archivo está siendo procesado, será notificado cuando esté listo!" });
+                if (typeof onClose == 'function') onClose();
+                return true;
+            }
             response = true;
             if (typeof onSigned == 'function') await onSigned(payload, data);
             else {

@@ -7,7 +7,7 @@ const schemaNotify = [
     { key: "mark_as_unread", text: "Marcar como no leído" }
 ];
 
-const CardNotify = ({ username, title, date, description, icon, image, read = false, options = schemaNotify, onOption = null }) => {
+const CardNotify = ({ username, title, date, description, icon, image, read = false, options = schemaNotify, onOption = null, actions = [] }) => {
 
     return (
         <div className={`list-group-item ${read ? '' : 'unread-important'}`}>
@@ -18,7 +18,7 @@ const CardNotify = ({ username, title, date, description, icon, image, read = fa
                 </span>
                 <Show condicion={image}>
                     <a href="#" className="user-avatar" style={{ objectFit: 'contain', width: "35px", height: "35px" }}>
-                        <img src={image} alt=""/>
+                        <img src={image} alt="avatar"/>
                     </a> 
                 </Show>
 
@@ -35,7 +35,7 @@ const CardNotify = ({ username, title, date, description, icon, image, read = fa
                     {/* <!-- grid column --> */}
                     <div className="col-12 col-lg-3 d-none d-lg-block">
                         <h4 className="list-group-item-title text-truncate">
-                            <a href="page-conversations.html">{username}</a>
+                            <a href="#">{username}</a>
                         </h4>
                         <p className="list-group-item-text"> {moment(date, "YYYY/MM/DD HH:mm:ss").fromNow()} </p>
                     </div>
@@ -45,6 +45,19 @@ const CardNotify = ({ username, title, date, description, icon, image, read = fa
                             <a href="page-conversations.html">{title}</a>
                         </h4>
                         <p className="list-group-item-text text-truncate">{description}</p>
+                        <div className="w-100 text-left">
+                            <div className="btn-group">
+                                {actions.map((act, indexA) => 
+                                    <a href={act.link} 
+                                        key={`list-action-${indexA}-${act.key}`} 
+                                        target="_blank" 
+                                        className="link mt-2"
+                                    >
+                                        {act.text}
+                                    </a>
+                                )}
+                            </div>
+                        </div>
                     </div>
                     {/* <!-- grid column --> */}
                     <div className="col-12 d-lg-none">

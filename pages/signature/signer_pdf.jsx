@@ -1,10 +1,12 @@
-import React, { Fragment, useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PdfView from '../../components/pdfView';
 import Show from '../../components/show';
-import { Body, DropZone } from '../../components/Utils';
+import { DropZone } from '../../components/Utils';
 import { PDFDocument } from 'pdf-lib';
 import { AppContext } from '../../contexts/AppContext';
 import { AUTHENTICATE } from '../../services/auth';
+import BoardSimple from '../../components/boardSimple';
+import { SocketContext } from '../../contexts/SocketContext';
 
 const SignerPDF = () => {
 
@@ -42,12 +44,15 @@ const SignerPDF = () => {
     }
     
     // render
-    return <div className="col-md-12">
-        <Body>
-            <div className="_card">
-                <div className="card-header">
-                    <i className="fas fa-signature"></i> Firmar PDF
-                </div>
+    return (
+        <div className="col-md-12">
+            <BoardSimple
+                prefix={<i className="fas fa-signature"/>}
+                title="Firmar PDF"
+                info={["Firmar archivo PDF"]}
+                bg="danger"
+                options={[]}
+            >
                 <div className="card-body">
                     <div className="row justify-content-center">
                         <div className="col-md-8 mt-5" style={{ paddingTop: '7em' }}>
@@ -62,18 +67,18 @@ const SignerPDF = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-        </Body>
+            </BoardSimple>
 
-        <Show condicion={show_pdf}>
-            <PdfView
-                pdfBlob={pdf_blob}
-                pdfDoc={pdf_doc}
-                pdfUrl={pdf_url}
-                onClose={onClose}
-            />
-        </Show>
-    </div>
+            <Show condicion={show_pdf}>
+                <PdfView
+                    pdfBlob={pdf_blob}
+                    pdfDoc={pdf_doc}
+                    pdfUrl={pdf_url}
+                    onClose={onClose}
+                />
+            </Show>
+        </div>
+    )
 }
 
 // server

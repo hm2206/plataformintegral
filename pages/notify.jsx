@@ -61,6 +61,7 @@ const Notify = ({ pathname, query, success, notification, count_read, count_no_r
                                         image={notify.image}
                                         icon={notify.icon}
                                         read={notify.read_at ? true : false}
+                                        actions={notify.actions || []}
                                     />    
                                 )}
                                 
