@@ -21,12 +21,8 @@ const Visualizador = dynamic(() => import('../../../components/visualizador'), {
 
 // menus
 const current_status_default = [
-    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['RECIBIDO', 'COPIA', 'ACEPTADO'], count: 0 },
-    { key: "SENT", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['DERIVADO', 'RESPONDIDO', 'PENDIENTE', 'REGISTRADO', 'RECHAZADO'], count: 0 },
-    // { key: "PENDIENTE", icon: 'fas fa-thumbtack', text: 'Pendientes', index: 2, filtros: ['PENDIENTE'], count: 0 },
-    // { key: "REGISTRADO", icon: 'far fa-file', text: 'Regístrados', index: 3, filtros: ['REGISTRADO'], count: 0 },
-    // { key: "ACEPTADO", icon: 'fas fa-check', text: 'Aceptados', index: 4, filtros: ['ACEPTADO'], count: 0 },
-    // { key: "RECHAZADO", icon: 'fas fa-times', text: 'Rechazados', index: 5, filtros: ['RECHAZADO'], count: 0 },
+    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['RECIBIDO', 'COPIA', 'ACEPTADO', 'PENDIENTE', 'DERIVADO', 'RECHAZADO'], count: 0 },
+    { key: "SENT", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['RESPONDIDO', 'REGISTRADO', 'RECHAZADO', 'ENVIADO'], count: 0 },
     { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 2, filtros: ['ANULADO'], count: 0 },
     { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 3, filtros: ['FINALIZADO'], count: 0 }
 ];

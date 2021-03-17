@@ -76,6 +76,14 @@
             "btn": "info",
             "label": "Copia",
             "color": "dark"
+        },
+        "ENVIADO": {
+            "text": "E",
+            "title": "Enviado",
+            "className": "badge-info",
+            "btn": "info",
+            "label": "Enviar",
+            "color": "teal"
         }
     }
 }

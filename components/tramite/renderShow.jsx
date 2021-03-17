@@ -397,7 +397,7 @@ const RenderShow = () => {
                                             disabled={!current_tracking.revisado}
                                             onClick={() => handleNext(current_tracking.next)}
                                         >
-                                            Enviar <i class="fas fa-paper-plane"></i>
+                                            Continuar trámite <i class="fas fa-paper-plane"></i>
                                         </Button>
                                     }
                                 >
@@ -416,7 +416,18 @@ const RenderShow = () => {
                                         </Button>
                                     </Show>
 
-                                    <Show condicion={current_tracking.status == 'REGISTRADO' || current_tracking.status == 'PENDIENTE'}>
+                                    <Show condicion={current_tracking.status == 'REGISTRADO'}>
+                                        <Button color="teal" 
+                                            basic 
+                                            size="mini"
+                                            disabled={!current_tracking.revisado}
+                                            onClick={() => handleNext('ENVIADO')}
+                                        >
+                                            Enviar <i class="fas fa-paper-plane"></i>
+                                        </Button>
+                                    </Show>
+
+                                    <Show condicion={current_tracking.status == 'PENDIENTE'}>
                                         <Button color="purple" 
                                             basic 
                                             size="mini"

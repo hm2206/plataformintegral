@@ -43,9 +43,9 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     const [current_multiple, setCurrentMultiple] = useState([]);
 
     // mostrar componentes
-    const destino = ['DERIVADO'];
-    const descripcion = ['ANULADO', 'DERIVADO', 'ACEPTADO', 'RECHAZADO', 'RESPONDIDO', 'FINALIZADO'];
-    const archivos = ['DERIVADO', 'RESPONDIDO'];
+    const destino = ['DERIVADO', 'ENVIADO'];
+    const descripcion = ['ANULADO', 'DERIVADO', 'ACEPTADO', 'RECHAZADO', 'RESPONDIDO', 'FINALIZADO', 'ENVIADO'];
+    const archivos = ['DERIVADO', 'RESPONDIDO', 'ENVIADO'];
 
     const current_tracking = tramite_context.tracking || {};
     const current_role = tramite_context.role || {};
