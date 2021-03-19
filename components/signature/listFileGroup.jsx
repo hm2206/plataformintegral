@@ -9,7 +9,7 @@ import { Checkbox, Button } from 'semantic-ui-react';
 const PlaceholderItem = () => {
 
     return (
-        <Fragment className="mb-3">
+        <>
             <div className="col-md-3">
                 <Skeleton height="200px"/>
             </div>
@@ -22,7 +22,7 @@ const PlaceholderItem = () => {
             <div className="col-md-3">
                 <Skeleton height="200px"/>
             </div>
-        </Fragment>
+        </>
     )
 }
 
@@ -33,7 +33,7 @@ const ItemValidation = ({ obj = {}, className = null }) => {
 
     // sin archivo
     return (
-        <Fragment>
+        <>
             <Show condicion={isFile}>
                 <div className={`${className}`} style={{ position: 'relative' }}>
                     <Show condicion={obj.verify}>
@@ -71,11 +71,11 @@ const ItemValidation = ({ obj = {}, className = null }) => {
                     </div>
                 </div>
             </Show>
-        </Fragment>
+        </>
     )
 }
 
-const ListValidation = () => {
+const ListFileGroup = () => {
 
     // group
     const  { group }= useContext(GroupContext);
@@ -86,11 +86,9 @@ const ListValidation = () => {
     const [current_page, setCurrentPage] = useState(1);
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [current_total, setCurrentTotal] = useState(0);
-    const [verify, setVerify] = useState(0);
-    const [is_verify, setIsVerify] = useState(false);
 
     // obtener 
-    const getValidation = async (add = false) => {
+    const getFiles = async (add = false) => {
         setCurrentLoading(true);
         // options
         let options = {
@@ -99,51 +97,33 @@ const ListValidation = () => {
                 GroupId: group.id
             }
         }
-        let query_string = `page=${current_page}&verify=${verify}`;
+        let query_string = `page=${current_page}`;
         // request
-        await signature.get(`auth/group/${group.id}/validation?${query_string}`, options)
+        await signature.get(`auth/group/${group.id}/file?${query_string}`, options)
         .then(res => {
-            let { validations } = res.data;
-            setCurrentLastPage(validations.lastPage || 0);
-            setCurrentTotal(validations.total || 0);
-            setDatos(add ? [...datos, ...validations.data] : validations.data);
+            let { files } = res.data;
+            setCurrentLastPage(files.lastPage || 0);
+            setCurrentTotal(files.total || 0);
+            setDatos(add ? [...datos, ...files.data] : files.data);
         }).catch(err => console.log(err));
         setCurrentLoading(false);
     }
 
     // primera carga
     useEffect(() => {
-        getValidation();
+        getFiles();
     }, []);
-
-    // cambio de validación
-    useEffect(() => {
-        if (is_verify) {
-            getValidation();
-            setIsVerify(false);
-        }
-    }, [verify]);
 
     // next page
     useEffect(() => {
-        if (current_page > 1) getValidation(true);
+        if (current_page > 1) getFiles(true);
     }, [current_page])
 
     // render
     return (
-        <Fragment>
+        <>
             <div className="row">
-                <div className="col-md-10"><h5><i className="fas fa-check"></i> Lista de validaciones</h5></div>
-                <div className="col-md-2 text-right">
-                    <Checkbox toggle
-                        onChange={(e, obj) => {
-                            setCurrentPage(1);
-                            setVerify(obj.checked ? 1 : 0);
-                            setIsVerify(true);
-                        }}
-                        checked={verify ? true : false}
-                    />
-                </div>
+                <div className="col-md-10"><h5><i className="far fa-file-pdf"></i> Lista de Archivos</h5></div>
             </div>
 
             <hr/>
@@ -153,7 +133,7 @@ const ListValidation = () => {
                     <ItemValidation 
                         obj={d}
                         className="col-md-3"
-                        key={`item-file-validation-${indexD}`}
+                        key={`item-file-validation-${indexD}-${d.id}`}
                     />   
                 )}
                 {/* no hay registros */}
@@ -164,7 +144,7 @@ const ListValidation = () => {
                 </Show>
                 {/* preloader */}
                 <Show condicion={current_loading}>
-                    <PlaceholderItem/>
+                    <PlaceholderItem className="mt-3"/>
                 </Show>
                 {/* next page */}
                 <div className="col-md-12 mt-2">
@@ -175,9 +155,9 @@ const ListValidation = () => {
                         <i className="fas fa-arrow-down"></i> Obtener más regístros
                     </Button>
                 </div>
-        </div>
-        </Fragment>
+            </div>
+        </>
     );
 }
 
-export default ListValidation;
+export default ListFileGroup;

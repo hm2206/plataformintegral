@@ -521,6 +521,10 @@ a {
     align-items: center;
 }
 
+.upload-theme-light {
+    background: linear-gradient(15deg,#cfd8dc,#ffffff);
+}
+
 .upload-body {
     flex: 4;
     height: 100%;

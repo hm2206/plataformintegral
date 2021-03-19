@@ -14,7 +14,7 @@ const ModalRight = ({ title = 'Menu', onClose = null, show = false, disabled = f
     return (
         <div className={`modal modal-drawer fade show has-shown window-fixed ${show ? 'fixed-open' : 'fixed-close'}`} 
             id="modalBoardConfig" 
-            tabindex="-1"
+            tabIndex="-1"
             role="dialog" 
             style={{ display: 'block' }}>
             {/* <!-- .modal-dialog --> */}

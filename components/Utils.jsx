@@ -48,7 +48,7 @@ const DropZone = ({
   result = [], onDelete = null ,
   onSigned = null, size = 100, 
   signerTypes = ['application/pdf'],
-  basic = false
+  basic = false, onRaw = null,
 }) => {
 
   // estados
@@ -90,9 +90,12 @@ const DropZone = ({
         } else typeof onChange == 'function' ? await onChange({ name, files }) : null;
       } else typeof onChange == 'function' ? await onChange({ name, files }) : null;
     } else typeof onChange == 'function' ? await onChange({ name, files }) : null;
-    // eliminar archivos temporales
-    let inputNode = document.getElementById(id);
-    if(inputNode) inputNode.value = null;
+    let inputChange = document.getElementById(id);
+    if (inputChange) inputChange.value = null;
+  }
+
+  const handleSelect = (target) => {
+    typeof onRaw == 'function' ? onRaw(target) : handleChange(target)
   }
 
   const handleSigner = async (obj, blob) => {
@@ -111,7 +114,7 @@ const DropZone = ({
             accept={accept}
             name={name}
             multiple={multiple}
-            onChange={async ({ target }) => handleChange(target)}
+            onChange={({ target }) => handleSelect(target)}
             hidden
           />
         </label>
@@ -143,7 +146,7 @@ const DropZone = ({
             accept={accept}
             name={name}
             multiple={multiple}
-            onChange={async ({ target }) => handleChange(target)}
+            onChange={({ target }) => handleSelect(target)}
             hidden
         />
     </label>

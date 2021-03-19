@@ -138,7 +138,7 @@ const ProgressFile = ({
                 <div className="row w-100">
                     <div className="col-md-5 col-5">
                         <div className="upload-body-text">
-                            <b>{file.name || ""}</b>
+                            <b title={file.name}>{file.name || ""}</b>
                             <div className="py-0 font-10" style={{ opacity: 0.8 }}>{formatBytes(file.size || 0)}</div>
                         </div>
                     </div>

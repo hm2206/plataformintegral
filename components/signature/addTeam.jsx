@@ -1,11 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import { signature } from '../../services/apis';
 import ModalRightPerson from '../authentication/modalRightPerson';
 import { Confirm } from '../../services/utils';
 import { GroupContext } from '../../contexts/SignatureContext';
 
 const actions = {
-    ADD: 'add'
+    ADD: 'add',
+    CREATE: 'create',
 }
 
 const AddTeam = ({ show, onClose, checked = [] }) => {
@@ -14,8 +15,9 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
     const group_context = useContext(GroupContext);
 
     // estados
-    const [current_user, setCurrentUser] = useState({});
+    const [current_person, setCurrentPerson] = useState({});
     const [option, setOption] = useState("");
+    const [percent, setPercent] = useState(0);
 
     // agregemos al equipo
     const create = async () => {
@@ -30,15 +32,19 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
 
     // render
     return (
-        <ModalRightPerson
-            show={show}
-            title="Equipo"
-            onClose={onClose}
-            onCheck={(e, user) => {
-                setCurrentUser(user);
-                setOption(actions.ADD);
-            }}
-        />
+        <Fragment>
+            <ModalRightPerson
+                show={show}
+                title="Agregar Equipo"
+                onClose={onClose}
+                onCheck={(e, person) => {
+                    setCurrentPerson(person);
+                    setOption(actions.CREATE);
+                }}
+            >
+                <hr/>
+            </ModalRightPerson>
+        </Fragment>
     );
 }
 

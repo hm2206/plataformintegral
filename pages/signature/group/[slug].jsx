@@ -1,16 +1,20 @@
 import React , { useState } from 'react';
 import BoardSimple from '../../../components/boardSimple';
-import { BtnBack, DropZone } from '../../../components/Utils';
+import { BtnBack } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import { signature } from '../../../services/apis';
 import { GroupProvider } from '../../../contexts/SignatureContext';
 import AddTeam from '../../../components/signature/addTeam';
-import AddValidation from '../../../components/signature/addValidation';
-import ListValidation from '../../../components/signature/listValidation';
 import ListTeam from '../../../components/signature/listTeam';
+import ListFileGroup from '../../../components/signature/listFileGroup';
+import UploadFileGroup from '../../../components/signature/uploadFileGroup';
+import NotFoundData from '../../../components/notFoundData'
 
 
 const SlugGroup = ({ pathname, query, success, group }) => {
+
+    // validar datos
+    if (!success) return <NotFoundData/>
 
     // estados
     const [option, setOption] = useState("");
@@ -26,8 +30,6 @@ const SlugGroup = ({ pathname, query, success, group }) => {
         }
     }
 
-    if (!success) return 'Not found'
-
     // render
     return (
         <div className="col-md-12">
@@ -40,7 +42,6 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                     onOption={handleOption}
                     options={[
                         { key: 'ADD_TEAM', title: 'Agregar al equipo de firma', icon: 'fas fa-user-plus' },
-                        { key: 'ADD_VALIDATION', title: 'Agregar las validaciones', icon: 'fas fa-user-cog' },
                     ]}
                 >
                     <div className="row">
@@ -48,19 +49,13 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                             <div className="card-body">
                                 <div className="row">
                                     <div className="col-md-12 mt-4">
-                                        <DropZone
-                                            id={`file-upload-signer`}
-                                            name="files"
-                                            multiple
-                                            accept="application/pdf"
-                                            title="Seleccionar PDF"
-                                        />
+                                        <UploadFileGroup/>
                                         <hr/>
                                     </div>
 
                                     <div className="col-md-12">
-                                        {/* listar validaciones */}
-                                        <ListValidation/>
+                                        {/* listar archivos */}
+                                        <ListFileGroup/>
                                     </div>
                                 </div>
                             </div>
@@ -74,11 +69,6 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                 {/* agregar equipo */}
                 <AddTeam 
                     show={option == 'ADD_TEAM'}
-                    onClose={(e) => setOption('')}
-                />
-                {/* agregar configuraciones */}
-                <AddValidation
-                    show={option == 'ADD_VALIDATION'}
                     onClose={(e) => setOption('')}
                 />
             </GroupProvider>

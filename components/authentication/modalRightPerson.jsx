@@ -82,14 +82,14 @@ const ModalRightUser = ({ title, show, onClose = null, onCheck = null, children 
                             />
                         }    
                         name="query_search"
-                        placeholder="Buscar integrante"
+                        placeholder="Buscar persona"
                         value={query_search || ""}
                         onChange={(e, obj) => setQuerySearch(obj.value || "")}
                     />
                 </Form.Field>
                 <div><hr/></div>
                 {children || null}
-                <h6 class="dropdown-header"> {current_page * datos.length} de {current_total} </h6>
+                <h6 className="dropdown-header"> {current_page * datos.length} de {current_total} </h6>
                 <div className="card-body">
                     <Show condicion={datos.length}>
                         {datos.map((d, indexD) => 
