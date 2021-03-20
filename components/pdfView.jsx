@@ -10,6 +10,7 @@ import ProgressFile from './progressFile';
 import { getPositions } from 'node-signature/client';
 import axios from 'axios';
 import { onProgress } from '../services/apis';
+import { AuthContext } from '../contexts/AuthContext';
 
 
 const PdfView = ({ 
@@ -23,6 +24,9 @@ const PdfView = ({
     onClose = null,
     onSigned = null
 }) => {
+
+    // auth
+    const { auth } = useContext(AuthContext);
 
     // obtener metadatos del pdf
     let pdfPages = pdfDoc.getPages(); 
@@ -223,6 +227,7 @@ const PdfView = ({
                                         disabled={current_loading}
                                         classBody="col-md-12"
                                         classSkeleton="col-md-12"
+                                        person_id={auth.person_id || null}
                                         onClick={(e, obj) => setCurrentSelect(obj)}
                                     />
                                 </div>

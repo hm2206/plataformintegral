@@ -46,12 +46,12 @@ const CardNotify = ({ username, title, date, description, icon, image, read = fa
                         </h4>
                         <p className="list-group-item-text text-truncate">{description}</p>
                         <div className="w-100 text-left">
-                            <div className="btn-group">
+                            <div className="btn-group mt-2 mb-2">
                                 {actions.map((act, indexA) => 
                                     <a href={act.link} 
                                         key={`list-action-${indexA}-${act.key}`} 
                                         target="_blank" 
-                                        className="link mt-2"
+                                        className="btn btn-outline-dark"
                                     >
                                         {act.text}
                                     </a>

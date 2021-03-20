@@ -89,7 +89,7 @@ const ModalRightUser = ({ title, show, onClose = null, onCheck = null, children 
                 </Form.Field>
                 <div><hr/></div>
                 {children || null}
-                <h6 className="dropdown-header"> {current_page * datos.length} de {current_total} </h6>
+                <h6 className="dropdown-header"> {current_page * 20} de {current_total} </h6>
                 <div className="card-body">
                     <Show condicion={datos.length}>
                         {datos.map((d, indexD) => 

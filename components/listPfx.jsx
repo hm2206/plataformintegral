@@ -1,15 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { signature } from '../services/apis';
 import { AppContext } from '../contexts/AppContext'
 import Skeleton from 'react-loading-skeleton'
 import { Fragment } from 'react';
 import Show from './show';
-import { AuthContext } from '../contexts/AuthContext';
 
-const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null, disabled = false }) => {
-
-    // auth
-    const { auth } = useContext(AuthContext);
+const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null, disabled = false, person_id = null }) => {
 
     // estatos
     const [current_loading, setCurrentLoading] = useState(false);
@@ -20,7 +16,7 @@ const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null, disab
     // obtener certificados del auth
     const getCertificate = async (add = false) => {
         setCurrentLoading(true);
-        await signature.get(`auth/certificate?page=${current_page}`)
+        await signature.get(`person/${person_id}/certificate?page=${current_page}`)
             .then(res => {
                 let { success, message, certificates } = res.data;
                 if (!success) throw new Error(message);
@@ -35,8 +31,8 @@ const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null, disab
 
     // primera carga
     useEffect(() => {
-        if (auth && auth.id) getCertificate();
-    }, []);
+        if (person_id) getCertificate();
+    }, [person_id]);
 
     // render
     return <Fragment>
