@@ -13,11 +13,12 @@ const next_status = {
 
 const ProgressFile = ({ 
     file = {}, size = 100, message = "", percent = 0, download = false,
-    onClose = null, onUpload = null, onCancel = null 
+    onClose = null, onUpload = null, onCancel = null ,
+    stepDefault = 'INITIAL'
 }) => {
 
     // estados
-    const [is_paso, setIsPaso] = useState("");
+    const [is_paso, setIsPaso] = useState(stepDefault);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState(message);
     const [is_upload, setIsUpload] = useState(false);

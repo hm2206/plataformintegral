@@ -26,54 +26,6 @@ const PlaceholderItem = () => {
     )
 }
 
-const ItemValidation = ({ obj = {}, className = null }) => {
-
-    const [file, setFile] = useState(obj.file || {});
-    const isFile = Object.keys(file).length;
-
-    // sin archivo
-    return (
-        <>
-            <Show condicion={isFile}>
-                <div className={`${className}`} style={{ position: 'relative' }}>
-                    <Show condicion={obj.verify}>
-                        <i className="fas fa-check text-success" 
-                            style={{ 
-                                position: 'absolute',
-                                bottom: '12%',
-                                right: '20px',
-                                zIndex: 100 
-                            }}
-                        />
-                    </Show>
-                    <FileSimple name={file.name || ""}
-                        url={file.url || ""}
-                        size={file.size || 0}
-                        date={file.created_at || ""}
-                        extname={file.extname || ""}
-                    />
-                </div> 
-            </Show>
-
-            <Show condicion={!isFile}>
-                <div className={className}>
-                    <div className="card card-body">
-                        <div className="filemgr-thumb text-primary">
-                            <i className="fas fa-upload"></i>
-                        </div>
-                        <a href="#"
-                            target="__blank" 
-                            className="stretched-link card-title card-link text-body font-size-sm d-block font-13 text-ellipsis"
-                            title={obj.ruler}
-                        >
-                            {obj.ruler}
-                        </a>
-                    </div>
-                </div>
-            </Show>
-        </>
-    )
-}
 
 const ListFileGroup = () => {
 
@@ -130,11 +82,14 @@ const ListFileGroup = () => {
             
             <div className="row">
                 {datos.map((d, indexD) =>
-                    <ItemValidation 
-                        obj={d}
-                        className="col-md-3"
-                        key={`item-file-validation-${indexD}-${d.id}`}
-                    />   
+                    <div className="col-md-3" key={`file-list-uploaded-${indexD}`}>
+                        <FileSimple name={d.name || ""}
+                            url={d.url || ""}
+                            size={d.size || 0}
+                            date={d.created_at || ""}
+                            extname={d.extname || ""}
+                        />  
+                    </div>
                 )}
                 {/* no hay registros */}
                 <Show condicion={!current_loading && !datos.length}>
