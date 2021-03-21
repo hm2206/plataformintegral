@@ -2,7 +2,7 @@ import React , { useState, useContext, useEffect } from 'react';
 import BoardSimple from '../../../components/boardSimple';
 import { BtnBack, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
-import { authentication, signature, handleErrorRequest } from '../../../services/apis';
+import { signature, handleErrorRequest } from '../../../services/apis';
 import { GroupProvider } from '../../../contexts/SignatureContext';
 import AddTeam from '../../../components/signature/addTeam';
 import ListTeam from '../../../components/signature/listTeam';
@@ -15,6 +15,7 @@ import { Confirm } from '../../../services/utils';
 import { AppContext } from '../../../contexts';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
+import { Message, Icon } from 'semantic-ui-react';
 
 const options = [
     { key: 'ADD_TEAM', title: 'Agregar al equipo de firma', icon: 'fas fa-user-plus' },
@@ -70,6 +71,29 @@ const SlugGroup = ({ pathname, query, success, group }) => {
         }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
+    // manejar verificación
+    const handleSigner = async () => {
+        let answer = await Confirm('warning', `¿Estás seguro en ejecutar el firmado masivo?`, 'Firmar');
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        // config
+        let options = {
+            headers: {
+                EntityId: group.entity_id,
+                DependenciaId: group.dependencia_id,
+                GroupId: group.id
+            }
+        }
+        // request
+        await signature.post(`auth/signer_massive/${group.id}`, {}, options)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            Router.push(location.href);
+        }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
+    }
+
     // activar entity
     useEffect(() => {
         entity_context.fireEntity({ render: true, disabled: true, entity_id: group.entity_id || "" });
@@ -92,6 +116,32 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                         <div className="col-md-8">
                             <div className="card-body">
                                 <div className="row">
+                                    <Show condicion={group.status == 'OVER'}>
+                                        <div className="col-md-12 mb-3">
+                                            <div>
+                                                <Message
+                                                    info
+                                                    header='Firmados'
+                                                    content="Todos los PDF's están firmados"
+                                                />
+                                            </div>
+                                            <hr/>
+                                        </div>
+                                    </Show>
+
+                                    <Show condicion={group.status == 'SIGNED'}>
+                                        <div className="col-md-12 mb-3">
+                                            <div>
+                                                <Message
+                                                    warning
+                                                    header='Procesando...'
+                                                    content="Todos los PDF's están siendo firmados"
+                                                />
+                                            </div>
+                                            <hr/>
+                                        </div>
+                                    </Show>
+
                                     <Show condicion={group.status == 'START'}>
                                         <div className="col-md-12 mt-4">
                                             <UploadFileGroup/>
@@ -128,7 +178,10 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                 </Show>
                 {/* firmar archivos */}
                 <Show condicion={group.status == 'VERIFIED'}>
-                    <BtnFloat>
+                    <BtnFloat
+                        title="Ejecutar firma masiva"
+                        onClick={handleSigner}
+                    >
                         <i className="fas fa-signature"></i>
                     </BtnFloat>
                 </Show>
