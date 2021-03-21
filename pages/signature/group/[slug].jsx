@@ -1,6 +1,6 @@
-import React , { useState } from 'react';
+import React , { useState, useContext, useEffect } from 'react';
 import BoardSimple from '../../../components/boardSimple';
-import { BtnBack } from '../../../components/Utils';
+import { BtnBack, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import { signature } from '../../../services/apis';
 import { GroupProvider } from '../../../contexts/SignatureContext';
@@ -9,12 +9,21 @@ import ListTeam from '../../../components/signature/listTeam';
 import ListFileGroup from '../../../components/signature/listFileGroup';
 import UploadFileGroup from '../../../components/signature/uploadFileGroup';
 import NotFoundData from '../../../components/notFoundData'
+import Show from '../../../components/show';
+import { EntityContext } from '../../../contexts/EntityContext';
+
+const options = [
+    { key: 'ADD_TEAM', title: 'Agregar al equipo de firma', icon: 'fas fa-user-plus' },
+]
 
 
 const SlugGroup = ({ pathname, query, success, group }) => {
 
     // validar datos
     if (!success) return <NotFoundData/>
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [option, setOption] = useState("");
@@ -30,6 +39,12 @@ const SlugGroup = ({ pathname, query, success, group }) => {
         }
     }
 
+    // activar entity
+    useEffect(() => {
+        entity_context.fireEntity({ render: true, disabled: true, entity_id: group.entity_id || "" });
+        return () => entity_context.fireEntity({ render: false, disabled: false })
+    }, []);
+
     // render
     return (
         <div className="col-md-12">
@@ -40,18 +55,18 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                     info={[group.description || '']}
                     prefix={<BtnBack className="mr-2"/>}
                     onOption={handleOption}
-                    options={[
-                        { key: 'ADD_TEAM', title: 'Agregar al equipo de firma', icon: 'fas fa-user-plus' },
-                    ]}
+                    options={group.status == 'START' ? options : []}
                 >
                     <div className="row">
                         <div className="col-md-8">
                             <div className="card-body">
                                 <div className="row">
-                                    <div className="col-md-12 mt-4">
-                                        <UploadFileGroup/>
-                                        <hr/>
-                                    </div>
+                                    <Show condicion={group.status == 'START'}>
+                                        <div className="col-md-12 mt-4">
+                                            <UploadFileGroup/>
+                                            <hr/>
+                                        </div>
+                                    </Show>
 
                                     <div className="col-md-12">
                                         {/* listar archivos */}
@@ -71,6 +86,20 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                     show={option == 'ADD_TEAM'}
                     onClose={(e) => setOption('')}
                 />
+                {/* btn de verificacion */}
+                <Show condicion={group.status == 'START'}>
+                    <BtnFloat theme="bg-warning"
+                        title="Verificar Grupo"
+                    >
+                        <i className="fas fa-check"></i>
+                    </BtnFloat>
+                </Show>
+                {/* firmar archivos */}
+                <Show condicion={group.status == 'VERIFIED'}>
+                    <BtnFloat>
+                        <i className="fas fa-signature"></i>
+                    </BtnFloat>
+                </Show>
             </GroupProvider>
         </div>
     )
