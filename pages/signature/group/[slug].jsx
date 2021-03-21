@@ -2,7 +2,7 @@ import React , { useState, useContext, useEffect } from 'react';
 import BoardSimple from '../../../components/boardSimple';
 import { BtnBack, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
-import { signature } from '../../../services/apis';
+import { authentication, signature, handleErrorRequest } from '../../../services/apis';
 import { GroupProvider } from '../../../contexts/SignatureContext';
 import AddTeam from '../../../components/signature/addTeam';
 import ListTeam from '../../../components/signature/listTeam';
@@ -11,6 +11,10 @@ import UploadFileGroup from '../../../components/signature/uploadFileGroup';
 import NotFoundData from '../../../components/notFoundData'
 import Show from '../../../components/show';
 import { EntityContext } from '../../../contexts/EntityContext';
+import { Confirm } from '../../../services/utils';
+import { AppContext } from '../../../contexts';
+import Swal from 'sweetalert2';
+import Router from 'next/router';
 
 const options = [
     { key: 'ADD_TEAM', title: 'Agregar al equipo de firma', icon: 'fas fa-user-plus' },
@@ -22,12 +26,16 @@ const SlugGroup = ({ pathname, query, success, group }) => {
     // validar datos
     if (!success) return <NotFoundData/>
 
+    // app
+    const app_context = useContext(AppContext);
+
     // entity
     const entity_context = useContext(EntityContext);
 
     // estados
     const [option, setOption] = useState("");
 
+    // manejar opciones
     const handleOption = (e, index, obj) => {
         switch (obj.key) {
             case 'ADD_TEAM':
@@ -37,6 +45,29 @@ const SlugGroup = ({ pathname, query, success, group }) => {
             default:
                 break;
         }
+    }
+
+    // manejar verificación
+    const handleVerify = async () => {
+        let answer = await Confirm('warning', `¿Estás seguro en verificar?`, 'Verificar');
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        // config
+        let options = {
+            headers: {
+                EntityId: group.entity_id,
+                DependenciaId: group.dependencia_id,
+                GroupId: group.id
+            }
+        }
+        // request
+        await signature.post(`auth/group/${group.id}/verify?_method=PUT`, {}, options)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            Router.push(location.href);
+        }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
     // activar entity
@@ -90,6 +121,7 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                 <Show condicion={group.status == 'START'}>
                     <BtnFloat theme="bg-warning"
                         title="Verificar Grupo"
+                        onClick={handleVerify}
                     >
                         <i className="fas fa-check"></i>
                     </BtnFloat>
