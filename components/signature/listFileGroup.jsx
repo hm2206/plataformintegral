@@ -38,6 +38,7 @@ const ListFileGroup = () => {
     const [current_page, setCurrentPage] = useState(1);
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [current_total, setCurrentTotal] = useState(0);
+    const [is_refresh, setIsRefresh] = useState(false);
 
     // obtener 
     const getFiles = async (add = false) => {
@@ -71,11 +72,26 @@ const ListFileGroup = () => {
         if (current_page > 1) getFiles(true);
     }, [current_page])
 
+    // refrescar
+    useEffect(() => {
+        if (is_refresh) {
+            getFiles();
+            setIsRefresh(false);
+        }
+    }, [is_refresh]);
+
     // render
     return (
         <>
             <div className="row">
-                <div className="col-md-10"><h5><i className="far fa-file-pdf"></i> Lista de Archivos</h5></div>
+                <div className="col-md-10 col-10"><h5><i className="far fa-file-pdf"></i> Lista de Archivos</h5></div>
+                <div className="col-md-2 text-right col-2">
+                    <button className="btn btn-outline-primary"
+                        onClick={(e) => setIsRefresh(true)}
+                    >
+                        <i className="fas fa-sync"></i>
+                    </button>
+                </div>
             </div>
 
             <hr/>

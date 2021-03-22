@@ -14,7 +14,7 @@ const CardReflow = ({
     title = 'Title', info = 'Info', 
     start = 0, over = 0, prefix = '',
     items = [defaultItem],
-    onDelete = null,
+    onDelete = null, onRefresh = null
 }) => {
 
 
@@ -30,7 +30,12 @@ const CardReflow = ({
             </div>
 
             <div className="card-body border-top">
-                <h4 className="card-title"> {info || ''} </h4>
+                <h4 className="card-title"> 
+                    {info || ''} 
+                    <span className="close cursor-pointer" onClick={(e) => typeof onRefresh == 'function' ? onRefresh(e) : null}>
+                        <i className="fas fa-sync"></i>
+                    </span>
+                </h4>
                 {/* <!-- .timeline --> */}
                 <ul className="timeline timeline-dashed-line">
                     <Show condicion={items.length}

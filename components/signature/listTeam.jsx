@@ -19,6 +19,7 @@ const ListTeam = () => {
     const [current_total, setCurrentTotal] = useState(0);
     const [is_error, setIsError] = useState(false);
     const [verify_count, setVerifyCount] = useState(0);
+    const [is_refresh, setIsRefresh] = useState(false);
 
     // obtener equipo
     const getTeam = async (add = false) => {
@@ -62,10 +63,19 @@ const ListTeam = () => {
         getTeam();
     }, []);
 
+    // refrescar
+    useEffect(() => {
+        if (is_refresh) {
+            getTeam();
+            setIsRefresh(false);
+        }
+    }, [is_refresh]);
+
     // renderizado
     return (
         <Fragment>
             <CardReflow
+                onRefresh={(e) => setIsRefresh(true)}
                 items={datos}
                 start={verify_count || 0}
                 over={current_total || 0}
