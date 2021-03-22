@@ -87,6 +87,7 @@ const types = {
     FILE_DELETE: "FILE[DELETE]",
     UPLOAD_DELETE: "UPLOAD[DELETE]",
     UPLOAD_READY: "UPLOAD[READY]",
+    CLEAR: "FILE[CLEAR]"
 };
 
 // estado inicial
@@ -147,6 +148,8 @@ const FileReducer = (state, action = { type: "", payload: {} }) => {
             }
             // response
             return newState;
+        case types.CLEAR:
+            return initialState;
         default:
             return state;
     }
@@ -157,6 +160,10 @@ const UploadFileGroup = () => {
 
     // estado
     const [fileState, dispatch] = useReducer(FileReducer, initialState);
+
+    useEffect(() => {
+        return () => dispatch({ type: types.CLEAR });
+    }, []);
 
     // render
     return (

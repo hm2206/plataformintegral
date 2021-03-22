@@ -155,7 +155,7 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
                     <hr/>
 
                     <div className="form-group">
-                        <ListPfx person_id={current_user.id}
+                        <ListPfx person_id={current_user.person_id}
                             onClick={(e, pfx) => setCurrentPfx(pfx)}
                         />
                     </div>
