@@ -7,6 +7,7 @@ import { handleErrorRequest, unujobs } from '../../services/apis';
 import DataTable from '../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../components/boardSimple';
+import { InputCredencias, InputAuth, InputEntity } from '../../services/utils';
 import { AppContext } from '../../contexts';
 
 const optionkeys = {
@@ -52,23 +53,27 @@ const Renta = ({ pathname, query, success, works }) => {
 
     // report
     const report = async (id) => {
-        app_context.setCurrentLoading(true);
-        await unujobs.post(`pdf/renta/${id}/${year}`, {}, { responseType: 'blob' })
-        .then(res => {
-            app_context.setCurrentLoading(false);
-            let a = document.createElement('a');
-            a.target = '_blank';
-            a.href = URL.createObjectURL(res.data);
-            a.download = "reporte_renta";
-            a.click();
-        }).catch(err => handleErrorRequest(err, null, app_context.setCurrentLoading(false)));
+        let form = document.createElement('form');
+        form.action = `${unujobs.path}/pdf/renta/${id}/${year}`; 
+        form.target = '__blank';
+        form.method = 'post';
+        // config request
+        form.appendChild(InputAuth());
+        // add credenciales
+        InputCredencias().filter(i => form.appendChild(i));
+        // add EntityId
+        form.appendChild(InputEntity());
+        // add al DOM
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
     }
 
     // renderizar
     return (
         <div className="col-md-12">
             <BoardSimple
-                prefix="T"
+                prefix="R"
                 title="Renta"
                 info={["Listado de Renta anual"]}
                 bg="danger"
