@@ -44,7 +44,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
     // mostrar componentes
     const destino = ['DERIVADO', 'ENVIADO'];
-    const descripcion = ['ANULADO', 'DERIVADO', 'ACEPTADO', 'RECHAZADO', 'RESPONDIDO', 'FINALIZADO', 'ENVIADO'];
+    const descripcion = ['DERIVADO'];
     const archivos = ['DERIVADO', 'RESPONDIDO', 'ENVIADO'];
 
     const current_tracking = tramite_context.tracking || {};

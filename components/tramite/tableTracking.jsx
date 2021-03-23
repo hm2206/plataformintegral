@@ -28,7 +28,7 @@ const ItemTracking = ({ tracking }) => {
     const tramite_context = useContext(TramiteContext);
 
     // props
-    let { tramite, dependencia_origen, dependencia_destino } = tracking || { };
+    let { tramite, dependencia } = tracking || { };
 
     // status
     const getStatus = (current_status) => status[current_status] || {};
@@ -42,7 +42,7 @@ const ItemTracking = ({ tracking }) => {
             files={tramite.files || []}
             document_type={tramite.tramite_type && tramite.tramite_type.description || ""}
             document_number={tramite.document_number || ""}
-            lugar={dependencia_destino.nombre || ""}
+            lugar={dependencia.nombre || ""}
             fecha={tracking.created_at || ""}
             day={tracking.day || 0}
             semaforo={tracking.semaforo || ""}
