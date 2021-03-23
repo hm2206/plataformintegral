@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import Show from './show';
 
 const defaultItem = {
+    id: "id",
     title: 'Example',
     info: 'details',
     description: '12/21/2018 – 12:42 PM',
@@ -62,7 +63,7 @@ const CardReflow = ({
                                     </h6>
                                     <span className="timeline-date">{i.description}</span>
                                 </div>
-                                <Show condicion={i._delete}>
+                                <Show condicion={typeof onDelete == 'function' && i._delete}>
                                     <button className="close"
                                         onClick={(e) => typeof onDelete == 'function' ? onDelete(indexI, i) : null}
                                     >

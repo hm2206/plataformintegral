@@ -5,8 +5,8 @@ import Show from '../show';
 import { formatBytes } from '../../services/utils';
 import { signature, CancelRequest, onProgress } from '../../services/apis'
 import { GroupContext } from '../../contexts/SignatureContext';
-import { collect } from 'collect.js';
 import { Fragment } from 'react';
+import uid from 'uid';
 
 const FileInfo = ({ file, onDelete = null }) => (
     <div className="upload-root upload-theme-light">
@@ -22,7 +22,7 @@ const FileInfo = ({ file, onDelete = null }) => (
 );
 
 // subir archivo al server
-const Upload = ({ file, onClose = null, onUploaded }) => {
+const Upload = ({ file, onClose = null, onUploaded = null }) => {
 
     // group
     const group_context = useContext(GroupContext);
@@ -30,7 +30,6 @@ const Upload = ({ file, onClose = null, onUploaded }) => {
     // estados
     const [percent, setPercent] = useState(0);
     const [current_cancel, setCurrentCancel] = useState(false);
-    const [is_upload, setIsUpload] = useState(false);
 
     // cancelar request
     const cancelTokenRequest = () => current_cancel && current_cancel.cancel();
@@ -56,14 +55,11 @@ const Upload = ({ file, onClose = null, onUploaded }) => {
         .catch(err => (false));
         // lista
         if (response && typeof onUploaded == 'function') {
-            setIsUpload(true);
-            onUploaded(file);
+            setTimeout(() => onUploaded(file), 700);
         }
         // response
         return response;
     }
-
-    if (is_upload) return null;
 
     // render
     return (
@@ -101,18 +97,21 @@ const initialState = {
 const FileReducer = (state, action = { type: "", payload: {} }) => {
     // clonar estado
     let newState = Object.assign({}, state);
+    let { payload } = action;
     // seleccionar
     switch (action.type) {
         case types.FILE_ADD:
             let file_temp = action.payload.files;
             // validar upload
-            let upload_count = collect(newState.upload).where('uploaded', false).toArray().length;
+            let upload_count = newState.upload.length;
             // append datos
             if (upload_count < 5)  {
                 let limit = 5 - upload_count;
                 Object.values(file_temp).forEach((f, indexF) => {
-                    if (indexF < limit) newState.upload.push(f);
-                    else newState.files.push(f);
+                    let newFile = f;
+                    newFile.id = uid(8);
+                    if (indexF < limit) newState.upload.push(newFile);
+                    else newState.files.push(newFile);
                 });
             } else newState.files.push(...file_temp);
             // clear input
@@ -135,17 +134,8 @@ const FileReducer = (state, action = { type: "", payload: {} }) => {
             return newState;
         case types.UPLOAD_READY:
             // flag uploaded
-            let file_uploaded = newState.upload[action.payload];
-            file_uploaded.uploaded = true;
-            newState.upload[action.payload] = file_uploaded;
-            let file_new = newState.files[0] || null;
-            if (file_new) {
-                newState.files.shift();
-                newState.upload.unshift(file_new);
-                let count_files = newState.files.length;
-                let count_upload = collect(newState.upload).where('uploaded', false).toArray().length;
-                newState.ready = count_files == 0 && count_upload == 0 ? true : false;
-            }
+            let newUpload = newState.upload.filter(f => f.id != payload.id);
+            newState.upload = newUpload;
             // response
             return newState;
         case types.CLEAR:
@@ -185,18 +175,11 @@ const UploadFileGroup = () => {
                                 <i className="fas fa-upload"></i> Subiendo archivos
                             <hr/>
                         </div>
-                        <Show condicion={fileState.ready}>
-                            <div className="text-right col-12">
-                                <button className="btn btn-sm btn-danger">
-                                    <i className="fas fa-times"></i> Limpiar archivos
-                                </button>
-                            </div>
-                        </Show>
                         {/* lista de archivo en subida */}
                         {fileState.upload.map((f, indexF) => 
                             <Fragment key={`list-upload-${indexF}`}>
                                 <Upload file={f} 
-                                    onUploaded={(e) => dispatch({ type: types.UPLOAD_READY, payload: indexF })}
+                                    onUploaded={(e) => dispatch({ type: types.UPLOAD_READY, payload: f })}
                                     onClose={(e) => dispatch({ type: types.UPLOAD_DELETE, payload: indexF })}
                                 />
                             </Fragment>

@@ -1,15 +1,24 @@
 import React, { useContext, useEffect, useState, Fragment } from 'react';
-import { signature } from '../../services/apis';
+import { handleErrorRequest, signature } from '../../services/apis';
 import { GroupContext } from '../../contexts/SignatureContext';
 import CardReflow from '../cardReflow';
 import Show from '../show';
 import Skeleton from 'react-loading-skeleton';
+import { AppContext } from '../../contexts/AppContext';
+import Swal from 'sweetalert2';
+import { Confirm } from '../../services/utils';
 
 
 const ListTeam = () => {
 
+    // app
+    const app_context = useContext(AppContext);
+
     // group
     const  { group }= useContext(GroupContext);
+
+    // actiones
+    const show_status = ['START', 'VERIFIED'];
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -21,15 +30,18 @@ const ListTeam = () => {
     const [verify_count, setVerifyCount] = useState(0);
     const [is_refresh, setIsRefresh] = useState(false);
 
+    // config headers
+    const configHeades = {
+        DependenciaId: group.dependencia_id,
+        GroupId: group.id
+    }
+
     // obtener equipo
     const getTeam = async (add = false) => {
         setCurrentLoading(true);
         // options
         let options = {
-            headers: {
-                DependenciaId: group.dependencia_id,
-                GroupId: group.id
-            }
+            headers: { ...configHeades }
         }
         let query_string = `page=${current_page}`;
         // request
@@ -41,6 +53,7 @@ const ListTeam = () => {
             teams.data.map(t => {
                 let { certificate } = t || {};
                 payload.push({
+                    id: t.id,
                     title: certificate.person && certificate.person.fullname || "",
                     classNameTitle: "capitalize",
                     description: certificate.subject && certificate.subject.title || "",
@@ -56,6 +69,22 @@ const ListTeam = () => {
             setIsError(false);
         }).catch(err => setIsError(true));
         setCurrentLoading(false);
+    }
+
+    // eliminar
+    const handleDelete = async (index, team) => {
+        let answer = await Confirm('warning', `¿Estas seguro en eliminar del equipo?`)
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        // options
+        let options = { headers: { ...configHeades } }
+        // request
+        await signature.post(`auth/team/${team.id}?_method=DELETE`, {}, options)
+        .then(res => {
+            app_context.setCurrentLoading(false);
+            let { message } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+        }).catch(err => handleErrorRequest(err, null, app_context.setCurrentLoading(false)));
     }
 
     // primera carga
@@ -81,7 +110,7 @@ const ListTeam = () => {
                 over={current_total || 0}
                 title={`Firmantes`}
                 info={`Equipo`}
-                onDelete={(e) => alert('ok')}
+                onDelete={show_status.includes(group.status) ? handleDelete : null}
             />
         </Fragment>
     )

@@ -68,12 +68,13 @@ const CreateGroup = ({ isClose = null }) => {
         }
         // request
         await signature.post(`auth/group`, datos, options)
-        .then(res => {
+        .then(async res => {
             let { message } = res.data;
-            Swal.fire({ icon: 'success', text: message });
+            await Swal.fire({ icon: 'success', text: message });
             signature_context.setRefresh(true);
             setForm({});
             setErrors({});
+            if (typeof isClose == 'function') isClose();
         }).catch(err => {
             try {
                 let { data } = err.response;
