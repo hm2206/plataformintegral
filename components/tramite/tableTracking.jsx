@@ -22,6 +22,53 @@ const PlaceholderTable = () => {
     )
 }
 
+const ItemTracking = ({ tracking }) => {
+
+    // tramite context
+    const tramite_context = useContext(TramiteContext);
+
+    // props
+    let { tramite, dependencia_origen, dependencia_destino } = tracking || { };
+
+    // status
+    const getStatus = (current_status) => status[current_status] || {};
+
+    // response
+    return (
+        <ItemTable
+            current={tracking.current}
+            slug={tramite.slug || ""}
+            title={tramite.asunto || ""}
+            files={tramite.files || []}
+            document_type={tramite.tramite_type && tramite.tramite_type.description || ""}
+            document_number={tramite.document_number || ""}
+            lugar={dependencia_destino.nombre || ""}
+            fecha={tracking.created_at || ""}
+            day={tracking.day || 0}
+            semaforo={tracking.semaforo || ""}
+            noRead={tracking.readed_at ? false : true}
+            status={getStatus(tracking.status).title}
+            statusClassName={getStatus(tracking.status).className}
+            onClickItem={(e) => {
+                tramite_context.setTracking(tracking);
+                tramite_context.setRender('SHOW')
+            }}
+            onButton={(e) => {
+                tramite_context.setTracking(tracking);
+                tramite_context.setRender('SHOW')
+            }}
+            onClickFile={(e, f) => {
+                e.preventDefault();
+                tramite_context.setFile(f);
+                tramite_context.setOption("VISUALIZADOR")
+            }}
+            buttons={[
+                { key: "go", title: "Ver más", icon: "fas fa-eye", className: "btn-primary" }
+            ]}
+        />
+    )
+}
+
 const TableTracking = () => {
 
     // tramite context
@@ -42,12 +89,6 @@ const TableTracking = () => {
         tramite_context.setLoading(false);
         tramite_context.setIsMenu(false);
         tramite_context.setIsTab(false);
-    }
-
-    // status
-    const getStatus = (current_status) => {
-        // response
-        return status[current_status] || {};
     }
 
     // primera carga
@@ -82,37 +123,9 @@ const TableTracking = () => {
             </thead>
             <tbody>
                 {tramite_context.datos.map((d, indexD) => 
-                    <ItemTable
+                    <ItemTracking
                         key={`tr-index-table-item${indexD}`}
-                        current={d.current}
-                        slug={d.tramite && d.tramite.slug || ""}
-                        title={d.tramite && d.tramite.asunto || ""}
-                        files={d.tramite && d.tramite.files || []}
-                        document_type={d.tramite && d.tramite.tramite_type && d.tramite.tramite_type.description || ""}
-                        document_number={d.tramite && d.tramite.document_number || ""}
-                        lugar={d.tramite && d.tramite.dependencia_origen && d.tramite.dependencia_origen.nombre || ""}
-                        fecha={d.created_at || ""}
-                        day={d.day || 0}
-                        semaforo={d.semaforo || ""}
-                        noRead={d.readed_at ? false : true}
-                        status={getStatus(d.status).title}
-                        statusClassName={getStatus(d.status).className}
-                        onClickItem={(e) => {
-                            tramite_context.setTracking(d);
-                            tramite_context.setRender('SHOW')
-                        }}
-                        onButton={(e) => {
-                            tramite_context.setTracking(d);
-                            tramite_context.setRender('SHOW')
-                        }}
-                        onClickFile={(e, f) => {
-                            e.preventDefault();
-                            tramite_context.setFile(f);
-                            tramite_context.setOption("VISUALIZADOR")
-                        }}
-                        buttons={[
-                            { key: "go", title: "Ver más", icon: "fas fa-eye", className: "btn-primary" }
-                        ]}
+                        tracking={d}
                     />
                 )}
                 {/* no hay datos */}
