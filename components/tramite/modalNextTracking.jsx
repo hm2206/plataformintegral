@@ -214,7 +214,6 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
                                     <Show condicion={!current_multiple.length && form.multiple}>
                                         <SelectMultitleDependencia
                                             dependencias={current_dependencias}
-                                            disabled={[form.dependencia_destino_id]}
                                             onReady={(datos) => setCurrentMultiple(datos)}
                                         />
                                     </Show>
