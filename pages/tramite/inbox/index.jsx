@@ -146,7 +146,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     useEffect(() => {
         entity_context.fireEntity({ render: true });
         if (success) {
-            setTab("YO")
+            setTab(!isRole ? "YO" : role.level == 'SECRETARY' ? "DEPENDENCIA" : "YO");
             setCurrentRender("LIST");
             setCurrentTotal(0);
             setCurrentLastPage(0);
