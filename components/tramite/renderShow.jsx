@@ -373,7 +373,7 @@ const RenderShow = () => {
 
                     <div className="col-md-12">
                         {/* configuración de los archivos del tracking */}
-                        <Show condicion={current_tracking.current && current_tracking.is_action}>
+                        <Show condicion={current_tracking.current}>
                             <div className="col-md-12 mt-4">
                                 <Show condicion={
                                     !current_tracking.revisado && 
@@ -427,7 +427,7 @@ const RenderShow = () => {
                                         </Button>
                                     </Show>
 
-                                    <Show condicion={current_tracking.status == 'PENDIENTE'}>
+                                    <Show condicion={current_tracking.status == 'PENDIENTE' && current_tracking.is_action}>
                                         <Button color="purple" 
                                             basic 
                                             size="mini"
