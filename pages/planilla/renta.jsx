@@ -1,14 +1,13 @@
-import React, { useContext, useState } from 'react'
-import { BtnFloat } from '../../components/Utils';
+import React, { useContext, useState, useEffect } from 'react'
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../services/auth';
 import { Button, Form, Pagination } from 'semantic-ui-react'
 import { handleErrorRequest, unujobs } from '../../services/apis';
 import DataTable from '../../components/datatable';
-import btoa from 'btoa';
 import BoardSimple from '../../components/boardSimple';
 import { InputCredencias, InputAuth, InputEntity } from '../../services/utils';
 import { AppContext } from '../../contexts';
+import { EntityContext } from '../../contexts/EntityContext';
 
 const optionkeys = {
     RENTA: 'renta'
@@ -18,6 +17,9 @@ const Renta = ({ pathname, query, success, works }) => {
 
     // app 
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // estados
     const [query_search, setQuerySearch] = useState(query.query_search || "");
@@ -68,6 +70,12 @@ const Renta = ({ pathname, query, success, works }) => {
         form.submit();
         document.body.removeChild(form);
     }
+
+    // mostrar entity
+    useEffect(() => {
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
+    }, []);
 
     // renderizar
     return (
