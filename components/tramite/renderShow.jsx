@@ -373,7 +373,7 @@ const RenderShow = () => {
 
                     <div className="col-md-12">
                         {/* configuración de los archivos del tracking */}
-                        <Show condicion={current_tracking.current}>
+                        <Show condicion={current_tracking.current && current_tracking.is_action}>
                             <div className="col-md-12 mt-4">
                                 <Show condicion={
                                     !current_tracking.revisado && 

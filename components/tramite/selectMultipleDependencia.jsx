@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Checkbox, Button, Input, Icon } from 'semantic-ui-react';
 import Show from '../show';
 import collect from 'collect.js';
@@ -44,14 +44,14 @@ const templateDependencia = {
 };
 
 
-const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disabled = [], onReady = null }) => {
+const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disabled = [], onReady = null, hidden = [] }) => {
 
     // checkeds
     const [checked, setChecked] = useState(collect([]));
     const ids = checked.pluck('id').toArray();
     const [current_check, setCurrentCheck] = useState(false);
     const [current_action, setCurrentAction] = useState(false);
-    const [current_dependencias, setCurrentDependencias] = useState(JSON.parse(JSON.stringify(dependencias)));
+    const [current_dependencias, setCurrentDependencias] = useState([]);
 
     // manejador de checked
     const handleChecked = (action, obj) => {
@@ -107,6 +107,17 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
         setChecked(newCheck);
         setCurrentAction(false);
     }
+
+    // setting Hidden
+    const settingHidden = async () => {
+        let newDependencia = dependencias.filter(d => !hidden.includes(d.id));
+        setCurrentDependencias(newDependencia);
+    }
+
+    // elimiar dependencia
+    useEffect(() => {
+        settingHidden();
+    }, [dependencias]);
     
     // render
     return (

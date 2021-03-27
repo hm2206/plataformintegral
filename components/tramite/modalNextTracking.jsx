@@ -11,7 +11,6 @@ import { tramite } from '../../services/apis';
 import Swal from 'sweetalert2';
 import SearchUserToDependencia from '../authentication/user/searchUserToDependencia';
 import { TramiteContext } from '../../contexts/TramiteContext';
-import SelectMultipleDependencia from './selectMultipleDependencia';
 import SelectMultitleDependencia from './selectMultipleDependencia';
 import { EntityContext } from '../../contexts/EntityContext';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -45,7 +44,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     // mostrar componentes
     const destino = ['DERIVADO', 'ENVIADO'];
     const descripcion = ['DERIVADO'];
-    const archivos = ['DERIVADO', 'RESPONDIDO', 'ENVIADO'];
+    const archivos = ['DERIVADO'];
 
     const current_tracking = tramite_context.tracking || {};
     const current_role = tramite_context.role || {};
@@ -154,7 +153,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
     // seleccionar dependencia destino predeterminado
     useEffect(() => {
-        setForm({ dependencia_destino_id: tramite_context.dependencia_id });
+        setForm({ dependencia_destino_id: tramite_context.dependencia_id, is_action: 1 });
     }, []);
 
     // clear multiple files
@@ -199,21 +198,36 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
                                 {/* muliple dependencias solo derivado */}
                                 <Show condicion={tramite_context.dependencia_id != form.dependencia_destino_id}>
-                                    <Form.Field>
-                                        <label htmlFor="">Dependencia Multiple</label>
-                                        <div>
-                                            <Checkbox 
-                                                toggle
-                                                name="multiple"
-                                                checked={form.multiple ? true : false}
-                                                onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked })}
-                                            />
-                                        </div>
-                                    </Form.Field>
+                                    <div className="row">
+                                        <Form.Field className="col-md-6 col-6">
+                                            <label htmlFor="">Dependencia Multiple</label>
+                                            <div>
+                                                <Checkbox 
+                                                    toggle
+                                                    name="multiple"
+                                                    checked={form.multiple ? true : false}
+                                                    onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked })}
+                                                />
+                                            </div>
+                                        </Form.Field>
+
+                                        <Form.Field className="col-md-6 col-6 text-right">
+                                            <label htmlFor="">Acción</label>
+                                            <div>
+                                                <Checkbox 
+                                                    toggle
+                                                    name="is_action"
+                                                    checked={form.is_action ? true : false}
+                                                    onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
+                                                />
+                                            </div>
+                                        </Form.Field>
+                                    </div>
                                     {/* mostrar al selecionar el multiple dependencia */}
                                     <Show condicion={!current_multiple.length && form.multiple}>
                                         <SelectMultitleDependencia
                                             dependencias={current_dependencias}
+                                            hidden={[form.dependencia_destino_id]}
                                             onReady={(datos) => setCurrentMultiple(datos)}
                                         />
                                     </Show>
