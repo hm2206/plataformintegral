@@ -45,7 +45,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     const destino = ['DERIVADO', 'ENVIADO'];
     const descripcion = ['DERIVADO'];
     const archivos = ['DERIVADO'];
-
+    const messages = ['ACEPTADO', 'RECHAZADO'];
     const current_tracking = tramite_context.tracking || {};
     const current_role = tramite_context.role || {};
     const current_boss = tramite_context.boss || {};
@@ -87,40 +87,42 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
     // executar 
     const execute = async () => {
-        let answer = await Confirm('warning', `¿Estás seguro en realizar la acción?`, 'Estoy seguro');
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            // setting datos
-            let datos = new FormData;
-            datos.append('status', action);
-            await Object.keys(form).map(key => datos.append(key, form[key]));
-            datos.delete('multiple');
-            datos.append('multiple', JSON.stringify(current_multiple));
-            // agregar usuario destino
-            if (isUser) datos.append('user_destino_id', user.id);
-            // agregar files
-            await current_files.map(f => datos.append('files', f));
-            // request
-            await tramite.post(`tracking/${current_tracking.id}/next`, datos, { headers: { DependenciaId: tramite_context.dependencia_id } })
-                .then(async res => {
-                    app_context.setCurrentLoading(false);
-                    let { success, message, tracking } = res.data;
-                    if (!success) throw new Error(message);
-                    await Swal.fire({ icon: 'success', text: message });
-                    if (typeof onSave == 'function') onSave(tracking);
-                }).catch(err => {
-                    try {
-                        app_context.setCurrentLoading(false);
-                        let { data } = err.response;
-                        if (typeof data != 'object') throw new Error(err.message);
-                        if (typeof data.errors != 'object') throw new Error(data.message);
-                        setErrors(data.errors);
-                        Swal.fire({ icon: 'warning', text: data.message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message });
-                    }
-                });
+        if (!messages.includes(action)) {
+            let answer = await Confirm('warning', `¿Estás seguro en realizar la acción?`, 'Estoy seguro');
+            if (!answer) return false; 
         }
+        // executar
+        app_context.setCurrentLoading(true);
+        // setting datos
+        let datos = new FormData;
+        datos.append('status', action);
+        await Object.keys(form).map(key => datos.append(key, form[key]));
+        datos.delete('multiple');
+        datos.append('multiple', JSON.stringify(current_multiple));
+        // agregar usuario destino
+        if (isUser) datos.append('user_destino_id', user.id);
+        // agregar files
+        await current_files.map(f => datos.append('files', f));
+        // request
+        await tramite.post(`tracking/${current_tracking.id}/next`, datos, { headers: { DependenciaId: tramite_context.dependencia_id } })
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { success, message, tracking } = res.data;
+            if (!success) throw new Error(message);
+            await Swal.fire({ icon: 'success', text: message });
+            if (typeof onSave == 'function') onSave(tracking);
+        }).catch(err => {
+            try {
+                app_context.setCurrentLoading(false);
+                let { data } = err.response;
+                if (typeof data != 'object') throw new Error(err.message);
+                if (typeof data.errors != 'object') throw new Error(data.message);
+                setErrors(data.errors);
+                Swal.fire({ icon: 'warning', text: data.message });
+            } catch (error) {
+                Swal.fire({ icon: 'error', text: error.message });
+            }
+        });
     }
 
     // obtener dependencias
@@ -297,7 +299,12 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
                         </Form.Field>
                     </Show>
 
-                    <hr/>
+                    <Show condicion={messages.includes(action)}>
+                        <div className="mt-3 text-center mb-5" style={{ fontSize: '17px' }}>
+                            <div><i className="fas fa-info-circle"></i></div>
+                            ¿Estás seguro en continuar...?
+                        </div>
+                    </Show>
 
                     <div className="mt-3 text-right">
                         <Button color={getStatus().color}

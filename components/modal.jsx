@@ -46,25 +46,23 @@ export default class Modal extends Component {
             padding: "0.5em 0.5em"
           }}
         >
-          <div style={{ display: "flex", height: "100%", justifyContent: "center", alignItems: "center" }}>
+          <div style={{ display: "flex", height: "100%", justifyContent: "center", alignItems: "center", }}>
             <div
-              className={`col-md-${md ? md : "6"}`}
-              style={{ position: "relative" }}
+              className={`col-md-${md ? md : "6"} card`}
+              style={{ position: "relative", maxHeight: "95vh", background: 'white', overflow: 'auto'}}
             >
-              <div className="card">
-                <div className={`card-header ${classHeader}`}>
-                  {this.props.titulo}
-                  <button
-                    className={`close ${classClose}`}
-                    disabled={disabled}
-                    onClick={this.close}
-                  >
-                    <i className="fas fa-times fa-xs"></i>
-                  </button>
-                </div>
-                <div style={{ overflowY: "auto", maxHeight: "85vh", height: "85vh", position: "relative" }}>
-                  {this.props.children}
-                </div>
+              <div className={`card-header ${classHeader}`}>
+                {this.props.titulo}
+                <button
+                  className={`close ${classClose}`}
+                  disabled={disabled}
+                  onClick={this.close}
+                >
+                  <i className="fas fa-times fa-xs"></i>
+                </button>
+              </div>
+              <div style={{ height: "100%", position: "relative" }}>
+                {this.props.children}
               </div>
             </div>
           </div>

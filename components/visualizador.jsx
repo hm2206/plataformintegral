@@ -115,7 +115,8 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
                             disabled={!is_download}
                             onClick={(e) => setIsNote(true)}
                         >
-                            <i class="fas fa-sticky-note"></i>
+                            <i class="fas fa-sticky-note mr-1"></i>
+                            Observación
                         </button>
 
                         <button class="btn text-white font-15"
