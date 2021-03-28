@@ -246,22 +246,6 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                                 <label>{errors.asunto && errors.asunto[0] || ""}</label>
                             </Form.Field>
 
-                            <Form.Field className="mb-3" error={errors.folio_count && errors.folio_count[0] ? true : false}>
-                                <label>N° Folio <b className="text-danger">*</b></label>
-                                <input type="number"
-                                    name="folio_count"
-                                    value={form.folio_count || ""}
-                                    onChange={({ target }) => handleInput(target, (value) => {
-                                        if (value > 0) return true;
-                                        if (value == '') return true;
-                                        return false;
-                                    })}
-                                    min="1"
-                                    max="10000"
-                                />
-                                <label>{errors.folio_count && errors.folio_count[0] || ""}</label>
-                            </Form.Field>
-
                             <Form.Field className="mb-3" error={errors.observation && errors.observation[0] ? true : false}>
                                 <label>Observación</label>
                                 <textarea 
