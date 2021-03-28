@@ -443,7 +443,7 @@ const RenderShow = () => {
                                         </Button>
                                     </Show>
 
-                                    <Show condicion={current_tracking.status == 'RECIBIDO' || current_tracking.status == 'ACEPTADO'}>
+                                    <Show condicion={current_tracking.status == 'RECIBIDO' || current_tracking.status == 'COPIA'}>
                                         <Button color="green" 
                                             basic 
                                             size="mini"
