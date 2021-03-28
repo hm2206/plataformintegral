@@ -156,20 +156,18 @@ const RenderShow = () => {
         tramite_context.setRefresh(true);
     }
 
-    // crear tramite apartir del tracking
-    const handleCreateTramite = async () => {
-        if (typeof onCreate == 'function') onCreate(current_tramite);
-    }
-
     // validar firma
     const validateFile = () => {
-        if (!current_tramite.state) return ['delete', 'signature']; 
-        // validar si es el dueño del documento
-        if (auth.person_id == current_tramite.person_id || auth.id == current_tramite.user_id) return [];
+        if (!current_tramite.state) return ['delete', 'signature', 'create']; 
+        // validar si es el dueño del documento y esta en la dependencia
+        if ((auth.person_id == current_tramite.person_id || 
+            auth.id == current_tramite.user_id) && 
+            (current_tracking.current) && 
+            current_tramite.dependencia_origen_id == tramite_context.dependencia_id) return [];
         // validar a otros usuarios
-        if (hidden.includes(current_tracking.status)) return ['delete', 'signature'];
+        if (hidden.includes(current_tracking.status)) return ['delete', 'signature', 'create'];
         // response default
-        return ['delete'];
+        return ['delete', 'create'];
     }
 
     // primera vez
@@ -269,11 +267,7 @@ const RenderShow = () => {
                                 </div>
                             ) : null}
                             {/* agregar archivos */}
-                            <Show condicion={
-                                current_tramite.state &&
-                                (current_tramite.user_id == auth.id || 
-                                current_tramite.person_id == auth.person_id)
-                            }>
+                            <Show condicion={!validateFile().includes('create')}>
                                     <div className="text-right ml-3">
                                         <DropZone
                                             id="file-tramite-datos"
@@ -332,7 +326,7 @@ const RenderShow = () => {
                                 dependencia={current_tracking.dependencia && current_tracking.dependencia.nombre || ""}
                                 status={current_tracking.status}
                                 revisado={current_tracking.revisado}
-                        />
+                            />
 
                             <Show condicion={Object.keys(current_tracking.info || {}).length}>
                                 <div className="mt-3">
