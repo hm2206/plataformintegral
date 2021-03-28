@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useReducer } from 'react';
 import Router from 'next/router';
+import { useRouter } from 'next/router'
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import { Button, Message, Form } from 'semantic-ui-react'
@@ -28,6 +29,9 @@ const current_status_default = [
 ];
 
 const InboxIndex = ({ pathname, query, success, role, boss }) => {
+
+    // router
+    const router = useRouter()
 
     // app
     const app_context = useContext(AppContext);
@@ -111,6 +115,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
             if (isAllow >= 2) {
                 let current_dependencia = dependencias[1];
                 query.dependencia_id = current_dependencia.value;
+                localStorage.setItem('dependenciaId', query.dependencia_id);
                 let { push } = Router;
                 push({ pathname, query });
             }
@@ -141,6 +146,20 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
         }
         else handleSelectMenu(1);
     }
+
+    // verificar dependencia predeterminada desde caché
+    const handleRouteChange = async () => {
+        let dependencia_id = localStorage.getItem('dependenciaId');
+        if (!query.dependencia_id && dependencia_id) {
+            query.dependencia_id = dependencia_id;
+            Router.push({ pathname, query });
+        }
+    }
+
+    // verificar la dependencia id
+    useEffect(() => {
+        handleRouteChange();
+    }, [router]);
 
     // montar componente
     useEffect(() => {

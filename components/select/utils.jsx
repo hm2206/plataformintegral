@@ -57,7 +57,8 @@ const ButtonRefresh = ({ message, onClick = null }) => {
 const SelectBase = ({ 
     onReady, defaultDatos = [], execute, refresh, url, api, 
     obj, id, value, text, name, onChange, valueChange, 
-    placeholder = 'Seleccionar', disabled = false, error = false }) => {
+    onData = null, placeholder = 'Seleccionar', 
+    disabled = false, error = false }) => {
 
     const [datos, setDatos] = useState([])
     const [is_error, setIsError] = useState(false);
@@ -125,6 +126,11 @@ const SelectBase = ({
             setIsReady(false);
         }
     }, [is_ready]);
+
+    // enviar datos pre cargados 
+    useEffect(() => {
+        if (datos.length) typeof onData == 'function' ? onData(datos) : null;
+    }, [datos]);
 
     // render
     return is_error 

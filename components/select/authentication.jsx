@@ -280,7 +280,7 @@ const SelectInstitution = ({ id = "id", name, value, onChange, refresh = false }
             />
 }
 
-const SelectAuthEntityDependencia = ({ entity_id, id = "id", name, value, onChange, onReady, disabled }) => {
+const SelectAuthEntityDependencia = ({ entity_id, id = "id", name, value, onChange, onReady, disabled, onData }) => {
     return <SelectBase 
                 api={authentication}
                 url={`auth/dependencia/${entity_id}`}
@@ -296,6 +296,7 @@ const SelectAuthEntityDependencia = ({ entity_id, id = "id", name, value, onChan
                 execute={false}
                 onReady={onReady}
                 disabled={disabled}
+                onData={onData}
             />
 }
 

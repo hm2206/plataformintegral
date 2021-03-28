@@ -82,7 +82,7 @@ const RenderShow = () => {
 
     // verificar tracking
     const verifyTracking = async () => {
-        let answer = await Confirm(`warning`, `¿Estás seguro en autorizar el trámite?`, 'Revisar');    
+        let answer = await Confirm(`warning`, `¿Estás seguro en autorizar el trámite?`, 'Autorizar');    
         if (answer) {
             app_context.setCurrentLoading(true);
             await tramite.post(`tracking/${current_tracking.id}/verify`, {}, { headers: { DependenciaId: tramite_context.dependencia_id } })
@@ -443,7 +443,7 @@ const RenderShow = () => {
                                         </Button>
                                     </Show>
 
-                                    <Show condicion={current_tracking.status == 'RECIBIDO'}>
+                                    <Show condicion={current_tracking.status == 'RECIBIDO' || current_tracking.status == 'ACEPTADO'}>
                                         <Button color="green" 
                                             basic 
                                             size="mini"
