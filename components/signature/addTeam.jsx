@@ -10,7 +10,10 @@ import ListPfx from '../listPfx'
 import ModalRightUser from '../authentication/modalRightUser';
 import { AppContext } from '../../contexts';
 import Swal from 'sweetalert2';
+import AuthGroupProvider from '../../providers/signature/auth/AuthGroupProvider';
 
+// providers
+const authGroupProvider = new AuthGroupProvider();
 
 const actions = {
     ADD: 'add',
@@ -24,17 +27,18 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
 
     // group
     const group_context = useContext(GroupContext);
+    let { group } = group_context;
 
     // estados
     const [current_user, setCurrentUser] = useState({});
     const [option, setOption] = useState("");
-    const [percent, setPercent] = useState(0);
     const [positions, setPositions] = useState([]);
     const [column_limit, setColumnLimit] = useState(0);
-    const [current_position, setCurrentPosition] = useState(0);
+    const [current_position, setCurrentPosition] = useState(undefined);
     const [current_page, setCurrentPage] = useState(1);
     const [current_pfx, setCurrentPfx] = useState(undefined);
     const [errors, setErrors] = useState({});
+    const [current_loading, setCurrentLoading] = useState(false);
 
     // agregemos al equipo
     const store = async () => {
@@ -67,13 +71,28 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
         }).catch(err => handleErrorRequest(err, setErrors, app_context.setCurrentLoading(false)));
     }
 
+    // obtener posiciones
+    const getPositions = async () => {
+        setCurrentLoading(true);
+        let options = {
+            headers: {
+                DependenciaId: group.dependencia_id,
+                GroupId: group.id
+            }
+        };
+        // request
+        await authGroupProvider.positions(group.id, options)
+            .then(res => {
+                setPositions(res.positions || []);
+                setColumnLimit(res.column);
+            }).catch(err => setPositions([]));
+        setCurrentLoading(false);
+    }
+
     // generar posiciones
     useEffect(() => {
-        let { width, height } = group_context.group;
-        let current_datos = getPositions({ width, height });
-        setPositions(current_datos.positions);
-        setColumnLimit(current_datos.column);
-    }, []);
+        if (current_user) getPositions();
+    }, [current_user.id]);
 
     // render
     return (
@@ -126,7 +145,8 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
                                         <input type="radio"
                                             className="cursor-pointer"
                                             value={pos.value}
-                                            checked={pos.value == current_position ? true : false}
+                                            disabled={pos.checked ? true : false}
+                                            checked={pos.value == current_position || pos.checked}
                                             onChange={({ target }) => setCurrentPosition(target.value)}
                                         />
                                     </div> 
