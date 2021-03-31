@@ -6,12 +6,14 @@ import { AUTHENTICATE } from '../../../services/auth';
 import atob from 'atob';
 import Show from '../../../components/show';
 import ConfigEntity from '../../../components/authentication/user/configEntity';
+import ConfigPermission from '../../../components/authentication/user/configPermission';
 import ConfigEntityDependencia from '../../../components/authentication/user/configEntityDependencia';
 import BoardSimple from '../../../components/boardSimple';
 
 const actions = {
     ADD_ENTITY: "ADD_ENTITY",
-    ADD_DEPENDENCIA: "ADD_DEPENDENCIA"
+    ADD_DEPENDENCIA: "ADD_DEPENDENCIA",
+    ADD_PERMISOS: "ADD_PERMISOS",
 };
 
  const ConfigUser = ({ pathname, query, success, user }) => {
@@ -108,6 +110,17 @@ const actions = {
                                                     />
                                                 </SimpleListContent>
                                             </div>
+
+                                            <div className="col-md-4">
+                                                <SimpleListContent>
+                                                    <SimpleList
+                                                        icon="fas fa-user-tag"
+                                                        bg="warning"
+                                                        title="Permisos"
+                                                        onClick={(e) => setOption(actions.ADD_PERMISOS)}
+                                                    />
+                                                </SimpleListContent>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -115,16 +128,17 @@ const actions = {
                         </Form>
                     </div>
                 </BoardSimple>
-
+                {/* agregar entity */}
                 <Show condicion={option == actions.ADD_ENTITY}>
-                    <ConfigEntity user={user} 
-                        isClose={(e) => setOption("")}
-                    />
+                    <ConfigEntity user={user} isClose={(e) => setOption("")}/>
                 </Show>
-
+                {/* agregar dependencia */}
                 <Show condicion={option == actions.ADD_DEPENDENCIA}>
-                    <ConfigEntityDependencia user={user} 
-                        isClose={(e) => setOption("")}/>
+                    <ConfigEntityDependencia user={user} isClose={(e) => setOption("")}/>
+                </Show>
+                {/* agregar permisos */}
+                <Show condicion={option == actions.ADD_PERMISOS}>
+                    <ConfigPermission user={user} isClose={(e) => setOption("")}/>
                 </Show>
         </div>
     )
