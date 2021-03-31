@@ -7,7 +7,6 @@ import { signature, CancelRequest, onProgress } from '../../services/apis'
 import { GroupContext } from '../../contexts/SignatureContext';
 import { Fragment } from 'react';
 import uid from 'uid';
-import { useRouter } from 'next/router';
 
 const FileInfo = ({ file, onDelete = null }) => (
     <div className="upload-root upload-theme-light">
@@ -148,9 +147,6 @@ const FileReducer = (state, action = { type: "", payload: {} }) => {
 
 // component main
 const UploadFileGroup = () => {
-
-    // router
-    const router = useRouter();
 
     // estado
     const [fileState, dispatch] = useReducer(FileReducer, initialState);

@@ -658,3 +658,7 @@ svg.icon-inline {
     word-wrap: normal!important;
     text-overflow: ellipsis;
 }
+
+.loader-app .ui.inverted.loader:after {
+    border-top-color: #2887f3!important;
+}

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import { formatBytes } from '../services/utils';
+import Show from './show';
+import CardLoader from './cardLoader';
+moment.locale('es');
 
 const icons = {
     text: { icon: 'far fa-file-alt', className: 'text-dark' },
@@ -23,7 +26,7 @@ const extensions = {
     mp4: icons.video,
 };
 
-const FileSimple = ({ name = "archivo.tmp", url = null, size = 0, extname = "tmp", date = '2021-02-04 11:20:01' }) => {
+const FileSimple = ({ name = "archivo.tmp", url = null, size = 0, extname = "tmp", date = '2021-02-04 11:20:01', onDelete = null, loading = false }) => {
 
     const extension = extensions[extname] || {}
 
@@ -40,7 +43,7 @@ const FileSimple = ({ name = "archivo.tmp", url = null, size = 0, extname = "tmp
     // render
     return (
         <div className="card card-body">
-            <div href="#" className={`filemgr-thumb ${extension.className || 'text-dark'}`}>
+            <div className={`filemgr-thumb ${extension.className || 'text-dark'}`}>
                 <i className={extension.icon || 'far fa-file'}></i>
             </div>
             <a href="#"
@@ -52,7 +55,19 @@ const FileSimple = ({ name = "archivo.tmp", url = null, size = 0, extname = "tmp
                 {name || ""}
             </a>
             <small class="text-muted">{formatBytes(size)}</small>
-            <div class="card-footer border-top-0 small text-muted">{moment(date, "YYYY/MM/DD HH:mm:ss").lang('es').fromNow()}</div>
+            <div class="card-footer border-top-0 small text-muted">{moment(date, "YYYY/MM/DD HH:mm:ss").fromNow()}</div>
+            <Show condicion={typeof onDelete == 'function'}>
+                <span style={{ position: 'absolute', top: '0px', right: '5px', zIndex: "10" }}
+                    className="cursor-pointer"
+                    onClick={onDelete}
+                >
+                    <i className="fas fa-times"></i>
+                </span>
+            </Show>
+            {/* loader */}
+            <Show condicion={loading}>
+                <CardLoader/>
+            </Show>
         </div>
     )
 }

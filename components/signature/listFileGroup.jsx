@@ -1,10 +1,15 @@
-import React, { useContext, useEffect, useState, Fragment } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { signature } from '../../services/apis';
 import { GroupContext } from '../../contexts/SignatureContext';
 import FileSimple from '../fileSimple';
 import Show from '../show';
 import Skeleton from 'react-loading-skeleton';
-import { Checkbox, Button } from 'semantic-ui-react';
+import { Button } from 'semantic-ui-react';
+import FileProvider from '../../providers/signature/FileProvider';
+import { Confirm } from '../../services/utils';
+
+// provedores
+const fileProvider = new FileProvider();
 
 const PlaceholderItem = () => {
 
@@ -26,6 +31,64 @@ const PlaceholderItem = () => {
     )
 }
 
+const ItemAction = ({ file, onDelete = null }) => {
+
+    // group
+    const  { group }= useContext(GroupContext);
+
+    // estados
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [is_error, setIsError] = useState(false);
+    const [render, setRender] = useState(true);
+
+    // validarion
+    const is_action = ['START'];
+
+    // animations
+    const animations = {
+        SHOW: "animate__fadeIn",
+        DELETE: "animate__fadeOutDown",
+    };
+
+    // eliminar
+    const handleDelete = async () => {
+        let answer = await Confirm(`warning`, `¿Estás seguro en eliminar el archivo?`);
+        if (!answer) return false;
+        setCurrentLoading(true);
+        await fileProvider.delete(file.id)
+            .then(res => {
+                setIsError(false);
+                setRender(false);
+            })
+            .catch(err => setIsError(true));
+        setCurrentLoading(false);
+    }
+
+    // executar eliminación del file
+    useEffect(() => {
+        if (!render) setTimeout((e) => typeof onDelete == "function" ? onDelete() : null, 400);
+    }, [render]);
+
+    // desmontar componente
+    useEffect(() => {
+        setRender(true);
+        setIsError(false);
+    }, [file]);
+
+    // render
+    return (
+        <div className={`animate__animated ${render ? animations.SHOW : animations.DELETE}`}>
+            <FileSimple name={file.name || ""}
+                loading={current_loading}
+                url={file.url || ""}
+                size={file.size || 0}
+                date={file.created_at || ""}
+                extname={file.extname || ""}
+                onDelete={is_action.includes(group.status) ? () => handleDelete() : null}
+            /> 
+        </div>
+    );
+}
 
 const ListFileGroup = () => {
 
@@ -60,6 +123,13 @@ const ListFileGroup = () => {
             setDatos(add ? [...datos, ...files.data] : files.data);
         }).catch(err => console.log(err));
         setCurrentLoading(false);
+    }
+
+    // eliminar file del files
+    const onDelete = async (index) => {
+        let newData = [...datos];
+        newData.splice(index, 1);
+        setDatos(newData);
     }
 
     // primera carga
@@ -99,12 +169,9 @@ const ListFileGroup = () => {
             <div className="row">
                 {datos.map((d, indexD) =>
                     <div className="col-md-3" key={`file-list-uploaded-${indexD}`}>
-                        <FileSimple name={d.name || ""}
-                            url={d.url || ""}
-                            size={d.size || 0}
-                            date={d.created_at || ""}
-                            extname={d.extname || ""}
-                        />  
+                        <ItemAction file={d}
+                            onDelete={() => onDelete(indexD)}
+                        /> 
                     </div>
                 )}
                 {/* no hay registros */}
