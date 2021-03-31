@@ -27,19 +27,27 @@ class AuthGroupProvider extends BaseProvider  {
     }
 
     update = async (id, body = {}, config = {}, ctx = null) => {
-        return await signature.post(`${this.collection}/${id}?_method=PUT`, body, config, ctx)
+        return await signature.post(`${this.collection}/${id}?_method=PUT`, body = {}, config, ctx)
             .then(res => res.data)
             .catch(err => this.handleError(err));
     }
 
     delete = async (id, body = {}, config = {}, ctx = null) => {
-        return await signature.post(`${this.collection}/${id}?_method=DELETE`, body, config, ctx)
+        return await signature.post(`${this.collection}/${id}?_method=DELETE`, body = {}, config, ctx)
             .then(res => res.data)
             .catch(err => this.handleError(err));
     }
 
     positions = async (id, config = {}, ctx = null) => {
         return await signature.get(`${this.collection}/${id}/positions`, config, ctx)
+            .then(res => res.data)
+            .catch(err => this.handleError(err));
+    }
+
+    zip = async (id, body, config = { }, ctx = null) => {
+        let newConfig = { responseType: 'blob' };
+        config = { ...newConfig, ...config }
+        return await signature.post(`${this.collection}/${id}/zip`, body, config, ctx)
             .then(res => res.data)
             .catch(err => this.handleError(err));
     }

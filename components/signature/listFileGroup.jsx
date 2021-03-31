@@ -4,12 +4,16 @@ import { GroupContext } from '../../contexts/SignatureContext';
 import FileSimple from '../fileSimple';
 import Show from '../show';
 import Skeleton from 'react-loading-skeleton';
-import { Button } from 'semantic-ui-react';
+import { Button, Input } from 'semantic-ui-react';
 import FileProvider from '../../providers/signature/FileProvider';
 import { Confirm } from '../../services/utils';
+import { AppContext } from '../../contexts';
+import AuthGroupProvider from '../../providers/signature/auth/AuthGroupProvider';
+import Swal from 'sweetalert2';
 
 // provedores
 const fileProvider = new FileProvider();
+const authGroupProvider = new AuthGroupProvider();
 
 const PlaceholderItem = () => {
 
@@ -92,8 +96,11 @@ const ItemAction = ({ file, onDelete = null }) => {
 
 const ListFileGroup = () => {
 
+    // app
+    const app_context = useContext(AppContext);
+
     // group
-    const  { group }= useContext(GroupContext);
+    const  { group } = useContext(GroupContext);
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -102,20 +109,22 @@ const ListFileGroup = () => {
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [current_total, setCurrentTotal] = useState(0);
     const [is_refresh, setIsRefresh] = useState(false);
+    const [query_search, setQuerySearch] = useState("");
+
+    // config options
+    const configOptions = {
+        headers: {
+            DependenciaId: group.dependencia_id,
+            GroupId: group.id
+        }
+    }
 
     // obtener 
     const getFiles = async (add = false) => {
         setCurrentLoading(true);
-        // options
-        let options = {
-            headers: {
-                DependenciaId: group.dependencia_id,
-                GroupId: group.id
-            }
-        }
-        let query_string = `page=${current_page}`;
+        let query_string = `page=${current_page}&query_search=${query_search}`;
         // request
-        await signature.get(`auth/group/${group.id}/file?${query_string}`, options)
+        await signature.get(`auth/group/${group.id}/file?${query_string}`, configOptions)
         .then(res => {
             let { files } = res.data;
             setCurrentLastPage(files.lastPage || 0);
@@ -130,6 +139,24 @@ const ListFileGroup = () => {
         let newData = [...datos];
         newData.splice(index, 1);
         setDatos(newData);
+    }
+
+    // download zip
+    const donwloadZip = async () => {
+        let answer = await Confirm(`warning`, `¿Estas seguro en descargas los archivos PDF's?`, 'Descargar');
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        await authGroupProvider.zip(group.id, {}, configOptions)
+            .then(res => {
+                app_context.setCurrentLoading(false);
+                let a = document.createElement('a');
+                a.href = URL.createObjectURL(res);
+                a.target = '__blank';
+                a.click();
+            }).catch(err => {
+                app_context.setCurrentLoading(false);
+                Swal.fire({ icon: 'error', text: err.message });
+            });
     }
 
     // primera carga
@@ -155,18 +182,46 @@ const ListFileGroup = () => {
         <>
             <div className="row">
                 <div className="col-md-10 col-10"><h5><i className="far fa-file-pdf"></i> Lista de Archivos</h5></div>
-                <div className="col-md-2 text-right col-2">
-                    <button className="btn btn-outline-primary"
-                        onClick={(e) => setIsRefresh(true)}
-                    >
-                        <i className="fas fa-sync"></i>
-                    </button>
-                </div>
+                <Show condicion={group.status == 'OVER'}>
+                    <div className="col-md-2 text-right col-2">
+                        <button className="btn btn-outline-primary"
+                            disabled={current_loading}
+                            onClick={donwloadZip}
+                        >
+                            <i className="fas fa-download"></i>
+                        </button>
+                    </div>
+                </Show>
             </div>
 
             <hr/>
             
             <div className="row">
+                {/* buscador */}
+                <div className="col-10">
+                    <Input type="text" fluid
+                        placeholder="Buscar archivos..."
+                        value={query_search || ""}
+                        onChange={(e, obj) => setQuerySearch(obj.value)}
+                        disabled={current_loading}
+                    />
+                </div>
+
+                <div className="col-2">
+                    <Button fluid 
+                        disabled={current_loading}
+                        onClick={(e) => {
+                            setCurrentPage(1);
+                            setIsRefresh(true)
+                        }}
+                    >
+                        <i className="fas fa-search"></i>
+                    </Button>
+                </div>
+
+                <div className="col-12 mt-3"></div>
+
+                {/* lista de archivos */}
                 {datos.map((d, indexD) =>
                     <div className="col-md-3" key={`file-list-uploaded-${indexD}`}>
                         <ItemAction file={d}

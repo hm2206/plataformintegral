@@ -40,6 +40,7 @@ const Upload = ({ file, onClose = null, onUploaded = null }) => {
         let payload = new FormData;
         payload.append('object_id', group_context.group.id);
         payload.append('object_type', 'App/Models/Group');
+        payload.append('object_dir', group_context.group.slug);
         payload.append('files', file);
         // cancel token
         let cancel_token = CancelRequest();
