@@ -2,9 +2,8 @@ import React, { useContext, useState } from 'react';
 import Router from 'next/router';
 import Show from '../components/show';
 import moment from 'moment';
-import Link from 'next/link';
-import toast from 'toastify-js';
 import { NotificationContext } from '../contexts/notification/NotificationContext';
+import { types } from '../contexts/notification/NotificationReducer';
 
 const Notification = () => {
 
@@ -12,7 +11,15 @@ const Notification = () => {
     const [show, setShow] = useState(false);
 
     // notification
-    const { notificationes, loading, count_unread } = useContext(NotificationContext);
+    const { notificationes, loading, count_unread, dispatch } = useContext(NotificationContext);
+
+    // click notification
+    const handleClick = (e, index, notify) => {
+        e.preventDefault();
+        let link = `/notify?id=${notify.id}`;
+        dispatch({ type: types.NOTIFICATION_READ, payload: notify });
+        Router.push(link);
+    }
 
     // response
     return (
@@ -40,28 +47,29 @@ const Notification = () => {
                     </h6>
                     <div className="dropdown-scroll perfect-scrollbar" style={{ overflowY: 'auto' }}>
                         {notificationes.map((notify, indexN) => 
-                            <Link href={`/notify?id=${notify.id}`} key={`notification-alert-${notify.id}-index-${indexN}`}>
-                                <a className={`dropdown-item ${notify.read_at ? 'read' : 'unread'}`}>
-                                    <Show condicion={!notify.image}>
-                                        <div className="notify-icon">
-                                            <i className={notify.icon}></i>
-                                        </div>
-                                    </Show>
-                                    <Show condicion={notify.image}>
-                                        <div className="user-avatar" style={{ objectFit: 'contain' }}>
-                                            <img src={notify.image}/>
-                                        </div>
-                                    </Show>
-                                    <div className="dropdown-item-body">
-                                        <p className="subject"> {notify.send && notify.send.username} </p>
-                                        <p className="text text-truncate">
-                                        {" "}
-                                        {notify.title}
-                                        </p>
-                                        <span className="date">{moment(notify.created_at, "YYYY/MM/DD HH:mm:ss").fromNow()}</span>
+                            <a key={`notification-alert-${notify.id}-index-${indexN}`}
+                                className={`dropdown-item ${notify.read_at ? 'read' : 'unread'}`}
+                                onClick={(e) => handleClick(e, indexN, notify)}
+                            >
+                                <Show condicion={!notify.image}>
+                                    <div className="notify-icon">
+                                        <i className={notify.icon}></i>
                                     </div>
-                                </a>  
-                            </Link>      
+                                </Show>
+                                <Show condicion={notify.image}>
+                                    <div className="user-avatar" style={{ objectFit: 'contain' }}>
+                                        <img src={notify.image}/>
+                                    </div>
+                                </Show>
+                                <div className="dropdown-item-body">
+                                    <p className="subject"> {notify.send && notify.send.username} </p>
+                                    <p className="text text-truncate">
+                                    {" "}
+                                    {notify.title}
+                                    </p>
+                                    <span className="date">{moment(notify.created_at, "YYYY/MM/DD HH:mm:ss").fromNow()}</span>
+                                </div>
+                            </a>    
                         )}
                         {/* no hay notificaciones */}
                         <Show condicion={!loading && !notificationes.length}>

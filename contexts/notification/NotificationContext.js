@@ -73,7 +73,8 @@ export const NotificationProvider = ({ children }) => {
         <NotificationContext.Provider 
             value={{   
                 loading: current_loading,
-                ...state
+                ...state,
+                dispatch
             }}
         >
             {/* agregar audio */}

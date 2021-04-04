@@ -662,3 +662,8 @@ svg.icon-inline {
 .loader-app .ui.inverted.loader:after {
     border-top-color: #2887f3!important;
 }
+
+
+.card-focus {
+    border-color:#2887f3!important;
+}

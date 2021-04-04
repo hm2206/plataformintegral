@@ -7,10 +7,12 @@ const schemaNotify = [
     { key: "mark_as_unread", text: "Marcar como no leído" }
 ];
 
-const CardNotify = ({ username, title, date, description, icon, image, read = false, options = schemaNotify, onOption = null, actions = [] }) => {
+const CardNotify = ({ focus = false, username, title, date, description, icon, image, read = false, options = schemaNotify, onOption = null, actions = [] }) => {
 
     return (
-        <div className={`list-group-item ${read ? '' : 'unread-important'}`}>
+        <div className={`list-group-item ${read ? '' : 'unread-important'} ${focus ? 'card-focus' : ''}`}
+            id={`list-notification-${title}`}
+        >
             {/* <!-- message figure --> */}
             <div className="list-group-item-figure">
                 <span className="rating rating-sm mr-3">
@@ -42,7 +44,7 @@ const CardNotify = ({ username, title, date, description, icon, image, read = fa
                     {/* <!-- grid column --> */}
                     <div className="col-12 col-lg-9">
                         <h4 className="list-group-item-title text-truncate">
-                            <a href="page-conversations.html">{title}</a>
+                            <a href="#">{title}</a>
                         </h4>
                         <p className="list-group-item-text text-truncate">{description}</p>
                         <div className="w-100 text-left">

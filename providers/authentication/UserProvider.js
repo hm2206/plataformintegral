@@ -7,7 +7,6 @@ class UserProvider extends BaseProvider  {
         return await authentication.get(`user/${id}/permissions`, config, ctx)
             .then(res => res.data)
             .catch(err => this.handleError(err));
-
     }
 
 }

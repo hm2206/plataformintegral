@@ -1,8 +1,10 @@
+import moment from "moment";
 
 export const types = {
     NOTIFICATION_ALL: "NOTIFICATION[ALL]",
     NOTIFICATION_ADD: "NOTIFICATION[ADD]",
-    NOTIFICATION_CLEAR: "NOTIFICATION[CLEAR]"
+    NOTIFICATION_READ: "NOTIFICATION[READ]",
+    NOTIFICATION_CLEAR: "NOTIFICATION[CLEAR]",
 };
 
 export const initialState = {
@@ -34,6 +36,21 @@ export const NotificationReducer = (state, action = { type: "init", payload: {} 
             let new_notification = action.payload;
             newState.notificationes = [new_notification, ...state.notificationes];
             newState.count_unread = state.count_unread + 1;
+            return newState;
+        case types.NOTIFICATION_READ:
+            let read_notification = action.payload;
+            // verify read
+            if (read_notification.read_at) return newState;
+            // add read
+            read_notification.read_at = moment('YYYY-MM-DD hh:mm:ss');
+            newState.notificationes.map(n => {
+                if (n.id == read_notification.id) n = read_notification;
+                return n;
+            });
+            // change count_read y count_unread
+            newState.count_read += 1;
+            newState.count_unread -= 1;
+            // response state
             return newState;
         case types.NOTIFICATION_CLEAR:
             return { };
