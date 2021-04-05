@@ -23,7 +23,7 @@ const useSocket = ({ host, path }) => {
             autoConnect: true,
             forceNew: true,
             auth: {
-                Authorization: `Bearer ${token.token}`,
+                Authorization: `Bearer ${token?.token}`,
                 ClientId: credencials.ClientId,
                 ClientSecret: credencials.ClientSecret
             },
