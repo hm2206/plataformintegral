@@ -1,10 +1,12 @@
-import React, { createContext, useContext, useEffect, useReducer, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useEffect, useReducer, useState } from 'react';
 import AuthTrackingProvider from '../../providers/tramite/auth/AuthTrackingProvider';
 import { TramiteSocket } from '../sockets/TramiteSocket';
 import { initialState, tramiteReducer, tramiteTypes } from './TramiteReducer';
+import AuthProvider from '../../providers/tramite/auth/AuthProvider';
 
 // providers
 const authTrackingProvider = new AuthTrackingProvider();
+const authProvider = new AuthProvider();
 
 export const TramiteContext = createContext();
 
@@ -23,6 +25,7 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
     const [option, setOption] = useState([]);
     const [next, setNext] = useState(null);
     const [file, setFile] = useState({});
+    const [tab, setTab] = useState();
 
     // is Role
     const isRole = Object.keys(role || {}).length;
@@ -30,15 +33,25 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
     // reducer
     const [state, dispatch] = useReducer(tramiteReducer, initialState);
 
+    // memos
+    const filtros = useMemo(() => {
+        for (let status of state.status) {
+            if (status.key == state.menu) return status.filtros;
+        }
+        // default
+        return [];
+    }, [state.menu]);
+
+    // options
+    const options = {
+        headers: { DependenciaId: dependencia_id }
+    };
+
     // obtener tracking
     const getTracking = async (add = false) => {
         setCurrentLoading(true);
-        // options
-        let options = {
-            headers: { DependenciaId: dependencia_id }
-        };
         // request
-        await authTrackingProvider.index(state.tab, { page, status: state.filtros , query_search }, options)
+        await authTrackingProvider.index(tab, { page, status: filtros , query_search }, options)
             .then(res => {
                 let { trackings } = res.data;
                 setLastPage(trackings.lastPage);
@@ -49,50 +62,60 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
         setCurrentLoading(false);
     }
 
+    // obtener status
+    const getStatus = async () => {
+        // options
+        let options = {
+            headers: { DependenciaId: dependencia_id }
+        };
+        // request 
+        await authProvider.status(tab, {}, options)
+            .then(async res => {
+                let { tracking_status } = res.data;
+                dispatch({ type: tramiteTypes.INITIAL_MENU, payload: tracking_status });
+            }).catch(err => console.error(err));
+    }
+
     // selección de TAB
     const selectTab = () => {
         if (isRole && role.level == 'SECRETARY') {
-            dispatch({ type: tramiteTypes.CHANGE_TAB, payload: "DEPENDENCIA" })
+            setTab("DEPENDENCIA");
         } else {
-            dispatch({ type: tramiteTypes.CHANGE_TAB, payload: "YO" })
+            setTab("YO");
         }
     }
 
     // conectarse a sala
     const connectSala = () => {
-        let name = `${state.tab}#${dependencia_id}`;
+        let name = `${tab}#${dependencia_id}`;
         socket?.emit('connect:inbox', name);
         // save sala
         dispatch({ type:tramiteTypes.CHANGE_SALA, payload: name });
     }
 
-    // escuchar message
-    const onInbox = () => {
-        socket?.on('inbox:message', (data) => {
-            console.log(data);
-        });
-    }
-
     // cambio de dependencia
     useEffect(() => {
-        dispatch({ type: tramiteTypes.CHANGE_TAB, payload: null });
+        setTab(null);
         dispatch({ type: tramiteTypes.CHANGE_RENDER, payload: "TAB" });
         setPage(1);
     }, [dependencia_id]);
 
     // seleccionar tab
     useEffect(() => {
-        if (!state.tab) selectTab();
-    }, [state.tab]);
+        if (!tab) selectTab();
+    }, [tab]);
 
-    // cargar al camb
+    // cargar al cambiar tab
     useEffect(() => {
-        if (dependencia_id && state.tab) setIsSearch(true);
-    }, [state.tab]);
+        if (dependencia_id && tab) setIsSearch(true);
+    }, [tab]);
 
     // executar búsqueda
     useEffect(() => {
-        if (is_search) getTracking();
+        if (is_search) {
+            getTracking();
+            getStatus();
+        }
     }, [is_search]);
 
     // disable search
@@ -102,13 +125,8 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
 
     // connect sala
     useEffect(() => {
-        if (online && state.tab && dependencia_id) connectSala();
-    }, [online, state.tab]);
-
-    // escuchar message
-    useEffect(() => {
-        if (socket) onInbox();
-    }, [socket]);
+        if (online && tab && dependencia_id) connectSala();
+    }, [online, tab]);
 
     // render
     return (
@@ -125,13 +143,18 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
             total,
             current_loading,
             option, 
-            setOption, 
+            setOption,
+            tab, 
+            setTab,
+            filtros,
             next,
             setNext,
             file,
             setFile,
             ...state,
             dispatch,
+            socket, 
+            online
         }}>
             {children}
         </TramiteContext.Provider>

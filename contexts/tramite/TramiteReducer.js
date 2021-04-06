@@ -9,23 +9,25 @@ const current_status_default = [
 ];
 
 export const initialState = {
-    menu: null,
-    tab: null,
     trackings: [],
     current_tracking: {},
     current_tramite: {},
-    status: current_status_default,
+    menu: null,
     filtros: [],
     render: null,
     sala: null,
+    tracking_status: {},
+    status: current_status_default,
+    is_created: false,
 };
 
 export const tramiteTypes = {
     INITIAL: "INITIAL[TRACKING]",
-    PUSH: "PUSH[tracking]",
+    PUSH: "PUSH[TRACKING]",
+    ADD: "ADD[TRACKING]",
+    IS_CREATED: "IS[CREATED]",
     INITIAL_MENU: "INITIAL[MENU]",
-    CHANGE_MENU: "CHANGE[MENU]",
-    CHANGE_TAB: "CHANGE[TAB]",
+    CHANGE_MENU: "CURRENT[MENU]",
     CHANGE_RENDER: "CHANGE[RENDER]",
     CHANGE_SALA: "CHANGE[SALA]",
     CHANGE_TRACKING: "CHANGE[TRACKING]",
@@ -35,20 +37,38 @@ export const tramiteTypes = {
     ADD_FILE_TRACKING: "ADD_FILE[TRACKING]",
     DELETE_FILE_TRACKING: "DELETE_FILE[TRACKING]",
     UPDATE_FILE_TRACKING: "UPDATE_FILE[TRACKING]",
-    CLEAR: "CLEAR"
 };
 
-export const tramiteReducer = (state = initialState, { type = "", payload = {} }) => {
+export const tramiteReducer = (state, { type = "", payload = {} }) => {
     let newState = Object.assign({}, state);
     switch (type) {
         case tramiteTypes.INITIAL:
             newState.trackings = payload;
+            newState.is_created = false;
             return newState;
         case tramiteTypes.PUSH:
             newState.trackings.push(...payload);
             return newState;
+        case tramiteTypes.ADD: 
+            let newTrackings = collect(payload || []);
+            // filtrar datos actuales
+            newState.trackings.filter(t => newTrackings.where('id', t.id).count());
+            // añadir nuevos tramites
+            newState.trackings.unshift(...newTrackings.toArray());
+            // new state
+            return newState;
+        case tramiteTypes.IS_CREATED:
+            if (newState.menu == 'SENT' && newState.render == 'TAB') {
+                newState.is_created = true;
+                newState.current_tracking = payload;
+            }
+            // response
+            return newState;
         case tramiteTypes.CHANGE_RENDER:
             newState.render = payload;
+            return newState;
+        case tramiteTypes.CHANGE_MENU:
+            newState.menu = payload;
             return newState;
         case tramiteTypes.INITIAL_MENU: 
             let newStatus = [...newState.status];
@@ -61,19 +81,6 @@ export const tramiteReducer = (state = initialState, { type = "", payload = {} }
                 }
             }
             // response
-            return newState;
-        case tramiteTypes.CHANGE_MENU:
-            newState.render = "TAB";
-            newState.menu = payload;
-            for (let status of newState.status) {
-                if (status.key == newState.menu) {
-                    newState.filtros = status.filtros;
-                    break;
-                }
-            }
-            return newState;
-        case tramiteTypes.CHANGE_TAB:
-            newState.tab = payload;
             return newState;
         case tramiteTypes.CHANGE_SALA:
             newState.sala = payload;
@@ -142,9 +149,6 @@ export const tramiteReducer = (state = initialState, { type = "", payload = {} }
                 // update
                 newState.current_tracking = newTrackingFile;
             }
-            return newState;
-        case tramiteTypes.CLEAR:
-            newState = initialState;
             return newState;
         default:
             return newState;

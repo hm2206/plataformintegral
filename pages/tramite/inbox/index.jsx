@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useReducer } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Router from 'next/router';
 import { TramiteSocketProvider } from '../../../contexts/sockets/TramiteSocket';
 import { useRouter } from 'next/router'
@@ -7,7 +7,6 @@ import Show from '../../../components/show';
 import { Button, Message, Form } from 'semantic-ui-react'
 import { SelectAuthEntityDependencia } from '../../../components/select/authentication';
 import CreateTramite from '../../../components/tramite/createTramite';
-import { AppContext } from '../../../contexts/AppContext';
 import { tramite } from '../../../services/apis';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { system_store } from '../../../services/verify.json';
@@ -61,10 +60,7 @@ const InboxContent = ({ pathname, query }) => {
     const handleOnSave = () => {
         setOption([]);
         setPage(1);
-        dispatch({ type: tramiteTypes.CHANGE_TRACKING });
-        dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "SENT" }); 
-        dispatch({ type: tramiteTypes.INCREMENT_FILTRO, payload: "SENT" });
-        setIsSearch(true);
+        dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "SENT" });
     }
 
     // manejador de cambio de observation

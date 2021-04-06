@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, Fragment } from 'react';
+import React, { useState, useContext, Fragment } from 'react';
 import Modal from '../modal';
 import { DropZone } from '../Utils';
 import { Confirm, formatBytes } from '../../services/utils';
@@ -12,6 +12,7 @@ import { SelectTramiteType } from '../select/tramite';
 import { onProgress } from '../../services/apis';
 import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import { EntityContext } from '../../contexts/EntityContext';
+import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 
 
 const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }) => {
@@ -24,7 +25,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
 
     // tramite
     const tramite_context = useContext(TramiteContext);
-    const { current_tramite } = tramite_context;
+    const { current_tramite, dispatch } = tramite_context;
 
     // estados
     const [form, setForm] = useState({});
@@ -102,6 +103,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
             setErrors({})
             setCurrentFiles([]);
             if (typeof onSave == 'function') onSave(tramite);
+            dispatch({ type: tramiteTypes.SET_SELF_CLIENT, payload: true });
         }).catch(err => handleErrorRequest(err, setErrors));
         // quitar loader
         setTimeout(() => setCurrentLoading(false), 1000);

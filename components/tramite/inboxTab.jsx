@@ -5,6 +5,11 @@ import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import Show from '../show';
 import { status } from './datos.json';
+import AuthTrackingProvider from '../../providers/tramite/auth/AuthTrackingProvider';
+import collect from 'collect.js';
+
+// providers
+const authTrackingProvider = new AuthTrackingProvider();
 
 const PlaceholderTable = () => {
     let datos = [1, 2, 3, 4];
@@ -75,14 +80,43 @@ const ItemTracking = ({ tracking }) => {
 const InboxTab = () => {
 
     // tramite
-    const { tab, isRole, role, dispatch, setPage, current_loading, trackings } = useContext(TramiteContext);
+    const tramite_context = useContext(TramiteContext);
+    const { setTab, tab, isRole, role, dispatch, setPage, current_loading, trackings, socket, is_created, current_tracking } = tramite_context;
 
     // manejador de tab
     const handleTab = (value) => {
         if (current_loading) return false;
         setPage(1);
-        dispatch({ type: tramiteTypes.CHANGE_TAB, payload: value });
+        setTab(value);
     }
+
+    // escuchar nuevo trámite 
+    const socketCreateTramite = async (tracking) => {
+        if (!is_created) return dispatch({ type: tramiteTypes.IS_CREATED, payload: tracking });
+        // query
+        let query_string = { page: 1, status: [tracking.status], tracking_id: [tracking.id] };
+        // config
+        let options = {
+            headers: { DependenciaId: tramite_context.dependencia_id }
+        }
+        // actualizar datos
+        await authTrackingProvider.index(tab, query_string, options)
+        .then(res => {
+            let { trackings } = res.data;
+            dispatch({ type: tramiteTypes.ADD, payload: trackings.data });
+            dispatch({ type: tramiteTypes.INCREMENT_FILTRO, payload: "SENT" });
+        }).catch(err => console.log(err));
+    }
+
+    // actualizar  datos
+    useEffect(() => {
+        if (is_created) socketCreateTramite(current_tracking);
+    }, [is_created]);
+
+    // escuchar sockets
+    useEffect(() => {
+        socket?.on('Tramite/TramiteListener.store', (data) => socketCreateTramite(data.tracking));
+    }, [socket]);
 
     // render
     return (
