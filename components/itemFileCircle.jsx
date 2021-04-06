@@ -85,9 +85,10 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
         datos.append('file', file);
         await tramite.post(`file/${id}/update`, datos)
             .then(async res => {
+                let newFile = res.data.file;
                 app_context.setCurrentLoading(false);
                 await Swal.fire({ icon: 'success', text: 'El archivo se firmó correctamente!' });
-                if (typeof onAction == 'function') onAction('signature', file)
+                if (typeof onAction == 'function') onAction('signature', newFile);
                 await generateVisorPDF(file, blob);
             }).catch(err => {
                 app_context.setCurrentLoading(false);

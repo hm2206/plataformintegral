@@ -10,7 +10,7 @@ import { AppContext } from '../../contexts/AppContext';
 import { SelectAuthEntityDependencia } from '../select/authentication';
 import { SelectTramiteType } from '../select/tramite';
 import { onProgress } from '../../services/apis';
-import { TramiteContext } from '../../contexts/TramiteContext';
+import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import { EntityContext } from '../../contexts/EntityContext';
 
 
@@ -24,12 +24,13 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
 
     // tramite
     const tramite_context = useContext(TramiteContext);
+    const { current_tramite } = tramite_context;
 
     // estados
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const isUser = Object.keys(user).length;
-    const isTramite = Object.keys(tramite_context.tramite).length;
+    const isTramite = Object.keys(current_tramite).length;
     const [current_files, setCurrentFiles] = useState([]);
     const [current_loading, setCurrentLoading] = useState(false);
     const [percent, setPercent] = useState(0);
@@ -78,33 +79,32 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
     // guardar el tramite
     const save = async () => {
         let answer = await Confirm('warning', `¿Deseas guardar el tramite?`);
-        if (answer) {
-            let cancelToken = CancelRequest();
-            setCurrentCancel(cancelToken);
-            setCurrentLoading(true);
-            let datos = new FormData;
-            datos.append('person_id', user.person_id);
-            datos.append('next', tramite_context.next);
-            if (isTramite) datos.append('tramite_id', tramite_context.tramite.id);
-            await Object.keys(form).map(key => datos.append(key, form[key]));
-            await current_files.map(f => datos.append('files', f));
-            await tramite.post(`tramite`, datos, { 
-                onUploadProgress: (evt) => onProgress(evt, setPercent),
-                onDownloadProgress: (evt) => onProgress(evt, setPercent),
-                cancelToken: cancelToken.token,
-                headers: { DependenciaId: tramite_context.dependencia_id } 
-            }).then(res => {
-                let { success, message, tramite } = res.data;
-                if (!success) throw new Error(message);
-                Swal.fire({ icon: 'success', text: message });
-                setForm({});
-                setErrors({})
-                setCurrentFiles([]);
-                if (typeof onSave == 'function') onSave(tramite);
-            }).catch(err => handleErrorRequest(err, setErrors));
-            // quitar loader
-            setTimeout(() => setCurrentLoading(false), 1000);
-        }
+        if (!answer) return false;
+        let cancelToken = CancelRequest();
+        setCurrentCancel(cancelToken);
+        setCurrentLoading(true);
+        let datos = new FormData;
+        datos.append('person_id', user.person_id);
+        datos.append('next', tramite_context.next);
+        if (isTramite) datos.append('tramite_id', current_tramite.id || "");
+        await Object.keys(form).map(key => datos.append(key, form[key]));
+        await current_files.map(f => datos.append('files', f));
+        await tramite.post(`tramite`, datos, { 
+            onUploadProgress: (evt) => onProgress(evt, setPercent),
+            onDownloadProgress: (evt) => onProgress(evt, setPercent),
+            cancelToken: cancelToken.token,
+            headers: { DependenciaId: tramite_context.dependencia_id } 
+        }).then(res => {
+            let { success, message, tramite } = res.data;
+            if (!success) throw new Error(message);
+            Swal.fire({ icon: 'success', text: message });
+            setForm({});
+            setErrors({})
+            setCurrentFiles([]);
+            if (typeof onSave == 'function') onSave(tramite);
+        }).catch(err => handleErrorRequest(err, setErrors));
+        // quitar loader
+        setTimeout(() => setCurrentLoading(false), 1000);
     }
 
     // render
@@ -129,7 +129,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                                     <input type="text"
                                         className="capitalize"
                                         readOnly
-                                        value={tramite_context.tramite.dependencia_origen && tramite_context.tramite.dependencia_origen.nombre || ""}
+                                        value={current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || ""}
                                     />
                                 </Form.Field>
 
@@ -138,7 +138,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                                     <input type="text"
                                         className="capitalize"
                                         readOnly
-                                        value={tramite_context.tramite.tramite_type && tramite_context.tramite.tramite_type.description || ""}
+                                        value={current_tramite.tramite_type && current_tramite.tramite_type.description || ""}
                                     />
                                 </Form.Field>
 
@@ -147,24 +147,24 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                                     <input type="text"
                                         className="capitalize"
                                         readOnly
-                                        value={tramite_context.tramite.document_number || ""}
+                                        value={current_tramite.document_number || ""}
                                     />
                                 </Form.Field>
 
                                 <Form.Field className="mb-3">
                                     <label>Asunto</label>
                                     <textarea 
-                                        value={tramite_context.tramite.asunto || ""}
+                                        value={current_tramite.asunto || ""}
                                         rows={3}
                                         readOnly
                                     />
                                 </Form.Field>
 
-                                <Show condicion={tramite_context.tramite.observation}>
+                                <Show condicion={current_tramite.observation}>
                                     <Form.Field className="mb-3">
                                         <label>Observación</label>
                                         <textarea 
-                                            value={tramite_context.tramite.observation || ""}
+                                            value={current_tramite.observation || ""}
                                             rows={3}
                                             readOnly
                                         />

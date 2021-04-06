@@ -10,7 +10,7 @@ import { AppContext } from '../../contexts/AppContext';
 import { tramite } from '../../services/apis';
 import Swal from 'sweetalert2';
 import SearchUserToDependencia from '../authentication/user/searchUserToDependencia';
-import { TramiteContext } from '../../contexts/TramiteContext';
+import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import SelectMultitleDependencia from './selectMultipleDependencia';
 import { EntityContext } from '../../contexts/EntityContext';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -45,8 +45,8 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     const destino = ['DERIVADO', 'ENVIADO'];
     const descripcion = ['DERIVADO', 'RECHAZADO'];
     const archivos = ['DERIVADO'];
-    const messages = ['ACEPTADO'];
-    const current_tracking = tramite_context.tracking || {};
+    const messages = ['ACEPTADO', 'FINALIZADO'];
+    const current_tracking = tramite_context.current_tracking || {};
     const current_role = tramite_context.role || {};
     const current_boss = tramite_context.boss || {};
 

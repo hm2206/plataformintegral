@@ -11,8 +11,7 @@ import { AppContext } from '../../../contexts/AppContext';
 import { tramite } from '../../../services/apis';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { system_store } from '../../../services/verify.json';
-import TableTracking from '../../../components/tramite/tableTracking';
-import RenderShow from '../../../components/tramite/renderShow';
+import InboxShow from '../../../components/tramite/inboxShow';
 import BoardSimple from '../../../components/boardSimple';
 import InboxMenu from '../../../components/tramite/inboxMenu';
 import InboxTab from '../../../components/tramite/inboxTab';
@@ -28,11 +27,15 @@ const InboxContent = ({ pathname, query }) => {
     // router
     const router = useRouter();
 
+    // auth
+    const { auth } = useContext(AuthContext);
+
     // entity
     const entity_context = useContext(EntityContext);
 
     // tramite
     const tramite_context = useContext(TramiteContext);
+    const { dispatch, setOption, setNext, setPage, setIsSearch, setQuerySearch } = tramite_context;
 
     // cambio de dependencia
     const handleDependencia = ({ value }) => {
@@ -54,58 +57,124 @@ const InboxContent = ({ pathname, query }) => {
         }
     }
 
+    // manejador de creado
+    const handleOnSave = () => {
+        setOption([]);
+        setPage(1);
+        dispatch({ type: tramiteTypes.CHANGE_TRACKING });
+        dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "SENT" }); 
+        dispatch({ type: tramiteTypes.INCREMENT_FILTRO, payload: "SENT" });
+        setIsSearch(true);
+    }
+
+    // manejador de cambio de observation
+    const handleFileObservation = (file) => {
+        if (tramite_context.render == 'TAB') setIsSearch(true);
+        else dispatch({ type: tramiteTypes.UPDATE_FILE_TRACKING, payload: file });
+    }
+
     // render
     return (
-        <div className="card-body">
-            <Form>
-                <div className="row mb-1">
-                    <div className="col-md-4 mb-2">
-                        <SelectAuthEntityDependencia
-                            onReady={dependenciaDefault}
-                            entity_id={entity_context.entity_id || ""}
-                            name="dependencia_id"
-                            onChange={(e, obj) => handleDependencia(obj)}
-                            value={query.dependencia_id || ""}
-                            disabled={tramite_context.current_loading}
-                        />
-                    </div>
+        <>
+            <div className="card-body">
+                <Form>
+                    <div className="row mb-1">
+                        <div className="col-md-4 mb-2">
+                            <SelectAuthEntityDependencia
+                                onReady={dependenciaDefault}
+                                entity_id={entity_context.entity_id || ""}
+                                name="dependencia_id"
+                                onChange={(e, obj) => handleDependencia(obj)}
+                                value={query.dependencia_id || ""}
+                                disabled={tramite_context.current_loading}
+                            />
+                        </div>
 
-                    <div className="col-md-6 mb-2">
-                        <input type="text"
-                            placeholder="Buscar trámite por código, numero de documento y nombre de archivo"
-                            value={tramite_context.query_search || ""}
-                            onChange={({ target }) => tramite_context.setQuerySearch(target.value)}
-                            disabled={tramite_context.current_loading}
-                        />
-                    </div>
+                        <div className="col-md-6 mb-2">
+                            <input type="text"
+                                placeholder="Buscar trámite por código, numero de documento y nombre de archivo"
+                                value={tramite_context.query_search || ""}
+                                onChange={({ target }) => setQuerySearch(target.value)}
+                                disabled={tramite_context.current_loading}
+                            />
+                        </div>
 
-                    <div className="col-md-2 mb-2">
-                        <Button color="blue"
-                            disabled={tramite_context.current_loading}
-                            onClick={(e) => {
-                                tramite_context.setPage(1);
-                                tramite_context.setIsSearch(true);
-                            }}
-                        >
-                            <i className="fas fa-search"></i>
-                        </Button>
-                    </div>
+                        <div className="col-md-2 mb-2">
+                            <Button color="blue"
+                                disabled={tramite_context.current_loading}
+                                onClick={(e) => {
+                                    setPage(1);
+                                    setIsSearch(true);
+                                }}
+                            >
+                                <i className="fas fa-search"></i>
+                            </Button>
+                        </div>
 
-                    <div className="col-md-12">
-                        <hr/>
+                        <div className="col-md-12">
+                            <hr/>
+                        </div>
                     </div>
-                </div>
-            </Form>
-            {/* body */}
-            <div className="row">
-                {/* menu */}
-                <InboxMenu dependencia_id={query.dependencia_id}/>
-                {/* tab */}
-                <Show condicion={tramite_context.render == 'TAB'}>
-                    <InboxTab/>
+                </Form>
+                {/* body */}
+                <Show condicion={query.dependencia_id}
+                    predeterminado={
+                        <div>
+                            <Message color="yellow">
+                                Porfavor seleccione una dependencia!
+                            </Message>
+                        </div>
+                    }
+                >
+                    <div className="row">
+                        {/* menu */}
+                        <InboxMenu dependencia_id={query.dependencia_id}/>
+                        {/* tab */}
+                        <Show condicion={tramite_context.render == 'TAB'}>
+                            <InboxTab/>
+                        </Show>
+                        {/* show */}
+                        <Show condicion={tramite_context.render == 'SHOW'}>
+                            <div className="col-xl-10 col-md-9">
+                                <InboxShow/>
+                            </div>
+                        </Show>
+                    </div>
                 </Show>
             </div>
-        </div>
+            {/* btn crear */}
+            <Show condicion={tramite_context.render == 'TAB'}>
+                <BtnFloat onClick={(e) => {
+                    setNext("");
+                    setOption(["CREATE"]);
+                }}>
+                    <i className="fas fa-plus"></i>
+                </BtnFloat>
+            </Show>
+            {/* modals */}
+            <CreateTramite 
+                show={tramite_context.option.includes('CREATE')}
+                isClose={(e) => {
+                    setOption([]);
+                    setNext("");
+                    dispatch({ type: tramiteTypes.CHANGE_TRAMITE });
+                }}
+                user={tramite_context.tab == 'DEPENDENCIA' ? tramite_context.boss.user : auth || {}}
+                onSave={handleOnSave}
+            />
+            {/* visualizador de archivo */}
+            <Show condicion={tramite_context.option.includes('VISUALIZADOR')}>
+                <Visualizador
+                    id={tramite_context.file?.id || '_error'}
+                    observation={tramite_context.file?.observation || ""}
+                    name={tramite_context.file?.name || ""}
+                    extname={tramite_context.file?.extname || ""}
+                    url={tramite_context.file?.url || ""}
+                    onClose={(e) => setOption([])}
+                    onUpdate={handleFileObservation}
+                />
+            </Show>
+        </>
     )
 }
 

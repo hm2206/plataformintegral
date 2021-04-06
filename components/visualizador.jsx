@@ -75,10 +75,10 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
         setCurrentLoading(true);
         await tramite.post(`file/${id}/observation`, { observation: current_observation })
             .then(res => {
-                let { success, message } = res.data;
+                let { success, message, file } = res.data;
                 if (!success) throw new Error(message);
                 Swal.fire({ icon: 'success', text: message });
-                if (typeof onUpdate == 'function') onUpdate(id);
+                if (typeof onUpdate == 'function') onUpdate(file);
             }).catch(err => Swal.fire({ icon: 'error', text: 'No se pudó guardar la observación' }))
         setCurrentLoading(false)
     }
@@ -95,35 +95,35 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
 
     // render
     return (
-        <div class="window-visualizador">
-            <div class="visualizador-header">
-                <div class="row align-items-center">
-                    <div class="col-md-9 col-7">
-                        <a href="#" class="text-white cursor-pointer font-17 mr-4"
+        <div className="window-visualizador">
+            <div className="visualizador-header">
+                <div className="row align-items-center">
+                    <div className="col-md-9 col-7">
+                        <a href="#" className="text-white cursor-pointer font-17 mr-4"
                             onClick={(e) => {
                                 e.preventDefault();
                                 if (typeof onClose == 'function') onClose(e);
                             }}
                         >
-                            <i class="fas fa-times"></i>
+                            <i className="fas fa-times"></i>
                         </a>
                         <i className={`fas fa-file-${extname} mr-3`}></i>
                         <span><b>{name || ""}</b></span>
                     </div>
-                    <div class="col-md-3 col-5 text-right">
-                        <button class="btn text-white font-15 mr-2"
+                    <div className="col-md-3 col-5 text-right">
+                        <button className="btn text-white font-15 mr-2"
                             disabled={!is_download}
                             onClick={(e) => setIsNote(true)}
                         >
-                            <i class="fas fa-sticky-note mr-1"></i>
+                            <i className="fas fa-sticky-note mr-1"></i>
                             Observación
                         </button>
 
-                        <button class="btn text-white font-15"
+                        <button className="btn text-white font-15"
                             disabled={!is_download}
                             onClick={downloadFile}
                         >
-                            <i class="fas fa-download"></i>
+                            <i className="fas fa-download"></i>
                         </button>
                     </div>
                 </div>
@@ -132,7 +132,7 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
                     <div style={{ height: '9px', background: '#cfd8dc', width: `${current_percent}%`, position: 'absolute', left: "0px", bottom: "-9px" }}></div>
                 </Show>
             </div>
-            <div class="h-100">
+            <div className="h-100">
                 <Show condicion={action == 'IFRAME'}>
                     <iframe src={current_url} width="100%" height="92%" style={{ border: "0px", objectFit: 'contain' }}/>
                 </Show>

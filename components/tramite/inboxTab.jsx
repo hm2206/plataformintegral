@@ -25,7 +25,7 @@ const PlaceholderTable = () => {
 const ItemTracking = ({ tracking }) => {
 
     // tramite context
-    const tramite_context = useContext(TramiteContext);
+    const { dispatch, setOption, setFile } = useContext(TramiteContext);
 
     // props
     let { tramite, dependencia } = tracking || { };
@@ -52,19 +52,19 @@ const ItemTracking = ({ tracking }) => {
             noRead={tracking.readed_at ? false : true}
             status={current_status.title}
             statusClassName={current_status.className}
-            // onClickItem={(e) => {
-            //     tramite_context.setTracking(tracking);
-            //     tramite_context.setRender('SHOW')
-            // }}
-            // onButton={(e) => {
-            //     tramite_context.setTracking(tracking);
-            //     tramite_context.setRender('SHOW')
-            // }}
-            // onClickFile={(e, f) => {
-            //     e.preventDefault();
-            //     tramite_context.setFile(f);
-            //     tramite_context.setOption("VISUALIZADOR")
-            // }}
+            onClickItem={(e) => {
+                dispatch({ type: tramiteTypes.CHANGE_TRACKING, payload: tracking });
+                dispatch({ type: tramiteTypes.CHANGE_RENDER, payload: "SHOW" });
+            }}
+            onButton={(e) => {
+                dispatch({ type: tramiteTypes.CHANGE_TRACKING, payload: tracking });
+                dispatch({ type: tramiteTypes.CHANGE_RENDER, payload: "SHOW" });
+            }}
+            onClickFile={(e, f) => {
+                e.preventDefault();
+                setFile(f);
+                setOption(["VISUALIZADOR"])
+            }}
             buttons={[
                 { key: "go", title: "Ver más", icon: "fas fa-eye", className: "btn-primary" }
             ]}

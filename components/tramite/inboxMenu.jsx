@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import AuthProvider from '../../providers/tramite/auth/AuthProvider';
 import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
