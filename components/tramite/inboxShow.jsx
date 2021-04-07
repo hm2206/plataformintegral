@@ -72,7 +72,7 @@ const InboxShow = ({ onRefresh }) => {
 
     // tramite
     const tramite_context = useContext(TramiteContext);
-    const { current_tracking, dispatch, menu, setOption } = tramite_context;
+    const { current_tracking, dispatch, menu, socket } = tramite_context;
     const  current_tramite = current_tracking.tramite || {};
     const isTramite = Object.keys(current_tramite).length;
     
@@ -133,6 +133,11 @@ const InboxShow = ({ onRefresh }) => {
         }
     }
 
+    // update verificacion por socket
+    const socketUpdateVerify = () => {
+        if (!current_tracking.revisado) setIsRefresh(true);
+    }
+
     // executar marcado
     useEffect(() => {
         markRead();
@@ -153,8 +158,14 @@ const InboxShow = ({ onRefresh }) => {
         if (is_refresh) setIsRefresh(false);
     }, [is_refresh]);
 
+    // executar socket
+    useEffect(() => {
+        socket?.on('Tramite/TramiteListener.verify', socketUpdateVerify);
+    }, [socket]);
+
     // holder
     if (current_loading) return <PlaceholderShow/>
+    
 
     // render
     return (

@@ -34,7 +34,7 @@ const InboxContent = ({ pathname, query }) => {
 
     // tramite
     const tramite_context = useContext(TramiteContext);
-    const { dispatch, setOption, setNext, setPage, setIsSearch, setQuerySearch } = tramite_context;
+    const { dispatch, setOption, setNext, setPage, setIsSearch, setQuerySearch, online } = tramite_context;
 
     // cambio de dependencia
     const handleDependencia = ({ value }) => {
@@ -61,6 +61,7 @@ const InboxContent = ({ pathname, query }) => {
         setOption([]);
         setPage(1);
         dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "SENT" });
+        if (!online) setIsSearch(true);
     }
 
     // manejador de cambio de observation
