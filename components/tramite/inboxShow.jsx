@@ -16,6 +16,7 @@ import AuthTramiteProvider from '../../providers/tramite/auth/AuthTramiteProvide
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import ShowInfo from './showInfo';
 import ShowAction from './showAction';
+import EditDescriptionTracking from './editDescriptionTracking';
 
 // providors
 const authTramiteProvider = new AuthTramiteProvider();
@@ -63,9 +64,6 @@ const PlaceholderShow = () => {
 }
 
 const InboxShow = ({ onRefresh }) => {
-
-    // app
-    const app_context = useContext(AppContext);
 
     // auth
     const { auth } = useContext(AuthContext);
@@ -253,6 +251,8 @@ const InboxShow = ({ onRefresh }) => {
                     </div>
                 </div>
             </div>
+            {/* tracking description */}
+            <EditDescriptionTracking/>
             {/* línea de tiempo */}
             <Show condicion={tramite_context.option.includes('TIMELINE')}>
                 <ModalTracking 
