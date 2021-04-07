@@ -52,8 +52,20 @@ export const tramiteReducer = (state, { type = "", payload = {} }) => {
             return newState;
         case tramiteTypes.ADD: 
             let newTrackings = collect(payload || []);
-            console.log(newState.trackings);
-            newState.trackings.unshift(...newTrackings.toArray());
+            let addTrackings = [];
+            // filtrar datos
+            for (let track of newState.trackings) {
+                let is_add_trackings = newTrackings.where('id', track.id).count();
+                if (is_add_trackings) {
+                    tramiteReducer(state, { type: tramiteTypes.DECREMENT_FILTRO, payload: 'SENT' })
+                    continue;
+                }
+                // add tracking
+                addTrackings.push(track);
+            }
+            // add nuevo tracking
+            addTrackings.unshift(...newTrackings.toArray());
+            newState.trackings = addTrackings;
             // new state
             return newState;
         case tramiteTypes.IS_CREATED:
