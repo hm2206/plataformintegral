@@ -1,7 +1,6 @@
 import React, { useContext, useEffect } from 'react';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { TramiteSocketProvider } from '../../../contexts/sockets/TramiteSocket';
-import { useRouter } from 'next/router'
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import { Button, Message, Form } from 'semantic-ui-react'
@@ -69,6 +68,20 @@ const InboxContent = ({ pathname, query }) => {
         if (tramite_context.render == 'TAB') setIsSearch(true);
         else dispatch({ type: tramiteTypes.UPDATE_FILE_TRACKING, payload: file });
     }
+
+    // verificar dependencia predeterminada desde caché
+    const handleRouteChange = async () => {
+        let dependencia_id = localStorage.getItem('dependenciaId');
+        if (!query.dependencia_id && dependencia_id) {
+            query.dependencia_id = dependencia_id;
+            Router.push({ pathname, query });
+        }
+    }
+
+    // montar componente
+    useEffect(() => {
+        handleRouteChange();
+    }, [router]);
 
     // render
     return (
