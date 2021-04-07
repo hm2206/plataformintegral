@@ -88,7 +88,10 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
     // conectarse a sala
     const connectSala = () => {
         let name = `${tab}#${dependencia_id}`;
-        socket?.emit('connect:inbox', name);
+        // validar sala solo dependencia
+        if (tab == 'DEPENDENCIA') {
+            socket?.emit('connect:inbox', name);
+        }
         // save sala
         dispatch({ type:tramiteTypes.CHANGE_SALA, payload: name });
     }

@@ -33,7 +33,7 @@ const InboxContent = ({ pathname, query }) => {
 
     // tramite
     const tramite_context = useContext(TramiteContext);
-    const { dispatch, setOption, setNext, setPage, setIsSearch, setQuerySearch, online } = tramite_context;
+    const { dispatch, setOption, setNext, setPage, setIsSearch, setQuerySearch, online, menu } = tramite_context;
 
     // cambio de dependencia
     const handleDependencia = ({ value }) => {
@@ -59,8 +59,12 @@ const InboxContent = ({ pathname, query }) => {
     const handleOnSave = () => {
         setOption([]);
         setPage(1);
-        dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "SENT" });
-        if (!online) setIsSearch(true);
+        if (menu != 'SENT') {
+            dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "SENT" });
+            setIsSearch(true);
+        } else {
+            if (!online) setIsSearch(true);
+        }
     }
 
     // manejador de cambio de observation

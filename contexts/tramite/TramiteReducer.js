@@ -52,16 +52,14 @@ export const tramiteReducer = (state, { type = "", payload = {} }) => {
             return newState;
         case tramiteTypes.ADD: 
             let newTrackings = collect(payload || []);
-            // filtrar datos actuales
-            newState.trackings.filter(t => newTrackings.where('id', t.id).count());
-            // añadir nuevos tramites
+            console.log(newState.trackings);
             newState.trackings.unshift(...newTrackings.toArray());
             // new state
             return newState;
         case tramiteTypes.IS_CREATED:
             if (newState.menu == 'SENT' && newState.render == 'TAB') {
                 newState.is_created = true;
-                newState.current_tracking = payload;
+                newState.current_tracking = payload; 
             }
             // response
             return newState;

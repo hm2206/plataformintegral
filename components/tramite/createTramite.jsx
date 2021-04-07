@@ -103,7 +103,6 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
             setErrors({})
             setCurrentFiles([]);
             if (typeof onSave == 'function') onSave(tramite);
-            dispatch({ type: tramiteTypes.SET_SELF_CLIENT, payload: true });
         }).catch(err => handleErrorRequest(err, setErrors));
         // quitar loader
         setTimeout(() => setCurrentLoading(false), 1000);

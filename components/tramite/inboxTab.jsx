@@ -6,6 +6,7 @@ import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import Show from '../show';
 import { status } from './datos.json';
 import AuthTrackingProvider from '../../providers/tramite/auth/AuthTrackingProvider';
+import collect from 'collect.js';
 
 // providers
 const authTrackingProvider = new AuthTrackingProvider();
@@ -80,7 +81,7 @@ const InboxTab = () => {
 
     // tramite
     const tramite_context = useContext(TramiteContext);
-    const { setTab, tab, isRole, role, dispatch, setPage, current_loading, trackings, socket, is_created, current_tracking } = tramite_context;
+    const { setTab, tab, isRole, role, dispatch, setPage, current_loading, trackings, socket, is_created, current_tracking, menu } = tramite_context;
 
     // manejador de tab
     const handleTab = (value) => {
@@ -116,8 +117,8 @@ const InboxTab = () => {
 
     // escuchar sockets
     useEffect(() => {
-        socket?.on('Tramite/TramiteListener.store', (data) => socketCreateTramite(data.tracking));
-    }, [socket]);
+        if (menu == 'SENT') socket?.on('Tramite/TramiteListener.store', (data) => socketCreateTramite(data.tracking));
+    }, [socket, menu]);
 
     // render
     return (
