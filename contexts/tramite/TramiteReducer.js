@@ -26,6 +26,7 @@ export const tramiteTypes = {
     PUSH: "PUSH[TRACKING]",
     ADD: "ADD[TRACKING]",
     IS_CREATED: "IS[CREATED]",
+    CHANGE_IS_CREATED: "CHANGE[IS_CREATED]",
     INITIAL_MENU: "INITIAL[MENU]",
     CHANGE_MENU: "CURRENT[MENU]",
     CHANGE_RENDER: "CHANGE[RENDER]",
@@ -64,12 +65,14 @@ export const tramiteReducer = (state, { type = "", payload = {} }) => {
             }
             // response
             return newState;
+        case tramiteTypes.CHANGE_IS_CREATED:
+            newState.is_created = payload;
+            return newState;
         case tramiteTypes.CHANGE_RENDER:
             newState.render = payload;
             return newState;
         case tramiteTypes.CHANGE_MENU:
             newState.menu = payload;
-            console.log(payload);
             return newState;
         case tramiteTypes.INITIAL_MENU: 
             let newStatus = [...newState.status];

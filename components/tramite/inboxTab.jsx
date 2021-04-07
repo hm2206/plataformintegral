@@ -6,7 +6,6 @@ import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import Show from '../show';
 import { status } from './datos.json';
 import AuthTrackingProvider from '../../providers/tramite/auth/AuthTrackingProvider';
-import collect from 'collect.js';
 
 // providers
 const authTrackingProvider = new AuthTrackingProvider();
@@ -105,7 +104,9 @@ const InboxTab = () => {
             let { trackings } = res.data;
             dispatch({ type: tramiteTypes.ADD, payload: trackings.data });
             dispatch({ type: tramiteTypes.INCREMENT_FILTRO, payload: "SENT" });
-        }).catch(err => console.log(err));
+        }).catch(err => {
+            dispatch({ type: tramiteTypes.CHANGE_IS_CREATED, payload: false });
+        });
     }
 
     // actualizar  datos
