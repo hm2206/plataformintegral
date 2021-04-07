@@ -97,7 +97,7 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
     useEffect(() => {
         setTab(null);
         dispatch({ type: tramiteTypes.CHANGE_RENDER, payload: "TAB" });
-        dispatch({ type: tramiteTypes.CHANGE_MENU, payload: null });
+        setTab(null);
         setPage(1);
     }, [dependencia_id]);
 

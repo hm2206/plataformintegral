@@ -69,6 +69,7 @@ export const tramiteReducer = (state, { type = "", payload = {} }) => {
             return newState;
         case tramiteTypes.CHANGE_MENU:
             newState.menu = payload;
+            console.log(payload);
             return newState;
         case tramiteTypes.INITIAL_MENU: 
             let newStatus = [...newState.status];

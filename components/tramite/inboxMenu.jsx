@@ -5,7 +5,7 @@ import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 const InboxMenu = ({ col = "col-xl-2 col-md-3", dependencia_id = null }) => {
     
     // tramite
-    const { status, menu, dispatch, setPage, setIsSearch, setStatus } = useContext(TramiteContext);
+    const { status, menu, dispatch, setPage, setIsSearch } = useContext(TramiteContext);
 
     // seleccionar menu
     const handleMenu = (newMenu) => {
@@ -17,7 +17,7 @@ const InboxMenu = ({ col = "col-xl-2 col-md-3", dependencia_id = null }) => {
 
     // inicializando menu
     useEffect(() => {
-        if (dependencia_id) dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "INBOX" });
+        dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "INBOX" });
     }, []);
     
     // render
