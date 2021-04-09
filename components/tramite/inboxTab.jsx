@@ -6,7 +6,6 @@ import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import Show from '../show';
 import { status } from './datos.json';
 import AuthTrackingProvider from '../../providers/tramite/auth/AuthTrackingProvider';
-import collect from 'collect.js';
 
 // providers
 const authTrackingProvider = new AuthTrackingProvider();
@@ -50,7 +49,7 @@ const ItemTracking = ({ tracking }) => {
             files={tramite.files || []}
             document_type={tramite.tramite_type && tramite.tramite_type.description || ""}
             document_number={tramite.document_number || ""}
-            lugar={dependencia.nombre || ""}
+            lugar={dependencia.nombre || "Exterior"}
             fecha={tracking.created_at || ""}
             day={tracking.day || 0}
             semaforo={tracking.semaforo || ""}

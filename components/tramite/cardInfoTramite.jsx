@@ -33,7 +33,7 @@ const CardInfoTramite = ({ remitente, email, dependencia, status, image, revisad
                         <span className="capitalize">{remitente || ""}</span>
                     </b>
                     <div className="text-primary font-12 lowercase">
-                        <u className="capitalize">{dependencia || ""}</u>
+                        <u className="capitalize">{dependencia || "Exterior"}</u>
                     </div>
                     <div className="text-muted font-12">{email || ""}</div>
                     <Show condicion={status}>
