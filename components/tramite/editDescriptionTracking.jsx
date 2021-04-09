@@ -19,6 +19,7 @@ const EditDescriptionTracking = () => {
 
     // tramite
     const { current_tracking, dispatch } = useContext(TramiteContext);
+    const { tramite } = current_tracking;
 
     // memo
     const isEdit = useMemo(() => {
@@ -54,7 +55,7 @@ const EditDescriptionTracking = () => {
                         value={description}
                         onChange={({ target }) => setDescription(target.value)}
                         rows="7"
-                        disabled={!isEdit || current_loading}
+                        disabled={!isEdit || current_loading || !tramite.state}
                     />
                 </div>
 
@@ -63,7 +64,7 @@ const EditDescriptionTracking = () => {
                         <Button color="primary"
                             loading={current_loading}
                             onClick={handleUpdate}
-                            disabled={current_loading}
+                            disabled={current_loading || !tramite.state}
                         >
                             <i className="fas fa-save"></i> Guardar datos
                         </Button>
