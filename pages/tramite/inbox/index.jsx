@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 import Router, { useRouter } from 'next/router';
 import { TramiteSocketProvider } from '../../../contexts/sockets/TramiteSocket';
 import { BtnFloat } from '../../../components/Utils';
@@ -20,6 +20,17 @@ import { AuthContext } from '../../../contexts/AuthContext';
 import { tramiteTypes } from '../../../contexts/tramite/TramiteReducer';
 const Visualizador = dynamic(() => import('../../../components/visualizador'), { ssr: false });
 
+const reducer = (state, { type, payload }) => {
+    let newState = Object.assign({}, state);
+    switch (type) {
+        case 'SET_DEPENDENCIA_ID':
+            newState.dependencia_id = payload;
+            return newState;
+        default:
+            return newState;
+    }
+};
+
 const InboxContent = ({ pathname, query }) => {
 
     // router
@@ -35,9 +46,13 @@ const InboxContent = ({ pathname, query }) => {
     const tramite_context = useContext(TramiteContext);
     const { dispatch, setOption, setNext, setPage, setIsSearch, setQuerySearch, online, menu } = tramite_context;
 
+    // reducer
+    const [state, currentDispatch] = useReducer(reducer, { dependencia_id: "" });
+
     // cambio de dependencia
     const handleDependencia = ({ value }) => {
         query.dependencia_id = value;
+        currentDispatch({ type: 'SET_DEPENDENCIA_ID', payload: value });
         router.push({ pathname, query });
     }
 
@@ -48,7 +63,7 @@ const InboxContent = ({ pathname, query }) => {
             if (isAllow >= 2) {
                 let current_dependencia = dependencias[1];
                 query.dependencia_id = current_dependencia.value;
-                localStorage.setItem('dependenciaId', query.dependencia_id);
+                currentDispatch({ type: 'SET_DEPENDENCIA_ID', payload: query.dependencia_id });
                 let { push } = Router;
                 push({ pathname, query });
             }
@@ -73,20 +88,6 @@ const InboxContent = ({ pathname, query }) => {
         else dispatch({ type: tramiteTypes.UPDATE_FILE_TRACKING, payload: file });
     }
 
-    // verificar dependencia predeterminada desde caché
-    const handleRouteChange = async () => {
-        let dependencia_id = localStorage.getItem('dependenciaId');
-        if (!query.dependencia_id && dependencia_id) {
-            query.dependencia_id = dependencia_id;
-            Router.push({ pathname, query });
-        }
-    }
-
-    // montar componente
-    useEffect(() => {
-        handleRouteChange();
-    }, [router]);
-
     // render
     return (
         <>
@@ -96,7 +97,7 @@ const InboxContent = ({ pathname, query }) => {
                         <div className="col-md-4 mb-2">
                             <SelectAuthEntityDependencia
                                 onReady={dependenciaDefault}
-                                entity_id={entity_context.entity_id || ""}
+                                entity_id={entity_context.entity_id}
                                 name="dependencia_id"
                                 onChange={(e, obj) => handleDependencia(obj)}
                                 value={query.dependencia_id || ""}

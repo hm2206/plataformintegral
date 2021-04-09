@@ -11,10 +11,10 @@ const NavLink = ({ children, active = false, url = "/", onClick = null }) => {
 		<a
 			href={url}
 			className={`menu-link ${active ? "text-primary" : ""}`}
-			onClick={(e) => {
-				e.preventDefault();
-				typeof onClick == 'function' ? onClick(url) : null;
-			}}
+			// onClick={(e) => {
+			// 	e.preventDefault();
+			// 	typeof onClick == 'function' ? onClick(url) : null;
+			// }}
 		>
 			<Show condicion={active}
 				predeterminado={children}
@@ -60,7 +60,6 @@ const  Navigation = () => {
 			// sin error
 			setIsError(false);
       	}).catch(err => {
-			console.log(err);
 			setIsError(true)
 		  });
 		setCurrentLoading(false);
@@ -78,7 +77,7 @@ const  Navigation = () => {
 		let { push } = Router;
 		push({ pathname: url, query: newQuery });
 		// active module
-		setCurrentActive(child)
+		setCurrentActive(child);
 	};
 
 	// renderizar
