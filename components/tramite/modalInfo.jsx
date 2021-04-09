@@ -25,7 +25,7 @@ const ModalInfo = ({ current_tramite = {}, isClose = null, onFile = null }) => {
                     <label htmlFor="">Dependencia Origen</label>
                     <input type="text" 
                         readOnly
-                        value={current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || ""}
+                        value={current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || "Externo"}
                     />
                 </div>
 
