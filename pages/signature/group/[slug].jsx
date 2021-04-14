@@ -4,7 +4,7 @@ import { BtnBack, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import { signature, handleErrorRequest } from '../../../services/apis';
 import { GroupProvider } from '../../../contexts/signature/GroupContext';
-import AddTeam from '../../../components/signature/group/AddTeam';
+import AddTeam from '../../../components/signature/group/addTeam';
 import ListTeam from '../../../components/signature/group/listTeam';
 import ListFileGroup from '../../../components/signature/group/listFileGroup';
 import UploadFileGroup from '../../../components/signature/group/uploadFileGroup';
