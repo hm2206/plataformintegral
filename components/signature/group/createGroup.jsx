@@ -1,13 +1,13 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
-import Modal from '../modal';
-import { Confirm } from '../../services/utils';
+import Modal from '../../modal';
+import { Confirm } from '../../../services/utils';
 import { Form, Button, Progress } from 'semantic-ui-react';
-import { signature, CancelRequest, onProgress } from '../../services/apis';
+import { signature, CancelRequest, onProgress } from '../../../services/apis';
 import Swal from 'sweetalert2';
-import Show from '../show';
-import { AppContext } from '../../contexts/AppContext';
-import { SignatureContext } from '../../contexts/SignatureContext';
-import { DropZone } from '../Utils';
+import Show from '../../show';
+import { AppContext } from '../../../contexts/AppContext';
+import { SignatureContext } from '../../../contexts/SignatureContext';
+import { DropZone } from '../../Utils';
 
 const rules = ['title', 'description'];
 

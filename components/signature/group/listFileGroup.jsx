@@ -1,15 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { signature } from '../../services/apis';
-import { GroupContext } from '../../contexts/SignatureContext';
-import FileSimple from '../fileSimple';
-import Show from '../show';
+import { signature } from '../../../services/apis';
+import { GroupContext } from '../../../contexts/signature/GroupContext';
+import FileSimple from '../../fileSimple';
+import Show from '../../show';
 import Skeleton from 'react-loading-skeleton';
 import { Button, Input } from 'semantic-ui-react';
-import FileProvider from '../../providers/signature/FileProvider';
-import { Confirm } from '../../services/utils';
-import { AppContext } from '../../contexts';
-import AuthGroupProvider from '../../providers/signature/auth/AuthGroupProvider';
+import FileProvider from '../../../providers/signature/FileProvider';
+import { Confirm } from '../../../services/utils';
+import { AppContext } from '../../../contexts';
+import AuthGroupProvider from '../../../providers/signature/auth/AuthGroupProvider';
 import Swal from 'sweetalert2';
+import { groupTypes } from '../../../contexts/signature/GroupReducer';
 
 // provedores
 const fileProvider = new FileProvider();
@@ -38,7 +39,7 @@ const PlaceholderItem = () => {
 const ItemAction = ({ file, onDelete = null }) => {
 
     // group
-    const  { group }= useContext(GroupContext);
+    const  { group, dispatch }= useContext(GroupContext);
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -63,14 +64,13 @@ const ItemAction = ({ file, onDelete = null }) => {
             .then(res => {
                 setIsError(false);
                 setRender(false);
-            })
-            .catch(err => setIsError(true));
+            }).catch(err => setIsError(true));
         setCurrentLoading(false);
     }
 
     // executar eliminación del file
     useEffect(() => {
-        if (!render) setTimeout((e) => typeof onDelete == "function" ? onDelete() : null, 400);
+        if (!render) setTimeout((e) => dispatch({ type: groupTypes.DOWNLOAD_DELETE, payload: file.id }), 400);
     }, [render]);
 
     // desmontar componente
@@ -100,7 +100,7 @@ const ListFileGroup = () => {
     const app_context = useContext(AppContext);
 
     // group
-    const  { group } = useContext(GroupContext);
+    const  { group, download, dispatch } = useContext(GroupContext);
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -129,7 +129,7 @@ const ListFileGroup = () => {
             let { files } = res.data;
             setCurrentLastPage(files.lastPage || 0);
             setCurrentTotal(files.total || 0);
-            setDatos(add ? [...datos, ...files.data] : files.data);
+            dispatch({ type: add ? groupTypes.DOWNLOAD_PUSH : groupTypes.DOWNLOAD_FILE , payload: files.data });
         }).catch(err => console.log(err));
         setCurrentLoading(false);
     }
@@ -222,7 +222,7 @@ const ListFileGroup = () => {
                 <div className="col-12 mt-3"></div>
 
                 {/* lista de archivos */}
-                {datos.map((d, indexD) =>
+                {download?.map((d, indexD) =>
                     <div className="col-md-3" key={`file-list-uploaded-${indexD}`}>
                         <ItemAction file={d}
                             onDelete={() => onDelete(indexD)}
@@ -230,7 +230,7 @@ const ListFileGroup = () => {
                     </div>
                 )}
                 {/* no hay registros */}
-                <Show condicion={!current_loading && !datos.length}>
+                <Show condicion={!current_loading && !download?.length}>
                     <div className="col-md-12 text-center text-muted mb-3">
                         No hay regístros disponibles
                     </div>

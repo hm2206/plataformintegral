@@ -1,16 +1,16 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { handleErrorRequest, signature } from '../../services/apis';
-import { Confirm } from '../../services/utils';
-import { GroupContext } from '../../contexts/SignatureContext';
-import Modal from '../modal';
+import { handleErrorRequest, signature } from '../../../services/apis';
+import { Confirm } from '../../../services/utils';
+import { GroupContext } from '../../../contexts/signature/GroupContext';
+import { groupTypes } from '../../../contexts/signature/GroupReducer';
+import Modal from '../../modal';
 import { Form, Button } from 'semantic-ui-react';
-import { getPositions } from 'node-signature/client';
-import Show from '../show'
-import ListPfx from '../listPfx'
-import ModalRightUser from '../authentication/modalRightUser';
-import { AppContext } from '../../contexts';
+import Show from '../../show'
+import ListPfx from '../../listPfx'
+import ModalRightUser from '../../authentication/modalRightUser';
+import { AppContext } from '../../../contexts';
 import Swal from 'sweetalert2';
-import AuthGroupProvider from '../../providers/signature/auth/AuthGroupProvider';
+import AuthGroupProvider from '../../../providers/signature/auth/AuthGroupProvider';
 
 // providers
 const authGroupProvider = new AuthGroupProvider();
@@ -27,7 +27,7 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
 
     // group
     const group_context = useContext(GroupContext);
-    let { group } = group_context;
+    let { group, dispatch } = group_context;
 
     // estados
     const [current_user, setCurrentUser] = useState({});
@@ -40,19 +40,20 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
 
+    // config
+    let options = {
+        headers: { 
+            EntityId: group_context.group.entity_id,
+            DependenciaId: group_context.group.dependencia_id,
+            GroupId: group_context.group.id
+        }
+    };
+
     // agregemos al equipo
     const store = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en agregar al equipo?`, 'Estoy seguro');
         if (!answer) return false;
         app_context.setCurrentLoading(true);
-        // config
-        let options = {
-            headers: { 
-                EntityId: group_context.group.entity_id,
-                DependenciaId: group_context.group.dependencia_id,
-                GroupId: group_context.group.id
-            }
-        };
         // payload
         let payload = {
             group_id: group_context.group.id,
@@ -64,11 +65,35 @@ const AddTeam = ({ show, onClose, checked = [] }) => {
         await signature.post(`auth/team`, payload, options)
         .then(async res => {
             app_context.setCurrentLoading(false);
-            let { message } = res.data;
+            let { message, team } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             setOption("");
             setCurrentPfx(undefined);
+            // obtener team
+            findTeam(team.id);
         }).catch(err => handleErrorRequest(err, setErrors, app_context.setCurrentLoading(false)));
+    }
+
+    // obtener team
+    const findTeam = async (id) => {
+        await signature.get(`auth/team/${id}`, options)
+            .then(res => {
+                let { team } = res.data;
+                let { certificate } = team;
+                let payload = {
+                    id: team.id,
+                    title: certificate.person && certificate.person.fullname || "",
+                    classNameTitle: "capitalize",
+                    description: certificate.subject && certificate.subject.title || "",
+                    check: team.verify ? true : false,
+                    _delete: true,
+                };
+                // add team
+                if (team.verify) dispatch({ type: groupTypes.INCREMENT_COUNT_VERIFY });
+                dispatch({ type: groupTypes.INCREMENT_COUNT_TOTAL });
+                dispatch({ type: groupTypes.PUSH_TEAM, payload: [payload] });
+            })
+            .catch(err => console.log(err));
     }
 
     // obtener posiciones

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
-import { SignatureContext } from '../../contexts/SignatureContext';
-import ProgressFile from '../progressFile';
+import { SignatureContext } from '../../../contexts/SignatureContext';
+import ProgressFile from '../../progressFile';
 
 const FindGroup = () => {
 

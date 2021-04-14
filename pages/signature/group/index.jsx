@@ -4,11 +4,11 @@ import { Body, BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import { Button, Message, Form } from 'semantic-ui-react'
 import { SelectAuthEntityDependencia } from '../../../components/select/authentication';
-import CreateGroup from '../../../components/signature/createGroup';
+import CreateGroup from '../../../components/signature/group/createGroup';
 import { AppContext } from '../../../contexts/AppContext';
 import { AUTHENTICATE } from '../../../services/auth';
 import { SignatureProvider } from '../../../contexts/SignatureContext';
-import ListarGroup from '../../../components/signature/listarGroup';
+import ListarGroup from '../../../components/signature/group/listarGroup';
 import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext';
  

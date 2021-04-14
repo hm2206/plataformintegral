@@ -3,11 +3,11 @@ import BoardSimple from '../../../components/boardSimple';
 import { BtnBack, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import { signature, handleErrorRequest } from '../../../services/apis';
-import { GroupProvider } from '../../../contexts/SignatureContext';
-import AddTeam from '../../../components/signature/addTeam';
-import ListTeam from '../../../components/signature/listTeam';
-import ListFileGroup from '../../../components/signature/listFileGroup';
-import UploadFileGroup from '../../../components/signature/uploadFileGroup';
+import { GroupProvider } from '../../../contexts/signature/GroupContext';
+import AddTeam from '../../../components/signature/group/AddTeam';
+import ListTeam from '../../../components/signature/group/listTeam';
+import ListFileGroup from '../../../components/signature/group/listFileGroup';
+import UploadFileGroup from '../../../components/signature/group/uploadFileGroup';
 import NotFoundData from '../../../components/notFoundData'
 import Show from '../../../components/show';
 import { EntityContext } from '../../../contexts/EntityContext';
@@ -15,7 +15,7 @@ import { Confirm } from '../../../services/utils';
 import { AppContext } from '../../../contexts';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
-import { Message, Icon } from 'semantic-ui-react';
+import { Message } from 'semantic-ui-react';
 
 const options = [
     { key: 'ADD_TEAM', title: 'Agregar al equipo de firma', icon: 'fas fa-user-plus' },
@@ -103,7 +103,7 @@ const SlugGroup = ({ pathname, query, success, group }) => {
     // render
     return (
         <div className="col-md-12">
-            <GroupProvider value={{ group }}>
+            <GroupProvider group={group}>
                 <BoardSimple
                     bg="light"
                     title={group.title || ""}

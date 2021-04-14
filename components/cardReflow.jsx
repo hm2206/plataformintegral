@@ -25,7 +25,9 @@ const CardReflow = ({
             <div className="card-body">
                 <h4 className="card-title"> {title || ''} </h4>
                 <div className="progress progress-sm rounded-0 mb-1">
-                    <div className="progress-bar bg-success" style={{ width: `${(start * 100) / over}%` }}></div>
+                    <Show condicion={over}>
+                        <div className="progress-bar bg-success" style={{ width: `${(start * 100) / over}%` }}></div>
+                    </Show>
                 </div>
                 <p className="text-muted text-weight-bolder small"> {prefix}{start} de {prefix}{over} </p>
             </div>

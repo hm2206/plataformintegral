@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { Body, BtnBack, InputFile } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
-import { signature } from '../../../services/apis';
+import { handleErrorRequest, signature } from '../../../services/apis';
 import { AppContext } from '../../../contexts/AppContext';
 import { backUrl, Confirm } from '../../../services/utils';
 import Router from 'next/router';
@@ -13,7 +13,7 @@ import atob from 'atob';
 import moment from 'moment';
 import { EntityContext } from '../../../contexts/EntityContext';
 
-const CreateCertificate = ({ query, certificate, success }) => {
+const CreateCertificate = ({ pathname, query, certificate, success }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -80,6 +80,21 @@ const CreateCertificate = ({ query, certificate, success }) => {
                     }
                 })
         }
+    }
+
+    // guardar area
+    const disabledCertificate = async () => {
+        let answer = await Confirm('warning', `¿Estas seguro en deshabilitar el certificado?`);
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        await signature.post(`certificate/${certificate.id}/disabled?_method=PUT`)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            Router.push({ pathname, query });  
+        }).catch(err => handleErrorRequest(err, (error) => Swal.fire({ icon: 'error', text: error.message }), 
+        app_context.setCurrentLoading(false)))
     }
 
     // render
@@ -193,6 +208,12 @@ const CreateCertificate = ({ query, certificate, success }) => {
                                             <hr/>
 
                                             <div className="text-right">
+                                                <Show condicion={certificate.state}>
+                                                    <Button color="red" onClick={disabledCertificate}>
+                                                        <i className="fas fa-disabled"></i> Deshabilitar
+                                                    </Button>
+                                                </Show>
+
                                                 <Button color="teal" onClick={saveCertificate}
                                                     disabled={!isPerson}
                                                 >
@@ -222,13 +243,13 @@ const CreateCertificate = ({ query, certificate, success }) => {
 // rendering server
 CreateCertificate.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
-    let { query } = ctx; 
+    let { pathname, query } = ctx; 
     let id = atob(query.id) || '__error';
     let { success, certificate } = await signature.get(`certificate/${id}`, {}, ctx)
         .then(res => res.data)
         .catch(err => ({ success: false }));
     // response
-    return { query, success, certificate };
+    return { pathname, query, success, certificate };
 }
 
 export default CreateCertificate;

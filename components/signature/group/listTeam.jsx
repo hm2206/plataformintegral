@@ -1,12 +1,11 @@
 import React, { useContext, useEffect, useState, Fragment } from 'react';
-import { handleErrorRequest, signature } from '../../services/apis';
-import { GroupContext } from '../../contexts/SignatureContext';
-import CardReflow from '../cardReflow';
-import Show from '../show';
-import Skeleton from 'react-loading-skeleton';
-import { AppContext } from '../../contexts/AppContext';
+import { handleErrorRequest, signature } from '../../../services/apis';
+import { GroupContext } from '../../../contexts/signature/GroupContext';
+import { groupTypes } from '../../../contexts/signature/GroupReducer';
+import CardReflow from '../../cardReflow';
+import { AppContext } from '../../../contexts/AppContext';
 import Swal from 'sweetalert2';
-import { Confirm } from '../../services/utils';
+import { Confirm } from '../../../services/utils';
 
 
 const ListTeam = () => {
@@ -15,19 +14,16 @@ const ListTeam = () => {
     const app_context = useContext(AppContext);
 
     // group
-    const  { group }= useContext(GroupContext);
+    const  { group, dispatch, count_total, count_verify, teams }= useContext(GroupContext);
 
     // actiones
     const show_status = ['START', 'VERIFIED'];
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
-    const [datos, setDatos] = useState([]);
     const [current_page, setCurrentPage] = useState(1);
     const [current_last_page, setCurrentLastPage] = useState(0);
-    const [current_total, setCurrentTotal] = useState(0);
     const [is_error, setIsError] = useState(false);
-    const [verify_count, setVerifyCount] = useState(0);
     const [is_refresh, setIsRefresh] = useState(false);
 
     // config headers
@@ -62,10 +58,10 @@ const ListTeam = () => {
                 })
             });
             // setting
-            setVerifyCount(verify || 0)
             setCurrentLastPage(teams.lastPage || 0);
-            setCurrentTotal(teams.total || 0);
-            setDatos(add ? [...datos, ...payload] : payload);
+            dispatch({ type: groupTypes.SET_COUNT_TOTAL, payload: teams.total || 0 });
+            dispatch({ type: groupTypes.SET_COUNT_VERIFY, payload: verify || 0 });
+            dispatch({ type: add ? groupTypes.PUSH_TEAM : groupTypes.SET_TEAM, payload: payload });
             setIsError(false);
         }).catch(err => setIsError(true));
         setCurrentLoading(false);
@@ -84,6 +80,9 @@ const ListTeam = () => {
             app_context.setCurrentLoading(false);
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
+            if (team.check) dispatch({ type: groupTypes.DECREMENT_COUNT_VERIFY });
+            dispatch({ type: groupTypes.DELETE_TEAM, payload: team.id });
+            dispatch({ type: groupTypes.DECREMENT_COUNT_TOTAL });
         }).catch(err => handleErrorRequest(err, null, app_context.setCurrentLoading(false)));
     }
 
@@ -105,9 +104,9 @@ const ListTeam = () => {
         <Fragment>
             <CardReflow
                 onRefresh={(e) => setIsRefresh(true)}
-                items={datos}
-                start={verify_count || 0}
-                over={current_total || 0}
+                items={teams}
+                start={count_verify || 0}
+                over={count_total || 0}
                 title={`Firmantes`}
                 info={`Equipo`}
                 onDelete={show_status.includes(group.status) ? handleDelete : null}

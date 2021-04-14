@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { SignatureContext } from '../../contexts/SignatureContext';
-import DirSimple from '../dirSimple';
-import Show from '../show';
-import { signature } from '../../services/apis';
+import { SignatureContext } from '../../../contexts/SignatureContext';
+import DirSimple from '../../dirSimple';
+import Show from '../../show';
+import { signature } from '../../../services/apis';
 import Skeleton from 'react-loading-skeleton';
 import Router from 'next/router';
 import btoa from 'btoa';
