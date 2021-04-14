@@ -1,15 +1,14 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { Body, BtnBack } from '../../../components/Utils';
+import { BtnBack } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import { projectTracking } from '../../../services/apis';
 import { AppContext } from '../../../contexts/AppContext';
-import { backUrl, Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import { Confirm } from '../../../services/utils';
 import { Button, Form, Checkbox } from 'semantic-ui-react';
-import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import atob from 'atob';
 import { EntityContext } from '../../../contexts/EntityContext';
+import BoardSimple from '../../../components/boardSimple';
 
 const EditPresupuesto = ({ success, presupuesto }) => {
 
@@ -65,11 +64,14 @@ const EditPresupuesto = ({ success, presupuesto }) => {
     // render
     return (
         <div className="col-md-12">
-            <Body>
-                <div className="card-">
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(Router.pathname))} /> Editar Presupuesto
-                    </div>
+            <BoardSimple
+                title="Presupuesto"
+                info={["Editar Presupuesto"]}
+                options={[]}
+                prefix={<BtnBack/>}
+                bg="light"
+            >
+                <div className="mt-4">
                     <div className="card-body">
                         <div className="row justify-content-center">
                             <div className="col-md-9">
@@ -134,7 +136,7 @@ const EditPresupuesto = ({ success, presupuesto }) => {
                         </div>
                     </div>
                 </div>
-            </Body>
+            </BoardSimple>
         </div>
     )
 }

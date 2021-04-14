@@ -7,6 +7,7 @@ import { AppContext } from '../../../contexts/AppContext';
 import Router from 'next/router';
 import btoa from 'btoa';
 import { EntityContext } from '../../../contexts/EntityContext';
+import BoardSimple from '../../../components/boardSimple';
 
 const IndexProject = ({ success, projects }) => {
 
@@ -38,11 +39,16 @@ const IndexProject = ({ success, projects }) => {
     // render
     return (
     <div className="col-md-12">
-        <Body>
+        <BoardSimple
+            title="Proyecto"
+            info={["Listar Proyectos"]}
+            prefix="P"
+            bg="danger"
+            options={[]}
+        >
             <Datatable
-                titulo="Lista de Proyectos"
                 isFilter={false}
-                headers={["#ID", "Titulo", "F. Incio", "F. Término", "Duración", "Costo del Proyecto"]}
+                headers={["#ID", "Titulo", "F. Incio", "F. Término", "Duración", "Costo. Proyecto"]}
                 index={[
                     { key: "id", type: "text" },
                     { key: "title", type: "text" },
@@ -66,7 +72,7 @@ const IndexProject = ({ success, projects }) => {
                 ]}
                 getOption={getOption}
             />
-        </Body>
+        </BoardSimple>
         
         <BtnFloat
             onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })} 

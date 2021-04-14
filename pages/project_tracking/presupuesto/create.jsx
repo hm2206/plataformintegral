@@ -10,6 +10,7 @@ import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import { SelectPresupuesto } from '../../../components/select/project_tracking';
 import { EntityContext } from '../../../contexts/EntityContext';
+import BoardSimple from '../../../components/boardSimple';
 
 const CreatePresupuesto = () => {
 
@@ -74,11 +75,14 @@ const CreatePresupuesto = () => {
     // render
     return (
         <div className="col-md-12">
-            <Body>
-                <div className="card-">
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(Router.pathname))}/> Crear Presupuesto Anual
-                    </div>
+            <BoardSimple
+                title="Presupuesto"
+                info={["Crear Presupuesto"]}
+                options={[]}
+                prefix={<BtnBack/>}
+                bg="light"
+            >
+                <div className="mt-4">
                     <div className="card-body">
                         <div className="row justify-content-center">
                             <div className="col-md-9">
@@ -153,7 +157,7 @@ const CreatePresupuesto = () => {
                         </div>
                     </div>
                 </div>
-            </Body>
+            </BoardSimple>
         </div>
     )
 }

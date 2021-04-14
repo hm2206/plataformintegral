@@ -1,18 +1,14 @@
 import React, { useContext, useEffect } from 'react';
-import { Body, BtnFloat } from '../../../components/Utils';
-import { AUTHENTICATE } from '../../../services/auth';
+import { BtnFloat } from '../../../components/Utils';
+import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { system_store } from '../../../services/verify.json';
 import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
-import { AppContext } from '../../../contexts/AppContext';
 import Router from 'next/router';
 import btoa from 'btoa';
-import { EntityContext } from '../../../contexts/EntityContext';
+import BoardSimple from '../../../components/boardSimple';
 
 const IndexPresupuesto = ({ success, presupuestos }) => {
-
-    // app
-    const app_context = useContext(AppContext);
 
     // handle options
     const getOption = async (obj, key, index) => {
@@ -30,7 +26,13 @@ const IndexPresupuesto = ({ success, presupuestos }) => {
     // render
     return (
         <div className="col-md-12">
-            <Body>
+            <BoardSimple
+                title="Presupuesto"
+                info={["Lista de Presupuesto"]}
+                options={[]}
+                prefix={"P"}
+                bg="danger"
+            >
                 <Datatable
                     titulo="Lista de Presupuesto"
                     isFilter={false}
@@ -51,7 +53,7 @@ const IndexPresupuesto = ({ success, presupuestos }) => {
                     ]}
                     getOption={getOption}
                 />
-            </Body>
+            </BoardSimple>
 
             <BtnFloat
                 onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })}
