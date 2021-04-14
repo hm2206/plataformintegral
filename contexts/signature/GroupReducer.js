@@ -114,7 +114,7 @@ export const Reducer = (state = initialState, action = { type: "", payload: {} }
             newState.teams = state.teams.filter(d => d.id != action.payload);
             return newState;
         case groupTypes.CLEAR:
-            return { files: [], upload: [], ready: false };
+            return initialState;
         default:
             return state;
     }
