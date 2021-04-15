@@ -67,10 +67,6 @@ const RoleTramite = () => {
                     </div>
                 </div>
             </BoardSimple>
-            {/* btn flotante */}
-            <BtnFloat>
-                <i className="fas fa-plus"></i>
-            </BtnFloat>
         </div>
     )
 }
