@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
 import BoardSimple from '../../components/boardSimple';
-import { BtnFloat } from '../../components/Utils';
 import ListRole from '../../components/tramite/listRole';
 import { SelectAuthEntityDependencia } from '../../components/select/authentication';
 import { AuthContext } from '../../contexts/AuthContext';
 import { EntityContext } from '../../contexts/EntityContext';
 import CreateRole from '../../components/tramite/createRole';
 import { AUTHENTICATE } from '../../services/auth';
+import Show from '../../components/show';
+import { Message } from 'semantic-ui-react'
 
 const RoleTramite = () => {
 
@@ -26,6 +27,11 @@ const RoleTramite = () => {
         return () => fireEntity({ render: false });
     }, []);
 
+    // reset entity
+    useEffect(() => {
+        setDependenciaId("");
+    }, [entity_id]);
+
     // render
     return (
         <div className="col-12">
@@ -41,10 +47,11 @@ const RoleTramite = () => {
                         <div className="col-md-6">
                             <SelectAuthEntityDependencia
                                 user_id={auth.id || ""}
-                                entity_id={entity_id || ""} 
+                                entity_id={entity_id} 
                                 execute={false}
                                 value={dependencia_id}
                                 onChange={(e, obj) => setDependenciaId(obj.value)}
+                                disabled={!entity_id}
                             />
                         </div>
 
@@ -52,18 +59,28 @@ const RoleTramite = () => {
                             <hr/>
                         </div>
 
-                        <div className="col-7">
-                            <ListRole dependencia_id={dependencia_id}
-                                is_create={is_create}
-                                setIsCreate={setIsCreate}
-                            />
-                        </div>
+                        <Show condicion={dependencia_id}
+                            predeterminado={
+                                <div className="col-12">
+                                    <Message color="yellow">
+                                        Porfavor seleccione una dependencia!
+                                    </Message>
+                                </div>
+                            }
+                        >
+                            <div className="col-7">
+                                <ListRole dependencia_id={dependencia_id}
+                                    is_create={is_create}
+                                    setIsCreate={setIsCreate}
+                                />
+                            </div>
 
-                        <div className="col-5">
-                            <CreateRole dependencia_id={dependencia_id}
-                                setIsCreate={setIsCreate}
-                            />
-                        </div>
+                            <div className="col-5">
+                                <CreateRole dependencia_id={dependencia_id}
+                                    setIsCreate={setIsCreate}
+                                />
+                            </div>
+                        </Show>
                     </div>
                 </div>
             </BoardSimple>

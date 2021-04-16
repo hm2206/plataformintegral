@@ -5,6 +5,8 @@ import Show from '../show';
 import { EntityContext } from '../../contexts/EntityContext';
 import { AuthContext } from '../../contexts/AuthContext';
 import { Button } from 'semantic-ui-react';
+import { Confirm } from '../../services/utils';
+import Swal from 'sweetalert2';
 
 // providers
 const roleProvider = new RoleProvider();
@@ -24,10 +26,66 @@ const Placeholder = () => {
     )
 }
 
-const ListRole = ({ dependencia_id, is_create, setIsCreate }) => {
-
+const ItemRole = ({ role, dependencia_id, onDelete = null }) => {
     // auth
     const { auth } = useContext(AuthContext);
+
+    // entity
+    const { entity_id } = useContext(EntityContext);
+
+    // estados
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [is_error, setIsError] = useState(false);
+
+    // options
+    let options = {
+        headers: { 
+            EntityId: entity_id,
+            DependenciaId: dependencia_id 
+        }
+    }
+
+    // disabled role
+    const disabledRole = async () => {
+        let answer = await Confirm('warning', `¿Estás seguro en deshabilitar el rol?`, 'Estoy seguro');
+        if (!answer) return false;
+        setCurrentLoading(true);
+        await roleProvider.disabled(role.id, {}, options)
+        .then(res => {
+            let { message } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+            setIsError(false);
+            if (typeof onDelete == 'function') onDelete(role);
+        }).catch(err => setIsError(true))
+        setCurrentLoading(false);
+    }
+
+    // render
+    return (
+        <tr>
+            <td>{role.id}</td>
+            <td>{role.user?.username || ""}</td>
+            <td className="capitalize">
+                {role.user?.person?.fullname}
+                <span className="badge badge-sm badge-dark ml-1">
+                    {role.user?.id == auth.id ? 'Yo' : ''}
+                </span>
+            </td>
+            <td>{role.level}</td>
+            <td className="text-center">
+                <Button color="red" size="mini"
+                    disabled={current_loading}
+                    onClick={disabledRole}
+                    loading={current_loading}
+                >
+                    <i className="fas fa-times"></i>
+                </Button>
+            </td>
+        </tr>
+    )
+}
+
+const ListRole = ({ dependencia_id, is_create, setIsCreate }) => {
 
     // entity
     const { entity_id } = useContext(EntityContext);
@@ -67,7 +125,7 @@ const ListRole = ({ dependencia_id, is_create, setIsCreate }) => {
             setRefresh(true);
         }
     }
-
+ 
     // montar componente
     useEffect(() => {
         getDatos();
@@ -136,22 +194,11 @@ const ListRole = ({ dependencia_id, is_create, setIsCreate }) => {
                                     }
                                 >
                                     {datos.map((d, indexD) => 
-                                        <tr key={`list-datos-${indexD}`}>
-                                            <td>{d.id}</td>
-                                            <td>{d.user?.username || ""}</td>
-                                            <td className="capitalize">
-                                                {d.user?.person?.fullname}
-                                                <span className="badge badge-sm badge-dark ml-1">
-                                                    {d.user?.id == auth.id ? 'Yo' : ''}
-                                                </span>
-                                            </td>
-                                            <td>{d.level}</td>
-                                            <td className="text-center">
-                                                <Button color="red" size="mini">
-                                                    <i className="fas fa-times"></i>
-                                                </Button>
-                                            </td>
-                                        </tr>
+                                        <ItemRole key={`list-datos-${indexD}`}
+                                            role={d}
+                                            dependencia_id={dependencia_id}
+                                            onDelete={() => setRefresh(true)}
+                                        />
                                     )}
                                 </Show>
                             </Show>
