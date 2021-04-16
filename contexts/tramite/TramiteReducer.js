@@ -132,9 +132,19 @@ export const tramiteReducer = (state, { type = "", payload = {} }) => {
             if (Object.keys(newState.current_tracking).length) {
                 let newTrackingFile = newState.current_tracking;
                 newTrackingFile.tramite = newTrackingFile.tramite || {};
-                newTrackingFile.tramite.files = [...newTrackingFile.tramite?.files || []].filter(f => f.id != payload.id) || [];
-                newTrackingFile.info.files = [...newTrackingFile.info?.files || []].filter(f => f.id != payload.id) || []; 
-                newTrackingFile.tramite.old_files = [...newTrackingFile.tramite?.old_files || []].filter(f => f.id != payload.id) || [];
+                // archivos del tramite
+                if (Object.keys(newTrackingFile.tramite && newTrackingFile.tramite.files || {}).length) {
+                    newTrackingFile.tramite.files = [...newTrackingFile.tramite.files || []].filter(f => f.id != payload.id) || [];
+                }
+                // archivos del info
+                if (Object.keys(newTrackingFile.info && newTrackingFile.info.files || {}).length) {
+                    newTrackingFile.info.files = [...newTrackingFile.info.files || []].filter(f => f.id != payload.id) || []; 
+                }
+                // archivos del tramite anidado
+                if (Object.keys(newTrackingFile.tramite && newTrackingFile.tramite.old_files || {}).length) {
+                    newTrackingFile.tramite.old_files = [...newTrackingFile.tramite.old_files || []].filter(f => f.id != payload.id) || [];
+                }
+                // update
                 newState.current_tracking = newTrackingFile;
             }
             return newState;
@@ -147,18 +157,18 @@ export const tramiteReducer = (state, { type = "", payload = {} }) => {
                 let isFileOld = collect(newTrackingFile.tramite?.old_files || []).where('id', payload.id).count();
                 // update file tramite
                 if (isFileTramite) {
-                    newTrackingFile.tramite.files = [...newTrackingFile.tramite?.files || []].filter(f => f.id != payload.id) || [];
-                    newTrackingFile.tramite.files = [...newTrackingFile.tramite?.files, payload]; 
+                    newTrackingFile.tramite.files = [...newTrackingFile.tramite.files || []].filter(f => f.id != payload.id) || [];
+                    newTrackingFile.tramite.files = [...newTrackingFile.tramite.files, payload]; 
                 }
                 // update file info
                 if (isFileInfo) {
-                    newTrackingFile.info.files = [...newTrackingFile.info?.files || []].filter(f => f.id != payload.id) || []; 
-                    newTrackingFile.info.files = [...newTrackingFile.info?.files, payload];
+                    newTrackingFile.info.files = [...newTrackingFile.info.files || []].filter(f => f.id != payload.id) || []; 
+                    newTrackingFile.info.files = [...newTrackingFile.info.files, payload];
                 }
                 // update file old
                 if (isFileOld) {
-                    newTrackingFile.tramite.old_files = [...newTrackingFile.tramite?.old_files || []].filter(f => f.id != payload.id) || [];
-                    newTrackingFile.tramite.old_files = [...newTrackingFile.tramite?.old_files, payload]; 
+                    newTrackingFile.tramite.old_files = [...newTrackingFile.tramite.old_files || []].filter(f => f.id != payload.id) || [];
+                    newTrackingFile.tramite.old_files = [...newTrackingFile.tramite.old_files, payload]; 
                 }
                 // update
                 newState.current_tracking = newTrackingFile;
