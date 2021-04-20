@@ -32,8 +32,8 @@ const schemaData = {
 };
 
 const ModalRequest = ({ 
-    api, result, path = "", isClose, getAdd = null,
-    data = schemaData 
+    api, result, path = "", isClose, getAdd = null, show = true,
+    data = schemaData, title = "Assignar Persona", icon = "fas fa-user"
 }) => {
 
     const [current_loading, setCurrentLoading] = useState(false);
@@ -94,9 +94,9 @@ const ModalRequest = ({
     // render
     return (
         <Modal
-            show={true}
+            show={show}
             isClose={isClose}
-            titulo={<span><i className="fas fa-user"></i> Asignar Persona</span>}
+            titulo={<span><i className={icon}></i> {title}</span>}
         >
             <Form className="card-body">
                 <div className="row justify-content-center pl-4 pr-4">
