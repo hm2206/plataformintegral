@@ -3,15 +3,10 @@ import PdfView from '../../components/pdfView';
 import Show from '../../components/show';
 import { DropZone } from '../../components/Utils';
 import { PDFDocument } from 'pdf-lib';
-import { AppContext } from '../../contexts/AppContext';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
-import { SocketContext } from '../../contexts/SocketContext';
 
 const SignerPDF = () => {
-
-    // app
-    const app_context = useContext(AppContext);
 
     // estados
     const [show_pdf, setShowPdf] = useState(false);
