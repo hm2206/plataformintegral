@@ -58,6 +58,7 @@ const SelectBase = ({
     onReady, defaultDatos = [], execute, refresh, url, api, 
     obj, id, value, text, name, onChange, valueChange, 
     onData = null, placeholder = 'Seleccionar', 
+    headers = { 'ContentType': 'application/json' },
     disabled = false, error = false }) => {
 
     const [datos, setDatos] = useState([])
@@ -72,7 +73,7 @@ const SelectBase = ({
         let query = `${url}`.split('?');
         let newParams = query[1] ? `&${query[1]}` : "";
         let newUrl = query[0] || "";
-        await api.get(`${newUrl}?page=${page}${newParams}`)
+        await api.get(`${newUrl}?page=${page}${newParams}`, { headers })
             .then(async res => {
                 let { success, message } = res.data;
                 if (!success) throw new Error(message);

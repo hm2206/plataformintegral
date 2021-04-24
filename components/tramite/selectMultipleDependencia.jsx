@@ -126,15 +126,15 @@ const SelectMultitleDependencia = ({ dependencias = [templateDependencia], disab
                 <thead>
                     <tr>
                         <th>
-                            <Checkbox checked={current_check}
+                            <Checkbox checked={current_check ? true : false}
                                 onChange={(e, obj) => checkAll(obj.checked)}
                             />
                         </th>
                         <th>
-                            <Input fluid
+                            {/* <Input fluid
                                 name="search"
                                 icon={<Icon name="circle search"/>}
-                            />
+                            /> */}
                         </th>
                         <th>
                             <Show condicion={current_check}>
