@@ -13,8 +13,9 @@ moment.locale('es');
 import Show from '../components/show';
 
 // css
-import 'react-vertical-timeline-component/style.min.css';
-import "toastify-js/src/toastify.css"
+import '../styles/main.scss';
+
+// context
 import { AppProvider } from '../contexts';
 import Cookies from 'js-cookie';
 

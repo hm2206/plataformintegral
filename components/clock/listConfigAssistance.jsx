@@ -1,130 +1,171 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { Form, Button } from 'semantic-ui-react';
-import Skeleton from 'react-loading-skeleton';
-import AssistanceProvider from '../../providers/clock/AssistanceProvider'
-import { AssistanceContext } from '../../contexts/clock/AssistanceContext';
+import React, { useEffect, useState, useContext, createRef } from 'react';
 import { EntityContext } from '../../contexts/EntityContext';
-import { assistanceTypes  } from '../../contexts/clock/AssistanceReducer';
-import ItemAssistance from './itemAssistance';
-import Show from '../show';
+import { Confirm } from '../../services/utils';
+import collect from 'collect.js';
 import moment from 'moment';
+import Fullcalendar from '../fullcalendar';
+import ConfigAssistanceProvider from '../../providers/clock/ConfigAssistanceProvider';
+import { AppContext } from '../../contexts';
+import Swal from 'sweetalert2';
 moment.locale('es');
 
-const PlaceholderTable = () => {
-    const datos = [1, 2, 3, 4];
-    return datos.map(index => 
-        <tr key={`list-table-clock-${index}`}>
-            <td><Skeleton/></td>
-            <td><Skeleton/></td>
-            <td><Skeleton/></td>
-            <td><Skeleton/></td>
-        </tr>
-    );
+// providers
+const configAssistanceProvider = new ConfigAssistanceProvider();
+
+const schemaEvent = {
+    id: "",
+    title: "Asistencia",
+    date: ""
 }
 
-const assistanceProvider = new AssistanceProvider();
-
 const ListAssistance = () => {
+
+    // app
+    const app_context = useContext(AppContext);
 
     // entity
     const { entity_id } = useContext(EntityContext);
 
-    // assistance
-    const { assistances, dispatch } = useContext(AssistanceContext);
+    // ref
+    const calendarRef = createRef();
 
     // estados
-    const [fecha, setFecha] = useState();
     const [current_loading, setCurrentLoading] = useState(false);
     const [is_error, setIsError] = useState(false); 
+    const [is_ready, setIsReady] = useState(false);
+    const [events, setEvents] = useState([]);
+    const [current_date, setCurrentDate] = useState("");
 
     // config
     const options = {
-        headers: {
-            EntityId: entity_id
-        }
+        headers: { EntityId: entity_id }
     }
 
-    const getAssistances = async () => {
-        setCurrentLoading(true);
-        await assistanceProvider.index({ page: assistances.page }, options)
+    const getAssistances = () => {
+        let year = moment(current_date).year();
+        let month = moment(current_date).month() + 1;
+        configAssistanceProvider.index({ page: 1, year, month }, options)
         .then(res => {
-            let { assistances } = res.data;
-            let payload = {
-                page: assistances.page,
-                last_page: assistances.lastPage,
-                total: assistances.total,
-                data: assistances.data
+            let { config_assistances } = res.data;
+            let payload = [];
+            for(let d of config_assistances.data) {
+                payload.push({
+                    ...schemaEvent,
+                    id: d.id,
+                    date: d.date
+                });
             }
-            console.log(payload);
             // set datos
-            dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload });
+            setEvents(payload);
             setIsError(false);
+            handleBtnChange();
         }).catch(err => setIsError(true));
-        setCurrentLoading(false);
+    }
+
+    const handleClick = async (info) => {
+        let newEvents = collect(events);
+        let current_year = moment().format('YYYY');
+        let current_month = moment().format('MM');
+        let select_year = moment(info.dateStr).format('YYYY');
+        let select_month = moment(info.dateStr).format('MM');
+        if (!(current_year <= select_year)) return false;
+        if (!(current_month <= select_month)) return false;
+        // validar que ya existe
+        let is_exists = await newEvents.where('date', info.dateStr).count();
+        if (is_exists) return false;
+        return handleSave(info);
+    }
+
+    const handleSave = async (info) => {
+        let answer = await Confirm('info', `¿Estás seguro en agregar la fecha ${info.dateStr}?`, 'Agregar');
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        await configAssistanceProvider.store({ date: info.dateStr }, options)
+        .then(res => {
+            app_context.setCurrentLoading(false);
+            let { message, config_assistance } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+            let payload = Object.assign({}, schemaEvent);
+            payload.id = config_assistance.id;
+            payload.date = info.dateStr;
+            // guardar event
+            setEvents([ ...events, payload ]);
+            handleBtnChange();
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: err.message })
+        });
+    }
+
+    const handleDelete = async (info) => {
+        let { event } = info;
+        let answer = await Confirm('warning', `¿Estás seguro en quitar la configuración de asistencia?`, 'Quitar');
+        if (!answer) return false;
+        // eliminar evento
+        app_context.setCurrentLoading(true);
+        await configAssistanceProvider.delete(event.id, {}, options)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message, config_assistance } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+            let newEvents = await events.filter(e => e.id != config_assistance.id);
+            setEvents(newEvents);
+            handleBtnChange();
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: err.message });
+        })
+    }
+
+    const handleBtnChange = () => {
+        let [btnToday] = document.getElementsByClassName('fc-today-button') || {};
+        let [btnPrev] = document.getElementsByClassName('fc-prev-button') || {};
+        let [btnNext] = document.getElementsByClassName('fc-next-button') || {};
+        // today
+        btnToday?.addEventListener('click', () => {
+            let nextDate = moment().format('YYYY-MM-DD');
+            setCurrentDate(nextDate);
+        });
+        // prev
+        btnPrev?.addEventListener('click', () => {
+            let prevDate = moment(current_date).subtract('month', 1).format('YYYY-MM-DD');
+            setCurrentDate(prevDate);
+        });
+        // next 
+        btnNext?.addEventListener('click', () => {
+            let nextDate = moment(current_date).add('month', 1).format('YYYY-MM-DD');
+            setCurrentDate(nextDate);
+        });
     }
 
     useEffect(() => {
-        let currentDate = moment().format('YYYY-MM-DD');
-        setFecha(currentDate);
+        setCurrentDate(moment().format('YYYY-MM-DD'));
     }, []);
 
     useEffect(() => {
-        if (entity_id) getAssistances();
-    }, [entity_id]);
+        if (is_ready) handleBtnChange();
+    }, [is_ready, current_date]);
 
+    useEffect(() => {
+        if (current_date && entity_id) getAssistances();
+    }, [entity_id, current_date]);
+
+    // render
     return (
         <div className="card">
-            <Form className="card-header">
-                <div className="row">
-                    <div className="col-12 mb-3">
-                        <i className="fas fa-clock"></i> Fecha de búsqueda
-                    </div>
-
-                    <div className="col-6">
-                        <input type="date"
-                            value={fecha || ""}
-                            readOnly
-                        />
-                    </div>
-
-                    <div className="col-2">
-                        <Button color="blue">
-                            <i className="fas fa-search"></i>
-                        </Button>
-                    </div>
-                </div>
-            </Form>
             <div className="card-body">
                 <div className="table-responsive">
-                    <table className="table table-bordered table-stripe">
-                        <thead>
-                            <tr>
-                                <th width="7%" className="text-center">ID#</th>
-                                <th>Apellidos y Nombres</th>
-                                <th width="15%" className="text-center">Tiempo marcado</th>
-                                <th width="10%" className="text-center">Tipo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <Show condicion={!current_loading}
-                                predeterminado={<PlaceholderTable/>}
-                            >
-                                <Show condicion={assistances.total || false}
-                                    predeterminado={
-                                        <tr>
-                                            <td colSpan="4" className="text-center">No hay regístros disponibles</td>
-                                        </tr>
-                                    }
-                                >
-                                    {assistances?.data?.map((a, indexA) => 
-                                        <ItemAssistance assistance={a}
-                                            key={`list-assistance-table-${indexA}`}
-                                        />
-                                    )}
-                                </Show>
-                            </Show>
-                        </tbody>
-                    </table>
+                    <Fullcalendar 
+                        defaultView='dayGridMonth' 
+                        locale="es"
+                        events={events}
+                        dateClick={handleClick}
+                        eventClick={handleDelete}
+                        eventColor="#d32f2f"
+                        eventTextColor="#ffffff"
+                        myRef={calendarRef}
+                        onReady={(e) => setIsReady(true)}
+                    />
                 </div>
             </div>
         </div>

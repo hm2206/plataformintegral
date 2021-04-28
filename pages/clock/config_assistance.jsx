@@ -1,20 +1,16 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
-import { BtnFloat } from '../../components/Utils';
-import ListAssistance from '../../components/clock/listAssistance';
-import CreateAssistance from '../../components/clock/createAssistance';
-import { EntityContext } from '../../contexts/EntityContext';
+import ListConfigAssistance from '../../components/clock/listConfigAssistance';
 import Show from '../../components/show';
+import { Message } from 'semantic-ui-react';
+import { EntityContext } from '../../contexts/EntityContext';
 import { AssistanceProvider } from '../../contexts/clock/AssistanceContext';
 
 const Assistance = ({ pathname, query }) => {
 
     // entity
     const { entity_id, fireEntity } = useContext(EntityContext);
-
-    // estados
-    const [option, setOption] = useState("");
 
     useEffect(() => {
         fireEntity({ render: true });
@@ -32,19 +28,19 @@ const Assistance = ({ pathname, query }) => {
                     options={[]}
                 >
                     <div className="card-body">
-                        <ListAssistance/>
+                        <Show condicion={entity_id}
+                            predeterminado={
+                                <div className="mt-4">
+                                    <Message color="yellow">
+                                        Porfavor seleccione una Entidad
+                                    </Message>
+                                </div>
+                            }
+                        >
+                            <ListConfigAssistance/>
+                        </Show>
                     </div>
                 </BoardSimple>
-                {/* btn para crear asistencia */}
-                <BtnFloat onClick={() => setOption("CREATE")}>
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
-                {/* show asistencia */}
-                <Show condicion={option == 'CREATE'}>
-                    <CreateAssistance
-                        onClose={() => setOption("")}
-                    />
-                </Show>
             </div>
         </AssistanceProvider>
     );
