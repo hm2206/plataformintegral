@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useContext, useMemo } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import Skeleton from 'react-loading-skeleton';
-import AssistanceProvider from '../../providers/clock/AssistanceProvider'
+import ConfigAssistanceProvider from '../../providers/clock/ConfigAssistanceProvider'
 import { AssistanceContext } from '../../contexts/clock/AssistanceContext';
 import { EntityContext } from '../../contexts/EntityContext';
-import { assistanceTypes  } from '../../contexts/clock/AssistanceReducer';
+import { assistanceTypes } from '../../contexts/clock/AssistanceReducer';
 import ItemAssistance from './itemAssistance';
 import { SelectConfigAssistance } from '../select/clock';
 import Show from '../show';
@@ -25,7 +25,7 @@ const PlaceholderTable = () => {
     );
 }
 
-const assistanceProvider = new AssistanceProvider();
+const configAssistanceProvider = new ConfigAssistanceProvider();
 
 const ListAssistance = () => {
 
@@ -33,12 +33,11 @@ const ListAssistance = () => {
     const { entity_id } = useContext(EntityContext);
 
     // assistance
-    const { assistances, dispatch } = useContext(AssistanceContext);
+    const { assistances, dispatch, config_assistance_id } = useContext(AssistanceContext);
 
     // estados
     const [year, setYear] = useState();
     const [month, setMonth] = useState();
-    const [config_assistance_id, setConfigAssistanceId] = useState("");
     const [current_loading, setCurrentLoading] = useState(false);
     const [is_error, setIsError] = useState(false); 
 
@@ -54,7 +53,7 @@ const ListAssistance = () => {
 
     const getAssistances = async () => {
         setCurrentLoading(true);
-        await assistanceProvider.index({ page: assistances.page }, options)
+        await configAssistanceProvider.assistances(config_assistance_id, { page: assistances.page }, options)
         .then(res => {
             let { assistances } = res.data;
             let payload = {
@@ -63,7 +62,6 @@ const ListAssistance = () => {
                 total: assistances.total,
                 data: assistances.data
             }
-            console.log(payload);
             // set datos
             dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload });
             setIsError(false);
@@ -77,9 +75,13 @@ const ListAssistance = () => {
         let index = pluckedText.indexOf(current_date);
         if (index >= 0) {
             let current_config = options[index];
-            setConfigAssistanceId(current_config.value);
-        } else setConfigAssistanceId("");
+            dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: current_config.value });
+        } else dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: "" });
     }
+
+    useEffect(() => {
+        dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: "" });
+    }, [entity_id]);
 
     useEffect(() => {
         let currentDate = moment();
@@ -88,8 +90,8 @@ const ListAssistance = () => {
     }, []);
 
     useEffect(() => {
-        if (entity_id) getAssistances();
-    }, [entity_id]);
+        if (config_assistance_id) getAssistances();
+    }, [config_assistance_id]);
 
     return (
         <div className="card">
@@ -137,7 +139,7 @@ const ListAssistance = () => {
                                 year={year || ""}
                                 month={month || ""}
                                 value={config_assistance_id}
-                                onChange={(e, obj) => setConfigAssistanceId(obj.value)}
+                                onChange={(e, obj) => dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: obj.value })}
                                 refresh={isChangeFilter}
                                 onReady={handleDefaultDate}
                             />

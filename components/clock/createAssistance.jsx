@@ -7,6 +7,7 @@ import { Confirm } from '../../services/utils';
 import moment from 'moment';
 import { Form, Button } from 'semantic-ui-react';
 import { EntityContext } from '../../contexts/EntityContext';
+import { AssistanceContext } from '../../contexts/clock/AssistanceContext'; 
 import Swal from 'sweetalert2';
 moment.locale('es');
 
@@ -24,6 +25,9 @@ const CreateAssistance = ({ onClose = null }) => {
     const [work, setWork] = useState({});
     const [select_work, setSelectWork] = useState(false);
     const [is_error, setIsError] = useState(false);
+
+    // context
+    const { config_assistance_id } = useContext(AssistanceContext);
 
     // memos
     const isWork = useMemo(() => {
@@ -64,6 +68,7 @@ const CreateAssistance = ({ onClose = null }) => {
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
         payload.work_id = work.id;
+        payload.config_assistance_id = config_assistance_id;
         payload.record_time = moment(`${form.date} ${form.time}`).format('YYYY-MM-DD HH:mm:ss');
         await assistanceProvider.store(payload, options)
         .then(res => {

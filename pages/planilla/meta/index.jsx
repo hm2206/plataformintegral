@@ -243,7 +243,7 @@ const Meta = ({ pathname, success, metas, query }) => {
 // server rending
 Meta.getInitialProps = async (ctx) => {
     AUTHENTICATE(ctx);
-    let { query } = ctx;
+    let { query, pathname } = ctx;
     query.page = typeof query.page != 'undefined' ? query.page : 1;
     query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
     query.year = typeof query.year != 'undefined' ? query.year : new Date().getFullYear();

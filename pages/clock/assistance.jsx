@@ -7,6 +7,7 @@ import CreateAssistance from '../../components/clock/createAssistance';
 import { EntityContext } from '../../contexts/EntityContext';
 import Show from '../../components/show';
 import { AssistanceProvider } from '../../contexts/clock/AssistanceContext';
+import { Message } from 'semantic-ui-react';
 
 const Assistance = ({ pathname, query }) => {
 
@@ -32,7 +33,17 @@ const Assistance = ({ pathname, query }) => {
                     options={[]}
                 >
                     <div className="card-body">
-                        <ListAssistance/>
+                        <Show condicion={entity_id}
+                            predeterminado={
+                                <div className="mt-4">
+                                    <Message color="yellow">
+                                        Porfavor seleccione una Entidad
+                                    </Message>
+                                </div>
+                            }
+                        >
+                            <ListAssistance/>
+                        </Show>
                     </div>
                 </BoardSimple>
                 {/* btn para crear asistencia */}
@@ -41,9 +52,7 @@ const Assistance = ({ pathname, query }) => {
                 </BtnFloat>
                 {/* show asistencia */}
                 <Show condicion={option == 'CREATE'}>
-                    <CreateAssistance
-                        onClose={() => setOption("")}
-                    />
+                    <CreateAssistance onClose={() => setOption("")}/>
                 </Show>
             </div>
         </AssistanceProvider>

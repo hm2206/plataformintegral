@@ -29,6 +29,15 @@ class ClockProvider extends BaseProvider  {
         .catch(err => this.handleError(err));
     }
 
+    assistances = async (id, query = {}, config = {}, ctx = null) => {
+        query.page = typeof query.page != 'undefined' ? query.page : 1;
+        query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
+        let query_string = `page=${query.page}&query_search=${query.query_search}`;
+        return await clock.get(`${this.collection}/${id}/assistances?${query_string}`, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
 }
 
 export default ClockProvider;

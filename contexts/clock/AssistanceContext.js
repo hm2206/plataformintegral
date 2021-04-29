@@ -8,10 +8,6 @@ export const AssistanceProvider = ({ children }) => {
     // reducer
     const [state, dispatch] = useReducer(AssistanceReducer, initialStates);
 
-    useEffect(() => {
-        dispatch({ type: 'hola', payload: 'Hola' });
-    }, []);
-
     // render
     return (
         <AssistanceContext.Provider value={{ ...state, dispatch }}>

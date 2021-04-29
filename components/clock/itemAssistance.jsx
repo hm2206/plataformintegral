@@ -4,10 +4,12 @@ moment.locale('es');
 
 const typeStatus = {
     ENTRY: {
-        text: "Entrada"
+        text: "Entrada",
+        className: "badge badge-primary"
     },
     EXIT: {
-        text: "Salida"
+        text: "Salida",
+        className: "badge badge-danger"
     }
 }
 
@@ -23,11 +25,11 @@ const ItemAssistance = ({ assistance = {} }) => {
             <td className="text-center">
                 <span className="badge badge-dark"> 
                     <i className="fas fa-clock mr-1"></i>
-                    {moment(assistance.record_time).format('HH:mm:ss')}
+                    {assistance.record_time}
                 </span>
             </td>
             <td className="text-center">
-                <span className="badge badge-primary">
+                <span className={current_status.className}>
                     {current_status.text}
                 </span>
             </td>
