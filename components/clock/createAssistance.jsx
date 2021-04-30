@@ -66,17 +66,18 @@ const CreateAssistance = ({ onClose = null }) => {
         let answer = await Confirm(`warning`, `¿Estás seguro en guardar los datos?`);
         if (!answer) return false;
         setCurrentLoading(true);
+        let current_date = moment().format('YYYY-MM-DD');
         let payload = Object.assign({}, form);
         payload.work_id = work.id;
         payload.config_assistance_id = config_assistance_id;
-        payload.record_time = moment(`${form.date} ${form.time}`).format('YYYY-MM-DD HH:mm:ss');
+        payload.record_time = moment(`${current_date} ${form.time}`).format('YYYY-MM-DD HH:mm:ss');
         await assistanceProvider.store(payload, options)
         .then(res => {
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
             setIsError(false);
             setErrors({});
-            setForm({});
+            setForm({ record_time: payload.record_time });
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
             setErrors(err.errors || {});

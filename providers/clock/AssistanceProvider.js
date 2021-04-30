@@ -3,7 +3,7 @@ import BaseProvider from '../BaseProvider';
 
 class ClockProvider extends BaseProvider  {
 
-    collection = "assistance";
+    collection = "assistances";
 
     index = async (query = {}, config = {}, ctx = null) => {
         query.page = typeof query.page != 'undefined' ? query.page : 1;

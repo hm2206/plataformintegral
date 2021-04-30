@@ -27,7 +27,7 @@ const PlaceholderTable = () => {
 
 const configAssistanceProvider = new ConfigAssistanceProvider();
 
-const ListAssistance = () => {
+const ListDescuento = () => {
 
     // entity
     const { entity_id } = useContext(EntityContext);
@@ -50,49 +50,6 @@ const ListAssistance = () => {
     const options = {
         headers: { EntityId: entity_id }
     }
-
-    const getAssistances = async () => {
-        setCurrentLoading(true);
-        await configAssistanceProvider.assistances(config_assistance_id, { page: assistances.page }, options)
-        .then(res => {
-            let { assistances } = res.data;
-            let payload = {
-                page: assistances.page,
-                last_page: assistances.lastPage,
-                total: assistances.total,
-                data: assistances.data
-            }
-            // set datos
-            dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload });
-            setIsError(false);
-        }).catch(err => setIsError(true));
-        setCurrentLoading(false);
-    }
-
-    const handleDefaultDate = async (options = []) => {
-        let pluckedText = await collect(options).pluck('text').toArray();
-        let current_date = moment().format('YYYY-MM-DD');
-        let index = pluckedText.indexOf(current_date);
-        if (index >= 0) {
-            let current_config = options[index];
-            dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: current_config.value });
-        } else dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: "" });
-    }
-
-    useEffect(() => {
-        dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: "" });
-    }, [entity_id]);
-
-    useEffect(() => {
-        let currentDate = moment();
-        setYear(currentDate.year());
-        setMonth(currentDate.month() + 1);
-    }, []);
-
-    useEffect(() => {
-        if (config_assistance_id) getAssistances();
-        else dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload: { page: 1, last_page: 0, total: 0, data: [] } });
-    }, [config_assistance_id]);
 
     return (
         <div className="card">
@@ -133,20 +90,6 @@ const ListAssistance = () => {
                         />
                     </div>
 
-                    <Show condicion={year && month}>
-                        <div className="col-md-3">
-                            <SelectConfigAssistance
-                                name="config_assistance_id"
-                                year={year || ""}
-                                month={month || ""}
-                                value={config_assistance_id}
-                                onChange={(e, obj) => dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: obj.value })}
-                                refresh={isChangeFilter}
-                                onReady={handleDefaultDate}
-                            />
-                        </div>
-                    </Show>
-
                     <div className="col-2">
                         <Button color="blue">
                             <i className="fas fa-search"></i>
@@ -160,30 +103,14 @@ const ListAssistance = () => {
                         <thead>
                             <tr>
                                 <th width="7%" className="text-center">ID#</th>
-                                <th>Apellidos y Nombres</th>
-                                <th width="15%" className="text-center">Tiempo marcado</th>
-                                <th width="10%" className="text-center">Tipo</th>
+                                <th width="20%">Apellidos y Nombres</th>
+                                <th width="10%" className="text-center">N° Documento</th>
+                                <th width="3%" className="text-center">1</th>
+                                <th width="3%" className="text-center">2</th>
+                                <th width="3%" className="text-center">3</th>
+                                <th width="3%" className="text-center">4</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <Show condicion={!current_loading}
-                                predeterminado={<PlaceholderTable/>}
-                            >
-                                <Show condicion={assistances.total || false}
-                                    predeterminado={
-                                        <tr>
-                                            <td colSpan="4" className="text-center">No hay regístros disponibles</td>
-                                        </tr>
-                                    }
-                                >
-                                    {assistances?.data?.map((a, indexA) => 
-                                        <ItemAssistance assistance={a}
-                                            key={`list-assistance-table-${indexA}`}
-                                        />
-                                    )}
-                                </Show>
-                            </Show>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -191,4 +118,4 @@ const ListAssistance = () => {
     );
 }
 
-export default ListAssistance;
+export default ListDescuento;

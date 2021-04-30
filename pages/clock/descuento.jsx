@@ -1,13 +1,13 @@
 import React, { useContext, useEffect } from 'react';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
-import ListConfigAssistance from '../../components/clock/listConfigAssistance';
 import Show from '../../components/show';
 import { Message } from 'semantic-ui-react';
 import { EntityContext } from '../../contexts/EntityContext';
 import { AssistanceProvider } from '../../contexts/clock/AssistanceContext';
+import ListDescuento from '../../components/clock/listDescuento';
 
-const ConfigAssistance = ({ pathname, query }) => {
+const Descuento = ({ pathname, query }) => {
 
     // entity
     const { entity_id, fireEntity } = useContext(EntityContext);
@@ -22,8 +22,8 @@ const ConfigAssistance = ({ pathname, query }) => {
         <AssistanceProvider>
             <div className="col-12">
                 <BoardSimple
-                    title="Configuración de Asistencia"
-                    info={["Control de configuracion de asistencia mensual"]}
+                    title="Descuentos"
+                    info={["Control de descuentos de faltas y tardanzas"]}
                     bg="danger"
                     options={[]}
                 >
@@ -37,7 +37,7 @@ const ConfigAssistance = ({ pathname, query }) => {
                                 </div>
                             }
                         >
-                            <ListConfigAssistance/>
+                            <ListDescuento/>
                         </Show>
                     </div>
                 </BoardSimple>
@@ -47,7 +47,7 @@ const ConfigAssistance = ({ pathname, query }) => {
 }
 
 // server
-ConfigAssistance.getInitialProps = async (ctx) => {
+Descuento.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
     let { query, pathname } = ctx;
     return { query, pathname }
@@ -55,4 +55,4 @@ ConfigAssistance.getInitialProps = async (ctx) => {
 
 
 // exportar
-export default ConfigAssistance;
+export default Descuento;
