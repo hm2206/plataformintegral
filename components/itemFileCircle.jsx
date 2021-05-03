@@ -8,6 +8,19 @@ import axios from 'axios';
 import PdfView from './pdfView';
 import { PDFDocument } from 'pdf-lib';
 
+const infos = {
+    pdf: {
+        icon: "fas fa-file-pdf",
+        signer: true,
+        delete: true,
+    },
+    docx: {
+        icon: "fas fa-file-word",
+        signer: false,
+        delete: true
+    }
+}
+
 const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = false, hidden = [], onAction = null, onClick = null }) => {
 
     // add
@@ -18,6 +31,9 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
     const [pdf_doc, setPdfDoc] = useState(undefined);
     const [pdf_blob, setPdfBlob] = useState(undefined);
     const [show_signed, setShowSigned] = useState(false);
+
+    // meta información
+    let meta_info = infos[extname] || {};
 
     // eliminar archivo
     const deleteFile = async () => {
@@ -108,11 +124,11 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
                 title={name || ""}
                 onClick={(e) => typeof onClick == 'function' ? onClick(e) : null}
             >
-                <i className={`fas fa-file-${extname}`}></i> {name || ""} 
+                <i className={`${meta_info.icon || ""}`}></i> {name || ""} 
             </a>
 
             <Show condicion={edit}>
-                <Show condicion={!hidden.includes('signature')}>
+                <Show condicion={meta_info.signer && !hidden.includes('signature')}>
                     <span className="text-success"
                         title="Firmar Archivo"
                         style={{ position: 'absolute', left: '-20px', cursor: 'pointer' }}
@@ -122,7 +138,7 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
                     </span>
                 </Show>
 
-                <Show condicion={!hidden.includes('delete')}>
+                <Show condicion={meta_info.delete && !hidden.includes('delete')}>
                     <span className="text-danger" 
                         title="Eliminar Archivo"
                         style={{ position: 'absolute', bottom: '-0px', left: '-20px', cursor: 'pointer' }}

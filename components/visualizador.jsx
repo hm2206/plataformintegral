@@ -7,7 +7,7 @@ import { Button } from 'semantic-ui-react';
 
 const options = {
     IFRAME: 'IFRAME',
-    IMAGE: 'IMAGE',
+    IMAGE: 'IMAGE', 
 }
 
 const actions = {
@@ -28,7 +28,7 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
     const [current_observation, setCurrentObservation] = useState(observation);
     const [current_loading, setCurrentLoading] = useState(false);
     const [current_percent, setCurrentPercent] = useState(0);
-    const action = actions[extname] || {};
+    const action = actions[extname] || "";
 
     // obtener archivo
     const getFile = async () => {
@@ -141,6 +141,15 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
                         <img src={current_url} alt={name} style={{ objectFit: 'contain', maxHeight: "100%" }}/>
                     </div>
                 </Show>
+                <Show condicion={!action}>
+                    <div className="text-center h-100 row justify-content-center align-items-center">
+                        <div className="col-12">
+                            <span onClick={downloadFile} className="btn btn-outline-light cursor-pointer">
+                                Descargar archivo <i className="fas fa-download"></i>
+                            </span>
+                        </div>
+                    </div>
+                </Show>                
                 {/* nota */}
                 <Show condicion={is_note}>
                     <div className="content-note">

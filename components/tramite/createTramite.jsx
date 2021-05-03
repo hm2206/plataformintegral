@@ -263,10 +263,10 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                                 <DropZone
                                     id="file-tramite-serve"
                                     name="files"
-                                    title="Seleccinar PDF"
+                                    title="Seleccinar (*.pdf y *.docx)"
                                     multiple={false}
                                     size={25}
-                                    accept="application/pdf"
+                                    accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                     result={current_files}
                                     onSigned={({ file }) => handleFile(file)}
                                     onChange={({ files }) => handleFile(files[0])}
