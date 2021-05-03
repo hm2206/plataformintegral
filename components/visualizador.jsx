@@ -141,7 +141,7 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
                         <img src={current_url} alt={name} style={{ objectFit: 'contain', maxHeight: "100%" }}/>
                     </div>
                 </Show>
-                <Show condicion={!action}>
+                <Show condicion={is_download && !action}>
                     <div className="text-center h-100 row justify-content-center align-items-center">
                         <div className="col-12">
                             <span onClick={downloadFile} className="btn btn-outline-light cursor-pointer">
