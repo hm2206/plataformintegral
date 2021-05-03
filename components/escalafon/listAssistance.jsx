@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useContext, useMemo } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import Skeleton from 'react-loading-skeleton';
-import ConfigAssistanceProvider from '../../providers/clock/ConfigAssistanceProvider'
-import { AssistanceContext } from '../../contexts/clock/AssistanceContext';
+import ConfigAssistanceProvider from '../../providers/escalafon/ConfigAssistanceProvider'
+import { AssistanceContext } from '../../contexts/escalafon/AssistanceContext';
 import { EntityContext } from '../../contexts/EntityContext';
-import { assistanceTypes } from '../../contexts/clock/AssistanceReducer';
+import { assistanceTypes } from '../../contexts/escalafon/AssistanceReducer';
 import ItemAssistance from './itemAssistance';
-import { SelectConfigAssistance } from '../select/clock';
+import { SelectConfigAssistance } from '../select/escalafon';
 import Show from '../show';
 import moment from 'moment';
 import uid from 'uid';
@@ -39,6 +39,7 @@ const ListAssistance = () => {
     const [year, setYear] = useState();
     const [month, setMonth] = useState();
     const [current_loading, setCurrentLoading] = useState(false);
+    const [is_refresh, setIsRefresh] = useState(false);
     const [is_error, setIsError] = useState(false); 
 
     // memos
@@ -79,6 +80,12 @@ const ListAssistance = () => {
         } else dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: "" });
     }
 
+    const handleSearch = async () => {
+        let payload = { page: 1, last_page: 0, total: 0, data: [] };
+        dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload });
+        setIsRefresh(true);
+    }
+
     useEffect(() => {
         dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: "" });
     }, [entity_id]);
@@ -93,6 +100,14 @@ const ListAssistance = () => {
         if (config_assistance_id) getAssistances();
         else dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload: { page: 1, last_page: 0, total: 0, data: [] } });
     }, [config_assistance_id]);
+
+    useEffect(() => {
+        if (entity_id && is_refresh) getAssistances();
+    }, [is_refresh]);
+
+    useEffect(() => {
+        if (is_refresh) setIsRefresh(false);
+    }, [is_refresh]);
 
     return (
         <div className="card">
@@ -148,7 +163,9 @@ const ListAssistance = () => {
                     </Show>
 
                     <div className="col-2">
-                        <Button color="blue">
+                        <Button color="blue"
+                            onClick={handleSearch}
+                        >
                             <i className="fas fa-search"></i>
                         </Button>
                     </div>

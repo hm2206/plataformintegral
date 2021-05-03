@@ -3,7 +3,7 @@ import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Button, Form, Pagination } from 'semantic-ui-react'
-import { escalafon } from '../../../services/apis';
+import { unujobs } from '../../../services/apis';
 import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../../components/boardSimple';
@@ -132,7 +132,7 @@ IndexWork.getInitialProps = async (ctx) => {
     query.page = typeof query.page != 'undefined' ? query.page : 1;
     query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
     // request
-    let { success, works } = await escalafon.get(`works?page=${query.page}&query_search=${query.query_search}`, {}, ctx)
+    let { success, works } = await unujobs.get(`work?page=${query.page}&query_search=${query.query_search}`, {}, ctx)
     .then(res => res.data)
     .catch(err => ({ success: false, works: {} }));
     // response

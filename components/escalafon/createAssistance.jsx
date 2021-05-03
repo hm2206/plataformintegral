@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import Modal from '../modal';
 import AssingTrabajador from '../contrato/assingTrabajador';
-import AssistanceProvider from '../../providers/clock/AssistanceProvider';
+import AssistanceProvider from '../../providers/escalafon/AssistanceProvider';
 import Show from '../show';
 import { Confirm } from '../../services/utils';
 import moment from 'moment';
 import { Form, Button } from 'semantic-ui-react';
 import { EntityContext } from '../../contexts/EntityContext';
-import { AssistanceContext } from '../../contexts/clock/AssistanceContext'; 
+import { AssistanceContext } from '../../contexts/escalafon/AssistanceContext'; 
 import Swal from 'sweetalert2';
 moment.locale('es');
 

@@ -4,7 +4,7 @@ import { AUTHENTICATE } from '../../../services/auth';
 import DataTable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
-import { unujobs } from '../../../services/apis';
+import { escalafon } from '../../../services/apis';
 import { SelectCargo } from '../../../components/select/cronograma';
 import { AppContext } from '../../../contexts/AppContext';
 import Show from '../../../components/show';
@@ -104,7 +104,7 @@ const Contrato = ({ pathname, query, success, infos }) => {
                             data={infos.data || []}
                             index={[
                                 { key: "id", type: "text" },
-                                { key: "person.fullname", type: "text", className: "uppercase" },
+                                { key: "work.person.fullname", type: "text", className: "uppercase" },
                                 { key: "planilla.nombre", type: "icon", bg: "primary" },
                                 { key: "cargo.alias", type: "icon", bg: "dark" },
                                 { key: "estado", type: "switch", is_true: "Activo", is_false: "Terminado"}
@@ -199,10 +199,9 @@ Contrato.getInitialProps = async (ctx) => {
     query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
     query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
     // request
-    let { success, infos } = await unujobs.get(`info?page=${query.page}&estado=${query.estado}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
+    let { success, infos } = await escalafon.get(`infos?page=${query.page}&estado=${query.estado}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
     .then(res => res.data)
     .catch(err => ({ success: false }))
-    console.log(success);
     // response
     return { pathname, success, infos: infos || {}, query };
 }

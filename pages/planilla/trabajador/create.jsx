@@ -2,12 +2,12 @@ import React, { Fragment, useState } from 'react';
 import {  BtnBack } from '../../../components/Utils';
 import { Confirm, parseUrl } from '../../../services/utils';
 import { Form, Button, Checkbox, Message } from 'semantic-ui-react'
-import { escalafon, handleErrorRequest } from '../../../services/apis';
+import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
 import AssignPerson from '../../../components/authentication/user/assignPerson';
 import { AUTHENTICATE } from '../../../services/auth';
-import { SelectAfp, SelectBanco } from '../../../components/select/escalafon';
+import { SelectAfp, SelectBanco } from '../../../components/select/cronograma';
 import BoardSimple from '../../../components/boardSimple'
 import ContentControl from '../../../components/contentControl';
 import Router from 'next/router';
@@ -48,7 +48,7 @@ const CreateWork = ({ pathname, query }) => {
         let payload = Object.assign({}, form);
         payload.person_id = person.id;
         payload.orden = person.fullname;
-        await escalafon.post('works', payload)
+        await unujobs.post('works', payload)
         .then(async res => {
             let { message, work } = res.data;
             await Swal.fire({ icon: 'success', text: message });

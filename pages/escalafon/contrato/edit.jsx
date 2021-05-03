@@ -3,7 +3,7 @@ import { Form, Button, Select, Checkbox, Message } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
 import { BtnBack, funcBack } from '../../../components/Utils';
-import { unujobs, handleErrorRequest } from '../../../services/apis';
+import { escalafon, handleErrorRequest } from '../../../services/apis';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import { Confirm } from '../../../services/utils'
@@ -169,20 +169,20 @@ const Edit = ({ success, info, query }) => {
                                 </div>
 
                                 <div className="col-md-4 mt-3 text-center">
-                                    <img src={info && info.person && info.person.image_images && info.person.image_images.image_200x200 || '/img/perfil.jpg'}
+                                    <img src={info?.work?.person?.image_images?.image_200x200 || '/img/perfil.jpg'}
                                         style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "50%" }}
                                     />
                                             
                                     <div className="row">
                                         <div className="col-md-12 mt-3">
-                                            <h3 className="text-center uppercase">{info && info.person ? info.person.fullname : ''}</h3>
+                                            <h3 className="text-center uppercase">{info?.work?.person?.fullname || ''}</h3>
                                         </div>
 
                                         <div className="col-md-12 mt-5 text-left">
                                             <label>Tip. Documento</label>
                                             <input type="text"
                                                 readOnly
-                                                value={info && info.person && info.person.document_type || ""}
+                                                value={info?.work?.person?.document_type?.name || ""}
                                             />
                                         </div>
 
@@ -191,7 +191,7 @@ const Edit = ({ success, info, query }) => {
                                                 <label>N° Documento</label>
                                                 <input type="text"
                                                     readOnly
-                                                    value={info && info.person && info.person.document_number || ""}
+                                                    value={info?.work?.person?.document_number || ""}
                                                 />
                                             </Form.Field>
                                         </div>
@@ -206,7 +206,7 @@ const Edit = ({ success, info, query }) => {
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectPlanilla name="planilla_id" value={form.planilla_id} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
-                                                    <input type="text" value={form.planilla || ""} readOnly/>
+                                                    <input type="text" value={form.planilla?.nombre || ""} readOnly/>
                                                 </Show>
                                                 <label>{errors.planilla_id && errors.planilla_id[0] || ""}</label>
                                             </Form.Field>
@@ -218,7 +218,7 @@ const Edit = ({ success, info, query }) => {
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectCargo name="cargo_id" value={form.cargo_id} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
-                                                    <input type="text" value={form.cargo || ""} readOnly/>
+                                                    <input type="text" value={form.cargo?.descripcion || ""} readOnly/>
                                                 </Show>
                                                 <label>{errors.cargo_id && errors.cargo_id[0] || ""}</label>
                                             </Form.Field>
@@ -227,7 +227,7 @@ const Edit = ({ success, info, query }) => {
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">Ext. Presupuestal</label>
-                                                <input type="text" value={info.ext_pptto || ""} readOnly/>
+                                                <input type="text" value={info.cargo?.ext_pptto || ""} readOnly/>
                                             </Form.Field>
                                         </div>
 
@@ -256,7 +256,7 @@ const Edit = ({ success, info, query }) => {
                                                             />
                                                         }
                                                 >
-                                                    <input type="text" value={info.categoria} readOnly/>
+                                                    <input type="text" value={info.type_categoria?.descripcion} readOnly/>
                                                 </Show>
                                                 <label>{errors.type_categoria_id && errors.type_categoria_id[0] || ""}</label>
                                             </Form.Field>
@@ -272,7 +272,7 @@ const Edit = ({ success, info, query }) => {
                                                         onChange={(e, obj) => handleInput(obj)}
                                                     />}
                                                 >
-                                                    <input type="text" value={info.metaID}/>
+                                                    <input type="text" value={info.meta?.metaID}/>
                                                 </Show>
                                                 <label>{errors.meta_id && errors.meta_id[0] || ""}</label>
                                             </Form.Field>
@@ -281,14 +281,14 @@ const Edit = ({ success, info, query }) => {
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">ActividadID</label>
-                                                <input type="text" value={info.actividadID} readOnly/>
+                                                <input type="text" value={info.meta?.actividadID} readOnly/>
                                             </Form.Field>
                                         </div>
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">Meta</label>
-                                                <input type="text" value={info.meta} readOnly/>
+                                                <input type="text" value={info.meta?.meta} readOnly/>
                                             </Form.Field>
                                         </div>
 
@@ -301,7 +301,7 @@ const Edit = ({ success, info, query }) => {
                                                         onChange={(e, obj) => handleInput(obj)}
                                                     />}
                                                 >
-                                                    <input type="text" readOnly value={info.dependencia && info.dependencia.nombre}/>
+                                                    <input type="text" readOnly value={info.dependencia?.nombre}/>
                                                 </Show>
                                                 <label>{errors.dependencia_id && errors.dependencia_id[0] || ""}</label>
                                             </Form.Field>
@@ -334,7 +334,7 @@ const Edit = ({ success, info, query }) => {
                                                         onChange={(e, obj) => handleInput(obj)}
                                                     />}
                                                 >
-                                                    <input type="text" readOnly value={form.situacion_laboral || ""}/>
+                                                    <input type="text" readOnly value={form.situacion_laboral?.nombre || ""}/>
                                                 </Show>
                                                 <label>{errors.situacion_laboral_id && errors.situacion_laboral_id[0] || ""}</label>
                                             </Form.Field>
@@ -421,7 +421,7 @@ const Edit = ({ success, info, query }) => {
                                                 <label htmlFor="">Ley Social</label>
                                                 <input type="text" 
                                                     readOnly
-                                                    value={info.afp || ""} 
+                                                    value={info.work?.afp?.afp || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -431,7 +431,7 @@ const Edit = ({ success, info, query }) => {
                                                 <label htmlFor="">Fecha de Afiliación</label>
                                                 <input type="date" 
                                                     readOnly
-                                                    value={info.fecha_de_afiliacion || ""} 
+                                                    value={info.work?.fecha_de_afiliacion || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -441,7 +441,7 @@ const Edit = ({ success, info, query }) => {
                                                 <label htmlFor="">N° CUSSP</label>
                                                 <input type="text" 
                                                     readOnly 
-                                                    value={info.numero_de_cussp || ""} 
+                                                    value={info.work?.numero_de_cussp || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -451,7 +451,7 @@ const Edit = ({ success, info, query }) => {
                                                 <label htmlFor="">N° Essalud</label>
                                                 <input type="text" 
                                                     readOnly
-                                                    value={info.numero_de_essalud || ""} 
+                                                    value={info.work?.numero_de_essalud || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -461,7 +461,7 @@ const Edit = ({ success, info, query }) => {
                                                 <label htmlFor="">Banco</label>
                                                 <input type="text" 
                                                     readOnly
-                                                    value={info.banco || ""} 
+                                                    value={info.work?.banco?.nombre || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -471,7 +471,7 @@ const Edit = ({ success, info, query }) => {
                                                 <label htmlFor="">N° Cuenta</label>
                                                 <input type="text" 
                                                     readOnly
-                                                    value={info.numero_de_cuenta || ""} 
+                                                    value={info.work?.numero_de_cuenta || ""} 
                                                 />
                                             </Form.Field>
                                         </div>
@@ -480,7 +480,7 @@ const Edit = ({ success, info, query }) => {
                                             <Form.Field>
                                                 <label htmlFor="">Prima Seguro</label>
                                                 <Checkbox toggle 
-                                                    checked={info.prima_seguro ? true : false} 
+                                                    checked={info.work?.prima_seguro ? true : false} 
                                                     disabled
                                                 />
                                             </Form.Field>
@@ -569,7 +569,7 @@ Edit.getInitialProps = async (ctx) => {
     let { pathname, query } = ctx;
     let id = atob(query.id) || '__error';
     // request
-    let { success, info } = await unujobs.get(`info/${id}`, {}, ctx)
+    let { success, info } = await escalafon.get(`infos/${id}`, {}, ctx)
     .then(res => res.data)
     .catch(err => ({ success: false, info: {} }));
     // response

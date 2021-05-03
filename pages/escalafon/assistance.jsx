@@ -2,11 +2,11 @@ import React, { useContext, useState, useEffect } from 'react';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
 import { BtnFloat } from '../../components/Utils';
-import ListAssistance from '../../components/clock/listAssistance';
-import CreateAssistance from '../../components/clock/createAssistance';
+import ListAssistance from '../../components/escalafon/listAssistance';
+import CreateAssistance from '../../components/escalafon/createAssistance';
 import { EntityContext } from '../../contexts/EntityContext';
 import Show from '../../components/show';
-import { AssistanceProvider } from '../../contexts/clock/AssistanceContext';
+import { AssistanceProvider } from '../../contexts/escalafon/AssistanceContext';
 import { Message } from 'semantic-ui-react';
 
 const Assistance = ({ pathname, query }) => {
