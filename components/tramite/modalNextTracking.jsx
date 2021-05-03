@@ -46,7 +46,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     const destino = ['DERIVADO', 'ENVIADO'];
     const descripcion = ['DERIVADO', 'RECHAZADO'];
     const archivos = ['DERIVADO'];
-    const messages = ['ACEPTADO', 'FINALIZADO'];
+    const messages = ['ACEPTADO', 'FINALIZADO', 'ANULADO'];
     const current_tracking = tramite_context.current_tracking || {};
     const current_role = tramite_context.role || {};
     const current_boss = tramite_context.boss || {};
