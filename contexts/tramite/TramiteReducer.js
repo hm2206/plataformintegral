@@ -2,10 +2,11 @@ import collect from 'collect.js';
 
 // menus
 const current_status_default = [
-    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['RECIBIDO', 'COPIA', 'PENDIENTE', 'DERIVADO', 'RECHAZADO', 'FINALIZADO'], count: 0 },
-    { key: "SENT", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['RESPONDIDO', 'ACEPTADO', 'REGISTRADO', 'ENVIADO'], count: 0 },
-    { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 2, filtros: ['ANULADO'], count: 0 },
-    { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 3, filtros: ['FINALIZADO'], count: 0 }
+    { key: "INBOX", icon: 'fas fa-inbox', text: 'Recibidos', index: 0, filtros: ['RECIBIDO', 'COPIA', 'PENDIENTE', 'DERIVADO', 'RECHAZADO', 'FINALIZADO'], count: 0, archived: 0 },
+    { key: "SENT", icon: 'fas fa-paper-plane', text: 'Enviados', index: 1, filtros: ['RESPONDIDO', 'ACEPTADO', 'REGISTRADO', 'ENVIADO'], count: 0, archived: 0 },
+    { key: "ANULADO", icon: 'fas fa-trash', text: 'Anulados', index: 2, filtros: ['ANULADO'], count: 0, archived: 0 },
+    { key: "FINALIZADOS", icon: 'fas fa-check-double', text: 'Finalizados', index: 3, filtros: ['FINALIZADO'], count: 0, archived: 0 },
+    { key: "ARCHIVED", icon: 'fas fa-archive', text: 'Archivados', index: 4, filtros: ['REGISTRADO', 'PENDIENTE', 'ACEPTADO', 'DERIVADO', 'FINALIZADO', 'RECHAZADO', 'ANULADO', 'RECIBIDO', 'RESPONDIDO', 'COPIA', 'ENVIADO'], count: 0, archived: 1 }
 ];
 
 export const initialState = {

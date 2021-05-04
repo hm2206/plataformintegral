@@ -34,9 +34,11 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
     const [state, dispatch] = useReducer(tramiteReducer, initialState);
 
     // memos
-    const filtros = useMemo(() => {
+    const { filtros, is_archived } = useMemo(() => {
         for (let status of state.status) {
-            if (status.key == state.menu) return status.filtros;
+            if (status.key == state.menu) {
+                return { filtros: status.filtros, is_archived: status.archived };
+            }
         }
         // default
         return [];
@@ -51,7 +53,7 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
     const getTracking = async (add = false) => {
         setCurrentLoading(true);
         // request
-        await authTrackingProvider.index(tab, { page, status: filtros , query_search }, options)
+        await authTrackingProvider.index(tab, { page, status: filtros , query_search, archived: is_archived }, options)
             .then(res => {
                 let { trackings } = res.data;
                 setLastPage(trackings.lastPage);

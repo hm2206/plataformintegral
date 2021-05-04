@@ -10,7 +10,8 @@ class AuthTramiteProvider extends BaseProvider  {
         query.status = typeof query.status == 'object' ? query.status || [] : [];
         query.tracking_id = typeof query.tracking_id == 'object' ? query.tracking_id : [];
         query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-        let query_string = `page=${query.page}&status=${query.status.join('&status=')}&query_search=${query.query_search}`;
+        query.archived = typeof query.archived != 'undefined' ? query.archived : "";
+        let query_string = `page=${query.page}&status=${query.status.join('&status=')}&query_search=${query.query_search}&archived=${query.archived}`;
         query_string += `&tracking_id=${query.tracking_id.join('&tracking_id=')}`;
         return await tramite.get(`auth/tracking/${tab}?${query_string}`, config, ctx)
         .then(res => res)
