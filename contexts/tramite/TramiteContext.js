@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useEffect, useReducer, useState } from 'react';
+import React, { createContext, useContext, useMemo, useEffect, useReducer, useState } from 'react';
 import AuthTrackingProvider from '../../providers/tramite/auth/AuthTrackingProvider';
 import { TramiteSocket } from '../sockets/TramiteSocket';
 import { initialState, tramiteReducer, tramiteTypes } from './TramiteReducer';
@@ -71,7 +71,7 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
             headers: { DependenciaId: dependencia_id }
         };
         // request 
-        await authProvider.status(tab, {}, options)
+        await authProvider.status(tab, { archive: is_archived }, options)
             .then(async res => {
                 let { tracking_status } = res.data;
                 dispatch({ type: tramiteTypes.INITIAL_MENU, payload: tracking_status });

@@ -16,7 +16,7 @@ import FileProvider from '../../providers/tramite/FileProvider';
 const trackingProvider = new TrackingProvider();
 const fileProvider = new FileProvider();
 
-const ShowInfo = ({ validateFile = [] }) => {
+const ShowInfo = ({ validateFile = [], onArchived = null }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -93,6 +93,8 @@ const ShowInfo = ({ validateFile = [] }) => {
                     dependencia={current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || ""}
                     status={current_tracking.first ? current_tracking.status : ''}
                     revisado={current_tracking.revisado}
+                    archived={current_tracking.archived ? true : false}
+                    onArchived={current_tracking.first ? onArchived : null}
                 />
 
                 <div className="mt-4">

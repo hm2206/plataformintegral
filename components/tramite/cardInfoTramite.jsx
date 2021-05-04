@@ -3,7 +3,7 @@ import Show from '../show';
 import datos from './datos.json';
 const current_status = datos.status;
 
-const CardInfoTramite = ({ remitente, email, dependencia, status, image, revisado = 0 }) => {
+const CardInfoTramite = ({ remitente, email, dependencia, status, image, revisado = 0, onArchived = null, archived }) => {
 
     // obtener status
     const getStatus = () => current_status[status] || {};
@@ -26,6 +26,8 @@ const CardInfoTramite = ({ remitente, email, dependencia, status, image, revisad
                     />
                 </div>
             </Show>
+
+                        
                                                         
             <div className="col-xs mb-2">
                 <div className="ml-2">
@@ -48,6 +50,25 @@ const CardInfoTramite = ({ remitente, email, dependencia, status, image, revisad
                     </Show>
                 </div>
             </div>
+            
+            <div className="col-12">
+                <Show condicion={onArchived}>
+                    <Show condicion={!archived}>
+                        <span className="ml-3 badge badge-sm badge-primary cursor-pointer"
+                            onClick={onArchived}
+                        >
+                            <i className="fas fa-folder"></i> Archivar
+                        </span>
+                    </Show>
+                </Show>
+                {/* archivado */}
+                <Show condicion={archived}>
+                    <span className="ml-3 badge badge-sm badge-light" title="Trámite archivado">
+                        Archivado <i className="fas fa-archive"></i>
+                    </span>
+                </Show>
+            </div>
+            
         </div>
     )
 }

@@ -13,6 +13,7 @@ import Skeleton from 'react-loading-skeleton';
 import InfoMultiple from './infoMultiple';
 import { AuthContext } from '../../contexts/AuthContext';
 import AuthTramiteProvider from '../../providers/tramite/auth/AuthTramiteProvider';
+import TrackingProvider from '../../providers/tramite/TrackingProvider';
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import ShowInfo from './showInfo';
 import ShowAction from './showAction';
@@ -20,6 +21,7 @@ import EditDescriptionTracking from './editDescriptionTracking';
 
 // providors
 const authTramiteProvider = new AuthTramiteProvider();
+const trackingProvider = new TrackingProvider();
 
 const hidden = ['RECIBIDO', 'RECHAZADO', 'FINALIZADO'];
 const nothing = ['FINALIZADO', 'ANULADO'];
@@ -68,6 +70,9 @@ const InboxShow = ({ onRefresh }) => {
     // auth
     const { auth } = useContext(AuthContext);
 
+    // app
+    const app_context = useContext(AppContext);
+
     // tramite
     const tramite_context = useContext(TramiteContext);
     const { current_tracking, dispatch, menu, socket } = tramite_context;
@@ -79,13 +84,14 @@ const InboxShow = ({ onRefresh }) => {
     const [action, setAction] = useState("");
     const [is_refresh, setIsRefresh] = useState(false);
 
+    // config options
+    let options = {
+        headers: { DependenciaId: tramite_context.dependencia_id } 
+    };
+
     // obtener tracking
     const getTracking = async (id = current_tracking.id) => {
         setCurrentLoading(true);
-        // options
-        let options = {
-            headers: { DependenciaId: tramite_context.dependencia_id } 
-        };
         // request
         await authTramiteProvider.show(id, {}, options)
             .then(res => {
@@ -93,6 +99,21 @@ const InboxShow = ({ onRefresh }) => {
                 dispatch({ type: tramiteTypes.CHANGE_TRACKING, payload: tracking });
             }).catch(err => console.log(err));
         setCurrentLoading(false);
+    }
+
+    // archivar
+    const handleArchived = async () => {
+        app_context.setCurrentLoading(true);
+        await trackingProvider.archived(current_tracking.id, current_tracking.archived ? false : true, options)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            setIsRefresh(true);
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: err.message });
+        });
     }
 
     // actualizar tracking
@@ -185,11 +206,14 @@ const InboxShow = ({ onRefresh }) => {
                 <div className="card-body">
                     <div className="row">
                         {/* info tramite */}
-                        <ShowInfo validateFile={validateFile()}/>
+                        <ShowInfo validateFile={validateFile()}
+                            onArchived={handleArchived}
+                        />
                         {/* meta datos */}
                         <Show condicion={!current_tracking.first}>
                             <div className="col-md-12 mt-3">
                                 <hr/>
+
                                 <CardInfoTramite
                                     image={current_tracking.person && current_tracking.person.image_images && current_tracking.person.image_images.image_200x200 || ""}
                                     remitente={current_tracking.person && current_tracking.person.fullname || ""}
@@ -197,6 +221,8 @@ const InboxShow = ({ onRefresh }) => {
                                     dependencia={current_tracking.dependencia && current_tracking.dependencia.nombre || ""}
                                     status={current_tracking.status}
                                     revisado={current_tracking.revisado}
+                                    archived={current_tracking.archived ? true : false}
+                                    onArchived={handleArchived}
                                 />
 
                                 <Show condicion={Object.keys(current_tracking.info || {}).length}>
