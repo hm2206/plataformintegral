@@ -1,6 +1,8 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { signature } from '../../services/apis';
 import { formatBytes } from '../../services/utils';
+import Skeleton from 'react-loading-skeleton';
+import Show from '../show';
 
 const SignedAllPage = ({ notification, config = {} }) => {
 
@@ -30,17 +32,28 @@ const SignedAllPage = ({ notification, config = {} }) => {
     return (
         <Fragment>
             <div className="card-header">
-                <i className="fas fa-file-pdf text-danger"></i> Archivo firmado: {file?.name}
+                <i className="fas fa-file-pdf text-danger"></i> Archivo firmado: {file?.name || ""}
             </div>
 
             <div className="card-body">
-                <ul>
-                    <li>Nombre: <b>{file?.name}</b></li>
-                    <li>Tamaño: <b>{formatBytes(file?.size)}</b></li>
-                    <li>Fecha de creación: <b className="badge badge-light">{file?.created_at}</b></li>
-                    <li>Tipo de archivo: <b className="badge badge-dark">{file?.extname}</b></li>
-                    <li>Archivo: <a target="__blank" href={file?.url}>Descargar</a></li>
-                </ul>
+                <Show condicion={!current_loading}
+                    predeterminado={
+                        <ul>
+                            <li><Skeleton width="200px"/></li>
+                            <li><Skeleton width="200px"/></li>
+                            <li><Skeleton width="200px"/></li>
+                            <li><Skeleton width="200px"/></li>
+                        </ul>
+                    }
+                >
+                    <ul>
+                        <li>Nombre: <b>{file?.name || ""}</b></li>
+                        <li>Tamaño: <b>{formatBytes(file?.size || 0)}</b></li>
+                        <li>Fecha de creación: <b className="badge badge-light">{file?.created_at || ""}</b></li>
+                        <li>Tipo de archivo: <b className="badge badge-dark">{file?.extname || ""}</b></li>
+                        <li>Archivo: <a target="__blank" href={file?.url}>Ver archivo</a></li>
+                    </ul>
+                </Show>
             </div>
         </Fragment>
     )
