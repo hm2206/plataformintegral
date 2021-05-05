@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import Router from 'next/router';
 import Show from '../components/show';
 import moment from 'moment';
+import btoa from 'btoa';
 import { NotificationContext } from '../contexts/notification/NotificationContext';
 import { types } from '../contexts/notification/NotificationReducer';
 
@@ -16,7 +17,8 @@ const Notification = () => {
     // click notification
     const handleClick = (e, index, notify) => {
         e.preventDefault();
-        let link = `/notify?id=${notify.id}`;
+        let slug = btoa(notify.id || '_error');
+        let link = `/notify/${slug}`;
         dispatch({ type: types.NOTIFICATION_READ, payload: notify });
         Router.push(link);
     }
@@ -51,18 +53,18 @@ const Notification = () => {
                                 className={`dropdown-item ${notify.read_at ? 'read' : 'unread'}`}
                                 onClick={(e) => handleClick(e, indexN, notify)}
                             >
-                                <Show condicion={!notify.image}>
+                                <Show condicion={!notify?.method?.image}>
                                     <div className="notify-icon">
                                         <i className={notify.icon}></i>
                                     </div>
                                 </Show>
-                                <Show condicion={notify.image}>
+                                <Show condicion={notify?.method?.image}>
                                     <div className="user-avatar" style={{ objectFit: 'contain' }}>
-                                        <img src={notify.image}/>
+                                        <img src={notify?.method?.image}/>
                                     </div>
                                 </Show>
                                 <div className="dropdown-item-body">
-                                    <p className="subject"> {notify.send && notify.send.username} </p>
+                                    <p className="subject"> {notify?.send?.username} </p>
                                     <p className="text text-truncate">
                                     {" "}
                                     {notify.title}

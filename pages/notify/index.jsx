@@ -1,16 +1,17 @@
 import React, { Fragment } from 'react';
-import PageNav from '../components/pageNav';
-import { AUTHENTICATE } from '../services/auth';
-import CardNotify from '../components/cardNotify';
-import Show from '../components/show';
+import PageNav from '../../components/pageNav';
+import { AUTHENTICATE } from '../../services/auth';
+import CardNotify from '../../components/cardNotify';
+import Show from '../../components/show';
 import Router from 'next/router';
-import NotificationProvider from '../providers/authentication/NotificationProvider';
+import NotificationProvider from '../../providers/authentication/NotificationProvider';
 import { Pagination } from 'semantic-ui-react';
+import btoa from 'btoa';
 
 // provedores
 const notificationProvider = new NotificationProvider();
 
-const Notify = ({ pathname, query, success, notification, count_read, count_no_read }) => {
+const IndexNotify = ({ pathname, query, success, notification, count_read, count_no_read }) => {
 
     // handleChange
     const handleOption = (e, index, obj) => {
@@ -46,6 +47,10 @@ const Notify = ({ pathname, query, success, notification, count_read, count_no_r
         await push({ pathname, query });
     }
 
+    const handleInfo = async (notify) => {
+        let slug = btoa(notify.id || '_error');
+        Router.push({ pathname: `${pathname}/${slug}` });
+    }
 
     // renderizar
     return (
@@ -73,10 +78,10 @@ const Notify = ({ pathname, query, success, notification, count_read, count_no_r
                                         key={`notification-view-${notify.id}`}
                                         date={notify.created_at}
                                         description={notify.description}
-                                        image={notify.image}
+                                        image={notify?.method?.image}
                                         icon={notify.icon}
                                         read={notify.read_at ? true : false}
-                                        actions={notify.actions || []}
+                                        onClick={() => handleInfo(notify)}
                                     />    
                                 )}
                                 
@@ -102,7 +107,7 @@ const Notify = ({ pathname, query, success, notification, count_read, count_no_r
 }
 
 // server
-Notify.getInitialProps = async (ctx) => {
+IndexNotify.getInitialProps = async (ctx) => {
     AUTHENTICATE(ctx);
     let { pathname, query } = ctx;
     // filtros
@@ -132,4 +137,4 @@ Notify.getInitialProps = async (ctx) => {
 }
 
 // exportar
-export default Notify;
+export default IndexNotify;

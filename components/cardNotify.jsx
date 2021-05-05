@@ -7,7 +7,7 @@ const schemaNotify = [
     { key: "mark_as_unread", text: "Marcar como no leído" }
 ];
 
-const CardNotify = ({ focus = false, username, title, date, description, icon, image, read = false, options = schemaNotify, onOption = null, actions = [] }) => {
+const CardNotify = ({ focus = false, username, title, date, description, icon, image, read = false, options = schemaNotify, onClick = null }) => {
 
     return (
         <div className={`list-group-item ${read ? '' : 'unread-important'} ${focus ? 'card-focus' : ''}`}
@@ -31,7 +31,7 @@ const CardNotify = ({ focus = false, username, title, date, description, icon, i
                 </Show>
             </div>
             {/* <!-- message body --> */}
-            <div className="list-group-item-body pl-md-2">
+            <div className="list-group-item-body pl-md-2 cursor-pointer"  onClick={(e) => typeof onClick == 'function' ? onClick() : null}>
                 {/* <!-- grid row --> */}
                 <div className="row">
                     {/* <!-- grid column --> */}
@@ -47,19 +47,6 @@ const CardNotify = ({ focus = false, username, title, date, description, icon, i
                             <a href="#">{title}</a>
                         </h4>
                         <p className="list-group-item-text text-truncate">{description}</p>
-                        <div className="w-100 text-left">
-                            <div className="btn-group mt-2 mb-2">
-                                {actions.map((act, indexA) => 
-                                    <a href={act.link} 
-                                        key={`list-action-${indexA}-${act.key}`} 
-                                        target="_blank" 
-                                        className="btn btn-outline-dark"
-                                    >
-                                        {act.text}
-                                    </a>
-                                )}
-                            </div>
-                        </div>
                     </div>
                     {/* <!-- grid column --> */}
                     <div className="col-12 d-lg-none">
