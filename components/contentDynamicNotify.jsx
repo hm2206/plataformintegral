@@ -10,7 +10,10 @@ const Content = ({ type, notification, config }) => {
         case "Auth/SignerController.signer":
             return <SignedAllPage notification={notification} config={config}/>;
         default:
-            return <div className="card-body">No se encontró una acción</div>;
+            return <div className="card-body text-center py-5">
+                <img src="/img/chip.png" width="200px" style={{ objectFit: 'contain' }}/>
+                <h5>No hay acciones disponibles</h5>
+            </div>;
     }
 }
 
