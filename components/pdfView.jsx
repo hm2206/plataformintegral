@@ -4,22 +4,19 @@ import Show from './show';
 import { Confirm } from '../services/utils';
 import ListPfx from './listPfx';
 import { signature, CancelRequest } from '../services/apis';
-import { AppContext } from '../contexts/AppContext'
 import Swal from 'sweetalert2';
 import ProgressFile from './progressFile';
 import { getPositions } from 'node-signature/client';
 import axios from 'axios';
 import { onProgress } from '../services/apis';
 import { AuthContext } from '../contexts/AuthContext';
-
+import pdfjsLib from 'pdfjs-dist';
 
 const PdfView = ({ 
     pdfUrl = "", 
     pdfBlob,
     pdfDoc,
-    defaultImage = "",
     disabledMetaInfo = false,
-    disabledImage = false,
     metaInfo = { reason: "Yo soy el firmante", location: "PE", image: "" },
     onClose = null,
     onSigned = null
@@ -47,7 +44,9 @@ const PdfView = ({
     const [errors, setErrors] = useState({});
     const [current_cancel, setCurrentCancel] = useState(null);
     const [current_download, setCurrentDownload] = useState(false);
+    const [current_dimension, setCurrentDimension] = useState({});
     const isSelect = Object.keys(current_select).length;
+    const isDimension = Object.keys(current_dimension).length;
 
     // config page
     let [current_col, setCurrentCol] = useState(0);
@@ -61,11 +60,47 @@ const PdfView = ({
             setPositions(datos.positions);
             setCurrentPosition(0);
             setCurrentCol(datos.column);
+            setCurrentDimension({ width, height });
         }
     }
 
     const handleInput = ({ name, value }, callback) => {
         if (typeof callback == 'function') callback(value)
+    }
+
+    const renderPage = async () => {
+        if (page <= 0) return false;
+        // obtener pdf
+        let link = await URL.createObjectURL(pdfBlob);
+        let loadTaskPdf = pdfjsLib.getDocument(link);
+        loadTaskPdf.promise.then(async tmpPdf => {
+            let contentPdf = document.getElementById('content-render');
+            let nextPage = parseInt(`${page}`);
+            let tmpPage = await tmpPdf.getPage(nextPage);
+            let scale = 1;
+            let viewport = await tmpPage.getViewport(scale);
+
+            if (viewport.width >= contentPdf.clientWidth) {
+                viewport = await tmpPage.getViewport(0.6);
+                console.log(viewport);
+            }
+
+            let current_height = viewport.height;
+            let current_width = viewport.width;
+
+            let canvas = document.getElementById('render-pdf-canvas');
+            let context = canvas.getContext('2d');
+            canvas.height = current_height;
+            canvas.width = current_width;
+
+            let renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+
+            await tmpPage.render(renderContext);
+        });
+
     }
 
     const handleClose = async (e) => {
@@ -218,6 +253,9 @@ const PdfView = ({
                 <div className="row h-100 text-left">
                     <div className="col-md-8 col-lg-9">
                         <iframe className="w-100 h-100 pl-4" frameBorder="0" src={pdfUrl}/>
+                        {/* <div className="text-center w-100 h-100" style={{ background: '#455a64', position: "relative" }} id="content-render">
+                            <canvas id="render-pdf-canvas" className="mt-2" width="100%" height="100%"/>
+                        </div> */}
                     </div>
                     <div className="col-md-4 col-lg-3">
                         <div className="h-100 w-100" style={{ borderLeft: '1px solid rgba(20,20,31,.12)' }}>
@@ -264,6 +302,15 @@ const PdfView = ({
                                                         value={location}
                                                         disabled={current_loading}
                                                         onChange={({target}) => handleInput(target, setLocation)}
+                                                    />
+                                                </Form.Field>
+
+                                                <Form.Field>
+                                                    <label htmlFor="">Dimensión</label>
+                                                    <input type="text"
+                                                        className="text-center"
+                                                        value={`${current_dimension?.width || 0} x ${current_dimension?.height || 0}`}
+                                                        readOnly
                                                     />
                                                 </Form.Field>
                                             </Show>
@@ -324,7 +371,7 @@ const PdfView = ({
                                         <div className="card-body">
                                             <Form>
                                                 <Form.Field>
-                                                    <div className="card pt-4">
+                                                    <div className="card- pt-4">
                                                         <div className="row justify-content-around">
                                                             {positions.map((pos, indexPos) => 
                                                                 <Fragment key={`list-point-position-${indexPos}`}>

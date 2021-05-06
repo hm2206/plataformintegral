@@ -1,10 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
-import PdfView from '../../components/pdfView';
+import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import Show from '../../components/show';
 import { DropZone } from '../../components/Utils';
 import { PDFDocument } from 'pdf-lib';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
+const PdfView = dynamic(() => import('../../components/pdfView'), { ssr: false });
 
 const SignerPDF = () => {
 
