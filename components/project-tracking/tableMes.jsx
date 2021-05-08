@@ -89,6 +89,10 @@ const TableMeses = ({ rows = 1, title, onChecked, isHeader = true, refresh = fal
         if (refresh) generateRows();
     }, [refresh]);
 
+    useEffect(() => {
+        if (defaultPosition?.length) generateRows();
+    }, [defaultPosition]);
+
     // render
     return <div className="table-responsive">
         <table className="w-100">
@@ -102,19 +106,33 @@ const TableMeses = ({ rows = 1, title, onChecked, isHeader = true, refresh = fal
                 <Show condicion={isHeader}>
                     <tr>
                         {current_rows.map(r => 
-                            <th key={`table-rows-select-header-${r.index}`} width="5%">{`${moment(dateInitial).add(r.index, "month").format("LL")}`.substr(0, 3)}</th>    
+                            <th key={`table-rows-select-header-${r.index}`} className="text-center" width="5%">
+                                {`${moment(dateInitial).add(r.index, "month").format("MMMM")}`.substr(0, 3)}
+                            </th>    
                         )}
                     </tr>
                     <tr>
                         {current_rows.map(r => 
-                            <th key={`table-rows-select-header-${r.index}`} width="5%">{r.value}</th>    
+                            <th key={`table-rows-select-header-${r.index}`} className="text-center" width="5%">{r.value}</th>    
                         )}
                     </tr>
                 </Show>
                 <tr>
                     {current_rows.map(r => 
-                        <td key={`table-rows-select-body-${r.index}`} width="5%" className={r.checked ? 'bg-primary' : ''}>
-                            <Checkbox checked={r.checked} onChange={(e, obj) => handleCheck(r.index, obj.checked)} disabled={disabled}/>
+                        <td key={`table-rows-select-body-${r.index}`} width="5%">
+                            <div style={{ display: "flex", justifyContent: "center" }}>
+                                <div style={{ 
+                                        width: "20px", height: "20px", 
+                                        background: r.checked ? '#ffb300' : 'transparent', display: 'flex', 
+                                        justifyContent: 'center', alignItems: 'center',
+                                        border: "1px solid #000",
+                                        borderRadius: '0.3em',
+                                        opacity: disabled ? 0.3 : 1
+                                    }}
+                                    className={disabled ? '' : 'cursor-pointer'}
+                                    onClick={(e) => !disabled ? handleCheck(r.index, !r.checked) : null}
+                                />
+                            </div>
                         </td>    
                     )}
                 </tr>

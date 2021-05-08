@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { Body, BtnFloat } from '../../../components/Utils';
+import React, { useContext, useEffect, useState } from 'react';
+import { BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
@@ -8,14 +8,18 @@ import Router from 'next/router';
 import btoa from 'btoa';
 import { EntityContext } from '../../../contexts/EntityContext';
 import BoardSimple from '../../../components/boardSimple';
+import { Pagination } from 'semantic-ui-react';
 
-const IndexProject = ({ success, projects }) => {
+const IndexProject = ({ pathname, query, success, projects }) => {
 
     // app
     const app_context = useContext(AppContext);
 
     // entity
     const entity_context = useContext(EntityContext);
+
+    // estados
+    const [query_search, setQuerySearch] = useState("");
 
     // primara carga
     useEffect(() => {
@@ -27,13 +31,19 @@ const IndexProject = ({ success, projects }) => {
     const getOption = async (obj, key, index) => {
         switch (key) {
             case 'information':
-            case 'edit':
-                let id = btoa(obj.id);
-                Router.push({ pathname: `${Router.pathname}/${key}`, query: { id } });
+                Router.push({ pathname: `${Router.pathname}/${obj.code}` });
                 break;
             default:
                 break;
         }
+    }
+
+    // siguiente página
+    const handlePage = async (e, { activePage }) => {
+        let { push } = Router;
+        query.page = activePage;
+        query.query_search = query_search;
+        await push({ pathname, query });
     }
 
     // render
@@ -63,15 +73,20 @@ const IndexProject = ({ success, projects }) => {
                         key: "information",
                         icon: "fas fa-info",
                         title: "Mostrar más información del proyecto"  
-                    },
-                    { 
-                        key: "edit",
-                        icon: "fas fa-pencil-alt",
-                        title: "Editar Proyecto"  
                     }
                 ]}
                 getOption={getOption}
-            />
+            >
+
+            </Datatable>
+            {/* paginación */}
+            <div className="text-center">
+                <hr/>
+                <Pagination activePage={query.page || 1} 
+                    totalPages={projects?.last_page || 1}
+                    onPageChange={handlePage}
+                />
+            </div>
         </BoardSimple>
         
         <BtnFloat

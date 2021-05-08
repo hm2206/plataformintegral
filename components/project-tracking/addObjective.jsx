@@ -1,21 +1,20 @@
 import React, { useContext, useState } from 'react';
-import { Button, Form, Select } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import Modal from '../modal'
-import { SelectRol } from '../select/project_tracking'
-import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
-import { projectTracking } from '../../services/apis';
+import { handleErrorRequest, projectTracking } from '../../services/apis';
 import Swal from 'sweetalert2';
+import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
 
-const AddComponente = (props) => {
+const AddObjective = (props) => {
 
     // app
     const app_context = useContext(AppContext);
 
     // project
-    const { project } = useContext(ProjectContext);
+    const { project, dispatch } = useContext(ProjectContext);
 
     // estados
     const [form, setForm] = useState({});
@@ -31,32 +30,22 @@ const AddComponente = (props) => {
         setErrors(newErrors);
     }
 
-    // crear equipo
-    const createComponente = async () => {
+    // crear objetivo
+    const handleSave = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            let datos = Object.assign({}, form);
-            datos.project_id = project.id;
-            await projectTracking.post(`objective`, datos)
-                .then(res => {
-                    app_context.setCurrentLoading(false);
-                    let { success, message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    setForm({});
-                    setErrors({});
-                    if (typeof props.onCreate == 'function') props.onCreate();
-                }).catch(err => {
-                    try {
-                        app_context.setCurrentLoading(false);
-                        let { errors, message, status } = err.response.data;
-                        Swal.fire({ icon: status == 402 ? 'warning' : 'error', text: message });
-                        if (status == 402) setErrors(errors);
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: err.message });
-                    }
-                });
-        }
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        let datos = Object.assign({}, form);
+        datos.project_id = project.id;
+        await projectTracking.post(`objective`, datos)
+        .then(res => {
+            app_context.setCurrentLoading(false);
+            let { message, objective } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+            setForm({});
+            setErrors({});
+            dispatch({ type: projectTypes.ADD_OBJECTIVE, payload: objective });
+        }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
     // render
@@ -95,21 +84,21 @@ const AddComponente = (props) => {
                     </div>
 
                     <div className="col-md-12 mb-3">
-                        <Form.Field error={errors.title && errors.title[0] || ""}>
-                            <label htmlFor="">Titulo del Componente</label>
+                        <Form.Field error={errors?.title?.[0] ? true : false}>
+                            <label htmlFor="">Titulo del Objectivo Específico</label>
                             <textarea  
                                 name="title"
                                 value={form.title || ""}
                                 onChange={({target}) => handleInput(target)}
                             />
-                            <label htmlFor="">{errors.title && errors.title[0] || ""}</label>
+                            <label htmlFor="">{errors?.title?.[0] ? true : false}</label>
                         </Form.Field>
                     </div>
 
                     <div className="col-md-12 text-right">
                         <hr/>
                         <Button color="teal" 
-                            onClick={createComponente}
+                            onClick={handleSave}
                         >
                             <i className="fas fa-save"></i> Guardar
                         </Button>
@@ -120,4 +109,4 @@ const AddComponente = (props) => {
     )
 }
 
-export default AddComponente;
+export default AddObjective;

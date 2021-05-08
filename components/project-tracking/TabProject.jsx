@@ -1,53 +1,52 @@
-import React, { Component, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Tab } from 'semantic-ui-react'
-import Router from 'next/router';
 import TabDatos from './tabDatos';
 import TabTeam from './tabTeam';
 import TabPlanTrabajo from './tabPlanTrabajo';
 import TabProjectInitial from './tabProjectInitial';
 import TabTracking from './tabTracking';
+import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 
-const TabProject = (props) => {
-
-    const onTabChange = (e, { activeIndex }) => {
-        // setActive(activeIndex);
-    }
-
+const TabProject = ({ menu, disabled = false }) => {
+    
     let styles = {
         border: '0px'
     }
 
+    // project
+    const { edit } = useContext(ProjectContext);
+
     const panes = [
             { 
-                menuItem: {key: 'info', icon: 'info circle', content: 'Datos Generales', disabled: false }, 
+                menuItem: {key: 'info', icon: 'info circle', content: 'Datos Generales', disabled: edit }, 
                 render: () => 
                     <Tab.Pane style={styles}>
                         <TabDatos/>
                     </Tab.Pane> 
             },
             { 
-                menuItem: {key: 'team', icon: 'info circle', content: 'Proyecto', disabled: false }, 
+                menuItem: {key: 'project', icon: 'chart line', content: 'Proyecto', disabled: edit }, 
                 render: () => 
                     <Tab.Pane style={styles}>
                         <TabProjectInitial/>
                     </Tab.Pane> 
             },
             { 
-                menuItem: {key: 'team', icon: 'info circle', content: 'Equipo Técnico', disabled: false }, 
+                menuItem: {key: 'team', icon: 'puzzle', content: 'Equipo Técnico', disabled: edit }, 
                 render: () => 
                     <Tab.Pane style={styles}>
                         <TabTeam/>
                     </Tab.Pane> 
             },
             { 
-                menuItem: {key: 'plan_trabajo', icon: 'info circle', content: 'Plan Trabajo', disabled: false }, 
+                menuItem: {key: 'plan_trabajo', icon: 'server', content: 'Plan Trabajo', disabled: edit }, 
                 render: () => 
                     <Tab.Pane style={styles}>
                         <TabPlanTrabajo/>
                     </Tab.Pane> 
             },
             { 
-                menuItem: {key: 'tracking_project', icon: 'info circle', content: 'Seguimiento', disabled: false }, 
+                menuItem: {key: 'tracking_project', icon: 'sitemap', content: 'Seguimiento', disabled: edit }, 
                 render: () => 
                     <Tab.Pane style={styles}>
                         <TabTracking/>
@@ -56,9 +55,7 @@ const TabProject = (props) => {
     ];
 
     return <Tab panes={panes} 
-                menu={props.menu} 
-                // activeIndex={active} 
-                // onTabChange={onTabChange} 
+                menu={menu} 
                 className="w-100 mt-3"
             />
 }
