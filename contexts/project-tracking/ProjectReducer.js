@@ -29,6 +29,12 @@ export const inititalStates = {
         total: 0,
         data: []
     },
+    gastos: {
+        page: 1,
+        last_page: 0,
+        total: 0,
+        data: []
+    },
     team: {
         page: 1,
         last_page: 0,
@@ -49,9 +55,14 @@ export const projectTypes = {
     SET_AREAS: 'SET[AREAS]',
     DELETE_AREA: 'DELETE[AREA]',
     SET_OBJECTIVES: 'SET[OBJECTIVES]',
+    UPDATE_OBJECTIVE: 'UPDATE[OBJECTIVE]',
     ADD_OBJECTIVE: 'ADD[OBJECTIVE]',
     SET_ACTIVITIES: 'SET[ACTIVITIES]',
     UPDATE_ACTIVITY: 'UPDATE[ACTIVITY]',
+    SET_GASTOS: 'SET[GASTOS]',
+    UPDATE_GASTO: 'UPDATE[GASTO]',
+    ADD_GASTO: 'ADD[GASTO',
+    DELETE_GASTO: 'DELETE_GASTO',
 };
 
 export const projectReducer = (state = inititalStates, { type, payload }) => {
@@ -69,13 +80,22 @@ export const projectReducer = (state = inititalStates, { type, payload }) => {
             newState.areas = newAreas;
             return newState;
         case projectTypes.DELETE_AREA:
-            let deleteAreas = newState.areas.data.filter(d => d.id != payload);
+            let deleteAreas = newState.areas.data.filter(d => d.id != payload.id);
             newState.areas.data = deleteAreas;
             newState.areas.total = state.areas.total - 1; 
             return newState;
         case projectTypes.SET_OBJECTIVES:
             let newObjectives = Object.assign(state.objectives, payload);
             newState.objectives = newObjectives;
+            return newState;
+        case projectTypes.UPDATE_OBJECTIVE:
+            let updateObjective = Object.assign({}, state.objectives);
+            let indexUpdateObjective = collect(updateObjective.data).pluck('id').toArray().indexOf(payload.id);
+            if (indexUpdateObjective < 0) return newState;
+            let currentUpdateObjective = updateObjective.data[indexUpdateObjective];
+            currentUpdateObjective = Object.assign(currentUpdateObjective, payload);
+            updateObjective.data[indexUpdateObjective] = currentUpdateObjective;
+            newState.objectives = updateObjective;
             return newState;
         case projectTypes.ADD_OBJECTIVE:
             let addObjectives = Object.assign({}, state.objectives);
@@ -91,9 +111,50 @@ export const projectReducer = (state = inititalStates, { type, payload }) => {
             let updateActivity = Object.assign({}, state.activities);
             let indexUpdateActivity = collect(updateActivity.data).pluck('id').toArray().indexOf(payload.id);
             if (indexUpdateActivity < 0) return newState;
-            updateActivity.data[indexUpdateActivity] = payload;
+            let currentUpdateActivity = updateActivity.data[indexUpdateActivity];
+            currentUpdateActivity = Object.assign(currentUpdateActivity, payload);
+            updateActivity.data[indexUpdateActivity] = currentUpdateActivity;
             newState.activities = updateActivity;
+            // obtener el total
+            let objective_total = collect(newState.activities.data).sum('total');
+            let payloadUpdateObjective = { id: currentUpdateActivity.objective_id, total: objective_total };
+            projectReducer(state, { type: projectTypes.UPDATE_OBJECTIVE, payload: payloadUpdateObjective });
             // response state
+            return newState;
+        case projectTypes.SET_GASTOS:
+            let newGastos = Object.assign(state.gastos, payload);
+            newState.gastos = newGastos;
+            return newState;
+        case projectTypes.UPDATE_GASTO:
+            let updateGasto = Object.assign({}, state.gastos);
+            let indexUpdateGasto = collect(updateGasto.data).pluck('id').toArray().indexOf(payload.id);
+            if (indexUpdateGasto < 0) return newState;
+            let currentUpdateGasto = updateGasto.data[indexUpdateGasto];
+            currentUpdateGasto = Object.assign(currentUpdateGasto, payload);
+            updateGasto[indexUpdateGasto] = currentUpdateGasto;
+            newState.gastos = updateGasto;
+            // obtener el total
+            let activity_total = collect(newState.gastos.data).sum('total');
+            let payloadUpdateActivity = { id: currentUpdateGasto.activity_id, total: activity_total };
+            projectReducer(state, { type: projectTypes.UPDATE_ACTIVITY, payload: payloadUpdateActivity });
+            // response state
+            return newState;
+        case projectTypes.ADD_GASTO:
+            let addGastos = Object.assign({}, state.gastos);
+            addGastos.data = addGastos.data.filter(obj => obj.id != payload.id);
+            addGastos.data.push(payload);
+            newState.gastos = addGastos;
+            let add_total_activity = collect(newState.gastos.data).sum('total');
+            let payloadAddActivity = { id: payload.activity_id, total: add_total_activity };
+            projectReducer(state, { type: projectTypes.UPDATE_ACTIVITY, payload: payloadAddActivity });
+            return newState;
+        case projectTypes.DELETE_GASTO:
+            let deleteGastos = newState.gastos.data.filter(d => d.id != payload.id);
+            newState.gastos.data = deleteGastos;
+            newState.gastos.total = state.gastos.total - 1;
+            let delete_total_activity = collect(newState.gastos.data).sum('total');
+            let payloadDeleteActivity = { id: payload.activity_id, total: delete_total_activity };
+            projectReducer(state, { type: projectTypes.UPDATE_ACTIVITY, payload: payloadDeleteActivity });
             return newState;
         default:
             return newState;

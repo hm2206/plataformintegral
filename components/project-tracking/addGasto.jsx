@@ -5,17 +5,18 @@ import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
-import { projectTracking } from '../../services/apis';
+import { handleErrorRequest, projectTracking } from '../../services/apis';
 import { SelectPresupuesto, SelectMedida, SelectRubro } from '../select/project_tracking';
 import Swal from 'sweetalert2';
+import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
 
-const AddGasto = ({ isClose, activity, onCreate }) => {
+const AddGasto = ({ isClose, activity, onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
 
     // project
-    const { project } = useContext(ProjectContext);
+    const { project, dispatch } = useContext(ProjectContext);
 
     // estados
     const [form, setForm] = useState({});
@@ -34,29 +35,20 @@ const AddGasto = ({ isClose, activity, onCreate }) => {
     // crear gasto
     const createGasto = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            let datos = Object.assign({}, form);
-            datos.activity_id = activity.id;
-            await projectTracking.post(`gasto`, datos)
-                .then(res => {
-                    app_context.setCurrentLoading(false);
-                    let { message, gasto } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    setForm({});
-                    setErrors({});
-                    if (typeof onCreate == 'function') onCreate(gasto);
-                }).catch(err => {
-                    try {
-                        app_context.setCurrentLoading(false);
-                        let { errors, message, status } = err.response.data;
-                        Swal.fire({ icon: status == 402 ? 'warning' : 'error', text: message });
-                        if (status == 402) setErrors(errors);
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: err.message });
-                    }
-                });
-        }
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        let datos = Object.assign({}, form);
+        datos.activity_id = activity.id;
+        await projectTracking.post(`gasto`, datos)
+        .then(res => {
+            app_context.setCurrentLoading(false);
+            let { message, gasto } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+            setForm({});
+            setErrors({});
+            dispatch({ type: projectTypes.ADD_GASTO, payload: gasto });
+            if (typeof onSave == 'function') onSave(gasto);
+        }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
     // render

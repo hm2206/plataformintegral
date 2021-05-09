@@ -7,7 +7,7 @@ import TabProjectInitial from './tabProjectInitial';
 import TabTracking from './tabTracking';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 
-const TabProject = ({ menu, disabled = false }) => {
+const TabProject = ({ menu }) => {
     
     let styles = {
         border: '0px'

@@ -6,11 +6,82 @@ import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import AddGasto from './addGasto';
+import ListGastos from './listGastos';
 import Swal from 'sweetalert2';
 import Show from '../show';
 import currencyFormatter from 'currency-formatter';
-import { SelectPresupuesto, SelectMedida } from '../select/project_tracking';
+import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
+import Skeleton from 'react-loading-skeleton';
 
+const Placeholder = () => {
+    const datos = [1, 2, 3, 4, 5, 6];
+    return datos.map(d => 
+        <tr key={`list-datos-item-placeholder-activity-${d}`}>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+        </tr>    
+    )
+}
+
+const ItemActivity = ({ objective, activity, index = 1, active = false, onClick = null }) => {
+
+    // estados
+    const [is_create, setIsCreate] = useState(false);
+
+    // render
+    return (
+        <Fragment> 
+            <tr style={{ background: 'rgba(0, 0, 0, 0.03)' }}>
+                <th colSpan="5" 
+                    className={`hover-basic ${active ? 'focus-basic' : ''}`}
+                    onClick={(e) => typeof onClick == 'function' ? onClick(e, activity) : null} 
+                >
+                    Actividad {objective?.index}.{index} : {activity?.title}
+                </th>
+                <td className="text-right">
+                    {currencyFormatter.format(activity?.total, { code: 'PEN' })}
+                </td>
+                <td width="5%">
+                    <div className="text-center w-100">
+                        <Show condicion={!activity?.verify}
+                            predeterminado={
+                                <span className="badge badge-primary">
+                                    Verificado
+                                </span>
+                            }
+                        >
+                            <Show condicion={active}>
+                                <Button basic 
+                                    size="mini"
+                                    color="teal"
+                                    icon="plus"
+                                    onClick={(e) => setIsCreate(true)}
+                                />
+                            </Show>
+                        </Show>
+                    </div>
+                    {/* crear gasto */}
+                    <Show condicion={is_create}>
+                        <AddGasto
+                            onSave={() => setIsCreate(false)}
+                            activity={activity}
+                            isClose={() => setIsCreate(false)}
+                        />
+                    </Show>
+                </td>
+            </tr>  
+            {/* body */}
+            <Show condicion={active}>
+                <ListGastos activity={activity}/>
+            </Show>
+        </Fragment>  
+    )
+}
 
 // agregar actividad
 const CoinActivity = ({ objective, isClose, onCreate }) => {
@@ -19,169 +90,32 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
     const app_context = useContext(AppContext);
 
     // project
-    const { project } = useContext(ProjectContext);
+    const { project, activities, dispatch } = useContext(ProjectContext);
 
     // estados
-    const [activity, setActivity] = useState({ page: 1, last_page: 0, total: 0, data: [] });
-    const [current_activity, setCurrentActivity] = useState({});
-    const [current_gasto, setCurrentGasto] = useState({});
-    const [old, setOld] = useState({ page: 1, last_page: 0, total: 0, data: [] });
-    const [cancel, setCancel] = useState(false);
-    const [edit, setEdit] = useState(false);
-    const [option, setOption] = useState("");
-    const [gastos, setGastos] = useState([]);
     const [current_loading, setCurrentLoading] = useState(false);
-
+    const [current_index, setCurrentIndex] = useState(0);
+ 
     // obtener activities
-    const getActivities = async (nextPage = 1, up = false) => {
+    const getActivities = async (add = false) => {
         setCurrentLoading(true);
-        await projectTracking.get(`objective/${objective.id}/activity?page=${nextPage}`)
+        await projectTracking.get(`objective/${objective.id}/activity?page=${activities.page || 1}`)
             .then(({ data }) => {
                 let payload = { 
-                    last_page: data.activities.last_page,
+                    last_page: data.activities.lastPage,
                     total: data.activities.total,
-                    data: up ? [...activity.data, ...data.objectives.data] : data.activities.data,
-                    page: data.activities.page
+                    data: add ? [...activities.data, ...data.objectives.data] : data.activities.data
                 };
-                setActivity(payload);
-                setOld(JSON.parse(JSON.stringify(payload)));
-            }).catch(err => console.log(err));
+                // setting data
+                dispatch({ type: projectTypes.SET_ACTIVITIES, payload });
+            }).catch(err => dispatch({ type: projectTypes.SET_ACTIVITIES, payload: { page: 1, data: [] } }));
         setCurrentLoading(false);
     }
-
-    // obtener gastos
-    const getGastos = async (nextPage = 1, add = false) => {
-        setCurrentLoading(true);
-        await projectTracking.get(`activity/${current_activity.id}/gasto?page=${nextPage}`)
-            .then(async res => {
-                let { lastPage, data } = res.data.gastos;
-                setGastos(add ? [...gastos, ...data] : data);
-                if (lastPage >= nextPage + 1) await getGastos(nextPage + 1, true);
-            })
-            .catch(err => console.log(err));
-        setCurrentLoading(false);
-    }
-
-    // actualizar gastos
-    const onCreateGasto = async (gasto) => {
-        await getGastos()
-        let newActivity = Object.assign({}, activity);
-        let newData = JSON.parse(JSON.stringify(newActivity.data));
-        let newObj = newData[current_activity.index];
-        newObj.total += gasto.total;
-        newActivity.data = newData;
-        setActivity(newActivity);
-        if (typeof onCreate == 'function') onCreate();
-    }
-
-    // habilitar edicion
-    const toggleEdit = (index, obj) => {
-        let newGastos = JSON.parse(JSON.stringify(gastos));
-        obj.edit = obj.edit ? false : true;
-        // validar datos
-        if (obj.edit) {
-            obj.current_description = obj.description;
-            obj.current_monto = obj.monto;
-            obj.current_cantidad = obj.cantidad;
-            obj.current_total = obj.total;
-        } else {
-            obj.description = obj.current_description;
-            obj.monto = obj.current_monto;
-            obj.cantidad = obj.current_cantidad;
-            obj.total = obj.current_total;
-        }
-        // setting gastos
-        newGastos[index] = obj;
-        setGastos(newGastos);
-    }
-
-    // modificar gasto
-    const handleEditGasto = (index, obj, { name, value }) => {
-        obj[name] = value;
-        let newGasto = JSON.parse(JSON.stringify(gastos));
-        newGasto[index] = obj;
-        setGastos(newGasto);
-    }
-
-    // eliminar gasto
-    const handleDeleteGasto = async (index, obj, indexParent, parent) => {
-        let answer = await Confirm('warning', '¿Estas seguro en eliminar el gasto?');
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            await projectTracking.post(`gasto/${obj.id}/delete`, obj)
-                .then(res => {
-                    app_context.setCurrentLoading(false);
-                    let { message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    let newGastos = JSON.parse(JSON.stringify(gastos));
-                    newGastos.splice(index, 1);
-                    setGastos(newGastos);
-                    // actualizar actividad
-                    let newActividad = JSON.parse(JSON.stringify(activity));
-                    parent.total = parseFloat(parent.total) - parseFloat(obj.total);
-                    newActividad.data[indexParent] = parent;
-                    setActivity(newActividad);
-                }).catch(err => {
-                    try {
-                        app_context.setCurrentLoading(false);
-                        let { message, errors } = err.response.data;
-                        if (!errors) throw new Error(message);
-                        Swal.fire({ icon: 'warning', text: message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message });
-                    }
-                });
-        }
-    }
-
-    // actualizar gasto
-    const updateGasto = async (index, obj) => {
-        let answer = await Confirm('warning', '¿Estas seguro en actualizar el gasto?')
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            await projectTracking.post(`gasto/${obj.id}/update`, obj)
-                .then(res => {
-                    app_context.setCurrentLoading(false);
-                    let { message, gasto } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    obj = gasto;
-                    let newGastos = JSON.parse(JSON.stringify(gastos));
-                    newGastos[index] = obj;
-                    setGastos(newGastos);
-                }).catch(err => {
-                    try {
-                        app_context.setCurrentLoading(false);
-                        let { message, errors } = err.response.data;
-                        if (!errors) throw new Error(message);
-                        Swal.fire({ icon: 'warning', text: message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message });
-                    }
-                });
-        }
-    }
-
-    // cancelar edicion
-    useEffect(() => {
-        if (cancel) {
-            setActivity(JSON.parse(JSON.stringify(old)))
-            setCancel(false);
-            setEdit(false);
-        }
-    }, [cancel]);
 
     // obtener actividades
     useEffect(() => {
         getActivities();
     }, []);
-
-    // executar gastos
-    useEffect(() => {
-        if (current_activity.id) {
-            setGastos([]);
-            getGastos();
-        }
-    }, [current_activity.id]);
 
     // render
     return (
@@ -210,177 +144,35 @@ const CoinActivity = ({ objective, isClose, onCreate }) => {
                                 <tbody>
                                     <tr>
                                         <td colSpan="7">
-                                            <b>Objectivo Específico {objective.index + 1}: </b> {objective.title} 
+                                            <b>Objectivo Específico {objective?.index + 1}: </b> {objective?.title} 
                                         </td>
                                     </tr>
-                                    {activity.data.map((act, indexA) => 
-                                        <Fragment key={`presupuesto-${indexA}`}> 
-                                            <tr style={{ background: 'rgba(0, 0, 0, 0.03)' }}>
-                                                <th colSpan="5" className={`hover-basic ${current_activity && current_activity.id == act.id ? 'focus-basic' : ''}`} 
-                                                    onClick={() => !current_loading ? setCurrentActivity({ ...act, index: indexA }) : null}
-                                                >
-                                                    Actividad {objective.index + 1}.{indexA + 1} : {act.title}
-                                                </th>
-                                                <td className="text-right">
-                                                    {currencyFormatter.format(act.total, { code: 'PEN' })}
-                                                </td>
-                                                <td width="5%" className="text-center">
-                                                    <div className="btn-group">
-                                                        <Show condicion={!act.verify}
-                                                            predeterminado={
-                                                                <span className="badge badge-primary">
-                                                                    Verificado
-                                                                </span>
-                                                            }
-                                                        >
-                                                            <button className="btn btn-sm btn-outline-success"
-                                                                disabled={current_loading}
-                                                                onClick={(e) => {
-                                                                    setCurrentActivity({ ...act, index: indexA })
-                                                                    setOption("add_gasto")
-                                                                }}
-                                                            >
-                                                                <i className="fas fa-plus"></i>
-                                                            </button>
-                                                        </Show>
-                                                    </div>
-                                                </td>
-                                            </tr>  
-                                            {/* body */}
-                                            <Show condicion={act.id == current_activity.id}>
-                                                {gastos.map((gas, indexG) => 
-                                                    <tr key={`gastos-${gas.id}-activity-${act.id}-index-${indexG}`} 
-                                                        className={`font-12`}
-                                                    >
-                                                        <th>
-                                                            <Show condicion={gas.edit}
-                                                                predeterminado={gas.description}
-                                                            >  
-                                                                <textarea 
-                                                                    name="description" 
-                                                                    rows="2"
-                                                                    value={gas.description}
-                                                                    onChange={({target}) => handleEditGasto(indexG, gas, target)}
-                                                                /> 
-                                                            </Show>
-                                                        </th>
-                                                        <th className="text-center">
-                                                            <Show condicion={gas.edit}
-                                                                predeterminado={gas && gas.presupuesto && gas.presupuesto.ext_pptto || ""}
-                                                            >
-                                                                <SelectPresupuesto
-                                                                    text="ext_pptto"
-                                                                    execute={true}
-                                                                    name="presupuesto_id"
-                                                                    value={gas.presupuesto_id}
-                                                                    onChange={(e, obj) => handleEditGasto(indexG, gas, obj)}
-                                                                />
-                                                            </Show>
-                                                        </th>
-                                                        <th className="text-center">
-                                                            <Show condicion={gas.edit}
-                                                                predeterminado={gas && gas.medida && gas.medida.name_short || ""}
-                                                            >
-                                                                <SelectMedida
-                                                                    execute={true}
-                                                                    name="medida_id"
-                                                                    value={gas.medida_id}
-                                                                    onChange={(e, obj) => handleEditGasto(indexG, gas, obj)}
-                                                                />
-                                                            </Show>
-                                                        </th>
-                                                        <th className="text-right">
-                                                            <Show condicion={gas.edit}
-                                                                predeterminado={currencyFormatter.format(gas.monto, { code: 'PEN' })}
-                                                            >
-                                                                <input type="number"
-                                                                    name="monto"
-                                                                    step="any"
-                                                                    value={gas.monto || ""}
-                                                                    onChange={(e) => handleEditGasto(indexG, gas, e.target)}
-                                                                />
-                                                            </Show>
-                                                        </th>
-                                                        <th className="text-center">
-                                                            <Show condicion={gas.edit}
-                                                                predeterminado={gas.cantidad}
-                                                            >
-                                                                <input type="number"
-                                                                    name="cantidad"
-                                                                    step="any"
-                                                                    value={gas.cantidad || ""}
-                                                                    onChange={(e) => handleEditGasto(indexG, gas, e.target)}
-                                                                />
-                                                            </Show>
-                                                        </th>
-                                                        <th className="text-right">{currencyFormatter.format(gas.total, { code: 'PEN' })}</th>
-                                                        <td width="5%" className="text-center">
-                                                            <div className="btn-group">
-                                                                <Show condicion={!act.verify}
-                                                                    predeterminado={
-                                                                        <span className="badge badge-success">
-                                                                            <i className="fas fa-check"></i>
-                                                                        </span>
-                                                                    }
-                                                                >
-                                                                    <button className={`btn btn-sm btn-outline-${gas.edit ? 'red' : 'primary'}`}
-                                                                        onClick={(e) => toggleEdit(indexG, gas)}
-                                                                    >
-                                                                        <i className={`fas fa-${gas.edit ? 'times' : 'edit'}`}></i>
-                                                                    </button>
-
-                                                                    <Show condicion={!gas.edit} 
-                                                                        predeterminado={
-                                                                            <button className="btn btn-sm btn-outline-success"
-                                                                                onClick={(e) => updateGasto(indexG, gas)}
-                                                                            >
-                                                                                <i className="fas fa-save"></i>
-                                                                            </button>
-                                                                        }
-                                                                    >
-                                                                        <Show condicion={gas.detalles && !gas.detalles.length}>
-                                                                            <button className="btn btn-sm btn-outline-red"
-                                                                                onClick={(e) => handleDeleteGasto(indexG, gas, indexA, act)}
-                                                                            >
-                                                                                <i className="fas fa-trash"></i>
-                                                                            </button>
-                                                                        </Show>
-                                                                    </Show>
-                                                                </Show>
-                                                            </div>
-                                                        </td>
-                                                    </tr>     
-                                                )}
-                                            </Show> 
-                                        </Fragment>  
-                                    )}
+                                    {/* obtener activities */}
+                                    <Show condicion={!current_loading}
+                                        predeterminado={<Placeholder/>}
+                                    >
+                                        {activities?.data?.map((act, indexA) => 
+                                            <ItemActivity activity={act}
+                                                key={`item-presupuesto-${indexA}`}
+                                                objective={objective}
+                                                active={current_index == indexA}
+                                                index={indexA + 1}
+                                                onClick={(e) => setCurrentIndex(indexA)}
+                                            />
+                                        )}
+                                        {/* no hay regístros */}
+                                        <Show condicion={!activities?.total}>
+                                            <tr>
+                                                <th colSpan="7" className="text-center">No hay regístros disponibles!</th>
+                                            </tr>
+                                        </Show>
+                                    </Show>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
-                    <Show condicion={edit}>
-                        <div className="col-md-12 text-right">
-                            <hr/>
-                            <Button color="red" onClick={(e) => setCancel(true)}>
-                                <i className="fas fa-times"></i> Cancelar
-                            </Button>
-
-                            <Button color="teal">
-                                <i className="fas fa-save"></i> Guardar Cambios
-                            </Button>
-                        </div>
-                    </Show>
                 </div>
             </Form>
-
-            <Show condicion={option == 'add_gasto'}>
-                <AddGasto
-                    activity={current_activity}
-                    isClose={() => setOption("")}
-                    onCreate={onCreateGasto}
-                />
-            </Show>
         </Modal>
     )
 }
