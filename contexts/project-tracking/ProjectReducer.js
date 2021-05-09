@@ -35,7 +35,7 @@ export const inititalStates = {
         total: 0,
         data: []
     },
-    team: {
+    teams: {
         page: 1,
         last_page: 0,
         total: 0,
@@ -63,6 +63,9 @@ export const projectTypes = {
     UPDATE_GASTO: 'UPDATE[GASTO]',
     ADD_GASTO: 'ADD[GASTO',
     DELETE_GASTO: 'DELETE_GASTO',
+    SET_TEAMS: 'SET[TEAMS]',
+    ADD_TEAM: 'ADD[TEAM]',
+    DELETE_TEAM: 'DELETE[TEAM]',
 };
 
 export const projectReducer = (state = inititalStates, { type, payload }) => {
@@ -155,6 +158,21 @@ export const projectReducer = (state = inititalStates, { type, payload }) => {
             let delete_total_activity = collect(newState.gastos.data).sum('total');
             let payloadDeleteActivity = { id: payload.activity_id, total: delete_total_activity };
             projectReducer(state, { type: projectTypes.UPDATE_ACTIVITY, payload: payloadDeleteActivity });
+            return newState;
+        case projectTypes.SET_TEAMS: 
+            let newTeams = Object.assign(state.teams, payload);
+            newState.teams = newTeams;
+            return newState;
+        case projectTypes.ADD_TEAM:
+            let addTeams = Object.assign({}, state.teams);
+            addTeams.data = addTeams.data.filter(obj => obj.id != payload.id);
+            addTeams.data.push(payload);
+            newState.teams = addTeams;
+            return newState;
+        case projectTypes.DELETE_TEAM:
+            let deleteTeams = newState.teams.data.filter(d => d.id != payload.id);
+            newState.teams.data = deleteTeams;
+            newState.teams.total = state.teams.total - 1; 
             return newState;
         default:
             return newState;

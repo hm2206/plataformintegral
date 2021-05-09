@@ -8,16 +8,17 @@ import storage from '../../services/storage.json';
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
-import { projectTracking } from '../../services/apis';
+import { handleErrorRequest, projectTracking } from '../../services/apis';
 import Swal from 'sweetalert2';
+import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
 
-const AddTeam = (props) => {
+const AddTeam = ({ isClose = null, onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
 
     // project
-    const { project } = useContext(ProjectContext);
+    const { project, dispatch } = useContext(ProjectContext);
 
     // estados
     const [option, setOption] = useState({});
@@ -44,30 +45,21 @@ const AddTeam = (props) => {
     // crear equipo
     const createTeam = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            let datos = Object.assign({}, form);
-            datos.person_id = person.id;
-            datos.project_id = project.id;
-            await projectTracking.post(`team`, datos)
-                .then(async res => {
-                    app_context.setCurrentLoading(false);
-                    let { success, message } = res.data;
-                    await Swal.fire({ icon: 'success', text: message });
-                    setPerson({});
-                    setForm({});
-                    if (typeof props.onCreate == 'function') props.onCreate();
-                }).catch(err => {
-                    try {
-                        app_context.setCurrentLoading(false);
-                        let { errors, message } = err.response.data;
-                        Swal.fire({ icon: 'warning', text: message });
-                        setErrors(errors);
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: err.message });
-                    }
-                });
-        }
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        let datos = Object.assign({}, form);
+        datos.person_id = person.id;
+        datos.project_id = project.id;
+        await projectTracking.post(`team`, datos)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message, team } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            setPerson({});
+            setForm({});
+            dispatch({ type: projectTypes.ADD_TEAM, payload: team });
+            if (typeof onSave == 'function') onSave();
+        }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
     // render
@@ -75,7 +67,7 @@ const AddTeam = (props) => {
         <Modal
             show={true}
             titulo={<span><i className="fas fa-plus"></i> Agregar Integrante al equipo de trabajo</span>}
-            {...props}
+            isClose={isClose}
         >  
             <Form className="card-body">
                 <div className="row">
@@ -89,7 +81,7 @@ const AddTeam = (props) => {
                     <Show condicion={isPerson}>
                         <div className="col-md-6 mb-3">
                             <label htmlFor="">Tip. Documento</label>
-                            <input type="text" value={person.document_type} readOnly/>
+                            <input type="text" value={person?.document_type?.name} readOnly/>
                         </div>
 
                         <div className="col-md-6 mb-3">

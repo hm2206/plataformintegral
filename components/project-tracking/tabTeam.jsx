@@ -2,12 +2,72 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Button } from 'semantic-ui-react';
 import AddTeam from './addTeam';
 import Show from '../show';
-import { projectTracking } from '../../services/apis';
+import { BtnFloat } from '../Utils';
+import { handleErrorRequest, projectTracking } from '../../services/apis';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import { Confirm } from '../../services/utils';
 import { AppContext } from '../../contexts/AppContext';
 import Swal from 'sweetalert2';
+import Skeleton from 'react-loading-skeleton';
 import Router from 'next/router';
+import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
+
+const Placeholder = () => {
+    const datos = [1, 2, 3, 4, 5];
+    return datos.map(d => 
+        <tr>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+        </tr>    
+    )
+}
+
+const ItemTeam = ({ team }) => {
+
+    // project
+    const { project, dispatch } = useContext(ProjectContext);
+    
+    // estados
+    const [current_loading, setCurrentLoading] = useState(false);
+
+    const handleDelete = async () => {
+        let answer = await Confirm('warning', `¿Deseas eliminar del equipo?`, 'Eliminar');
+        if (!answer) return false;
+        setCurrentLoading(true);
+        await projectTracking.post(`team/${team.id}/delete`, {})
+        .then(async res => {
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            dispatch({ type: projectTypes.DELETE_TEAM, payload: team });
+        }).catch(err => handleErrorRequest(err));
+        setCurrentLoading(false);
+    }
+    
+    // render
+    return (
+        <tr>
+            <td className="text-center uppercase">{team?.person?.fullname}</td>
+            <td className="text-center uppercase">{team?.person?.document_number}</td>
+            <td className="text-center uppercase">{team?.role?.description}</td>
+            <td className="text-center uppercase">{team?.person?.profession}</td>
+            <Show condicion={project.state != "OVER"}>
+                <td className="text-center">
+                    <Button color="red" basic
+                        size="mini"
+                        onClick={handleDelete}
+                        loading={current_loading}
+                        disabled={current_loading}
+                    >
+                        <i className="fas fa-times"></i>
+                    </Button>
+                </td>
+            </Show>
+        </tr>
+    )
+}
 
 const TabTeam = () => {
 
@@ -15,48 +75,28 @@ const TabTeam = () => {
     const app_context = useContext(AppContext);
 
     // project
-    let { project } = useContext(ProjectContext);
+    let { project, teams, dispatch } = useContext(ProjectContext);
     let isProject = Object.keys(project).length;
 
     // estados
     const [option, setOption] = useState("");
+    const [is_create, setIsCreate] = useState(false);
     const [current_loading, setCurrentLoading] = useState(false);
-    const [team, setTeam] = useState({ last_page: 0, total: 0, page: 1, data: []});
-    const isTeam = team.data.length;
 
     // obtener equipo
-    const getTeam = async (nextPage = 1, up = false) => {
+    const getTeam = async (add = false) => {
         setCurrentLoading(true);
-        await projectTracking.get(`project/${project.id}/team?page=${nextPage}`)
+        await projectTracking.get(`project/${project.id}/team?page=${teams.page}`)
             .then(({ data }) => {
-                setTeam({ 
-                    last_page: data.teams.last_page,
+                let payload = { 
+                    last_page: data.teams.lastPage,
                     total: data.teams.total,
-                    data: up ? [...team.data, ...data.teams.data] : data.teams.data,
-                    page: data.teams.page
-                });
+                    data: add ? [...teams.data, ...data.teams.data] : data.teams.data
+                };
+                // setting
+                dispatch({ type: projectTypes.SET_TEAMS, payload });
             }).catch(err => console.log(err));
         setCurrentLoading(false);
-    }
-
-    // eliminar del equipo
-    const deleteTeam = async (id) => {
-        let answer = await Confirm('warning', `¿Deseas eliminar del equipo?`, 'Eliminar')
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            await projectTracking.post(`team/${id}/delete`, {})
-                .then(async res => {
-                    app_context.setCurrentLoading(false);
-                    let { success, message } = res.data;
-                    await Swal.fire({ icon: 'success', text: message });
-                    let { push, pathname, query } = Router;
-                    await push({ pathname, query });
-                    getTeam();
-                }).catch(err => {
-                    app_context.setCurrentLoading(false);
-                    Swal.fire({ icon: 'error', text: err.message });
-                })
-        }
     }
 
     // primera carga
@@ -75,56 +115,38 @@ const TabTeam = () => {
                         <th className="text-center">N° Documento</th>
                         <th className="text-center">Rol</th>
                         <th className="text-center">Profesión</th>
-                        <Show condicion={project.state != "OVER"}>
-                            <th width="5%">
-                                <Button fluid 
-                                    basic 
-                                    size="mini"
-                                    color="green" 
-                                    onClick={(e) => setOption("add_team")}
-                                >
-                                    <i className="fas fa-plus"></i>
-                                </Button>
-                            </th>
-                        </Show>
+                        <th className="text-center">Eliminar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {team.data.map((t, indexT) =>
-                        <tr key={`team-person-${indexT}`}>
-                            <td className="text-center uppercase">{t.person && t.person.fullname}</td>
-                            <td className="text-center uppercase">{t.person && t.person.document_number}</td>
-                            <td className="text-center uppercase">{t.role}</td>
-                            <td className="text-center uppercase">{t.person && t.person.profession}</td>
-                            <Show condicion={project.state != "OVER"}>
-                                <td>
-                                    <Button color="red" basic
-                                        size="mini"
-                                        onClick={(e) => deleteTeam(t.id)}
-                                    >
-                                        <i className="fas fa-times"></i>
-                                    </Button>
-                                </td>
-                            </Show>
-                        </tr>
-                    )}
-                    <Show condicion={!current_loading && !isTeam}>
-                        <tr>
-                            <td colSpan="5" className="text-center">No hay registros disponibles</td>
-                        </tr>
+                    <Show condicion={!current_loading}
+                        predeterminado={<Placeholder/>}
+                    >
+                        {teams?.data?.map((t, indexT) =>
+                            <ItemTeam key={`team-person-${indexT}`}
+                                team={t}
+                            />
+                        )}
+                        {/* no hay registros */}
+                        <Show condicion={!teams?.total}>
+                            <tr>
+                                <td colSpan="5" className="text-center">No hay registros disponibles</td>
+                            </tr>
+                        </Show>
                     </Show>
                 </tbody>
             </table>
         </div>
-
-        <Show condicion={option == "add_team"}>
-            <AddTeam 
-                isClose={(e) => setOption("")}
-                onCreate={async (e) => {
-                    let { push, pathname, query } = Router;
-                    await push({ pathname, query });
-                    getTeam()
-                }}
+        {/* agregar equipo */}
+        <Show condicion={project.state != "OVER"}>
+            <BtnFloat onClick={() => setIsCreate(true)}>
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
+        </Show>
+        {/* modal agregar equipo */}
+        <Show condicion={is_create}>
+            <AddTeam isClose={(e) => setIsCreate(false)}
+                onSave={(e) => setIsCreate(false)}
             />
         </Show>
     </Fragment>)
