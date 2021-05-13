@@ -40,7 +40,7 @@ const actions = {
         newForm[name] = value;
         setForm(newForm);
         let newErrors = Object.assign({}, errors);
-        newErrors[name] = value;
+        newErrors[name] = [];
         setErrors(newErrors);
         setEdit(true);
     }
