@@ -2,6 +2,25 @@ import React from 'react';
 import { SelectBase } from './utils';
 import { projectTracking } from '../../services/apis';
 
+
+const SelectTypeProject = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+                api={projectTracking}
+                url={`type_projects`}
+                id={`select-type_project-${id}-${name}`}
+                value={id}
+                text="name"
+                obj="type_project"
+                name={name}
+                valueChange={value || ""}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                placeholder="Seleccionar tipo Proyecto"
+                refresh={refresh}
+                execute={true}
+                disabled={disabled}
+            />
+}
+
 const SelectProject = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
                 api={projectTracking}
@@ -203,6 +222,7 @@ const SelectArea = ({ id = "id", name, value, onChange, refresh = false, disable
 
 // exportables
 export { 
+    SelectTypeProject,
     SelectProject,
     SelectProjectPlanTrabajo,
     SelectProjectObjective,

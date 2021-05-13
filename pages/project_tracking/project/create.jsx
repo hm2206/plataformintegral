@@ -9,6 +9,7 @@ import { Button, Form } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import { EntityContext } from '../../../contexts/EntityContext';
+import { SelectTypeProject } from '../../../components/select/project_tracking';
 
 const CreateProject = () => {
 
@@ -105,6 +106,17 @@ const CreateProject = () => {
                                                     value={form.title || ""}
                                                     name="title"
                                                     onChange={(e) => handleInput(e.target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-12 mb-4">
+                                            <Form.Field>
+                                                <label>Tipo de Proyecto</label>
+                                                <SelectTypeProject
+                                                    value={form?.type_project_id || ""}
+                                                    name="type_project_id"
+                                                    onChange={(e, obj) => handleInput(obj)}
                                                 />
                                             </Form.Field>
                                         </div>

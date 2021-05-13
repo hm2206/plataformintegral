@@ -43,9 +43,10 @@ const SlugProject = ({ pathname, query, success, project }) => {
                     prefix={<BtnBack/>}
                     bg="light"
                     title={project?.title || ""}
-                    info={["información detallada del proyecto"]}
+                    info={["Información detallada del proyecto"]}
                     options={[
                         { key: "refresh", title: "Refrescar", icon: "fas fa-sync" },
+                        { key: "report-over", title: "Reporte de Cierre", icon: "fas fa-file-alt"}
                     ]}
                     onOption={handleOptions}
                 >

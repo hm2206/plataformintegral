@@ -1,21 +1,23 @@
 import React, { useContext, useState } from 'react';
-import { Button, Form, Select } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import Modal from '../modal'
 import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
-import { projectTracking } from '../../services/apis';
+import { handleErrorRequest, projectTracking } from '../../services/apis';
 import Swal from 'sweetalert2';
 import currentFormatter from 'currency-formatter';
+import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
+import moment from 'moment';
 
-const AddPlanTrabajo = (props) => {
+const AddPlanTrabajo = ({ onSave = null, isClose = null }) => {
 
     // app
     const app_context = useContext(AppContext);
 
     // project
-    const { project } = useContext(ProjectContext);
+    const { project, dispatch } = useContext(ProjectContext);
 
     // estados
     const [form, setForm] = useState({});
@@ -34,30 +36,20 @@ const AddPlanTrabajo = (props) => {
     // crear plan de trabajo
     const cratePlanTrabajo = async () => {
         let answer = await Confirm('warning', `¿Estas seguro en guardar el proyecto?`);
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            let datos = Object.assign({}, form);
-            datos.project_id = project.id;
-            await projectTracking.post('plan_trabajo', datos)
-                .then(res => {
-                    app_context.setCurrentLoading(false);
-                    let { message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    setForm({})
-                    setErrors({})
-                    let { onSave } = props;
-                    if (typeof onSave == 'function') onSave();
-                }).catch(err => {
-                    app_context.setCurrentLoading(false);
-                    let { data } = err.response;
-                    if (typeof data != 'object') throw new Error(err.message);
-                    if (typeof data.errors != 'object') throw new Error(data.message);
-                    Swal.fire({ icon: 'warning', text: data.message });
-                    setErrors(data.errors);
-                }).catch(err => {
-                    Swal.fire({ icon: 'error', text: err.message });
-                });
-        }
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        let datos = Object.assign({}, form);
+        datos.project_id = project.id;
+        await projectTracking.post('plan_trabajo', datos)
+        .then(res => {
+            app_context.setCurrentLoading(false);
+            let { message, plan_trabajo } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+            setForm({})
+            setErrors({})
+            dispatch({ type: projectTypes.ADD_PLAN_TRABAJO, payload: plan_trabajo });
+            if (typeof onSave == 'function') onSave(plan_trabajo);
+        }).catch(err => handleErrorRequest(err, setErrors, app_context.setCurrentLoading(false)));
     }
 
     // render
@@ -65,7 +57,7 @@ const AddPlanTrabajo = (props) => {
         <Modal
             show={true}
             titulo={<span><i className="fas fa-plus"></i> Agregar Plan de Trabajo</span>}
-            {...props}
+            isClose={isClose}
         >  
             <Form className="card-body">
                 <div className="row">
@@ -91,8 +83,43 @@ const AddPlanTrabajo = (props) => {
                         </Form.Field>
                     </div>
 
+                    <div className="col-md-6 mb-3">
+                        <Form.Field>
+                            <label htmlFor="">Inicio</label>
+                            <input  
+                                type="text"
+                                value={moment(project.date_start).format('YYYY') || ""}
+                                readOnly
+                            />
+                        </Form.Field>
+                    </div>
+
+                    <div className="col-md-6 mb-3">
+                        <Form.Field>
+                            <label htmlFor="">Final</label>
+                            <input  
+                                type="text"
+                                value={moment(project.date_over).format('YYYY') || ""}
+                                readOnly
+                            />
+                        </Form.Field>
+                    </div>
+
                     <div className="col-md-12">
                         <hr/>
+                    </div>
+
+                    <div className="col-md-12 mb-3">
+                        <Form.Field error={errors.year && errors.year[0] || ""}>
+                            <label htmlFor="">Año <b className="text-red">*</b></label>
+                            <input  
+                                type="number"
+                                name="year"
+                                value={form.year || ""}
+                                onChange={({target}) => handleInput(target)}
+                            />
+                            <label htmlFor="">{errors.year && errors.year[0] || ""}</label>
+                        </Form.Field>
                     </div>
 
                     <div className="col-md-12 mb-3">
@@ -122,15 +149,15 @@ const AddPlanTrabajo = (props) => {
                     </div>
 
                     <div className="col-md-12 mb-3">
-                        <Form.Field error={errors.duration && errors.duration[0] || ""}>
-                            <label htmlFor="">Duración <b className="text-red">*</b></label>
-                            <input  
-                                type="number"
-                                name="duration"
-                                value={form.duration || ""}
+                        <Form.Field error={errors?.description?.[0] || ""}>
+                            <label htmlFor="">Descripción <b className="text-red">*</b></label>
+                            <textarea  
+                                type="text"
+                                name="description"
+                                value={form.description || ""}
                                 onChange={({target}) => handleInput(target)}
                             />
-                            <label htmlFor="">{errors.duration && errors.duration[0] || ""}</label>
+                            <label htmlFor="">{errors?.description?.[0] || ""}</label>
                         </Form.Field>
                     </div>
 

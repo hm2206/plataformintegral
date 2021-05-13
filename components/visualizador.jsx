@@ -17,7 +17,7 @@ const actions = {
 };
 
 
-const Visualizador = ({ id, name, extname, url, observation, onClick = null, onClose = null, onUpdate = null }) => {
+const Visualizador = ({ id, name, extname, url, observation, onClick = null, onClose = null, onUpdate = null, is_observation = true }) => {
 
     // estados
     const [current_url, setCurrentUrl] = useState("");
@@ -111,13 +111,15 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
                         <span><b>{name || ""}</b></span>
                     </div>
                     <div className="col-md-3 col-5 text-right">
-                        <button className="btn text-white font-15 mr-2"
-                            disabled={!is_download}
-                            onClick={(e) => setIsNote(true)}
-                        >
-                            <i className="fas fa-sticky-note mr-1"></i>
-                            Observación
-                        </button>
+                        <Show condicion={is_observation}>
+                            <button className="btn text-white font-15 mr-2"
+                                disabled={!is_download}
+                                onClick={(e) => setIsNote(true)}
+                            >
+                                <i className="fas fa-sticky-note mr-1"></i>
+                                Observación
+                            </button>
+                        </Show>
 
                         <button className="btn text-white font-15"
                             disabled={!is_download}

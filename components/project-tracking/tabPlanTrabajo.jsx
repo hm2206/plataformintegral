@@ -2,17 +2,12 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import { projectTracking } from '../../services/apis';
 import { AppContext } from '../../contexts/AppContext';
-import moment from 'moment';
 import Show from '../show';
-import InfoPlanTrabajo from './infoPlanTrabajo';
-import ExecutePlanTrabajo from './executePlanTrabajo';
-import AnualPlanTrabajo from './anualPlanTrabajo';
-import Anexos from './anexos';
 import AddPlanTrabajo from './addPlanTrabajo';
-import Router from 'next/router'
-import { Button, Form } from 'semantic-ui-react';
-import ReportPlanTrabajo from './reportPlanTrabajo';
-import currentFormatter from 'currency-formatter'
+import Skeleton from 'react-loading-skeleton';
+import ItemPlanTrabajo from './itemPlanTrabajo';
+import { BtnFloat } from '../Utils';
+import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
 
 const situacions = {
     PENDIENTE: {
@@ -41,36 +36,50 @@ const situacions = {
     }
 }
 
+const Placeholder = () => {
+    const datos = [1, 2, 3, 4, 5];
+    return datos.map(d => 
+        <tr>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
+        </tr>  
+    );
+}
+
 const TabPlanTrabajo = () => {
 
     // app
     const app_context = useContext(AppContext);
 
     // project
-    const { project } = useContext(ProjectContext);
+    const { project, plan_trabajos, dispatch } = useContext(ProjectContext);
 
     // stados
+    const [is_create, setIsCreate] = useState(false);
     const [current_loading, setCurrentLoading] = useState(true);
-    const [plan_trabajo, setPlanTrabajo] = useState({ page: 1, lastPage: 0, data: [] });
-    const [option, setOption] = useState("");
-    const [current_plan_trabajo, setCurrentPlanTrabajo] = useState({});
-    const [duration, setDuration] = useState("");
-    const [resolucion, setResolucion] = useState("");
-    const [date_resolucion, setDateResolucion] = useState("");
 
     // obtener plan de trabajo
-    const getPlanTrabajo = async () => {
+    const getPlanTrabajo = async (add = false) => {
         setCurrentLoading(true);
-        await projectTracking.get(`project/${project.id}/plan_trabajo?page=${plan_trabajo.page || 1}`)
+        await projectTracking.get(`project/${project.id}/plan_trabajo?page=${plan_trabajos.page || 1}`)
             .then(res => {
-                let { plan_trabajos } = res.data;
-                setPlanTrabajo({
-                    page: plan_trabajos.page,
-                    lastPage: plan_trabajos.lastPage,
-                    data: plan_trabajos.data
-                });
+                let { data } = res;
+                let payload ={
+                    total: data.plan_trabajos.total,
+                    lastPage: data.plan_trabajos.lastPage,
+                    data: add ? [...plan_trabajos.data, ...data.plan_trabajos.data] : data.plan_trabajos.data
+                };
+                // setting 
+                dispatch({ type: projectTypes.SET_PLAN_TRABAJOS, payload });
             })
-            .catch(err => console.log(err.message));
+            .catch(err => {
+                let payload = { page: 1, total: 0, last_page: 0, data: [] };
+                dispatch({ type: projectTypes.SET_PLAN_TRABAJOS, payload });
+            });
         setCurrentLoading(false);
     }
 
@@ -81,141 +90,66 @@ const TabPlanTrabajo = () => {
 
     // render
     return (
-    <Fragment>
-        <Show condicion={project.state != 'OVER'}>
-            <Form className="row">
-                <div className="col-md-12 mb-4 text-right">
-                    <Button color="teal" onClick={(e) => setOption('plan_trabajo')}>
-                        <i className="fas fa-plus"></i> Agregar plan de trabajo
-                    </Button>
-                </div>
-            </Form>
-        </Show>
-
-        <div className="table-responsive font-13">
-            <table className="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th className="text-center" rowSpan="2">Duración</th>
-                        <th className="text-center" colSpan="2">Fechas</th>
-                        <th className="text-center" rowSpan="2">Costo</th>
-                        <th className="text-center" rowSpan="2">Situación</th>
-                        <th className="text-center" rowSpan="2">Acciones</th>
-                    </tr>
-                    <tr>
-                        <th className="text-center">Inicio</th>
-                        <th className="text-center">Fin</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {plan_trabajo && plan_trabajo.data.map(pla => 
-                        <tr key={`th-plan-trabajo-${pla.id}`}>
-                            <td className="text-center">{pla.duration}</td>    
-                            <td className="text-center">{moment(pla.date_start).format('DD/MM/YYYY')}</td>  
-                            <td className="text-center">{moment(pla.date_over).format('DD/MM/YYYY')}</td> 
-                            <th className="text-center">{currentFormatter.format(pla.monto, { code: 'PEN' })}</th> 
-                            <td className="text-center">{pla.state}</td> 
-                            <td className="text-center">
-                                <div className="btn btn-group">
-                                    <button className="btn btn-sm btn-outline-primary"
-                                        onClick={(e) => {
-                                            setOption('info')
-                                            setCurrentPlanTrabajo(pla)
-                                        }}
-                                        title="Ver más"
-                                    >
-                                        <i className="fas fa-search"></i>
-                                    </button>
-
-                                    <button className="btn btn-sm btn-outline-dark"
-                                        title="Ejecutar plan de trabajo"
-                                        onClick={(e) => {
-                                            setOption('execute')
-                                            setCurrentPlanTrabajo(pla)
-                                        }}
-                                    >
-                                        <i className="fas fa-upload"></i>
-                                    </button>
-
-                                    <button className="btn btn-sm btn-outline-danger"
-                                        title="reporte"
-                                        onClick={(e) => {
-                                            setOption('anual')
-                                            setCurrentPlanTrabajo(pla)
-                                        }}
-                                    >
-                                        <i className="fas fa-file-pdf"></i>
-                                    </button>
-
-                                    <button className="btn btn-sm btn-warning"
-                                        title="Anexos del plan de trabajo"
-                                        onClick={(e) => {
-                                            setOption('anexos')
-                                            setCurrentPlanTrabajo(pla)
-                                        }}
-                                    >
-                                        <i className="fas fa-paperclip"></i>
-                                    </button>
-                                </div>
-                            </td> 
-                        </tr>
-                    )}
-                    <Show condicion={!current_loading && plan_trabajo.data && !plan_trabajo.data.length}>
+        <Fragment>
+            <div className="table-responsive font-13">
+                <table className="table table-bordered table-striped">
+                    <thead>
                         <tr>
-                            <td colSpan="8" className="text-center">No hay registros disponibles</td>
+                            <th className="text-center">Duración</th>
+                            <th className="text-center">Año</th>
+                            <th className="text-center">N° Resolución</th>
+                            <th className="text-center">F. Resolución</th>
+                            <th className="text-center">Costo</th>
+                            <th className="text-center">Acciones</th>
                         </tr>
-                    </Show>
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        <Show condicion={!current_loading}
+                            predeterminado={<Placeholder/>}
+                        >
+                            {plan_trabajos?.data?.map((plan, indexP) => 
+                                <ItemPlanTrabajo 
+                                    key={`th-plan-trabajo-${indexP}`}
+                                    plan_trabajo={plan}
+                                />
+                            )}
+                            {/* no hay regístros */}
+                            <Show condicion={!plan_trabajos?.total}>
+                                <tr>
+                                    <td colSpan="7" className="text-center">No hay registros disponibles</td>
+                                </tr>
+                            </Show>
 
-        {/* <div className="mt-5">
-            <b className="font-13"><u>Situación del Informe</u></b>
-            <div className="font-12">
-                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['PENDIENTE'].color }}></div> {situacions['PENDIENTE'].text}</div>
-                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['ENVIADO'].color }}></div> {situacions['ENVIADO'].text}</div>
-                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['OBSERVADO'].color }}></div> {situacions['OBSERVADO'].text}</div>
-                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['APROBADO'].color }}></div> {situacions['APROBADO'].text}</div>
-                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['RESERVA'].color }}></div> {situacions['RESERVA'].text}</div>
-                <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['DESAPROBADO'].color }}></div> {situacions['DESAPROBADO'].text}</div>
+                        </Show>
+                    </tbody>
+                </table>
             </div>
-        </div> */}
 
-        <Show condicion={option == 'info'}>
-            <InfoPlanTrabajo
-                plan_trabajo={current_plan_trabajo}
-                isClose={(e) => setOption("")}
-            />
-        </Show>
+            {/* <div className="mt-5">
+                <b className="font-13"><u>Situación del Informe</u></b>
+                <div className="font-12">
+                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['PENDIENTE'].color }}></div> {situacions['PENDIENTE'].text}</div>
+                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['ENVIADO'].color }}></div> {situacions['ENVIADO'].text}</div>
+                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['OBSERVADO'].color }}></div> {situacions['OBSERVADO'].text}</div>
+                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['APROBADO'].color }}></div> {situacions['APROBADO'].text}</div>
+                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['RESERVA'].color }}></div> {situacions['RESERVA'].text}</div>
+                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['DESAPROBADO'].color }}></div> {situacions['DESAPROBADO'].text}</div>
+                </div>
+            </div> */}
+            {/* crear plan de trabajo */}
+            <Show condicion={project.state != 'OVER'}>
+                <BtnFloat onClick={() => setIsCreate(true)}>
+                    <i className="fas fa-plus"></i>
+                </BtnFloat>
 
-        <Show condicion={option == 'execute'}>
-            <ExecutePlanTrabajo
-                plan_trabajo={current_plan_trabajo}
-                isClose={(e) => setOption("")}
-            />
-        </Show>
-
-        <Show condicion={option == 'anual'}>
-            <ReportPlanTrabajo
-                plan_trabajo={current_plan_trabajo}
-                isClose={(e) => setOption("")}
-            />
-        </Show>
-
-        <Show condicion={option == 'anexos'}>
-            <Anexos
-                object_id={current_plan_trabajo.id}
-                object_type={'App/Models/PlanTrabajo'}
-                isClose={(e) => setOption("")}
-            />
-        </Show>
-
-        <Show condicion={option == 'plan_trabajo'}>
-            <AddPlanTrabajo isClose={(e) => setOption("")}
-                onSave={(e) => getPlanTrabajo()}
-            />
-        </Show>
-    </Fragment>)
+                <Show condicion={is_create}>
+                    <AddPlanTrabajo isClose={(e) => setIsCreate(false)}
+                        onSave={(e) => setIsCreate(false)}
+                    />
+                </Show>
+            </Show>
+        </Fragment>
+    )
 }
 
 export default TabPlanTrabajo;

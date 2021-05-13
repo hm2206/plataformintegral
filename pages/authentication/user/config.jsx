@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Body, BtnBack, SimpleList, SimpleListContent } from '../../../components/Utils';
+import React, { useContext, useEffect, useState } from 'react';
+import { BtnBack, SimpleList, SimpleListContent } from '../../../components/Utils';
 import { Form } from 'semantic-ui-react'
-import { authentication } from '../../../services/apis';
+import { authentication, handleErrorRequest } from '../../../services/apis';
 import { AUTHENTICATE } from '../../../services/auth';
 import atob from 'atob';
 import Show from '../../../components/show';
@@ -9,6 +9,12 @@ import ConfigEntity from '../../../components/authentication/user/configEntity';
 import ConfigPermission from '../../../components/authentication/user/configPermission';
 import ConfigEntityDependencia from '../../../components/authentication/user/configEntityDependencia';
 import BoardSimple from '../../../components/boardSimple';
+import { AppContext } from '../../../contexts';
+import { Confirm } from '../../../services/utils';
+import Swal from 'sweetalert2';
+import router from 'next/router';
+import { Button } from 'semantic-ui-react';
+import NotFoundData from '../../../components/notFoundData'
 
 const actions = {
     ADD_ENTITY: "ADD_ENTITY",
@@ -18,8 +24,48 @@ const actions = {
 
  const ConfigUser = ({ pathname, query, success, user }) => {
 
+    if (!success) return <NotFoundData/>
+
+    // app
+    const app_context = useContext(AppContext);
+
     // estados
     const [option, setOption] = useState();
+    const [form, setForm] = useState({});
+    const [edit, setEdit] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = value;
+        setErrors(newErrors);
+        setEdit(true);
+    }
+
+    const handleUpdate = async () => {
+        let answer = await Confirm('info', `¿Estás seguro en guardar los cambios?`, 'Estoy seguro');
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        await authentication.post(`user/${user.id}?_method=PUT`, form)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            await router.push(location.href);
+            setEdit(false);
+        }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)))
+    }
+
+    useEffect(() => {
+        setForm(Object.assign({}, user || {}));
+    }, []);
+
+    useEffect(() => {
+        if (!edit) setForm(Object.assign({}, user || {}));
+    }, [edit]);
 
     // render
     return (
@@ -47,7 +93,7 @@ const actions = {
                                             <input type="text" 
                                                 className="uppercase"
                                                 placeholder="Ingrese un nombre"
-                                                value={user.person && user.person.fullname || ""}
+                                                value={user?.person?.fullname || ""}
                                                 readOnly
                                             />
                                         </Form.Field>
@@ -58,7 +104,7 @@ const actions = {
                                             <label htmlFor="">N° Documento</label>
                                             <input type="text"
                                                 placeholder="Ingrese un nombre"
-                                                value={user.person && user.person.document_number || ""}
+                                                value={user?.person?.document_number || ""}
                                                 readOnly
                                             />
                                         </Form.Field>
@@ -68,10 +114,10 @@ const actions = {
                                         <Form.Field>
                                             <label htmlFor="">Username</label>
                                             <input type="text" 
-                                                name="name"
-                                                placeholder="Ingrese un nombre"
-                                                value={user.username || ""}
-                                                readOnly
+                                                name="username"
+                                                placeholder="Ingrese el username"
+                                                value={form?.username || ""}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                         </Form.Field>
                                     </div>
@@ -80,11 +126,29 @@ const actions = {
                                         <Form.Field>
                                             <label htmlFor="">Email</label>
                                             <input type="text" 
-                                                value={user.email || ""}
-                                                readOnly
+                                                name="email"
+                                                value={form?.email || ""}
+                                                onChange={(e) => handleInput(e.target)}
                                             />
                                         </Form.Field>
                                     </div>
+
+                                    <Show condicion={edit}>
+                                        <div className="col-12 text-right">
+                                            <Button color="red"
+                                                basic
+                                                onClick={() => setEdit(false)}
+                                            >
+                                                <i className="fas fa-times"></i> Cancelar
+                                            </Button>
+
+                                            <Button color="blue"
+                                                onClick={handleUpdate}
+                                            >
+                                                <i className="fas fa-sync"></i> Guardar cambios
+                                            </Button>
+                                        </div>
+                                    </Show>
 
                                     <div className="col-md-12 mt-4">
                                         <hr/>

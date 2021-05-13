@@ -7,7 +7,7 @@ const useAuth = () => {
 
     // estados
     const [loading, setLoading] = useState(false);
-    const [is_logged, setIsLogged] = useState(false);
+    const [is_logged, setIsLogged] = useState(undefined);
 
     // remover tokens
     const removeToken = () => {

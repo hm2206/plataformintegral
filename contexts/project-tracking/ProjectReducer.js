@@ -66,6 +66,8 @@ export const projectTypes = {
     SET_TEAMS: 'SET[TEAMS]',
     ADD_TEAM: 'ADD[TEAM]',
     DELETE_TEAM: 'DELETE[TEAM]',
+    SET_PLAN_TRABAJOS: 'SET[PLAN_TRABAJOS]',
+    ADD_PLAN_TRABAJO: 'SET[PLAN_TRABAJO]',  
 };
 
 export const projectReducer = (state = inititalStates, { type, payload }) => {
@@ -104,6 +106,7 @@ export const projectReducer = (state = inititalStates, { type, payload }) => {
             let addObjectives = Object.assign({}, state.objectives);
             addObjectives.data = addObjectives.data.filter(obj => obj.id != payload.id);
             addObjectives.data.push(payload);
+            addObjectives.total += 1;
             newState.objectives = addObjectives;
             return newState;
         case projectTypes.SET_ACTIVITIES:
@@ -173,6 +176,17 @@ export const projectReducer = (state = inititalStates, { type, payload }) => {
             let deleteTeams = newState.teams.data.filter(d => d.id != payload.id);
             newState.teams.data = deleteTeams;
             newState.teams.total = state.teams.total - 1; 
+            return newState;
+        case projectTypes.SET_PLAN_TRABAJOS:
+            let newPlanTrabajos = Object.assign(state.plan_trabajos, payload);
+            newState.plan_trabajos = newPlanTrabajos;
+            return newState;
+        case projectTypes.ADD_PLAN_TRABAJO:
+            let addPlanTrabajos = Object.assign({}, state.plan_trabajos);
+            addPlanTrabajos.data = addPlanTrabajos.data.filter(obj => obj.id != payload.id);
+            addPlanTrabajos.data.push(payload);
+            addPlanTrabajos.total += 1;
+            newState.plan_trabajos = addPlanTrabajos;
             return newState;
         default:
             return newState;

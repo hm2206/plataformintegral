@@ -14,6 +14,7 @@ import { Input, FormField, Button, Form } from 'semantic-ui-react';
 import { AppContext } from '../../contexts';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
+import { SelectTypeProject } from '../select/project_tracking';
 
 const Placeholder = () => {
     const datos = [1, 2, 3, 4];
@@ -47,12 +48,6 @@ const states = {
     }
 };
 
-const defaultPaginate = {
-    total: 0,
-    last_page: 0,
-    page: 1,
-    data: []
-};
 
 const TabDatos = () => {
 
@@ -125,12 +120,13 @@ const TabDatos = () => {
         let payload = Object.assign({}, form);
         payload.keywords = JSON.stringify(form.keywords);
         await projectTracking.post(`project/${project.id}/update`, payload)
-        .then(res => {
+        .then(async res => {
             app_context.setCurrentLoading(false);
             let { message } = res.data;
-            Swal.fire({ icon: 'success', text: message });
+            await Swal.fire({ icon: 'success', text: message });
             dispatch({ type: projectTypes.SET_PROJECT, payload: form });
             setEdit(false);
+            Router.push(location.href);
         }).catch(err => handleErrorRequest(err, setErrors, app_context.setCurrentLoading(false)));
     }
 
@@ -166,6 +162,24 @@ const TabDatos = () => {
                                 >
                                     <i className={`fas fa-edit fa-sm text-dark`}></i>
                                 </span>
+                            </Show>
+                        </td>
+                    </tr>
+                    {/* tipo de proyecto */}
+                    <tr>
+                        <td className="uppercase"><b>Tipo Proyecto: </b></td>
+                        <td colSpan="2">
+                            <Show condicion={edit}
+                                predeterminado={<span className="uppercase">{project?.type_project?.name || ""}</span>}
+                            >
+                                <FormField error={errors?.type_project_id?.[0] ? true : false}>
+                                    <SelectTypeProject
+                                        name="type_project_id"
+                                        value={form?.type_project_id}
+                                        onChange={(e, obj) => handleInput(obj)}
+                                    />
+                                    <label>{errors?.title?.[0]}</label>
+                                </FormField>
                             </Show>
                         </td>
                     </tr>

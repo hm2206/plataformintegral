@@ -9,6 +9,7 @@ import SkullContent from '../components/loaders/skullContent';
 import { EntityProvider } from '../contexts/EntityContext';
 import { SocketProvider } from '../contexts/SocketContext';
 import { NotificationProvider } from '../contexts/notification/NotificationContext';
+import router from 'next/router';
 
 export const AuthContext = createContext();
 
@@ -22,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     const { auth_token } = useContext(AppContext);
 
     // auth context
-    const { getAuth, logout, is_logged, loading } = useAuth(auth_token);
+    const { getAuth, logout, is_logged, loading, removeToken } = useAuth(auth_token);
 
     // obtener el auth
     const handleAuth = async () => {
@@ -34,6 +35,14 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         handleAuth();
     }, [auth_token]);
+
+    // no se pudo loggear
+    useEffect(() => {
+        if(typeof is_logged == 'boolean' && !is_logged) {
+            removeToken();
+            router.push('/login');
+        }
+    }, [is_logged]);
 
     // response
     return (

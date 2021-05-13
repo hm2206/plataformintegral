@@ -8,9 +8,41 @@ import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import Swal from 'sweetalert2';
 import { DropZone } from '../Utils';
-import { Confirm } from '../../services/utils';
+import { Confirm, formatBytes } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import Skeleton from 'react-loading-skeleton';
+import Visualizador from '../visualizador';
+
+const ItemAnexo = ({ anexo }) => {
+    // estados
+    const [is_render, setIsRender] = useState(false);
+    // render
+    return (
+        <tr>
+            <td>{anexo?.name}</td>
+            <td>{formatBytes(anexo?.size || 0)}</td>
+            <td>
+                <div className="text-center">
+                    <span className="text-primary cursor-pointer"
+                        onClick={(e) => setIsRender(true)}
+                    >
+                        <i className="fas fa-search"></i>
+                    </span>
+                </div>
+
+                <Show condicion={is_render}>
+                    <Visualizador
+                        is_observation={false}
+                        name={anexo?.name}
+                        extname={anexo?.extname}
+                        url={anexo?.url}
+                        onClose={(e) => setIsRender(false)}
+                    />
+                </Show>
+            </td> 
+        </tr>   
+    )
+}
 
 const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true }) => {
 
@@ -102,7 +134,7 @@ const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true })
                             <tr>
                                 <th>Nombre</th>
                                 <th>Tamaño</th>
-                                <th className="text-center">Descargar</th>
+                                <th className="text-center">Visualizar</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -121,16 +153,10 @@ const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true })
                             </Show>
 
                             {data.map((f, indexF) =>
-                                <tr key={`list-anexos-${indexF}`}>
-                                   <td>{f.name}</td>
-                                   <td>{f.size}</td>
-                                   <td className="text-center">
-                                        <a href={f.url} target="_blank" rel="noopener noreferrer">
-                                            <i className="fas fa-download"></i>
-                                        </a>
-                                    </td> 
-                                </tr>    
-                            )}
+                                <ItemAnexo anexo={f}
+                                    key={`list-anexos-${indexF}`}
+                                />
+                            )}  
 
                             <Show condicion={current_loading}>
                                 <tr>
