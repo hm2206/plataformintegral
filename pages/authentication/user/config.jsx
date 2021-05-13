@@ -111,7 +111,7 @@ const actions = {
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field>
+                                        <Form.Field errors={errors?.username?.[0] ? true : false}>
                                             <label htmlFor="">Username</label>
                                             <input type="text" 
                                                 name="username"
@@ -119,17 +119,19 @@ const actions = {
                                                 value={form?.username || ""}
                                                 onChange={(e) => handleInput(e.target)}
                                             />
+                                            <label>{errors?.username?.[0] || ""}</label>
                                         </Form.Field>
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <Form.Field>
+                                        <Form.Field errors={errors?.email?.[0] ? true : false}>
                                             <label htmlFor="">Email</label>
                                             <input type="text" 
                                                 name="email"
                                                 value={form?.email || ""}
                                                 onChange={(e) => handleInput(e.target)}
                                             />
+                                            <label>{errors?.email?.[0] || ""}</label>
                                         </Form.Field>
                                     </div>
 
