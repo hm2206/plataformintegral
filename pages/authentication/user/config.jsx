@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { BtnBack, SimpleList, SimpleListContent } from '../../../components/Utils';
+import { BtnBack, CheckBox, SimpleList, SimpleListContent } from '../../../components/Utils';
 import { Form } from 'semantic-ui-react'
 import { authentication, handleErrorRequest } from '../../../services/apis';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -13,7 +13,7 @@ import { AppContext } from '../../../contexts';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import router from 'next/router';
-import { Button } from 'semantic-ui-react';
+import { Button, Checkbox } from 'semantic-ui-react';
 import NotFoundData from '../../../components/notFoundData'
 
 const actions = {
@@ -134,6 +134,20 @@ const actions = {
                                     </div>
 
                                     <Show condicion={edit}>
+                                        <div className="col-md-6 mb-3 text-right">
+                                            <Form.Field>
+                                                <label htmlFor="">
+                                                    Sincronizar email con el 
+                                                    <span className="ml-1 badge badge-light">email de contacto</span>
+                                                </label>
+                                                <Checkbox toggle
+                                                    name="sync"
+                                                    checked={form.sync ? true : false}
+                                                    onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
                                         <div className="col-12 text-right">
                                             <Button color="red"
                                                 basic
