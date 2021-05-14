@@ -60,9 +60,10 @@ export const projectTypes = {
     SET_ACTIVITIES: 'SET[ACTIVITIES]',
     UPDATE_ACTIVITY: 'UPDATE[ACTIVITY]',
     SET_GASTOS: 'SET[GASTOS]',
-    UPDATE_GASTO: 'UPDATE[GASTO]',
     ADD_GASTO: 'ADD[GASTO',
+    UPDATE_GASTO: 'UPDATE[GASTO]',
     DELETE_GASTO: 'DELETE_GASTO',
+    VERIFY_TECNICA: 'VERIFY_TECNICA',
     SET_TEAMS: 'SET[TEAMS]',
     ADD_TEAM: 'ADD[TEAM]',
     DELETE_TEAM: 'DELETE[TEAM]',
@@ -151,7 +152,7 @@ export const projectReducer = (state = inititalStates, { type, payload }) => {
             addGastos.data.push(payload);
             newState.gastos = addGastos;
             let add_total_activity = collect(newState.gastos.data).sum('total');
-            let payloadAddActivity = { id: payload.activity_id, total: add_total_activity };
+            let payloadAddActivity = { id: payload.activity_id, total: add_total_activity, verify: 0, verify_tecnica: 0 };
             projectReducer(state, { type: projectTypes.UPDATE_ACTIVITY, payload: payloadAddActivity });
             return newState;
         case projectTypes.DELETE_GASTO:

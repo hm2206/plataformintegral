@@ -1,9 +1,8 @@
 import React, { useContext, useState, useEffect, Fragment } from 'react';
-import { Button, Form, Checkbox } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import Modal from '../modal'
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
-import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
 import AddGasto from './addGasto';
 import ListGastos from './listGastos';
@@ -30,6 +29,9 @@ const Placeholder = () => {
 
 const ItemActivity = ({ objective, activity, index = 1, active = false, onClick = null }) => {
 
+    // project
+    const { project } = useContext(ProjectContext);
+
     // estados
     const [is_create, setIsCreate] = useState(false);
 
@@ -48,21 +50,19 @@ const ItemActivity = ({ objective, activity, index = 1, active = false, onClick 
                 </td>
                 <td width="5%">
                     <div className="text-center w-100">
-                        <Show condicion={!activity?.verify}
-                            predeterminado={
-                                <span className="badge badge-primary">
-                                    Verificado
-                                </span>
-                            }
-                        >
-                            <Show condicion={active}>
-                                <Button basic 
-                                    size="mini"
-                                    color="teal"
-                                    icon="plus"
-                                    onClick={(e) => setIsCreate(true)}
-                                />
-                            </Show>
+                        <Show condicion={activity?.verify && activity?.verify_tecnica}>
+                            <span className="badge badge-primary mb-1">
+                                Verificado
+                            </span>
+                        </Show>
+                        {/* button */}
+                        <Show condicion={project.status != 'OVER' && active}>
+                            <Button basic 
+                                size="mini"
+                                color="teal"
+                                icon="plus"
+                                onClick={(e) => setIsCreate(true)}
+                            />
                         </Show>
                     </div>
                     {/* crear gasto */}

@@ -155,11 +155,12 @@ const ItemGasto = ({ activity, gasto }) => {
             </th>
             <td width="5%" className="text-center">
                 <Button.Group size="mini">
-                    <Show condicion={!activity.verify}
+                    <Show condicion={!gasto.verify_financiera || !gasto.verify_tecnica}
                         predeterminado={
-                            <span className="badge badge-success">
-                                <i className="fas fa-check"></i>
-                            </span>
+                            <Button color="green"
+                                size="mini"
+                                icon="check"
+                            />
                         }
                     >
                         <Button basic

@@ -1,13 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Button, Form, Select } from 'semantic-ui-react';
-import Modal from '../modal'
 import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
-import { Confirm } from '../../services/utils';
 import { projectTracking } from '../../services/apis';
-import Swal from 'sweetalert2';
 import currencyFormatter from 'currency-formatter';
+import Skeleton from 'react-loading-skeleton';
 import moment from 'moment';
 
 const defaultData = {
@@ -15,6 +12,17 @@ const defaultData = {
     total: 0,
     page: 0,
     data: []
+}
+
+const Placeholder = () => {
+    const data = [1, 2, 3, 4];
+    return data.map( d => 
+        <div key={`list-item-placeholder-${d}`}
+            className="col-12"
+        >
+            <Skeleton height="50px"/>
+        </div>
+    )
 }
 
 const ListDetalle = (props) => {
@@ -54,43 +62,6 @@ const ListDetalle = (props) => {
         setCurrentLoading(false);
     }
 
-    // cambiar form
-    const handleInput = ({ name, value }) => {
-        let newForm = Object.assign({}, form);
-        newForm[name] = value;
-        setForm(newForm);
-        let newErrors = Object.assign({}, errors);
-        setErrors(newErrors);
-    }
-
-    // crear equipo
-    const createDetalle = async () => {
-        let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`);
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            let datos = Object.assign({}, form);
-            datos.gasto_id = gasto.id;
-            await projectTracking.post(`detalle`, datos)
-                .then(res => {
-                    app_context.setCurrentLoading(false);
-                    let { success, message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    setForm({});
-                    if (typeof props.onCreate == 'function') props.onCreate();
-                }).catch(err => {
-                    try {
-                        app_context.setCurrentLoading(false);
-                        let { errors, message } = err.response.data;
-                        if (!errors) throw new Error(message);
-                        Swal.fire({ icon: 'warning', text: message });
-                        setErrors(errors);
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message });
-                    }
-                });
-        }
-    }
-
     // primera carga
     useEffect(() => {
         if (isGasto) getDetalles();
@@ -98,87 +69,12 @@ const ListDetalle = (props) => {
 
     // render
     return (
-        <Modal
-            show={true}
-            titulo={<span><i className="fas fa-coins"></i> Detalle de Gasto Ejecutado</span>}
-            {...props}
-            md="7"
-        >  
-            <Form className="card-body">
-                <div className="row">
-                    <div className="col-md-12 mb-3">
-                        <Form.Field>
-                            <label htmlFor="">Partida Presupuestal</label>
-                            <input type="text" 
-                                className="uppercase"
-                                readOnly 
-                                value={`${gasto && gasto.presupuesto} - ${gasto && gasto.ext_pptto}`}
-                            />
-                        </Form.Field>
-                    </div>
-                    
-                    <div className="col-md-12 mb-3">
-                        <Form.Field>
-                            <label htmlFor="">Rubro</label>
-                            <input type="text" 
-                                className="uppercase"
-                                readOnly 
-                                value={gasto && gasto.rubro}
-                            />
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-12 mb-3">
-                        <Form.Field>
-                            <label htmlFor="">Descripción de gasto programado</label>
-                            <input type="text" 
-                                className="uppercase"
-                                readOnly 
-                                value={`${gasto && gasto.description}`}
-                            />
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-12 mb-3">
-                        <Form.Field>
-                            <label htmlFor="">Medida de gasto programado</label>
-                            <input type="text" 
-                                className="uppercase"
-                                readOnly 
-                                value={`${gasto && gasto.medida || ""}`}
-                            />
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-6 mb-3">
-                        <Form.Field>
-                            <label htmlFor="">Total de gasto programado</label>
-                            <input type="text" 
-                                className="uppercase"
-                                readOnly 
-                                value={`${gasto && currencyFormatter.format(gasto.total, { code: 'PEN' })}`}
-                            />
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-6 mb-3">
-                        <Form.Field>
-                            <label htmlFor="">Total de gasto ejecutado</label>
-                            <input type="text" 
-                                className="uppercase"
-                                readOnly 
-                                value={`${gasto && currencyFormatter.format(total, { code: 'PEN' })}`}
-                            />
-                        </Form.Field>
-                    </div>
-
-                    <div className="col-md-12 mt-4 mb-3">
-                        <hr/>
-                        <h5><i className="fas fa-info-circle"></i> Comprobantes</h5>
-                        <hr/>
-                    </div>
-
-                    {detalle && detalle.data && detalle.data.map((det, indexD) => 
+        <div className="card-body">
+            <div className="row">
+                <Show condicion={!current_loading}
+                    predeterminado={<Placeholder/>}
+                >
+                    {detalle?.data?.map((det, indexD) => 
                         <div className="col-md-12 mb-3" key={`show-comprobando-${indexD}`}>
                             <div className="card card-body">
                                 <div className="row">
@@ -241,9 +137,15 @@ const ListDetalle = (props) => {
                             </div>
                         </div>    
                     )}
-                </div>
-            </Form>
-        </Modal>
+                    {/* no hay resgistros */}
+                    <Show condicion={!detalle?.total}>
+                        <div className="col-12 text-center">
+                            No hay regístros
+                        </div>
+                    </Show>
+                </Show>
+            </div>
+        </div>
     )
 }
 

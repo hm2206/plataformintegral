@@ -8,6 +8,7 @@ import ListMedioVerification from './listMedioVerification'
 import { Confirm } from '../../services/utils';
 import ItemSaldoFinanciero from './itemSaldoFinanciero';
 import Skeleton from 'react-loading-skeleton';
+import collect from 'collect.js';
 
 const Placeholder = () => {
     const datos = [1, 2, 3, 4, 5];
@@ -37,7 +38,6 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
 
     // estados
     const [current_objectives, setCurrentObjectives] = useState([]);
-    const [current_gasto, setCurrentGasto] = useState({});
     const [option, setOption] = useState("");
     const [current_meta, setCurrentMeta] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
@@ -52,68 +52,31 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
         setCurrentLoading(false);
     }
 
-    // actualizar los detalles del gasto
-    const onUpdateGasto = async (detalle) => {
-        setOption("");
-        getSaldoFinanciero();
-    }
-
-    // verificación financiera
-    const handleVerify = async (indexO, indexA, obj) => {
-        let answer = await Confirm('warning', '¿Estas seguro en verificar financieramente la actividad?')
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            await projectTracking.post(`activity/${obj.id}/verify`)
-                .then(res => {
-                    app_context.setCurrentLoading(false);
-                    let { message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    let newObjectives = JSON.parse(JSON.stringify(current_objectives));
-                    let newActivities = newObjectives[indexO].activities;
-                    obj.verify = 1;
-                    newActivities[indexA] = obj;
-                    newObjectives.activities = newActivities;
-                    setCurrentObjectives(newObjectives);
-                }).catch(err => {
-                    try {
-                        app_context.setCurrentLoading(false);
-                        let { message, errors } = err.response.data;
-                        if (!errors) throw new Error(message);
-                        Swal.fire({ icon: 'warning', text: message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message || err.message });
-                    }
-                });
+    // verificación de actividad
+    const handleVerify = async (index, act, gas, name = 'verify_tecnica') => {
+        let newObjectives = [...current_objectives];
+        let current_objective = newObjectives[index];
+        if (!current_objective) return;
+        gas[name] = 1;
+        // update gasto
+        await act?.gastos?.map(g => {
+            if (g.id == gas.id) g = gas;
+            return g
+        });
+        // update activities
+        await current_objective?.activities?.map(a => {
+            if (a.id = act.id) a = act;
+            return a;
+        });
+        // actualizar objectives
+        newObjectives[index] = current_objective;
+        // verificar actividad
+        let lackVerify = collect(act.gastos).where('verify_tecnica', 0).count();
+        if (!lackVerify) {
+            act[name == 'verify_tecnica' ? name : 'verify'] = 1;
         }
-    }
-
-    // verificación técnica
-    const handleVerifyTecnica = async (indexO, indexA, obj) => {
-        let answer = await Confirm('warning', '¿Estas seguro en verificar técnicamente la actividad?')
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            await projectTracking.post(`activity/${obj.id}/verify_tecnica`)
-                .then(res => {
-                    app_context.setCurrentLoading(false);
-                    let { message } = res.data;
-                    Swal.fire({ icon: 'success', text: message });
-                    let newObjectives = JSON.parse(JSON.stringify(current_objectives));
-                    let newActivities = newObjectives[indexO].activities;
-                    obj.verify_tecnica = 1;
-                    newActivities[indexA] = obj;
-                    newObjectives.activities = newActivities;
-                    setCurrentObjectives(newObjectives);
-                }).catch(err => {
-                    try {
-                        app_context.setCurrentLoading(false);
-                        let { message, errors } = err.response.data;
-                        if (!errors) throw new Error(message);
-                        Swal.fire({ icon: 'warning', text: message });
-                    } catch (error) {
-                        Swal.fire({ icon: 'error', text: error.message || err.message });
-                    }
-                });
-        }
+        // aplicar cambios
+        setCurrentObjectives(newObjectives);
     }
 
     // primera carga
@@ -233,6 +196,8 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                                                         activity={act}
                                                                         execute={execute}
                                                                         gasto={gas}
+                                                                        onVerifyTecnica={() => handleVerify(indexO, act, gas, 'verify_tecnica')}
+                                                                        onVerifyFinanciera={() => handleVerify(indexO, act, gas, 'verify_financiera')}
                                                                     />
                                                                 )}
                                                             </tbody>    
