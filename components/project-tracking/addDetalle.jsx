@@ -31,6 +31,7 @@ const AddDetalle = (props) => {
         newForm[name] = value;
         setForm(newForm);
         let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
         setErrors(newErrors);
     }
 
@@ -128,7 +129,7 @@ const AddDetalle = (props) => {
                 </div>
 
                 <div className="col-md-6 mb-3">
-                    <Form.Field error={errors.document_type_id && errors.document_type_id[0] || ""}>
+                    <Form.Field error={errors.document_type_id && errors.document_type_id[0] ? true : false}>
                         <label htmlFor="">Tip. Documento <b className="text-red">*</b></label>
                         <SelectDocumentType
                             name="document_type_id"
@@ -140,7 +141,7 @@ const AddDetalle = (props) => {
                 </div>
 
                 <div className="col-md-6 mb-3">
-                    <Form.Field error={errors.document_number && errors.document_number[0] || ""}>
+                    <Form.Field error={errors.document_number && errors.document_number[0] ? true : false}>
                         <label htmlFor="">N° Documento <b className="text-red">*</b></label>
                         <input
                             type="text"
@@ -179,7 +180,7 @@ const AddDetalle = (props) => {
                 </div>
 
                 <div className="col-md-12 mb-3">
-                    <Form.Field error={errors.razon_social && errors.razon_social[0] || ""}>
+                    <Form.Field error={errors.razon_social && errors.razon_social[0] ? true : false}>
                         <label htmlFor="">Pagado a la orden <b className="text-red">*</b></label>
                         <input
                             type="text"
@@ -192,7 +193,7 @@ const AddDetalle = (props) => {
                 </div>
 
                 <div className="col-md-12 mb-3">
-                    <Form.Field error={errors.description && errors.description[0] || ""}>
+                    <Form.Field error={errors.description && errors.description[0] ? true : false}>
                         <label htmlFor="">Descripción <b className="text-red">*</b></label>
                         <textarea
                             rows="3"
@@ -205,7 +206,7 @@ const AddDetalle = (props) => {
                 </div>
 
                 <div className="col-md-6 mb-3">
-                    <Form.Field error={errors.medio_pago_id && errors.medio_pago_id[0] || ""}>
+                    <Form.Field error={errors.medio_pago_id && errors.medio_pago_id[0] ? true : false}>
                         <label htmlFor="">Medio de Pago <b className="text-red">*</b></label>
                         <SelectMedioPago
                             name="medio_pago_id"
@@ -217,7 +218,7 @@ const AddDetalle = (props) => {
                 </div>
 
                 <div className="col-md-6 mb-3">
-                    <Form.Field error={errors.pago_number && errors.pago_number[0] || ""}>
+                    <Form.Field error={errors.pago_number && errors.pago_number[0] ? true : false}>
                         <label htmlFor="">Nro</label>
                         <input
                             type="text"
@@ -230,7 +231,7 @@ const AddDetalle = (props) => {
                 </div>
 
                 <div className="col-md-6 mb-3">
-                    <Form.Field error={errors.date_pago && errors.date_pago[0] || ""}>
+                    <Form.Field error={errors.date_pago && errors.date_pago[0] ? true : false}>
                         <label htmlFor="">Fecha de Emisión</label>
                         <input
                             type="date"
@@ -243,7 +244,7 @@ const AddDetalle = (props) => {
                 </div>
 
                 <div className="col-md-6 mb-3">
-                    <Form.Field error={errors.monto && errors.monto[0] || ""}>
+                    <Form.Field error={errors.monto && errors.monto[0] ? true : false}>
                         <label htmlFor="">Monto detallado <b className="text-red">*</b></label>
                         <input
                             type="number"
@@ -277,7 +278,7 @@ const AddDetalle = (props) => {
                             <div className="card-body">
                                 <div className="row">
                                     <div className="col-md-10">
-                                        <b>{form.file && form.file.name || ""}</b>
+                                        <b>{form?.file?.name || ""}</b>
                                     </div>
                                     <div className="col-md-2 text-center">
                                         <Button color="red"

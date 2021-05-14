@@ -1,21 +1,25 @@
 import React, { useContext, useState } from 'react';
-import { Button, Form, Select } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import Modal from '../modal'
 import { SelectRol } from '../select/project_tracking'
 import Show from '../show';
-import AssignPerson from '../authentication/user/assignPerson'
-import storage from '../../services/storage.json';
+import AssignUser from '../authentication/user/assignUser';
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import { Confirm } from '../../services/utils';
 import { handleErrorRequest, projectTracking } from '../../services/apis';
 import Swal from 'sweetalert2';
 import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
+import { SelectEntityDependenciaUser } from '../../components/select/authentication';
+import { EntityContext } from '../../contexts/EntityContext';
 
 const AddTeam = ({ isClose = null, onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // project
     const { project, dispatch } = useContext(ProjectContext);
@@ -24,8 +28,8 @@ const AddTeam = ({ isClose = null, onSave = null }) => {
     const [option, setOption] = useState({});
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
-    const [person, setPerson] = useState({});
-    const isPerson = Object.keys(person).length;
+    const [user, setUser] = useState({});
+    const isUser = Object.keys(user).length;
 
     // cambiar form
     const handleInput = ({ name, value }) => {
@@ -37,8 +41,8 @@ const AddTeam = ({ isClose = null, onSave = null }) => {
     }
 
     // agregar persona
-    const addPerson = (obj) => {
-        setPerson(obj);
+    const addUser = (obj) => {
+        setUser(obj);
         setOption("");
     }
 
@@ -48,14 +52,14 @@ const AddTeam = ({ isClose = null, onSave = null }) => {
         if (!answer) return false;
         app_context.setCurrentLoading(true);
         let datos = Object.assign({}, form);
-        datos.person_id = person.id;
+        datos.user_id = user.id;
         datos.project_id = project.id;
         await projectTracking.post(`team`, datos)
         .then(async res => {
             app_context.setCurrentLoading(false);
             let { message, team } = res.data;
             await Swal.fire({ icon: 'success', text: message });
-            setPerson({});
+            setUser({});
             setForm({});
             dispatch({ type: projectTypes.ADD_TEAM, payload: team });
             if (typeof onSave == 'function') onSave();
@@ -73,35 +77,37 @@ const AddTeam = ({ isClose = null, onSave = null }) => {
                 <div className="row">
                     <div className="col-md-12 mb-3">
                         <Button onClick={(e) => setOption("assign")}>
-                            <i className={`fas fa-${isPerson ? 'sync' : 'plus'}`}></i> {isPerson ? 'Cambiar' : 'Asignar'}
+                            <i className={`fas fa-${isUser ? 'sync' : 'plus'}`}></i> {isUser ? 'Cambiar' : 'Asignar'}
                         </Button>
                         <hr/>
                     </div>
 
-                    <Show condicion={isPerson}>
+                    <Show condicion={isUser}>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="">Tip. Documento</label>
-                            <input type="text" value={person?.document_type?.name} readOnly/>
+                            <Form.Field>
+                                <label htmlFor="">Apellidos y Nombres</label>
+                                <input type="text" className="uppercase" value={user?.person?.fullname} readOnly/>
+                            </Form.Field>
                         </div>
 
                         <div className="col-md-6 mb-3">
                             <Form.Field>
                                 <label htmlFor="">N° Documento</label>
-                                <input type="text" value={person.document_number} readOnly/>
+                                <input type="text" value={user?.person?.document_number} readOnly/>
                             </Form.Field>
                         </div>
 
-                        <div className="col-md-6 mb-3">
+                        <div className="col-12 mb-3">
                             <Form.Field>
-                                <label htmlFor="">Apellidos y Nombres</label>
-                                <input type="text" className="uppercase" value={person.fullname} readOnly/>
-                            </Form.Field>
-                        </div>
-
-                        <div className="col-md-6 mb-3">
-                            <Form.Field>
-                                <label htmlFor="">Profesión</label>
-                                <input type="text" className="uppercase" value={person.profession} readOnly/>
+                                <label htmlFor="">Dependencia <b className="text-red">*</b></label>
+                                <SelectEntityDependenciaUser
+                                    name="dependencia_id"
+                                    value={form.dependencia_id}
+                                    entity_id={entity_context.entity_id}
+                                    user_id={user.id}
+                                    refresh={user.id}
+                                    onChange={(e, obj) => handleInput(obj)}
+                                />
                             </Form.Field>
                         </div>
                     </Show>
@@ -121,7 +127,7 @@ const AddTeam = ({ isClose = null, onSave = null }) => {
                     <div className="col-md-12 text-right">
                         <hr/>
                         <Button color="teal" 
-                            disabled={!isPerson}
+                            disabled={!isUser}
                             onClick={createTeam}
                         >
                             <i className="fas fa-save"></i> Guardar
@@ -131,10 +137,10 @@ const AddTeam = ({ isClose = null, onSave = null }) => {
             </Form>
 
             <Show condicion={option == 'assign'}>
-                <AssignPerson
+                <AssignUser
                     local={true}
                     isClose={(e) => setOption(false)}
-                    getAdd={addPerson}
+                    getAdd={addUser}
                 />
             </Show>
         </Modal>

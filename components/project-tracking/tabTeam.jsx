@@ -49,10 +49,10 @@ const ItemTeam = ({ team }) => {
     // render
     return (
         <tr>
-            <td className="text-center uppercase">{team?.person?.fullname}</td>
-            <td className="text-center uppercase">{team?.person?.document_number}</td>
+            <td className="text-center uppercase">{team?.user?.person?.fullname}</td>
+            <td className="text-center uppercase">{team?.user?.username}</td>
+            <td className="text-center uppercase">{team?.dependencia?.nombre}</td>
             <td className="text-center uppercase">{team?.role?.description}</td>
-            <td className="text-center uppercase">{team?.person?.profession}</td>
             <Show condicion={project.state != "OVER"}>
                 <td className="text-center">
                     <Button color="red" basic
@@ -112,9 +112,9 @@ const TabTeam = () => {
                 <thead>
                     <tr>
                         <th className="text-center">Apellidos y Nombres</th>
-                        <th className="text-center">N° Documento</th>
+                        <th className="text-center">Usuario</th>
+                        <th className="text-center">Dependencia</th>
                         <th className="text-center">Rol</th>
-                        <th className="text-center">Profesión</th>
                         <th className="text-center">Eliminar</th>
                     </tr>
                 </thead>

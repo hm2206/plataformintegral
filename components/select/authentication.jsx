@@ -165,7 +165,7 @@ const SelectEntityUser = ({ id = "id", user_id, name, value, onChange, refresh, 
     />
 }
 
-const SelectEntityDependenciaUser = ({ id = "id", user_id, entity_id, name, value, onChange, refresh = false, execute = true, disabled = false, except = 0 }) => {
+const SelectEntityDependenciaUser = ({ id = "id", user_id, entity_id, name, value, onChange, refresh = false, execute = true, disabled = false, except = "" }) => {
     return <SelectBase 
         execute={execute}
         api={authentication}
