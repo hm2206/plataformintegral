@@ -77,7 +77,7 @@ const AddGasto = ({ isClose, activity, onSave = null }) => {
                             <SelectPresupuesto
                                 execute={true}
                                 name="presupuesto_id"
-                                value={form.presupuesto_id}
+                                value={form?.presupuesto_id}
                                 onChange={(e, obj) => handleInput(obj)}
                             />
                         </Form.Field>
@@ -89,7 +89,7 @@ const AddGasto = ({ isClose, activity, onSave = null }) => {
                             <SelectRubro
                                 execute={true}
                                 name="rubro_id"
-                                value={form.rubro_id}
+                                value={form?.rubro_id}
                                 onChange={(e, obj) => handleInput(obj)}
                             />
                         </Form.Field>
@@ -101,7 +101,7 @@ const AddGasto = ({ isClose, activity, onSave = null }) => {
                             <SelectMedida
                                 execute={true}
                                 name="medida_id"
-                                value={form.medida_id}
+                                value={form?.medida_id}
                                 onChange={(e, obj) => handleInput(obj)}
                             />
                         </Form.Field>
@@ -113,7 +113,7 @@ const AddGasto = ({ isClose, activity, onSave = null }) => {
                             <textarea 
                                 rows="2"
                                 name="description"
-                                value={form.description || ""}
+                                value={form?.description || ""}
                                 onChange={({target}) => handleInput(target)}
                             />
                         </Form.Field>

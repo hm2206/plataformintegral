@@ -71,7 +71,7 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
         // actualizar objectives
         newObjectives[index] = current_objective;
         // verificar actividad
-        let lackVerify = collect(act.gastos).where('verify_tecnica', 0).count();
+        let lackVerify = collect(act.gastos).where(name, 0).count();
         if (!lackVerify) {
             act[name == 'verify_tecnica' ? name : 'verify'] = 1;
         }

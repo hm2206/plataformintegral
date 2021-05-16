@@ -4,8 +4,6 @@ import Modal from '../modal'
 import Show from '../show';
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
-import { Confirm } from '../../services/utils';
-import { projectTracking } from '../../services/apis';
 import TableSaldoFinanciero from './tableSaldoFinanciero';
 import Swal from 'sweetalert2';
 

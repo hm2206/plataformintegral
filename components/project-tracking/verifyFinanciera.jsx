@@ -102,7 +102,9 @@ const VerifyFinanciera = ({ gasto, isClose = null, onVerifycationFinanciera = nu
                             </Accordion.Title>
                             <Show condicion={current_index == 0}>
                                 <Accordion.Content active={true}>
-                                    <AddDetalle gasto={gasto}/>
+                                    <AddDetalle gasto={gasto}
+                                        onSave={() => setCurrentIndex(1)}
+                                    />
                                 </Accordion.Content>
                             </Show>
                         </Show>

@@ -11,7 +11,7 @@ import Swal from 'sweetalert2';
 import currencyFormatter from 'currency-formatter';
 import { DropZone } from '../Utils';
 
-const AddDetalle = (props) => {
+const AddDetalle = ({ gasto, onSave }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -21,9 +21,6 @@ const AddDetalle = (props) => {
 
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
-
-    // props
-    const { gasto } = props;
 
     // cambiar form
     const handleInput = ({ name, value }) => {
@@ -53,7 +50,7 @@ const AddDetalle = (props) => {
                     let { success, message } = res.data;
                     Swal.fire({ icon: 'success', text: message });
                     setForm({});
-                    if (typeof props.onCreate == 'function') props.onCreate();
+                    if (typeof onSave == 'function') onSave();
                 }).catch(err => {
                     try {
                         app_context.setCurrentLoading(false);
@@ -133,7 +130,7 @@ const AddDetalle = (props) => {
                         <label htmlFor="">Tip. Documento <b className="text-red">*</b></label>
                         <SelectDocumentType
                             name="document_type_id"
-                            value={form.document_type_id}
+                            value={form?.document_type_id || ""}
                             onChange={(e, obj) => handleInput(obj)}
                         />
                         <label htmlFor="">{errors.document_type_id && errors.document_type_id[0] || ""}</label>
@@ -146,7 +143,7 @@ const AddDetalle = (props) => {
                         <input
                             type="text"
                             name="document_number"
-                            value={form.document_number}
+                            value={form?.document_number || ""}
                             onChange={(e) => handleInput(e.target)}
                         />
                         <label htmlFor="">{errors.document_number && errors.document_number[0] || ""}</label>
@@ -159,7 +156,7 @@ const AddDetalle = (props) => {
                         <input
                             type="text"
                             name="ruc"
-                            value={form.ruc}
+                            value={form?.ruc || ""}
                             onChange={(e) => handleInput(e.target)}
                         />
                         <label htmlFor="">{errors.ruc && errors.ruc[0] || ""}</label>
@@ -172,7 +169,7 @@ const AddDetalle = (props) => {
                         <input
                             type="date"
                             name="date"
-                            value={form.date}
+                            value={form?.date || ""}
                             onChange={(e) => handleInput(e.target)}
                         />
                         <label htmlFor="">{errors.date && errors.date[0] || ""}</label>
@@ -185,7 +182,7 @@ const AddDetalle = (props) => {
                         <input
                             type="text"
                             name="razon_social"
-                            value={form.razon_social}
+                            value={form?.razon_social || ""}
                             onChange={(e) => handleInput(e.target)}
                         />
                         <label htmlFor="">{errors.razon_social && errors.razon_social[0] || ""}</label>
@@ -198,7 +195,7 @@ const AddDetalle = (props) => {
                         <textarea
                             rows="3"
                             name="description"
-                            value={form.description}
+                            value={form?.description || ""}
                             onChange={(e) => handleInput(e.target)}
                         />
                         <label htmlFor="">{errors.description && errors.description[0] || ""}</label>
@@ -210,7 +207,7 @@ const AddDetalle = (props) => {
                         <label htmlFor="">Medio de Pago <b className="text-red">*</b></label>
                         <SelectMedioPago
                             name="medio_pago_id"
-                            value={form.medio_pago_id}
+                            value={form?.medio_pago_id || ""}
                             onChange={(e, obj) => handleInput(obj)}
                         />
                         <label htmlFor="">{errors.medio_pago_id && errors.medio_pago_id[0] || ""}</label>
@@ -223,7 +220,7 @@ const AddDetalle = (props) => {
                         <input
                             type="text"
                             name="pago_number"
-                            value={form.pago_number}
+                            value={form?.pago_number || ""}
                             onChange={(e) => handleInput(e.target)}
                         />
                         <label htmlFor="">{errors.pago_number && errors.pago_number[0] || ""}</label>
@@ -236,7 +233,7 @@ const AddDetalle = (props) => {
                         <input
                             type="date"
                             name="date_pago"
-                            value={form.date_pago}
+                            value={form?.date_pago || ""}
                             onChange={(e) => handleInput(e.target)}
                         />
                         <label htmlFor="">{errors.date_pago && errors.date_pago[0] || ""}</label>
@@ -250,7 +247,7 @@ const AddDetalle = (props) => {
                             type="number"
                             name="monto"
                             step="any"
-                            value={form.monto}
+                            value={form?.monto || ""}
                             onChange={(e) => handleInput(e.target)}
                         />
                         <label htmlFor="">{errors.monto && errors.monto[0] || ""}</label>
