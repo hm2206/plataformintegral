@@ -99,7 +99,7 @@ const AddPlanTrabajo = ({ onSave = null, isClose = null }) => {
                             <label htmlFor="">Final</label>
                             <input  
                                 type="text"
-                                value={moment(project.date_over).format('YYYY') || ""}
+                                value={moment(project?.extension?.date_resolucion || project.date_over).format('YYYY') || ""}
                                 readOnly
                             />
                         </Form.Field>

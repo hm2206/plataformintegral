@@ -1,11 +1,12 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Form } from 'semantic-ui-react';
+import { Form, Button } from 'semantic-ui-react';
 import Show from '../show';
 import { projectTracking } from '../../services/apis';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext';
 import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
 import AddObjective from './addObjective';
 import InfoObjective from './infoObjective';
+import ListExtension from './listExtension';
 import Skeleton from 'react-loading-skeleton';
 import { BtnFloat } from '../Utils';
 
@@ -20,14 +21,6 @@ const Placeholder = () => {
     );
 }
 
-
-const defaultPaginate = {
-    total: 0,
-    last_page: 0,
-    page: 1,
-    data: []
-};
-
 const TabActivity = (props) => {
 
     // project
@@ -35,7 +28,7 @@ const TabActivity = (props) => {
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
-    const [is_create, setIsCreate] = useState(false);
+    const [option, setOption] = useState("");
 
     // obtener componentes
     const getObjectives = async (add = false) => {
@@ -77,6 +70,17 @@ const TabActivity = (props) => {
                                     )}
                                 </td>
                             </tr>
+                            <tr>
+                                <th width="20%">Ampliaciones: </th>
+                                <td>
+                                    <Button icon="server"
+                                        color="black"
+                                        size="mini"
+                                        basic
+                                        onClick={() => setOption('extension')}
+                                    />
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                     <hr/>
@@ -114,14 +118,20 @@ const TabActivity = (props) => {
             </div>
             {/* btn crear */}
             <Show condicion={project?.state != 'OVER'}>
-                <BtnFloat onClick={() => setIsCreate(true)}>
+                <BtnFloat onClick={() => setOption("create")}>
                     <i className="fas fa-plus"></i>
                 </BtnFloat>
             </Show>
             {/* crear objective */}
-            <Show condicion={is_create}>
-                <AddObjective isClose={(e) => setIsCreate(false)}/>
+            <Show condicion={option == 'create'}>
+                <AddObjective isClose={(e) => setOption("")}/>
             </Show> 
+            {/* list extensiones */}
+            <Show condicion={option == 'extension'}>
+                <ListExtension
+                    onClose={() => setOption("")}
+                />
+            </Show>
         </Fragment>
     )
 }

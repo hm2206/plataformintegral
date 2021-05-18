@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AUTHENTICATE } from '../../../services/auth';
 import { projectTracking } from '../../../services/apis';
 import dynamic from 'next/dynamic';
@@ -7,8 +7,10 @@ import { BtnBack } from '../../../components/Utils';
 import { ProjectProvider } from '../../../contexts/project-tracking/ProjectContext';
 import Router from 'next/router';
 import { EntityContext } from '../../../contexts/EntityContext';
+import Show from '../../../components/show';
 import NotFoundData from '../../../components/notFoundData';
 import BoardSimple from '../../../components/boardSimple';
+import AddExtension from '../../../components/project-tracking/addExtension';
 
 //  componente principal
 const SlugProject = ({ pathname, query, success, project }) => {
@@ -17,6 +19,9 @@ const SlugProject = ({ pathname, query, success, project }) => {
 
     // entity
     const entity_context = useContext(EntityContext);
+
+    // estados
+    const [option, setOption] = useState("");
 
     // primera carga
     useEffect(() => {
@@ -29,6 +34,9 @@ const SlugProject = ({ pathname, query, success, project }) => {
         switch (obj.key) {
             case 'refresh':
                 Router.push(location.href);
+                break;
+            case 'ampliacion':
+                setOption(obj.key);
                 break;
             default:
                 break;
@@ -46,7 +54,8 @@ const SlugProject = ({ pathname, query, success, project }) => {
                     info={["Información detallada del proyecto"]}
                     options={[
                         { key: "refresh", title: "Refrescar", icon: "fas fa-sync" },
-                        { key: "report-over", title: "Reporte de Cierre", icon: "fas fa-file-alt"}
+                        { key: "ampliacion", title: "Ampliación de Plan de Trabajo", icon: "fas fa-server"},
+                        { key: "report-over", title: "Reporte de Cierre", icon: "fas fa-file-alt"},
                     ]}
                     onOption={handleOptions}
                 >
@@ -56,6 +65,12 @@ const SlugProject = ({ pathname, query, success, project }) => {
                         </div>
                     </div>
                 </BoardSimple>
+                {/* agregar ampliación */}
+                <Show condicion={option == 'ampliacion'}>
+                    <AddExtension onClose={() => setOption("")}
+                        onSave={() => setOption("")}
+                    />
+                </Show>
             </ProjectProvider>
         </div>
     )
