@@ -17,7 +17,7 @@ const actions = {
 };
 
 
-const Visualizador = ({ id, name, extname, url, observation, onClick = null, onClose = null, onUpdate = null, is_observation = true }) => {
+const Visualizador = ({ id, name, extname, url, observation, onDownload = null, onClose = null, onUpdate = null, is_observation = true }) => {
 
     // estados
     const [current_url, setCurrentUrl] = useState("");
@@ -61,6 +61,7 @@ const Visualizador = ({ id, name, extname, url, observation, onClick = null, onC
         a.target = '_blank';
         a.download = name;
         a.click();
+        if (typeof onDownload == 'function') onDownload();
     }
 
     // configurar datos
