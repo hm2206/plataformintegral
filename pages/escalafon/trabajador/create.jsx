@@ -159,6 +159,19 @@ const CreateWork = ({ pathname, query }) => {
                                             <hr/>
                                         </div>
 
+                                        <div className="col-md-6 mb-3">
+                                            <Form.Field error={errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] ? true : false}>
+                                                <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
+                                                <input type="date" 
+                                                    name="fecha_de_ingreso"
+                                                    value={form.fecha_de_ingreso}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                    disabled={current_loading}
+                                                />
+                                                <label>{errors.fecha_de_ingreso && errors.fecha_de_ingreso[0]}</label>
+                                            </Form.Field>
+                                        </div>
+
                                         <div className="col-md-6 mb-2">
                                             <Form.Field error={errors.numero_de_essalud && errors.numero_de_essalud[0] ? true : false}>
                                                 <label htmlFor="">N° de Essalud</label>

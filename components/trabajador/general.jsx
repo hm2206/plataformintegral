@@ -45,9 +45,17 @@ const  General = ({ work }) => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`, 'Estoy Seguro')
         if (answer) {
             app_context.setCurrentLoading(true);
-            let form = Object.assign({}, current_work);
-            form._method = 'PUT';
-            await unujobs.post(`work/${work.id}`, form)
+            let payload = {};
+            payload.fecha_de_ingreso = current_work.fecha_de_ingreso || "";
+            payload.banco_id = current_work.banco_id || "";
+            payload.numero_de_cuenta = current_work.numero_de_cuenta || "";
+            payload.afp_id = current_work.afp_id || "";
+            payload.numero_de_cussp = current_work.numero_de_cussp || "";
+            payload.fecha_de_afiliacion = current_work.fecha_de_ingreso || "";
+            payload.fecha_de_essalud = current_work.fecha_de_essalud || "";
+            payload.prima_seguro = current_work.prima_seguro ? 1 : 0;
+            payload._method = 'PUT';
+            await unujobs.post(`work/${work.id}`, payload)
             .then(res => {
                 app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
@@ -196,6 +204,17 @@ const  General = ({ work }) => {
                             <div className="col-md-12">
                                 <h4><i className="fas fa-file-alt"></i> Datos del Trabajador</h4>
                                 <hr/>
+                            </div>
+
+                            <div className="col-md-6 mb-2">
+                                <Form.Field>
+                                    <label htmlFor="">Fecha de Ingreso</label>
+                                    <input type="date" 
+                                        value={current_work.fecha_de_ingreso || ""}
+                                        name="fecha_de_ingreso"
+                                        onChange={(e) => handleInput(e.target)}
+                                    />
+                                </Form.Field>
                             </div>
 
                             <div className="col-md-6 mb-2">
