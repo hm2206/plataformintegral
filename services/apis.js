@@ -186,22 +186,6 @@ export const projectTracking = {
 };
 
 
-/**
- * api para consumir el sistema de clock
- */
- export const clock = {
-    get: async (path, config = { }, ctx) => {
-        return axios.get(`${url.API_CLOCK}/${path}`, await ConfigHeaders(ctx, config));
-    },
-    post: async (path, body = { }, config = { }, ctx) => {
-        return axios.post(`${url.API_CLOCK}/${path}`, body, await ConfigHeaders(ctx, config));
-    },
-    fetch: async (path, config = { }, ctx) => {
-        return fetch(`${url.API_CLOCK}/${path}`, await ConfigHeaders(ctx, config));
-    },
-    path: url.API_CLOCK
-};
-
 
 export default {
     authentication,
@@ -211,5 +195,4 @@ export default {
     tramite,
     signature,
     projectTracking,
-    clock
 }

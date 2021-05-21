@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useContext, useMemo } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import Skeleton from 'react-loading-skeleton';
-import ConfigAssistanceProvider from '../../providers/clock/ConfigAssistanceProvider'
-import { AssistanceContext } from '../../contexts/clock/AssistanceContext';
+import ConfigAssistanceProvider from '../../providers/escalafon/ConfigAssistanceProvider'
+import { AssistanceContext } from '../../contexts/escalafon/AssistanceContext';
 import { EntityContext } from '../../contexts/EntityContext';
-import { assistanceTypes } from '../../contexts/clock/AssistanceReducer';
+import { assistanceTypes } from '../../contexts/escalafon/AssistanceReducer';
 import ItemAssistance from './itemAssistance';
-import { SelectConfigAssistance } from '../select/clock';
+import { SelectConfigAssistance } from '../select/escalafon';
 import Show from '../show';
 import moment from 'moment';
 import uid from 'uid';

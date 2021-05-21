@@ -4,7 +4,7 @@ import { Confirm } from '../../services/utils';
 import collect from 'collect.js';
 import moment from 'moment';
 import Fullcalendar from '../fullcalendar';
-import ConfigAssistanceProvider from '../../providers/clock/ConfigAssistanceProvider';
+import ConfigAssistanceProvider from '../../providers/escalafon/ConfigAssistanceProvider';
 import { AppContext } from '../../contexts';
 import Swal from 'sweetalert2';
 moment.locale('es');

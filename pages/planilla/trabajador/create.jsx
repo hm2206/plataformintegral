@@ -2,12 +2,12 @@ import React, { Fragment, useState } from 'react';
 import {  BtnBack } from '../../../components/Utils';
 import { Confirm, parseUrl } from '../../../services/utils';
 import { Form, Button, Checkbox, Message } from 'semantic-ui-react'
-import { escalafon, handleErrorRequest } from '../../../services/apis';
+import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
 import AssignPerson from '../../../components/authentication/user/assignPerson';
 import { AUTHENTICATE } from '../../../services/auth';
-import { SelectAfp, SelectBanco } from '../../../components/select/escalafon';
+import { SelectAfp, SelectBanco } from '../../../components/select/cronograma';
 import BoardSimple from '../../../components/boardSimple'
 import ContentControl from '../../../components/contentControl';
 import Router from 'next/router';
@@ -48,7 +48,7 @@ const CreateWork = ({ pathname, query }) => {
         let payload = Object.assign({}, form);
         payload.person_id = person.id;
         payload.orden = person.fullname;
-        await escalafon.post('works', payload)
+        await unujobs.post('works', payload)
         .then(async res => {
             let { message, work } = res.data;
             await Swal.fire({ icon: 'success', text: message });
@@ -157,19 +157,6 @@ const CreateWork = ({ pathname, query }) => {
                                             <hr/>
                                             <h4><i className="fas fa-praying-hands"></i> Datos del Trabajador</h4>
                                             <hr/>
-                                        </div>
-
-                                        <div className="col-md-6 mb-3">
-                                            <Form.Field error={errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] ? true : false}>
-                                                <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
-                                                <input type="date" 
-                                                    name="fecha_de_ingreso"
-                                                    value={form.fecha_de_ingreso}
-                                                    onChange={(e) => handleInput(e.target)}
-                                                    disabled={current_loading}
-                                                />
-                                                <label>{errors.fecha_de_ingreso && errors.fecha_de_ingreso[0]}</label>
-                                            </Form.Field>
                                         </div>
 
                                         <div className="col-md-6 mb-2">

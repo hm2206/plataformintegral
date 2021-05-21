@@ -1,23 +1,20 @@
-import React,  { Component, Fragment, useState, useContext } from 'react';
-import Router from 'next/router';
+import React,  { Fragment, useMemo, useState } from 'react';
 import Cover from '../../../components/trabajador/cover';
 import NavCover from '../../../components/trabajador/navCover';
 import { AUTHENTICATE } from '../../../services/auth';
-import {  unujobs } from '../../../services/apis';
+import { escalafon } from '../../../services/apis';
 import Show from '../../../components/show';
-import General from '../../../components/trabajador/general';
-import { AppContext } from '../../../contexts/AppContext'
-import { backUrl } from '../../../services/utils'
+import InfoGeneral from '../../../components/escalafon/infoGeneral';
 import atob from 'atob';
-import Contratos from '../../../components/trabajador/contratos';
-import Grado from '../../../components/trabajador/grado';
-import Ascenso from '../../../components/trabajador/ascenso';
-import Familiar from '../../../components/trabajador/familiar';
-import Desplazamiento from '../../../components/trabajador/desplazamiento';
-import Merito from '../../../components/trabajador/merito';
-import Licencia from '../../../components/trabajador/licencia';
-import Permiso from '../../../components/trabajador/permiso';
-import Vacacion from '../../../components/trabajador/vacacion';
+import Contratos from '../../../components/escalafon/contratos';
+import Grado from '../../../components/escalafon/grado';
+import Ascenso from '../../../components/escalafon/ascenso';
+import Familiar from '../../../components/escalafon/familiar';
+import Desplazamiento from '../../../components/escalafon/desplazamiento';
+import Merito from '../../../components/escalafon/merito';
+import Licencia from '../../../components/escalafon/licencia';
+import Permiso from '../../../components/escalafon/permiso';
+import Vacacion from '../../../components/escalafon/vacacion';
 import NotFoundData from '../../../components/notFoundData';
 
 
@@ -27,6 +24,10 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
     // estados
     const [option, setOption] = useState("general");
 
+    const isWork = useMemo(() => {
+        return Object.keys(work).length;
+    }, [work]);
+
     if (!success) return <NotFoundData/>
 
     // render
@@ -34,9 +35,9 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
         <div className="col-md-12">
             <Cover
                 back
-                titulo={work && work.person && work.person.fullname}
-                email={work && work.person && work.person.email_contact}
-                image={work && work.person && work.person.image ? `${work.person.image && work.person.image_images && work.person.image_images.image_200x200}` : '/img/perfil.jpg'}
+                titulo={work?.person?.fullname}
+                email={work?.person?.email_contact}
+                image={work?.person?.image ? `${work?.person?.image_images?.image_200x200}` : '/img/perfil.jpg'}
             />
 
             <NavCover
@@ -57,10 +58,10 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
             />
 
             {/* Contenidos */}
-            <Show condicion={typeof work == 'object' && Object.values(work).length}>
+            <Show condicion={isWork}>
                 <div className="col-md-12 mt-5">
                     <Show condicion={option == 'general'}>
-                        <General work={work}/>
+                        <InfoGeneral work={work}/>
                     </Show>
                     <Show condicion={option == 'info'}>
                         <Contratos work={work}/>
@@ -100,7 +101,7 @@ TrabajadorID.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
     let { query, pathname } = ctx;
     let id = atob(query.id || "") || "_error";
-    let { success, work } = await unujobs.get(`work/${id}`, {}, ctx)
+    let { success, work } = await escalafon.get(`works/${id}`, {}, ctx)
         .then(res => res.data)
         .catch(err => ({ success: false, work: {} }));
     // response
