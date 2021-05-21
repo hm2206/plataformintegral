@@ -1,11 +1,11 @@
 import React, { useContext, useEffect } from 'react';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
-import ListConfigAssistance from '../../components/clock/listConfigAssistance';
+import ListConfigAssistance from '../../components/escalafon/listConfigAssistance';
 import Show from '../../components/show';
 import { Message } from 'semantic-ui-react';
 import { EntityContext } from '../../contexts/EntityContext';
-import { AssistanceProvider } from '../../contexts/clock/AssistanceContext';
+import { AssistanceProvider } from '../../contexts/escalafon/AssistanceContext';
 
 const ConfigAssistance = ({ pathname, query }) => {
 
