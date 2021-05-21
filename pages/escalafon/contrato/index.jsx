@@ -4,15 +4,15 @@ import { AUTHENTICATE } from '../../../services/auth';
 import DataTable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
-import { escalafon } from '../../../services/apis';
+import { unujobs } from '../../../services/apis';
 import { SelectCargo } from '../../../components/select/cronograma';
 import { AppContext } from '../../../contexts/AppContext';
 import Show from '../../../components/show';
 import BoardSimple from '../../../components/boardSimple';
-import { BtnFloat } from '../../../components/Utils';
+import UpdateRemuneracionMassive from '../../../components/contrato/updateRemuneracionMassive';
 import { EntityContext } from '../../../contexts/EntityContext';
 
-const Contrato = ({ pathname, query, success, infos }) => {
+const Contrato = ({ success, infos, query }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -79,14 +79,6 @@ const Contrato = ({ pathname, query, success, infos }) => {
         await push({ pathname, query });
     }
 
-    // crear trabajador
-    const handleCreate = async () => {
-        let { push } = Router;
-        let newQuery = {};
-        newQuery.href = btoa(`${location.href}`)
-        push({ pathname: `${pathname}/register`, query: newQuery });
-    }
-
     // render
     return (
         <div className="col-md-12">
@@ -104,7 +96,7 @@ const Contrato = ({ pathname, query, success, infos }) => {
                             data={infos.data || []}
                             index={[
                                 { key: "id", type: "text" },
-                                { key: "work.person.fullname", type: "text", className: "uppercase" },
+                                { key: "person.fullname", type: "text", className: "uppercase" },
                                 { key: "planilla.nombre", type: "icon", bg: "primary" },
                                 { key: "cargo.alias", type: "icon", bg: "dark" },
                                 { key: "estado", type: "switch", is_true: "Activo", is_false: "Terminado"}
@@ -183,9 +175,9 @@ const Contrato = ({ pathname, query, success, infos }) => {
                     </div>
                 </Form>
 
-                <BtnFloat onClick={handleCreate}>
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
+                <Show condicion={option == 'UPDATE_REMUNERACION_MASSIVE'}>
+                    <UpdateRemuneracionMassive isClose={(e) => setOption("")}/>
+                </Show>
             </BoardSimple>
     </div>)
 }
@@ -193,17 +185,18 @@ const Contrato = ({ pathname, query, success, infos }) => {
 // server rendering
 Contrato.getInitialProps = async (ctx) => {
     await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
+    let { query } = ctx;
     query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
     query.page = typeof query.page != 'undefined' ? query.page : 1;
     query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
     query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
     // request
-    let { success, infos } = await escalafon.get(`infos?page=${query.page}&estado=${query.estado}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
+    let { success, infos } = await unujobs.get(`info?page=${query.page}&estado=${query.estado}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
     .then(res => res.data)
     .catch(err => ({ success: false }))
+    console.log(success);
     // response
-    return { pathname, success, infos: infos || {}, query };
+    return { success, infos: infos || {}, query };
 }
 
 // export 

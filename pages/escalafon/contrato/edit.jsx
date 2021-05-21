@@ -3,7 +3,7 @@ import { Form, Button, Select, Checkbox, Message } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/router';
 import { BtnBack, funcBack } from '../../../components/Utils';
-import { escalafon, handleErrorRequest } from '../../../services/apis';
+import { handleErrorRequest, escalafon, unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import { Confirm } from '../../../services/utils'
@@ -237,7 +237,7 @@ const Edit = ({ success, info, query }) => {
                                                 <Show condicion={!edit}
                                                     predeterminado={<Select name="pap" value={form.pap} options={storage.pap} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
-                                                    <input type="text" value={info.pap}/>
+                                                    <input type="text" value={info.pap} readOnly/>
                                                 </Show>
                                                 <label>{errors.pap && errors.pap[0] || ""}</label>
                                             </Form.Field>
