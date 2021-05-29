@@ -85,7 +85,6 @@ const SignedAllPage = ({ notification, config = {} }) => {
                             url={file?.url}
                             is_observation={false}
                             onClose={() => setIsRender(false)}
-                            onDownload={disableFile}
                         />
                     </Show>
                 </Show>

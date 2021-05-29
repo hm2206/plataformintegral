@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import Show from '../show';
 import Skeleton from 'react-loading-skeleton';
-import ClockProvider from '../../providers/clock/ClockProvider';
+import ClockProvider from '../../providers/escalafon/ClockProvider';
 import { EntityContext } from '../../contexts/EntityContext';
 import { useEffect } from 'react';
 
@@ -60,7 +60,6 @@ const ListClock = ({ datos = [], setDatos, setBlock, block }) => {
         setCurrentLoading(true);
         await clockProvider.index({ page }, options)
         .then(res => {
-            console.log(res.data);
             let { clocks } = res.data;
             setIsError(false);
             setLastPage(clocks.last_page || 0);

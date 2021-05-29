@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Form, Button } from 'semantic-ui-react';
 import { Confirm } from '../../services/utils';
 import { EntityContext } from '../../contexts/EntityContext';
-import ClockProvider from '../../providers/clock/ClockProvider';
+import ClockProvider from '../../providers/escalafon/ClockProvider';
 import Swal from 'sweetalert2';
 
 // providers

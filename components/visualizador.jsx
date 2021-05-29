@@ -16,8 +16,17 @@ const actions = {
     png: options.IMAGE,
 };
 
+const canPrint = [options.IFRAME];
 
-const Visualizador = ({ id, name, extname, url, observation, onDownload = null, onClose = null, onUpdate = null, is_observation = true }) => {
+
+const Visualizador = ({ 
+    id = 'iframe-visuzalizador', name, extname, url, observation, 
+    onDownload = null, 
+    onClose = null, 
+    onUpdate = null, 
+    onPrint = null,
+    is_observation = true, is_print = false,
+}) => {
 
     // estados
     const [current_url, setCurrentUrl] = useState("");
@@ -62,6 +71,13 @@ const Visualizador = ({ id, name, extname, url, observation, onDownload = null, 
         a.download = name;
         a.click();
         if (typeof onDownload == 'function') onDownload();
+    }
+
+    // imprimir archivo
+    const printFile = async () => {
+        let iframe = document.getElementById(id);
+        iframe.focus();
+        iframe.contentWindow.print();
     }
 
     // configurar datos
@@ -125,9 +141,20 @@ const Visualizador = ({ id, name, extname, url, observation, onDownload = null, 
                         <button className="btn text-white font-15"
                             disabled={!is_download}
                             onClick={downloadFile}
+                            title="Descargar"
                         >
                             <i className="fas fa-download"></i>
                         </button>
+
+                        <Show condicion={canPrint.includes(action) && is_print}>
+                            <button className="btn text-white font-15"
+                                disabled={!is_download}
+                                onClick={printFile}
+                                title="Imprimir"
+                            >
+                                <i className="fas fa-print"></i>
+                            </button>
+                        </Show>
                     </div>
                 </div>
 
@@ -136,10 +163,10 @@ const Visualizador = ({ id, name, extname, url, observation, onDownload = null, 
                 </Show>
             </div>
             <div className="h-100">
-                <Show condicion={action == 'IFRAME'}>
-                    <iframe src={current_url} width="100%" height="92%" style={{ border: "0px", objectFit: 'contain' }}/>
+                <Show condicion={action == options.IFRAME}>
+                    <iframe src={current_url} width="100%" height="92%" style={{ border: "0px", objectFit: 'contain' }} id={id}/>
                 </Show>
-                <Show condicion={action == 'IMAGE'}>
+                <Show condicion={action == options.IMAGE}>
                     <div className="row justify-content-center h-100">
                         <img src={current_url} alt={name} style={{ objectFit: 'contain', maxHeight: "100%" }}/>
                     </div>

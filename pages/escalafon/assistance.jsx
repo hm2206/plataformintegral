@@ -4,6 +4,7 @@ import BoardSimple from '../../components/boardSimple';
 import { BtnFloat } from '../../components/Utils';
 import ListAssistance from '../../components/escalafon/listAssistance';
 import CreateAssistance from '../../components/escalafon/createAssistance';
+import SyncAssistanceToClock from '../../components/escalafon/syncAssistanceToClock';
 import { EntityContext } from '../../contexts/EntityContext';
 import Show from '../../components/show';
 import { AssistanceProvider } from '../../contexts/escalafon/AssistanceContext';
@@ -16,6 +17,16 @@ const Assistance = ({ pathname, query }) => {
 
     // estados
     const [option, setOption] = useState("");
+
+    const handleOption = (e, index, obj) => {
+        switch (obj.key) {
+            case 'sync-assistance':
+                setOption('SYNC-ASSISTANCE');
+                break;
+            default:
+                break;
+        }
+    }
 
     useEffect(() => {
         fireEntity({ render: true });
@@ -30,7 +41,10 @@ const Assistance = ({ pathname, query }) => {
                     title="Asistencia"
                     info={["Control de asistencia diaria"]}
                     bg="danger"
-                    options={[]}
+                    options={[
+                        { key: "sync-assistance", title: "Sincronizar asistencia con el reloj biométrico", icon: "fas fa-user-clock" }
+                    ]}
+                    onOption={handleOption}
                 >
                     <div className="card-body">
                         <Show condicion={entity_id}
@@ -54,6 +68,10 @@ const Assistance = ({ pathname, query }) => {
                 <Show condicion={option == 'CREATE'}>
                     <CreateAssistance onClose={() => setOption("")}/>
                 </Show>
+                {/* sincronizar asistencia */}
+                <Show condicion={option == 'SYNC-ASSISTANCE'}>
+                    <SyncAssistanceToClock onClose={() => setOption("")}/>
+                </Show>
             </div>
         </AssistanceProvider>
     );
@@ -65,7 +83,6 @@ Assistance.getInitialProps = async (ctx) => {
     let { query, pathname } = ctx;
     return { query, pathname }
 }
-
 
 // exportar
 export default Assistance;

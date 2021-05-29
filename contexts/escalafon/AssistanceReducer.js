@@ -1,4 +1,6 @@
 
+import collect from 'collect.js';
+
 export const initialStates = {
     config_assistance_id: "",
     assistances: {
@@ -11,6 +13,9 @@ export const initialStates = {
 
 export const assistanceTypes = {
     SET_ASSISTANCES: "SET[ASSISTANCES]",
+    PUSH_ASSISTANCES: "PUSH[ASSISTANCES]",
+    UPDATE_ASSISTANCE: "UPDATE[ASSISTANCE]",
+    DELETE_ASSISTANCE: "DELETE[ASSISTANCE]",
     SET_CONFIG_ASSISTANCE_ID: "SET[CONFIG_ASSISTANCE_ID]",
 }
 
@@ -23,6 +28,27 @@ export const AssistanceReducer = (state = initialStates, action = { }) => {
                 ...state.assistances,
                 ...payload
             };
+            return newState;
+        case assistanceTypes.PUSH_ASSISTANCES:
+            newState.assistances = {
+                ...state.assistances,
+                page: payload.page || 1,
+                last_page: payload.last_page || 0,
+                total: payload.total || 0,
+                data: [...newState.assistances.data, ...payload.data]
+            };
+            return newState;
+        case assistanceTypes.UPDATE_ASSISTANCE:
+            let updateAssistancePlucked = collect(newState.assistances.data).pluck('id').toArray();
+            let updateAssistanceIndex = updateAssistancePlucked.indexOf(payload.id);
+            if (updateAssistanceIndex < 0) break;
+            let updateAssistance = Object.assign(newState.assistances.data[updateAssistanceIndex], payload);
+            newState.assistances.data[updateAssistanceIndex] = updateAssistance;
+            return newState;
+        case assistanceTypes.DELETE_ASSISTANCE:
+            let deleteAssistances = newState.assistances.data.filter(a => a.id != payload);
+            newState.assistances.data = deleteAssistances;
+            newState.assistances.total -= 1; 
             return newState;
         case assistanceTypes.SET_CONFIG_ASSISTANCE_ID:
             newState.config_assistance_id = payload;

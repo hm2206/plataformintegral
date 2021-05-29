@@ -13,6 +13,7 @@ import { onProgress } from '../../services/apis';
 import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import { EntityContext } from '../../contexts/EntityContext';
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
+import uid from 'uid';
 
 
 const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }) => {
@@ -36,6 +37,9 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
     const [current_loading, setCurrentLoading] = useState(false);
     const [percent, setPercent] = useState(0);
     const [current_cancel, setCurrentCancel] = useState(null);
+    const [slug, setSlug] = useState(uid(10));
+
+    let linkPath = `${tramite.path}/file?disk=tmp&path=/tramite/${slug}/`;
 
     // cambio de form
     const handleInput = async ({ name, value }, callback = true) => {
@@ -87,6 +91,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
         let datos = new FormData;
         datos.append('person_id', user.person_id);
         datos.append('next', tramite_context.next);
+        datos.append('slug', slug);
         if (isTramite) datos.append('tramite_id', current_tramite.id || "");
         await Object.keys(form).map(key => datos.append(key, form[key]));
         await current_files.map(f => datos.append('files', f));
@@ -261,12 +266,13 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                             <Form.Field className="mb-3" error={errors.files && errors.files[0] ? true : false}>
                                 <label>Archivos <b className="text-danger">*</b></label>
                                 <DropZone
+                                    linkCodeQr={linkPath}
                                     id="file-tramite-serve"
                                     name="files"
                                     title="Seleccinar (*.pdf y *.docx)"
                                     multiple={false}
                                     size={25}
-                                    accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
                                     result={current_files}
                                     onSigned={({ file }) => handleFile(file)}
                                     onChange={({ files }) => handleFile(files[0])}

@@ -35,6 +35,9 @@ const AppHeader = () => {
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
             <link rel="stylesheet" href="/css/custom.css" />
 
+            {/* link excel */}
+            <link rel="stylesheet" href="/css/excel.css" />
+
             {/* WPA */}
             {/* <link rel="manifest" href="/manifest.json" />
             <link href='/favicon-16x16.png' rel='icon' type='image/png' sizes='16x16' />

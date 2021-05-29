@@ -49,6 +49,7 @@ const DropZone = ({
   onSigned = null, size = 100, 
   signerTypes = ['application/pdf'],
   basic = false, onRaw = null,
+  linkCodeQr = null,
 }) => {
 
   // estados
@@ -121,6 +122,7 @@ const DropZone = ({
 
         <Show condicion={show_signed}>
           <PdfView
+            linkCodeQr={linkCodeQr}
             pdfUrl={pdf_url} 
             pdfDoc={pdf_doc}
             pdfBlob={pdf_blob}
@@ -173,6 +175,7 @@ const DropZone = ({
     
     <Show condicion={show_signed}>
       <PdfView
+        linkCodeQr={linkCodeQr}
         pdfUrl={pdf_url} 
         pdfDoc={pdf_doc}
         pdfBlob={pdf_blob}

@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import moment from 'moment';
-import { escalafon, unujobs } from '../../services/apis';
+import { escalafon, handleErrorRequest, unujobs } from '../../services/apis';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 import Show from '../../components/show';
@@ -17,11 +17,15 @@ const InfoGeneral = ({ work }) => {
     const [person, setPerson] = useState(JSON.parse(JSON.stringify(work.person)) || {});
     const [current_work, setCurrentWork] = useState(work || {});
     const [edit, setEdit] = useState(false);
+    const [errors, setErrors] = useState({});
 
     const handleInput = ({ name, value }) => {
         let newObject = Object.assign({}, current_work);
         newObject[name] = value;
         setCurrentWork(newObject);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
         setEdit(true);
     }
 
@@ -30,43 +34,31 @@ const InfoGeneral = ({ work }) => {
         let answer = await Swal.fire({
             icon: 'warning',
             text: "¿Está seguro en cancelar la edición?",
-            confirmButtonText: "Continuar",
+            confirmButtonText: "Cancelar Edición",
             showCancelButton: true
         });
         // verify
         if (answer) {
             setCurrentWork(JSON.parse(JSON.stringify(work)))
             setEdit(false);
+            setErrors({});
         }
     }
 
     const updateWork = async () => {
         let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`, 'Estoy Seguro')
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            let form = Object.assign({}, current_work);
-            form._method = 'PUT';
-            await escalafon.post(`works/${work.id}?_method=PUT`, form)
-            .then(res => {
-                app_context.setCurrentLoading(false);
-                let { success, message } = res.data;
-                if (!success) throw new Error(message);
-                setEdit(false);
-                Swal.fire({ icon: 'success', text: message });
-            })
-            .catch(err => {
-                try {
-                    app_context.setCurrentLoading(false);
-                    let { data } = err.response;
-                    if (!data) throw new Error(err.message);
-                    let { message, errors } = data;
-                    if (!errors) throw new Error(message);
-                    Swal.fire({ icon: 'warning', text: message });
-                } catch (error) {
-                    Swal.fire({ icon: 'error', text: error.message });
-                }
-            });
-        }
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        let form = Object.assign({}, current_work);
+        form._method = 'PUT';
+        await escalafon.post(`works/${work.id}?_method=PUT`, form)
+        .then(res => {
+            app_context.setCurrentLoading(false);
+            let { success, message } = res.data;
+            if (!success) throw new Error(message);
+            setEdit(false);
+            Swal.fire({ icon: 'success', text: message });
+        }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
     }
 
     // render
@@ -186,6 +178,18 @@ const InfoGeneral = ({ work }) => {
                             <div className="col-md-12">
                                 <h4><i className="fas fa-file-alt"></i> Datos del Trabajador</h4>
                                 <hr/>
+                            </div>
+
+                            <div className="col-md-6 mb-2">
+                                <Form.Field error={errors?.fecha_de_ingreso?.[0] ? true : false}>
+                                    <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
+                                    <input type="date" 
+                                        value={current_work.fecha_de_ingreso || ""}
+                                        name="fecha_de_ingreso"
+                                        onChange={(e) => handleInput(e.target)}
+                                    />
+                                    <label>{errors?.fecha_de_ingreso?.[0]}</label>
+                                </Form.Field>
                             </div>
 
                             <div className="col-md-6 mb-2">

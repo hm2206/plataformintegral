@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useContext } from 'react';
+import React, { useState, useEffect, Fragment, useContext, useMemo } from 'react';
 import { Form, Checkbox } from 'semantic-ui-react';
 import Show from './show';
 import { Confirm } from '../services/utils';
@@ -11,6 +11,7 @@ import axios from 'axios';
 import { onProgress } from '../services/apis';
 import { AuthContext } from '../contexts/AuthContext';
 import pdfjsLib from 'pdfjs-dist';
+import qrCode from 'qrcode';
 
 const PdfView = ({ 
     pdfUrl = "", 
@@ -19,7 +20,8 @@ const PdfView = ({
     disabledMetaInfo = false,
     metaInfo = { reason: "Yo soy el firmante", location: "PE", image: "" },
     onClose = null,
-    onSigned = null
+    onSigned = null,
+    linkCodeQr = null
 }) => {
 
     // auth
@@ -30,6 +32,8 @@ const PdfView = ({
     let lastPage = pdfPages.length;
 
     // estados
+    const [current_blob, setCurrentBlob] = useState(pdfBlob);
+    const [current_url, setCurrentUrl] = useState(pdfUrl);
     const [current_loading, setCurrentLoading] = useState(false);
     const [current_progress, setCurrentProgress] = useState(0);
     const [reason, setReason] = useState(metaInfo.reason || "");
@@ -118,7 +122,7 @@ const PdfView = ({
         setErrors({});
         let payload = {};
         // assign pdfBlob
-        payload.pdfBlob = pdfBlob;
+        payload.pdfBlob = new File([current_blob], pdfBlob.name);
         payload.page = page;
         payload.visible = false;
         // validar datos
@@ -226,11 +230,38 @@ const PdfView = ({
         });
     }
 
+    // agregar codeQr
+    const addCodeQr = async () => {
+        let codeQr = await qrCode.toDataURL(`${linkCodeQr}${pdfBlob.name}`);
+        const firstPage = pdfDoc.getPage(0);
+        const pngImage = await pdfDoc.embedPng(codeQr);
+        const { width, height } = firstPage.getSize();
+        let options = {
+            x: 0,
+            y: 0,
+            width: 75, 
+            height: 75,
+        };
+        // add imagen a la primara pagina
+        firstPage.drawImage(pngImage, options);
+        const pdfBytes = await pdfDoc.save();
+        const newBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const newLink = URL.createObjectURL(newBlob);
+        setCurrentBlob(newBlob);
+        setCurrentUrl(newLink);
+        console.log(newBlob);
+    }
+
     // generar calculos
     useEffect(() => {
         getSignatures();
         generatePositions();
     }, [page, pdfUrl]);
+
+
+    useEffect(() => {
+        if (!count_signature && linkCodeQr) addCodeQr();
+    }, [count_signature]);
 
     // renderizar
     return (
@@ -252,7 +283,7 @@ const PdfView = ({
                 </div>
                 <div className="row h-100 text-left">
                     <div className="col-md-8 col-lg-9">
-                        <iframe className="w-100 h-100 pl-4" frameBorder="0" src={pdfUrl}/>
+                        <iframe className="w-100 h-100 pl-4" frameBorder="0" src={current_url}/>
                         {/* <div className="text-center w-100 h-100" style={{ background: '#455a64', position: "relative" }} id="content-render">
                             <canvas id="render-pdf-canvas" className="mt-2" width="100%" height="100%"/>
                         </div> */}
@@ -315,17 +346,19 @@ const PdfView = ({
                                                 </Form.Field>
                                             </Show>
 
-                                            <Form.Field>
-                                                <label htmlFor="">Todas las hojas</label>
-                                                <div>
-                                                    <Checkbox toggle 
-                                                        disabled={current_loading}
-                                                        checked={all_page}
-                                                        name="all_page"
-                                                        onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked }, setAllPage)}
-                                                    />
-                                                </div>
-                                            </Form.Field>
+                                            <Show condicion={lastPage > 1}>
+                                                <Form.Field>
+                                                    <label htmlFor="">Todas las hojas</label>
+                                                    <div>
+                                                        <Checkbox toggle 
+                                                            disabled={current_loading}
+                                                            checked={all_page}
+                                                            name="all_page"
+                                                            onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked }, setAllPage)}
+                                                        />
+                                                    </div>
+                                                </Form.Field>
+                                            </Show>
 
                                             {/* posición de firma en la página */}
                                             <Show condicion={!all_page}>

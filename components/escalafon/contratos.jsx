@@ -38,7 +38,7 @@ const Contratos = ({ work }) => {
     // obtener contratos
     const getInfos = async (add = false) => {
         setCurrentLoading(true);
-        await escalafon.get(`work/${work.id}/info`)
+        await escalafon.get(`works/${work.id}/infos`)
             .then(res => {
                 let { success, infos, message } = res.data;
                 if (!success) throw new Error(message);

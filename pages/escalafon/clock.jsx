@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
 import { EntityContext } from '../../contexts/EntityContext';
-import CreateClock from '../../components/clock/createClock';
-import ListClock from '../../components/clock/listClock';
+import CreateClock from '../../components/escalafon/createClock';
+import ListClock from '../../components/escalafon/listClock';
 
 const Clock = ({ pathname, query }) => {
 

@@ -20,6 +20,12 @@ class ClockProvider extends BaseProvider  {
         .catch(err => this.handleError(err));
     }
 
+    syncAssistance = async (id, body = {}, config = {}, ctx = null) => {
+        return await escalafon.post(`${this.collection}/${id}/sync_assistances`, body, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
 }
 
 export default ClockProvider;

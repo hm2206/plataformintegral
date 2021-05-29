@@ -21,6 +21,7 @@ const PlaceholderTable = () => {
             <td><Skeleton/></td>
             <td><Skeleton/></td>
             <td><Skeleton/></td>
+            <td><Skeleton/></td>
         </tr>
     );
 }
@@ -52,7 +53,7 @@ const ListAssistance = () => {
         headers: { EntityId: entity_id }
     }
 
-    const getAssistances = async () => {
+    const getAssistances = async (add = false) => {
         setCurrentLoading(true);
         await configAssistanceProvider.assistances(config_assistance_id, { page: assistances.page }, options)
         .then(res => {
@@ -64,7 +65,10 @@ const ListAssistance = () => {
                 data: assistances.data
             }
             // set datos
-            dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload });
+            dispatch({ 
+                type: add ? assistanceTypes.PUSH_ASSISTANCES : assistanceTypes.SET_ASSISTANCES, 
+                payload 
+            });
             setIsError(false);
         }).catch(err => setIsError(true));
         setCurrentLoading(false);
@@ -86,6 +90,13 @@ const ListAssistance = () => {
         setIsRefresh(true);
     }
 
+    const nextPage = async () => {
+        dispatch({ 
+            type: assistanceTypes.SET_ASSISTANCES, 
+            payload: { page: assistances.page + 1 } 
+        });
+    }
+
     useEffect(() => {
         dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: "" });
     }, [entity_id]);
@@ -97,7 +108,7 @@ const ListAssistance = () => {
     }, []);
 
     useEffect(() => {
-        if (config_assistance_id) getAssistances();
+        if (config_assistance_id) handleSearch();
         else dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload: { page: 1, last_page: 0, total: 0, data: [] } });
     }, [config_assistance_id]);
 
@@ -108,6 +119,10 @@ const ListAssistance = () => {
     useEffect(() => {
         if (is_refresh) setIsRefresh(false);
     }, [is_refresh]);
+
+    useEffect(() => {
+        if (assistances.page > 1) getAssistances(true);
+    }, [assistances.page]);
 
     return (
         <div className="card">
@@ -172,6 +187,9 @@ const ListAssistance = () => {
                 </div>
             </Form>
             <div className="card-body">
+                
+                <h4>Resultados: {assistances?.data?.length} de {assistances.total || 0}</h4>
+
                 <div className="table-responsive">
                     <table className="table table-bordered table-stripe">
                         <thead>
@@ -180,25 +198,40 @@ const ListAssistance = () => {
                                 <th>Apellidos y Nombres</th>
                                 <th width="15%" className="text-center">Tiempo marcado</th>
                                 <th width="10%" className="text-center">Tipo</th>
+                                <th width="10%" className="text-center">Opciones</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {/* listar datos */}
+                            {assistances?.data?.map((a, indexA) => 
+                                <ItemAssistance assistance={a}
+                                    index={indexA}
+                                    group={a.work_id != assistances?.data?.[indexA + 1]?.work_id ? true : false}
+                                    key={`list-assistance-table-${indexA}`}
+                                />
+                            )}
+                            {/* preloader */}
                             <Show condicion={!current_loading}
                                 predeterminado={<PlaceholderTable/>}
                             >
-                                <Show condicion={assistances.total || false}
-                                    predeterminado={
-                                        <tr>
-                                            <td colSpan="4" className="text-center">No hay regístros disponibles</td>
-                                        </tr>
-                                    }
-                                >
-                                    {assistances?.data?.map((a, indexA) => 
-                                        <ItemAssistance assistance={a}
-                                            key={`list-assistance-table-${indexA}`}
-                                        />
-                                    )}
+                                <Show condicion={!assistances.total}>
+                                    <tr>
+                                        <td colSpan="5" className="text-center">No hay regístros disponibles</td>
+                                    </tr>
                                 </Show>
+                            </Show>
+                            {/* obtener más regíster */}
+                            <Show condicion={(assistances?.last_page >= assistances?.page + 1)}>
+                                <tr>
+                                    <th colSpan="5">
+                                        <Button fluid 
+                                            disabled={current_loading}
+                                            onClick={nextPage}
+                                        >
+                                            <i className="fas fa-arrow-down"></i> Obtener más regístros
+                                        </Button>
+                                    </th>
+                                </tr>
                             </Show>
                         </tbody>
                     </table>

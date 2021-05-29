@@ -4,9 +4,6 @@ import Skeleton from 'react-loading-skeleton';
 import ConfigAssistanceProvider from '../../providers/escalafon/ConfigAssistanceProvider'
 import { AssistanceContext } from '../../contexts/escalafon/AssistanceContext';
 import { EntityContext } from '../../contexts/EntityContext';
-import { assistanceTypes } from '../../contexts/escalafon/AssistanceReducer';
-import ItemAssistance from './itemAssistance';
-import { SelectConfigAssistance } from '../select/escalafon';
 import Show from '../show';
 import moment from 'moment';
 import uid from 'uid';
@@ -49,6 +46,14 @@ const ListDescuento = () => {
     // config
     const options = {
         headers: { EntityId: entity_id }
+    }
+
+    const headers = () => {
+        let payload = [];
+        for (let index = 1; index < 30; index++) {
+            payload.push(index);
+        }
+        return payload;
     }
 
     return (
@@ -99,19 +104,57 @@ const ListDescuento = () => {
             </Form>
             <div className="card-body">
                 <div className="table-responsive">
-                    <table className="table table-bordered table-stripe">
+                    <table className="table-excel font-10">
                         <thead>
                             <tr>
-                                <th width="7%" className="text-center">ID#</th>
-                                <th width="20%">Apellidos y Nombres</th>
-                                <th width="10%" className="text-center">N° Documento</th>
-                                <th width="3%" className="text-center">1</th>
-                                <th width="3%" className="text-center">2</th>
-                                <th width="3%" className="text-center">3</th>
-                                <th width="3%" className="text-center">4</th>
+                                <th className="text-center" rowSpan="2">N° <br/> TRAB</th>
+                                <th className="text-center no-wrap" rowSpan="2">APELLIDOS  Y  NOMBRES</th>
+                                <th className="text-center no-wrap" rowSpan="2">N° DOCUMENTO</th>
+                                <th className="text-center no-wrap" width="50px" rowSpan="2">CAT. NIV.</th>
+                                {headers().map(h => 
+                                    <th className="text-center no-wrap" key={`item-header-${h}`}>{h}</th>
+                                )}
+                                <th className="text-center no-wrap" rowSpan="2">TOT <br /> MIN</th>
+                                <th className="text-center no-wrap" rowSpan="2">(*) <br /> TOTAL <br /> DESC.</th>
+                                <th className="text-center no-wrap" rowSpan="2">DCTO <br /> X <br /> MIN</th>
+                                <th className="text-center no-wrap" rowSpan="2">BASE DE <br /> CALCULO</th>
+                                <th className="text-center no-wrap" colSpan="13">OCURRENCIAS</th>
+                            </tr>
+                            <tr>
+                                {headers().map(h => 
+                                    <th className="text-center no-wrap" key={`item-header-${h}`}>{h}</th>
+                                )}
+                                <th>V</th>
+                                <th>DM</th>
+                                <th>F</th>
+                                <th>LCG</th>
+                                <th>CS</th>
+                                <th>LCS</th>
+                                <th>ONO</th>
+                                <th>L</th>
+                                <th>C</th>
+                                <th>SJ</th>
+                                <th>P</th>
+                                <th>FR</th>
+                                <th>L</th>
                             </tr>
                         </thead>
                     </table>
+                    {/* info */}
+                    <div className="row">
+                        <div className="col-6">
+                            <div className="table-responsive">
+                                <table className="table-excel font-12">
+                                    <thead>
+                                        <tr>
+                                            <th width="70%" className="text-center no-wrap">DONDE:</th>
+                                            <th width="30%" className="text-center no-wrap">N° TRAB</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

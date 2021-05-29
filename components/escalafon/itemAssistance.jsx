@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
+import { Button, Select } from 'semantic-ui-react';
+import AssistanceProvider from '../../providers/escalafon/AssistanceProvider';
 import moment from 'moment';
+import Show from '../show';
+import Swal from 'sweetalert2';
+import { Confirm } from '../../services/utils';
+import { AssistanceContext } from '../../contexts/escalafon/AssistanceContext';
+import { assistanceTypes } from '../../contexts/escalafon/AssistanceReducer';
 moment.locale('es');
+
+// providers
+const assistanceProvider = new AssistanceProvider();
 
 const typeStatus = {
     ENTRY: {
@@ -13,14 +23,58 @@ const typeStatus = {
     }
 }
 
-const ItemAssistance = ({ assistance = {} }) => {
+const ItemAssistance = ({ index, assistance = {}, group = false }) => {
+
+    // assistance
+    const { dispatch } = useContext(AssistanceContext);
 
     const current_status = typeStatus[assistance.status] || {};
 
+    // estados
+    const [form, setForm] = useState(assistance);
+    const [current_loading, setCurrentLoading] = useState(false);
+    const [is_render, setIsRender] = useState(true);
+    const [edit, setEdit] = useState(false);
+
+    const handleUpdate = async () => {
+        let answer = await Confirm('warning', `¿Estas seguro en guardar los cambios?`);
+        if (!answer) return;
+        setCurrentLoading(true);
+        await assistanceProvider.update(assistance.id, form)
+        .then(async res => {
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            setEdit(false);
+            dispatch({ type: assistanceTypes.UPDATE_ASSISTANCE, payload: form });
+        }).catch(async err => await Swal.fire({ icon: 'error', text: err.message }));
+        setCurrentLoading(false);
+    }
+
+    const handleDelete = async () => {
+        let answer = await Confirm('warning', `¿Estas seguro en ocultar la asistencia?`);
+        if (!answer) return;
+        setCurrentLoading(true);
+        await assistanceProvider.delete(assistance.id)
+        .then(async res => {
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            dispatch({ type: assistanceTypes.DELETE_ASSISTANCE, payload: assistance.id });
+        }).catch(async err => await Swal.fire({ icon: 'error', text: err.message }));
+        setCurrentLoading(false);
+    }
+
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+    }
+
+    if (!is_render) return null;
+
     // render
     return (
-        <tr>
-            <td>{assistance.id}</td>
+        <tr style={{ borderBottom: group ? '2px solid #000' : '' }}>
+            <td>{index + 1}</td>
             <td className="capitalize">{assistance?.person?.fullname}</td>
             <td className="text-center">
                 <span className="badge badge-dark"> 
@@ -29,9 +83,59 @@ const ItemAssistance = ({ assistance = {} }) => {
                 </span>
             </td>
             <td className="text-center">
-                <span className={current_status.className}>
-                    {current_status.text}
-                </span>
+                <Show condicion={edit}
+                    predeterminado={
+                        <span className={current_status.className}>
+                            {current_status.text}
+                        </span>
+                    }
+                >
+                    <Select name="status"
+                        value={form.status || ""}
+                        onChange={(e, obj) => handleInput(obj)}
+                        options={[
+                            { key: 'ENTRY', value: 'ENTRY', text: 'Entrada' },
+                            { key: 'EXIT', value: 'EXIT', text: 'Salida' },
+                        ]}
+                    />
+                </Show>
+            </td>
+            <td className="text-center">
+                <Show condicion={!current_loading}
+                    predeterminado={
+                        <Button size="mini">
+                            <i className="fas fa-spinner fa-pulse"></i>
+                        </Button>
+                    }
+                >
+                    <Button.Group size="mini">
+                        <Show condicion={!edit}>
+                            <Button onClick={() => setEdit(true)}>
+                                <i className="fas fa-pencil-alt"></i>
+                            </Button>
+
+                            <Button color="red" 
+                                basic
+                                onClick={handleDelete}
+                            >
+                                <i className="fas fa-times"></i>
+                            </Button>
+                        </Show>
+                        {/* editar */}
+                        <Show condicion={edit}>
+                            <Button color="red"
+                                basic
+                                onClick={() => setEdit(false)}
+                            >
+                                <i className="fas fa-times"></i>
+                            </Button>
+
+                            <Button color="teal" onClick={handleUpdate}>
+                                <i className="fas fa-save"></i>
+                            </Button>
+                        </Show>
+                    </Button.Group>
+                </Show>
             </td>
         </tr>
     )

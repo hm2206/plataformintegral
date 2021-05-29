@@ -11,6 +11,7 @@ import ItemFileCircle from '../itemFileCircle';
 import { DropZone } from '../Utils';
 import { AuthContext } from '../../contexts/AuthContext';
 import FileProvider from '../../providers/tramite/FileProvider';
+import { tramite } from '../../services/apis';
 
 // providers
 const trackingProvider = new TrackingProvider();
@@ -28,6 +29,8 @@ const ShowInfo = ({ validateFile = [], onArchived = null }) => {
     const { current_tracking, dependencia_id, dispatch, setOption, setFile } = useContext(TramiteContext);
     const current_tramite = current_tracking.tramite || {};
     const isTramite = Object.keys(current_tramite).length;
+
+    let linkPath = `${tramite.path}/file?disk=tmp&path=/tramite/${current_tramite?.slug}/`;
 
     // verificar tracking
     const verifyTracking = async () => {
@@ -164,7 +167,8 @@ const ShowInfo = ({ validateFile = [], onArchived = null }) => {
                             <DropZone
                                 id="file-tramite-datos"
                                 title="Seleccionar archivo PDF"
-                                accept="application/pdf"
+                                linkCodeQr={linkPath}
+                                accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
                                 multiple={false}
                                 size={6}
                                 basic={true}

@@ -45,6 +45,7 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                 options={[
                     { key: "general", text: "Información General" },
                     { key: "info", text: "Contratos" },
+                    { key: "schedule", text: "Horarios" },
                     { key: "grados", text: "Formación Aca." },
                     { key: "ascenso", text: "Ascensos" },
                     { key: "familiar", text: "Familia" },

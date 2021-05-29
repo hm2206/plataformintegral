@@ -4,8 +4,8 @@ import BoardSimple from '../../components/boardSimple';
 import Show from '../../components/show';
 import { Message } from 'semantic-ui-react';
 import { EntityContext } from '../../contexts/EntityContext';
-import { AssistanceProvider } from '../../contexts/clock/AssistanceContext';
-import ListDescuento from '../../components/clock/listDescuento';
+import { AssistanceProvider } from '../../contexts/escalafon/AssistanceContext';
+import ListDescuento from '../../components/escalafon/listDescuento';
 
 const Descuento = ({ pathname, query }) => {
 

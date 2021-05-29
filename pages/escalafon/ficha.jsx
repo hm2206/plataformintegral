@@ -1,25 +1,23 @@
-import React, { Component, Fragment,useState, useContext, useEffect } from 'react';
+import React, { Fragment,useState, useContext, useEffect } from 'react';
 import { Form, Button, Select, Checkbox } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../services/auth';
 import { Body, BtnBack } from '../../components/Utils';
-import ContentControl from '../../components/contentControl';
 import Show from '../../components/show';
 import { escalafon } from '../../services/apis';
-import { parseUrl, Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 import AssignTrabajadorEntity from '../../components/contrato/assingTrabajadorEntity';   
 import { AppContext } from '../../contexts/AppContext';
+import { EntityContext } from '../../contexts/EntityContext';
+import Visualizador from '../../components/visualizador';
 
 const parametros = [
-    { key: 'grado', value: 'grado', text: 'Formación Académica' },
-    { key: 'experiencia', value: 'experiencia', text: 'Exp. Laboral' },
+    { key: 'experiencia', value: 'experiencia', text: 'Exp. Laboral', disabled: true },
     { key: 'licencia', value: 'licencia', text: 'Licencia' },
     { key: 'ascenso', value: 'ascenso', text: 'Ascensos' },
     { key: 'desplazamiento', value: 'desplazamiento', text: 'Desplazamientos' },
     { key: 'merito', value: 'merito', text: 'Méritos' },
-    { key: 'desmerito', value: 'desmerito', text: 'Desmeritos' },
-    { key: 'familiar', value: 'familiar', text: 'Familiar' }
+    { key: 'demerito', value: 'demerito', text: 'Deméritos' }
 ];
 
 const Ficha = () => {
@@ -33,23 +31,29 @@ const Ficha = () => {
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
     const [option, setOption] = useState("");
-    const [info, setInfo] = useState({});
-    const isInfo = Object.keys(info).length;
+    const [work, setWork] = useState({});
+    const isWork = Object.keys(work).length;
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const [argumentos, setArgumentos] = useState([]);
     const [pdf, setPdf] = useState(null);
+    const [file, setFile] = useState({});
 
     // setting
     useEffect(() => {
         entity_context.fireEntity({ render: true });
-        return () => entity_context.fireEntity({ render: fales });
+        return () => entity_context.fireEntity({ render: false });
     }, []);
 
     const getAdd = async (obj) => {
         setOption("");
-        setInfo(obj);
+        setWork(obj);
         setPdf(null);
+    }
+
+    const configRequest = {
+        responseType: 'blob', 
+        headers: { 'Content-Type': 'multipart/form-data' }
     }
 
     // Obtener ficha
@@ -57,16 +61,23 @@ const Ficha = () => {
         let form = new FormData;
         await argumentos.map(par => form.append('argumentos[]', par));
         app_context.setCurrentLoading(true);
-        await escalafon.post(`report/ficha_escalafonaria/${info.id}?is_pdf=0`, form, { responseType: 'blob' })
-            .then(res => {
-                app_context.setCurrentLoading(false);
-                let blob = new Blob([res.data], { type: 'text/html' });
-                let link = URL.createObjectURL(blob);
-                setPdf(link);
-            }).catch(err => {
-                app_context.setCurrentLoading(false);
-                Swal.fire({ icon: 'error', text: err.message })
-            });
+        await escalafon.get(`works/${work.id}/ficha`, configRequest)
+        .then(res => {
+            app_context.setCurrentLoading(false);
+            let { data } = res;
+            let newFile =  {
+                name: 'ficha_escalafonaria.pdf',
+                extname:'pdf',
+                url: URL.createObjectURL(data),
+                size: data.size
+            }
+            // guardar archivo
+            setFile(newFile);
+            setOption('VISUALIZAR');
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: err.message })
+        });
             
     }
 
@@ -108,7 +119,7 @@ const Ficha = () => {
                                 <div className="row justify-content-center">
                                     <div className="col-md-12 mb-4">
                                         <div className="row">
-                                            <Show condicion={!isInfo}>
+                                            <Show condicion={!isWork}>
                                                 <div className="col-md-4">
                                                     <Button
                                                         disabled={current_loading}
@@ -119,13 +130,12 @@ const Ficha = () => {
                                                 </div>
                                             </Show>
 
-                                            <Show condicion={isInfo}>
+                                            <Show condicion={isWork}>
                                                 <div className="col-md-4 mb-2">
                                                     <Form.Field>
                                                         <label htmlFor="">Tip. Documento</label>
                                                         <input type="text"
-                                                            value={info.person && info.person.document_type  || ""}
-                                                            disabled
+                                                            value={work?.person?.document_type?.name  || ""}
                                                             readOnly
                                                         />
                                                     </Form.Field>
@@ -135,8 +145,7 @@ const Ficha = () => {
                                                     <Form.Field>
                                                         <label htmlFor="">N° Documento</label>
                                                         <input type="text"
-                                                            value={info.person && info.person.document_number  || ""}
-                                                            disabled
+                                                            value={work?.person?.document_number  || ""}
                                                             readOnly
                                                         />
                                                     </Form.Field>
@@ -146,8 +155,7 @@ const Ficha = () => {
                                                     <Form.Field>
                                                         <label htmlFor="">Apellidos y Nombres</label>
                                                         <input type="text"
-                                                            value={info.person && info.person.fullname || ""}
-                                                            disabled
+                                                            value={work?.person?.fullname || ""}
                                                             className="uppercase"
                                                             readOnly
                                                         />
@@ -185,7 +193,7 @@ const Ficha = () => {
                                                                 <div className="py-5 text-center">
                                                                     <i className="far fa-file-pdf" style={{ fontSize: '4em' }}></i>
                                                                     <div className="mt-2" style={{ fontSize: '1.5em'}}>
-                                                                        No se encontró la ficha escalafonaria
+                                                                        Reporte PDF
                                                                     </div>
                                                                 </div>
                                                             </Show>
@@ -196,17 +204,8 @@ const Ficha = () => {
                                                         </div>
                                                         <div className="card-footer">
                                                             <div className="py-2 text-right w-100">
-                                                                <Show condicion={pdf}>
-                                                                    <Button color="blue" 
-                                                                        disabled={app_context.isLoading}
-                                                                        onClick={executePrint}
-                                                                    >
-                                                                        <i className="fas fa-print"></i> Imprimir
-                                                                    </Button>
-                                                                </Show>
-
                                                                 <Button color="black" 
-                                                                    disabled={!isInfo}
+                                                                    disabled={!isWork}
                                                                     onClick={getFicha}
                                                                 >
                                                                     <i className="fas fa-sync"></i> Generar
@@ -224,7 +223,13 @@ const Ficha = () => {
                                                         <div className="card-body">
                                                             {parametros.map(par => 
                                                                 <div className="mb-2" key={`parametro-${par.key}`}>
-                                                                    <Checkbox onChange={handleChecked} name={par.key}/> {par.text}
+                                                                    {par.disabled ? 
+                                                                        <Checkbox checked disabled/> 
+                                                                    :   <Checkbox onChange={handleChecked} 
+                                                                            name={par.key}
+                                                                        />     
+                                                                }
+                                                                        <span className="ml-2">{par.text}</span>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -243,6 +248,16 @@ const Ficha = () => {
                 <AssignTrabajadorEntity
                     getAdd={getAdd}
                     isClose={(e) => setOption("")}
+                />
+            </Show>
+
+            <Show condicion={option == 'VISUALIZAR'}>
+                <Visualizador
+                    is_observation={false}
+                    name={file?.name}
+                    url={file?.url}
+                    extname={file?.extname}
+                    onClose={() => setOption("")}
                 />
             </Show>
         </Fragment>
