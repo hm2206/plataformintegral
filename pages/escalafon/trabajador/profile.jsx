@@ -1,4 +1,4 @@
-import React,  { Fragment, useMemo, useState } from 'react';
+import React,  { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import Cover from '../../../components/trabajador/cover';
 import NavCover from '../../../components/trabajador/navCover';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -16,6 +16,7 @@ import Licencia from '../../../components/escalafon/licencia';
 import Permiso from '../../../components/escalafon/permiso';
 import Vacacion from '../../../components/escalafon/vacacion';
 import NotFoundData from '../../../components/notFoundData';
+import { EntityContext } from '../../../contexts/EntityContext';
 
 
 const TrabajadorID = ({ pathname, query, success, work }) => {
@@ -24,11 +25,18 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
     // estados
     const [option, setOption] = useState("general");
 
+    const entity_context = useContext(EntityContext);
+
     const isWork = useMemo(() => {
         return Object.keys(work).length;
     }, [work]);
 
     if (!success) return <NotFoundData/>
+
+    useEffect(() => {
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
+    }, []);
 
     // render
     return <Fragment>
