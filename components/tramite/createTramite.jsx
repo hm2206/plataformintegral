@@ -14,6 +14,7 @@ import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import { EntityContext } from '../../contexts/EntityContext';
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import uid from 'uid';
+import { useMemo } from 'react';
 
 
 const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }) => {
@@ -37,9 +38,15 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
     const [current_loading, setCurrentLoading] = useState(false);
     const [percent, setPercent] = useState(0);
     const [current_cancel, setCurrentCancel] = useState(null);
-    const [slug, setSlug] = useState(uid(10));
+    const [slug, setSlug] = useState(`${uid(10)}`.toUpperCase());
 
-    let linkPath = `${tramite.path}/file?disk=tmp&path=/tramite/${slug}/`;
+    let linkPath = useMemo(() => {
+        return `${tramite.path}/file?disk=tmp&path=/tramite/${slug}/`;
+    }, [slug]);
+
+    const generateSlug = () => {
+        return `${uid(10)}`.toUpperCase();
+    }
 
     // cambio de form
     const handleInput = async ({ name, value }, callback = true) => {
@@ -107,6 +114,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
             setForm({});
             setErrors({})
             setCurrentFiles([]);
+            setSlug(generateSlug());
             if (typeof onSave == 'function') onSave(tramite);
         }).catch(err => handleErrorRequest(err, setErrors));
         // quitar loader
