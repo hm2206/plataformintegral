@@ -60,6 +60,20 @@ const CreateTypeCategoria = ({ pathname, query }) => {
                         <div className="row justify-content-center">
                             <div className="col-md-8">
                                 <div className="row justify-content-end">
+                                    <div className="col-md-12 mb-3">
+                                        <Form.Field  error={errors.information && errors.information[0] ? true : false}>
+                                            <label htmlFor="">Información Detallada</label>
+                                            <textarea
+                                                rows="4"
+                                                placeholder="Ingrese la información detallada"
+                                                name="information"
+                                                value={form.information || ""}
+                                                onChange={(e) => handleInput(e.target)}
+                                            />
+                                            <label>{errors.information && errors.information[0]}</label>  
+                                        </Form.Field>
+                                    </div>
+
                                     <div className="col-md-6 mb-3">
                                         <Form.Field  error={errors.descripcion && errors.descripcion[0] ? true : false}>
                                             <label htmlFor="">Descripción</label>

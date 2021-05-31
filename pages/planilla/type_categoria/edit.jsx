@@ -43,9 +43,10 @@ const EditTypeCategoria = ({ pathname, query, success, type_categoria }) => {
         let answer = await Confirm("warning", "¿Estás seguro en guardar los datos?", "Estoy seguro");
         if (!answer) return false;
         app_context.setCurrentLoading(true);
-        let payload = Object.assign({}, type_categoria);
+        let payload = Object.assign({}, form);
+        delete payload.cargos;
         payload._method = 'PUT';
-        await unujobs.post(`type_categoria`, payload)
+        await unujobs.post(`type_categoria/${type_categoria.id}`, payload)
         .then(async res => {
             app_context.setCurrentLoading(false)
             let { message } = res.data;
@@ -77,6 +78,20 @@ const EditTypeCategoria = ({ pathname, query, success, type_categoria }) => {
                         <div className="row justify-content-center">
                             <div className="col-md-8">
                                 <div className="row justify-content-end">
+                                    <div className="col-md-12 mb-3">
+                                        <Form.Field  error={errors.information && errors.information[0] ? true : false}>
+                                            <label htmlFor="">Información Detallada</label>
+                                            <textarea
+                                                rows="4"
+                                                placeholder="Ingrese la información detallada"
+                                                name="information"
+                                                value={form.information || ""}
+                                                onChange={(e) => handleInput(e.target)}
+                                            />
+                                            <label>{errors.information && errors.information[0]}</label>  
+                                        </Form.Field>
+                                    </div>
+
                                     <div className="col-md-6 mb-3">
                                         <Form.Field  error={errors.descripcion && errors.descripcion[0] ? true : false}>
                                             <label htmlFor="">Descripción</label>
