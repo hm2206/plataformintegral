@@ -108,8 +108,8 @@ const IndexWork = ({ pathname, query, success, works }) => {
                         </DataTable>
                         <div className="text-center">
                             <hr/>
-                            <Pagination activePage={query.page} 
-                                totalPages={works?.last_page || 0}
+                            <Pagination activePage={query.page || 1} 
+                                totalPages={works?.lastPage || 0}
                                 onPageChange={handlePage}
                             />
                         </div>

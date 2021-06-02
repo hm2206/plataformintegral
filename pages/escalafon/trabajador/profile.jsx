@@ -15,6 +15,7 @@ import Merito from '../../../components/escalafon/merito';
 import Licencia from '../../../components/escalafon/licencia';
 import Permiso from '../../../components/escalafon/permiso';
 import Vacacion from '../../../components/escalafon/vacacion';
+import Schedule from '../../../components/escalafon/schedule';
 import NotFoundData from '../../../components/notFoundData';
 import { EntityContext } from '../../../contexts/EntityContext';
 
@@ -74,6 +75,9 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     </Show>
                     <Show condicion={option == 'info'}>
                         <Contratos work={work}/>
+                    </Show>
+                    <Show condicion={option == 'schedule'}>
+                        <Schedule work={work}/>
                     </Show>
                     <Show condicion={option == 'grados'}>
                         <Grado work={work}/>
