@@ -58,9 +58,30 @@ const SelectConfigAssistance = ({ id = "id", year, month, name, value, onChange,
     />
 }
 
+const SelectConfigSchedule = ({ id = "id", name, value, onChange, error = false, refresh = true, onReady = null, disabled = false }) => {
+    return <SelectBase 
+        execute={true}
+        api={escalafon}
+        url={`config_schedules`}
+        id={`select-config_schedules-${name}`}
+        value={id}
+        text="name"
+        obj="config_schedules"
+        name={name}
+        valueChange={`${value || ""}`}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Config. de Horario"
+        refresh={refresh}
+        onReady={onReady}
+        error={error}
+        disabled={disabled}
+    />
+}
+
 
 export { 
     SelectAfp,
     SelectBanco,
     SelectConfigAssistance,
+    SelectConfigSchedule,
 };

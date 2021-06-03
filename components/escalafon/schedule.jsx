@@ -5,6 +5,7 @@ import { escalafon } from '../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
 import { collect } from 'collect.js';
+import { BtnFloat } from '../Utils';
 import moment from 'moment';
 
 moment.locale('es');
@@ -50,7 +51,7 @@ const ItemContrato = ({ info }) => {
             <>
                 <i className={`fas fa-${type == 'AM' ? 'sun' : 'moon'} mr-1`}></i> 
                 {format}
-                <span className={`badge badge-${is_config ? 'info' : 'light'} capitalize badge-sm ml-1`}>{option}</span>
+                <span className={`badge badge-${is_config ? 'primary' : 'light'} capitalize badge-sm ml-1`}>{option}</span>
             </>
         );
     }
@@ -80,18 +81,34 @@ const ItemContrato = ({ info }) => {
         setSchedules(payload);
     }
 
+    // redirigir a editar
+    const handleEdit = () => {
+        let path = `/escalafon/contrato/edit`;
+        let q = {};
+        q.id = btoa(info?.id);
+        q.href = btoa(Router.asPath);
+        Router.push({ pathname: path, query: q });
+    }
+
     useEffect(() => {
         settingSchedules();
+        return () => setSchedules([]);
     }, [info?.id]);
 
     // render
     return (
         <div className={`card font-13`}>
             <div className="card-header">
-                Planilla: {info?.planilla?.nombre || ""}
+                Planilla: {info?.planilla?.nombre || ""} - <span className="badge badge-dark">{info?.type_categoria?.descripcion}</span>
+                <span className="close cursor-pointer"
+                    onClick={handleEdit}
+                >
+                    <i className="fas fa-edit"></i>
+                </span>
             </div>
             <div className="card-body">
                 <div className="row content-widget">
+                    {/* listado de schedule */}
                     {schedules?.map((s, indexS) => 
                         <div className="col-md-3 col-xl-3 col-6 mb-2 mt-2"
                             key={`list-item-schedule-${indexS}`}
@@ -128,6 +145,12 @@ const Contratos = ({ work }) => {
     // primera carga
     useEffect(() => {
         getInfos();
+        return () => {
+            setCurrentInfos([]);
+            setPage(1);
+            setCurrenTotal(0);
+            setCurrentLastPage(0);
+        }
     }, []);
 
     // obtener contratos
@@ -161,6 +184,11 @@ const Contratos = ({ work }) => {
         <Show condicion={current_loading}>
             <Placeholder/>
         </Show>
+
+        {/* crear horario */}
+        <BtnFloat>
+            <i className="fas fa-plus"></i>
+        </BtnFloat>
     </div>
 }
 

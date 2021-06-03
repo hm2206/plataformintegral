@@ -13,6 +13,7 @@ import btoa from 'btoa';
 import { AppContext } from '../../../contexts/AppContext';
 import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta, SelectSitacionLaboral } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
+import { SelectConfigSchedule } from '../../../components/select/escalafon';
 import storage from '../../../services/storage.json';
 import BoardSimple from '../../../components/boardSimple';
 import NotFoundData from '../../../components/notFoundData'
@@ -202,7 +203,7 @@ const Edit = ({ success, info, query }) => {
                                     <div className="row">
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.planilla_id && errors.planilla_id[0] || ""}>
-                                                <label htmlFor="">Planilla</label>
+                                                <label htmlFor="">Planilla <b className="text-red">*</b></label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectPlanilla name="planilla_id" value={form.planilla_id} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
@@ -214,7 +215,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.cargo_id && errors.cargo_id[0] || ""}>
-                                                <label htmlFor="">Partición Presupuestal</label>
+                                                <label htmlFor="">Partición Presupuestal <b className="text-red">*</b></label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectCargo name="cargo_id" value={form.cargo_id} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
@@ -233,7 +234,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.pap && errors.pap[0] || ""}>
-                                                <label htmlFor="">P.A.P</label>
+                                                <label htmlFor="">P.A.P <b className="text-red">*</b></label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<Select name="pap" value={form.pap} options={storage.pap} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
@@ -245,7 +246,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.type_categoria_id && errors.type_categoria_id[0] || ""}>
-                                                <label htmlFor="">Tip. Categoría</label>
+                                                <label htmlFor="">Tip. Categoría <b className="text-red">*</b></label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectCargoTypeCategoria 
                                                                 cargo_id={form.cargo_id} 
@@ -264,7 +265,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.meta_id && errors.meta_id[0] || ""}>
-                                                <label htmlFor="">MetaID</label>
+                                                <label htmlFor="">MetaID <b className="text-red">*</b></label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectMeta name="meta_id" 
                                                         value={form.meta_id} 
@@ -294,7 +295,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.dependencia_id && errors.dependencia_id[0] || ""}>
-                                                <label htmlFor="">Dependencia</label>
+                                                <label htmlFor="">Dependencia <b className="text-red">*</b></label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectDependencia name="dependencia_id" 
                                                         value={form.dependencia_id} 
@@ -309,7 +310,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.perfil_laboral_id && errors.perfil_laboral_id[0] || ""}>
-                                                <label htmlFor="">Perfil Laboral</label>
+                                                <label htmlFor="">Perfil Laboral <b className="text-red">*</b></label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectDependenciaPerfilLaboral
                                                         dependencia_id={form.dependencia_id} 
@@ -327,7 +328,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.situacion_laboral_id && errors.situacion_laboral_id[0] || ""}>
-                                                <label htmlFor="">Situación Laboral</label>
+                                                <label htmlFor="">Situación Laboral <b className="text-red">*</b></label>
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectSitacionLaboral name="situacion_laboral_id" 
                                                         value={form.situacion_laboral_id}
@@ -366,7 +367,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.resolucion && errors.resolucion[0] || ""}>
-                                                <label htmlFor="">N° Resolución</label>
+                                                <label htmlFor="">N° Resolución <b className="text-red">*</b></label>
                                                 <input type="text" 
                                                     readOnly={!edit}
                                                     value={form.resolucion || ""}
@@ -379,7 +380,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.fecha_de_resolucion && errors.fecha_de_resolucion[0] || ""}>
-                                                <label htmlFor="">Fecha de Resolución</label>
+                                                <label htmlFor="">Fecha de Resolución <b className="text-red">*</b></label>
                                                 <input type="date" 
                                                     readOnly={!edit}
                                                     value={form.fecha_de_resolucion || ""}
@@ -392,7 +393,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] || ""}>
-                                                <label htmlFor="">Fecha de Ingreso</label>
+                                                <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
                                                 <input type="date" 
                                                     readOnly={!edit}
                                                     value={form.fecha_de_ingreso || ""}
@@ -418,7 +419,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
-                                                <label htmlFor="">Ley Social</label>
+                                                <label htmlFor="">Ley Social <b className="text-red">*</b></label>
                                                 <input type="text" 
                                                     readOnly
                                                     value={info.work?.afp?.afp || ""} 
@@ -458,7 +459,7 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
-                                                <label htmlFor="">Banco</label>
+                                                <label htmlFor="">Banco <b className="text-red">*</b></label>
                                                 <input type="text" 
                                                     readOnly
                                                     value={info.work?.banco?.nombre || ""} 
@@ -477,12 +478,15 @@ const Edit = ({ success, info, query }) => {
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field>
-                                                <label htmlFor="">Prima Seguro</label>
-                                                <Checkbox toggle 
-                                                    checked={info.work?.prima_seguro ? true : false} 
-                                                    disabled
+                                            <Form.Field error={errors?.config_schedule_id?.[0] ? true : false}>
+                                                <label htmlFor="">Horario <b className="text-red">*</b></label>
+                                                <SelectConfigSchedule
+                                                    disabled={!edit}
+                                                    name="config_schedule_id"
+                                                    value={form.config_schedule_id}
+                                                    onChange={(e, obj) => handleInput(obj)}
                                                 />
+                                                <label>{errors?.config_schedule_id?.[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
@@ -496,6 +500,16 @@ const Edit = ({ success, info, query }) => {
                                                     onChange={({target}) => handleInput(target)}
                                                 />
                                                 <label>{errors.observacion && errors.observacion[0] || ""}</label>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Prima Seguro</label>
+                                                <Checkbox toggle 
+                                                    checked={info.work?.prima_seguro ? true : false} 
+                                                    disabled
+                                                />
                                             </Form.Field>
                                         </div>
 

@@ -12,6 +12,7 @@ import Router from 'next/router';
 import AssignTrabajador from '../../../components/contrato/assingTrabajador';   
 import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
+import { SelectConfigSchedule } from '../../../components/select/escalafon';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext';
@@ -366,22 +367,16 @@ const Register = () => {
                                                 <b className="text-red">{errors && errors.fecha_de_resolucion && errors.fecha_de_resolucion[0]}</b>
                                             </Form.Field>
                                         </div>
-                                        
+
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors && errors.file && errors.file[0] ? true : false}>
-                                                <label htmlFor="file">Archivo de Regístro</label>
-                                                <label htmlFor="file" className="btn btn-outline-dark">
-                                                    <i className="fas fa-file-alt"></i>
-                                                    <input type="file" 
-                                                        id="file"
-                                                        onChange={(e) => handleFile(e.target)}
-                                                        name="file"
-                                                        hidden 
-                                                        placeholder="Archivo de Regístro"
-                                                        accept="application/pdf"
-                                                    />
-                                                </label>
-                                                <label>{errors && errors.file && errors.file[0]}</label>
+                                            <Form.Field error={errors?.config_schedule_id?.[0] ? true : false}>
+                                                <label htmlFor="">Horario <b className="text-red">*</b></label>
+                                                <SelectConfigSchedule
+                                                    name="config_schedule_id"
+                                                    value={form.config_schedule_id}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                                <label>{errors?.config_schedule_id?.[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
@@ -410,6 +405,22 @@ const Register = () => {
                                                 <label htmlFor="">{errors && errors.fecha_de_cese && errors.fecha_de_cese[0]}</label>
                                             </Form.Field>
                                         </div>
+
+                                        <div className="col-md-4 mb-3">
+                                            <Form.Field>
+                                                <label htmlFor="">¿ Agregar aportación empleador: ESSALUD ?</label>
+                                                <Select
+                                                    placeholder="Select. Aportación"
+                                                    name="is_aportacion"
+                                                    options={[
+                                                        { key: "0", value: "0", text: "No" },
+                                                        { key: "1", value: "1", text: "Si" }
+                                                    ]}
+                                                    value={`${form.is_aportacion || ""}`}
+                                                    onChange={(e, obj) => handleInput(obj)}
+                                                />
+                                            </Form.Field>
+                                        </div>
                                         
                                         <div className="col-md-8 mb-3">
                                             <Form.Field error={errors && errors.observacion && errors.observacion[0] ? true : false}>
@@ -433,18 +444,20 @@ const Register = () => {
                                                 />
                                             </Form.Field>
 
-                                            <Form.Field>
-                                                <label htmlFor="">¿ Agregar aportación empleador: ESSALUD ?</label>
-                                                <Select
-                                                    placeholder="Select. Aportación"
-                                                    name="is_aportacion"
-                                                    options={[
-                                                        { key: "0", value: "0", text: "No" },
-                                                        { key: "1", value: "1", text: "Si" }
-                                                    ]}
-                                                    value={`${form.is_aportacion || ""}`}
-                                                    onChange={(e, obj) => handleInput(obj)}
-                                                />
+                                            <Form.Field error={errors && errors.file && errors.file[0] ? true : false}>
+                                                <label htmlFor="file">Archivo de Regístro</label>
+                                                <label htmlFor="file" className="btn btn-outline-dark">
+                                                    <i className="fas fa-file-alt"></i>
+                                                    <input type="file" 
+                                                        id="file"
+                                                        onChange={(e) => handleFile(e.target)}
+                                                        name="file"
+                                                        hidden 
+                                                        placeholder="Archivo de Regístro"
+                                                        accept="application/pdf"
+                                                    />
+                                                </label>
+                                                <label>{errors && errors.file && errors.file[0]}</label>
                                             </Form.Field>
                                         </div>
                                     </div>
