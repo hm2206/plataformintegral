@@ -97,10 +97,7 @@ const ItemClock = ({ object = {}, onUpdate = null }) => {
                             <Button icon="edit" 
                                 onClick={() => setEdit(true)}
                             />
-                            <Button icon="hourglass outline" 
-                                color="black"
-                                basic
-                            />
+
                             <Button icon="trash" 
                                 color="red"
                             />
@@ -157,8 +154,8 @@ const listConfigSchedule = ({ datos = [], setDatos, setBlock, block }) => {
     }
 
     useEffect(() => {
-        getConfigSchedule();
-    }, []);
+        if (entity_id) getConfigSchedule();
+    }, [entity_id]);
 
     useEffect(() => {
         if (is_refresh) getConfigSchedule();

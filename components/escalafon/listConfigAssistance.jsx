@@ -3,14 +3,18 @@ import { EntityContext } from '../../contexts/EntityContext';
 import { Confirm } from '../../services/utils';
 import collect from 'collect.js';
 import moment from 'moment';
+import Show from '../show';
 import Fullcalendar from '../fullcalendar';
+import { SelectConfigSchedule } from '../select/escalafon';
 import ConfigAssistanceProvider from '../../providers/escalafon/ConfigAssistanceProvider';
+import ConfigScheduleProvider from '../../providers/escalafon/ConfigScheduleProvider';
 import { AppContext } from '../../contexts';
 import Swal from 'sweetalert2';
 moment.locale('es');
 
 // providers
 const configAssistanceProvider = new ConfigAssistanceProvider();
+const configScheduleProvider = new ConfigScheduleProvider();
 
 const schemaEvent = {
     id: "",
@@ -30,6 +34,7 @@ const ListAssistance = () => {
     const calendarRef = createRef();
 
     // estados
+    const [config_schedule_id, setConfigScheduleId] = useState(null);
     const [current_loading, setCurrentLoading] = useState(false);
     const [is_error, setIsError] = useState(false); 
     const [is_ready, setIsReady] = useState(false);
@@ -44,9 +49,10 @@ const ListAssistance = () => {
     const getAssistances = () => {
         let year = moment(current_date).year();
         let month = moment(current_date).month() + 1;
-        configAssistanceProvider.index({ page: 1, year, month }, options)
+        configScheduleProvider.config_assistances(config_schedule_id,  { page: 1, year, month }, options)
         .then(res => {
             let { config_assistances } = res.data;
+            console.log(config_assistances)
             let payload = [];
             for(let d of config_assistances.data) {
                 payload.push({
@@ -80,7 +86,11 @@ const ListAssistance = () => {
         let answer = await Confirm('info', `¿Estás seguro en agregar la fecha ${info.dateStr}?`, 'Agregar');
         if (!answer) return false;
         app_context.setCurrentLoading(true);
-        await configAssistanceProvider.store({ date: info.dateStr }, options)
+        let payload = {
+            date: info.dateStr,
+            config_schedule_id,
+        }
+        await configAssistanceProvider.store(payload, options)
         .then(res => {
             app_context.setCurrentLoading(false);
             let { message, config_assistance } = res.data;
@@ -125,15 +135,16 @@ const ListAssistance = () => {
         btnToday?.addEventListener('click', () => {
             let nextDate = moment().format('YYYY-MM-DD');
             setCurrentDate(nextDate);
+            alert('today')
         });
         // prev
         btnPrev?.addEventListener('click', () => {
-            let prevDate = moment(current_date).subtract('month', 1).format('YYYY-MM-DD');
+            let prevDate = moment(current_date).subtract(1, 'month').format('YYYY-MM-DD');
             setCurrentDate(prevDate);
         });
         // next 
         btnNext?.addEventListener('click', () => {
-            let nextDate = moment(current_date).add('month', 1).format('YYYY-MM-DD');
+            let nextDate = moment(current_date).add(1, 'month').format('YYYY-MM-DD');
             setCurrentDate(nextDate);
         });
     }
@@ -147,26 +158,50 @@ const ListAssistance = () => {
     }, [is_ready, current_date]);
 
     useEffect(() => {
-        if (current_date && entity_id) getAssistances();
-    }, [entity_id, current_date]);
+        if (config_schedule_id && current_date) getAssistances();
+    }, [config_schedule_id, current_date]);
 
     // render
     return (
         <div className="card">
             <div className="card-body">
-                <div className="table-responsive">
-                    <Fullcalendar 
-                        defaultView='dayGridMonth' 
-                        locale="es"
-                        events={events}
-                        dateClick={handleClick}
-                        eventClick={handleDelete}
-                        eventColor="#d32f2f"
-                        eventTextColor="#ffffff"
-                        myRef={calendarRef}
-                        onReady={(e) => setIsReady(true)}
-                    />
+
+                <div className="row">
+                    <div className="col-md-6 mb-4">
+                        <SelectConfigSchedule
+                            name="config_schedule_id"
+                            value={config_schedule_id}
+                            onChange={(e, obj) => setConfigScheduleId(obj.value)}
+                        />
+                    </div>
+
+                    <div className="col-12">
+                        <hr />
+                    </div>
                 </div>
+
+                <Show condicion={config_schedule_id}
+                    predeterminado={
+                        <h3 className="text-center mb-4">
+                            <i className="fas fa-sync mb-3"></i>
+                            <div>No se encontró regístros de configuración</div>
+                        </h3>
+                    }
+                >
+                    <div className="table-responsive">
+                        <Fullcalendar 
+                            defaultView='dayGridMonth' 
+                            locale="es"
+                            events={events}
+                            dateClick={handleClick}
+                            eventClick={handleDelete}
+                            eventColor="#d32f2f"
+                            eventTextColor="#ffffff"
+                            myRef={calendarRef}
+                            onReady={(e) => setIsReady(true)}
+                        />
+                    </div>
+                </Show>
             </div>
         </div>
     );
