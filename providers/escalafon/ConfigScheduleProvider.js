@@ -20,8 +20,8 @@ class ConfigScheduleProvider extends BaseProvider  {
         .catch(err => this.handleError(err));
     }
 
-    syncAssistance = async (id, body = {}, config = {}, ctx = null) => {
-        return await escalafon.post(`${this.collection}/${id}/sync_assistances`, body, config, ctx)
+    update = async (id, body = {}, config = {}, ctx = null) => {
+        return await escalafon.post(`${this.collection}/${id}?_method=PUT`, body, config, ctx)
         .then(res => res)
         .catch(err => this.handleError(err));
     }
