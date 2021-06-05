@@ -45,8 +45,6 @@ class AuthGroupProvider extends BaseProvider  {
     }
 
     zip = async (id, body, config = { }, ctx = null) => {
-        let newConfig = { responseType: 'blob' };
-        config = { ...newConfig, ...config }
         return await signature.post(`${this.collection}/${id}/zip`, body, config, ctx)
             .then(res => res.data)
             .catch(err => this.handleError(err));

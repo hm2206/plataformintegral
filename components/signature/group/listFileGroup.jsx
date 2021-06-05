@@ -110,6 +110,7 @@ const ListFileGroup = () => {
     const [current_total, setCurrentTotal] = useState(0);
     const [is_refresh, setIsRefresh] = useState(false);
     const [query_search, setQuerySearch] = useState("");
+    const [current_processing, setCurrentProcessing] = useState(false);
 
     // config options
     const configOptions = {
@@ -143,26 +144,25 @@ const ListFileGroup = () => {
 
     // download zip
     const donwloadZip = async () => {
-        let answer = await Confirm(`warning`, `¿Estas seguro en descargas los archivos PDF's?`, 'Descargar');
+        let answer = await Confirm(`warning`, `¿Estas seguro en comprimir los archivos PDF's?`, 'Comprimir');
         if (!answer) return false;
         app_context.setCurrentLoading(true);
         await authGroupProvider.zip(group.id, {}, configOptions)
-            .then(res => {
-                app_context.setCurrentLoading(false);
-                let a = document.createElement('a');
-                a.href = URL.createObjectURL(res);
-                a.target = '__blank';
-                a.click();
-            }).catch(err => {
-                app_context.setCurrentLoading(false);
-                Swal.fire({ icon: 'error', text: err.message });
-            });
+        .then(res => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'success', text: "El zip está siendo generado, se le notificará cuando esté listo!!!" });
+            setCurrentProcessing(true);
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: err.message });
+        });
     }
 
     // primera carga
     useEffect(() => {
         getFiles();
-    }, []);
+        setCurrentProcessing(group.processing);
+    }, [group]);
 
     // next page
     useEffect(() => {
@@ -184,12 +184,15 @@ const ListFileGroup = () => {
                 <div className="col-md-10 col-10"><h5><i className="far fa-file-pdf"></i> Lista de Archivos</h5></div>
                 <Show condicion={group.status == 'OVER'}>
                     <div className="col-md-2 text-right col-2">
-                        <button className="btn btn-outline-primary"
-                            disabled={current_loading}
+                        <Button size="mini"
+                            basic={current_processing ? false : true}
+                            color={current_processing ? 'black' : 'blue'}
+                            disabled={current_loading || current_processing}
                             onClick={donwloadZip}
+                            loading={current_processing}
                         >
                             <i className="fas fa-download"></i>
-                        </button>
+                        </Button>
                     </div>
                 </Show>
             </div>

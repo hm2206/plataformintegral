@@ -17,8 +17,11 @@ import Swal from 'sweetalert2';
 import Router from 'next/router';
 import { Message } from 'semantic-ui-react';
 
+const refreshOption = { key: 'REFRESH', title: 'Refrescar Grupo', icon: 'fas fa-sync' };
+
 const options = [
     { key: 'ADD_TEAM', title: 'Agregar al equipo de firma', icon: 'fas fa-user-plus' },
+    refreshOption,
 ]
 
 
@@ -37,12 +40,14 @@ const SlugGroup = ({ pathname, query, success, group }) => {
     const [option, setOption] = useState("");
 
     // manejar opciones
-    const handleOption = (e, index, obj) => {
+    const handleOption = async (e, index, obj) => {
         switch (obj.key) {
             case 'ADD_TEAM':
             case 'ADD_VALIDATION':
                 setOption(obj.key);
                 break;
+            case 'REFRESH':
+                await Router.push(location.href);
             default:
                 break;
         }
@@ -110,7 +115,7 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                     info={[group.description || '']}
                     prefix={<BtnBack className="mr-2"/>}
                     onOption={handleOption}
-                    options={group.status == 'START' ? options : []}
+                    options={group.status == 'START' ? options : [refreshOption]}
                 >
                     <div className="row">
                         <div className="col-md-8">
