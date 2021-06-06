@@ -12,7 +12,7 @@ const ModalReport = ({ cronograma, isClose }) => {
                 md="10"
                 isClose={isClose}
             >
-                <div className="card-body">
+                <div className="card-body" style={{ height: '80vh' }}>
                     <BasicReport cronograma={cronograma} basic/>
                 </div>
             </Modal>

@@ -28,7 +28,7 @@ export default class Modal extends Component {
   }
 
   render() {
-    let { md, disabled = false, display, classHeader, classClose } = this.props;
+    let { md, disabled = false, display, classHeader, classClose, height } = this.props;
     let { isShow } = this.state;
 
     if (isShow || display) {
@@ -49,7 +49,7 @@ export default class Modal extends Component {
           <div style={{ display: "flex", height: "100%", justifyContent: "center", alignItems: "center", }}>
             <div
               className={`col-md-${md ? md : "6"} card`}
-              style={{ position: "relative", maxHeight: "95vh", background: 'white', overflow: 'auto'}}
+              style={{ position: "relative", maxHeight: "95vh", height: height ? height : 'auto', background: 'white', overflow: 'auto'}}
             >
               <div className={`card-header ${classHeader}`}>
                 {this.props.titulo}
