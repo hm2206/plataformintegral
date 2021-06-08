@@ -4,15 +4,11 @@ import { Button } from 'semantic-ui-react';
 import CardLoader from '../cardLoader';
 import Show from '../show';
 import moment from 'moment';
+import EditSchedule from './editSchedule';
+import CreateSchedule from './createSchedule';
 import InfoProvider from '../../providers/escalafon/InfoProvider';
 moment.locale('es');
 
-// [
-//     {
-//       title  : 'event1',
-//       start  : '2021-06-01'
-//     }
-// ]
 
 // providers
 const infoProvider = new InfoProvider();
@@ -25,7 +21,11 @@ const ItemInfoSchedules = ({ info }) => {
     // estados
     const [current_date, setCurrentDate] = useState(moment().format('YYYY-MM-DD'));
     const [current_loading, setCurrentLoading] = useState(false);
+    const [select_date, setSelectDate] = useState();
     const [events, setEvents] = useState([]);
+    const [add, setAdd] = useState(false);
+    const [current_schedule, setCurrentSchedule] = useState({});
+    const isChurrentSchedule = Object.keys(current_schedule).length;
 
     const toDay = moment().format('YYYY-MM-DD');
 
@@ -49,6 +49,7 @@ const ItemInfoSchedules = ({ info }) => {
                     id: schedule.id,
                     title: `${displayStart}`,
                     start: schedule.date,
+                    className: "cursor-pointer",
                     schedule
                 });
             });
@@ -80,6 +81,50 @@ const ItemInfoSchedules = ({ info }) => {
         let next = moment(current_date).subtract(1, 'month').format('YYYY-MM-DD');
         calendarApi.gotoDate(next);
         setCurrentDate(next);
+    }
+
+    const handleEvent = ({ event }) => {
+        let { schedule } = event.extendedProps;
+        setCurrentSchedule(schedule);
+    }
+
+    const handleAdd = (args) => {
+        let current_fecha = moment();
+        let select_fecha = moment(`${moment(args.dateStr).format('YYYY-MM')}-01`);
+        let isDeny = current_fecha.diff(select_fecha, 'months').valueOf();
+        if (isDeny >= 1) return;
+        setSelectDate(args.dateStr);
+        setAdd(true);
+    }
+
+    const onAdd = (schedule) => {
+        let displayStart = moment(`${schedule.date} ${schedule.time_start}`).format('HH:mm A');
+        setEvents((prev) => [...prev, {  
+            id: schedule.id,
+            title: displayStart,
+            start: schedule.date,
+            className: "cursor-pointer",
+            schedule
+        }]);
+        // hidden modal
+        setAdd(false);
+    }
+
+    const onReplicar = async (schedules = []) => {
+        let payload = [];
+        await schedules.map(schedule => {
+            let displayStart = moment(`${schedule.date} ${schedule.time_start}`).format('HH:mm A');
+            payload.push({
+                id: schedule.id,
+                title: displayStart,
+                start: schedule.date,
+                className: "cursor-pointer",
+                schedule
+            });
+        });
+        // add
+        setEvents(prev => [...prev, ...payload]);
+        setCurrentSchedule({});
     }
 
     useEffect(() => {
@@ -131,11 +176,31 @@ const ItemInfoSchedules = ({ info }) => {
                         defaultDate={current_date}
                         events={events}
                         eventTextColor="#ffffff"
-                        // eventClick={handleDelete}
+                        eventClick={handleEvent}
+                        dateClick={handleAdd}
                     />
                     {/* loader */}
                     <Show condicion={current_loading}>
                         <CardLoader/>
+                    </Show>
+
+                    {/* crear */}
+                    <Show condicion={add}>
+                        <CreateSchedule
+                            onSave={onAdd}
+                            date={select_date}
+                            info={info}
+                            onClose={() => setAdd(false)}
+                        />
+                    </Show>
+
+                    {/* edit */}
+                    <Show condicion={isChurrentSchedule}>
+                        <EditSchedule
+                            schedule={current_schedule}
+                            onClose={(e) => setCurrentSchedule({})}
+                            onReplicar={onReplicar}
+                        />
                     </Show>
                 </div>
             </div>
