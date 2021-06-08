@@ -1,24 +1,12 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
+import ItemInfoSchedules from '../../components/escalafon/itemInfoSchedules';
 import Skeleton from 'react-loading-skeleton';
 import Show from '../show'
 import { escalafon } from '../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
-import { collect } from 'collect.js';
-import { BtnFloat } from '../Utils';
 import moment from 'moment';
-
 moment.locale('es');
-
-const itemDays = {
-    0: "Domingo",
-    1: "Lunes",
-    2: "Martes",
-    3: "Miercoles",
-    4: "Jueves",
-    5: "Viernes",
-    6: "Sábado"
-}
 
 
 const Placeholder = () => {
@@ -36,101 +24,6 @@ const Placeholder = () => {
     </Fragment>
 }
 
-const ItemContrato = ({ info }) => {
-
-    const [schedules, setSchedules] = useState([]);
-
-    const DrawHour = ({ schedule }) => {
-        let date = moment(`${(new Date).toDateString()} ${schedule?.time_start}`);
-        let format = date.format('HH:SS A');
-        let type = date.format('A');
-        let option = `${schedule?.config_schedule?.name || 'Personalizado'}`.toLowerCase();
-        let is_config = schedule?.config_schedule?.name ? true : false;
-        // render
-        return (
-            <>
-                <i className={`fas fa-${type == 'AM' ? 'sun' : 'moon'} mr-1`}></i> 
-                {format}
-                <span className={`badge badge-${is_config ? 'primary' : 'light'} capitalize badge-sm ml-1`}>{option}</span>
-            </>
-        );
-    }
-
-    const settingSchedules = async () => {
-        let payload = [];
-        let config_schedules = info?.config_schedule?.schedules || [];
-        let datos = info?.schedules || [];
-        datos.push(...config_schedules)
-        let newSchedules = collect(datos).groupBy('index');
-        let current_config_schedule = info?.config_schedule || {};
-        // add format
-        for (let attr in newSchedules.items) {
-            let items = newSchedules.items[attr].sortBy('time_start').toArray();
-            // add config
-            await items?.map(i => {
-                if (i.object_type == 'App/Models/ConfigSchedule') i.config_schedule = current_config_schedule;
-                return i;
-            });
-            // agregar
-            await payload.push({
-                day: attr,
-                data: items
-            });
-        }
-        // setting
-        setSchedules(payload);
-    }
-
-    // redirigir a editar
-    const handleEdit = () => {
-        let path = `/escalafon/contrato/edit`;
-        let q = {};
-        q.id = btoa(info?.id);
-        q.href = btoa(Router.asPath);
-        Router.push({ pathname: path, query: q });
-    }
-
-    useEffect(() => {
-        settingSchedules();
-        return () => setSchedules([]);
-    }, [info?.id]);
-
-    // render
-    return (
-        <div className={`card font-13`}>
-            <div className="card-header">
-                Planilla: {info?.planilla?.nombre || ""} - <span className="badge badge-dark">{info?.type_categoria?.descripcion}</span>
-                <span className="close cursor-pointer"
-                    onClick={handleEdit}
-                >
-                    <i className="fas fa-edit"></i>
-                </span>
-            </div>
-            <div className="card-body">
-                <div className="row content-widget">
-                    {/* listado de schedule */}
-                    {schedules?.map((s, indexS) => 
-                        <div className="col-md-3 col-xl-3 col-6 mb-2 mt-2"
-                            key={`list-item-schedule-${indexS}`}
-                        >
-                            <div className="card card-body">
-                                <h4 className="mb-1"><i className="fas fa-table"></i> {itemDays[s.day] || ''}</h4>
-                                <hr />
-                                <ul className="pl-1">
-                                    {s?.data?.map((d, indexD) => 
-                                        <li key={`item-day-${indexD}`} style={{ listStyle: 'none' }}>
-                                            {<DrawHour schedule={d}/>}
-                                        </li>
-                                    )}
-                                </ul>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    )
-}
 
 const Contratos = ({ work }) => {
 
@@ -156,7 +49,7 @@ const Contratos = ({ work }) => {
     // obtener contratos
     const getInfos = async (add = false) => {
         setCurrentLoading(true);
-        await escalafon.get(`works/${work.id}/schedules`)
+        await escalafon.get(`works/${work.id}/infos?estado=1`)
             .then(res => {
                 let { success, infos, message } = res.data;
                 if (!success) throw new Error(message);
@@ -169,26 +62,21 @@ const Contratos = ({ work }) => {
     }
 
     // render
-    return <div className="row">
+    return <div className="row justify-content-center">
         <div className="col-md-12">
             <h5>Listado de Horarios activos</h5>
             <hr/>
         </div>
         
         {current_infos.map((i, indexI) => 
-            <div className="col-md-12" key={`info-list-${i.id}-${indexI}`}>
-                <ItemContrato info={i}/>
+            <div className="col-md-6" key={`info-list-${i.id}-${indexI}`}>
+                <ItemInfoSchedules info={i}/>
             </div>
         )}
 
         <Show condicion={current_loading}>
             <Placeholder/>
         </Show>
-
-        {/* crear horario */}
-        <BtnFloat>
-            <i className="fas fa-plus"></i>
-        </BtnFloat>
     </div>
 }
 

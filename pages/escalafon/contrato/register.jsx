@@ -12,7 +12,6 @@ import Router from 'next/router';
 import AssignTrabajador from '../../../components/contrato/assingTrabajador';   
 import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
-import { SelectConfigSchedule } from '../../../components/select/escalafon';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext';
@@ -369,18 +368,6 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field error={errors?.config_schedule_id?.[0] ? true : false}>
-                                                <label htmlFor="">Horario <b className="text-red">*</b></label>
-                                                <SelectConfigSchedule
-                                                    name="config_schedule_id"
-                                                    value={form.config_schedule_id}
-                                                    onChange={(e, obj) => handleInput(obj)}
-                                                />
-                                                <label>{errors?.config_schedule_id?.[0] || ""}</label>
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mb-3">
                                             <Form.Field error={errors && errors.fecha_de_ingreso && errors.fecha_de_ingreso[0] ? true : false}>
                                                 <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
                                                 <input type="date" 
@@ -408,6 +395,18 @@ const Register = () => {
 
                                         <div className="col-md-4 mb-3">
                                             <Form.Field>
+                                                <label htmlFor="">N° Ruc</label>
+                                                <input type="text" 
+                                                    placeholder="N° Ruc"
+                                                    name="ruc"
+                                                    value={form.ruc || ""}
+                                                    onChange={(e) => handleInput(e.target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4">
+                                            <Form.Field>
                                                 <label htmlFor="">¿ Agregar aportación empleador: ESSALUD ?</label>
                                                 <Select
                                                     placeholder="Select. Aportación"
@@ -434,15 +433,6 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-4 mb-3">
-                                            <Form.Field>
-                                                <label htmlFor="">N° Ruc</label>
-                                                <input type="text" 
-                                                    placeholder="N° Ruc"
-                                                    name="ruc"
-                                                    value={form.ruc || ""}
-                                                    onChange={(e) => handleInput(e.target)}
-                                                />
-                                            </Form.Field>
 
                                             <Form.Field error={errors && errors.file && errors.file[0] ? true : false}>
                                                 <label htmlFor="file">Archivo de Regístro</label>

@@ -13,7 +13,6 @@ import btoa from 'btoa';
 import { AppContext } from '../../../contexts/AppContext';
 import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta, SelectSitacionLaboral } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
-import { SelectConfigSchedule } from '../../../components/select/escalafon';
 import storage from '../../../services/storage.json';
 import BoardSimple from '../../../components/boardSimple';
 import NotFoundData from '../../../components/notFoundData'
@@ -478,15 +477,12 @@ const Edit = ({ success, info, query }) => {
                                         </div>
 
                                         <div className="col-md-4 mt-3">
-                                            <Form.Field error={errors?.config_schedule_id?.[0] ? true : false}>
-                                                <label htmlFor="">Horario <b className="text-red">*</b></label>
-                                                <SelectConfigSchedule
-                                                    disabled={!edit}
-                                                    name="config_schedule_id"
-                                                    value={form.config_schedule_id}
-                                                    onChange={(e, obj) => handleInput(obj)}
+                                            <Form.Field>
+                                                <label htmlFor="">Prima Seguro</label>
+                                                <Checkbox toggle 
+                                                    checked={info.work?.prima_seguro ? true : false} 
+                                                    disabled
                                                 />
-                                                <label>{errors?.config_schedule_id?.[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 
@@ -500,16 +496,6 @@ const Edit = ({ success, info, query }) => {
                                                     onChange={({target}) => handleInput(target)}
                                                 />
                                                 <label>{errors.observacion && errors.observacion[0] || ""}</label>
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mt-3">
-                                            <Form.Field>
-                                                <label htmlFor="">Prima Seguro</label>
-                                                <Checkbox toggle 
-                                                    checked={info.work?.prima_seguro ? true : false} 
-                                                    disabled
-                                                />
                                             </Form.Field>
                                         </div>
 
