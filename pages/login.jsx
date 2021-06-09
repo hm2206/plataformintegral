@@ -19,6 +19,7 @@ const Login = ({ pathname, query }) => {
 
     // estados
     const [option, setOption] = useState("VERIFICATION");
+    const [show_password, setShowPassword] = useState(false);
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false); 
@@ -124,7 +125,7 @@ const Login = ({ pathname, query }) => {
                 <Form.Field className="form-group" error={ errors.password && errors.password[0] || null}>
                     <div className="form-label-group">
                         <input
-                            type="password"
+                            type={`${show_password ? 'text' : 'password'}`}
                             id="inputPassword"
                             className={`form-control`}
                             placeholder="Contraseña"
@@ -134,6 +135,12 @@ const Login = ({ pathname, query }) => {
                             disabled={current_loading || !form.email}
                         />{" "}
                         <label htmlFor="inputPassword">Contraseña</label>
+                        <span style={{ position: 'absolute', top: '10px', right: '10px' }} 
+                            className="cursor-pointer"
+                            onClick={() => setShowPassword(prev => !prev)}
+                        >
+                            <i className={`fas fa-${show_password ? 'eye' : 'eye-slash'}`}></i>
+                        </span>
                     </div>
                     <label className="text-danger">{errors.password && errors.password[0]}</label>
                 </Form.Field>
