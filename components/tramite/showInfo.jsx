@@ -174,7 +174,7 @@ const ShowInfo = ({ validateFile = [], onArchived = null }) => {
                                 basic={true}
                                 icon="fas fa-plus"
                                 onChange={async ({ files, name }) => await addFile({ name, file: files[0] }, current_tramite.id)}
-                                onSigned={async ({ name, file }) => await addFile({ name, file }, current_tracking.id)}
+                                onSigned={async ({ name, file }) => await addFile({ name, file }, current_tramite.id)}
                             />
                         </div>
                     </Show>
