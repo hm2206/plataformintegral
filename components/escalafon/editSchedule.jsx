@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 
 const scheduleProvider = new ScheduleProvider();
 
-const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null }) => {
+const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
@@ -33,10 +33,34 @@ const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null }) => {
         setErrors(newErrors);
     }
 
+    const handleUpdate = async () => {
+        let answer = await Confirm('info', `¿Estás seguro en guardar los cambios?`, 'Estoy seguro');
+        if (!answer) return;
+        setCurrentLoading(true);
+        await scheduleProvider.update(schedule.id, form)
+        .then(res => {
+            let { message } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+            if (typeof onUpdate == 'function') onUpdate(schedule);
+        }).catch(err => {
+            Swal.fire({ icon: 'error', text: err.message });
+        });
+        setCurrentLoading(false);
+    }
+
     const handleDelete = async () => {
         let answer = await Confirm('warning', `¿Estás seguro en eliminar?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
+        await scheduleProvider.delete(schedule.id)
+        .then(res => {
+            let { message } = res.data;
+            Swal.fire({ icon: 'success', text: message });
+            if (typeof onDelete == 'function') onDelete(schedule);
+        }).catch(err => {
+            Swal.fire({ icon: 'error', text: err.message });
+        });
+        setCurrentLoading(false);
     }
 
     const handleReplicar = async () => {
@@ -111,6 +135,7 @@ const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null }) => {
                                 <Button color="teal" 
                                     disabled={current_loading} 
                                     loading={current_loading}
+                                    onClick={handleUpdate}
                                 >
                                     <i className="fas fa-sync"></i> Guardar cambios
                                 </Button>

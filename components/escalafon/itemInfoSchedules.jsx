@@ -6,9 +6,13 @@ import Show from '../show';
 import moment from 'moment';
 import EditSchedule from './editSchedule';
 import CreateSchedule from './createSchedule';
+import SyncScheduleInfos from './syncScheduleInfos';
 import InfoProvider from '../../providers/escalafon/InfoProvider';
 moment.locale('es');
 
+const options = {
+    SYNC_INFOS: "SYNC_INFOS"
+};
 
 // providers
 const infoProvider = new InfoProvider();
@@ -25,6 +29,7 @@ const ItemInfoSchedules = ({ info }) => {
     const [events, setEvents] = useState([]);
     const [add, setAdd] = useState(false);
     const [current_schedule, setCurrentSchedule] = useState({});
+    const [option, setOption] = useState("");
     const isChurrentSchedule = Object.keys(current_schedule).length;
 
     const toDay = moment().format('YYYY-MM-DD');
@@ -135,7 +140,18 @@ const ItemInfoSchedules = ({ info }) => {
     return (
         <div className="card">
             <div className="card-header uppercase">
-                <i className="fas fa-info-circle"></i>  {info?.type_categoria?.descripcion || ""} - <span className="badge badge-primary">{info?.pap || ""}</span>
+                <div className="row">
+                    <div className="col-9">
+                        <i className="fas fa-info-circle mr-1"></i>  
+                        {info?.type_categoria?.descripcion || ""} - <span className="badge badge-primary">{info?.pap || ""}</span>
+                    </div>
+                    <div className="col-3 text-right">
+                        <Button.Group size="mini">
+                            <Button icon="random" onClick={() => setOption(options.SYNC_INFOS)}/>
+                            <Button icon="arrow up"/>
+                        </Button.Group>
+                    </div>
+                </div>
             </div>
             <div className="card-body">
                 <div className="row mb-4">
@@ -200,6 +216,14 @@ const ItemInfoSchedules = ({ info }) => {
                             schedule={current_schedule}
                             onClose={(e) => setCurrentSchedule({})}
                             onReplicar={onReplicar}
+                        />
+                    </Show>
+
+                    {/* sincronizar horarios filtrando contratos */}
+                    <Show condicion={option == options.SYNC_INFOS}>
+                        <SyncScheduleInfos info={info}
+                            date={current_date}
+                            onClose={() => setOption("")}
                         />
                     </Show>
                 </div>

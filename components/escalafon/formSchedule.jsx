@@ -75,7 +75,7 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                         step="any"
                         name="delay_start"
                         readOnly={readOnly.includes('delay_start')}
-                        value={form?.delay_start || ""}
+                        value={form?.delay_start || 0}
                         onChange={handleChange}
                     />
                     <label htmlFor="">{errors?.delay_start?.[0] || ""}</label>
@@ -87,7 +87,7 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                         step="any" 
                         name="delay_over"
                         readOnly={readOnly.includes('delay_over')}
-                        value={form?.delay_over || ""}
+                        value={form?.delay_over || 0}
                         onChange={handleChange}
                     />
                     <label htmlFor="">{errors?.delay_over?.[0] || ""}</label>

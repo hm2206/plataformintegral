@@ -31,6 +31,14 @@ class InfoProvider extends BaseProvider  {
             .catch(err => this.handleError(err));
     }
 
+    asyncSchedules = async (id, body = {}, config = {}, ctx = null) => {
+        // request
+        return await escalafon.post(`${this.collection}/${id}/sync_schedules`, body, config, ctx)
+            .then(res => res)
+            .catch(err => this.handleError(err));
+    }
+
+
 }
 
 export default InfoProvider;

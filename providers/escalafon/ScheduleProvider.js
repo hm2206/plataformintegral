@@ -21,6 +21,18 @@ class ScheduleProvider extends BaseProvider  {
         .catch(err => this.handleError(err));
     }
 
+    update = async (id, body = {}, config = {}, ctx = null) => {
+        return await escalafon.post(`${this.collection}/${id}?_method=PUT`, body, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
+    delete = async (id, body = {}, config = {}, ctx = null) => {
+        return await escalafon.post(`${this.collection}/${id}?_method=DELETE`, body, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
     replicar = async (id, body = {}, config = {}, ctx = null) => {
         return await escalafon.post(`${this.collection}/${id}/replicar`, body, config, ctx)
         .then(res => res)
