@@ -150,11 +150,6 @@ const UserIndex = ({ pathname, query, success, users }) => {
                             key: "config",
                             icon: "fas fa-cog",
                             title: "Configuraciones"
-                        },
-                        {
-                            key: "reset_password",
-                            icon: "fas fa-sync-alt",
-                            title: "Auto reset contraseña"
                         }
                     ]}
                     optionAlign="text-center"

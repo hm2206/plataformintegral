@@ -34,6 +34,7 @@ const actions = {
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
     const [errors, setErrors] = useState({});
+    const [reset_password, setResetPassword] = useState();
 
     const handleInput = ({ name, value }) => {
         let newForm = Object.assign({}, form);
@@ -55,6 +56,21 @@ const actions = {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             await router.push(location.href);
+            setEdit(false);
+        }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)))
+    }
+
+    const autoResetPassword = async () => {
+        let answer = await Confirm('info', `¿Estás seguro en auto-generar contraseña?`, 'Estoy seguro');
+        if (!answer) return false;
+        app_context.setCurrentLoading(true);
+        await authentication.post(`user/${user.id}/auto_reset_password?_method=PUT`, form)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message, password } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            await router.push(location.href);
+            setResetPassword(password);
             setEdit(false);
         }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)))
     }
@@ -135,7 +151,27 @@ const actions = {
                                         </Form.Field>
                                     </div>
 
-                                    <Show condicion={edit}>
+                                    <Show condicion={reset_password}>
+                                        <div className="col-md-12 mb-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Contraseñ Auto-generada</label>
+                                                <input type="text" 
+                                                    value={reset_password || ""}
+                                                    readOnly
+                                                />
+                                            </Form.Field>
+                                        </div>
+                                    </Show>
+
+                                    <Show condicion={edit}
+                                        predeterminado={
+                                            <Form.Field className="col-md-6 text-right">
+                                                <Button onClick={autoResetPassword}>
+                                                    <i className="fas fa-key"></i> Reset Password
+                                                </Button>
+                                            </Form.Field>
+                                        }
+                                    >
                                         <div className="col-md-6 mb-3 text-right">
                                             <Form.Field>
                                                 <label htmlFor="">
