@@ -49,7 +49,7 @@ const ItemTable = ({ current = true,
     return (
         <Fragment>
             <tr className={`table-select table-item ${current ? '' : 'disabled'}`} style={{ background: noRead ? 'rgba(0, 255, 0, 0.05)' : 'transparent' }}>
-                <th width="10%" onClick={(e) => handleClick(onClickItem, e)} rowSpan="2">
+                <th width="10%" onClick={(e) => handleClick(onClickItem, e)} rowSpan={files && files.length ? '2' : '1'}>
                     <span className="badge badge-dark font-13">
                         {slug || ""}
                     </span>
