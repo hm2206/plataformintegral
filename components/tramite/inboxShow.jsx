@@ -124,7 +124,8 @@ const InboxShow = ({ onRefresh }) => {
 
     // validar firma
     const validateFile = () => {
-        if (!current_tramite.state) return ['delete', 'signature', 'create']; 
+        if (!current_tramite.state) return ['delete', 'signature', 'create'];
+        if (current_tracking?.revisado) return ['delete', 'create'];
         // validar si es el dueño del documento y esta en la dependencia
         if ((auth.person_id == current_tramite.person_id || 
             auth.id == current_tramite.user_id) && 
@@ -262,7 +263,9 @@ const InboxShow = ({ onRefresh }) => {
                             </div>
                         </Show>
                         {/* info action */}
-                        <ShowAction onAction={setAction}/>
+                        <ShowAction onAction={setAction}
+                            onAnularProcess={handleOnSave}
+                        />
                         {/* multiple */}
                         <Show condicion={current_tracking.multiple}>
                             <div className="col-md-12 mt-4">
@@ -289,7 +292,7 @@ const InboxShow = ({ onRefresh }) => {
                 />
             </Show>
             {/* ventana de acciones */}
-            <Show condicion={current_tracking.current && tramite_context.option.includes('NEXT')}>
+            <Show condicion={(current_tracking.current && tramite_context.option.includes('NEXT')) || (action == 'ANULADO' && tramite_context.option.includes('NEXT'))}>
                 <ModalNextTracking
                     isClose={(e) => tramite_context.setOption([])}
                     action={action}

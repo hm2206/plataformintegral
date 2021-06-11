@@ -4,11 +4,18 @@ import Show from '../show';
 import { Button } from 'semantic-ui-react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
+import { Confirm } from '../../services/utils';
+import { tramite } from '../../services/apis';
+import Swal from 'sweetalert2';
+import { AppContext } from '../../contexts';
 
-const ShowAction = ({ onAction = null }) => {
+const ShowAction = ({ onAction = null, onAnularProcess = null }) => {
 
     // auth
     const { auth } = useContext(AuthContext);
+
+    // app
+    const app_context = useContext(AppContext);
 
     // tramite
     const { current_tracking, setOption, setNext, dispatch } = useContext(TramiteContext);
@@ -21,17 +28,43 @@ const ShowAction = ({ onAction = null }) => {
         if (typeof onAction == 'function') onAction(act);
     }
     
+    const handleAnularProcess = async () => {
+        let answer = await Confirm('warning', '¿Estas seguro en anular el proceso del trámite?', 'Anular Proceso');
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        await tramite.post(`tramite/${current_tramite.id}/anular_process`)
+        .then(async res => {
+            let { tracking } = res.data;
+            app_context.setCurrentLoading(false);
+            await Swal.fire({ icon: 'success', text: 'El proceso del trámite se anulo correctamente!' });
+            if (typeof onAnularProcess == 'function') onAnularProcess(tracking);
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: 'No se pudó anular el proceso del trámite' });
+        });
+    }
+
     // render
     return (
         <div className="col-md-12">
             {/* configuración de los archivos del tracking */}
-            <Show condicion={current_tracking.current}>
+            <Show condicion={current_tracking.current}
+                predeterminado={
+                    <div className="col-md-12 mt-4 text-right">
+                        <Show condicion={auth.person_id == current_tramite.person_id && current_tracking.status != 'ANULADO'}>
+                            <Button color="red" 
+                                basic
+                                size="mini"
+                                onClick={handleAnularProcess}
+                            >
+                                Anular Proceso <i className="fas fa-times"></i>
+                            </Button>
+                        </Show>
+                    </div>
+                }
+            >
                 <div className="col-md-12 mt-4">
-                    <Show condicion={
-                        !current_tracking.revisado && 
-                        auth.id == current_tracking.user_verify_id && 
-                        current_tracking.status == 'REGISTRADO'
-                    }>
+                    <Show condicion={current_tracking.status != 'ANULADO' && auth.person_id == current_tramite.person_id}>
                         <Button color="red" 
                             basic
                             size="mini"

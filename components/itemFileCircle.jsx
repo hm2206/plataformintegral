@@ -10,14 +10,11 @@ import { PDFDocument } from 'pdf-lib';
 
 const infos = {
     pdf: {
-        icon: "fas fa-file-pdf",
-        signer: true,
-        delete: true,
+        icon: "fas fa-file-pdf"
     },
     docx: {
         icon: "fas fa-file-word",
-        signer: false,
-        delete: true
+        hidden: ['signer']
     }
 }
 
@@ -128,7 +125,7 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
             </a>
 
             <Show condicion={edit}>
-                <Show condicion={meta_info.signer && !hidden.includes('signature')}>
+                <Show condicion={!meta_info?.hidden?.includes('signature') && !hidden.includes('signature')}>
                     <span className="text-success"
                         title="Firmar Archivo"
                         style={{ position: 'absolute', left: '-20px', cursor: 'pointer' }}
@@ -138,7 +135,7 @@ const ItemFileCircle = ({ id, url, name, extname, is_observation = "", edit = fa
                     </span>
                 </Show>
 
-                <Show condicion={meta_info.delete && !hidden.includes('delete')}>
+                <Show condicion={!meta_info?.hidden?.includes('delete') && !hidden?.includes('delete')}>
                     <span className="text-danger" 
                         title="Eliminar Archivo"
                         style={{ position: 'absolute', bottom: '-0px', left: '-20px', cursor: 'pointer' }}

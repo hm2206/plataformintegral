@@ -34,7 +34,7 @@ const ShowInfo = ({ validateFile = [], onArchived = null }) => {
 
     // verificar tracking
     const verifyTracking = async () => {
-        let answer = await Confirm(`warning`, `¿Estás seguro en autorizar el trámite?`, 'Autorizar');    
+        let answer = await Confirm(`warning`, `¿Estás seguro en ${current_tracking.revisado ? 'quitar la autorización' : 'autorizar'} el trámite?`, 'Autorizar');    
         if (!answer) return false;
         app_context.setCurrentLoading(true);
         // options
@@ -42,13 +42,13 @@ const ShowInfo = ({ validateFile = [], onArchived = null }) => {
             headers: { DependenciaId: dependencia_id }
         }
         // request
-        await trackingProvider.verify(current_tracking.id, {}, options)
+        await trackingProvider.verify(current_tracking.id, { revisado: current_tracking.revisado ? 0 : 1 }, options)
         .then(async res => {
             app_context.setCurrentLoading(false);
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             let newTracking = Object.assign({}, current_tracking);
-            newTracking.revisado = 1;
+            newTracking.revisado = !newTracking.revisado;
             dispatch({ type: tramiteTypes.CHANGE_TRACKING, payload: newTracking })
         }).catch(err => {
             app_context.setCurrentLoading(false);
@@ -109,12 +109,28 @@ const ShowInfo = ({ validateFile = [], onArchived = null }) => {
                     <br/>
                     <b>N° Folio: </b> {current_tramite.folio_count || 0}
                     <br/>
-                    <Show condicion={!current_tracking.revisado && current_tracking.user_verify_id == auth.id}>
+                    <Show condicion={current_tracking.current && !current_tracking.revisado && current_tracking.user_verify_id == auth.id}>
                         <div className="mb-3 mt-3">
                             <button className="btn btn-outline-success"
                                 onClick={verifyTracking}
                             >
                                 <i className="fas fa-check"></i> Autorizar
+                            </button>
+                        </div>
+                    </Show>
+
+                    <Show condicion={
+                            current_tracking.status != 'ANULADO' 
+                            && current_tracking.current 
+                            && current_tracking.revisado 
+                            && current_tracking.user_verify_id == auth.id
+                        }
+                    >
+                        <div className="mb-3 mt-3">
+                            <button className="btn btn-outline-danger"
+                                onClick={verifyTracking}
+                            >
+                                <i className="fas fa-times"></i> Quitar Autorización
                             </button>
                         </div>
                     </Show>
