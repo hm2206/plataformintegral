@@ -17,6 +17,8 @@ import { tramite } from '../../services/apis';
 const trackingProvider = new TrackingProvider();
 const fileProvider = new FileProvider();
 
+const allowToggleVerify = ['REGISTRADO', 'PENDIENTE', ''];
+
 const ShowInfo = ({ validateFile = [], onArchived = null }) => {
 
     // app
@@ -109,30 +111,36 @@ const ShowInfo = ({ validateFile = [], onArchived = null }) => {
                     <br/>
                     <b>N° Folio: </b> {current_tramite.folio_count || 0}
                     <br/>
-                    <Show condicion={current_tracking.current && !current_tracking.revisado && current_tracking.user_verify_id == auth.id}>
-                        <div className="mb-3 mt-3">
-                            <button className="btn btn-outline-success"
-                                onClick={verifyTracking}
-                            >
-                                <i className="fas fa-check"></i> Autorizar
-                            </button>
-                        </div>
-                    </Show>
 
-                    <Show condicion={
-                            current_tracking.status != 'ANULADO' 
-                            && current_tracking.current 
-                            && current_tracking.revisado 
-                            && current_tracking.user_verify_id == auth.id
-                        }
-                    >
-                        <div className="mb-3 mt-3">
-                            <button className="btn btn-outline-danger"
-                                onClick={verifyTracking}
-                            >
-                                <i className="fas fa-times"></i> Quitar Autorización
-                            </button>
-                        </div>
+                    <Show condicion={allowToggleVerify.includes(current_tracking.status)}>
+                        <Show condicion={
+                                current_tracking.current && !current_tracking.revisado 
+                                && current_tracking.user_verify_id == auth.id
+                            }
+                        >
+                            <div className="mb-3 mt-3">
+                                <button className="btn btn-outline-success"
+                                    onClick={verifyTracking}
+                                >
+                                    <i className="fas fa-check"></i> Autorizar
+                                </button>
+                            </div>
+                        </Show>
+
+                        <Show condicion={
+                                current_tracking.current 
+                                && current_tracking.revisado 
+                                && current_tracking.user_verify_id == auth.id
+                            }
+                        >
+                            <div className="mb-3 mt-3">
+                                <button className="btn btn-outline-danger"
+                                    onClick={verifyTracking}
+                                >
+                                    <i className="fas fa-times"></i> Quitar Autorización
+                                </button>
+                            </div>
+                        </Show>
                     </Show>
                 </div>
             </div>

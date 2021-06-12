@@ -22,6 +22,7 @@ const PlaceholderTable = () => {
             <td><Skeleton height="30px"/></td>
             <td><Skeleton height="30px"/></td>
             <td><Skeleton height="30px"/></td>
+            <td><Skeleton height="30px"/></td>
         </tr>    
     )
 }
@@ -148,10 +149,10 @@ const InboxTab = () => {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th>Código</th>
-                            <th>Asunto</th>
-                            <th>T. Documento</th>
-                            <th>N° Documento</th>
+                            <th width="30px">Código</th>
+                            <th width="250px">Asunto</th>
+                            <th>Tipo</th>
+                            <th>Documento</th>
                             <th>Dependencia</th>
                             <th>Fecha</th>
                             <th className="text-center">Estado</th>

@@ -27,7 +27,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
 
     // tramite
     const tramite_context = useContext(TramiteContext);
-    const { current_tramite, dispatch } = tramite_context;
+    const { current_tramite, dispatch, setNext } = tramite_context;
 
     // estados
     const [form, setForm] = useState({});
@@ -85,6 +85,13 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
         setCurrentFiles(newFiles);
     }
 
+    // limpiar datos anteriores
+    const handleClose = () => {
+        setNext("");
+        dispatch({ type: tramiteTypes.CHANGE_TRAMITE });
+        if (typeof isClose == 'function') isClose();
+    }
+
     // cancelar solicitud
     const handleCancel = () => current_cancel && current_cancel.cancel();
 
@@ -124,7 +131,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
     // render
     return <Fragment>
         <Modal show={show}
-            isClose={isClose}
+            isClose={handleClose}
             disabled={current_loading}
             titulo={<span><i className="fas fa-plus"></i> Trámite nuevo</span>}
         >

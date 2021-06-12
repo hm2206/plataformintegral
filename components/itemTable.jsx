@@ -54,8 +54,8 @@ const ItemTable = ({ current = true,
                         {slug || ""}
                     </span>
                 </th>
-                <td>
-                    <div className="text-ellipsis cursor-pointer" onClick={(e) => handleClick(onClickItem, e)}>
+                <td width="45px" style={{ wordWrap: "break-word" }}>
+                    <div className="cursor-pointer" style={{ minWidth: "250", maxWidth: "350px", wordWrap: "break-word" }}  onClick={(e) => handleClick(onClickItem, e)}>
                         <b>{title || ""}</b>
                     </div>
                 </td>
@@ -79,7 +79,7 @@ const ItemTable = ({ current = true,
                 <td width="5%" className="text-center" onClick={(e) => handleClick(onClickItem, e)}>
                     <span className={`uppercase badge ${getSemaforo()}`}>{day}</span>
                 </td>
-                <td>
+                <td className="text-center">
                     <div className="btn-group text-center">
                         {buttons.map((b, indexB) => 
                             <button className={`btn btn-sm btn-light ${b.className || ""}`}

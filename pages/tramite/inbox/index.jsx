@@ -71,15 +71,19 @@ const InboxContent = ({ pathname, query }) => {
     }
 
     // manejador de creado
-    const handleOnSave = () => {
+    const handleOnSave = (tramite) => {
         setOption([]);
         setPage(1);
         if (menu != 'SENT') {
-            dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "SENT" });
             setIsSearch(true);
+            dispatch({ type: tramiteTypes.CHANGE_MENU, payload: "SENT" });
         } else {
             if (!online) setIsSearch(true);
         }
+        // cambiar tab
+        dispatch({ type: tramiteTypes.CHANGE_TRACKING, payload: tramite?.tracking || {} });
+        dispatch({ type: tramiteTypes.CHANGE_RENDER, payload: 'SHOW' });
+        dispatch({ type: tramiteTypes.DECREMENT_FILTRO, payload: 'SENT' })
     }
 
     // manejador de cambio de observation
@@ -169,11 +173,7 @@ const InboxContent = ({ pathname, query }) => {
             {/* modals */}
             <CreateTramite 
                 show={tramite_context.option.includes('CREATE')}
-                isClose={(e) => {
-                    setOption([]);
-                    setNext("");
-                    dispatch({ type: tramiteTypes.CHANGE_TRAMITE });
-                }}
+                isClose={(e) => setOption([])}
                 user={tramite_context.tab == 'DEPENDENCIA' ? tramite_context.boss.user : auth || {}}
                 onSave={handleOnSave}
             />

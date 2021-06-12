@@ -196,7 +196,7 @@ const InboxShow = ({ onRefresh }) => {
                         {current_tramite.slug || ""}
                     </span>
                     <i className="fas fa-arrow-right ml-1 mr-1"></i>
-                    {current_tramite.asunto || ""}
+                    <span style={{ wordWrap: 'break-word' }}>{current_tramite.asunto || ""}</span>
                     <span className="close cursor-pointer"
                         onClick={(e) => setIsRefresh(true)}
                     >

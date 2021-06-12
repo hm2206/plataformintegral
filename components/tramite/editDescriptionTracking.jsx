@@ -55,7 +55,7 @@ const EditDescriptionTracking = () => {
                         value={description}
                         onChange={({ target }) => setDescription(target.value)}
                         rows="7"
-                        disabled={!isEdit || current_loading || !tramite.state}
+                        disabled={!isEdit || current_loading || !tramite?.state}
                     />
                 </div>
 
@@ -64,7 +64,7 @@ const EditDescriptionTracking = () => {
                         <Button color="primary"
                             loading={current_loading}
                             onClick={handleUpdate}
-                            disabled={current_loading || !tramite.state}
+                            disabled={current_loading || !tramite?.state}
                         >
                             <i className="fas fa-save"></i> Guardar datos
                         </Button>

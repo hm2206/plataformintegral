@@ -48,23 +48,13 @@ const ShowAction = ({ onAction = null, onAnularProcess = null }) => {
     return (
         <div className="col-md-12">
             {/* configuración de los archivos del tracking */}
-            <Show condicion={current_tracking.current}
-                predeterminado={
-                    <div className="col-md-12 mt-4 text-right">
-                        <Show condicion={auth.person_id == current_tramite.person_id && current_tracking.status != 'ANULADO'}>
-                            <Button color="red" 
-                                basic
-                                size="mini"
-                                onClick={handleAnularProcess}
-                            >
-                                Anular Proceso <i className="fas fa-times"></i>
-                            </Button>
-                        </Show>
-                    </div>
-                }
-            >
+            <Show condicion={current_tracking.current}>
                 <div className="col-md-12 mt-4">
-                    <Show condicion={current_tracking.status != 'ANULADO' && auth.person_id == current_tramite.person_id}>
+                    <Show condicion={
+                        !current_tracking.revisado && 
+                        auth.id == current_tracking.user_verify_id && 
+                        current_tracking.status == 'REGISTRADO'
+                    }>
                         <Button color="red" 
                             basic
                             size="mini"
