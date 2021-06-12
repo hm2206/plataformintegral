@@ -18,6 +18,7 @@ import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import ShowInfo from './showInfo';
 import ShowAction from './showAction';
 import EditDescriptionTracking from './editDescriptionTracking';
+import EditTramite from './editTramite';
 
 // providors
 const authTramiteProvider = new AuthTramiteProvider();
@@ -77,6 +78,7 @@ const InboxShow = ({ onRefresh }) => {
     const tramite_context = useContext(TramiteContext);
     const { current_tracking, dispatch, menu, socket } = tramite_context;
     const  current_tramite = current_tracking.tramite || {};
+    const [current_edit, setCurrentEdit] = useState(false);
     const isTramite = Object.keys(current_tramite).length;
     
     // estados
@@ -197,6 +199,7 @@ const InboxShow = ({ onRefresh }) => {
                     </span>
                     <i className="fas fa-arrow-right ml-1 mr-1"></i>
                     <span style={{ wordWrap: 'break-word' }}>{current_tramite.asunto || ""}</span>
+                    
                     <span className="close cursor-pointer"
                         onClick={(e) => setIsRefresh(true)}
                     >
@@ -265,6 +268,7 @@ const InboxShow = ({ onRefresh }) => {
                         {/* info action */}
                         <ShowAction onAction={setAction}
                             onAnularProcess={handleOnSave}
+                            onEdit={() => setCurrentEdit(true)}
                         />
                         {/* multiple */}
                         <Show condicion={current_tracking.multiple}>
@@ -280,6 +284,14 @@ const InboxShow = ({ onRefresh }) => {
                     </div>
                 </div>
             </div>
+            {/* editar trámite */}
+            <EditTramite show={current_edit}
+                onClose={() => setCurrentEdit(false)}
+                onSave={(track) => {
+                    setCurrentEdit(false);
+                    handleOnSave(track);
+                }}
+            />
             {/* tracking description */}
             <EditDescriptionTracking/>
             {/* línea de tiempo */}

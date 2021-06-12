@@ -17,7 +17,7 @@ import { tramite } from '../../services/apis';
 const trackingProvider = new TrackingProvider();
 const fileProvider = new FileProvider();
 
-const allowToggleVerify = ['REGISTRADO', 'PENDIENTE', ''];
+const allowToggleVerify = ['REGISTRADO', 'PENDIENTE'];
 
 const ShowInfo = ({ validateFile = [], onArchived = null }) => {
 
