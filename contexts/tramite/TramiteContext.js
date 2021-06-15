@@ -57,7 +57,7 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
             .then(res => {
                 let { trackings } = res.data;
                 setLastPage(trackings.lastPage);
-                setTotal(trackings.tota || 0);
+                setTotal(trackings.total || 0);
                 dispatch({ type: add ? tramiteTypes.PUSH : tramiteTypes.INITIAL, payload: trackings.data });
             })
             .catch(err => console.log(err));
@@ -71,7 +71,7 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
             headers: { DependenciaId: dependencia_id }
         };
         // request 
-        await authProvider.status(tab, { archive: is_archived }, options)
+        await authProvider.status(tab, { archive: is_archived, query_search }, options)
             .then(async res => {
                 let { tracking_status } = res.data;
                 dispatch({ type: tramiteTypes.INITIAL_MENU, payload: tracking_status });
@@ -113,8 +113,8 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
 
     // cargar al cambiar tab
     useEffect(() => {
-        if (dependencia_id && tab) setIsSearch(true);
-    }, [tab]);
+        if (dependencia_id && tab && page) setIsSearch(true);
+    }, [tab, page]);
 
     // executar búsqueda
     useEffect(() => {
@@ -144,7 +144,8 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
             setIsSearch, 
             setQuerySearch, 
             query_search, 
-            setPage, 
+            setPage,
+            page, 
             last_page,
             total,
             current_loading,

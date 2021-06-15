@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import ItemTable from '../itemTable';
+import { Pagination } from 'semantic-ui-react';
 import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import Show from '../show';
@@ -81,7 +82,7 @@ const InboxTab = () => {
 
     // tramite
     const tramite_context = useContext(TramiteContext);
-    const { setTab, tab, isRole, role, dispatch, setPage, current_loading, trackings, socket, is_created, current_tracking, menu } = tramite_context;
+    const { setTab, tab, isRole, role, dispatch, current_loading, trackings, socket, is_created, current_tracking, menu, page, last_page, setPage, total } = tramite_context;
 
     // manejador de tab
     const handleTab = (value) => {
@@ -123,6 +124,18 @@ const InboxTab = () => {
     // render
     return (
         <div className="col-xl-10 col-md-9">
+            <Show condicion={total}>
+                <div className="text-right">
+                    <Pagination activePage={page || 1}
+                        pointing
+                        disabled={current_loading}
+                        secondary 
+                        totalPages={last_page}
+                        onPageChange={(e, { activePage }) => setPage(activePage)}
+                    />
+                </div>
+            </Show>
+
             <div className="nav-custom-content">
                 <div className="row">
                     <Show condicion={isRole && role.level == 'SECRETARY'}>
