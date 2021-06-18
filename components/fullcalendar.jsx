@@ -53,7 +53,6 @@ const FullCalendarCustom = (props) => {
       }),
 
       render: (props, { calendar: Calendar, ...plugins }) => {
-        if (typeof props.onReady == 'function') props.onReady(Calendar);
         // render
         return (
           <Calendar {...props} 

@@ -41,7 +41,7 @@ const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null, onUpda
         .then(res => {
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            if (typeof onUpdate == 'function') onUpdate(schedule);
+            if (typeof onUpdate == 'function') onUpdate(form);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });

@@ -132,6 +132,18 @@ const ItemInfoSchedules = ({ info }) => {
         setCurrentSchedule({});
     }
 
+    const onDelete = async (schedule, show = true) => {
+        let newEvents = await events.filter(e => e.id != schedule.id);
+        setEvents(newEvents);
+        if (show) setCurrentSchedule({});
+    }
+
+    const onUpdate = async (schedule) => {
+        await onDelete(schedule, false);
+        await onAdd(schedule);
+        setCurrentSchedule(prev => ({ ...prev, ...schedule }));
+    }
+
     useEffect(() => {
         if (current_date) getSchedules();
     }, [current_date]);
@@ -216,6 +228,8 @@ const ItemInfoSchedules = ({ info }) => {
                             schedule={current_schedule}
                             onClose={(e) => setCurrentSchedule({})}
                             onReplicar={onReplicar}
+                            onUpdate={onUpdate}
+                            onDelete={onDelete}
                         />
                     </Show>
 
