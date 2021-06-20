@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -7,11 +7,15 @@ import { escalafon } from '../../../services/apis';
 import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../../components/boardSimple';
+import { EntityContext } from '../../../contexts/EntityContext'; 
 
 const IndexWork = ({ pathname, query, success, works }) => {
 
     // estados
     const [query_search, setQuerySearch] = useState(query.query_search || "");
+
+    // entity
+    const entity_context = useContext(EntityContext);
 
     // obtener opciones
     const handleOption = async (obj, key, index) => {
@@ -50,6 +54,11 @@ const IndexWork = ({ pathname, query, success, works }) => {
         push({ pathname: `${pathname}/create`, query: newQuery });
     }
 
+    useEffect(() => {
+        entity_context.fireEntity({ render: true });
+        return () => entity_context.fireEntity({ render: false });
+    }, []);
+
     // renderizar
     return (
         <div className="col-md-12">
@@ -63,14 +72,15 @@ const IndexWork = ({ pathname, query, success, works }) => {
                 <Form>
                     <div className="col-md-12">
                         <DataTable
-                            headers={["#ID", "Imagen", "Apellidos y Nombres", "N° Documento", "N° Cussp"]}
+                            headers={["#ID", "Imagen", "Apellidos y Nombres", "N° Documento", "N° Cussp", "Estado"]}
                             data={works?.data || []}
                             index={[
                                 { key: "person.id", type: "text" },
                                 { key: "person.image_images.image_50x50", type: 'cover' },
                                 { key: "person.fullname", type: "text", className: "uppercase" },
                                 { key: "person.document_number", type: "icon" },
-                                { key: "numero_de_cussp", type: "icon", bg: 'dark' }
+                                { key: "numero_de_cussp", type: "icon", bg: 'dark' },
+                                { key: "__meta__.infos_count", type: "switch", bg_true: "success", bg_false: "danger", is_true: "Activo", is_false: "Inactivo" }
                             ]}
                             options={[
                                 { key: "profile", icon: "fas fa-info" }
