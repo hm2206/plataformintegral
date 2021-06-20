@@ -50,11 +50,11 @@ const Contratos = ({ work }) => {
     const getInfos = async (add = false) => {
         setCurrentLoading(true);
         await escalafon.get(`works/${work.id}/infos?estado=1`)
-            .then(res => {
-                let { success, infos, message } = res.data;
-                if (!success) throw new Error(message);
-                setCurrentInfos(add ? [...current_infos, ...infos.data] : infos.data);
-                setCurrenTotal(infos.total || 0);
+            .then(async res => {
+                let { infos } = res.data;
+                let payload = await infos?.data?.filter(i => i?.planilla?.principal == 1);
+                setCurrentInfos(add ? [...current_infos, ...payload] : payload);
+                setCurrenTotal(infos?.total);
                 setPage(infos.current_page || 1);
                 setCurrentLastPage(infos.last_pate || 0);
             }).catch(err => setError(true))

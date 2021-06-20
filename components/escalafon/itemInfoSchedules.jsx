@@ -155,6 +155,7 @@ const ItemInfoSchedules = ({ info }) => {
                 <div className="row">
                     <div className="col-9">
                         <i className="fas fa-info-circle mr-1"></i>  
+                        <span className="badge badge-dark mr-2">{info?.planilla?.nombre || ""}</span> 
                         {info?.type_categoria?.descripcion || ""} - <span className="badge badge-primary">{info?.pap || ""}</span>
                     </div>
                     <div className="col-3 text-right">
