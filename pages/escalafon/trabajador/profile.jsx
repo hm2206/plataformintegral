@@ -35,8 +35,8 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
     if (!success) return <NotFoundData/>
 
     useEffect(() => {
-        entity_context.fireEntity({ render: true });
-        return () => entity_context.fireEntity({ render: false });
+        entity_context.fireEntity({ render: true, disabled: true });
+        return () => entity_context.fireEntity({ render: false, disabled: false });
     }, []);
 
     // render

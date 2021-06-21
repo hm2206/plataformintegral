@@ -8,6 +8,7 @@ import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext'; 
+import { parseCookies } from 'nookies';
 
 const IndexWork = ({ pathname, query, success, works }) => {
 

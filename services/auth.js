@@ -1,5 +1,5 @@
 import NextCookie from 'next-cookies';
-import { setCookie, destroyCookie, get } from 'nookies';
+import { setCookie, destroyCookie } from 'nookies';
 import Router from 'next/router';
 import { authentication } from './apis';
 
