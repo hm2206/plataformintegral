@@ -91,7 +91,7 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null }) 
                             </Button>
                         </Show>
 
-                        <Show condicion={current_tracking.status == 'REGISTRADO'}>
+                        <Show condicion={current_tracking.status == 'REGISTRADO' || current_tracking.status == 'SUBTRAMITE'}>
                             <Button color="teal" 
                                 basic 
                                 size="mini"

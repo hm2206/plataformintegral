@@ -317,7 +317,7 @@ const InboxShow = ({ onRefresh }) => {
                     tramite_context.setNext("");
                     tramite_context.setOption(['CREATE']);
                     dispatch({ type: tramiteTypes.CHANGE_TRAMITE, payload: current_tramite });
-                }}>
+                }} theme="bg-warning">
                     <i className="fas fa-plus"></i>
                 </BtnFloat>
             </Show>

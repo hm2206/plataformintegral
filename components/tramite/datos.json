@@ -7,6 +7,13 @@
             "btn": "dark",
             "color": "black"
         },
+        "SUBTRAMITE": {
+            "text": "S",
+            "title": "Sub-Trámite",
+            "className": "badge-dark",
+            "btn": "dark",
+            "color": "black"
+        },
         "PENDIENTE": {
             "text": "P",
             "title": "Pendiente",

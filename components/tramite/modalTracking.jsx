@@ -17,6 +17,7 @@ import Swal from 'sweetalert2';
 import ModalInfo from './modalInfo';
 import Visualizador from '../visualizador';
 import InfoMultiple from './infoMultiple';
+moment.locale('es');
 
 
 const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null, current = null, onMultiple = null }) => {
@@ -25,6 +26,7 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
     const getMetadata = (status) => {
         let icons = {
             REGISTRADO: { icon: <FileCopy/> },
+            SUBTRAMITE: { icon: <FileCopy/>, name: 'SUB-TRÁMITE' },
             DERIVADO: { icon: <CallMissedOutgoingRoundedIcon style={{ color: '#5e35b1' }} />, message: "La dependencia ha derivado el documento a: " , color: '#5e35b1' },
             ACEPTADO: { icon: <CheckCircleOutlineOutlinedIcon fontSize="large" style={{ color: '#346cb0' }} />, message: "Fue Aceptado en: ", color: '#346cb0' },
             RECHAZADO: { icon: <CloseIcon style={{ color: '#b76ba3' }} />, message: "", color: '#b76ba3' },
@@ -45,7 +47,7 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
     return (
         <VerticalTimelineElement
             className="vertical-timeline-element--work mb-3"
-            date={moment(current_tracking.created_at).lang('es').format('h:mm a')}
+            date={moment(current_tracking.created_at).format('h:mm a')}
             iconStyle={{ background: '#fff', color: info.color, border: `2px solid ${info.color || '#78909c'}` }}
             icon={info.icon || <i className="fas fa-file-alt"></i>}
             contentArrowStyle={{ borderRight: `10px solid ${info.color || '#78909c'}` }}
@@ -64,7 +66,7 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
                 Persona: <span className="badge badge-dark mr-1 capitalize">{person && person.fullname || ""}</span>
             </h4>
             <p className="text-center">
-                {moment(current_tracking.created_at).lang('es').format('LL')}
+                {moment(current_tracking.created_at).format('LL')}
             </p>
             <hr/>
             <div className="text-center">
