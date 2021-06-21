@@ -163,12 +163,12 @@ const InboxShow = ({ onRefresh }) => {
     // executar marcado
     useEffect(() => {
         markRead();
-    }, []);
+    }, [current_tracking.id]);
 
     // primera vez
     useEffect(() => {
         getTracking();
-    }, []);
+    }, [current_tracking.id]);
 
     // refrescar datos
     useEffect(() => {
