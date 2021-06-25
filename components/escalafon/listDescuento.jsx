@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext, useMemo } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import Skeleton from 'react-loading-skeleton';
-import ConfigAssistanceProvider from '../../providers/escalafon/ConfigAssistanceProvider'
 import { AssistanceContext } from '../../contexts/escalafon/AssistanceContext';
 import { EntityContext } from '../../contexts/EntityContext';
 import Show from '../show';
@@ -21,8 +20,6 @@ const PlaceholderTable = () => {
         </tr>
     );
 }
-
-const configAssistanceProvider = new ConfigAssistanceProvider();
 
 const ListDescuento = () => {
 
