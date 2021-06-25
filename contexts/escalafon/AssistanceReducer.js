@@ -2,7 +2,6 @@
 import collect from 'collect.js';
 
 export const initialStates = {
-    config_assistance_id: "",
     assistances: {
         page: 1,
         last_page: 0,
@@ -16,7 +15,6 @@ export const assistanceTypes = {
     PUSH_ASSISTANCES: "PUSH[ASSISTANCES]",
     UPDATE_ASSISTANCE: "UPDATE[ASSISTANCE]",
     DELETE_ASSISTANCE: "DELETE[ASSISTANCE]",
-    SET_CONFIG_ASSISTANCE_ID: "SET[CONFIG_ASSISTANCE_ID]",
 }
 
 export const AssistanceReducer = (state = initialStates, action = { }) => {
@@ -49,9 +47,6 @@ export const AssistanceReducer = (state = initialStates, action = { }) => {
             let deleteAssistances = newState.assistances.data.filter(a => a.id != payload);
             newState.assistances.data = deleteAssistances;
             newState.assistances.total -= 1; 
-            return newState;
-        case assistanceTypes.SET_CONFIG_ASSISTANCE_ID:
-            newState.config_assistance_id = payload;
             return newState;
         default:
             return newState;

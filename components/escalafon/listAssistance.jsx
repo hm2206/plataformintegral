@@ -1,16 +1,13 @@
 import React, { useEffect, useState, useContext, useMemo } from 'react';
 import { Form, Button, Select } from 'semantic-ui-react';
 import Skeleton from 'react-loading-skeleton';
-import ConfigAssistanceProvider from '../../providers/escalafon/ConfigAssistanceProvider'
+import AssistanceProvider from '../../providers/escalafon/AssistanceProvider'
 import { AssistanceContext } from '../../contexts/escalafon/AssistanceContext';
 import { EntityContext } from '../../contexts/EntityContext';
 import { assistanceTypes } from '../../contexts/escalafon/AssistanceReducer';
 import ItemAssistance from './itemAssistance';
-import { SelectConfigAssistance } from '../select/escalafon';
 import Show from '../show';
 import moment from 'moment';
-import uid from 'uid';
-import { collect } from 'collect.js';
 moment.locale('es');
 
 const PlaceholderTable = () => {
@@ -26,7 +23,7 @@ const PlaceholderTable = () => {
     );
 }
 
-const configAssistanceProvider = new ConfigAssistanceProvider();
+const assistanceProvider = new AssistanceProvider();
 
 const ListAssistance = () => {
 
@@ -39,13 +36,43 @@ const ListAssistance = () => {
     // estados
     const [year, setYear] = useState();
     const [month, setMonth] = useState();
+    const [day, setDay] = useState();
     const [current_loading, setCurrentLoading] = useState(false);
     const [is_refresh, setIsRefresh] = useState(false);
     const [is_error, setIsError] = useState(false); 
 
     // memos
-    const isChangeFilter = useMemo(() => {
-        return uid(6);
+    const isFilter = useMemo(() => {
+        return year && month && day
+    }, [year, month, day]);
+
+    const array_months = useMemo(() => {
+        let payload = [];
+        for (let index = 1; index <= 12; index++) {
+            let current_date = moment(`2020-${index}-01`);
+            payload.push({
+                key: `month-${index}`,
+                value: current_date.format('MM'),
+                text: current_date.format("MMMM")
+            })
+        }
+        // response months
+        return payload;
+    }, []);
+
+    const array_days = useMemo(() => {
+        let last_day = parseInt(moment(`${year}-${month}-01`).add(1, "month").subtract(1, "day").format('D'));
+        let payload = [];
+        for (let index = 1; index <= last_day; index++) {
+            let text = moment(`${year}-${month}-${index}`).format('DD');
+            payload.push({
+                key: `day-${index}`,
+                value: text,
+                text
+            })
+        }
+        // response days
+        return payload;
     }, [year, month]);
 
     // config
@@ -55,7 +82,8 @@ const ListAssistance = () => {
 
     const getAssistances = async (add = false) => {
         setCurrentLoading(true);
-        await configAssistanceProvider.assistances(config_assistance_id, { page: assistances.page }, options)
+        let date = `${year}-${month}-${day}`
+        await assistanceProvider.index({ page: assistances.page, date }, options)
         .then(res => {
             let { assistances } = res.data;
             let payload = {
@@ -74,16 +102,6 @@ const ListAssistance = () => {
         setCurrentLoading(false);
     }
 
-    const handleDefaultDate = async (options = []) => {
-        let pluckedText = await collect(options).pluck('text').toArray();
-        let current_date = moment().format('YYYY-MM-DD');
-        let index = pluckedText.indexOf(current_date);
-        if (index >= 0) {
-            let current_config = options[index];
-            dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: current_config.value });
-        } else dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: "" });
-    }
-
     const handleSearch = async () => {
         let payload = { page: 1, last_page: 0, total: 0, data: [] };
         dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload });
@@ -98,19 +116,16 @@ const ListAssistance = () => {
     }
 
     useEffect(() => {
-        dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: "" });
-    }, [entity_id]);
-
-    useEffect(() => {
         let currentDate = moment();
         setYear(currentDate.year());
-        setMonth(currentDate.month() + 1);
+        setMonth(currentDate.format('MM'));
+        setDay(currentDate.format('DD'));
     }, []);
 
     useEffect(() => {
-        if (config_assistance_id) handleSearch();
+        if (day) handleSearch();
         else dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload: { page: 1, last_page: 0, total: 0, data: [] } });
-    }, [config_assistance_id]);
+    }, [day]);
 
     useEffect(() => {
         if (entity_id && is_refresh) getAssistances();
@@ -136,7 +151,10 @@ const ListAssistance = () => {
                         <input type="number"
                             step="any"
                             placeholder="Año"
-                            onChange={({ target }) => setYear(target.value)}
+                            onChange={({ target }) => {
+                                setYear(target.value)
+                                setMonth("")
+                            }}
                             value={year || ""}
                         />
                     </div>
@@ -145,40 +163,30 @@ const ListAssistance = () => {
                         <Select
                             placeholder="Seleccionar Mes"
                             value={month || ""}
-                            onChange={(e, obj) => setMonth(obj.value)}
-                            options={[
-                                { key: "Ene", value: 1, text: "Enero" },
-                                { key: "Feb", value: 2, text: "Febrero" },
-                                { key: "Mar", value: 3, text: "Marzo" },
-                                { key: "Abr", value: 4, text: "Abril" },
-                                { key: "May", value: 5, text: "Mayo" },
-                                { key: "Jun", value: 6, text: "Junio" },
-                                { key: "Jul", value: 7, text: "Julio" },
-                                { key: "Ago", value: 8, text: "Agosto" },
-                                { key: "Sep", value: 9, text: "Septiembre" },
-                                { key: "Oct", value: 10, text: "Octubre" },
-                                { key: "Nov", value: 11, text: "Noviembre" },
-                                { key: "Dic", value: 12, text: "Diciembre" }
-                            ]}
+                            onChange={(e, obj) => {
+                                setMonth(obj.value)
+                                setDay("")
+                            }}
+                            options={array_months}
+                            className="capitalize"
                         />
                     </div>
 
                     <Show condicion={year && month}>
                         <div className="col-md-3">
-                            <SelectConfigAssistance
-                                name="config_assistance_id"
-                                year={year || ""}
-                                month={month || ""}
-                                value={config_assistance_id}
-                                onChange={(e, obj) => dispatch({ type: assistanceTypes.SET_CONFIG_ASSISTANCE_ID, payload: obj.value })}
-                                refresh={isChangeFilter}
-                                onReady={handleDefaultDate}
+                            <Select
+                                placeholder="Seleccionar Día"
+                                value={day || ""}
+                                onChange={(e, obj) => setDay(obj.value)}
+                                options={array_days}
+                                className="capitalize"
                             />
                         </div>
                     </Show>
 
                     <div className="col-2">
                         <Button color="blue"
+                            disabled={!isFilter || current_loading}
                             onClick={handleSearch}
                         >
                             <i className="fas fa-search"></i>

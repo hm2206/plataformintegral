@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { escalafon } from '../../services/apis';
 import BaseProvider from '../BaseProvider';
 
@@ -6,8 +7,9 @@ class AssistanceProvider extends BaseProvider  {
     collection = "assistances";
 
     index = async (query = {}, config = {}, ctx = null) => {
-        query.page = typeof query.page != 'undefined' ? query.page : 1;
-        let query_string = `page=${query.page}`;
+        query.page = typeof query.page != 'undefined' ? query.page : 1
+        query.date = typeof query.date != 'undefined' ? query.date : moment().format('YYYY-MM-DD')
+        let query_string = `page=${query.page}&date=${query.date}`;
         // request
         return await escalafon.get(`${this.collection}?${query_string}`, config, ctx)
             .then(res => res)
