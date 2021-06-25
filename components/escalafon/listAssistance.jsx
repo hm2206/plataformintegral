@@ -37,6 +37,7 @@ const ListAssistance = () => {
     const [year, setYear] = useState();
     const [month, setMonth] = useState();
     const [day, setDay] = useState();
+    const [query_search, setQuerySearch] = useState("");
     const [current_loading, setCurrentLoading] = useState(false);
     const [is_refresh, setIsRefresh] = useState(false);
     const [is_error, setIsError] = useState(false); 
@@ -83,7 +84,7 @@ const ListAssistance = () => {
     const getAssistances = async (add = false) => {
         setCurrentLoading(true);
         let date = `${year}-${month}-${day}`
-        await assistanceProvider.index({ page: assistances.page, date }, options)
+        await assistanceProvider.index({ page: assistances.page, date, query_search }, options)
         .then(res => {
             let { assistances } = res.data;
             let payload = {
@@ -147,7 +148,15 @@ const ListAssistance = () => {
                         <i className="fas fa-clock"></i> Fecha de Búsqueda
                     </div>
 
-                    <div className="col-md-3 col-6 mb-2">
+                    <div className="col-md-4 col-6 mb-2">
+                        <input type="text"
+                            placeholder="Buscar por Apellidos y Nombres"
+                            onChange={({ target }) => setQuerySearch(target.value)}
+                            value={query_search || ""}
+                        />
+                    </div>
+
+                    <div className="col-md-2 col-6 mb-2">
                         <input type="number"
                             step="any"
                             placeholder="Año"
@@ -173,7 +182,7 @@ const ListAssistance = () => {
                     </div>
 
                     <Show condicion={year && month}>
-                        <div className="col-md-3">
+                        <div className="col-md-2 col-6">
                             <Select
                                 placeholder="Seleccionar Día"
                                 value={day || ""}

@@ -9,7 +9,8 @@ class AssistanceProvider extends BaseProvider  {
     index = async (query = {}, config = {}, ctx = null) => {
         query.page = typeof query.page != 'undefined' ? query.page : 1
         query.date = typeof query.date != 'undefined' ? query.date : moment().format('YYYY-MM-DD')
-        let query_string = `page=${query.page}&date=${query.date}`;
+        query.query_search = typeof query.query_search != 'undefined' ? query.query_search : ""
+        let query_string = `page=${query.page}&date=${query.date}&query_search=${query.query_search}`;
         // request
         return await escalafon.get(`${this.collection}?${query_string}`, config, ctx)
             .then(res => res)
