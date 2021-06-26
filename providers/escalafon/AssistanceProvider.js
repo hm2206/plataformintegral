@@ -35,6 +35,19 @@ class AssistanceProvider extends BaseProvider  {
         .catch(err => this.handleError(err));
     }
 
+    reportMonthly = async (query = {}, config = { }, ctx = null) => {
+        config.responseType = 'blob';
+        let date = moment()
+        query.year = typeof query.year != 'undefined' ? query.year : date.year()
+        query.month = typeof query.month != 'undefined' ? query.month : date.month() + 1
+        query.query_search = typeof query.query_search != 'undefined' ? query.query_search : ""
+        let query_string = `year=${query.year}&month=${query.month}&query_search=${query.query_search}`;
+        // request
+        return await escalafon.get(`${this.collection}/report/monthly?${query_string}`, config, ctx)
+            .then(res => res)
+            .catch(err => this.handleError(err));
+    }
+
 }
 
 export default AssistanceProvider;

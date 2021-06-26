@@ -10,7 +10,7 @@ import Show from '../../components/show';
 import { AssistanceProvider } from '../../contexts/escalafon/AssistanceContext';
 import { Message } from 'semantic-ui-react';
 
-const Assistance = ({ pathname, query }) => {
+const Assistance = ({ pathname, query }) =>  {
 
     // entity
     const { entity_id, fireEntity } = useContext(EntityContext);
@@ -21,7 +21,8 @@ const Assistance = ({ pathname, query }) => {
     const handleOption = (e, index, obj) => {
         switch (obj.key) {
             case 'sync-assistance':
-                setOption('SYNC-ASSISTANCE');
+            case 'report-pdf':
+                setOption(`${obj.key}`.toUpperCase());
                 break;
             default:
                 break;
@@ -35,14 +36,15 @@ const Assistance = ({ pathname, query }) => {
 
     // render
     return (
-        <AssistanceProvider>
+        <AssistanceProvider value={{ setOption, option }}>
             <div className="col-12">
                 <BoardSimple
                     title="Asistencia"
                     info={["Control de asistencia diaria"]}
                     bg="danger"
                     options={[
-                        { key: "sync-assistance", title: "Sincronizar asistencia con el reloj biométrico", icon: "fas fa-user-clock" }
+                        { key: "sync-assistance", title: "Sincronizar asistencia con el reloj biométrico", icon: "fas fa-user-clock" },
+                        { key: "report-pdf", title: "Generar reporte PDF", icon: "fas fa-file-export" }
                     ]}
                     onOption={handleOption}
                 >

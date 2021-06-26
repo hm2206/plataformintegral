@@ -8,6 +8,10 @@ import { assistanceTypes } from '../../contexts/escalafon/AssistanceReducer';
 import ItemAssistance from './itemAssistance';
 import Show from '../show';
 import moment from 'moment';
+import { AppContext } from '../../contexts';
+import { Confirm } from '../../services/utils';
+import Visualizador from '../visualizador';
+import Swal from 'sweetalert2';
 moment.locale('es');
 
 const PlaceholderTable = () => {
@@ -27,20 +31,20 @@ const assistanceProvider = new AssistanceProvider();
 
 const ListAssistance = () => {
 
+    // app
+    const app_context = useContext(AppContext);
+
     // entity
     const { entity_id } = useContext(EntityContext);
 
     // assistance
-    const { assistances, dispatch, config_assistance_id } = useContext(AssistanceContext);
+    const { assistances, dispatch, year, setYear, month, setMonth, day, setDay, query_search, setQuerySearch, option, setOption } = useContext(AssistanceContext);
 
     // estados
-    const [year, setYear] = useState();
-    const [month, setMonth] = useState();
-    const [day, setDay] = useState();
-    const [query_search, setQuerySearch] = useState("");
     const [current_loading, setCurrentLoading] = useState(false);
     const [is_refresh, setIsRefresh] = useState(false);
     const [is_error, setIsError] = useState(false); 
+    const [current_file, setCurrentFile] = useState(null);
 
     // memos
     const isFilter = useMemo(() => {
@@ -103,6 +107,22 @@ const ListAssistance = () => {
         setCurrentLoading(false);
     }
 
+    const generateReportPDF = async () => {
+        let answer = await Confirm("info", `¿Estás seguro en generar el reporte en PDF?`, 'Generar PDF');
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        await assistanceProvider.reportMonthly({ year, month, query_search })
+        .then(res => {
+            let file = new File([res.data], 'report-pdf');
+            file.url = URL.createObjectURL(res.data);
+            file.extname = 'pdf';
+            setCurrentFile(file);
+            setOption('VISUALIZADOR')
+        })
+        .catch(err => Swal.fire({ icon: 'error', text: 'No se pudó generar el PDF' }));
+        app_context.setCurrentLoading(false);
+    }
+
     const handleSearch = async () => {
         let payload = { page: 1, last_page: 0, total: 0, data: [] };
         dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload });
@@ -114,6 +134,14 @@ const ListAssistance = () => {
             type: assistanceTypes.SET_ASSISTANCES, 
             payload: { page: assistances.page + 1 } 
         });
+    }
+
+    const handleOption = () => {
+        switch(option) {
+            case 'REPORT-PDF':
+                generateReportPDF();
+                break;
+        }
     }
 
     useEffect(() => {
@@ -139,6 +167,10 @@ const ListAssistance = () => {
     useEffect(() => {
         if (assistances.page > 1) getAssistances(true);
     }, [assistances.page]);
+
+    useEffect(() => {
+        if (option) handleOption();
+    }, [option]);
 
     return (
         <div className="card">
@@ -254,6 +286,18 @@ const ListAssistance = () => {
                     </table>
                 </div>
             </div>
+            {/* visualizador */}
+            <Show condicion={option == 'VISUALIZADOR'}>
+                <Visualizador
+                    onClose={() => setOption("")}
+                    id="vizualizador-report-pdf"
+                    is_print={true}
+                    is_observation={false}
+                    name={current_file?.name}
+                    extname={current_file?.extname}
+                    url={current_file?.url}
+                />
+            </Show>
         </div>
     );
 }
