@@ -7,6 +7,7 @@ import Show from '../../../components/show';
 import InfoGeneral from '../../../components/escalafon/infoGeneral';
 import atob from 'atob';
 import Contratos from '../../../components/escalafon/contratos';
+import Papeletas from '../../../components/escalafon/papeletas';
 import Grado from '../../../components/escalafon/grado';
 import Ascenso from '../../../components/escalafon/ascenso';
 import Familiar from '../../../components/escalafon/familiar';
@@ -55,6 +56,7 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     { key: "general", text: "Información General" },
                     { key: "info", text: "Contratos" },
                     { key: "schedule", text: "Horarios" },
+                    { key: "papeletas", text: "Papeletas" },
                     { key: "grados", text: "Formación Aca." },
                     { key: "ascenso", text: "Ascensos" },
                     { key: "familiar", text: "Familia" },
@@ -78,6 +80,9 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     </Show>
                     <Show condicion={option == 'schedule'}>
                         <Schedule work={work}/>
+                    </Show>
+                    <Show condicion={option == 'papeletas'}>
+                        <Papeletas work={work}/>
                     </Show>
                     <Show condicion={option == 'grados'}>
                         <Grado work={work}/>
