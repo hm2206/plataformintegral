@@ -113,7 +113,7 @@ const ListAssistance = () => {
         app_context.setCurrentLoading(true);
         await assistanceProvider.reportMonthly({ year, month, query_search })
         .then(res => {
-            let file = new File([res.data], 'report-pdf');
+            let file = new File([res.data], 'report-pdf.pdf');
             file.url = URL.createObjectURL(res.data);
             file.extname = 'pdf';
             setCurrentFile(file);
