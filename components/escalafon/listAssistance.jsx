@@ -109,7 +109,7 @@ const ListAssistance = () => {
 
     const generateReportPDF = async () => {
         let answer = await Confirm("info", `¿Estás seguro en generar el reporte en PDF?`, 'Generar PDF');
-        if (!answer) return;
+        if (!answer) return setOption("");
         app_context.setCurrentLoading(true);
         await assistanceProvider.reportMonthly({ year, month, query_search })
         .then(res => {
