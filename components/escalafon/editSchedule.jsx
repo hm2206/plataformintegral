@@ -38,10 +38,11 @@ const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null, onUpda
         if (!answer) return;
         setCurrentLoading(true);
         await scheduleProvider.update(schedule.id, form)
-        .then(res => {
+        .then(async res => {
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            if (typeof onUpdate == 'function') onUpdate(form);
+            if (typeof onUpdate == 'function') await onUpdate(form);
+            setEdit(false)
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });
