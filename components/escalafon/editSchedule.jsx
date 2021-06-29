@@ -46,6 +46,7 @@ const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null, onUpda
             if (typeof onUpdate == 'function') await onUpdate(newForm);
             setEdit(false)
         }).catch(err => {
+            setErrors(err.errors || {})
             Swal.fire({ icon: 'error', text: err.message });
         });
         setCurrentLoading(false);
