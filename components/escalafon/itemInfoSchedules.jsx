@@ -45,17 +45,27 @@ const ItemInfoSchedules = ({ info }) => {
         let month = moment(current_date).month() + 1;
         await infoProvider.schedules(info.id, { year, month })
         .then(async res => {
+            let modoStyles = {
+                ALL: { backgroundColor: "#2887f3", borderColor: "#2887f3", display: 'time_start' },
+                ENTRY: { backgroundColor: "#f7c46c", borderColor: "#f7c46c", textColor: '#000000', display: 'time_start' },
+                EXIT: { backgroundColor: "#ea6759", borderColor: "#ea6759", display: 'time_over' },
+            }
+            // agregar schedules
             let { schedules } = res.data;
             let payload = [];
             await schedules.forEach(schedule => {
-                let displayStart = moment(`${schedule.date} ${schedule.time_start}`).format('HH:mm A');
+                // obtener style actual
+                let current_style = modoStyles[schedule.modo] || {};
+                // mostrar display
+                let displayTitle = moment(`${schedule[current_style.display]}`, 'HH:mm:ss').format('HH:mm A');
                 // add datos
                 payload.push({
                     id: schedule.id,
-                    title: `${displayStart}`,
+                    title: `${displayTitle}`,
                     start: schedule.date,
                     className: "cursor-pointer",
-                    schedule
+                    schedule,
+                    ...current_style
                 });
             });
             // agregar eventos
