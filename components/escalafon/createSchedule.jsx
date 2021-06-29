@@ -16,9 +16,17 @@ const CreateSchedule = ({ info = {}, date,  onClose = null, onSave = null }) => 
     const [current_loading, setCurrentLoading] = useState(false);
 
     const readySave = useMemo(() => {
-        let required = ['date', 'time_start', 'time_over'];
+        if (!form?.modo) return false;
+        // validacion por modo
+        let validateModo = {
+            ALL: ['date', 'time_start', 'time_over'],
+            ENTRY: ['date', 'time_start'],
+            EXIT: ['date', 'time_over']
+        }
+        // modo actual
+        let currentValidateModo = validateModo[form?.modo] || [];
         // validar
-        for (let item of required) {
+        for (let item of currentValidateModo) {
             let value = form[item];
             if (!value) return false;
         }

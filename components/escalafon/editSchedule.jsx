@@ -39,9 +39,11 @@ const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null, onUpda
         setCurrentLoading(true);
         await scheduleProvider.update(schedule.id, form)
         .then(async res => {
-            let { message } = res.data;
+            let { message, schedule } = res.data;
+            let newForm = Object.assign({}, form);
+            newForm = { ...form, ...schedule };
             Swal.fire({ icon: 'success', text: message });
-            if (typeof onUpdate == 'function') await onUpdate(form);
+            if (typeof onUpdate == 'function') await onUpdate(newForm);
             setEdit(false)
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
