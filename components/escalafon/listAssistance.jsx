@@ -113,14 +113,17 @@ const ListAssistance = () => {
         app_context.setCurrentLoading(true);
         await assistanceProvider.reportMonthly({ year, month, query_search })
         .then(res => {
+            app_context.setCurrentLoading(false);
             let file = new File([res.data], 'report-pdf.pdf');
             file.url = URL.createObjectURL(res.data);
             file.extname = 'pdf';
             setCurrentFile(file);
             setOption('VISUALIZADOR')
-        })
-        .catch(err => Swal.fire({ icon: 'error', text: 'No se pudó generar el PDF' }));
-        app_context.setCurrentLoading(false);
+        }).catch(err => {
+            setOption("");
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: 'No se pudó generar el PDF' })
+        });
     }
 
     const handleSearch = async () => {
