@@ -14,6 +14,12 @@ const options = {
     SYNC_INFOS: "SYNC_INFOS"
 };
 
+const modoStyles = {
+    ALL: { backgroundColor: "#2887f3", borderColor: "#2887f3", display: 'time_start' },
+    ENTRY: { backgroundColor: "#f7c46c", borderColor: "#f7c46c", textColor: '#000000', display: 'time_start' },
+    EXIT: { backgroundColor: "#ea6759", borderColor: "#ea6759", display: 'time_over' },
+}
+
 // providers
 const infoProvider = new InfoProvider();
 
@@ -39,35 +45,30 @@ const ItemInfoSchedules = ({ info }) => {
         return moment(current_date).format('LL');
     }, [current_date]);
 
+    const formatterEvent = (obj) => {
+        let current_style = modoStyles[obj.modo] || {};
+        // mostrar display
+        let displayTitle = moment(`${obj[current_style.display]}`, 'HH:mm:ss').format('HH:mm A');
+        return {
+            id: obj.id,
+            title: `${displayTitle}`,
+            start: obj.date,
+            className: "cursor-pointer",
+            schedule: obj,
+            ...current_style
+        }
+    }
+
     const getSchedules = async () => {
         setCurrentLoading(true);
         let year =  moment(current_date).year();
         let month = moment(current_date).month() + 1;
         await infoProvider.schedules(info.id, { year, month })
         .then(async res => {
-            let modoStyles = {
-                ALL: { backgroundColor: "#2887f3", borderColor: "#2887f3", display: 'time_start' },
-                ENTRY: { backgroundColor: "#f7c46c", borderColor: "#f7c46c", textColor: '#000000', display: 'time_start' },
-                EXIT: { backgroundColor: "#ea6759", borderColor: "#ea6759", display: 'time_over' },
-            }
             // agregar schedules
             let { schedules } = res.data;
             let payload = [];
-            await schedules.forEach(schedule => {
-                // obtener style actual
-                let current_style = modoStyles[schedule.modo] || {};
-                // mostrar display
-                let displayTitle = moment(`${schedule[current_style.display]}`, 'HH:mm:ss').format('HH:mm A');
-                // add datos
-                payload.push({
-                    id: schedule.id,
-                    title: `${displayTitle}`,
-                    start: schedule.date,
-                    className: "cursor-pointer",
-                    schedule,
-                    ...current_style
-                });
-            });
+            await schedules.forEach(schedule => payload.push(formatterEvent(schedule)));
             // agregar eventos
             setEvents(payload);
         })
@@ -113,30 +114,13 @@ const ItemInfoSchedules = ({ info }) => {
     }
 
     const onAdd = (schedule) => {
-        let displayStart = moment(`${schedule.date} ${schedule.time_start}`).format('HH:mm A');
-        setEvents((prev) => [...prev, {  
-            id: schedule.id,
-            title: displayStart,
-            start: schedule.date,
-            className: "cursor-pointer",
-            schedule
-        }]);
-        // hidden modal
+        setEvents((prev) => [...prev, formatterEvent(schedule)]);
         setAdd(false);
     }
 
     const onReplicar = async (schedules = []) => {
         let payload = [];
-        await schedules.map(schedule => {
-            let displayStart = moment(`${schedule.date} ${schedule.time_start}`).format('HH:mm A');
-            payload.push({
-                id: schedule.id,
-                title: displayStart,
-                start: schedule.date,
-                className: "cursor-pointer",
-                schedule
-            });
-        });
+        await schedules.map(schedule => payload.push(formatterEvent(schedule)));
         // add
         setEvents(prev => [...prev, ...payload]);
         setCurrentSchedule({});
