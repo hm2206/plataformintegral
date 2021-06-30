@@ -3,6 +3,7 @@ import Modal from '../modal';
 import { tramite } from '../../services/apis';
 import Show from '../show';
 import moment from 'moment';
+import { Button, Loader } from 'semantic-ui-react'
 import ModalFiles from './modalFiles';
 import { VerticalTimeline, VerticalTimelineElement }  from 'react-vertical-timeline-component';
 import SendRoundedIcon from '@material-ui/icons/SendRounded';
@@ -123,7 +124,7 @@ const ModalTracking = ({ isClose = null, slug = "", current = null }) => {
     // obtener linea de tiempo
     const getTracking = async (add = false) => {
         setCurrentLoading(true);
-        await tramite.get(`tramite/${slug}/timeline`)
+        await tramite.get(`tramite/${slug}/timeline?page=${current_page}`)
             .then(res => {
                 let { trackings, success, message } = res.data;
                 if (!success) throw new Error(message);
@@ -141,20 +142,9 @@ const ModalTracking = ({ isClose = null, slug = "", current = null }) => {
         getTracking();
     }, []);
 
-    // imprimir tracking
-    const getPrint = async () => {
-        this.setState({ loader: true })
-        await tramite.get(`report/tracking/${this.props.tramite.tramite_id}`, { responseType: 'blob' })
-            .then(({data}) => {
-                let a = document.createElement('a');
-                a.target = '_blank';
-                a.href = URL.createObjectURL(data);
-                a.click();
-            }).catch(err => {
-                Swal.fire({ icon: 'error', text: err.message });
-            });
-        this.setState({ loader: false })
-    }
+    useEffect(() => {
+        if (current_page > 1) getTracking(true)
+    }, [current_page]);
  
     // renderizar
     return (
@@ -190,6 +180,22 @@ const ModalTracking = ({ isClose = null, slug = "", current = null }) => {
                        />
                     )}
                 </VerticalTimeline>
+                {/* preloader */}
+                <Show condicion={current_loading}>
+                    <div style={{ position: 'relative' }} className="mt-5 mb-5 pt-4 pb-4">
+                        <Loader active/>
+                    </div>
+                </Show>
+                {/* obtener más registros */}
+                <Show condicion={(current_page + 1) <= current_last_page}>
+                    <Button fluid 
+                        className="mt-2" 
+                        disabled={current_loading}
+                        onClick={(e) => setCurrentPage(prev => prev + 1)}
+                    >
+                        <i className="fas fa-arrow-down"></i> Obtener más regístros
+                    </Button>
+                </Show>
                 {/* modal de archivos */}
                 <Show condicion={option == 'SHOW_FILE'}>
                     <ModalFiles files={current_files}
