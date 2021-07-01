@@ -1,24 +1,32 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import Modal from '../modal';
+import Modal from '../../modal';
 import { Button } from 'semantic-ui-react';
-import FormPapeleta from './formPapeleta';
-import Show from '../show';
-import { Confirm } from '../../services/utils';
-import ScheduleProvider from '../../providers/escalafon/ScheduleProvider';
+import FormSchedule from './formSchedule';
+import Show from '../../show';
+import { Confirm } from '../../../services/utils';
+import ScheduleProvider from '../../../providers/escalafon/ScheduleProvider';
 import Swal from 'sweetalert2';
 
 const scheduleProvider = new ScheduleProvider();
 
-const CreatePapeleta = ({ info = {}, date,  onClose = null, onSave = null }) => {
+const CreateSchedule = ({ info = {}, date,  onClose = null, onSave = null }) => {
 
     const [form, setForm] = useState({ date });
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
 
     const readySave = useMemo(() => {
-        let required = ['date', 'time_start', 'time_over'];
+        if (!form?.modo) return false;
+        // validacion por modo
+        let validateModo = {
+            ALL: ['date', 'time_start', 'time_over'],
+            ENTRY: ['date', 'time_start'],
+            EXIT: ['date', 'time_over']
+        }
+        // modo actual
+        let currentValidateModo = validateModo[form?.modo] || [];
         // validar
-        for (let item of required) {
+        for (let item of currentValidateModo) {
             let value = form[item];
             if (!value) return false;
         }
@@ -57,9 +65,9 @@ const CreatePapeleta = ({ info = {}, date,  onClose = null, onSave = null }) => 
         <Modal isClose={onClose}
             show={true}
             md="5"
-            titulo={<span><i className="fas fa-file-alt"></i> Crear Papeleta</span>}
+            titulo={<span><i className="fas fa-calendar"></i> Crear Horario</span>}
         >
-            <FormPapeleta className="card-body"
+            <FormSchedule className="card-body"
                 form={form}
                 errors={errors}
                 readOnly={['date']}
@@ -76,9 +84,9 @@ const CreatePapeleta = ({ info = {}, date,  onClose = null, onSave = null }) => 
                         <i className="fas fa-save"></i> Guardar
                     </Button>
                 </div>
-            </FormPapeleta>
+            </FormSchedule>
         </Modal>
     )
 }
 
-export default CreatePapeleta;
+export default CreateSchedule;

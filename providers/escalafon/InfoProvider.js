@@ -38,6 +38,15 @@ class InfoProvider extends BaseProvider  {
             .catch(err => this.handleError(err));
     }
 
+    ballots = async (id, query = {}, config = {}, ctx = null) => {
+        query.year = typeof query.year != 'undefined' ? query.year : moment().year();
+        query.month = typeof query.month != 'undefined' ? query.month : moment().month() + 1;
+        let query_string = `year=${query.year}&month=${query.month}`;
+        // request
+        return await escalafon.get(`${this.collection}/${id}/ballots?${query_string}`, config, ctx)
+            .then(res => res)
+            .catch(err => this.handleError(err));
+    }
 
 }
 

@@ -1,9 +1,9 @@
 import { escalafon } from '../../services/apis';
 import BaseProvider from '../BaseProvider';
 
-class ScheduleProvider extends BaseProvider  {
+class BallotProvider extends BaseProvider  {
 
-    collection = "schedules";
+    collection = "ballots";
 
     index = async (query = {}, config = {}, ctx = null) => {
         query.page = typeof query.page != 'undefined' ? query.page : 1;
@@ -40,4 +40,4 @@ class ScheduleProvider extends BaseProvider  {
 
 }
 
-export default ScheduleProvider;
+export default BallotProvider;

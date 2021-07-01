@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import Modal from '../modal';
+import Modal from '../../modal';
 import { Button, Progress } from 'semantic-ui-react';
 import FormSchedule from './formSchedule';
-import Show from '../show';
-import { Confirm } from '../../services/utils';
+import Show from '../../show';
+import { Confirm } from '../../../services/utils';
 import moment from 'moment';
-import ScheduleProvider from '../../providers/escalafon/ScheduleProvider';
+import ScheduleProvider from '../../../providers/escalafon/ScheduleProvider';
 import Swal from 'sweetalert2';
 
 const scheduleProvider = new ScheduleProvider();

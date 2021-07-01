@@ -7,7 +7,7 @@ import Show from '../../../components/show';
 import InfoGeneral from '../../../components/escalafon/infoGeneral';
 import atob from 'atob';
 import Contratos from '../../../components/escalafon/contratos';
-import Papeletas from '../../../components/escalafon/papeletas';
+import Ballot from '../../../components/escalafon/ballots/index';
 import Grado from '../../../components/escalafon/grado';
 import Ascenso from '../../../components/escalafon/ascenso';
 import Familiar from '../../../components/escalafon/familiar';
@@ -16,7 +16,7 @@ import Merito from '../../../components/escalafon/merito';
 import Licencia from '../../../components/escalafon/licencia';
 import Permiso from '../../../components/escalafon/permiso';
 import Vacacion from '../../../components/escalafon/vacacion';
-import Schedule from '../../../components/escalafon/schedule';
+import Schedule from '../../../components/escalafon/schedule/index.jsx';
 import NotFoundData from '../../../components/notFoundData';
 import { EntityContext } from '../../../contexts/EntityContext';
 
@@ -82,7 +82,7 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                         <Schedule work={work}/>
                     </Show>
                     <Show condicion={option == 'papeletas'}>
-                        <Papeletas work={work}/>
+                        <Ballot work={work}/>
                     </Show>
                     <Show condicion={option == 'grados'}>
                         <Grado work={work}/>

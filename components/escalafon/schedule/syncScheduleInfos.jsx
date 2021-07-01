@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Modal from '../modal';
+import Modal from '../../modal';
 import { Button } from 'semantic-ui-react';
-import { SelectCargo, SelectTypeCategoria } from '../select/cronograma';
-import InfoProvider from '../../providers/escalafon/InfoProvider';
+import { SelectCargo, SelectTypeCategoria } from '../../select/cronograma';
+import InfoProvider from '../../../providers/escalafon/InfoProvider';
 import Swal from 'sweetalert2';
 import moment from 'moment';
 

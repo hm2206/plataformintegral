@@ -1,6 +1,7 @@
-import moment from 'moment';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Form, Select } from 'semantic-ui-react';
+import { SelectInfoSchedule } from '../../select/escalafon';
+import Show from '../../show'
 
 const motivos = [
     {
@@ -25,7 +26,7 @@ const motivos = [
     },
 ]
 
-const FormPapeleta = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null }) => {
+const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, isHorario = true, className = null, readOnly = [], onChange = null }) => {
 
     const handleChange = (e, { name, value }) => {
         if (typeof onChange == 'function') onChange(e, { name, value });
@@ -34,15 +35,31 @@ const FormPapeleta = ({ children, form = {}, errors = {}, className = null, read
     return (
         <Form className={className}>
             <div className="row">
-                <div className="col-md-12 mb-3">
-                    <label>Horario</label>
-                    <input type="date"
-                        name="date"
-                        readOnly={readOnly.includes('date')}
-                        value={form?.date || ""}
+                <Show condicion={isHorario}>
+                    <div className="col-md-12 mb-3">
+                        <label>Horario</label>
+                        <SelectInfoSchedule
+                            disabled={readOnly.includes('schedule_id')}
+                            name="schedule_id"
+                            year={year}
+                            month={month}
+                            value={form?.schedule_id}
+                            info_id={info_id}
+                            onChange={(e, obj) => handleChange(e, obj)}
+                        />
+                    </div>
+                </Show>
+
+                <Form.Field className="col-md-6 mb-3" error={errors?.ballot_number?.[0] ? true : false}>
+                    <label htmlFor="">N° Papeleta <b className="text-red">*</b></label>
+                    <input type="text" 
+                        name="ballot_number"
+                        readOnly={readOnly.includes('ballot_number')}
+                        value={form?.ballot_number || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
-                </div>
+                    <label htmlFor="">{errors?.ballot_number?.[0] || ""}</label>
+                </Form.Field>
 
                 <Form.Field className="col-md-6 mb-3" error={errors?.motivo?.[0] ? true : false}>
                     <label htmlFor="">Motivo <b className="text-red">*</b></label>
@@ -61,7 +78,7 @@ const FormPapeleta = ({ children, form = {}, errors = {}, className = null, read
                     <label htmlFor="">Hora de Ingreso <b className="text-red">*</b></label>
                     <input type="time" 
                         name="time_start"
-                        readOnly={readOnly.includes('tine_over')}
+                        readOnly={readOnly.includes('time_start')}
                         value={form?.time_start || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
@@ -72,7 +89,7 @@ const FormPapeleta = ({ children, form = {}, errors = {}, className = null, read
                     <label htmlFor="">Hora de Salida <b className="text-red">*</b></label>
                     <input type="time" 
                         name="time_over"
-                        readOnly={readOnly.includes('tine_over')}
+                        readOnly={readOnly.includes('time_over')}
                         value={form?.time_over || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
@@ -80,26 +97,37 @@ const FormPapeleta = ({ children, form = {}, errors = {}, className = null, read
                 </Form.Field>
 
                 <Form.Field className="col-md-6 mb-3" error={errors?.time_return?.[0] ? true : false}>
-                    <label htmlFor="">Hora de Retorno <b className="text-red">*</b></label>
+                    <label htmlFor="">Hora de Retorno</label>
                     <input type="time" 
                         name="time_return"
-                        readOnly={readOnly.includes('tine_over')}
+                        readOnly={readOnly.includes('time_return')}
                         value={form?.time_return || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
                     <label htmlFor="">{errors?.time_return?.[0] || ""}</label>
                 </Form.Field>
 
-                <Form.Field className="col-md-12 mb-3" error={errors?.delay_over?.[0] ? true : false}>
-                    <label htmlFor="">Observación</label>
-                    <textarea
-                        rows="4"
-                        name="observation"
-                        readOnly={readOnly.includes('observation')}
-                        value={form?.observation || ""}
+                <Form.Field className="col-md-6 mb-3" error={errors?.total?.[0] ? true : false}>
+                    <label htmlFor="">Total <b><small>(Minutos)</small></b></label>
+                    <input type="number" 
+                        name="total"
+                        readOnly={readOnly.includes('total')}
+                        value={form?.total || 0}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
-                    <label htmlFor="">{errors?.observation?.[0] || ""}</label>
+                    <label htmlFor="">{errors?.total?.[0] || ""}</label>
+                </Form.Field>
+
+                <Form.Field className="col-md-12 mb-3" error={errors?.justification?.[0] ? true : false}>
+                    <label htmlFor="">Justificación</label>
+                    <textarea
+                        rows="4"
+                        name="justification"
+                        readOnly={readOnly.includes('justification')}
+                        value={form?.justification || ""}
+                        onChange={(e) => handleChange(e,  e.target)}
+                    />
+                    <label htmlFor="">{errors?.justification?.[0] || ""}</label>
                 </Form.Field>
 
                 {children || null}
@@ -108,4 +136,4 @@ const FormPapeleta = ({ children, form = {}, errors = {}, className = null, read
     )
 }
 
-export default FormPapeleta;
+export default FormBallot;

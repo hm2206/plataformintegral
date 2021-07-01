@@ -1,8 +1,8 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react';
-import ItemSchedulesPapeletas from '../../components/escalafon/itemSchedulesPapeletas';
+import ItemInfoSchedules from './itemInfoSchedules';
 import Skeleton from 'react-loading-skeleton';
-import Show from '../show'
-import { escalafon } from '../../services/apis';
+import Show from '../../show'
+import { escalafon } from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
 import moment from 'moment';
@@ -25,7 +25,7 @@ const Placeholder = () => {
 }
 
 
-const Papeletas = ({ work }) => {
+const Contratos = ({ work }) => {
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -64,13 +64,13 @@ const Papeletas = ({ work }) => {
     // render
     return <div className="row justify-content-center">
         <div className="col-md-12">
-            <h5>Listado de Papeletas</h5>
+            <h5>Listado de Horarios activos</h5>
             <hr/>
         </div>
         
         {current_infos.map((i, indexI) => 
             <div className="col-md-6" key={`info-list-${i.id}-${indexI}`}>
-                <ItemSchedulesPapeletas info={i}/>
+                <ItemInfoSchedules info={i}/>
             </div>
         )}
 
@@ -81,4 +81,4 @@ const Papeletas = ({ work }) => {
 }
 
 // export 
-export default Papeletas;
+export default Contratos;

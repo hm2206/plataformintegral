@@ -1,6 +1,6 @@
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import Show from '../show';
+import Show from '../../show';
 import { Form, Select } from 'semantic-ui-react';
 
 const FormSchedule = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null }) => {

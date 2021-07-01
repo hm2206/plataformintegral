@@ -1,16 +1,24 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
-import Fullcalendar from '../fullcalendar';
+import Fullcalendar from '../../fullcalendar';
 import { Button } from 'semantic-ui-react';
-import CardLoader from '../cardLoader';
-import Show from '../show';
+import CardLoader from '../../cardLoader';
+import Show from '../../show';
 import moment from 'moment';
-import CreatePapeleta from './createPapeleta';
-import InfoProvider from '../../providers/escalafon/InfoProvider';
+import EditSchedule from './editSchedule';
+import CreateSchedule from './createSchedule';
+import SyncScheduleInfos from './syncScheduleInfos';
+import InfoProvider from '../../../providers/escalafon/InfoProvider';
 moment.locale('es');
 
 const options = {
-    CREATE: "CREATE"
+    SYNC_INFOS: "SYNC_INFOS"
 };
+
+const modoStyles = {
+    ALL: { backgroundColor: "#2887f3", borderColor: "#2887f3", display: 'time_start' },
+    ENTRY: { backgroundColor: "#f7c46c", borderColor: "#f7c46c", textColor: '#000000', display: 'time_start' },
+    EXIT: { backgroundColor: "#ea6759", borderColor: "#ea6759", display: 'time_over' },
+}
 
 // providers
 const infoProvider = new InfoProvider();
@@ -37,24 +45,30 @@ const ItemInfoSchedules = ({ info }) => {
         return moment(current_date).format('LL');
     }, [current_date]);
 
-    const getPapeletas = async () => {
+    const formatterEvent = (obj) => {
+        let current_style = modoStyles[obj.modo] || {};
+        // mostrar display
+        let displayTitle = moment(`${obj[current_style.display]}`, 'HH:mm:ss').format('HH:mm A');
+        return {
+            id: obj.id,
+            title: `${displayTitle}`,
+            start: obj.date,
+            className: "cursor-pointer",
+            schedule: obj,
+            ...current_style
+        }
+    }
+
+    const getSchedules = async () => {
         setCurrentLoading(true);
         let year =  moment(current_date).year();
         let month = moment(current_date).month() + 1;
         await infoProvider.schedules(info.id, { year, month })
         .then(async res => {
+            // agregar schedules
             let { schedules } = res.data;
             let payload = [];
-            await schedules.forEach(schedule => {
-                // add datos
-                payload.push({
-                    id: schedule.id,
-                    title: `Pa`,
-                    start: schedule.date,
-                    className: "cursor-pointer",
-                    schedule
-                });
-            });
+            await schedules.forEach(schedule => payload.push(formatterEvent(schedule)));
             // agregar eventos
             setEvents(payload);
         })
@@ -90,8 +104,42 @@ const ItemInfoSchedules = ({ info }) => {
         setCurrentSchedule(schedule);
     }
 
+    const handleAdd = (args) => {
+        let current_fecha = moment();
+        let select_fecha = moment(`${moment(args.dateStr).format('YYYY-MM')}-01`);
+        let isDeny = current_fecha.diff(select_fecha, 'months').valueOf();
+        if (isDeny >= 1) return;
+        setSelectDate(args.dateStr);
+        setAdd(true);
+    }
+
+    const onAdd = (schedule) => {
+        setEvents((prev) => [...prev, formatterEvent(schedule)]);
+        setAdd(false);
+    }
+
+    const onReplicar = async (schedules = []) => {
+        let payload = [];
+        await schedules.map(schedule => payload.push(formatterEvent(schedule)));
+        // add
+        setEvents(prev => [...prev, ...payload]);
+        setCurrentSchedule({});
+    }
+
+    const onDelete = async (schedule, show = true) => {
+        let newEvents = await events.filter(e => e.id != schedule.id);
+        setEvents(newEvents);
+        if (show) setCurrentSchedule({});
+    }
+
+    const onUpdate = async (schedule) => {
+        await onDelete(schedule, false);
+        await onAdd(schedule);
+        setCurrentSchedule(prev => ({ ...prev, ...schedule }));
+    }
+
     useEffect(() => {
-        if (current_date) getPapeletas();
+        if (current_date) getSchedules();
     }, [current_date]);
 
     // render
@@ -106,11 +154,8 @@ const ItemInfoSchedules = ({ info }) => {
                     </div>
                     <div className="col-3 text-right">
                         <Button.Group size="mini">
-                            <Button 
-                                onClick={() => setOption(options.CREATE)}
-                            >
-                                <i className="fas fa-plus"></i>
-                            </Button>
+                            <Button icon="random" onClick={() => setOption(options.SYNC_INFOS)}/>
+                            <Button icon="arrow up"/>
                         </Button.Group>
                     </div>
                 </div>
@@ -155,19 +200,42 @@ const ItemInfoSchedules = ({ info }) => {
                         events={events}
                         eventTextColor="#ffffff"
                         eventClick={handleEvent}
+                        dateClick={handleAdd}
                     />
                     {/* loader */}
                     <Show condicion={current_loading}>
                         <CardLoader/>
                     </Show>
-                </div>
 
-                {/* crear papeleta */}
-                <Show condicion={option == options.CREATE}>
-                    <CreatePapeleta
-                        onClose={() => setOption("")}
-                    />
-                </Show>
+                    {/* crear */}
+                    <Show condicion={add}>
+                        <CreateSchedule
+                            onSave={onAdd}
+                            date={select_date}
+                            info={info}
+                            onClose={() => setAdd(false)}
+                        />
+                    </Show>
+
+                    {/* edit */}
+                    <Show condicion={isChurrentSchedule}>
+                        <EditSchedule
+                            schedule={current_schedule}
+                            onClose={(e) => setCurrentSchedule({})}
+                            onReplicar={onReplicar}
+                            onUpdate={onUpdate}
+                            onDelete={onDelete}
+                        />
+                    </Show>
+
+                    {/* sincronizar horarios filtrando contratos */}
+                    <Show condicion={option == options.SYNC_INFOS}>
+                        <SyncScheduleInfos info={info}
+                            date={current_date}
+                            onClose={() => setOption("")}
+                        />
+                    </Show>
+                </div>
             </div>
         </div>
     )

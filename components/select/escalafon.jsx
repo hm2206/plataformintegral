@@ -1,6 +1,7 @@
 import React from 'react';
 import { SelectBase } from './utils';
 import { escalafon } from '../../services/apis';
+import moment from 'moment'
 
 
 const SelectAfp = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
@@ -58,19 +59,29 @@ const SelectConfigAssistance = ({ id = "id", year, month, name, value, onChange,
     />
 }
 
-const SelectConfigSchedule = ({ id = "id", name, value, onChange, error = false, refresh = true, onReady = null, disabled = false }) => {
+const SelectInfoSchedule = ({ id = "id", info_id, year, month, name, value, onChange, error = false, refresh = true, onReady = null, disabled = false }) => {
+
+    const displayText = (el) => {
+        let text = el?.modo == 'EXIT' ? 'Salida' : 'Entrada';
+        let time_start = moment(el?.time_start, 'HH:mm').format('HH:mm A');
+        let time_over = moment(el?.time_over, 'HH:mm').format('HH:mm A');
+        let textTime = el?.modo == 'EXIT' ? time_over : `${time_start} Salida: ${time_over}`;
+        return `${el?.date} | ${text}: ${textTime}`
+    }
+
     return <SelectBase 
         execute={true}
         api={escalafon}
-        url={`config_schedules`}
-        id={`select-config_schedules-${name}`}
+        url={`infos/${info_id}/schedules?year=${year}&month=${month}`}
+        id={`select-info-schedules-${name}`}
         value={id}
-        text="name"
-        obj="config_schedules"
+        text="date"
+        obj="schedules"
+        displayText={displayText}
         name={name}
         valueChange={`${value || ""}`}
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-        placeholder="Seleccionar Config. de Horario"
+        placeholder="Seleccionar Horario"
         refresh={refresh}
         onReady={onReady}
         error={error}
@@ -83,5 +94,5 @@ export {
     SelectAfp,
     SelectBanco,
     SelectConfigAssistance,
-    SelectConfigSchedule,
+    SelectInfoSchedule,
 };

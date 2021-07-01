@@ -1,10 +1,8 @@
-import React, { useState, useContext, useEffect, Fragment } from 'react';
-import ItemInfoSchedules from '../../components/escalafon/itemInfoSchedules';
+import React, { useState, useEffect, Fragment } from 'react';
+import ItemSchedulesBallot from './itemSchedulesBallot';
 import Skeleton from 'react-loading-skeleton';
-import Show from '../show'
-import { escalafon } from '../../services/apis';
-import Router from 'next/router';
-import btoa from 'btoa';
+import Show from '../../show'
+import { escalafon } from '../../../services/apis';
 import moment from 'moment';
 moment.locale('es');
 
@@ -25,7 +23,7 @@ const Placeholder = () => {
 }
 
 
-const Contratos = ({ work }) => {
+const Ballots = ({ work }) => {
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -64,13 +62,13 @@ const Contratos = ({ work }) => {
     // render
     return <div className="row justify-content-center">
         <div className="col-md-12">
-            <h5>Listado de Horarios activos</h5>
+            <h5>Listado de Papeletas</h5>
             <hr/>
         </div>
         
         {current_infos.map((i, indexI) => 
             <div className="col-md-6" key={`info-list-${i.id}-${indexI}`}>
-                <ItemInfoSchedules info={i}/>
+                <ItemSchedulesBallot info={i}/>
             </div>
         )}
 
@@ -81,4 +79,4 @@ const Contratos = ({ work }) => {
 }
 
 // export 
-export default Contratos;
+export default Ballots;

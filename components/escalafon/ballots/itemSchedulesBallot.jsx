@@ -1,24 +1,17 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
-import Fullcalendar from '../fullcalendar';
+import Fullcalendar from '../../fullcalendar';
 import { Button } from 'semantic-ui-react';
-import CardLoader from '../cardLoader';
-import Show from '../show';
+import CardLoader from '../../cardLoader';
+import Show from '../../show';
 import moment from 'moment';
-import EditSchedule from './editSchedule';
-import CreateSchedule from './createSchedule';
-import SyncScheduleInfos from './syncScheduleInfos';
-import InfoProvider from '../../providers/escalafon/InfoProvider';
+import CreateBallot from './createBallot';
+import EditBallot from './editBallot';
+import InfoProvider from '../../../providers/escalafon/InfoProvider';
 moment.locale('es');
 
 const options = {
-    SYNC_INFOS: "SYNC_INFOS"
+    CREATE: "CREATE"
 };
-
-const modoStyles = {
-    ALL: { backgroundColor: "#2887f3", borderColor: "#2887f3", display: 'time_start' },
-    ENTRY: { backgroundColor: "#f7c46c", borderColor: "#f7c46c", textColor: '#000000', display: 'time_start' },
-    EXIT: { backgroundColor: "#ea6759", borderColor: "#ea6759", display: 'time_over' },
-}
 
 // providers
 const infoProvider = new InfoProvider();
@@ -31,12 +24,10 @@ const ItemInfoSchedules = ({ info }) => {
     // estados
     const [current_date, setCurrentDate] = useState(moment().format('YYYY-MM-DD'));
     const [current_loading, setCurrentLoading] = useState(false);
-    const [select_date, setSelectDate] = useState();
     const [events, setEvents] = useState([]);
-    const [add, setAdd] = useState(false);
-    const [current_schedule, setCurrentSchedule] = useState({});
+    const [current_ballot, setCurrentBallot] = useState({});
     const [option, setOption] = useState("");
-    const isChurrentSchedule = Object.keys(current_schedule).length;
+    const isChurrentBallot = Object.keys(current_ballot).length;
 
     const toDay = moment().format('YYYY-MM-DD');
 
@@ -45,30 +36,28 @@ const ItemInfoSchedules = ({ info }) => {
         return moment(current_date).format('LL');
     }, [current_date]);
 
-    const formatterEvent = (obj) => {
-        let current_style = modoStyles[obj.modo] || {};
-        // mostrar display
-        let displayTitle = moment(`${obj[current_style.display]}`, 'HH:mm:ss').format('HH:mm A');
+    const formatterEvent = (ballot) => {
         return {
-            id: obj.id,
-            title: `${displayTitle}`,
-            start: obj.date,
+            id: ballot.id,
+            title: ballot.ballot_number,
+            start: ballot.schedule?.date,
             className: "cursor-pointer",
-            schedule: obj,
-            ...current_style
+            ballot
         }
     }
 
-    const getSchedules = async () => {
+    const getPapeletas = async () => {
         setCurrentLoading(true);
         let year =  moment(current_date).year();
         let month = moment(current_date).month() + 1;
-        await infoProvider.schedules(info.id, { year, month })
+        await infoProvider.ballots(info.id, { year, month })
         .then(async res => {
-            // agregar schedules
-            let { schedules } = res.data;
+            let { ballots } = res.data;
             let payload = [];
-            await schedules.forEach(schedule => payload.push(formatterEvent(schedule)));
+            await ballots?.forEach(ballot => {
+                // add datos
+                payload.push(formatterEvent(ballot));
+            });
             // agregar eventos
             setEvents(payload);
         })
@@ -100,46 +89,29 @@ const ItemInfoSchedules = ({ info }) => {
     }
 
     const handleEvent = ({ event }) => {
-        let { schedule } = event.extendedProps;
-        setCurrentSchedule(schedule);
+        let { ballot } = event.extendedProps;
+        setCurrentBallot(ballot);
     }
 
-    const handleAdd = (args) => {
-        let current_fecha = moment();
-        let select_fecha = moment(`${moment(args.dateStr).format('YYYY-MM')}-01`);
-        let isDeny = current_fecha.diff(select_fecha, 'months').valueOf();
-        if (isDeny >= 1) return;
-        setSelectDate(args.dateStr);
-        setAdd(true);
+    const onSave = (ballot) => {
+        setEvents(prev => [...prev, formatterEvent(ballot)]);
+        setOption("");
     }
 
-    const onAdd = (schedule) => {
-        setEvents((prev) => [...prev, formatterEvent(schedule)]);
-        setAdd(false);
+    const onUpdate = async (ballot) => {
+        await onDelete(ballot, false);
+        await onSave(ballot);
+        setCurrentBallot(prev => ({ ...prev, ...ballot }));
     }
 
-    const onReplicar = async (schedules = []) => {
-        let payload = [];
-        await schedules.map(schedule => payload.push(formatterEvent(schedule)));
-        // add
-        setEvents(prev => [...prev, ...payload]);
-        setCurrentSchedule({});
-    }
-
-    const onDelete = async (schedule, show = true) => {
-        let newEvents = await events.filter(e => e.id != schedule.id);
+    const onDelete = async (ballot, show = true) => {
+        let newEvents = await events.filter(e => e.id != ballot.id);
         setEvents(newEvents);
-        if (show) setCurrentSchedule({});
-    }
-
-    const onUpdate = async (schedule) => {
-        await onDelete(schedule, false);
-        await onAdd(schedule);
-        setCurrentSchedule(prev => ({ ...prev, ...schedule }));
+        if (show) setCurrentBallot({});
     }
 
     useEffect(() => {
-        if (current_date) getSchedules();
+        if (current_date) getPapeletas();
     }, [current_date]);
 
     // render
@@ -154,8 +126,11 @@ const ItemInfoSchedules = ({ info }) => {
                     </div>
                     <div className="col-3 text-right">
                         <Button.Group size="mini">
-                            <Button icon="random" onClick={() => setOption(options.SYNC_INFOS)}/>
-                            <Button icon="arrow up"/>
+                            <Button 
+                                onClick={() => setOption(options.CREATE)}
+                            >
+                                <i className="fas fa-plus"></i>
+                            </Button>
                         </Button.Group>
                     </div>
                 </div>
@@ -200,42 +175,32 @@ const ItemInfoSchedules = ({ info }) => {
                         events={events}
                         eventTextColor="#ffffff"
                         eventClick={handleEvent}
-                        dateClick={handleAdd}
                     />
                     {/* loader */}
                     <Show condicion={current_loading}>
                         <CardLoader/>
                     </Show>
-
-                    {/* crear */}
-                    <Show condicion={add}>
-                        <CreateSchedule
-                            onSave={onAdd}
-                            date={select_date}
-                            info={info}
-                            onClose={() => setAdd(false)}
-                        />
-                    </Show>
-
-                    {/* edit */}
-                    <Show condicion={isChurrentSchedule}>
-                        <EditSchedule
-                            schedule={current_schedule}
-                            onClose={(e) => setCurrentSchedule({})}
-                            onReplicar={onReplicar}
-                            onUpdate={onUpdate}
-                            onDelete={onDelete}
-                        />
-                    </Show>
-
-                    {/* sincronizar horarios filtrando contratos */}
-                    <Show condicion={option == options.SYNC_INFOS}>
-                        <SyncScheduleInfos info={info}
-                            date={current_date}
-                            onClose={() => setOption("")}
-                        />
-                    </Show>
                 </div>
+
+                {/* crear papeleta */}
+                <Show condicion={option == options.CREATE}>
+                    <CreateBallot
+                        date={current_date}
+                        onSave={onSave}
+                        info={info}
+                        onClose={() => setOption("")}
+                    />
+                </Show>
+
+                {/* edit */}
+                <Show condicion={isChurrentBallot}>
+                    <EditBallot
+                        ballot={current_ballot}
+                        onClose={() => setCurrentBallot({})}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete}
+                    />
+                </Show>
             </div>
         </div>
     )

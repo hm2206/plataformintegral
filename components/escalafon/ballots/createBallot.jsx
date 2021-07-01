@@ -1,32 +1,25 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import Modal from '../modal';
+import React, { useMemo, useState } from 'react';
+import Modal from '../../modal';
 import { Button } from 'semantic-ui-react';
-import FormSchedule from './formSchedule';
-import Show from '../show';
-import { Confirm } from '../../services/utils';
-import ScheduleProvider from '../../providers/escalafon/ScheduleProvider';
+import FormBallot from './formBallot';
+import { Confirm } from '../../../services/utils';
+import BallotProvider from '../../../providers/escalafon/BallotProvider';
 import Swal from 'sweetalert2';
+import moment from 'moment';
 
-const scheduleProvider = new ScheduleProvider();
+const ballotProvider = new BallotProvider();
 
-const CreateSchedule = ({ info = {}, date,  onClose = null, onSave = null }) => {
+const CreateBallot = ({ info = {}, date, onClose = null, onSave = null }) => {
 
-    const [form, setForm] = useState({ date });
+    const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
+    const current_date = moment(date);
 
     const readySave = useMemo(() => {
-        if (!form?.modo) return false;
-        // validacion por modo
-        let validateModo = {
-            ALL: ['date', 'time_start', 'time_over'],
-            ENTRY: ['date', 'time_start'],
-            EXIT: ['date', 'time_over']
-        }
-        // modo actual
-        let currentValidateModo = validateModo[form?.modo] || [];
+        let required = ['schedule_id', 'motivo', 'time_start', 'time_over'];
         // validar
-        for (let item of currentValidateModo) {
+        for (let item of required) {
             let value = form[item];
             if (!value) return false;
         }
@@ -44,16 +37,16 @@ const CreateSchedule = ({ info = {}, date,  onClose = null, onSave = null }) => 
     }
 
     const handleSave = async () => {
-        let answer = await Confirm('info', '¿Estas seguro en guardar el horario?', 'Guardar');
+        let answer = await Confirm('info', '¿Estas seguro en guardar el papeleta?', 'Guardar');
         if (!answer) return;
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
         payload.info_id = info.id;
-        await scheduleProvider.store(payload)
+        await ballotProvider.store(payload)
         .then(res => {
-            let { message, schedule } = res.data;
+            let { message, ballot } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            if (typeof onSave == 'function') onSave(schedule);
+            if (typeof onSave == 'function') onSave(ballot);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
             setErrors(err.errors || {});
@@ -65,13 +58,15 @@ const CreateSchedule = ({ info = {}, date,  onClose = null, onSave = null }) => 
         <Modal isClose={onClose}
             show={true}
             md="5"
-            titulo={<span><i className="fas fa-calendar"></i> Crear Horario</span>}
+            titulo={<span><i className="fas fa-file-alt"></i> Crear Papeleta</span>}
         >
-            <FormSchedule className="card-body"
+            <FormBallot className="card-body"
                 form={form}
                 errors={errors}
-                readOnly={['date']}
                 onChange={handleInput}
+                info_id={info?.id}
+                year={current_date.year()}
+                month={current_date.month() + 1}
             >
                 <div className="col-md-12 text-right">
                     <hr />
@@ -84,9 +79,9 @@ const CreateSchedule = ({ info = {}, date,  onClose = null, onSave = null }) => 
                         <i className="fas fa-save"></i> Guardar
                     </Button>
                 </div>
-            </FormSchedule>
+            </FormBallot>
         </Modal>
     )
 }
 
-export default CreateSchedule;
+export default CreateBallot;

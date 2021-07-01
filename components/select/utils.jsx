@@ -7,7 +7,7 @@ import Skeleton from 'react-loading-skeleton';
  * setting format for select
  * @param {*} param0 
  */
-const settingSelect = async ({ is_new = true, data = [], index = { key: "", value: "", text: "" }, placeholder = "Seleccionar" }) => {
+const settingSelect = async ({ is_new = true, data = [], index = { key: "", value: "", text: "" }, displayText = null, placeholder = "Seleccionar" }) => {
     let newData = [];
     if (is_new) {
         newData.push({
@@ -33,10 +33,13 @@ const settingSelect = async ({ is_new = true, data = [], index = { key: "", valu
     } 
     // add datos
     await data.filter(async (d, indexD) => {
+        let text = `${getObj(d, index.text)}`.toUpperCase()
+        if (typeof displayText == 'function') text = await displayText(d);
+        // agregar data
         await newData.push({
             key: `${index.key}_${indexD + 1}_${uid(10)}`,
             value: `${getObj(d, index.value)}`,
-            text: `${getObj(d, index.text)}`.toUpperCase(),
+            text,
             obj: d
         });
     });
@@ -56,8 +59,8 @@ const ButtonRefresh = ({ message, onClick = null }) => {
 
 const SelectBase = ({ 
     onReady, defaultDatos = [], execute, refresh, url, api, 
-    obj, id, value, text, name, onChange, valueChange, 
-    onData = null, placeholder = 'Seleccionar', 
+    obj, id, value, text, name, onChange, valueChange,
+    displayText = null, onData = null, placeholder = 'Seleccionar', 
     headers = { 'ContentType': 'application/json' },
     disabled = false, error = false }) => {
 
@@ -76,21 +79,32 @@ const SelectBase = ({
         await api.get(`${newUrl}?page=${page}${newParams}`, { headers })
             .then(async res => {
                 let { success, message } = res.data;
-                if (!success) throw new Error(message);
-                let current_last_page = 0;
-                let { lastPage, last_page, data } = res.data[obj];
-                current_last_page = typeof lastPage != 'undefined' ? lastPage : last_page;
-                // add entities
-                let tmpDatos = await settingSelect({ is_new: page == 1 ? true : false, data, index: { key: id, value, text } });
-                let newDatos = page == 1 ? tmpDatos : [...datos, ...tmpDatos];
-                setDatos(newDatos);
-                setIsError(false);
-                setLoading(false);
-                 // continuar
-                if (current_last_page >= page + 1) setNexPage(page + 1);
-                else {
+                let is_array = res.data[obj];
+                if (Array.isArray(is_array)) {
+                    let tmpDatos = res.data[obj];
+                    let newDatos = await settingSelect({ is_new: true, data: tmpDatos, index: { key: id, value, text }, displayText });
+                    setDatos(newDatos);
+                    setIsError(false);
+                    setLoading(false);
                     setIsReady(true);
                     setCurrentExecute(false);
+                } else {
+                    if (!success) throw new Error(message);
+                    let current_last_page = 0;
+                    let { lastPage, last_page, data } = res.data[obj];
+                    current_last_page = typeof lastPage != 'undefined' ? lastPage : last_page;
+                    // add entities
+                    let tmpDatos = await settingSelect({ is_new: page == 1 ? true : false, data, index: { key: id, value, text } });
+                    let newDatos = page == 1 ? tmpDatos : [...datos, ...tmpDatos];
+                    setDatos(newDatos);
+                    setIsError(false);
+                    setLoading(false);
+                    // continuar
+                    if (current_last_page >= page + 1) setNexPage(page + 1);
+                    else {
+                        setIsReady(true);
+                        setCurrentExecute(false);
+                    }
                 }
             }).catch(err => {
                 setIsError(true);
