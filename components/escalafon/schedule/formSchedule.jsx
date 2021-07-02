@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import Show from '../../show';
 import { Form, Select } from 'semantic-ui-react';
 
-const FormSchedule = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null }) => {
+const FormSchedule = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null, disabled = false }) => {
 
     const handleChange = (e, { name, value }) => {
         if (typeof onChange == 'function') onChange(e, { name, value });
@@ -65,7 +65,7 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                             { key: "ENTRY", value: "ENTRY", text: "Solo Entrada" },
                             { key: "EXIT", value: "EXIT", text: "Solo Salida" },
                         ]}
-                        disabled={readOnly.includes('modo')}
+                        disabled={readOnly.includes('modo') || disabled}
                         name="modo"
                         onChange={(e, obj) => handleChange(e, obj)}
                         value={form?.modo || ""}
@@ -78,7 +78,7 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                         <label htmlFor="">Hora de Ingreso <b className="text-red">*</b></label>
                         <input type="time" 
                             name="time_start"
-                            readOnly={readOnly.includes('time_start')}
+                            readOnly={readOnly.includes('time_start') || disabled}
                             value={form?.time_start || ""}
                             onChange={(e) => handleChange(e, e.target)}
                         />
@@ -91,7 +91,7 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                         <label htmlFor="">Hora de Salida <b className="text-red">*</b></label>
                         <input type="time" 
                             name="time_over"
-                            readOnly={readOnly.includes('tine_over')}
+                            readOnly={readOnly.includes('tine_over') || disabled}
                             value={form?.time_over || ""}
                             onChange={(e) => handleChange(e, e.target)}
                         />
@@ -99,13 +99,13 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                     </Form.Field>
                 </Show>
                     
-                <Show condicion={allowModo.includes('delay_start')}>
+                <Show condicion={allowModo.includes('delay_start') || disabled}>
                     <Form.Field className="col-md-6 mb-3" error={errors?.delay_start?.[0] ? true : false}>
                         <label htmlFor="">Tolerancia de Ingreso</label>
                         <input type="number" 
                             step="any"
                             name="delay_start"
-                            readOnly={readOnly.includes('delay_start')}
+                            readOnly={readOnly.includes('delay_start') || disabled}
                             value={form?.delay_start || 0}
                             onChange={(e) => handleChange(e, e.target)}
                         />
@@ -118,7 +118,7 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                     <textarea
                         rows="4"
                         name="observation"
-                        readOnly={readOnly.includes('observation')}
+                        readOnly={readOnly.includes('observation') || disabled}
                         value={form?.observation || ""}
                         onChange={(e) => handleChange(e, e.target)}
                     />

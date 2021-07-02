@@ -6,7 +6,7 @@ import { escalafon } from '../../../services/apis';
 import Show from '../../../components/show';
 import InfoGeneral from '../../../components/escalafon/infoGeneral';
 import atob from 'atob';
-import Contratos from '../../../components/escalafon/contratos';
+import Infos from '../../../components/escalafon/infos/index';
 import Ballot from '../../../components/escalafon/ballots/index';
 import Grado from '../../../components/escalafon/grado';
 import Ascenso from '../../../components/escalafon/ascenso';
@@ -76,7 +76,7 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                         <InfoGeneral work={work}/>
                     </Show>
                     <Show condicion={option == 'info'}>
-                        <Contratos work={work}/>
+                        <Infos work={work}/>
                     </Show>
                     <Show condicion={option == 'schedule'}>
                         <Schedule work={work}/>

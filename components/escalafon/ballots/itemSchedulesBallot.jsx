@@ -124,15 +124,24 @@ const ItemInfoSchedules = ({ info }) => {
                         <span className="badge badge-dark mr-2">{info?.planilla?.nombre || ""}</span> 
                         {info?.type_categoria?.descripcion || ""} - <span className="badge badge-primary">{info?.pap || ""}</span>
                     </div>
-                    <div className="col-3 text-right">
-                        <Button.Group size="mini">
-                            <Button 
-                                onClick={() => setOption(options.CREATE)}
-                            >
-                                <i className="fas fa-plus"></i>
-                            </Button>
-                        </Button.Group>
-                    </div>
+                    <Show condicion={info?.estado}
+                        predeterminado={
+                            <div className="col-3 text-right">
+                                <i className="fas fa-circle text-muted"></i>
+                            </div>
+                        }
+                    >
+                        <div className="col-3 text-right">
+                            <Button.Group size="mini">
+                                <Button 
+                                    onClick={() => setOption(options.CREATE)}
+                                >
+                                    <i className="fas fa-plus"></i>
+                                </Button>
+                            </Button.Group>
+                            <i className="fas fa-circle text-success ml-3"></i>
+                        </div>
+                    </Show>
                 </div>
             </div>
             <div className="card-body">
@@ -196,6 +205,7 @@ const ItemInfoSchedules = ({ info }) => {
                 <Show condicion={isChurrentBallot}>
                     <EditBallot
                         ballot={current_ballot}
+                        info={info}
                         onClose={() => setCurrentBallot({})}
                         onUpdate={onUpdate}
                         onDelete={onDelete}

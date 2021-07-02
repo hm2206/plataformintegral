@@ -152,12 +152,20 @@ const ItemInfoSchedules = ({ info }) => {
                         <span className="badge badge-dark mr-2">{info?.planilla?.nombre || ""}</span> 
                         {info?.type_categoria?.descripcion || ""} - <span className="badge badge-primary">{info?.pap || ""}</span>
                     </div>
-                    <div className="col-3 text-right">
-                        <Button.Group size="mini">
-                            <Button icon="random" onClick={() => setOption(options.SYNC_INFOS)}/>
-                            <Button icon="arrow up"/>
-                        </Button.Group>
-                    </div>
+                    <Show condicion={info?.estado}
+                        predeterminado={
+                            <div className="col-3 text-right">
+                                <i className="fas fa-circle text-muted"></i>
+                            </div>
+                        }
+                    >
+                        <div className="col-3 text-right">
+                            <Button.Group size="mini">
+                                <Button icon="random" onClick={() => setOption(options.SYNC_INFOS)}/>
+                            </Button.Group>
+                            <i className="fas fa-circle text-success ml-3"></i>
+                        </div>
+                    </Show>
                 </div>
             </div>
             <div className="card-body">
@@ -200,7 +208,7 @@ const ItemInfoSchedules = ({ info }) => {
                         events={events}
                         eventTextColor="#ffffff"
                         eventClick={handleEvent}
-                        dateClick={handleAdd}
+                        dateClick={info?.estado ? handleAdd : null}
                     />
                     {/* loader */}
                     <Show condicion={current_loading}>
@@ -220,6 +228,7 @@ const ItemInfoSchedules = ({ info }) => {
                     {/* edit */}
                     <Show condicion={isChurrentSchedule}>
                         <EditSchedule
+                            info={info}
                             schedule={current_schedule}
                             onClose={(e) => setCurrentSchedule({})}
                             onReplicar={onReplicar}

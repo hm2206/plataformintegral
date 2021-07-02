@@ -3,6 +3,7 @@ import ItemSchedulesBallot from './itemSchedulesBallot';
 import Skeleton from 'react-loading-skeleton';
 import Show from '../../show'
 import { escalafon } from '../../../services/apis';
+import { Select } from 'semantic-ui-react'
 import moment from 'moment';
 moment.locale('es');
 
@@ -32,22 +33,13 @@ const Ballots = ({ work }) => {
     const [current_total, setCurrenTotal] = useState(0);
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [error, setError] = useState(false);
-
-    // primera carga
-    useEffect(() => {
-        getInfos();
-        return () => {
-            setCurrentInfos([]);
-            setPage(1);
-            setCurrenTotal(0);
-            setCurrentLastPage(0);
-        }
-    }, []);
+    const [estado, setEstado] = useState(1);
 
     // obtener contratos
     const getInfos = async (add = false) => {
         setCurrentLoading(true);
-        await escalafon.get(`works/${work.id}/infos?estado=1`)
+        let query_string =`${typeof estado == 'number' ? `estado=${estado}` : ''}`; 
+        await escalafon.get(`works/${work.id}/infos?${query_string}`)
             .then(async res => {
                 let { infos } = res.data;
                 let payload = await infos?.data?.filter(i => i?.planilla?.principal == 1);
@@ -58,11 +50,34 @@ const Ballots = ({ work }) => {
             }).catch(err => setError(true))
         setCurrentLoading(false);
     }
+    
+    // primera carga
+    useEffect(() => {
+        getInfos();
+        return () => {
+            setCurrentInfos([]);
+            setPage(1);
+            setCurrenTotal(0);
+            setCurrentLastPage(0);
+        }
+    }, [estado]);
 
     // render
-    return <div className="row justify-content-center">
+    return <div className="row">
         <div className="col-md-12">
-            <h5>Listado de Papeletas</h5>
+            <h5 className="ml-3">Listado de Papeletas</h5>
+            <div className="col-md-3">
+                <Select placeholder="Todos"
+                    options={[
+                        { key: "TODOS", value: "", text: "Todos" },
+                        { key: "ENABLED", value: 1, text: "Activos" },
+                        { key: "DISABLED", value: 0, text: "Terminados" },
+                    ]}
+                    value={estado}
+                    disabled={current_loading}
+                    onChange={(e, obj) => setEstado(obj.value)}
+                />
+            </div>
             <hr/>
         </div>
         

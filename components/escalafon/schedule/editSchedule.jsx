@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 
 const scheduleProvider = new ScheduleProvider();
 
-const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null, onUpdate = null, onDelete = null }) => {
+const EditSchedule = ({ schedule = {}, info = {}, onClose = null, onReplicar = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
@@ -94,12 +94,13 @@ const EditSchedule = ({ schedule = {}, onClose = null, onReplicar = null, onUpda
             titulo={<span><i className="fas fa-calendar"></i> Editar Horario <span className="badge badge-dark">{schedule?.date}</span></span>}
         >
             <FormSchedule className="card-body"
+                disabled={!info?.estado}
                 form={form}
                 errors={errors}
                 readOnly={['date']}
                 onChange={handleInput}
             >
-                <Show condicion={isModify}>
+                <Show condicion={isModify && info?.estado}>
                     <div className="col-md-12 text-right">
                         <Show condicion={edit}
                             predeterminado={

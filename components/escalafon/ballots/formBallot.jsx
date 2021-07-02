@@ -26,7 +26,7 @@ const motivos = [
     },
 ]
 
-const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, isHorario = true, className = null, readOnly = [], onChange = null }) => {
+const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, isHorario = true, className = null, readOnly = [], onChange = null, disabled = false }) => {
 
     const handleChange = (e, { name, value }) => {
         if (typeof onChange == 'function') onChange(e, { name, value });
@@ -54,7 +54,7 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                     <label htmlFor="">N° Papeleta <b className="text-red">*</b></label>
                     <input type="text" 
                         name="ballot_number"
-                        readOnly={readOnly.includes('ballot_number')}
+                        readOnly={readOnly.includes('ballot_number') || disabled}
                         value={form?.ballot_number || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
@@ -67,7 +67,7 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                         placeholder="Seleccionar motivo"
                         options={motivos}
                         name="motivo"
-                        disabled={readOnly.includes('motivo')}
+                        disabled={readOnly.includes('motivo') || disabled}
                         value={form?.motivo || ""}
                         onChange={(e, obj) => handleChange(e,  obj)}
                     />
@@ -78,7 +78,7 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                     <label htmlFor="">Hora de Ingreso <b className="text-red">*</b></label>
                     <input type="time" 
                         name="time_start"
-                        readOnly={readOnly.includes('time_start')}
+                        readOnly={readOnly.includes('time_start') || disabled}
                         value={form?.time_start || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
@@ -89,7 +89,7 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                     <label htmlFor="">Hora de Salida <b className="text-red">*</b></label>
                     <input type="time" 
                         name="time_over"
-                        readOnly={readOnly.includes('time_over')}
+                        readOnly={readOnly.includes('time_over') || disabled}
                         value={form?.time_over || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
@@ -100,7 +100,7 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                     <label htmlFor="">Hora de Retorno</label>
                     <input type="time" 
                         name="time_return"
-                        readOnly={readOnly.includes('time_return')}
+                        readOnly={readOnly.includes('time_return') || disabled}
                         value={form?.time_return || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
@@ -111,7 +111,7 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                     <label htmlFor="">Total <b><small>(Minutos)</small></b></label>
                     <input type="number" 
                         name="total"
-                        readOnly={readOnly.includes('total')}
+                        readOnly={readOnly.includes('total') || disabled}
                         value={form?.total || 0}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
@@ -123,7 +123,7 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                     <textarea
                         rows="4"
                         name="justification"
-                        readOnly={readOnly.includes('justification')}
+                        readOnly={readOnly.includes('justification') || disabled}
                         value={form?.justification || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />

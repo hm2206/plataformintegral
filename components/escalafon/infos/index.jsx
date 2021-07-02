@@ -1,9 +1,10 @@
-import React, { useState, useContext, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import Skeleton from 'react-loading-skeleton';
-import Show from '../show'
-import { escalafon } from '../../services/apis';
+import Show from '../../show'
+import { escalafon } from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
+import { Select } from 'semantic-ui-react'
 
 const Placeholder = () => {
 
@@ -20,7 +21,7 @@ const Placeholder = () => {
     </Fragment>
 }
 
-const Contratos = ({ work }) => {
+const Infos = ({ work }) => {
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -29,16 +30,13 @@ const Contratos = ({ work }) => {
     const [current_total, setCurrenTotal] = useState(0);
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [error, setError] = useState(false);
-
-    // primera carga
-    useEffect(() => {
-        getInfos();
-    }, []);
+    const [estado, setEstado] = useState(1);
 
     // obtener contratos
     const getInfos = async (add = false) => {
         setCurrentLoading(true);
-        await escalafon.get(`works/${work.id}/infos`)
+        let query_string =`${typeof estado == 'number' ? `estado=${estado}` : ''}`; 
+        await escalafon.get(`works/${work.id}/infos?${query_string}`)
             .then(res => {
                 let { success, infos, message } = res.data;
                 if (!success) throw new Error(message);
@@ -59,10 +57,33 @@ const Contratos = ({ work }) => {
         Router.push({ pathname: path, query: q });
     }
 
+    // primera carga
+    useEffect(() => {
+        getInfos();
+        return () => {
+            setCurrentInfos([]);
+            setPage(1);
+            setCurrenTotal(0);
+            setCurrentLastPage(0);
+        }
+    }, [estado]);
+
     // render
     return <div className="row">
         <div className="col-md-12">
-            <h5>Listado de Contratos y/o Nombramientos</h5>
+            <h5 className="ml-3">Listado de Contratos y/o Nombramientos</h5>
+            <div className="col-md-3">
+                <Select placeholder="Todos"
+                    options={[
+                        { key: "TODOS", value: "", text: "Todos" },
+                        { key: "ENABLED", value: 1, text: "Activos" },
+                        { key: "DISABLED", value: 0, text: "Terminados" },
+                    ]}
+                    value={estado}
+                    disabled={current_loading}
+                    onChange={(e, obj) => setEstado(obj.value)}
+                />
+            </div>
             <hr/>
         </div>
         
@@ -109,4 +130,4 @@ const Contratos = ({ work }) => {
 }
 
 // export 
-export default Contratos;
+export default Infos;
