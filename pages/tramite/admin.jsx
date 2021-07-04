@@ -34,6 +34,22 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
         Router.push({ pathname, query });
     }
 
+    const handleToggleCurrent = async (tramite, status) => {
+        let answer = await Confirm('warning', `¿Estás seguro en ${status == 'enabled' ? 'habilitar el trámite en la dependencia origen' : 'continuar el flujo del trámite'}?`)
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        await tramiteProvider.toggleCurrent(tramite.id, { status })
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            handleSearch();
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: "No se pudó procesar la operación" })
+        })
+    }
+
     const handleDelete = async (tramite) => {
         let answer = await Confirm('warning', '¿Estás seguro en eliminar el trámite?')
         if (!answer) return;
@@ -48,6 +64,11 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
             app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'error', text: "No se pudó eliminar el trámite" })
         })
+    }
+
+    const handlePage = async (e, { activePage }) => {
+        query.page = activePage;
+        Router.push({ pathname, query });
     }
 
     // effect
@@ -130,11 +151,27 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
                                                     </td>
                                                     <td className="text-center">
                                                         <Button.Group size="mini">
-                                                            <Button>
-                                                                <i className="fas fa-info"></i>
-                                                            </Button>
+                                                            <Show condicion={tra.state && tra?.current_tracking ? true : false}>
+                                                                <Show condicion={tra?.__meta__?.current_tracking_count > 1 && tra?.current_tracking?.first}>
+                                                                    <Button onClick={() => handleToggleCurrent(tra, 'disabled')}>
+                                                                        <i className="fas fa-sync"></i>
+                                                                    </Button>
+                                                                </Show>
 
-                                                            <Button onClick={() => handleDelete(tra)} color="red">
+                                                                <Show condicion={!tra?.current_tracking?.first}>
+                                                                    <Button color="black" basic 
+                                                                        title="Activar dependencia origen"
+                                                                        onClick={() => handleToggleCurrent(tra, 'enabled')}    
+                                                                    >
+                                                                        <i className="fas fa-circle"></i>
+                                                                    </Button>
+                                                                </Show>
+                                                            </Show>
+
+                                                            <Button onClick={() => handleDelete(tra)} 
+                                                                color="red"
+                                                                title="Eliminar trámite"
+                                                            >
                                                                 <i className="fas fa-trash"></i>
                                                             </Button>
                                                         </Button.Group>
@@ -152,6 +189,7 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
                                 <Show condicion={tramites?.lastPage > 1}>
                                     <div className="text-center">
                                         <Pagination
+                                            onPageChange={handlePage}
                                             activePage={query.page || 1}
                                             totalPages={tramites.lastPage || 0}
                                         /> 

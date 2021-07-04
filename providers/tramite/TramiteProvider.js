@@ -38,6 +38,13 @@ class TramiteProvider extends BaseProvider  {
         .catch(err => this.handleError(err));
     }
 
+    toggleCurrent = async (id, body = {}, config = {}, ctx = null) => {
+        body.status = typeof body.status != 'undefined' ? body.status : 'enabled';
+        return await tramite.post(`${this.collection}/${id}/toggle_current?_method=PUT`, body, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
 }
 
 export default TramiteProvider;
