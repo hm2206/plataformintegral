@@ -3,7 +3,8 @@ import BoardSimple from '../../components/boardSimple';
 import TramiteProvider from '../../providers/tramite/TramiteProvider';
 import { AuthContext } from '../../contexts/AuthContext';
 import { EntityContext } from '../../contexts/EntityContext';
-import { AUTHENTICATE } from '../../services/auth';
+import { system_store } from '../../services/verify.json';
+import { AUTHENTICATE, VERIFY } from '../../services/auth';
 import Show from '../../components/show';
 import { Button, Form, Pagination } from 'semantic-ui-react'
 import Router from 'next/router';
@@ -207,6 +208,7 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
 AdminTramite.getInitialProps = async (ctx) => {
     AUTHENTICATE(ctx);
     let { pathname, query } = ctx;
+    await VERIFY(ctx, system_store.TRAMITE_DOCUMENTARIO, pathname);
     let { success, tramites } = await tramiteProvider.index(query, {}, ctx)
     .then(res => res.data)
     .catch(() => ({ success: false, tramites: {} }))

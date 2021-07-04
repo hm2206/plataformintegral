@@ -54,9 +54,10 @@ export const VERIFY = async (ctx, systemSlug, name = "", type = "MODULE") => {
     //  validar permiso
     if (allow) return true;
     // validar server
-    if (!ctx.isServer) Router.replace(`/401`);
-    else {
+    if (ctx.res) {
         ctx.res.writeHead(301, { Location: '/401' });
         ctx.res.end();
     }
+    // client
+    Router.replace(`/401`); 
 }
