@@ -5,6 +5,7 @@ import { escalafon } from '../../../services/apis';
 import Router from 'next/router';
 import btoa from 'btoa';
 import { Select } from 'semantic-ui-react'
+import { BtnFloat } from '../../Utils';
 
 const Placeholder = () => {
 
@@ -126,6 +127,10 @@ const Infos = ({ work }) => {
         <Show condicion={current_loading}>
             <Placeholder/>
         </Show>
+
+        <BtnFloat theme="btn-success">
+            <i className="fas fa-plus"></i>
+        </BtnFloat>
     </div>
 }
 
