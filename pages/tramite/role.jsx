@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import BoardSimple from '../../components/boardSimple';
 import ListRole from '../../components/tramite/listRole';
-import { SelectAuthEntityDependencia } from '../../components/select/authentication';
+import { SelectDependencia } from '../../components/select/authentication';
 import { AuthContext } from '../../contexts/AuthContext';
 import { EntityContext } from '../../contexts/EntityContext';
 import CreateRole from '../../components/tramite/createRole';
@@ -45,10 +45,7 @@ const RoleTramite = () => {
                 <div className="card-body mt-4">
                     <div className="row">
                         <div className="col-md-6">
-                            <SelectAuthEntityDependencia
-                                user_id={auth.id || ""}
-                                entity_id={entity_id} 
-                                execute={false}
+                            <SelectDependencia
                                 value={dependencia_id}
                                 onChange={(e, obj) => setDependenciaId(obj.value)}
                                 disabled={!entity_id}

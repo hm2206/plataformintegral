@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import ConfigDependenciaProvider from '../../providers/tramite/ConfigDependenciaProvider';
 import Show from '../show';
 import { EntityContext } from '../../contexts/EntityContext';
-import { AuthContext } from '../../contexts/AuthContext';
 import { Button } from 'semantic-ui-react';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
@@ -36,8 +35,7 @@ const ItemRole = ({ dependencia, dependencia_id, onDelete = null }) => {
     // options
     let options = {
         headers: { 
-            EntityId: entity_id,
-            DependenciaId: dependencia_id 
+            EntityId: entity_id 
         }
     }
 
@@ -46,7 +44,7 @@ const ItemRole = ({ dependencia, dependencia_id, onDelete = null }) => {
         let answer = await Confirm('warning', `¿Estás seguro en eliminar dependencia destino?`, 'Eliminar');
         if (!answer) return false;
         setCurrentLoading(true);
-        await configDependenciaProvider.delete(dependencia.id, {}, options)
+        await configDependenciaProvider.delete(dependencia.id, { dependencia_id }, options)
         .then(res => {
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
@@ -98,8 +96,7 @@ const ListConfigDependencia = ({ dependencia_id, is_create, setIsCreate }) => {
         // options
         let options = {
             headers: { 
-                EntityId: entity_id,
-                DependenciaId: dependencia_id 
+                EntityId: entity_id
             }
         }
         // request
@@ -129,6 +126,7 @@ const ListConfigDependencia = ({ dependencia_id, is_create, setIsCreate }) => {
     useEffect(() => {
         if (dependencia_id) {
             setPage(1);
+            setLastPage(1);
             setRefresh(true);
         }
     }, [dependencia_id]);
@@ -152,6 +150,16 @@ const ListConfigDependencia = ({ dependencia_id, is_create, setIsCreate }) => {
     useEffect(() => {
         if (is_create) setIsCreate(false);
     }, [is_create]);
+
+    // next page
+    useEffect(() => {
+        if (page > 1) getDatos(true);
+    }, [page]);
+
+    // memos
+    const isMoreDatos = useMemo(() => {
+        return (page + 1) <= last_page;
+    }, [page, last_page, dependencia_id]);
 
     // render
     return (
@@ -192,6 +200,17 @@ const ListConfigDependencia = ({ dependencia_id, is_create, setIsCreate }) => {
                                             onDelete={() => setRefresh(true)}
                                         />
                                     )}
+                                    {/* paginador */}
+                                    <tr>
+                                        <td colSpan="3">
+                                            <Button fluid
+                                                disabled={!isMoreDatos}
+                                                onClick={(e) => setPage(prev => prev + 1)}
+                                            >
+                                                <i className="fas fa-arrow-down"></i> Obtener más regístros
+                                            </Button>
+                                        </td>
+                                    </tr>
                                 </Show>
                             </Show>
                         </tbody>

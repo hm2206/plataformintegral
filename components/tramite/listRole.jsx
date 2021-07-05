@@ -109,7 +109,7 @@ const ListRole = ({ dependencia_id, is_create, setIsCreate }) => {
             }
         }
         // request
-        await roleProvider.index({ page }, options)
+        await roleProvider.index({ page, dependencia_id }, options)
         .then(res => {
             let { roles } = res.data;
             setLastPage(roles.lastPage || 0);

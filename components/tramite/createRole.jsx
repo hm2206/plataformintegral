@@ -43,14 +43,14 @@ const CreateRole = ({ dependencia_id, setIsCreate }) => {
         // options
         let options = {
             headers: { 
-                EntityId: entity_id,
-                DependenciaId: dependencia_id
+                EntityId: entity_id
             }
         }
         // body
         let payload = {
             user_id: user.id,
-            level
+            level,
+            dependencia_id
         };
         // request
         roleProvider.store(payload, options)

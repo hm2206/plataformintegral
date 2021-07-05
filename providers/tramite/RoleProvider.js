@@ -7,7 +7,8 @@ class RoleProvider extends BaseProvider  {
 
     index = async (query = { page: 1 }, config = {}, ctx = null) => {
         query.page = typeof query.page != 'undefined' ? query.page : 1;
-        let query_string = `page=${query.page}`;
+        query.dependencia_id = typeof query.dependencia_id != 'undefined' ? query.dependencia_id : '';
+        let query_string = `page=${query.page}&dependencia_id=${query.dependencia_id}`;
         // response
         return await tramite.get(`${this.collection}?${query_string}`, config, ctx)
         .then(res => res)

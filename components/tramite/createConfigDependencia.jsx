@@ -27,13 +27,13 @@ const CreateConfigDependencia = ({ dependencia_id, setIsCreate }) => {
         // options
         let options = {
             headers: { 
-                EntityId: entity_id,
-                DependenciaId: dependencia_id
+                EntityId: entity_id
             }
         }
         // body
         let payload = {
-            dependencia_destino_id
+            dependencia_destino_id,
+            dependencia_id
         };
         // request
         await configDependenciaProvider.store(payload, options)
