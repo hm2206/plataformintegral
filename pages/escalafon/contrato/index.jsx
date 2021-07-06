@@ -175,10 +175,6 @@ const Contrato = ({ pathname, success, infos, query }) => {
                         </div>
                     </div>
                 </Form>
-
-                <BtnFloat onClick={() => Router.push({ pathname: `${pathname}/register` })}>
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
             </BoardSimple>
     </div>)
 }
