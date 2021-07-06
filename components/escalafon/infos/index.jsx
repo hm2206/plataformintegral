@@ -6,6 +6,7 @@ import Router from 'next/router';
 import btoa from 'btoa';
 import { Select } from 'semantic-ui-react'
 import { BtnFloat } from '../../Utils';
+import CreateInfo from './createInfo';
 
 const Placeholder = () => {
 
@@ -32,6 +33,7 @@ const Infos = ({ work }) => {
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [error, setError] = useState(false);
     const [estado, setEstado] = useState(1);
+    const [option, setOption] = useState();
 
     // obtener contratos
     const getInfos = async (add = false) => {
@@ -56,6 +58,11 @@ const Infos = ({ work }) => {
         q.id = btoa(obj.id);
         q.href = btoa(Router.asPath);
         Router.push({ pathname: path, query: q });
+    }
+
+    const handleSave = () => {
+        setOption("");
+        getInfos();
     }
 
     // primera carga
@@ -128,9 +135,18 @@ const Infos = ({ work }) => {
             <Placeholder/>
         </Show>
 
-        <BtnFloat theme="btn-success">
+        {/*  crear info */}
+        <BtnFloat theme="btn-success" onClick={() => setOption("CREATE")}>
             <i className="fas fa-plus"></i>
         </BtnFloat>
+
+        <Show condicion={option == 'CREATE'}>
+            <CreateInfo 
+                onClose={() => setOption()}
+                work={work}
+                onSave={handleSave}
+            />
+        </Show>
     </div>
 }
 
