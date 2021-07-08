@@ -148,12 +148,7 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null }) 
                 </div>
             </Show>
             {/* editar  tramite*/}
-            <Show condicion={
-                    current_tracking.status == 'REGISTRADO'
-                    && current_tracking.current
-                    && !current_tracking.revisado
-                }
-            >
+            <Show condicion={current_tracking.current && !current_tracking.revisado}>
                 <div className="col-md-12 text-right">
                     <span className="close cursor-pointer" onClick={() => typeof onEdit == 'function' ? onEdit() : null}>
                         <i className="fas fa-edit text-dark"></i>

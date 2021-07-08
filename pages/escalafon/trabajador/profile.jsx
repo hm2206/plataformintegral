@@ -15,7 +15,7 @@ import Desplazamiento from '../../../components/escalafon/desplazamiento';
 import Merito from '../../../components/escalafon/merito';
 import Licencia from '../../../components/escalafon/licencia';
 import Permiso from '../../../components/escalafon/permiso';
-import Vacacion from '../../../components/escalafon/vacacion';
+import ConfigVacation from '../../../components/escalafon/config_vacation/index';
 import Schedule from '../../../components/escalafon/schedule/index.jsx';
 import NotFoundData from '../../../components/notFoundData';
 import { EntityContext } from '../../../contexts/EntityContext';
@@ -57,6 +57,7 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     { key: "info", text: "Contratos" },
                     { key: "schedule", text: "Horarios" },
                     { key: "papeletas", text: "Papeletas" },
+                    { key: "vacation", text: "Vacaciones" },
                     { key: "grados", text: "Formación Aca." },
                     { key: "ascenso", text: "Ascensos" },
                     { key: "familiar", text: "Familia" },
@@ -64,7 +65,6 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     { key: "merito", text: "Mérito/Demérito" },
                     { key: "licencia", text: "Licencias" },
                     { key: "permiso", text: "Permisos" },
-                    { key: "vacacion", text: "Vacaciónes" }
                 ]}
                 getOption={(key) => setOption(key)}
             />
@@ -83,6 +83,9 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     </Show>
                     <Show condicion={option == 'papeletas'}>
                         <Ballot work={work}/>
+                    </Show>
+                    <Show condicion={option == 'vacation'}>
+                        <ConfigVacation work={work}/>
                     </Show>
                     <Show condicion={option == 'grados'}>
                         <Grado work={work}/>
@@ -104,9 +107,6 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     </Show>
                     <Show condicion={option == 'permiso'}>
                         <Permiso work={work}/>
-                    </Show>
-                    <Show condicion={option == 'vacacion'}>
-                        <Vacacion work={work}/>
                     </Show>
                 </div>
             </Show>
