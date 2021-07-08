@@ -251,6 +251,17 @@ const AddObligacion = (props) => {
                     </Form.Field>
                 </Show>
 
+                <Show condicion={form.is_porcentaje}>
+                    <Form.Field error={errors.modo && errors.modo[0] || ""} className="col-md-6 mb-3">
+                        <label htmlFor="">Aplica Bonificaciones</label>
+                        <Checkbox toggle 
+                            name="bonificacion"
+                            value={form.bonificacion ? true : false}   
+                            onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
+                        />
+                    </Form.Field>
+                </Show>
+
                 <div className="col-md-6 mb-3">
                     <Form.Field>
                         <label htmlFor="">{form.is_porcentaje ? 'Porcentaje %' : 'Monto'}</label>

@@ -312,6 +312,18 @@ const Obligacion = () => {
                         <Show condicion={obl.is_porcentaje}>
                             <div className="col-md-2 mb-2">
                                 <Form.Field>
+                                    <label htmlFor="">Aplica Bonificaciones</label>
+                                    <Checkbox 
+                                        toggle
+                                        checked={obl.bonificacion ? true : false}
+                                        disabled={!edit}
+                                        step="any"
+                                        name="bonificacion"
+                                        onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? true : false }, index)}
+                                    />
+                                </Form.Field>
+
+                                <Form.Field>
                                     <label htmlFor="">Porcentaje</label>
                                     <input type="number" 
                                         value={obl.porcentaje || ""}
