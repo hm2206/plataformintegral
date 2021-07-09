@@ -11,9 +11,14 @@ import Router from 'next/router';
 import { Confirm } from '../../services/utils';
 import { AppContext } from '../../contexts';
 import Swal from 'sweetalert2';
+import ModalTracking from '../../components/tramite/modalTracking'
 
 // providers
 const tramiteProvider = new TramiteProvider();
+
+const options = {
+    TRAKCING: 'tracking'
+}
 
 const AdminTramite = ({ pathname, query, success, tramites }) => {
 
@@ -28,6 +33,8 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
 
     // estados
     const [query_search, setQuerySearch] = useState(query.query_search || "");
+    const [option, setOption] = useState("");
+    const [current_tramite, setCurrentTramite] = useState({});
 
     const handleSearch = () => {
         query.page = 1;
@@ -65,6 +72,11 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
             app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'error', text: "No se pudó eliminar el trámite" })
         })
+    }
+
+    const handleTracking = async (tramite) => {
+        setCurrentTramite(tramite);
+        setOption(options.TRAKCING);
     }
 
     const handlePage = async (e, { activePage }) => {
@@ -169,6 +181,12 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
                                                                 </Show>
                                                             </Show>
 
+                                                            <Button onClick={() => handleTracking(tra)} 
+                                                                title="seguímiento trámite"
+                                                            >
+                                                                <i className="fas fa-external-link-alt"></i>
+                                                            </Button>
+
                                                             <Button onClick={() => handleDelete(tra)} 
                                                                 color="red"
                                                                 title="Eliminar trámite"
@@ -200,6 +218,14 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
                         </div>
                     </Form>
                 </div>
+                {/* trakcing */}
+                {option}
+                <Show condicion={option == options.TRAKCING}>
+                    <ModalTracking
+                        slug={current_tramite?.slug}
+                        isClose={() => setOption("")}
+                    />
+                </Show>
             </BoardSimple>
         </div>
     )
