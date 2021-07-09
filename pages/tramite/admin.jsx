@@ -11,13 +11,15 @@ import Router from 'next/router';
 import { Confirm } from '../../services/utils';
 import { AppContext } from '../../contexts';
 import Swal from 'sweetalert2';
-import ModalTracking from '../../components/tramite/modalTracking'
+import ModalTracking from '../../components/tramite/modalTracking';
+import Tracking from '../../components/tramite/tracking/index';
 
 // providers
 const tramiteProvider = new TramiteProvider();
 
 const options = {
-    TRAKCING: 'tracking'
+    TIMELINE: 'timeline',
+    TRACKING: 'tracking'
 }
 
 const AdminTramite = ({ pathname, query, success, tramites }) => {
@@ -74,9 +76,14 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
         })
     }
 
+    const handleTimeline = async (tramite) => {
+        setCurrentTramite(tramite);
+        setOption(options.TIMELINE);
+    }
+
     const handleTracking = async (tramite) => {
         setCurrentTramite(tramite);
-        setOption(options.TRAKCING);
+        setOption(options.TRACKING);
     }
 
     const handlePage = async (e, { activePage }) => {
@@ -128,6 +135,11 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
                             </div>
 
                             <div className="col-12">
+
+                                <div className="text-right mb-3">
+                                    <b><u>Doble click en el trámite para editar seguímiento</u></b>
+                                </div>
+
                                 <div className="table-responsive">
                                     <table className="table">
                                         <thead className="font-12 text-center">
@@ -145,21 +157,25 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
                                         <tbody>
                                             {tramites?.data?.map(tra =>
                                                 <tr key={`list-tramite-${tra.id}`}>
-                                                    <td>
+                                                    <td className="cursor-pointer" onDoubleClick={() => handleTracking(tra)}>
                                                         <span className="badge badge-dark">{tra?.slug}</span>
                                                     </td>
-                                                    <td>
+                                                    <td className="cursor-pointer" onDoubleClick={() => handleTracking(tra)}>
                                                         <div>{tra?.asunto}</div>
                                                     </td>
-                                                    <td>{tra?.tramite_type?.description || ""}</td>
-                                                    <td>{tra?.document_number}</td>
-                                                    <td>
+                                                    <td className="cursor-pointer" onDoubleClick={() => handleTracking(tra)}>
+                                                        {tra?.tramite_type?.description || ""}
+                                                    </td>
+                                                    <td className="cursor-pointer" onDoubleClick={() => handleTracking(tra)}>
+                                                        {tra?.document_number}
+                                                    </td>
+                                                    <td className="cursor-pointer" onDoubleClick={() => handleTracking(tra)}>
                                                         <span className="badge badge-warning">{tra?.dependencia?.nombre || ""}</span>
                                                     </td>
-                                                    <td className="capitalize">
+                                                    <td className="capitalize cursor-pointer" onDoubleClick={() => handleTracking(tra)}>
                                                         {tra?.person?.fullname || ""}
                                                     </td>
-                                                    <td className="text-center">
+                                                    <td className="text-center cursor-pointer" onDoubleClick={() => handleTracking(tra)}>
                                                         <span className={`badge badge-${tra?.current_tracking?.status ? 'success' : 'danger'}`}>{tra?.current_tracking?.status || 'ANULADO'}</span>
                                                     </td>
                                                     <td className="text-center">
@@ -181,7 +197,7 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
                                                                 </Show>
                                                             </Show>
 
-                                                            <Button onClick={() => handleTracking(tra)} 
+                                                            <Button onClick={() => handleTimeline(tra)} 
                                                                 title="seguímiento trámite"
                                                             >
                                                                 <i className="fas fa-external-link-alt"></i>
@@ -219,11 +235,16 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
                     </Form>
                 </div>
                 {/* trakcing */}
-                {option}
-                <Show condicion={option == options.TRAKCING}>
+                <Show condicion={option == options.TIMELINE}>
                     <ModalTracking
                         slug={current_tramite?.slug}
                         isClose={() => setOption("")}
+                    />
+                </Show>
+                {/* edit tracking */}
+                <Show condicion={option == options.TRACKING}>
+                    <Tracking tramite={current_tramite}
+                        onClose={() => setOption("")}
                     />
                 </Show>
             </BoardSimple>

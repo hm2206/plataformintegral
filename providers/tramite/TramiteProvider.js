@@ -45,6 +45,14 @@ class TramiteProvider extends BaseProvider  {
         .catch(err => this.handleError(err));
     }
 
+    trackings = async (id, query = {}, config = {}, ctx = null) => {
+        query.page = typeof query.page != 'undefined' ? query.page : 1;
+        let query_string = `page=${query.page}`;
+        return await tramite.get(`${this.collection}/${id}/trackings?${query_string}`, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
 }
 
 export default TramiteProvider;
