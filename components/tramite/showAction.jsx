@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import Show from '../show';
 import { Button } from 'semantic-ui-react';
@@ -9,7 +9,7 @@ import { tramite } from '../../services/apis';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../contexts';
 
-const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null }) => {
+const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null, onBackRecibido = null }) => {
 
     // auth
     const { auth } = useContext(AuthContext);
@@ -21,6 +21,12 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null }) 
     const { current_tracking, setOption, setNext, dispatch } = useContext(TramiteContext);
     const current_tramite = current_tracking.tramite || {};
     const isTramite = Object.keys(current_tramite).length;
+
+    const options = {
+        headers: { 
+            DependenciaId: current_tracking.dependencia_id
+        }
+    }
 
     // next action
     const handleNext = (act) => {
@@ -43,6 +49,35 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null }) 
             Swal.fire({ icon: 'error', text: 'No se pudó anular el proceso del trámite' });
         });
     }
+
+    const handleBackRecibido = async () => {
+        let answer = await Confirm('warning', '¿Estas seguro en regresar el trámite a recibido?', 'Regresar');
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        await tramite.post(`tracking/${current_tracking.id}/back_recibido?_method=DELETE`, {}, options)
+        .then(async res => {
+            let { tracking } = res.data;
+            app_context.setCurrentLoading(false);
+            await Swal.fire({ icon: 'success', text: 'El trámite regresó a recibido correctamente!' });
+            if (typeof onBackRecibido == 'function') onBackRecibido(tracking);
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: 'No se pudó regresar el trámite' });
+        });
+    }
+
+    const canEdit = useMemo(() => {
+        let allower = current_tracking.current 
+            && !current_tracking.revisado
+            && current_tracking.dependencia_id == current_tramite.dependencia_origen_id;
+        if (current_tracking.modo == 'YO' && allower) return current_tramite.person_id == current_tracking.person_id;
+        return allower;
+    }, [current_tracking]);
+
+    const canBackRecibido = useMemo(() => {
+        if (!current_tracking.current || current_tracking.revisado) return false;
+        return current_tracking?.tracking?.status == 'ACEPTADO' ? true : false;
+    }, [current_tracking]);
 
     // render
     return (
@@ -148,13 +183,23 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null }) 
                 </div>
             </Show>
             {/* editar  tramite*/}
-            <Show condicion={current_tracking.current && !current_tracking.revisado}>
-                <div className="col-md-12 text-right">
-                    <span className="close cursor-pointer" onClick={() => typeof onEdit == 'function' ? onEdit() : null}>
-                        <i className="fas fa-edit text-dark"></i>
+            <div className="col-md-12 text-right">
+                <Show condicion={canEdit}>
+                    <span className="close cursor-pointer" 
+                        title="Editar Trámite"
+                        onClick={() => typeof onEdit == 'function' ? onEdit() : null}>
+                        <i className="fas fa-pencil-alt text-dark"></i>
                     </span>
-                </div>
-            </Show>
+                </Show>
+                
+                <Show condicion={canBackRecibido}>
+                    <span className="close cursor-pointer mr-4" 
+                        title="Regresar a recibido"
+                        onClick={handleBackRecibido}>
+                        <i className="fas fa-history text-danger"></i>
+                    </span>
+                </Show>
+            </div>
         </div>
     )
 }

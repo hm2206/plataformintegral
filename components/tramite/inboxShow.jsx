@@ -268,6 +268,7 @@ const InboxShow = ({ onRefresh }) => {
                         {/* info action */}
                         <ShowAction onAction={setAction}
                             onAnularProcess={handleOnSave}
+                            onBackRecibido={handleOnSave}
                             onEdit={() => setCurrentEdit(true)}
                         />
                         {/* multiple */}
