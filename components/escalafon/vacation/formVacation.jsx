@@ -1,4 +1,5 @@
-import React from 'react';
+import moment from 'moment';
+import React, { useMemo } from 'react';
 import { Form } from 'semantic-ui-react';
 
 const FormVacation = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null, disabled = false }) => {
@@ -6,6 +7,13 @@ const FormVacation = ({ children, form = {}, errors = {}, className = null, read
     const handleChange = (e, { name, value }) => {
         if (typeof onChange == 'function') onChange(e, { name, value });
     }
+
+    const displayDaysUser = useMemo(() => {
+        let date_start = moment(form?.date_start);
+        let date_over = moment(form?.date_over);
+        let duration = date_over.diff(date_start, 'days').valueOf();
+        return duration > 0 ? duration + 1 : duration;
+    }, [form]);
 
     return (
         <Form className={className}>
@@ -32,6 +40,27 @@ const FormVacation = ({ children, form = {}, errors = {}, className = null, read
                         min="1"
                     />
                     <label htmlFor="">{errors?.date_over?.[0] || ""}</label>
+                </Form.Field>
+
+                <Form.Field className="col-md-8 mb-3" error={errors?.resolucion?.[0] ? true : false}>
+                    <label htmlFor="">Resolución <b className="text-red">*</b></label>
+                    <input type="text" 
+                        name="resolucion"
+                        readOnly={readOnly.includes('resolucion') || disabled}
+                        value={form?.resolucion || ""}
+                        onChange={(e) => handleChange(e,  e.target)}
+                        min="1"
+                    />
+                    <label htmlFor="">{errors?.resolucion?.[0] || ""}</label>
+                </Form.Field>
+
+                <Form.Field className="col-md-4 mb-3" error={errors?.days_used?.[0] ? true : false}>
+                    <label htmlFor="">Dias Usados <b className="text-red">*</b></label>
+                    <input type="text" 
+                        readOnly
+                        value={displayDaysUser}
+                    />
+                    <label htmlFor="">{errors?.days_used?.[0] || ""}</label>
                 </Form.Field>
 
                 <Form.Field className="col-md-12 mb-3" error={errors?.observation?.[0] ? true : false}>

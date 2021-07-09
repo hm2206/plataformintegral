@@ -56,7 +56,7 @@ const CreateVacation = ({ config_vacation = {}, onClose = null, onSave = null })
         <Modal isClose={onClose}
             show={true}
             md="5"
-            titulo={<span><i className="fas fa-file-alt"></i> Crear Vacación</span>}
+            titulo={<span><i className="fas fa-file-alt"></i> Crear Vacación <span className="badge badge-dark">{config_vacation?.year}</span></span>}
         >
             <FormVacation className="card-body"
                 form={form}

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from '../../modal';
 import { Button, Progress } from 'semantic-ui-react';
 import FormVacation from './formVacation';
@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 
 const vacationProvider = new VacationProvider();
 
-const EditVacation = ({ vacation = {}, info = {}, onClose = null, onUpdate = null, onDelete = null }) => {
+const EditVacation = ({ config_vacation, vacation = {}, info = {}, onClose = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
@@ -69,7 +69,7 @@ const EditVacation = ({ vacation = {}, info = {}, onClose = null, onUpdate = nul
             show={true}
             md="5"
             disabled={current_loading}
-            titulo={<span><i className="fas fa-calendar"></i> Editar Vacaciones</span>}
+            titulo={<span><i className="fas fa-calendar"></i> Editar Vacaciones <span className="badge badge-dark">{config_vacation?.year}</span></span>}
         >
             <FormVacation className="card-body"
                 form={form}

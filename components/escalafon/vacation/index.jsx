@@ -79,6 +79,10 @@ const Vacation = ({ config_vacation, info }) => {
     }, [datos])
 
     useEffect(() => {
+        if (config_vacation?.id) setIsRefresh(true);
+    }, [config_vacation?.id]);
+    
+    useEffect(() => {
         if (is_refresh) getVacations()
     }, [is_refresh]);
 
@@ -110,10 +114,10 @@ const Vacation = ({ config_vacation, info }) => {
                                 <i className="fas fa-plus"></i>
                             </Button>
                         </th>
+                        <th>Resolución</th>
                         <th width="100px">F. Inicio</th>
                         <th width="100px">F. Fin</th>
                         <th width="150px" className="text-center">Días usados</th>
-                        <th className="text-center">Observación</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,10 +127,10 @@ const Vacation = ({ config_vacation, info }) => {
                             onDoubleClick={() => handleEdit(d)}
                         >
                             <td>{indexD + 1}</td>
+                            <td>{d.resolucion}</td>
                             <td>{moment(d.date_start).format('DD/MM/YYYY')}</td>
                             <td>{moment(d.date_over).format('DD/MM/YYYY')}</td>
                             <td className="text-center">{d.days_used}</td>
-                            <td>{d.observation || ""}</td>  
                         </tr>
                     )}
                     {/* no hay datos  */}
@@ -168,6 +172,7 @@ const Vacation = ({ config_vacation, info }) => {
             {/* editar vacation */}
             <Show condicion={option == options.EDIT}>
                 <EditVacation onClose={() => setOption("")}
+                    config_vacation={config_vacation}
                     vacation={current_vacation}
                     info={info}
                     onUpdate={onUpdate}
