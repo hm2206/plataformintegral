@@ -8,6 +8,7 @@ import CreateConfigVacation from './createConfigVacation';
 import EditConfigVacation from './editConfigVacation';
 import InfoProvider from '../../../providers/escalafon/InfoProvider';
 import { SelectInfoConfigVacation } from '../../select/escalafon';
+import Vacation from '../vacation/index';
 moment.locale('es');
 
 const options = {
@@ -20,17 +21,13 @@ const infoProvider = new InfoProvider();
 
 const ItemInfoVacation = ({ info }) => {
 
-    // ref
-    const calendarRef = useRef();
-
     // estados
     const [current_config_vacation, setCurrentConfigVacation] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
     const [events, setEvents] = useState([]);
-    const [current_ballot, setCurrentBallot] = useState({});
     const [option, setOption] = useState("");
     const [is_add, setIsAdd] = useState(false);
-    const isChurrentBallot = Object.keys(current_ballot).length;
+    const isCurrentConfigVacation = Object.keys(current_config_vacation).length;
 
     const formatterEvent = (ballot) => {
         return {
@@ -140,6 +137,13 @@ const ItemInfoVacation = ({ info }) => {
                         </div>
                     </div>
                 </Form>
+                {/* lista de vacaciones */}
+                <Show condicion={isCurrentConfigVacation}>
+                    <hr />
+                    <Vacation info={info}
+                        config_vacation={current_config_vacation} 
+                    />
+                </Show>
                 {/* crear papeleta */}
                 <Show condicion={option == options.CREATE}>
                     <CreateConfigVacation

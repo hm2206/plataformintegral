@@ -1,22 +1,21 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Modal from '../../modal';
 import { Button } from 'semantic-ui-react';
-import FormConfigVacation from './formConfigVacation';
+import FormVacation from './formVacation';
 import { Confirm } from '../../../services/utils';
-import ConfigVacationProvider from '../../../providers/escalafon/ConfigVacationProvider';
+import VacationProvider from '../../../providers/escalafon/VacationProvider';
 import Swal from 'sweetalert2';
-import moment from 'moment';
 
-const configVacationProvider = new ConfigVacationProvider();
+const vacationProvider = new VacationProvider();
 
-const CreateConfigVacation = ({ info = {}, onClose = null, onSave = null }) => {
+const CreateVacation = ({ config_vacation = {}, onClose = null, onSave = null }) => {
 
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
 
     const readySave = useMemo(() => {
-        let required = ['year', 'scheduled_days'];
+        let required = ['date_start', 'date_over'];
         // validar
         for (let item of required) {
             let value = form[item];
@@ -36,17 +35,16 @@ const CreateConfigVacation = ({ info = {}, onClose = null, onSave = null }) => {
     }
 
     const handleSave = async () => {
-        let answer = await Confirm('info', '¿Estas seguro en guardar la configuración de vacaciones?', 'Guardar');
+        let answer = await Confirm('info', '¿Estas seguro en guardar la vacación?', 'Guardar');
         if (!answer) return;
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
-        payload.info_id = info.id;
-        payload.year = `${form.year}`;
-        await configVacationProvider.store(payload)
+        payload.config_vacation_id = config_vacation.id;
+        await vacationProvider.store(payload)
         .then(res => {
-            let { message, config_vacation } = res.data;
+            let { message, vacation } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            if (typeof onSave == 'function') onSave(config_vacation);
+            if (typeof onSave == 'function') onSave(vacation);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
             setErrors(err.errors || {});
@@ -54,22 +52,16 @@ const CreateConfigVacation = ({ info = {}, onClose = null, onSave = null }) => {
         setCurrentLoading(false);
     }
 
-    useEffect(() => {
-        let date = moment();
-        setForm({ year: date.year(), scheduled_days: 30 });
-    }, []);
-
     return (
         <Modal isClose={onClose}
             show={true}
             md="5"
-            titulo={<span><i className="fas fa-file-alt"></i> Crear Configuración de Vacaciones</span>}
+            titulo={<span><i className="fas fa-file-alt"></i> Crear Vacación</span>}
         >
-            <FormConfigVacation className="card-body"
+            <FormVacation className="card-body"
                 form={form}
                 errors={errors}
                 onChange={handleInput}
-                info_id={info?.id}
             >
                 <div className="col-md-12 text-right">
                     <hr />
@@ -82,9 +74,9 @@ const CreateConfigVacation = ({ info = {}, onClose = null, onSave = null }) => {
                         <i className="fas fa-save"></i> Guardar
                     </Button>
                 </div>
-            </FormConfigVacation>
+            </FormVacation>
         </Modal>
     )
 }
 
-export default CreateConfigVacation;
+export default CreateVacation;

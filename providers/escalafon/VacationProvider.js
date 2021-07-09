@@ -1,9 +1,9 @@
 import { escalafon } from '../../services/apis';
 import BaseProvider from '../BaseProvider';
 
-class ConfigVacationProvider extends BaseProvider  {
+class VacationProvider extends BaseProvider  {
 
-    collection = "config_vacations";
+    collection = "vacations";
 
     index = async (query = {}, config = {}, ctx = null) => {
         query.page = typeof query.page != 'undefined' ? query.page : 1;
@@ -32,14 +32,6 @@ class ConfigVacationProvider extends BaseProvider  {
         .catch(err => this.handleError(err));
     }
 
-    vacations = async (id, query = {}, config = {}, ctx = null) => {
-        query.page = typeof query.page != 'undefined' ? query.page : 1;
-        let query_string = `page=${query.page}`;
-        return await escalafon.get(`${this.collection}/${id}/vacations?${query_string}`, config, ctx)
-        .then(res => res)
-        .catch(err => this.handleError(err));
-    }
-
 }
 
-export default ConfigVacationProvider;
+export default VacationProvider;
