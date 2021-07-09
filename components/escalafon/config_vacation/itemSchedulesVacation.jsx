@@ -3,13 +3,16 @@ import { Button, Form } from 'semantic-ui-react';
 import CardLoader from '../../cardLoader';
 import Show from '../../show';
 import moment from 'moment';
+import collect from 'collect.js';
 import CreateConfigVacation from './createConfigVacation';
-import EditBallot from './editVacation';
+import EditConfigVacation from './editConfigVacation';
 import InfoProvider from '../../../providers/escalafon/InfoProvider';
+import { SelectInfoConfigVacation } from '../../select/escalafon';
 moment.locale('es');
 
 const options = {
-    CREATE: "CREATE"
+    CREATE: "CREATE",
+    EDIT: "EDIT",
 };
 
 // providers
@@ -26,6 +29,7 @@ const ItemInfoVacation = ({ info }) => {
     const [events, setEvents] = useState([]);
     const [current_ballot, setCurrentBallot] = useState({});
     const [option, setOption] = useState("");
+    const [is_add, setIsAdd] = useState(false);
     const isChurrentBallot = Object.keys(current_ballot).length;
 
     const formatterEvent = (ballot) => {
@@ -55,22 +59,33 @@ const ItemInfoVacation = ({ info }) => {
         setCurrentLoading(false);
     }
 
-    const onSave = (ballot) => {
-        setEvents(prev => [...prev, formatterEvent(ballot)]);
+    const handleConfigVacation = async (e, { value, options }) => {
+        let allIndexs = collect(options).pluck('value').toArray();
+        let index = allIndexs.indexOf(value);
+        if (index < 0) return "";
+        let tmpOption = options[index];
+        setCurrentConfigVacation(tmpOption?.obj || {});
+    }
+
+    const onSave = () => {
+        setIsAdd(true);
         setOption("");
     }
 
-    const onUpdate = async (ballot) => {
-        await onDelete(ballot, false);
-        await onSave(ballot);
-        setCurrentBallot(prev => ({ ...prev, ...ballot }));
+    const onUpdate = async (config_vacation) => {
+        setCurrentConfigVacation(prev => ({ ...prev, ...config_vacation }));
+        setIsAdd(true);
     }
 
-    const onDelete = async (ballot, show = true) => {
-        let newEvents = await events.filter(e => e.id != ballot.id);
-        setEvents(newEvents);
-        if (show) setCurrentBallot({});
+    const onDelete = async (config_vacation) => {
+        setCurrentConfigVacation({});
+        setOption("");
+        setIsAdd(true);
     }
+
+    useEffect(() => {
+        if (is_add) setIsAdd(false);
+    }, [is_add]);
 
     // render
     return (
@@ -91,9 +106,7 @@ const ItemInfoVacation = ({ info }) => {
                     >
                         <div className="col-3 text-right">
                             <Button.Group size="mini">
-                                <Button 
-                                    onClick={() => setOption(options.CREATE)}
-                                >
+                                <Button onClick={() => setOption(options.CREATE)}>
                                     <i className="fas fa-plus"></i>
                                 </Button>
                             </Button.Group>
@@ -106,15 +119,22 @@ const ItemInfoVacation = ({ info }) => {
                 <Form>
                     <div className="row mb-4">
                         <div className="col-md-9 col-6">
-                            <input type="number" 
-                                name="year"
-                                placeholder="Ingrese el periodo anual"
+                            <SelectInfoConfigVacation
+                                info_id={info.id}
+                                name="config_vacation_id"
                                 value={current_config_vacation?.id}
+                                onChange={handleConfigVacation}
+                                refresh={is_add}
                             />
                         </div>
 
                         <div className="col-md-3 col-6 text-center">
-                            <Button fluid basic>
+                            <Button fluid 
+                                color="black"
+                                disabled={!current_config_vacation?.id}
+                                basic
+                                onClick={() => setOption(options.EDIT)}
+                            >
                                 <i className="fas fa-pencil-alt"></i>
                             </Button>
                         </div>
@@ -130,11 +150,11 @@ const ItemInfoVacation = ({ info }) => {
                 </Show>
 
                 {/* edit */}
-                <Show condicion={isChurrentBallot}>
-                    <EditBallot
-                        ballot={current_ballot}
+                <Show condicion={option == options.EDIT}>
+                    <EditConfigVacation
+                        config_vacation={current_config_vacation}
                         info={info}
-                        onClose={() => setCurrentBallot({})}
+                        onClose={() => setOption("")}
                         onUpdate={onUpdate}
                         onDelete={onDelete}
                     />

@@ -94,7 +94,7 @@ const SelectBase = ({
                     let { lastPage, last_page, data } = res.data[obj];
                     current_last_page = typeof lastPage != 'undefined' ? lastPage : last_page;
                     // add entities
-                    let tmpDatos = await settingSelect({ is_new: page == 1 ? true : false, data, index: { key: id, value, text } });
+                    let tmpDatos = await settingSelect({ is_new: page == 1 ? true : false, data, index: { key: id, value, text }, displayText });
                     let newDatos = page == 1 ? tmpDatos : [...datos, ...tmpDatos];
                     setDatos(newDatos);
                     setIsError(false);

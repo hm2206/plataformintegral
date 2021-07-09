@@ -89,10 +89,36 @@ const SelectInfoSchedule = ({ id = "id", info_id, year, month, name, value, onCh
     />
 }
 
+const SelectInfoConfigVacation = ({ id = "id", info_id, name, value, onChange, error = false, refresh = true, onReady = null, displayText = null }) => {
+
+    const defaultDisplayText = (el) => {
+        if (typeof displayText == 'function') return displayText(el); 
+        return `${el.year} | Días programados: ${el.scheduled_days}`;
+    }
+
+    return <SelectBase 
+        execute={true}
+        api={escalafon}
+        url={`infos/${info_id}/config_vacations`}
+        id={`select-config_vacations-${name}`}
+        value={id}
+        text="year"
+        obj="config_vacations"
+        displayText={defaultDisplayText}
+        name={name}
+        valueChange={`${value || ""}`}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Configuración de Vacación"
+        refresh={refresh}
+        onReady={onReady}
+        error={error}
+    />
+}
 
 export { 
     SelectAfp,
     SelectBanco,
     SelectConfigAssistance,
     SelectInfoSchedule,
+    SelectInfoConfigVacation,
 };

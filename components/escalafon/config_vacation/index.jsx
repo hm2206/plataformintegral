@@ -63,34 +63,36 @@ const Vacation = ({ work }) => {
     }, [estado]);
 
     // render
-    return <div className="row">
-        <div className="col-md-12">
-            <h5 className="ml-3">Listado de Papeletas</h5>
-            <div className="col-md-3">
-                <Select placeholder="Todos"
-                    options={[
-                        { key: "TODOS", value: "", text: "Todos" },
-                        { key: "ENABLED", value: 1, text: "Activos" },
-                        { key: "DISABLED", value: 0, text: "Terminados" },
-                    ]}
-                    value={estado}
-                    disabled={current_loading}
-                    onChange={(e, obj) => setEstado(obj.value)}
-                />
+    return (
+        <div className="row">
+            <div className="col-md-12">
+                <h5 className="ml-3">Listado de Papeletas</h5>
+                <div className="col-md-3">
+                    <Select placeholder="Todos"
+                        options={[
+                            { key: "TODOS", value: "", text: "Todos" },
+                            { key: "ENABLED", value: 1, text: "Activos" },
+                            { key: "DISABLED", value: 0, text: "Terminados" },
+                        ]}
+                        value={estado}
+                        disabled={current_loading}
+                        onChange={(e, obj) => setEstado(obj.value)}
+                    />
+                </div>
+                <hr/>
             </div>
-            <hr/>
-        </div>
-        
-        {current_infos.map((i, indexI) => 
-            <div className="col-md-6" key={`info-list-${i.id}-${indexI}`}>
-                <ItemSchedulesBallot info={i}/>
-            </div>
-        )}
+            
+            {current_infos.map((i, indexI) => 
+                <div className="col-md-6" key={`info-list-${i.id}-${indexI}`}>
+                    <ItemSchedulesBallot info={i}/>
+                </div>
+            )}
 
-        <Show condicion={current_loading}>
-            <Placeholder/>
-        </Show>
-    </div>
+            <Show condicion={current_loading}>
+                <Placeholder/>
+            </Show>
+        </div>
+    )
 }
 
 // export 

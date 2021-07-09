@@ -5,24 +5,17 @@ import FormConfigVacation from './formConfigVacation';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
 import moment from 'moment';
-import BallotProvider from '../../../providers/escalafon/BallotProvider';
+import ConfigVactionProvider from '../../../providers/escalafon/ConfigVacationProvider';
 import Swal from 'sweetalert2';
 
-const ballotProvider = new BallotProvider();
+const configVactionProvider = new ConfigVactionProvider();
 
-const EditVacation = ({ ballot = {}, info = {}, onClose = null, onUpdate = null, onDelete = null }) => {
+const EditConfigVacation = ({ config_vacation = {}, info = {}, onClose = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
-
-    const canDelete = useMemo(() => {
-        let current_fecha = moment(`${moment().format('YYYY-MM')}-01`);
-        let select_fecha = moment(`${moment(ballot?.schedule?.date).format('YYYY-MM')}-01`);
-        let diff = select_fecha.diff(current_fecha, 'months').valueOf();
-        return diff >= 0;
-    }, [ballot]);
 
     const handleInput = (e, { name, value }) => {
         let newForm = Object.assign({}, form);
@@ -38,11 +31,11 @@ const EditVacation = ({ ballot = {}, info = {}, onClose = null, onUpdate = null,
         let answer = await Confirm('info', `¿Estás seguro en guardar los cambios?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await ballotProvider.update(ballot.id, form)
+        await configVactionProvider.update(config_vacation.id, form)
         .then(async res => {
-            let { message, ballot } = res.data;
+            let { message, config_vacation } = res.data;
             let newForm = Object.assign({}, form);
-            newForm = { ...form, ...ballot };
+            newForm = { ...form, ...config_vacation };
             Swal.fire({ icon: 'success', text: message });
             if (typeof onUpdate == 'function') await onUpdate(newForm);
             setEdit(false)
@@ -57,11 +50,11 @@ const EditVacation = ({ ballot = {}, info = {}, onClose = null, onUpdate = null,
         let answer = await Confirm('warning', `¿Estás seguro en eliminar?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await ballotProvider.delete(ballot.id)
+        await configVactionProvider.delete(config_vacation.id)
         .then(res => {
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            if (typeof onDelete == 'function') onDelete(ballot);
+            if (typeof onDelete == 'function') onDelete(config_vacation);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });
@@ -69,7 +62,7 @@ const EditVacation = ({ ballot = {}, info = {}, onClose = null, onUpdate = null,
     }
 
     useEffect(() => {
-        if (!edit) setForm(Object.assign({}, ballot))
+        if (!edit) setForm(Object.assign({}, config_vacation))
     }, [edit]);
 
     return (
@@ -77,7 +70,7 @@ const EditVacation = ({ ballot = {}, info = {}, onClose = null, onUpdate = null,
             show={true}
             md="5"
             disabled={current_loading}
-            titulo={<span><i className="fas fa-calendar"></i> Editar Papeleta <span className="badge badge-dark">{ballot?.ballot_number}</span></span>}
+            titulo={<span><i className="fas fa-calendar"></i> Editar Configuración de Vacaciones <span className="badge badge-dark">{config_vacation?.year}</span></span>}
         >
             <FormConfigVacation className="card-body"
                 form={form}
@@ -91,21 +84,19 @@ const EditVacation = ({ ballot = {}, info = {}, onClose = null, onUpdate = null,
                     <div className="col-md-12 text-right">
                         <Show condicion={edit}
                             predeterminado={
-                                <Show condicion={canDelete}>
-                                    <Show condicion={!current_loading}
-                                        predeterminado={
-                                            <div>
-                                                <Progress active percent={100} color="blue" inverted/>
-                                            </div>
-                                        }
-                                    >
-                                        <Button color="red" 
-                                            disabled={current_loading} 
-                                            onClick={handleDelete}
-                                        > 
-                                            <i className="fas fa-trash"></i> Eliminar
-                                        </Button>
-                                    </Show>
+                                <Show condicion={!current_loading}
+                                    predeterminado={
+                                        <div>
+                                            <Progress active percent={100} color="blue" inverted/>
+                                        </div>
+                                    }
+                                >
+                                    <Button color="red" 
+                                        disabled={current_loading} 
+                                        onClick={handleDelete}
+                                    > 
+                                        <i className="fas fa-trash"></i> Eliminar
+                                    </Button>
                                 </Show>
                             }
                         >
@@ -133,4 +124,4 @@ const EditVacation = ({ ballot = {}, info = {}, onClose = null, onUpdate = null,
     )
 }
 
-export default EditVacation;
+export default EditConfigVacation;
