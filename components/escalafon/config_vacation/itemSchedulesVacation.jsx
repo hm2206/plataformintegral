@@ -7,7 +7,7 @@ import collect from 'collect.js';
 import CreateConfigVacation from './createConfigVacation';
 import EditConfigVacation from './editConfigVacation';
 import InfoProvider from '../../../providers/escalafon/InfoProvider';
-import { SelectInfoConfigVacation } from '../../select/escalafon';
+// import { SelectInfoConfigVacation } from '../../select/escalafon';
 import Vacation from '../vacation/index';
 moment.locale('es');
 
@@ -116,13 +116,13 @@ const ItemInfoVacation = ({ info }) => {
                 <Form>
                     <div className="row mb-4">
                         <div className="col-md-9 col-6">
-                            <SelectInfoConfigVacation
+                            {/* <SelectInfoConfigVacation
                                 info_id={info.id}
                                 name="config_vacation_id"
                                 value={current_config_vacation?.id}
                                 onChange={handleConfigVacation}
                                 refresh={is_add}
-                            />
+                            /> */}
                         </div>
 
                         <div className="col-md-3 col-6 text-center">

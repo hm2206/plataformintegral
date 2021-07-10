@@ -51,6 +51,11 @@ const Vacation = ({ config_vacation, info }) => {
         }).catch(err => setIsError(true))
         setCurrentLoading(false);
     }
+
+    const handleRefresh = () => {
+        setPage(1);
+        setIsRefresh(true);
+    }
     
     const handleEdit = (vacation) => {
         setOption(options.EDIT);
@@ -95,90 +100,102 @@ const Vacation = ({ config_vacation, info }) => {
     }, [is_refresh]);
 
     return (
-        <div className="table-responsive">
-            <Show condicion={datos.length}>
-                <div className="text-right">
-                    <b className="text-muted"><u>Doble click en las vacaciones para editar</u></b>
-                </div>
-            </Show>
+        <div className="card">
+            <div className="card-header">
+                <i className="fas fa-calendar"></i> Vacaciones
+                <span className="close cursor-pointer"
+                    onClick={handleRefresh}
+                >
+                    <i className="fas fa-sync"></i>
+                </span>
+            </div>
+            
+            <div className="card-body">
+                <div className="table-responsive">
+                    <Show condicion={datos.length}>
+                        <div className="text-right">
+                            <b className="text-muted"><u>Doble click en las vacaciones para editar</u></b>
+                        </div>
+                    </Show>
 
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th width="50px">
-                            <Button size="mini" 
-                                basic
-                                color="green"
-                                onClick={() => setOption(options.CREATE)}
-                            >
-                                <i className="fas fa-plus"></i>
-                            </Button>
-                        </th>
-                        <th>Resolución</th>
-                        <th width="100px">F. Inicio</th>
-                        <th width="100px">F. Fin</th>
-                        <th width="150px" className="text-center">Días usados</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {/* datos */}
-                    {datos.map((d, indexD) => 
-                        <tr key={`lista-datos-${d.id}`} className="cursor-pointer"
-                            onDoubleClick={() => handleEdit(d)}
-                        >
-                            <td>{indexD + 1}</td>
-                            <td>{d.resolucion}</td>
-                            <td>{moment(d.date_start).format('DD/MM/YYYY')}</td>
-                            <td>{moment(d.date_over).format('DD/MM/YYYY')}</td>
-                            <td className="text-center">{d.days_used}</td>
-                        </tr>
-                    )}
-                    {/* no hay datos  */}
-                    <Show condicion={!current_loading && !datos.length}>
-                        <tr>
-                            <th colSpan="5" 
-                                className="text-center"
-                            >
-                                No hay regístros disponibles
-                            </th>
-                        </tr>
-                    </Show>
-                    {/* preloading */}
-                    <Show condicion={current_loading}>
-                        <Placeholder/>
-                    </Show>
-                    {/* obtener más registros */}
-                    <Show condicion={isMoreDatos}>
-                        <tr>
-                            <th colSpan="5">
-                                <Button basic
-                                    fluid
-                                    onClick={() => setPage(prev => prev + 1)}
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th width="50px">
+                                    <Button size="mini" 
+                                        basic
+                                        color="green"
+                                        onClick={() => setOption(options.CREATE)}
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                    </Button>
+                                </th>
+                                <th>Resolución</th>
+                                <th width="100px">F. Inicio</th>
+                                <th width="100px">F. Fin</th>
+                                <th width="150px" className="text-center">Días usados</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {/* datos */}
+                            {datos.map((d, indexD) => 
+                                <tr key={`lista-datos-${d.id}`} className="cursor-pointer"
+                                    onDoubleClick={() => handleEdit(d)}
                                 >
-                                    <i className="fas fa-arrow-down"></i> Obtener más regístros
-                                </Button>
-                            </th>
-                        </tr>
+                                    <td>{indexD + 1}</td>
+                                    <td>{d.resolucion}</td>
+                                    <td>{moment(d.date_start).format('DD/MM/YYYY')}</td>
+                                    <td>{moment(d.date_over).format('DD/MM/YYYY')}</td>
+                                    <td className="text-center">{d.days_used}</td>
+                                </tr>
+                            )}
+                            {/* no hay datos  */}
+                            <Show condicion={!current_loading && !datos.length}>
+                                <tr>
+                                    <th colSpan="5" 
+                                        className="text-center"
+                                    >
+                                        No hay regístros disponibles
+                                    </th>
+                                </tr>
+                            </Show>
+                            {/* preloading */}
+                            <Show condicion={current_loading}>
+                                <Placeholder/>
+                            </Show>
+                            {/* obtener más registros */}
+                            <Show condicion={isMoreDatos}>
+                                <tr>
+                                    <th colSpan="5">
+                                        <Button basic
+                                            fluid
+                                            onClick={() => setPage(prev => prev + 1)}
+                                        >
+                                            <i className="fas fa-arrow-down"></i> Obtener más regístros
+                                        </Button>
+                                    </th>
+                                </tr>
+                            </Show>
+                        </tbody>
+                    </table>
+                    {/* crear vacation */}
+                    <Show condicion={option == options.CREATE}>
+                        <CreateVacation config_vacation={config_vacation}
+                            onClose={() => setOption("")}
+                            onSave={onSave}
+                        />
                     </Show>
-                </tbody>
-            </table>
-            {/* crear vacation */}
-            <Show condicion={option == options.CREATE}>
-                <CreateVacation config_vacation={config_vacation}
-                    onClose={() => setOption("")}
-                    onSave={onSave}
-                />
-            </Show>
-            {/* editar vacation */}
-            <Show condicion={option == options.EDIT}>
-                <EditVacation onClose={() => setOption("")}
-                    config_vacation={config_vacation}
-                    vacation={current_vacation}
-                    info={info}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                />
-            </Show>
+                    {/* editar vacation */}
+                    <Show condicion={option == options.EDIT}>
+                        <EditVacation onClose={() => setOption("")}
+                            config_vacation={config_vacation}
+                            vacation={current_vacation}
+                            onUpdate={onUpdate}
+                            onDelete={onDelete}
+                        />
+                    </Show>
+                </div>
+            </div>
         </div>
     )
 }

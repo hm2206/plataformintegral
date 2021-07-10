@@ -1,12 +1,19 @@
 import React, { useState, useEffect, Fragment } from 'react';
-import ItemSchedulesBallot from './itemSchedulesVacation';
+import collect from 'collect.js';
+import { SelectWorkConfigVacation } from '../../select/escalafon';
+import CreateConfigVacation from './createConfigVacation';
+import EditConfigVacation from './editConfigVacation';
 import Skeleton from 'react-loading-skeleton';
-import Show from '../../show'
-import { escalafon } from '../../../services/apis';
-import { Select } from 'semantic-ui-react'
+import { Button } from 'semantic-ui-react'
 import moment from 'moment';
+import Show from '../../show'
+import Vacation from '../vacation/index';
 moment.locale('es');
 
+const options = {
+    CREATE: 'create',
+    EDIT: 'edit'
+}
 
 const Placeholder = () => {
 
@@ -24,76 +31,105 @@ const Placeholder = () => {
 }
 
 
-const Vacation = ({ work }) => {
+const ConfigVacation = ({ work }) => {
 
     // estados
-    const [current_loading, setCurrentLoading] = useState(false);
-    const [current_infos, setCurrentInfos] = useState([]);
-    const [page, setPage] = useState(1);
-    const [current_total, setCurrenTotal] = useState(0);
-    const [current_last_page, setCurrentLastPage] = useState(0);
-    const [error, setError] = useState(false);
-    const [estado, setEstado] = useState(1);
+    const [current_config_vacation, setCurrentConfigVacation] = useState({});
+    const [option, setOption] = useState("");
+    const [is_add, setIsAdd] = useState(true);
 
-    // obtener contratos
-    const getInfos = async (add = false) => {
-        setCurrentLoading(true);
-        let query_string =`${typeof estado == 'number' ? `estado=${estado}` : ''}`; 
-        await escalafon.get(`works/${work.id}/infos?principal=1&${query_string}`)
-            .then(async res => {
-                let { infos } = res.data;
-                let payload = await infos?.data?.filter(i => i?.planilla?.principal == 1);
-                setCurrentInfos(add ? [...current_infos, ...payload] : payload);
-                setCurrenTotal(infos?.total);
-                setPage(infos.current_page || 1);
-                setCurrentLastPage(infos.last_pate || 0);
-            }).catch(err => setError(true))
-        setCurrentLoading(false);
+    const handleConfigVacation = async (e, { value, options }) => {
+        let allIndexs = collect(options).pluck('value').toArray();
+        let index = allIndexs.indexOf(value);
+        if (index < 0) return "";
+        let tmpOption = options[index];
+        setCurrentConfigVacation(tmpOption?.obj || {});
     }
-    
-    // primera carga
+
+    const onSave = () => {
+        setIsAdd(true);
+        setOption("");
+    }
+
+    const onUpdate = async (config_vacation) => {
+        setCurrentConfigVacation(prev => ({ ...prev, ...config_vacation }));
+        setIsAdd(true);
+    }
+
+    const onDelete = async (config_vacation) => {
+        setCurrentConfigVacation({});
+        setOption("");
+        setIsAdd(true);
+    }
+
     useEffect(() => {
-        getInfos();
-        return () => {
-            setCurrentInfos([]);
-            setPage(1);
-            setCurrenTotal(0);
-            setCurrentLastPage(0);
-        }
-    }, [estado]);
+        if (is_add) setIsAdd(false);
+    }, [is_add]);
 
     // render
     return (
-        <div className="row">
-            <div className="col-md-12">
-                <h5 className="ml-3">Listado de Papeletas</h5>
-                <div className="col-md-3">
-                    <Select placeholder="Todos"
-                        options={[
-                            { key: "TODOS", value: "", text: "Todos" },
-                            { key: "ENABLED", value: 1, text: "Activos" },
-                            { key: "DISABLED", value: 0, text: "Terminados" },
-                        ]}
-                        value={estado}
-                        disabled={current_loading}
-                        onChange={(e, obj) => setEstado(obj.value)}
-                    />
-                </div>
-                <hr/>
-            </div>
-            
-            {current_infos.map((i, indexI) => 
-                <div className="col-md-6" key={`info-list-${i.id}-${indexI}`}>
-                    <ItemSchedulesBallot info={i}/>
-                </div>
-            )}
+        <>
+            <div className="row">
+                <div className="col-md-12">
+                    <h5 className="ml-3">Listado de Configuración de Vacaciones</h5>
+                    <div className="row">
+                        <div className="col-md-4 col-lg-3 col-10 mb-2">
+                            <SelectWorkConfigVacation
+                                displayText={(el) => el.year}
+                                work_id={work.id}
+                                value={current_config_vacation?.id}
+                                onChange={handleConfigVacation}
+                                refresh={is_add}
+                            />
+                        </div>
 
-            <Show condicion={current_loading}>
-                <Placeholder/>
+                        <div className="col-md-2 col-2 mb-2">
+                            <Button color="green" fluid
+                                onClick={() => setOption(options.CREATE)}
+                            >
+                                <i className="fas fa-plus"></i>
+                            </Button>
+                        </div>
+                    </div>
+                    <hr/>
+                </div>
+
+                <Show condicion={current_config_vacation?.id}>
+                    <div className="col-md-6">
+                        <div className="card">
+                            <div className="card-header">
+                                <i className="fas fa-cogs"></i> Configuración Vacaciones
+                            </div>
+                            <div className="card-body">
+                                <EditConfigVacation
+                                    config_vacation={current_config_vacation}
+                                    work={work}
+                                    onClose={() => setOption("")}
+                                    onUpdate={onUpdate}
+                                    onDelete={onDelete}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="col-md-6">
+                        <Vacation work={work}
+                            config_vacation={current_config_vacation}
+                        />
+                    </div>
+                </Show>
+            </div>
+            {/* crear config vacation */}
+            <Show condicion={option == options.CREATE}>
+                <CreateConfigVacation
+                    onSave={onSave}
+                    work={work}
+                    onClose={() => setOption("")}
+                />
             </Show>
-        </div>
+        </>
     )
 }
 
 // export 
-export default Vacation;
+export default ConfigVacation;

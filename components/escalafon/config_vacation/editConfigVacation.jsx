@@ -1,16 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import Modal from '../../modal';
 import { Button, Progress } from 'semantic-ui-react';
 import FormConfigVacation from './formConfigVacation';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
-import moment from 'moment';
 import ConfigVactionProvider from '../../../providers/escalafon/ConfigVacationProvider';
 import Swal from 'sweetalert2';
 
 const configVactionProvider = new ConfigVactionProvider();
 
-const EditConfigVacation = ({ config_vacation = {}, info = {}, onClose = null, onUpdate = null, onDelete = null }) => {
+const EditConfigVacation = ({ config_vacation = {}, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
@@ -63,64 +61,56 @@ const EditConfigVacation = ({ config_vacation = {}, info = {}, onClose = null, o
 
     useEffect(() => {
         if (!edit) setForm(Object.assign({}, config_vacation))
-    }, [edit]);
+    }, [edit, config_vacation?.id]);
 
     return (
-        <Modal isClose={onClose}
-            show={true}
-            md="5"
+        <FormConfigVacation className="card-body"
+            form={form}
+            errors={errors}
             disabled={current_loading}
-            titulo={<span><i className="fas fa-calendar"></i> Editar Configuración de Vacaciones <span className="badge badge-dark">{config_vacation?.year}</span></span>}
+            onChange={handleInput}
+            readOnly={['year']}
         >
-            <FormConfigVacation className="card-body"
-                form={form}
-                errors={errors}
-                disabled={current_loading || !info?.estado}
-                readOnly={['schedule_id']}
-                onChange={handleInput}
-                isHorario={false}
-            >
-                <Show condicion={info?.estado}>
-                    <div className="col-md-12 text-right">
-                        <Show condicion={edit}
-                            predeterminado={
-                                <Show condicion={!current_loading}
-                                    predeterminado={
-                                        <div>
-                                            <Progress active percent={100} color="blue" inverted/>
-                                        </div>
-                                    }
-                                >
-                                    <Button color="red" 
-                                        disabled={current_loading} 
-                                        onClick={handleDelete}
-                                    > 
-                                        <i className="fas fa-trash"></i> Eliminar
-                                    </Button>
-                                </Show>
-                            }
-                        >
-                                <hr />
+            <Show condicion={true}>
+                <div className="col-md-12 text-right">
+                    <Show condicion={edit}
+                        predeterminado={
+                            <Show condicion={!current_loading}
+                                predeterminado={
+                                    <div>
+                                        <Progress active percent={100} color="blue" inverted/>
+                                    </div>
+                                }
+                            >
                                 <Button color="red" 
                                     disabled={current_loading} 
-                                    basic
-                                    onClick={() => setEdit(false)}
-                                >
-                                    <i className="fas fa-times"></i> Cancelar
+                                    onClick={handleDelete}
+                                > 
+                                    <i className="fas fa-trash"></i> Eliminar
                                 </Button>
+                            </Show>
+                        }
+                    >
+                            <hr />
+                            <Button color="red" 
+                                disabled={current_loading} 
+                                basic
+                                onClick={() => setEdit(false)}
+                            >
+                                <i className="fas fa-times"></i> Cancelar
+                            </Button>
 
-                                <Button color="teal" 
-                                    disabled={current_loading} 
-                                    loading={current_loading}
-                                    onClick={handleUpdate}
-                                >
-                                    <i className="fas fa-sync"></i> Guardar cambios
-                                </Button>
-                        </Show>
-                    </div>
-                </Show>
-            </FormConfigVacation>
-        </Modal>
+                            <Button color="teal" 
+                                disabled={current_loading} 
+                                loading={current_loading}
+                                onClick={handleUpdate}
+                            >
+                                <i className="fas fa-sync"></i> Guardar cambios
+                            </Button>
+                    </Show>
+                </div>
+            </Show>
+        </FormConfigVacation>
     )
 }
 

@@ -9,7 +9,7 @@ import moment from 'moment';
 
 const configVacationProvider = new ConfigVacationProvider();
 
-const CreateConfigVacation = ({ info = {}, onClose = null, onSave = null }) => {
+const CreateConfigVacation = ({ work = {}, onClose = null, onSave = null }) => {
 
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
@@ -40,7 +40,7 @@ const CreateConfigVacation = ({ info = {}, onClose = null, onSave = null }) => {
         if (!answer) return;
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
-        payload.info_id = info.id;
+        payload.work_id = work.id;
         payload.year = `${form.year}`;
         await configVacationProvider.store(payload)
         .then(res => {
@@ -69,7 +69,6 @@ const CreateConfigVacation = ({ info = {}, onClose = null, onSave = null }) => {
                 form={form}
                 errors={errors}
                 onChange={handleInput}
-                info_id={info?.id}
             >
                 <div className="col-md-12 text-right">
                     <hr />

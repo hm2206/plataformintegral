@@ -89,7 +89,7 @@ const SelectInfoSchedule = ({ id = "id", info_id, year, month, name, value, onCh
     />
 }
 
-const SelectInfoConfigVacation = ({ id = "id", info_id, name, value, onChange, error = false, refresh = true, onReady = null, displayText = null }) => {
+const SelectWorkConfigVacation = ({ id = "id", work_id, name, value, onChange, error = false, refresh = true, onReady = null, displayText = null }) => {
 
     const defaultDisplayText = (el) => {
         if (typeof displayText == 'function') return displayText(el); 
@@ -99,7 +99,7 @@ const SelectInfoConfigVacation = ({ id = "id", info_id, name, value, onChange, e
     return <SelectBase 
         execute={true}
         api={escalafon}
-        url={`infos/${info_id}/config_vacations`}
+        url={`works/${work_id}/config_vacations`}
         id={`select-config_vacations-${name}`}
         value={id}
         text="year"
@@ -120,5 +120,5 @@ export {
     SelectBanco,
     SelectConfigAssistance,
     SelectInfoSchedule,
-    SelectInfoConfigVacation,
+    SelectWorkConfigVacation,
 };

@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 
 const vacationProvider = new VacationProvider();
 
-const EditVacation = ({ config_vacation, vacation = {}, info = {}, onClose = null, onUpdate = null, onDelete = null }) => {
+const EditVacation = ({ config_vacation, vacation = {}, onClose = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
@@ -74,10 +74,10 @@ const EditVacation = ({ config_vacation, vacation = {}, info = {}, onClose = nul
             <FormVacation className="card-body"
                 form={form}
                 errors={errors}
-                disabled={current_loading || !info?.estado}
+                disabled={current_loading}
                 onChange={handleInput}
             >
-                <Show condicion={info?.estado}>
+                <Show condicion={true}>
                     <div className="col-md-12 text-right">
                         <Show condicion={edit}
                             predeterminado={
