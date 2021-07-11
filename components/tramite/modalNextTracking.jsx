@@ -164,6 +164,11 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
         if (!form.multiple) setCurrentMultiple([]);
     }, [form.multiple]);
 
+    // cambio de dependencia limpiar user
+    useEffect(() => {
+        setUser({});
+    }, [form?.dependencia_destino_id]);
+
     // render
     return (
         <Modal show={true}
@@ -255,14 +260,14 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
                                         <div className="col-md-10 col-lg-11">
                                             <input type="text"
                                                 className="uppercase"
-                                                disabled
+                                                readOnly
                                                 value={`${user.document_number} - ${user.fullname || ""}`}
                                             />
                                         </div>
                                     </Show>
-                                    <div className="col-md-2 col-lg-1">
+                                    <div className={`col-md-${isUser ? '2' : '12'} col-lg-${isUser ? '1' : '12'}`}>
                                         <button className="btn btn-sm btn-outline-dark mb-2" onClick={(e) => setOption("ASSIGN")}>
-                                            {isUser ? <i className="fas fa-sync"></i> : <i className="fas fa-plus"></i>}
+                                            {isUser ? <i className="fas fa-sync"></i> : <span><i className="fas fa-plus"></i> Usuario</span>}
                                         </button>
                                     </div>
                                 </div>
@@ -319,7 +324,8 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
                 <Show condicion={option == 'ASSIGN'}>
                     <SearchUserToDependencia
-                        isClose={(e) => setOption("")}
+                        onClose={(e) => setOption("")}
+                        hidden={[auth.id]}
                         getAdd={handleAdd}
                         entity_id={entity_context.entity_id}
                         dependencia_id={tramite_context.dependencia_id}

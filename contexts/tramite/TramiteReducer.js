@@ -118,6 +118,7 @@ export const tramiteReducer = (state, { type = "", payload = {} }) => {
         case tramiteTypes.DECREMENT_FILTRO:
             for (let increment_state of newState.status) {
                 if (increment_state.key == payload) {
+                    if (increment_state.count == 0) continue;
                     increment_state.count -= 1;
                     break;
                 }

@@ -33,7 +33,8 @@ const schemaData = {
 
 const ModalRequest = ({ 
     api, result, path = "", isClose, getAdd = null, show = true,
-    data = schemaData, title = "Assignar Persona", icon = "fas fa-user"
+    data = schemaData, title = "Assignar Persona", icon = "fas fa-user",
+    verifyHidden = 'id', hidden = [],
 }) => {
 
     const [current_loading, setCurrentLoading] = useState(false);
@@ -48,9 +49,10 @@ const ModalRequest = ({
     const getDatos = async (add = false) => {
         setCurrentLoading(true);
         await api.get(`${path}?page=${current_page}&query_search=${query_search}`)
-        .then(res => {
+        .then(async res => {
             let response = res.data[result];
-            setDatos(add ? [...datos, ...response.data] : response.data);
+            let newData = await settingData(response.data || [])
+            setDatos(add ? [...datos, ...newData] : newData);
             setCurrentTotal(response.total || 0);
             setCurrentLastPage(response.lastPage || response.last_page || 0);
             setIsError(false);
@@ -71,6 +73,32 @@ const ModalRequest = ({
         }
         // response 
         return response;
+    }
+
+    const settingData = async (datos = []) => {
+        let payload = []
+        for (let d of datos) {
+            if (await validateHidden(d)) continue;
+            payload.push({
+                image: renderObj('image', d),
+                text: renderObj('text', d),
+                obj: d
+            });
+        }
+        // response
+        return payload;
+    }
+
+    const validateHidden = (obj = {}) => {
+        let value = obj[verifyHidden];
+        if (!value) return false;
+        if (!hidden.includes(value)) return false;
+        return true;
+    }
+
+    const handleAdd = (data) => {
+        let obj = data.obj;
+        if (typeof getAdd == 'function') getAdd(obj);
     }
 
     // primera carga
@@ -130,15 +158,15 @@ const ModalRequest = ({
                             <List.Item key={`list-people-${obj.id}`}>
                                 <List.Content floated='right'>
                                     <Button color="blue"
-                                        onClick={(e) => typeof getAdd == 'function' ? getAdd(obj) : null}
+                                        onClick={(e) => handleAdd(obj)}
                                     >
                                         <i className="fas fa-plus"></i>
                                     </Button>
                                 </List.Content>
-                                <Image avatar src={renderObj('image', obj) || '/img/base.png'} 
+                                <Image avatar src={obj.image || '/img/base.png'} 
                                     style={{ objectFit: 'cover' }}
                                 />
-                                <List.Content><span className="uppercase">{renderObj('text', obj) || ""}</span></List.Content>
+                                <List.Content><span className="uppercase">{obj.text || ""}</span></List.Content>
                             </List.Item>
                         )}
                         {/* no hay registros */}

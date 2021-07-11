@@ -98,6 +98,11 @@ export const TramiteProvider = ({ children, dependencia_id, role = {}, boss = {}
         dispatch({ type:tramiteTypes.CHANGE_SALA, payload: name });
     }
 
+    // cambio de menu
+    useEffect(() => {
+        if (state.menu) dispatch({ type: tramiteTypes.INITIAL, payload: [] });
+    }, [state.menu]);
+
     // cambio de dependencia
     useEffect(() => {
         setTab(null);
