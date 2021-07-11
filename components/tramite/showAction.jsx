@@ -159,7 +159,7 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null, on
                             </Button>
                         </Show>
 
-                        <Show condicion={current_tracking.status == 'RECIBIDO' || current_tracking.status == 'COPIA'}>
+                        <Show condicion={current_tracking.status == 'RECIBIDO'}>
                             <Button color="green" 
                                 basic 
                                 size="mini"
