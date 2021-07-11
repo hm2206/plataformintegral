@@ -272,7 +272,7 @@ const InboxShow = ({ onRefresh }) => {
                             onEdit={() => setCurrentEdit(true)}
                         />
                         {/* multiple */}
-                        <Show condicion={current_tracking.multiple}>
+                        <Show condicion={current_tracking?.__meta__?.multiples_count}>
                             <div className="col-md-12 mt-4">
                                 <hr/>
                                 <button className="btn btn-primary"
@@ -323,7 +323,7 @@ const InboxShow = ({ onRefresh }) => {
                 </BtnFloat>
             </Show>
             {/* multiple tracking */}
-            <Show condicion={current_tracking.multiple && action == 'MULTIPLE'}>
+            <Show condicion={action == 'MULTIPLE'}>
                 <InfoMultiple
                     current_tracking={current_tracking}
                     isClose={(e) => setAction("")}

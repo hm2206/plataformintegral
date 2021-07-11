@@ -91,7 +91,7 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
                     </Show>
                 </Show>
                 {/* tracking multiple */}
-                <Show condicion={current_tracking.multiple}>
+                <Show condicion={current_tracking?.__meta__?.multiples_count}>
                     <button className="btn btn-primary"
                         onClick={(e) => typeof onMultiple == 'function' ? onMultiple(current_tracking) : null}
                     >
