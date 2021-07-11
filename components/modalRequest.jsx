@@ -34,7 +34,7 @@ const schemaData = {
 const ModalRequest = ({ 
     api, result, path = "", isClose, getAdd = null, show = true,
     data = schemaData, title = "Assignar Persona", icon = "fas fa-user",
-    verifyHidden = 'id', hidden = [],
+    verifyHidden = 'id', hidden = [], disabled = []
 }) => {
 
     const [current_loading, setCurrentLoading] = useState(false);
@@ -80,6 +80,7 @@ const ModalRequest = ({
         for (let d of datos) {
             if (await validateHidden(d)) continue;
             payload.push({
+                __id: d[verifyHidden],
                 image: renderObj('image', d),
                 text: renderObj('text', d),
                 obj: d
@@ -155,9 +156,10 @@ const ModalRequest = ({
 
                     <List divided verticalAlign='middle'>
                         {datos.map(obj => 
-                            <List.Item key={`list-people-${obj.id}`}>
+                            <List.Item key={`list-people-${obj.__id}`}>
                                 <List.Content floated='right'>
                                     <Button color="blue"
+                                        disabled={disabled.includes(obj.__id)}
                                         onClick={(e) => handleAdd(obj)}
                                     >
                                         <i className="fas fa-plus"></i>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import Modal from '../modal';
 import { Form, Button , Checkbox } from 'semantic-ui-react';
 import { SelectDependencia } from '../select/authentication';
@@ -15,6 +15,7 @@ import SelectMultitleDependencia from './selectMultipleDependencia';
 import { SelectConfigDependenciaDestino } from '../select/tramite';
 import { EntityContext } from '../../contexts/EntityContext';
 import { AuthContext } from '../../contexts/AuthContext';
+import { collect } from 'collect.js';
 
 
 const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
@@ -37,8 +38,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     const is_errors = Object.keys(errors).length;
     const [current_files, setCurrentFiles] = useState([]);
     const [option, setOption] = useState("");
-    const [user, setUser] = useState({});
-    const isUser = Object.keys(user).length;
+    const [users, setUsers] = useState([]);
     const [current_dependencias, setCurrentDependencias] = useState([]);
     const [current_multiple, setCurrentMultiple] = useState([]);
 
@@ -50,6 +50,21 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     const current_tracking = tramite_context.current_tracking || {};
     const current_role = tramite_context.role || {};
     const current_boss = tramite_context.boss || {};
+
+    const isPrivated = useMemo(() => {
+        return form?.dependencia_destino_id == current_tracking.dependencia_id;
+    }, [form]);
+
+    const canNext = useMemo(() => {
+        if (isPrivated) return users.length ? true : false;
+        return form.dependencia_destino_id ? true : false;
+    }, [users, form]);
+
+    const userChecked = useMemo(() => {
+        let storage = collect(users);
+        let checked = storage.pluck('id').toArray();
+        return checked
+    }, [users]);
 
     // combiar form
     const handleInput = ({ name, value }) => {
@@ -79,8 +94,32 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
     // obtener usuario
     const handleAdd = async (obj) => {
-        setOption("");
-        setUser(obj);
+        let userIds = collect(users).pluck('id').toArray();
+        if (userIds.includes(obj.id)) return;
+        let newObj = {
+            id: obj.id,
+            person_id: obj.person_id,
+            fullname: obj.fullname,
+            document_number: obj.document_number,
+            is_action: 1
+        };
+        // next users
+        setUsers(prev => [...prev, newObj]);
+    }
+
+    const onDeleteUser = async (obj) => {
+        let newUsers = await users.filter(u => u.id != obj.id);
+        setUsers(newUsers);
+    }
+
+    const onToggleCheckUser = async (obj, check) => {
+        let newUsers = await users.map(u => {
+            if (obj.id == u.id) u.is_action = check ? 1 : 0;
+            // response
+            return u;
+        });
+        // setting users
+        setUsers(newUsers);
     }
 
     // obtener status
@@ -99,9 +138,20 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
         datos.append('status', action);
         await Object.keys(form).map(key => datos.append(key, form[key]));
         datos.delete('multiple');
-        datos.append('multiple', JSON.stringify(current_multiple));
-        // agregar usuario destino
-        if (isUser) datos.append('user_destino_id', user.id);
+        datos.delete('is_action');
+        let newUsers = [...users];
+        // agregar usuarios destinos
+        if (newUsers.length) {
+            let firstUsers = newUsers[0];
+            datos.append('user_destino_id', firstUsers?.id);
+            datos.append('is_action', firstUsers?.is_action ? 1 : 0);
+            newUsers.splice(0, 1);
+            // agregar usuarios multiples
+            datos.append('users', JSON.stringify(newUsers));
+        } else {
+            datos.append('multiple', JSON.stringify(current_multiple));
+            datos.append('is_action', form.is_action ? 1 : 0);
+        }
         // agregar files
         await current_files.map(f => datos.append('files', f));
         // request
@@ -166,7 +216,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
     // cambio de dependencia limpiar user
     useEffect(() => {
-        setUser({});
+        setUsers([]);
     }, [form?.dependencia_destino_id]);
 
     // render
@@ -252,28 +302,46 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
                             </Show>
                         </Show>
 
-                        <Show condicion={destino.includes(action) && current_tracking.revisado && form.dependencia_destino_id == tramite_context.dependencia_id}>
-                            <Form.Field className="mb-3" errors={is_errors && errors.user_destino_id && errors.user_destino_id[0] ? "true" : "false"}>
+                        <Show condicion={isPrivated}>
+                            <Form.Field className="mb-3">
                                 <label htmlFor="">Usuario Destino</label>
-                                <div className="row">
-                                    <Show condicion={isUser}>
-                                        <div className="col-md-10 col-lg-11">
-                                            <input type="text"
-                                                className="uppercase"
-                                                readOnly
-                                                value={`${user.document_number} - ${user.fullname || ""}`}
-                                            />
-                                        </div>
-                                    </Show>
-                                    <div className={`col-md-${isUser ? '2' : '12'} col-lg-${isUser ? '1' : '12'}`}>
-                                        <button className="btn btn-sm btn-outline-dark mb-2" onClick={(e) => setOption("ASSIGN")}>
-                                            {isUser ? <i className="fas fa-sync"></i> : <span><i className="fas fa-plus"></i> Usuario</span>}
-                                        </button>
-                                    </div>
-                                </div>
-                                <label>{is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}</label>
-                                <hr/>
+                                <button className="btn btn-sm btn-outline-dark mb-2" onClick={(e) => setOption("ASSIGN")}>
+                                <span><i className="fas fa-plus"></i> Usuario</span>
+                                </button>
                             </Form.Field>
+
+                            <Show condicion={destino.includes(action) && current_tracking.revisado && form.dependencia_destino_id == tramite_context.dependencia_id}>
+                                {users?.map(u => 
+                                    <Form.Field className="mb-3" errors={is_errors && errors.user_destino_id && errors.user_destino_id[0] ? "true" : "false"}>
+                                        <div className="row">
+                                            <div className="col-md-9 col-9">
+                                                <input type="text"
+                                                    className="uppercase"
+                                                    readOnly
+                                                    value={`${u?.document_number} - ${u?.fullname || ""}`}
+                                                />
+                                            </div>
+                                            <div className="col-md-2 col-2">
+                                                <Checkbox 
+                                                    toggle
+                                                    name="is_action"
+                                                    checked={u.is_action ? true : false}
+                                                    onChange={(e, obj) => onToggleCheckUser(u, obj.checked)}
+                                                />
+                                            </div>
+                                            <div className="col-md-1 col-1">
+                                                <button className="btn btn-ms btn-danger btn-block"
+                                                    onClick={() => onDeleteUser(u)}
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <label>{is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}</label>
+                                        <hr/>
+                                    </Form.Field>    
+                                )}
+                            </Show>
                         </Show>
                     </Show>
 
@@ -315,6 +383,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
 
                     <div className="mt-3 text-right">
                         <Button color={getStatus().color}
+                            disabled={!canNext}
                             onClick={execute}
                         >
                             <i className={`fas ${getStatus().icon}`}></i> {getStatus().label} 
@@ -329,6 +398,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
                         getAdd={handleAdd}
                         entity_id={entity_context.entity_id}
                         dependencia_id={tramite_context.dependencia_id}
+                        disabled={userChecked}
                     />
                 </Show>
             </div>
