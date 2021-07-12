@@ -150,7 +150,7 @@ const CreateTramite = ({ show = true, isClose = null, user = {}, onSave = null }
                                     <input type="text"
                                         className="capitalize"
                                         readOnly
-                                        value={current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || ""}
+                                        value={current_tramite.dependencia_origen && current_tramite.dependencia_origen.nombre || "Externo"}
                                     />
                                 </Form.Field>
 

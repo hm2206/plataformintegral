@@ -20,6 +20,7 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null, on
     // tramite
     const { current_tracking, setOption, setNext, dispatch } = useContext(TramiteContext);
     const current_tramite = current_tracking.tramite || {};
+    const isDependenciaResponse = current_tracking?.tracking?.dependencia_id ? true : false;
     const isTramite = Object.keys(current_tramite).length;
 
     const options = {
@@ -111,7 +112,10 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null, on
                             </Button>
                         }
                     >
-                        <Show condicion={!current_tracking.alert && current_tracking.status == 'PENDIENTE'}>
+                        <Show condicion={!current_tracking.alert 
+                            && current_tracking.status == 'PENDIENTE' 
+                            && isDependenciaResponse
+                        }>
                             <Button color="orange" 
                                 basic 
                                 size="mini"

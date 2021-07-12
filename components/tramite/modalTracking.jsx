@@ -60,7 +60,7 @@ const ItemTracking = ({ current_tracking = {}, onFiles = null, onTramite = null,
             <h4 className="vertical-timeline-element-subtitle">
                 Lugar de destino: 
                 <span className="badge badge-dark mr-1 ml-1 capitalize">
-                    {dependencia && dependencia.nombre || ""}
+                    {dependencia?.nombre || "Exterior"}
                 </span>
             </h4>
             <h4 className="vertical-timeline-element-subtitle">
