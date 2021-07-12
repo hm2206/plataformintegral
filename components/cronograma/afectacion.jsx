@@ -9,7 +9,7 @@ import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../contexts/AppContext';
 import Skeleton from 'react-loading-skeleton';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../select/authentication';
-import { SelectAfp, SelectMeta, SelectSitacionLaboral, SelectTypeCategoriaCargo } from '../select/cronograma';
+import { SelectAfp, SelectMeta, SelectSitacionLaboral, SelectTypeCategoriaCargo, SelectBanco } from '../select/cronograma';
 
 const PlaceHolderInput = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
@@ -157,15 +157,26 @@ const Afectacion = () => {
                         </Show>
                     </Form.Field>
 
-                    <Form.Field>
+                    <Form.Field error={errors?.banco_id?.[0] ? true : false}>
                         <Show condicion={!loading}
                             predeterminado={<PlaceHolderInput/>}
                         >
                             <label><h5>Tip. Cuenta</h5></label>
-                            <input type="text"
-                                value={historial.banco ? historial.banco : 'B NACIÓN'}
-                                readOnly
-                            />
+                            <Show condicion={edit}
+                                predeterminado={
+                                    <input type="text"
+                                        value={historial.banco ? historial.banco : 'B NACIÓN'}
+                                        readOnly
+                                    />
+                                }
+                            >
+                                <SelectBanco
+                                    value={historial.banco_id || ""}
+                                    name="banco_id"
+                                    onChange={(e, obj) => handleInput(obj)}
+                                />
+                                <label>{errors.banco_id && errors.banco_id[0]}</label>
+                            </Show>
                         </Show>
                     </Form.Field>
 
