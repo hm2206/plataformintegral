@@ -56,6 +56,7 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
     }, [form]);
 
     const canNext = useMemo(() => {
+        if (!destino.includes(action)) return true;
         if (isPrivated) return users.length ? true : false;
         return form.dependencia_destino_id ? true : false;
     }, [users, form]);
@@ -300,49 +301,50 @@ const ModalNextTracking = ({ isClose = null, action = "", onSave = null }) => {
                                     )}
                                 </Show>
                             </Show>
-                        </Show>
+                            
+                            <Show condicion={isPrivated}>
+                                <Form.Field className="mb-3">
+                                    <label htmlFor="">Usuario Destino</label>
+                                    <button className="btn btn-sm btn-outline-dark mb-2" onClick={(e) => setOption("ASSIGN")}>
+                                    <span><i className="fas fa-plus"></i> Usuario</span>
+                                    </button>
+                                </Form.Field>
 
-                        <Show condicion={isPrivated}>
-                            <Form.Field className="mb-3">
-                                <label htmlFor="">Usuario Destino</label>
-                                <button className="btn btn-sm btn-outline-dark mb-2" onClick={(e) => setOption("ASSIGN")}>
-                                <span><i className="fas fa-plus"></i> Usuario</span>
-                                </button>
-                            </Form.Field>
-
-                            <Show condicion={destino.includes(action) && current_tracking.revisado && form.dependencia_destino_id == tramite_context.dependencia_id}>
-                                {users?.map(u => 
-                                    <Form.Field className="mb-3" errors={is_errors && errors.user_destino_id && errors.user_destino_id[0] ? "true" : "false"}>
-                                        <div className="row">
-                                            <div className="col-md-9 col-9">
-                                                <input type="text"
-                                                    className="uppercase"
-                                                    readOnly
-                                                    value={`${u?.document_number} - ${u?.fullname || ""}`}
-                                                />
+                                <Show condicion={destino.includes(action) && current_tracking.revisado && form.dependencia_destino_id == tramite_context.dependencia_id}>
+                                    {users?.map(u => 
+                                        <Form.Field className="mb-3" errors={is_errors && errors.user_destino_id && errors.user_destino_id[0] ? "true" : "false"}>
+                                            <div className="row">
+                                                <div className="col-md-9 col-9">
+                                                    <input type="text"
+                                                        className="uppercase"
+                                                        readOnly
+                                                        value={`${u?.document_number} - ${u?.fullname || ""}`}
+                                                    />
+                                                </div>
+                                                <div className="col-md-2 col-2">
+                                                    <Checkbox 
+                                                        toggle
+                                                        name="is_action"
+                                                        checked={u.is_action ? true : false}
+                                                        onChange={(e, obj) => onToggleCheckUser(u, obj.checked)}
+                                                    />
+                                                </div>
+                                                <div className="col-md-1 col-1">
+                                                    <button className="btn btn-ms btn-danger btn-block"
+                                                        onClick={() => onDeleteUser(u)}
+                                                    >
+                                                        <i className="fas fa-times"></i>
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className="col-md-2 col-2">
-                                                <Checkbox 
-                                                    toggle
-                                                    name="is_action"
-                                                    checked={u.is_action ? true : false}
-                                                    onChange={(e, obj) => onToggleCheckUser(u, obj.checked)}
-                                                />
-                                            </div>
-                                            <div className="col-md-1 col-1">
-                                                <button className="btn btn-ms btn-danger btn-block"
-                                                    onClick={() => onDeleteUser(u)}
-                                                >
-                                                    <i className="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <label>{is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}</label>
-                                        <hr/>
-                                    </Form.Field>    
-                                )}
+                                            <label>{is_errors && errors.user_destino_id && errors.user_destino_id[0] || ""}</label>
+                                            <hr/>
+                                        </Form.Field>    
+                                    )}
+                                </Show>
                             </Show>
                         </Show>
+
                     </Show>
 
                     <Show condicion={descripcion.includes(action)}>
