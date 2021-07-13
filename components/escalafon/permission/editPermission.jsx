@@ -17,7 +17,7 @@ const EditPermission = ({ permission = {}, onClose = null, onUpdate = null, onDe
     const [current_loading, setCurrentLoading] = useState(false);
 
     const canSave = useMemo(() => {
-        let required = ['date_start', 'date_over', 'option', 'document_number', 'justification'];
+        let required = ['date_start', 'date_over', 'option', 'document_number', 'justification', 'type_permission_id'];
         // validar
         for (let item of required) {
             let value = form[item];

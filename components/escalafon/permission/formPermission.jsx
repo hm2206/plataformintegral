@@ -58,7 +58,7 @@ const FormPermission = ({ children, form = {}, errors = {}, className = null, re
                 </Form.Field>
 
                 <Form.Field className="col-md-12 mb-3" error={errors?.type_permission_id?.[0] ? true : false}>
-                    <label htmlFor="">Tipo. Permiso</label>
+                    <label htmlFor="">Tipo. Permiso <b className="text-red">*</b></label>
                     <SelectTypePermission
                         name="type_permission_id"
                         readOnly={readOnly.includes('type_permission_id') || disabled}

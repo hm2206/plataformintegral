@@ -15,7 +15,7 @@ const CreatePermission = ({ work = {}, onClose = null, onSave = null }) => {
     const [current_loading, setCurrentLoading] = useState(false);
 
     const readySave = useMemo(() => {
-        let required = ['date_start', 'date_over', 'option', 'document_number', 'justification'];
+        let required = ['date_start', 'date_over', 'option', 'document_number', 'justification', 'type_permission_id'];
         // validar
         for (let item of required) {
             let value = form[item];
