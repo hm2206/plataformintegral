@@ -1,10 +1,11 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import Show from '../../show';
 import CreatePermission from './createPermission';
 import { BtnFloat } from '../../Utils';
 import ItemPermission from './itemPermission';
 import WorkProvider from '../../../providers/escalafon/WorkProvider';
+import { Button } from 'semantic-ui-react';
 
 const workProvider = new WorkProvider();
 
@@ -37,6 +38,11 @@ const Permission = ({ work }) => {
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [current_total, setCurrentTotal] = useState(0);
     const [error, setError] = useState(false);
+    const [is_refresh, setIsRefresh] = useState(true);
+
+    const isNextPage = useMemo(() => {
+        return (current_page + 1) <= current_last_page;
+    }, [current_data]);
 
     // obtener permissions
     const getDatos = async (add = false) => {
@@ -75,15 +81,35 @@ const Permission = ({ work }) => {
         getDatos();
     }
 
+    useEffect(() => {
+        if (current_page > 1) getDatos(true);
+    }, [current_page]);
+
     // primera carga
     useEffect(() => {
-        getDatos();
-    }, []);
+        if (is_refresh) getDatos();
+    }, [is_refresh]);
+
+    useEffect(() => {
+        if (is_refresh) setIsRefresh(false);
+    }, [is_refresh]);
 
     // render
     return <div className="row">
         <div className="col-md-12">
-            <h5>Listado de Permisos</h5>
+            <h5>
+                Listado de Permisos
+                <Show condicion={!current_loading}>
+                    <span className="close cursor-pointer"
+                        onClick={() => {
+                            setCurrentPage(1);
+                            setIsRefresh(true);
+                        }}
+                    >
+                        <i className="fas fa-sync"></i>
+                    </span>
+                </Show>
+            </h5>
             <hr/>
         </div>
         
@@ -96,8 +122,23 @@ const Permission = ({ work }) => {
             </div>    
         )}
 
+        {/* no hay registros */}
+        <Show condicion={!current_loading && !current_data?.length}>
+            <div className="col-12 text-center">
+                <b>No hay regístros disponibles</b>
+            </div>
+        </Show>  
+
         <Show condicion={current_loading}>
             <Placeholder/>
+        </Show>
+
+        <Show condicion={isNextPage}>
+            <div className="col-12">
+                <Button onClick={() => setCurrentPage(prev => prev + 1)} fluid>
+                    <i className="fas fa-arrow-down"></i> Obtener más regístros
+                </Button>
+            </div>
         </Show>
 
         <BtnFloat onClick={() => setOption(options.CREATE)}>
