@@ -9,10 +9,11 @@ const FormVacation = ({ children, form = {}, errors = {}, className = null, read
     }
 
     const displayDaysUser = useMemo(() => {
+        if (!form?.date_start || !form?.date_over) return 0;
         let date_start = moment(form?.date_start);
         let date_over = moment(form?.date_over);
-        let duration = date_over.diff(date_start, 'days').valueOf();
-        return duration > 0 ? duration + 1 : duration;
+        let duration = date_over.diff(date_start, 'days').valueOf() + 1;
+        return duration;
     }, [form]);
 
     return (

@@ -115,10 +115,31 @@ const SelectWorkConfigVacation = ({ id = "id", work_id, name, value, onChange, e
     />
 }
 
+const SelectTypePermission = ({ id = "id", name, value, onChange, error = false, refresh = true, onReady = null }) => {
+    return <SelectBase 
+        execute={true}
+        api={escalafon}
+        url={`type_permissions`}
+        id={`select-type_permissions-${name}`}
+        value={id}
+        text="description"
+        obj="type_permissions"
+        name={name}
+        valueChange={`${value || ""}`}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Tipo. Permiso"
+        refresh={refresh}
+        onReady={onReady}
+        error={error}
+    />
+}
+
+
 export { 
     SelectAfp,
     SelectBanco,
     SelectConfigAssistance,
     SelectInfoSchedule,
     SelectWorkConfigVacation,
+    SelectTypePermission,
 };

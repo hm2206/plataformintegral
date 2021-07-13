@@ -1,20 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Modal from '../../modal';
 import { Button, Progress } from 'semantic-ui-react';
-import FormVacation from './formVacation';
+import FormPermission from './formPermission';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
-import VacationProvider from '../../../providers/escalafon/VacationProvider';
+import PermissionProvider from '../../../providers/escalafon/PermissionProvider';
 import Swal from 'sweetalert2';
 
-const vacationProvider = new VacationProvider();
+const permissionProvider = new PermissionProvider();
 
-const EditVacation = ({ config_vacation, vacation = {}, onClose = null, onUpdate = null, onDelete = null }) => {
+const EditPermission = ({ permission = {}, onClose = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
+
+    const canSave = useMemo(() => {
+        let required = ['date_start', 'date_over', 'option', 'document_number', 'justification'];
+        // validar
+        for (let item of required) {
+            let value = form[item];
+            if (!value) return false;
+        }
+        // response
+        return true;
+    }, [form]);
 
     const handleInput = (e, { name, value }) => {
         let newForm = Object.assign({}, form);
@@ -30,11 +41,11 @@ const EditVacation = ({ config_vacation, vacation = {}, onClose = null, onUpdate
         let answer = await Confirm('info', `¿Estás seguro en guardar los cambios?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await vacationProvider.update(vacation.id, form)
+        await permissionProvider.update(permission.id, form)
         .then(async res => {
-            let { message, vacation } = res.data;
+            let { message, permission } = res.data;
             let newForm = Object.assign({}, form);
-            newForm = { ...form, ...vacation };
+            newForm = { ...form, ...permission };
             await Swal.fire({ icon: 'success', text: message });
             if (typeof onUpdate == 'function') await onUpdate(newForm);
             setEdit(false)
@@ -49,11 +60,11 @@ const EditVacation = ({ config_vacation, vacation = {}, onClose = null, onUpdate
         let answer = await Confirm('warning', `¿Estás seguro en eliminar?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await vacationProvider.delete(vacation.id)
-        .then(async res => {
+        await permissionProvider.delete(permission.id)
+        .then(res => {
             let { message } = res.data;
-            await Swal.fire({ icon: 'success', text: message });
-            if (typeof onDelete == 'function') await onDelete(vacation);
+            Swal.fire({ icon: 'success', text: message });
+            if (typeof onDelete == 'function') onDelete(permission);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });
@@ -61,7 +72,7 @@ const EditVacation = ({ config_vacation, vacation = {}, onClose = null, onUpdate
     }
 
     useEffect(() => {
-        if (!edit) setForm(Object.assign({}, vacation))
+        if (!edit) setForm(Object.assign({}, permission))
     }, [edit]);
 
     return (
@@ -69,9 +80,9 @@ const EditVacation = ({ config_vacation, vacation = {}, onClose = null, onUpdate
             show={true}
             md="5"
             disabled={current_loading}
-            titulo={<span><i className="fas fa-calendar"></i> Editar Vacaciones <span className="badge badge-dark">{config_vacation?.year}</span></span>}
+            titulo={<span><i className="fas fa-calendar"></i> Editar Permiso</span>}
         >
-            <FormVacation className="card-body"
+            <FormPermission className="card-body"
                 form={form}
                 errors={errors}
                 disabled={current_loading}
@@ -107,7 +118,7 @@ const EditVacation = ({ config_vacation, vacation = {}, onClose = null, onUpdate
                                 </Button>
 
                                 <Button color="teal" 
-                                    disabled={current_loading} 
+                                    disabled={current_loading || !canSave} 
                                     loading={current_loading}
                                     onClick={handleUpdate}
                                 >
@@ -116,9 +127,9 @@ const EditVacation = ({ config_vacation, vacation = {}, onClose = null, onUpdate
                         </Show>
                     </div>
                 </Show>
-            </FormVacation>
+            </FormPermission>
         </Modal>
     )
 }
 
-export default EditVacation;
+export default EditPermission;
