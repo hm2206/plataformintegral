@@ -1,8 +1,7 @@
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { Form } from 'semantic-ui-react';
+import { Form, Checkbox } from 'semantic-ui-react';
 import { SelectSitacionLaboral } from '../../select/cronograma';
-import { SelectWorkInfo } from '../../select/escalafon';
 
 const FormLicense = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null, disabled = false }) => {
 
@@ -81,7 +80,18 @@ const FormLicense = ({ children, form = {}, errors = {}, className = null, readO
                     <label htmlFor="">{errors?.date_over?.[0] || ""}</label>
                 </Form.Field>
 
-                <Form.Field className="col-md-12 mb-3" error={errors?.days_used?.[0] ? true : false}>
+                <Form.Field className="col-md-6 mb-3" error={errors?.days_used?.[0] ? true : false}>
+                    <label htmlFor="">{form?.is_pay ? 'Con' : 'Sin'} Gose</label>
+                    <Checkbox toggle
+                        disabled={readOnly.includes('date_over') || disabled}
+                        name="is_pay"
+                        checked={form?.is_pay ? true : false}
+                        onChange={(e, obj) => handleChange(e,  { name: obj.name, value: obj.checked ? 1 : 0 })}
+                    />
+                    <label htmlFor="">{errors?.days_used?.[0] || ""}</label>
+                </Form.Field>
+
+                <Form.Field className="col-md-6 mb-3" error={errors?.days_used?.[0] ? true : false}>
                     <label htmlFor="">Dias Usados</label>
                     <input type="text" 
                         readOnly
