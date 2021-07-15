@@ -134,6 +134,38 @@ const SelectTypePermission = ({ id = "id", name, value, onChange, error = false,
     />
 }
 
+const SelectWorkInfo = ({ id = "id", work_id, estado = null, principal = null, name, value, onChange, error = false, refresh = true, onReady = null }) => {
+
+    const queryString = () => {
+        let query = "";
+        if (estado != null) query += `estado=${estado}&`;
+        if (principal != null) query += `principal=${principal}&`
+        return query;
+    }
+
+    const displayText = (el) => {
+        return `${el?.planilla?.nombre} - ${el?.type_categoria?.descripcion}`;
+    }
+
+    return <SelectBase 
+        execute={true}
+        api={escalafon}
+        url={`works/${work_id}/infos?${queryString()}`}
+        id={`select-work-infos${name}`}
+        value={id}
+        text="fecha_de_ingreso"
+        obj="infos"
+        name={name}
+        valueChange={`${value || ""}`}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Contrato"
+        refresh={refresh}
+        onReady={onReady}
+        displayText={displayText}
+        error={error}
+    />
+}
+
 
 export { 
     SelectAfp,
@@ -142,4 +174,5 @@ export {
     SelectInfoSchedule,
     SelectWorkConfigVacation,
     SelectTypePermission,
+    SelectWorkInfo,
 };

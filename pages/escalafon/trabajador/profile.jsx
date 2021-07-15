@@ -14,7 +14,7 @@ import Ascenso from '../../../components/escalafon/ascenso';
 import Familiar from '../../../components/escalafon/familiar';
 import Desplazamiento from '../../../components/escalafon/desplazamiento';
 import Merito from '../../../components/escalafon/merito';
-import Licencia from '../../../components/escalafon/licencia';
+import License from '../../../components/escalafon/license/index.jsx';
 import ConfigVacation from '../../../components/escalafon/config_vacation/index';
 import Schedule from '../../../components/escalafon/schedule/index.jsx';
 import NotFoundData from '../../../components/notFoundData';
@@ -59,12 +59,12 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     { key: "papeletas", text: "Papeletas" },
                     { key: "vacation", text: "Vacaciones" },
                     { key: "permiso", text: "Permisos" },
-                    { key: "grados", text: "Formación Aca." },
-                    { key: "ascenso", text: "Ascensos" },
-                    { key: "familiar", text: "Familia" },
-                    { key: "desplazamiento", text: "Desplazamientos" },
-                    { key: "merito", text: "Mérito/Demérito" },
                     { key: "licencia", text: "Licencias" },
+                    // { key: "grados", text: "Formación Aca." },
+                    // { key: "ascenso", text: "Ascensos" },
+                    // { key: "familiar", text: "Familia" },
+                    // { key: "desplazamiento", text: "Desplazamientos" },
+                    // { key: "merito", text: "Mérito/Demérito" },
                 ]}
                 getOption={(key) => setOption(key)}
             />
@@ -90,6 +90,9 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     <Show condicion={option == 'permiso'}>
                         <Permission work={work}/>
                     </Show>
+                    <Show condicion={option == 'licencia'}>
+                        <License work={work}/>
+                    </Show>
                     <Show condicion={option == 'grados'}>
                         <Grado work={work}/>
                     </Show>
@@ -104,9 +107,6 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     </Show>
                     <Show condicion={option == 'merito'}>
                         <Merito work={work}/>
-                    </Show>
-                    <Show condicion={option == 'licencia'}>
-                        <Licencia work={work}/>
                     </Show>
                 </div>
             </Show>
