@@ -7,6 +7,7 @@ import btoa from 'btoa';
 import { Select } from 'semantic-ui-react'
 import { BtnFloat } from '../../Utils';
 import CreateInfo from './createInfo';
+import ItemInfo from './itemInfo';
 
 const Placeholder = () => {
 
@@ -97,37 +98,7 @@ const Infos = ({ work }) => {
         
         {current_infos.map((i, indexI) => 
             <div className="col-md-6" key={`info-list-${i.id}-${indexI}`}>
-                <div className={`card font-13 ${i.estado ? 'alert-success' : ''}`}>
-                    <div className="card-header">
-                        Planilla: {i.planilla && i.planilla.nombre || ""}
-                    </div>
-                    <div className="card-body">
-                        <div className="row">
-                            <div className="col-md-10">
-                                <div><b>Tip. Categoría:</b> {i.type_categoria && i.type_categoria.descripcion}</div>
-                                <div><b>Fecha de Resolución:</b> {i.fecha_de_resolucion}</div>
-                                <div><b>Resolución:</b> {i.resolucion}</div>
-                                <div><b>Fecha de Ingreso:</b> {i.fecha_de_ingreso}</div>
-                                <div><b>Fecha de Cese:</b> {i.fecha_de_cese}</div>
-                                <div><b>Plaza:</b> {i.plaza}</div>
-                                <div><b>P.A.P:</b> {i.pap}</div>
-                            </div>
-                            <div className="col-md-2 text-right">
-                                <div className="btn-group">
-                                    <button className="btn btn-sm btn-outline-primary"
-                                        onClick={(e) => handleEdit(i)}
-                                    >
-                                        <i className="fas fa-search"></i>
-                                    </button>
-
-                                    <button className="btn btn-sm btn-outline-red">
-                                        <i className="fas fa-file-pdf"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ItemInfo info={i} onEdit={() => handleEdit(i)}/>
             </div>
         )}
 

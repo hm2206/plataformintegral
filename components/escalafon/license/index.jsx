@@ -6,6 +6,9 @@ import { BtnFloat } from '../../Utils';
 import ItemLicense from './itemLicense';
 import WorkProvider from '../../../providers/escalafon/WorkProvider';
 import { Button } from 'semantic-ui-react';
+import ItemInfo from '../infos/itemInfo';
+import collect from 'collect.js';
+import { SelectWorkInfo } from '../../select/escalafon';
 
 const workProvider = new WorkProvider();
 
@@ -39,6 +42,7 @@ const License = ({ work }) => {
     const [current_total, setCurrentTotal] = useState(0);
     const [error, setError] = useState(false);
     const [is_refresh, setIsRefresh] = useState(true);
+    const [current_info, setCurrentInfo] = useState({});
 
     const isNextPage = useMemo(() => {
         return (current_page + 1) <= current_last_page;
@@ -81,14 +85,22 @@ const License = ({ work }) => {
         getDatos();
     }
 
+    const handleInfo = (e, { value, options }) => {
+        let plucked = collect(options).pluck('value').toArray();
+        let index = plucked.indexOf(value);
+        if (index < 0) return; 
+        let obj = options[index];
+        setCurrentInfo(obj?.obj || {});
+    }
+
     useEffect(() => {
         if (current_page > 1) getDatos(true);
     }, [current_page]);
 
     // primera carga
     useEffect(() => {
-        if (is_refresh) getDatos();
-    }, [is_refresh]);
+        if (current_info?.id && is_refresh) getDatos();
+    }, [current_info?.id, is_refresh]);
 
     useEffect(() => {
         if (is_refresh) setIsRefresh(false);
@@ -99,7 +111,7 @@ const License = ({ work }) => {
         <div className="col-md-12">
             <h5>
                 Listado de Licencias Laborales
-                <Show condicion={!current_loading}>
+                <Show condicion={current_info?.id && !current_loading}>
                     <span className="close cursor-pointer"
                         onClick={() => {
                             setCurrentPage(1);
@@ -112,45 +124,67 @@ const License = ({ work }) => {
             </h5>
             <hr/>
         </div>
-        
-        {current_data.map((d, indexD) => 
-            <div className="col-md-6" key={`grado-lista-${indexD}`}>
-                <ItemLicense license={d}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                />
-            </div>    
-        )}
 
-        {/* no hay registros */}
-        <Show condicion={!current_loading && !current_data?.length}>
-            <div className="col-12 text-center">
-                <b>No hay regístros disponibles</b>
-            </div>
-        </Show>  
-
-        <Show condicion={current_loading}>
-            <Placeholder/>
-        </Show>
-
-        <Show condicion={isNextPage}>
-            <div className="col-12">
-                <Button onClick={() => setCurrentPage(prev => prev + 1)} fluid>
-                    <i className="fas fa-arrow-down"></i> Obtener más regístros
-                </Button>
-            </div>
-        </Show>
-
-        <BtnFloat onClick={() => setOption(options.CREATE)}>
-            <i className="fas fa-plus"></i>
-        </BtnFloat>
-
-        <Show condicion={option == options.CREATE}>
-            <CreateLicense
-                work={work}
-                onClose={() => setOption("")}
-                onSave={onSave}
+        <div className="col-4">
+            <SelectWorkInfo
+                defaultValue={1}
+                onDefaultValue={({obj}) => setCurrentInfo(obj)}
+                principal={1}
+                work_id={work?.id}
+                name="info_id"
+                value={current_info?.id}
+                onChange={handleInfo}
             />
+        </div>
+
+        <div className="col-12 mb-3"></div>
+        
+        <Show condicion={current_info?.id}>
+            <div className="col-md-4">
+                <ItemInfo info={current_info}/>
+            </div>
+
+            <div className="col-md-8">
+                {current_data.map((d, indexD) => 
+                    <ItemLicense key={`grado-lista-${indexD}`}
+                        license={d}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete}
+                    />
+                )}
+
+                {/* no hay registros */}
+                <Show condicion={!current_loading && !current_data?.length}>
+                    <div className="card card-body text-center">
+                        <b>No hay regístros disponibles</b>
+                    </div>
+                </Show>  
+
+                <Show condicion={current_loading}>
+                    <Placeholder/>
+                </Show>
+            
+                <Show condicion={isNextPage}>
+                    <div className="col-12">
+                        <Button onClick={() => setCurrentPage(prev => prev + 1)} fluid>
+                            <i className="fas fa-arrow-down"></i> Obtener más regístros
+                        </Button>
+                    </div>
+                </Show>
+            </div>   
+
+
+            <BtnFloat onClick={() => setOption(options.CREATE)}>
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
+
+            <Show condicion={option == options.CREATE}>
+                <CreateLicense
+                    info={current_info}
+                    onClose={() => setOption("")}
+                    onSave={onSave}
+                />
+            </Show>
         </Show>
     </div>
 }

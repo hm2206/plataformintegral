@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 
 const licenseProvider = new LicenseProvider();
 
-const CreateLicense = ({ work = {}, onClose = null, onSave = null }) => {
+const CreateLicense = ({ info = {}, onClose = null, onSave = null }) => {
 
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
@@ -42,7 +42,7 @@ const CreateLicense = ({ work = {}, onClose = null, onSave = null }) => {
         if (!answer) return;
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
-        payload.work_id = work.id;
+        payload.info_id = info.id;
         await licenseProvider.store(payload)
         .then(res => {
             let { message, license } = res.data;

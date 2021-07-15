@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 
 const permissionProvider = new PermissionProvider();
 
-const CreatePermission = ({ work = {}, onClose = null, onSave = null }) => {
+const CreatePermission = ({ info = {}, onClose = null, onSave = null }) => {
 
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
@@ -39,7 +39,7 @@ const CreatePermission = ({ work = {}, onClose = null, onSave = null }) => {
         if (!answer) return;
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
-        payload.work_id = work.id;
+        payload.info_id = info.id;
         await permissionProvider.store(payload)
         .then(res => {
             let { message, permission } = res.data;
@@ -56,7 +56,7 @@ const CreatePermission = ({ work = {}, onClose = null, onSave = null }) => {
         <Modal isClose={onClose}
             show={true}
             md="5"
-            titulo={<span><i className="fas fa-file-alt"></i> Crear Permisión</span>}
+            titulo={<span><i className="fas fa-file-alt"></i> Crear Permiso</span>}
         >
             <FormPermission className="card-body"
                 form={form}

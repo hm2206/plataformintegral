@@ -134,7 +134,10 @@ const SelectTypePermission = ({ id = "id", name, value, onChange, error = false,
     />
 }
 
-const SelectWorkInfo = ({ id = "id", work_id, estado = null, principal = null, name, value, onChange, error = false, refresh = true, onReady = null }) => {
+const SelectWorkInfo = ({ 
+    id = "id", work_id, estado = null, principal = null, name, value, onChange, error = false,
+    refresh = true, onReady = null, displayText = null, defaultValue = null, onDefaultValue = null
+}) => {
 
     const queryString = () => {
         let query = "";
@@ -143,8 +146,9 @@ const SelectWorkInfo = ({ id = "id", work_id, estado = null, principal = null, n
         return query;
     }
 
-    const displayText = (el) => {
-        return `${el?.planilla?.nombre} - ${el?.type_categoria?.descripcion}`;
+    const defaultDisplayText = (el) => {
+        if (typeof displayText == 'function') return displayText(el)
+        return `${el?.estado ? 'Activo' : 'Terminado'} : ${el?.planilla?.nombre} - ${el?.type_categoria?.descripcion}`;
     }
 
     return <SelectBase 
@@ -161,7 +165,9 @@ const SelectWorkInfo = ({ id = "id", work_id, estado = null, principal = null, n
         placeholder="Seleccionar Contrato"
         refresh={refresh}
         onReady={onReady}
-        displayText={displayText}
+        displayText={defaultDisplayText}
+        defaultValue={defaultValue}
+        onDefaultValue={onDefaultValue}
         error={error}
     />
 }

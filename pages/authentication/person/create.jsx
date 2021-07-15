@@ -223,7 +223,8 @@ const CreatePerson = () => {
                                                     { key: "S", value: "S", text: "Soltero(a)" },
                                                     { key: "C", value: "C", text: "Casado(a)" },
                                                     { key: "D", value: "D", text: "Divorsiado(a)" },
-                                                    { key: "V", value: "V", text: "Viudo(a)" }
+                                                    { key: "V", value: "V", text: "Viudo(a)" },
+                                                    { key: "O", value: "O", text: "Conviviente(a)" }
                                                 ]}
                                             />
                                             <label>{errors.marital_status && errors.marital_status[0]}</label>

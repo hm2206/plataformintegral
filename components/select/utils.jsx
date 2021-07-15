@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Select, Dropdown } from 'semantic-ui-react';
+import { Select } from 'semantic-ui-react';
 import uid from 'uid';
 import Skeleton from 'react-loading-skeleton';
 
@@ -59,10 +59,10 @@ const ButtonRefresh = ({ message, onClick = null }) => {
 
 const SelectBase = ({ 
     onReady, defaultDatos = [], execute, refresh, url, api, 
-    obj, id, value, text, name, onChange, valueChange,
+    obj, id, value, text, name, onChange, valueChange, onDefaultValue = null,
     displayText = null, onData = null, placeholder = 'Seleccionar', 
     headers = { 'ContentType': 'application/json' },
-    disabled = false, error = false }) => {
+    disabled = false, error = false, defaultValue = null }) => {
 
     const [datos, setDatos] = useState([])
     const [is_error, setIsError] = useState(false);
@@ -118,6 +118,16 @@ const SelectBase = ({
         await getDatos();
     }
 
+    const handleReady = () => {
+        setIsReady(false);
+        if (typeof onReady == 'function') onReady(datos);
+        if (defaultValue < 0) return;
+        let e = {};
+        let obj = datos[defaultValue] || {};
+        if (!Object.keys(obj).length) return false;
+        if (typeof onDefaultValue == 'function') onDefaultValue(obj);
+    }
+
     // obtener entities
     useEffect(() => {
         // execute
@@ -136,10 +146,7 @@ const SelectBase = ({
 
     // todos los datos están cargados
     useEffect(() => {
-        if (is_ready) if (typeof onReady == 'function') {
-            onReady(datos);
-            setIsReady(false);
-        }
+        if (is_ready) handleReady();
     }, [is_ready]);
 
     // enviar datos pre cargados 
