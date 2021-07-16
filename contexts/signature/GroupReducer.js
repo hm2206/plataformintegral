@@ -2,6 +2,8 @@ import uid from 'uid';
 
 // tipo de action
 export const groupTypes = {
+    SET_UPLOAD: "SET[UPDATE]",
+    SET_FILE: "SET[FILE",
     FILE_ADD: "FILE[ADD]",
     FILE_DELETE: "FILE[DELETE]",
     UPLOAD_DELETE: "UPLOAD[DELETE]",
@@ -39,6 +41,12 @@ export const Reducer = (state = initialState, action = { type: "", payload: {} }
     let { payload } = action;
     // seleccionar
     switch (action.type) {
+        case groupTypes.SET_FILE:
+            newState.files = Array.isArray(action.payload) ? action.payload : [];
+            return newState;
+        case groupTypes.SET_UPLOAD:
+            newState.upload = Array.isArray(action.payload) ? action.payload : [];
+            return newState;
         case groupTypes.FILE_ADD:
             let file_temp = action.payload.files;
             // validar upload
@@ -114,6 +122,7 @@ export const Reducer = (state = initialState, action = { type: "", payload: {} }
             newState.teams = state.teams.filter(d => d.id != action.payload);
             return newState;
         case groupTypes.CLEAR:
+            console.log();
             return initialState;
         default:
             return state;

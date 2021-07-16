@@ -88,7 +88,8 @@ const UploadFileGroup = () => {
     const { dispatch, upload, files } = useContext(GroupContext);
 
     useEffect(() => {
-        dispatch({ type: groupTypes.CLEAR });
+        dispatch({ type: groupTypes.SET_UPLOAD, payload: [] });
+        dispatch({ type: groupTypes.SET_FILE, payload: [] });
     }, []);
 
     // render

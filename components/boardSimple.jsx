@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Fragment } from 'react';
-import ModalBoardConfig from './modalBoardConfig';
 import Show from './show';
 
 const optionDefault = {
