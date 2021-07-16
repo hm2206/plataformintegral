@@ -64,10 +64,10 @@ const EditLicense = ({ license = {}, onClose = null, onUpdate = null, onDelete =
         if (!answer) return;
         setCurrentLoading(true);
         await licenseProvider.delete(license.id)
-        .then(res => {
+        .then(async res => {
             let { message } = res.data;
-            Swal.fire({ icon: 'success', text: message });
-            if (typeof onDelete == 'function') onDelete(license);
+            await Swal.fire({ icon: 'success', text: message });
+            if (typeof onDelete == 'function') await onDelete(license);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });

@@ -4,27 +4,24 @@ import Show from '../../show';
 import CreateLicense from './createLicense';
 import { BtnFloat } from '../../Utils';
 import ItemLicense from './itemLicense';
-import WorkProvider from '../../../providers/escalafon/WorkProvider';
+import InfoProvider from '../../../providers/escalafon/InfoProvider';
 import { Button } from 'semantic-ui-react';
 import ItemInfo from '../infos/itemInfo';
 import collect from 'collect.js';
 import { SelectWorkInfo } from '../../select/escalafon';
 
-const workProvider = new WorkProvider();
+const infoProvider = new InfoProvider();
 
 const Placeholder = () => {
 
     const datos = [1, 2, 3, 4];
 
-    return <Fragment>
-        <div className="col-md-12"></div>
-        {datos.map((d, indexD) => 
-            <div className="col-md-6 mb-3" key={`placeholder-contrato-${indexD}`}>
-                <Skeleton height="50px"/>
-                <Skeleton height="150px"/>
-            </div>
-        )}
-    </Fragment>
+    return datos.map((d, indexD) => 
+        <div key={`placeholder-contrato-${indexD}`}>
+            <Skeleton height="50px"/>
+            <Skeleton height="150px"/>
+        </div>
+    )
 }
 
 const License = ({ work }) => {
@@ -51,7 +48,7 @@ const License = ({ work }) => {
     // obtener permissions
     const getDatos = async (add = false) => {
         setCurrentLoading(true);
-        await workProvider.licenses(work.id, { page: current_page })
+        await infoProvider.licenses(current_info.id, { page: current_page })
         .then(res => {
             let { success, message, licenses } = res.data;
             if (!success) throw new Error(message);
@@ -94,13 +91,21 @@ const License = ({ work }) => {
     }
 
     useEffect(() => {
+        if (current_info?.id) {
+            setIsRefresh(true);
+            setCurrentPage(1);
+            setCurrentTotal(0);
+        }
+    }, [current_info?.id]);
+
+    useEffect(() => {
         if (current_page > 1) getDatos(true);
     }, [current_page]);
 
     // primera carga
     useEffect(() => {
-        if (current_info?.id && is_refresh) getDatos();
-    }, [current_info?.id, is_refresh]);
+        if (is_refresh) getDatos();
+    }, [is_refresh]);
 
     useEffect(() => {
         if (is_refresh) setIsRefresh(false);

@@ -61,10 +61,10 @@ const EditPermission = ({ permission = {}, onClose = null, onUpdate = null, onDe
         if (!answer) return;
         setCurrentLoading(true);
         await permissionProvider.delete(permission.id)
-        .then(res => {
+        .then(async res => {
             let { message } = res.data;
-            Swal.fire({ icon: 'success', text: message });
-            if (typeof onDelete == 'function') onDelete(permission);
+            await Swal.fire({ icon: 'success', text: message });
+            if (typeof onDelete == 'function') await onDelete(permission);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });

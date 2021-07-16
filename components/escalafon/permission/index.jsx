@@ -4,27 +4,24 @@ import Show from '../../show';
 import CreatePermission from './createPermission';
 import { BtnFloat } from '../../Utils';
 import ItemPermission from './itemPermission';
-import WorkProvider from '../../../providers/escalafon/WorkProvider';
+import InfoProvider from '../../../providers/escalafon/InfoProvider';
 import { Button } from 'semantic-ui-react';
 import { SelectWorkInfo } from '../../select/escalafon';
 import ItemInfo from '../infos/itemInfo';
 import { collect } from 'collect.js';
 
-const workProvider = new WorkProvider();
+const infoProvider = new InfoProvider();
 
 const Placeholder = () => {
 
     const datos = [1, 2, 3, 4];
 
-    return <Fragment>
-        <div className="col-md-12"></div>
-        {datos.map((d, indexD) => 
-            <div className="col-md-6 mb-3" key={`placeholder-contrato-${indexD}`}>
-                <Skeleton height="50px"/>
-                <Skeleton height="150px"/>
-            </div>
-        )}
-    </Fragment>
+    return datos.map((d, indexD) => 
+        <div key={`placeholder-contrato-${indexD}`}>
+            <Skeleton height="50px"/>
+            <Skeleton height="150px"/>
+        </div>
+    )
 }
 
 const Permission = ({ work }) => {
@@ -51,7 +48,7 @@ const Permission = ({ work }) => {
     // obtener permissions
     const getDatos = async (add = false) => {
         setCurrentLoading(true);
-        await workProvider.permissions(work.id, { page: current_page })
+        await infoProvider.permissions(current_info.id, { page: current_page })
         .then(res => {
             let { success, message, permissions } = res.data;
             if (!success) throw new Error(message);
@@ -94,13 +91,21 @@ const Permission = ({ work }) => {
     }
 
     useEffect(() => {
+        if (current_info?.id) {
+            setIsRefresh(true);
+            setCurrentPage(1);
+            setCurrentTotal(0);
+        }
+    }, [current_info?.id]);
+
+    useEffect(() => {
         if (current_page > 1) getDatos(true);
     }, [current_page]);
 
     // primera carga
     useEffect(() => {
-        if (current_info?.id && is_refresh) getDatos();
-    }, [current_info, is_refresh]);
+        if (is_refresh) getDatos();
+    }, [is_refresh]);
 
     useEffect(() => {
         if (is_refresh) setIsRefresh(false);
@@ -113,10 +118,7 @@ const Permission = ({ work }) => {
                 Listado de Permisos
                 <Show condicion={current_info?.id && !current_loading}>
                     <span className="close cursor-pointer"
-                        onClick={() => {
-                            setCurrentPage(1);
-                            setIsRefresh(true);
-                        }}
+                        onClick={() => setCurrentPage(1)}
                     >
                         <i className="fas fa-sync"></i>
                     </span>
@@ -128,7 +130,10 @@ const Permission = ({ work }) => {
         <div className="col-4">
             <SelectWorkInfo
                 defaultValue={1}
-                onDefaultValue={({obj}) => setCurrentInfo(obj)}
+                onDefaultValue={({obj}) => {
+                    setCurrentInfo(obj)
+                    setIsRefresh(true);
+                }}
                 principal={1}
                 work_id={work?.id}
                 name="info_id"

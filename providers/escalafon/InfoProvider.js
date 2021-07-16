@@ -48,6 +48,24 @@ class InfoProvider extends BaseProvider  {
             .catch(err => this.handleError(err));
     }
 
+    permissions = async (id, query = {}, config = {}, ctx = null) => {
+        query.page = typeof query.page != 'undefined' ? query.page : 1;
+        let query_string = `page=${query.page}`;
+        // request
+        return await escalafon.get(`${this.collection}/${id}/permissions?${query_string}`, config, ctx)
+            .then(res => res)
+            .catch(err => this.handleError(err));
+    }
+
+    licenses = async (id, query = {}, config = {}, ctx = null) => {
+        query.page = typeof query.page != 'undefined' ? query.page : 1;
+        let query_string = `page=${query.page}`;
+        // request
+        return await escalafon.get(`${this.collection}/${id}/licenses?${query_string}`, config, ctx)
+            .then(res => res)
+            .catch(err => this.handleError(err));
+    }
+
 }
 
 export default InfoProvider;
