@@ -17,7 +17,7 @@ const CreateBallot = ({ info = {}, date, onClose = null, onSave = null }) => {
     const current_date = moment(date);
 
     const readySave = useMemo(() => {
-        let required = ['schedule_id', 'motivo', 'time_start', 'time_over'];
+        let required = ['schedule_id', 'motivo', 'time_over'];
         // validar
         for (let item of required) {
             let value = form[item];
