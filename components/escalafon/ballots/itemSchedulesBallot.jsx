@@ -7,6 +7,7 @@ import moment from 'moment';
 import CreateBallot from './createBallot';
 import EditBallot from './editBallot';
 import InfoProvider from '../../../providers/escalafon/InfoProvider';
+import { BtnFloat } from '../../Utils';
 moment.locale('es');
 
 const options = {
@@ -33,7 +34,9 @@ const ItemInfoSchedules = ({ info }) => {
 
     // memo
     const displayDate = useMemo(() => {
-        return moment(current_date).format('LL');
+        let date = moment(current_date)
+        let mes = date.format('MMMM');
+        return `${mes} - ${date.year()}`;
     }, [current_date]);
 
     const formatterEvent = (ballot) => {
@@ -112,107 +115,88 @@ const ItemInfoSchedules = ({ info }) => {
 
     useEffect(() => {
         if (current_date) getPapeletas();
-    }, [current_date]);
+    }, [info?.id, current_date]);
 
     // render
     return (
-        <div className="card">
-            <div className="card-header uppercase">
-                <div className="row">
-                    <div className="col-9">
-                        <i className="fas fa-info-circle mr-1"></i>  
-                        <span className="badge badge-dark mr-2">{info?.planilla?.nombre || ""}</span> 
-                        {info?.type_categoria?.descripcion || ""} - <span className="badge badge-primary">{info?.pap || ""}</span>
-                    </div>
-                    <Show condicion={info?.estado}
-                        predeterminado={
-                            <div className="col-3 text-right">
-                                <i className="fas fa-circle text-muted"></i>
-                            </div>
-                        }
-                    >
-                        <div className="col-3 text-right">
-                            <Button.Group size="mini">
-                                <Button 
-                                    onClick={() => setOption(options.CREATE)}
-                                >
-                                    <i className="fas fa-plus"></i>
-                                </Button>
-                            </Button.Group>
-                            <i className="fas fa-circle text-success ml-3"></i>
+        <>
+            <div className="card">
+                <div className="card-body">
+                    <div className="row mb-4">
+                        <div className="col-md-9 col-6">
+                            <h3 className="capitalize">{displayDate}</h3>
                         </div>
+
+                        <div className="col-md-3 col-6 text-center">
+                            <Button.Group size="mini">
+                                <Button basic 
+                                    onClick={changePrev}
+                                    icon="arrow left"
+                                    color="black"
+                                />
+
+                                <Button basic={toDay != current_date}
+                                    color="black"
+                                    onClick={changeToDay}
+                                > 
+                                    Hoy
+                                </Button>
+
+                                <Button basic 
+                                    onClick={changeNext}
+                                    icon="arrow right" 
+                                    color="black"
+                                />
+                            </Button.Group>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <Fullcalendar 
+                            myRef={calendarRef}
+                            defaultView='dayGridMonth' 
+                            locale="es"
+                            header={false}
+                            defaultDate={current_date}
+                            events={events}
+                            eventTextColor="#ffffff"
+                            eventClick={handleEvent}
+                        />
+                        {/* loader */}
+                        <Show condicion={current_loading}>
+                            <CardLoader/>
+                        </Show>
+                    </div>
+
+                    {/* crear papeleta */}
+                    <Show condicion={option == options.CREATE}>
+                        <CreateBallot
+                            date={current_date}
+                            onSave={onSave}
+                            info={info}
+                            onClose={() => setOption("")}
+                        />
+                    </Show>
+
+                    {/* edit */}
+                    <Show condicion={isChurrentBallot}>
+                        <EditBallot
+                            ballot={current_ballot}
+                            info={info}
+                            onClose={() => setCurrentBallot({})}
+                            onUpdate={onUpdate}
+                            onDelete={onDelete}
+                        />
                     </Show>
                 </div>
             </div>
-            <div className="card-body">
-                <div className="row mb-4">
-                    <div className="col-md-9 col-6">
-                        <h3>{displayDate}</h3>
-                    </div>
-
-                    <div className="col-md-3 col-6 text-center">
-                        <Button.Group size="mini">
-                            <Button basic 
-                                onClick={changePrev}
-                                icon="arrow left"
-                                color="black"
-                            />
-
-                            <Button basic={toDay != current_date}
-                                color="black"
-                                onClick={changeToDay}
-                            > 
-                                Hoy
-                            </Button>
-
-                            <Button basic 
-                                onClick={changeNext}
-                                icon="arrow right" 
-                                color="black"
-                            />
-                        </Button.Group>
-                    </div>
-                </div>
-                
-                <div>
-                    <Fullcalendar 
-                        myRef={calendarRef}
-                        defaultView='dayGridMonth' 
-                        locale="es"
-                        header={false}
-                        defaultDate={current_date}
-                        events={events}
-                        eventTextColor="#ffffff"
-                        eventClick={handleEvent}
-                    />
-                    {/* loader */}
-                    <Show condicion={current_loading}>
-                        <CardLoader/>
-                    </Show>
-                </div>
-
-                {/* crear papeleta */}
-                <Show condicion={option == options.CREATE}>
-                    <CreateBallot
-                        date={current_date}
-                        onSave={onSave}
-                        info={info}
-                        onClose={() => setOption("")}
-                    />
-                </Show>
-
-                {/* edit */}
-                <Show condicion={isChurrentBallot}>
-                    <EditBallot
-                        ballot={current_ballot}
-                        info={info}
-                        onClose={() => setCurrentBallot({})}
-                        onUpdate={onUpdate}
-                        onDelete={onDelete}
-                    />
-                </Show>
-            </div>
-        </div>
+            {/* crear ballot */}
+            <Show condicion={info?.estado}>
+                <BtnFloat onClick={() => setOption(options.CREATE)}>
+                    <i className="fas fa-plus"></i>
+                </BtnFloat>
+            </Show>
+        </>
     )
 } 
 

@@ -42,7 +42,9 @@ const ItemInfoSchedules = ({ info }) => {
 
     // memo
     const displayDate = useMemo(() => {
-        return moment(current_date).format('LL');
+        let date = moment(current_date)
+        let mes = date.format('MMMM');
+        return `${mes} - ${date.year()}`;
     }, [current_date]);
 
     const formatterEvent = (obj) => {
@@ -140,38 +142,15 @@ const ItemInfoSchedules = ({ info }) => {
 
     useEffect(() => {
         if (current_date) getSchedules();
-    }, [current_date]);
+    }, [info?.id, current_date]);
 
     // render
     return (
         <div className="card">
-            <div className="card-header uppercase">
-                <div className="row">
-                    <div className="col-9">
-                        <i className="fas fa-info-circle mr-1"></i>  
-                        <span className="badge badge-dark mr-2">{info?.planilla?.nombre || ""}</span> 
-                        {info?.type_categoria?.descripcion || ""} - <span className="badge badge-primary">{info?.pap || ""}</span>
-                    </div>
-                    <Show condicion={info?.estado}
-                        predeterminado={
-                            <div className="col-3 text-right">
-                                <i className="fas fa-circle text-muted"></i>
-                            </div>
-                        }
-                    >
-                        <div className="col-3 text-right">
-                            <Button.Group size="mini">
-                                <Button icon="random" onClick={() => setOption(options.SYNC_INFOS)}/>
-                            </Button.Group>
-                            <i className="fas fa-circle text-success ml-3"></i>
-                        </div>
-                    </Show>
-                </div>
-            </div>
             <div className="card-body">
                 <div className="row mb-4">
                     <div className="col-md-9 col-6">
-                        <h3>{displayDate}</h3>
+                        <h3 className="capitalize">{displayDate}</h3>
                     </div>
 
                     <div className="col-md-3 col-6 text-center">
@@ -194,6 +173,14 @@ const ItemInfoSchedules = ({ info }) => {
                                 icon="arrow right" 
                                 color="black"
                             />
+
+                            <Show condicion={info?.estado}>
+                                <Button icon="random" 
+                                    color="black"
+                                    basic
+                                    onClick={() => setOption(options.SYNC_INFOS)}
+                                />
+                            </Show>
                         </Button.Group>
                     </div>
                 </div>
