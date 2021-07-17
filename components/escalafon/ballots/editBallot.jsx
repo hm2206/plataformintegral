@@ -24,6 +24,10 @@ const EditBallot = ({ ballot = {}, info = {}, onClose = null, onUpdate = null, o
         return diff >= 0;
     }, [ballot]);
 
+    const displayDate = useMemo(() => {
+        return moment(form.date);
+    }, [form?.date]);
+
     const handleInput = (e, { name, value }) => {
         let newForm = Object.assign({}, form);
         newForm[name] = value;
@@ -83,9 +87,12 @@ const EditBallot = ({ ballot = {}, info = {}, onClose = null, onUpdate = null, o
                 form={form}
                 errors={errors}
                 disabled={current_loading || !info?.estado}
-                readOnly={['schedule_id']}
+                readOnly={['schedule_id', 'total']}
                 onChange={handleInput}
-                isHorario={false}
+                info_id={info?.id}
+                isEdit={true}
+                year={displayDate.year()}
+                month={displayDate.month() + 1}
             >
                 <Show condicion={info?.estado}>
                     <div className="col-md-12 text-right">

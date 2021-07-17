@@ -1,4 +1,5 @@
-import React from 'react';
+import moment from 'moment';
+import React, { useEffect, useMemo } from 'react';
 import { Form, Select } from 'semantic-ui-react';
 import { SelectInfoSchedule } from '../../select/escalafon';
 import Show from '../../show'
@@ -26,7 +27,21 @@ const motivos = [
     },
 ]
 
-const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, isHorario = true, className = null, readOnly = [], onChange = null, disabled = false }) => {
+
+const modos = [
+    { 
+        key: "ENTRY",
+        value: "ENTRY",
+        text: "Entrada"
+    },
+    { 
+        key: "EXIT",
+        value: "EXIT",
+        text: "Salida"
+    }
+]
+
+const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, isEdit = false, className = null, readOnly = [], onChange = null, disabled = false }) => {
 
     const handleChange = (e, { name, value }) => {
         if (typeof onChange == 'function') onChange(e, { name, value });
@@ -35,20 +50,18 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
     return (
         <Form className={className}>
             <div className="row">
-                <Show condicion={isHorario}>
-                    <div className="col-md-12 mb-3">
-                        <label>Horario</label>
-                        <SelectInfoSchedule
-                            disabled={readOnly.includes('schedule_id')}
-                            name="schedule_id"
-                            year={year}
-                            month={month}
-                            value={form?.schedule_id}
-                            info_id={info_id}
-                            onChange={(e, obj) => handleChange(e, obj)}
-                        />
-                    </div>
-                </Show>
+                <div className="col-md-12 mb-3">
+                    <label>Horario</label>
+                    <SelectInfoSchedule
+                        disabled={readOnly.includes('schedule_id')}
+                        name="schedule_id"
+                        year={year}
+                        month={month}
+                        value={form?.schedule_id}
+                        info_id={info_id}
+                        onChange={(e, obj) => handleChange(e, obj)}
+                    />
+                </div>
 
                 <Form.Field className="col-md-6 mb-3" error={errors?.ballot_number?.[0] ? true : false}>
                     <label htmlFor="">N° Papeleta <b className="text-red">*</b></label>
@@ -74,50 +87,71 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                     <label htmlFor="">{errors?.motivo?.[0] || ""}</label>
                 </Form.Field>
 
-                <Form.Field className="col-md-6 mb-3" error={errors?.time_start?.[0] ? true : false}>
-                    <label htmlFor="">Hora de Ingreso <b className="text-red">*</b></label>
-                    <input type="time" 
-                        name="time_start"
-                        readOnly={readOnly.includes('time_start') || disabled}
-                        value={form?.time_start || ""}
-                        onChange={(e) => handleChange(e,  e.target)}
+                <Form.Field className="col-md-12 mb-3" error={errors?.modo?.[0] ? true : false}>
+                    <label htmlFor="">Modo <b className="text-red">*</b></label>
+                    <Select
+                        placeholder="Seleccionar Modo"
+                        options={modos}
+                        name="modo"
+                        disabled={readOnly.includes('modo') || disabled}
+                        value={form?.modo || ""}
+                        onChange={(e, obj) => handleChange(e,  obj)}
                     />
-                    <label htmlFor="">{errors?.time_start?.[0] || ""}</label>
+                    <label htmlFor="">{errors?.modo?.[0] || ""}</label>
                 </Form.Field>
 
-                <Form.Field className="col-md-6 mb-3" error={errors?.time_over?.[0] ? true : false}>
-                    <label htmlFor="">Hora de Salida <b className="text-red">*</b></label>
-                    <input type="time" 
-                        name="time_over"
-                        readOnly={readOnly.includes('time_over') || disabled}
-                        value={form?.time_over || ""}
-                        onChange={(e) => handleChange(e,  e.target)}
-                    />
-                    <label htmlFor="">{errors?.time_over?.[0] || ""}</label>
-                </Form.Field>
+                <Show condicion={form?.modo == 'ENTRY'}>
+                    <Form.Field className="col-md-6 mb-3" error={errors?.time_start?.[0] ? true : false}>
+                        <label htmlFor="">Hora de Ingreso <b className="text-red">*</b></label>
+                        <input type="time" 
+                            name="time_start"
+                            readOnly={readOnly.includes('time_start') || disabled}
+                            value={form?.time_start || ""}
+                            onChange={(e) => handleChange(e,  e.target)}
+                        />
+                        <label htmlFor="">{errors?.time_start?.[0] || ""}</label>
+                    </Form.Field>
+                </Show>
 
-                <Form.Field className="col-md-6 mb-3" error={errors?.time_return?.[0] ? true : false}>
-                    <label htmlFor="">Hora de Retorno</label>
-                    <input type="time" 
-                        name="time_return"
-                        readOnly={readOnly.includes('time_return') || disabled}
-                        value={form?.time_return || ""}
-                        onChange={(e) => handleChange(e,  e.target)}
-                    />
-                    <label htmlFor="">{errors?.time_return?.[0] || ""}</label>
-                </Form.Field>
+                <Show condicion={form?.modo}>
+                    <Form.Field className="col-md-6 mb-3" error={errors?.time_over?.[0] ? true : false}>
+                        <label htmlFor="">Hora de Salida <b className="text-red">*</b></label>
+                        <input type="time" 
+                            name="time_over"
+                            readOnly={readOnly.includes('time_over') || disabled}
+                            value={form?.time_over || ""}
+                            onChange={(e) => handleChange(e,  e.target)}
+                        />
+                        <label htmlFor="">{errors?.time_over?.[0] || ""}</label>
+                    </Form.Field>
+                </Show>
 
-                <Form.Field className="col-md-6 mb-3" error={errors?.total?.[0] ? true : false}>
-                    <label htmlFor="">Total <b><small>(Minutos)</small></b></label>
-                    <input type="number" 
-                        name="total"
-                        readOnly={readOnly.includes('total') || disabled}
-                        value={form?.total || 0}
-                        onChange={(e) => handleChange(e,  e.target)}
-                    />
-                    <label htmlFor="">{errors?.total?.[0] || ""}</label>
-                </Form.Field>
+                <Show condicion={form?.modo == 'EXIT'}>
+                    <Form.Field className="col-md-6 mb-3" error={errors?.time_return?.[0] ? true : false}>
+                        <label htmlFor="">Hora de Retorno <b className="text-red">*</b></label>
+                        <input type="time" 
+                            name="time_return"
+                            readOnly={readOnly.includes('time_return') || disabled}
+                            value={form?.time_return || ""}
+                            onChange={(e) => handleChange(e,  e.target)}
+                        />
+                        <label htmlFor="">{errors?.time_return?.[0] || ""}</label>
+                    </Form.Field>
+                </Show>
 
+                <Show condicion={isEdit}>
+                    <Form.Field className="col-md-12 mb-3" error={errors?.total?.[0] ? true : false}>
+                        <label htmlFor="">Total <b><small>(Minutos)</small></b></label>
+                        <input type="number" 
+                                name="total"
+                                readOnly={readOnly.includes('total') || disabled}
+                                value={form?.total || ""}
+                                onChange={(e) => handleChange(e,  e.target)}
+                            />
+                        <label htmlFor="">{errors?.total?.[0] || ""}</label>
+                    </Form.Field>
+                </Show>
+                
                 <Form.Field className="col-md-12 mb-3" error={errors?.justification?.[0] ? true : false}>
                     <label htmlFor="">Justificación</label>
                     <textarea
