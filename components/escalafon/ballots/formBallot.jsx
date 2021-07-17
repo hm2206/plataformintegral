@@ -1,6 +1,5 @@
-import moment from 'moment';
-import React, { useEffect, useMemo } from 'react';
-import { Form, Select } from 'semantic-ui-react';
+import React from 'react';
+import { Form, Select, Checkbox } from 'semantic-ui-react';
 import { SelectInfoSchedule } from '../../select/escalafon';
 import Show from '../../show'
 
@@ -87,7 +86,7 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                     <label htmlFor="">{errors?.motivo?.[0] || ""}</label>
                 </Form.Field>
 
-                <Form.Field className="col-md-12 mb-3" error={errors?.modo?.[0] ? true : false}>
+                <Form.Field className="col-md-6 mb-3" error={errors?.modo?.[0] ? true : false}>
                     <label htmlFor="">Modo <b className="text-red">*</b></label>
                     <Select
                         placeholder="Seleccionar Modo"
@@ -98,6 +97,18 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                         onChange={(e, obj) => handleChange(e,  obj)}
                     />
                     <label htmlFor="">{errors?.modo?.[0] || ""}</label>
+                </Form.Field>
+
+                <Form.Field className="col-md-6 mb-3" error={errors?.is_applied?.[0] ? true : false}>
+                    <label htmlFor="">Aplicar descuento <b className="text-red">*</b></label>
+                    <Checkbox
+                        toggle
+                        name="is_applied"
+                        disabled={readOnly.includes('is_applied') || disabled}
+                        checked={form?.is_applied ? true : false}
+                        onChange={(e, obj) => handleChange(e,  { name: obj.name, value: obj.checked ? 1 : 0 })}
+                    />
+                    <label htmlFor="">{errors?.is_applied?.[0] || ""}</label>
                 </Form.Field>
 
                 <Show condicion={form?.modo == 'ENTRY'}>
@@ -139,7 +150,7 @@ const FormBallot = ({ children, form = {}, year, month, info_id, errors = {}, is
                     </Form.Field>
                 </Show>
 
-                <Show condicion={isEdit}>
+                <Show condicion={isEdit && form?.is_applied}>
                     <Form.Field className="col-md-12 mb-3" error={errors?.total?.[0] ? true : false}>
                         <label htmlFor="">Total <b><small>(Minutos)</small></b></label>
                         <input type="number" 
