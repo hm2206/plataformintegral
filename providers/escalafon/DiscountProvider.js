@@ -49,6 +49,12 @@ class DiscountProvider extends BaseProvider  {
             .catch(err => this.handleError(err));
     }
 
+    process = async (year, month, body = {}, config = {}, ctx = null) => {
+        return await escalafon.post(`${this.collection}/${year}/${month}/process`, body, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
 }
 
 export default DiscountProvider;

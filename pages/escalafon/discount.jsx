@@ -8,7 +8,10 @@ import DiscountProvider from '../../providers/escalafon/DiscountProvider';
 import TableContentDiscount from '../../components/escalafon/discount/tableContentDiscount';
 import Skeleton from 'react-loading-skeleton';
 import ItemDiscount from '../../components/escalafon/discount/itemDiscount';
+import { Confirm } from '../../services/utils';
 import moment from 'moment';
+import Swal from 'sweetalert2';
+import { AppContext } from '../../contexts';
 
 
 // providers
@@ -77,6 +80,9 @@ const MonthHeaders = ({ year, month }) => {
 
 const Discount = ({ pathname, query }) => {
 
+    // app
+    const app_context = useContext(AppContext);
+
     // entity
     const { entity_id, fireEntity } = useContext(EntityContext);
 
@@ -134,6 +140,30 @@ const Discount = ({ pathname, query }) => {
         setIsFetch(true);
     }
 
+    const handleOption = async (e, index, obj) => {
+        switch (obj.key) {
+            case 'generate-discount':
+                await generateDiscount();
+            default:
+                return;
+        }
+    }
+
+    const generateDiscount = async () => {
+        let answer = await Confirm('warning', `¿Estas seguro en generar el descuento?`);
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        discountProvider.process(year, month)
+        .then(res => {
+            app_context.setCurrentLoading(false);
+            let { message } = res.data;
+            Swal.fire({ icon: 'successs', text: message });
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'warning', text: err.message });
+        });
+    }
+
     useEffect(() => {
         fireEntity({ render: true });
         return () => fireEntity({ render: false });
@@ -163,7 +193,10 @@ const Discount = ({ pathname, query }) => {
                 title="Descuentos"
                 info={["Control de descuentos de faltas y tardanzas"]}
                 bg="danger"
-                options={[]}
+                onOption={handleOption}
+                options={[
+                    { key: "generate-discount", icon: "fas fa-download", title: "Generar descuentos" }
+                ]}
             >
                 <div className="card-body">
                     <Show condicion={entity_id}
