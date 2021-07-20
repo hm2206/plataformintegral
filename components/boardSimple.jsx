@@ -120,7 +120,7 @@ const BoardSimple = ({
                 {/* modal de configuración */}
                 {/* <ModalBoardConfig/> */}
             </header>
-            <div style={{ minHeight: '100%', maxHeight: 'auto' }}>
+            <div style={{ minHeight: '100vh', maxHeight: 'auto' }}>
                 {children || null}
             </div>
         </Fragment>

@@ -10,9 +10,17 @@
 	border:1px solid #000;
 }
 
+.table-excel th,
+.table-excel td {
+	background-color: rgba(0, 0, 0, 0.03);
+}
+
 .table-excel th {
 	font-weight:bold;
-	background-color:#ddd;
+}
+
+.table-excel tbody tr:hover {
+	background-color: rgba(0, 0, 0, 0.1)
 }
 
 .table-excel th,
@@ -23,4 +31,13 @@
 
 .table-excel .no-wrap {
     white-space: nowrap;
+}
+
+
+.table-excel .warning {
+	background: #ffecb3;
+}
+
+.table-excel .success {
+	background: #c8e6c9;
 }
