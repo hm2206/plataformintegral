@@ -7,7 +7,7 @@
 
 .table-excel thead th {
 	background-color: #e1f5fe;
-	border:1px solid #000;
+	border:1px solid #000!important;
 }
 
 .table-excel th,
@@ -20,13 +20,13 @@
 }
 
 .table-excel tbody tr:hover {
-	background-color: rgba(0, 0, 0, 0.1)
+	background-color: rgba(0, 0, 0, 0.1);
 }
 
 .table-excel th,
 .table-excel td {
 	padding:0.5em;
-	border: 1px solid #ccc;
+	border: 1px solid #ccc!important;
 }
 
 .table-excel .no-wrap {
@@ -40,4 +40,12 @@
 
 .table-excel .success {
 	background: #c8e6c9;
+}
+
+.table-excel .danger {
+	background: #ef9a9a;
+}
+
+.table-excel .primary {
+	background: #bbdefb;
 }

@@ -111,7 +111,7 @@ const Discount = ({ pathname, query }) => {
 
     const getDiscounts = async (add = false) => {
         setCurrentLoading(true);
-        await discountProvider.preView(year, month)
+        await discountProvider.preView(year, month, { page })
         .then(res => {
             let { discounts } = res.data;
             setIsError(false);
@@ -123,9 +123,15 @@ const Discount = ({ pathname, query }) => {
     }
 
     const defaultDate = () => {
-        let current_date = moment();
+        let current_date = moment().subtract(1, 'month');
         setYear(current_date.year());
         setMonth(current_date.month() + 1);
+    }
+
+    const defaultRefresh = () => {
+        setPage(1);
+        setDatos([]);
+        setIsFetch(true);
     }
 
     useEffect(() => {
@@ -139,15 +145,11 @@ const Discount = ({ pathname, query }) => {
 
     // cambio de fecha y que sea valida
     useEffect(() => {
-        if (dateIsValid) {
-            setPage(1);
-            setDatos([]);
-            setIsFetch(true);
-        }
+        if (dateIsValid) defaultRefresh();
     }, [year, month]);
 
     useEffect(() => {
-        if (is_fetch) getDiscounts();
+        if (is_fetch) getDiscounts(page > 1 ? true : false);
     }, [is_fetch]);
 
     useEffect(() => {
@@ -212,7 +214,9 @@ const Discount = ({ pathname, query }) => {
                                     </div>
 
                                     <div className="col-2">
-                                        <Button color="blue">
+                                        <Button color="blue"
+                                            onClick={defaultRefresh}
+                                        >
                                             <i className="fas fa-search"></i>
                                         </Button>
                                     </div>
@@ -258,7 +262,14 @@ const Discount = ({ pathname, query }) => {
                                             <Show condicion={!current_loading && isNextPage}> 
                                                 <tr>
                                                     <th className="font-12" colSpan={countColumns}>
-                                                        <Button fluid basic color="black">
+                                                        <Button fluid 
+                                                            basic
+                                                            color="black"
+                                                            onClick={() => {
+                                                                setPage(pre => pre + 1)
+                                                                setIsFetch(true);
+                                                            }}
+                                                        >
                                                             <i className="fas fa-arrow-down"></i> Obtener más regístros
                                                         </Button>
                                                     </th>
@@ -269,7 +280,11 @@ const Discount = ({ pathname, query }) => {
                                     {/* info */}
                                     <div className="row">
                                         <div className="col-5">
-                                            <TableContentDiscount/>
+                                            <TableContentDiscount
+                                                year={year}
+                                                month={month}
+                                                is_fetch={is_fetch}
+                                            />
                                         </div>
                                     </div>
                                 </div>

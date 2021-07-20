@@ -42,6 +42,13 @@ class DiscountProvider extends BaseProvider  {
             .catch(err => this.handleError(err));
     }
 
+    preViewDetails = async (year, month, query = {}, config = {}, ctx = null) => {
+        // request
+        return await escalafon.get(`${this.collection}/${year}/${month}/pre_view_details`, config, ctx)
+            .then(res => res)
+            .catch(err => this.handleError(err));
+    }
+
 }
 
 export default DiscountProvider;
