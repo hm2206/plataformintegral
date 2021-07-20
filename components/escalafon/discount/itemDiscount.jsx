@@ -54,8 +54,8 @@ const ItemDiscount = ({ index = 0, discount = {} }) => {
                     date={d}
                 />    
             )}
-            <th className="font-12 text-center">-</th>
             <th className="font-12 text-center">{discount?.count || "-"}</th>
+            <th className="font-12 text-center">{discount?.discount || "-"}</th>
             <th className="font-12 text-center">{discount?.discount_min}</th>
             <th className="font-12 text-center">{discount?.base || 0}</th>
         </tr>
