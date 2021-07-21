@@ -41,7 +41,7 @@ export const AppProvider = ({ children, success, app, env, pathname, query }) =>
     const verifyInternet = () => {
         let is_online = navigator.onLine;
         if (is_internet != is_online) {
-            setIsInternet(is_online);
+            setIsInternet(/*is_online*/ true);
             clearInterval(intervaloInternet);
         }
     }
