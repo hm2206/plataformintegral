@@ -11,11 +11,11 @@ import UploadFileGroup from '../../../components/signature/group/uploadFileGroup
 import NotFoundData from '../../../components/notFoundData'
 import Show from '../../../components/show';
 import { EntityContext } from '../../../contexts/EntityContext';
-import { Confirm } from '../../../services/utils';
+import { Confirm, backUrl } from '../../../services/utils';
 import { AppContext } from '../../../contexts';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
-import { Message } from 'semantic-ui-react';
+import { Message, Button } from 'semantic-ui-react';
 
 const refreshOption = { key: 'REFRESH', title: 'Refrescar Grupo', icon: 'fas fa-sync' };
 
@@ -38,6 +38,14 @@ const SlugGroup = ({ pathname, query, success, group }) => {
 
     // estados
     const [option, setOption] = useState("");
+
+    let configHeaders = {
+        headers: {
+            EntityId: group.entity_id,
+            DependenciaId: group.dependencia_id,
+            GroupId: group.id
+        }
+    }
 
     // manejar opciones
     const handleOption = async (e, index, obj) => {
@@ -81,22 +89,29 @@ const SlugGroup = ({ pathname, query, success, group }) => {
         let answer = await Confirm('warning', `¿Estás seguro en ejecutar el firmado masivo?`, 'Firmar');
         if (!answer) return false;
         app_context.setCurrentLoading(true);
-        // config
-        let options = {
-            headers: {
-                EntityId: group.entity_id,
-                DependenciaId: group.dependencia_id,
-                GroupId: group.id
-            }
-        }
         // request
-        await signature.post(`auth/signer_massive/${group.id}`, {}, options)
+        await signature.post(`auth/signer_massive/${group.id}`, {}, configHeaders)
         .then(async res => {
             app_context.setCurrentLoading(false);
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             Router.push(location.href);
         }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
+    }
+
+    // eliminar grupo
+    const handleDelete = async () => {
+        let answer = await Confirm('warning', `¿Estas seguro en eliminar?`, 'Eliminar');
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        await signature.post(`auth/group/${group?.id}?_method=DELETE`, {}, configHeaders)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let { message } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
+            let newQuery = { dependencia_id: query.dependencia_id };
+            Router.push({ pathname: backUrl(pathname), query: newQuery })
+        }).catch(err => handleErrorRequest(err, null, app_context.setCurrentLoading(false)))
     }
 
     // activar entity
@@ -152,6 +167,13 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                                             <UploadFileGroup/>
                                             <hr/>
                                         </div>
+
+                                        <dic className="col-md-12 mb-1">
+                                            <Button color="red" onClick={handleDelete}>
+                                                <i className="fas fa-trash"></i> Eliminar Grupo de Firma
+                                            </Button>
+                                            <hr />
+                                        </dic>
                                     </Show>
 
                                     <div className="col-md-12">
