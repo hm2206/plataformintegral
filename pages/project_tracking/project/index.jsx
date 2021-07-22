@@ -5,10 +5,10 @@ import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
 import Router from 'next/router';
-import btoa from 'btoa';
 import { EntityContext } from '../../../contexts/EntityContext';
 import BoardSimple from '../../../components/boardSimple';
-import { Pagination } from 'semantic-ui-react';
+import { Form, Pagination, Button } from 'semantic-ui-react';
+import { SelectTypeProject } from '../../../components/select/project_tracking';
 
 const IndexProject = ({ pathname, query, success, projects }) => {
 
@@ -20,12 +20,20 @@ const IndexProject = ({ pathname, query, success, projects }) => {
 
     // estados
     const [query_search, setQuerySearch] = useState("");
+    const [type_project_id, setTypeProjectId] = useState("");
 
     // primara carga
     useEffect(() => {
         entity_context.fireEntity({ render: true });
         return () => entity_context.fireEntity({ render: false });
     }, []);
+
+    useEffect(() => {
+        if (query) {
+            setQuerySearch(query.query_search);
+            setTypeProjectId(query.type_project_id);
+        }
+    }, [query]);
 
     // handle options
     const getOption = async (obj, key, index) => {
@@ -38,11 +46,20 @@ const IndexProject = ({ pathname, query, success, projects }) => {
         }
     }
 
+    const handleSearch = () => {
+        let { push } = Router;
+        query.page = 1;
+        query.query_search = query_search;
+        query.type_project_id = type_project_id;
+        push({ pathname, query });
+    }
+
     // siguiente página
     const handlePage = async (e, { activePage }) => {
         let { push } = Router;
         query.page = activePage;
         query.query_search = query_search;
+        query.type_project_id = type_project_id;
         await push({ pathname, query });
     }
 
@@ -77,7 +94,34 @@ const IndexProject = ({ pathname, query, success, projects }) => {
                 ]}
                 getOption={getOption}
             >
+                <Form>
+                    <div className="row">
+                        <Form.Field className="col-md-4">
+                            <input type="text" 
+                                placeholder="Ingrese el Título/Palabra clave"
+                                onChange={({ target }) => setQuerySearch(target.value || "")}
+                                value={query_search}
+                            />
+                        </Form.Field>
 
+                        <Form.Field className="col-md-3">
+                            <SelectTypeProject
+                                name="type_project_id"
+                                value={type_project_id}
+                                onChange={(e, obj) => setTypeProjectId(obj.value || "")}
+                            />
+                        </Form.Field>
+
+                        <Form.Field className="col-md-2">
+                            <Button fluid 
+                                color="blue"
+                                onClick={handleSearch}
+                            >
+                                <i className="fas fa-search"></i>
+                            </Button>
+                        </Form.Field>
+                    </div>
+                </Form>
             </Datatable>
             {/* paginación */}
             <div className="text-center">
@@ -103,7 +147,9 @@ IndexProject.getInitialProps = async (ctx) => {
     // obtener queries y pathname
     let { pathname, query } = ctx;
     await VERIFY(ctx, "PROJECT_TRACKING", pathname);
-    let { success, projects } = await projectTracking.get(`project`, {}, ctx)
+    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : '';
+    query.type_project_id = typeof query.type_project_id != 'undefined' ? query.type_project_id : '';
+    let { success, projects } = await projectTracking.get(`project?query_search=${query.query_search}&type_project_id=${query.type_project_id}`, {}, ctx)
         .then(res => res.data)
         .catch(err => err.response.data)
         .catch(err => ({ success: false }));
