@@ -9,11 +9,11 @@ import atob from 'atob';
 import Infos from '../../../components/escalafon/infos/index';
 import Ballot from '../../../components/escalafon/ballots/index';
 import Permission from '../../../components/escalafon/permission/index';
-import Grado from '../../../components/escalafon/grado';
-import Ascenso from '../../../components/escalafon/ascenso';
-import Familiar from '../../../components/escalafon/familiar';
-import Desplazamiento from '../../../components/escalafon/desplazamiento';
-import Merito from '../../../components/escalafon/merito';
+import Ascent from '../../../components/escalafon/ascent/index';
+import Degrees from '../../../components/escalafon/degrees/index';
+import Family from '../../../components/escalafon/family/index';
+import Displacement from '../../../components/escalafon/Displacement';
+import Merit from '../../../components/escalafon/merit/index';
 import License from '../../../components/escalafon/license/index.jsx';
 import ConfigVacation from '../../../components/escalafon/config_vacation/index';
 import Schedule from '../../../components/escalafon/schedule/index.jsx';
@@ -60,11 +60,11 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     { key: "vacation", text: "Vacaciones" },
                     { key: "permiso", text: "Permisos" },
                     { key: "licencia", text: "Licencias" },
-                    // { key: "grados", text: "Formación Aca." },
-                    // { key: "ascenso", text: "Ascensos" },
-                    // { key: "familiar", text: "Familia" },
-                    // { key: "desplazamiento", text: "Desplazamientos" },
-                    // { key: "merito", text: "Mérito/Demérito" },
+                    { key: "ascenso", text: "Ascensos" },
+                    { key: "desplazamiento", text: "Desplazamientos" },
+                    { key: "merito", text: "Mérito/Demérito" },
+                    { key: "grados", text: "Formación Aca." },
+                    { key: "familiar", text: "Familia" },
                 ]}
                 getOption={(key) => setOption(key)}
             />
@@ -93,20 +93,20 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     <Show condicion={option == 'licencia'}>
                         <License work={work}/>
                     </Show>
-                    <Show condicion={option == 'grados'}>
-                        <Grado work={work}/>
-                    </Show>
                     <Show condicion={option == 'ascenso'}>
-                        <Ascenso work={work}/>
-                    </Show>
-                    <Show condicion={option == 'familiar'}>
-                        <Familiar work={work}/>
+                        <Ascent work={work}/>
                     </Show>
                     <Show condicion={option == 'desplazamiento'}>
-                        <Desplazamiento work={work}/>
+                        <Displacement work={work}/>
                     </Show>
                     <Show condicion={option == 'merito'}>
-                        <Merito work={work}/>
+                        <Merit work={work}/>
+                    </Show>
+                    <Show condicion={option == 'grados'}>
+                        <Degrees work={work}/>
+                    </Show>
+                    <Show condicion={option == 'familiar'}>
+                        <Family work={work}/>
                     </Show>
                 </div>
             </Show>
