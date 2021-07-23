@@ -54,8 +54,8 @@ const FileSimple = ({ name = "archivo.tmp", url = null, size = 0, extname = "tmp
             >
                 {name || ""}
             </a>
-            <small class="text-muted">{formatBytes(size)}</small>
-            <div class="card-footer border-top-0 small text-muted">{moment(date, "YYYY/MM/DD HH:mm:ss").fromNow()}</div>
+            <small className="text-muted">{formatBytes(size)}</small>
+            <div className="card-footer border-top-0 small text-muted">{moment(date, "YYYY/MM/DD HH:mm:ss").fromNow()}</div>
             <Show condicion={typeof onDelete == 'function'}>
                 <span style={{ position: 'absolute', top: '0px', right: '5px', zIndex: "10" }}
                     className="cursor-pointer"

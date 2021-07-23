@@ -57,6 +57,8 @@ const Upload = ({ file, onClose = null, onUploaded = null }) => {
                 let newFiles = res.data.files;
                 dispatch({ type: groupTypes.UPLOAD_READY, payload: file });
                 dispatch({ type: groupTypes.DOWNLOAD_PUSH, payload: newFiles });
+                dispatch({ type: groupTypes.UPLOAD_NEXT, payload: {} });
+                if (typeof onUploaded == 'function') onUploaded();
             }, 700);
             // response
             return true;

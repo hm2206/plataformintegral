@@ -187,9 +187,9 @@ const ListFileGroup = () => {
                         <Button size="mini"
                             basic={current_processing ? false : true}
                             color={current_processing ? 'black' : 'blue'}
-                            disabled={current_loading || current_processing}
+                            disabled={(current_loading || current_processing) ? true : false}
                             onClick={donwloadZip}
-                            loading={current_processing}
+                            loading={current_processing ? true : false}
                         >
                             <i className="fas fa-download"></i>
                         </Button>

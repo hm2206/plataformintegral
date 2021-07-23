@@ -8,6 +8,7 @@ export const groupTypes = {
     FILE_DELETE: "FILE[DELETE]",
     UPLOAD_DELETE: "UPLOAD[DELETE]",
     UPLOAD_READY: "UPLOAD[READY]",
+    UPLOAD_NEXT: "UPLOAD[NEXT]",
     CLEAR: "FILE[CLEAR]",
     DOWNLOAD_FILE: "FILE[DOWNLOAD]",
     DOWNLOAD_PUSH: "PUSH[DOWNLOAD]",
@@ -32,6 +33,7 @@ export const initialState = {
     count_total: 0, //  total de team agregados
     count_verify: 0, // contador de team verificados
     teams: [], // arreglo del equipo
+    count_upload: 1
 };
 
 // reducer
@@ -52,8 +54,8 @@ export const Reducer = (state = initialState, action = { type: "", payload: {} }
             // validar upload
             let upload_count = newState.upload.length;
             // append datos
-            if (upload_count < 5)  {
-                let limit = 5 - upload_count;
+            if (upload_count < newState.count_upload)  {
+                let limit = newState.count_upload - upload_count;
                 Object.values(file_temp).forEach((f, indexF) => {
                     let newFile = f;
                     newFile.id = uid(8);
@@ -84,6 +86,13 @@ export const Reducer = (state = initialState, action = { type: "", payload: {} }
             let newUpload = newState.upload.filter(f => f.id != payload.id);
             newState.upload = newUpload;
             // response
+            return newState;
+        case groupTypes.UPLOAD_NEXT:
+            let nextUploadFile = newState.files[0];
+            if (typeof nextUploadFile == 'object') {
+                Reducer(newState, { type: groupTypes.FILE_DELETE, payload: nextUploadFile });
+                newState.upload.push(nextUploadFile);
+            }
             return newState;
         case groupTypes.DOWNLOAD_FILE:
             newState.download = action.payload;
@@ -122,7 +131,6 @@ export const Reducer = (state = initialState, action = { type: "", payload: {} }
             newState.teams = state.teams.filter(d => d.id != action.payload);
             return newState;
         case groupTypes.CLEAR:
-            console.log();
             return initialState;
         default:
             return state;
