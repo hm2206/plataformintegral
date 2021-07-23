@@ -12,7 +12,7 @@ import Permission from '../../../components/escalafon/permission/index';
 import Ascent from '../../../components/escalafon/ascent/index';
 import Degrees from '../../../components/escalafon/degrees/index';
 import Family from '../../../components/escalafon/family/index';
-import Displacement from '../../../components/escalafon/Displacement/index';
+import Displacement from '../../../components/escalafon/displacement/index';
 import Merit from '../../../components/escalafon/merit/index';
 import License from '../../../components/escalafon/license/index.jsx';
 import ConfigVacation from '../../../components/escalafon/config_vacation/index';
