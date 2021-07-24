@@ -105,7 +105,7 @@ const AddTeam = ({ isClose = null, onSave = null }) => {
 
                         <div className="col-12 mb-3">
                             <Form.Field>
-                                <label htmlFor="">Dependencia <b className="text-red">*</b></label>
+                                <label htmlFor="">Dependencia</label>
                                 <SelectEntityDependenciaUser
                                     name="dependencia_id"
                                     value={form.dependencia_id}
