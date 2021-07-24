@@ -1,9 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Button, Form, Select } from 'semantic-ui-react';
 import Modal from '../modal'
-import { SelectRol } from '../select/project_tracking'
 import Show from '../show';
-import storage from '../../services/storage.json';
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
 import Swal from 'sweetalert2';
@@ -13,32 +11,27 @@ import { projectTracking } from '../../services/apis';
 import Skeleton from 'react-loading-skeleton';
 import Visualizador from '../visualizador';
 
-const ItemAnexo = ({ anexo }) => {
-    // estados
-    const [is_render, setIsRender] = useState(false);
+const ItemAnexo = ({ anexo, onView = null, onDelete = null }) => {
     // render
     return (
         <tr>
             <td>{anexo?.name}</td>
             <td>{formatBytes(anexo?.size || 0)}</td>
-            <td>
-                <div className="text-center">
-                    <span className="text-primary cursor-pointer"
-                        onClick={(e) => setIsRender(true)}
+            <td className="text-center">
+                <Button.Group className="btn-group" size="mini">
+                    <Button color="blue"
+                        basic
+                        onClick={() => typeof onView == 'function' ? onView(anexo) : null}
                     >
                         <i className="fas fa-search"></i>
-                    </span>
-                </div>
+                    </Button>
 
-                <Show condicion={is_render}>
-                    <Visualizador
-                        is_observation={false}
-                        name={anexo?.name}
-                        extname={anexo?.extname}
-                        url={anexo?.url}
-                        onClose={(e) => setIsRender(false)}
-                    />
-                </Show>
+                    <Button color="red"
+                        onClick={() => typeof onDelete == 'function' ? onDelete(anexo) : null}
+                    >
+                        <i className="fas fa-times"></i>
+                    </Button>
+                </Button.Group>
             </td> 
         </tr>   
     )
@@ -51,6 +44,8 @@ const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true })
     const [current_loading, setCurrentLoading] = useState(false);
     const [data, setData] = useState([]);
     const [error, setError] = useState(false);
+    const [option, setOption] = useState("");
+    const [current_anexo, setCurrentAnexo] = useState({});
 
     // project
     const { project } = useContext(ProjectContext);
@@ -67,14 +62,10 @@ const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true })
         await setCurrentLoading(false);
     }
 
-    // config
-    useEffect(() => {
-        getObject();
-        // desmontar
-        return () => {
-            setData([]);
-        }
-    }, []);
+    const handleView = (anexo) => {
+        setCurrentAnexo(anexo);
+        setOption("VISUALIZADOR");
+    }
 
     // subir anexo
     const handleFile = async ({ files }) => {
@@ -87,20 +78,45 @@ const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true })
             app_context.setCurrentLoading(true);
             // request
             await projectTracking.post(`file`, datos)
-                .then(async res => {
-                    app_context.setCurrentLoading(false);
-                    let { success, message, files } = res.data;
-                    if (!success) throw new Error(message);
-                    await Swal.fire({ icon: 'success', text: message });
-                    setData([...data, ...files]);
-                    if (typeof afterSave == 'function') await afterSave(files);
-                }).catch(err => {
-                    app_context.setCurrentLoading(false);
-                    let { message } = err.response.data;
-                    Swal.fire({ icon: 'error', text: message || err.message });
-                })
+            .then(async res => {
+                app_context.setCurrentLoading(false);
+                let { success, message, files } = res.data;
+                if (!success) throw new Error(message);
+                await Swal.fire({ icon: 'success', text: message });
+                setData([...data, ...files]);
+                if (typeof afterSave == 'function') await afterSave(files);
+            }).catch(err => {
+                app_context.setCurrentLoading(false);
+                let { message } = err.response.data;
+                Swal.fire({ icon: 'error', text: message || err.message });
+            })
         }
     }
+
+    // eliminar anexo
+    const handleDelete = async (anexo) => {
+        let answer = await Confirm("warning", `¿Estas seguro en eliminar el anexo?`, 'Eliminar');
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        // request
+        await projectTracking.post(`file/${anexo.id}?_method=DELETE`)
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            await Swal.fire({ icon: 'success', text: "El archivo se eliminó correctamente!" });
+            await getObject();
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: "No se pudó eliminar el anexo" });
+        })
+    }
+
+    // config
+    useEffect(() => {
+        getObject();
+        // desmontar
+        return () => setData([]);
+    }, []);
+
 
     // render
     return (
@@ -155,6 +171,8 @@ const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true })
                             {data.map((f, indexF) =>
                                 <ItemAnexo anexo={f}
                                     key={`list-anexos-${indexF}`}
+                                    onView={handleView}
+                                    onDelete={handleDelete}
                                 />
                             )}  
 
@@ -168,6 +186,17 @@ const Anexos = ({ isClose, object_id, object_type, afterSave, editable = true })
                         </tbody>
                     </table>
                 </div>
+
+                {/*  */}
+                <Show condicion={option == 'VISUALIZADOR'}>
+                    <Visualizador
+                        is_observation={false}
+                        name={current_anexo?.name}
+                        extname={current_anexo?.extname}
+                        url={current_anexo?.url}
+                        onClose={(e) => setOption("")}
+                    />
+                </Show>
             </Form>
         </Modal>
     )
