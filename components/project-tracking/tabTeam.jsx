@@ -42,6 +42,11 @@ const ItemTeam = ({ team }) => {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             dispatch({ type: projectTypes.DELETE_TEAM, payload: team });
+            // eliminar principal del project
+            if (!team.principal) return;
+            let newProject = Object.assign({}, project);
+            newProject.principal = {};
+            dispatch({ type: projectTypes.SET_PROJECT, payload: newProject })
         }).catch(err => handleErrorRequest(err));
         setCurrentLoading(false);
     }
@@ -51,7 +56,7 @@ const ItemTeam = ({ team }) => {
         <tr>
             <td className="text-center uppercase">{team?.user?.person?.fullname}</td>
             <td className="text-center uppercase">{team?.user?.username}</td>
-            <td className="text-center uppercase">{team?.dependencia?.nombre}</td>
+            <td className="text-center uppercase">{team?.dependencia?.nombre || 'Exterior'}</td>
             <td className="text-center uppercase">{team?.role?.description}</td>
             <Show condicion={project.state != "OVER"}>
                 <td className="text-center">
@@ -79,7 +84,6 @@ const TabTeam = () => {
     let isProject = Object.keys(project).length;
 
     // estados
-    const [option, setOption] = useState("");
     const [is_create, setIsCreate] = useState(false);
     const [current_loading, setCurrentLoading] = useState(false);
 
@@ -87,7 +91,7 @@ const TabTeam = () => {
     const getTeam = async (add = false) => {
         setCurrentLoading(true);
         await projectTracking.get(`project/${project.id}/team?page=${teams.page}`)
-            .then(({ data }) => {
+            .then(async ({ data }) => {
                 let payload = { 
                     last_page: data.teams.lastPage,
                     total: data.teams.total,

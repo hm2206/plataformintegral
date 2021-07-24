@@ -61,6 +61,12 @@ const AddTeam = ({ isClose = null, onSave = null }) => {
             await Swal.fire({ icon: 'success', text: message });
             setUser({});
             setForm({});
+            let newProject = Object.assign({}, project);
+            let newPrincipal = Object.assign({}, team);
+            newPrincipal.person = team?.user?.person;
+            delete newPrincipal.user
+            newProject.principal = newPrincipal;
+            dispatch({ type: projectTypes.SET_PROJECT, payload: newProject });
             dispatch({ type: projectTypes.ADD_TEAM, payload: team });
             if (typeof onSave == 'function') onSave();
         }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
