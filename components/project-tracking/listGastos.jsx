@@ -206,7 +206,7 @@ const ListGastos = ({ activity }) => {
     // obtener gastos
     const getGastos = async (add = false) => {
         setCurrentLoading(true);
-        await projectTracking.get(`activity/${activity.id}/gasto?page=`)
+        await projectTracking.get(`activity/${activity.id}/gasto?page=&principal=1`)
         .then(({ data }) => {
             let payload = {
                 total: data.gastos.total,

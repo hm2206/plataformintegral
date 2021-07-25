@@ -33,7 +33,7 @@ const TabActivity = (props) => {
     // obtener componentes
     const getObjectives = async (add = false) => {
         setCurrentLoading(true);
-        await projectTracking.get(`project/${project.id}/objective?page=${objectives?.page || 1}`)
+        await projectTracking.get(`project/${project.id}/objective?page=${objectives?.page || 1}&principal=1`)
         .then(({ data }) => {
             let payload = {
                 last_page: data.objectives.lastPage,
