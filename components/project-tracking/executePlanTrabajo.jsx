@@ -37,7 +37,11 @@ const ExecutePlanTrabajo = ({ plan_trabajo, isClose = null }) => {
             <div className="card-body">
                 <div className="row">
                     <div className="col-md-12">
-                        <TableSaldoFinanciero plan_trabajo={plan_trabajo} refresh={refresh} execute={true}/>
+                        <TableSaldoFinanciero plan_trabajo={plan_trabajo} 
+                            refresh={refresh} 
+                            execute={true}
+                            viewer={['financiera']}
+                        />
                     </div>
                 </div>
             </div>
