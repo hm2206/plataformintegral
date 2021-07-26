@@ -112,7 +112,7 @@ const InfoPlanTrabajo = ({ plan_trabajo, isClose = null }) => {
                     </div>
 
                     <div className="col-md-12">
-                        <TableSaldoFinanciero plan_trabajo={plan_trabajo} refresh={refresh}/>
+                        <TableSaldoFinanciero plan_trabajo={plan_trabajo} refresh={refresh} viewer={['tecnica']}/>
                     </div>
                 </div>
             </div>

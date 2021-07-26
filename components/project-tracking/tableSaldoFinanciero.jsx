@@ -3,9 +3,7 @@ import { projectTracking } from '../../services/apis';
 import currencyFormatter from 'currency-formatter'
 import { AppContext } from '../../contexts/AppContext';
 import Show from '../show';
-import Swal from 'sweetalert2';
 import ListMedioVerification from './listMedioVerification'
-import { Confirm } from '../../services/utils';
 import ItemSaldoFinanciero from './itemSaldoFinanciero';
 import Skeleton from 'react-loading-skeleton';
 import collect from 'collect.js';
@@ -31,7 +29,12 @@ const Placeholder = () => {
     )
 }
 
-const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
+const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false, viewer = [] }) => {
+
+    const verifies = {
+        tecnica: 'tecnica', 
+        financiera: 'financiera'
+    }
 
     // app
     const app_context = useContext(AppContext);
@@ -41,6 +44,7 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
     const [option, setOption] = useState("");
     const [current_meta, setCurrentMeta] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
+    const [block, setBlock] = useState(false);
 
     const getSaldoFinanciero = async () => {
         setCurrentLoading(true);
@@ -57,7 +61,7 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
         let newObjectives = [...current_objectives];
         let current_objective = newObjectives[index];
         if (!current_objective) return;
-        gas[name] = 1;
+        gas[name] = gas[name] ? 0 : 1;
         // update gasto
         await act?.gastos?.map(g => {
             if (g.id == gas.id) g = gas;
@@ -72,9 +76,7 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
         newObjectives[index] = current_objective;
         // verificar actividad
         let lackVerify = collect(act.gastos).where(name, 0).count();
-        if (!lackVerify) {
-            act[name == 'verify_tecnica' ? name : 'verify'] = 1;
-        }
+        act[name == 'verify_tecnica' ? name : 'verify'] = lackVerify ? 0 : 1;
         // aplicar cambios
         setCurrentObjectives(newObjectives);
     }
@@ -99,20 +101,16 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                     <tr>
                                         <th>Objectivo/Componente</th>
                                         <th className="text-center" width="10%">TOTAL PROG.</th>
-                                        <Show condicion={execute}>
-                                            <th className="text-center" width="10%">TOTAL EJEC.</th>
-                                            <th className="text-center" width="10%">TOTAL SALDO</th>
-                                        </Show>
+                                        <th className="text-center" width="10%">TOTAL EJEC.</th>
+                                        <th className="text-center" width="10%">TOTAL SALDO</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td>{obj.title}</td>
                                         <td className="font-13 text-right">{currencyFormatter.format(obj.total_programado, { code: 'PEN' })}</td>
-                                        <Show condicion={execute}>
-                                            <td className="font-13 text-right">{currencyFormatter.format(obj.total_ejecutado, { code: 'PEN' })}</td>
-                                            <td className={`font-13 text-right ${obj.total_saldo < 0 ? 'text-red' : ''}`}>{currencyFormatter.format(obj.total_saldo, { code: 'PEN' })}</td>
-                                        </Show>
+                                        <td className="font-13 text-right">{currencyFormatter.format(obj.total_ejecutado, { code: 'PEN' })}</td>
+                                        <td className={`font-13 text-right ${obj.total_saldo < 0 ? 'text-red' : ''}`}>{currencyFormatter.format(obj.total_saldo, { code: 'PEN' })}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -126,10 +124,13 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                     <tr>
                                         <th className="text-center">ACTIVIDAD</th>
                                         <th className="text-center" width="10%">TOTAL PROG.</th>
-                                        <Show condicion={execute}>
-                                            <th className="text-center" width="10%">TOTAL EJEC.</th>
-                                            <th className="text-center" width="10%">TOTAL SALDO</th>
+                                        <th className="text-center" width="10%">TOTAL EJEC.</th>
+                                        <th className="text-center" width="10%">TOTAL SALDO</th>
+                                        <Show condicion={viewer.includes(verifies.tecnica)}>
                                             <th className="text-center" width="5%" title="Verificación Técnica">VT</th>
+                                        </Show>
+
+                                        <Show condicion={viewer.includes(verifies.financiera)}>
                                             <th className="text-center" width="5%" title="Verificación Financiera">VF</th>
                                         </Show>
                                     </tr>
@@ -140,22 +141,25 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                             <tr>
                                                 <th className="font-14">{act.title}</th>
                                                 <th className="font-13 text-right">{currencyFormatter.format(act.total_programado, { code: 'PEN' })}</th>
-                                                <Show condicion={execute}>
-                                                    <th className="font-13 text-right">{currencyFormatter.format(act.total_ejecutado, { code: 'PEN' })}</th>
-                                                    <th className={`font-13 text-right ${act.total_saldo < 0 ? 'text-red' : ''}`}>{currencyFormatter.format(act.total_saldo, { code: 'PEN' })}</th>
+                                                <th className="font-13 text-right">{currencyFormatter.format(act.total_ejecutado, { code: 'PEN' })}</th>
+                                                <th className={`font-13 text-right ${act.total_saldo < 0 ? 'text-red' : ''}`}>{currencyFormatter.format(act.total_saldo, { code: 'PEN' })}</th>
+                                                <Show condicion={viewer.includes(verifies.tecnica)}>
                                                     <td className="text-center bg-white">
                                                         <Show condicion={!act.verify_tecnica}
                                                             predeterminado={
-                                                                <span className="badge badge-success"><i className="fas fa-check"></i></span>
+                                                                <span className="badge badge-success cursor-pointer"><i className="fas fa-check"></i></span>
                                                             }
                                                         >
                                                             <span className="badge badge-danger"><i className="fas fa-times"></i></span>
                                                         </Show>
                                                     </td>
+                                                </Show>
+
+                                                <Show condicion={viewer.includes(verifies.financiera)}>
                                                     <td className="text-center bg-white">
                                                         <Show condicion={!act.verify}
                                                             predeterminado={
-                                                                <span className="badge badge-success"><i className="fas fa-check"></i></span>
+                                                                <span className="badge badge-success cursor-pointer"><i className="fas fa-check"></i></span>
                                                             }
                                                         >
                                                             <span className="badge badge-danger"><i className="fas fa-times"></i></span>
@@ -182,9 +186,11 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                                                     <th>COSTO UNITARIO</th>
                                                                     <th>CANTIDAD</th>
                                                                     <th>COSTO TOTAL</th>
-                                                                    <Show condicion={execute}>
-                                                                        <th>EJEC.</th>
-                                                                        <th width="5%">VT</th>
+                                                                    <th>EJEC.</th>
+                                                                    <Show condicion={viewer.includes(verifies.tecnica)}>
+                                                                        <th width="5%" colSpan="2">VT</th>
+                                                                    </Show>
+                                                                    <Show condicion={viewer.includes(verifies.financiera)}>
                                                                         <th width="5%">VF</th>
                                                                     </Show>
                                                                 </tr>
@@ -196,8 +202,12 @@ const TableSaldoFinanciero = ({ plan_trabajo, refresh, execute = false }) => {
                                                                         activity={act}
                                                                         execute={execute}
                                                                         gasto={gas}
+                                                                        onUpdate={async () => await getSaldoFinanciero()}
                                                                         onVerifyTecnica={() => handleVerify(indexO, act, gas, 'verify_tecnica')}
                                                                         onVerifyFinanciera={() => handleVerify(indexO, act, gas, 'verify_financiera')}
+                                                                        viewer={viewer}
+                                                                        block={block}
+                                                                        onBlock={(value) => setBlock(value)}
                                                                     />
                                                                 )}
                                                             </tbody>    

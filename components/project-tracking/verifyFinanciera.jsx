@@ -23,7 +23,7 @@ const VerifyFinanciera = ({ gasto, isClose = null, onVerifycationFinanciera = nu
         let answer = await Confirm('info', '¿Deseas realizar la verificación Financiera?', 'Verificar');
         if (!answer) return false;
         setCurrentLoading(true);
-        await projectTracking.post(`gasto/${gasto.id}/verify_financiera?_method=PUT`)
+        await projectTracking.post(`gasto/${gasto.id}/verify_financiera?_method=PUT&verify=${gasto.verify_financiera ? 0 : 1}`)
         .then(async res => {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });

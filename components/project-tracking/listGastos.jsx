@@ -50,7 +50,7 @@ const ItemGasto = ({ activity, gasto }) => {
         let answer = await Confirm('warning', '¿Estas seguro en actualizar el gasto?')
         if (!answer) return false;
         setCurrentLoading(true);
-        await projectTracking.post(`gasto/${gasto.id}/update`, form)
+        await projectTracking.post(`gasto/${gasto.id}?_method=PUT`, form)
         .then(res => {
             let { message } = res.data;
             Swal.fire({ icon: 'success', text: message });
