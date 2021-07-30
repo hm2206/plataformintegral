@@ -48,14 +48,14 @@ const Ascent = ({ work }) => {
     // obtener permissions
     const getDatos = async (add = false) => {
         setCurrentLoading(true);
-        await infoProvider.licenses(current_info.id, { page: current_page })
+        await infoProvider.ascents(current_info.id, { page: current_page })
         .then(res => {
-            let { success, message, licenses } = res.data;
+            let { success, message, ascents } = res.data;
             if (!success) throw new Error(message);
             setError(false);
-            setCurrentTotal(licenses.total);
-            setCurrentLastPage(licenses.lastPage);
-            setCurrentData(add ? [...current_data, ...licenses.data] : licenses.data);
+            setCurrentTotal(ascents.total);
+            setCurrentLastPage(ascents.lastPage);
+            setCurrentData(add ? [...current_data, ...ascents.data] : ascents.data);
         })
         .catch(() => setError(true))
         setCurrentLoading(false);
@@ -152,7 +152,7 @@ const Ascent = ({ work }) => {
             <div className="col-md-8">
                 {current_data.map((d, indexD) => 
                     <ItemAscent key={`grado-lista-${indexD}`}
-                        license={d}
+                        ascent={d}
                         onUpdate={onUpdate}
                         onDelete={onDelete}
                     />

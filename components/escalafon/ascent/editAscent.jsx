@@ -4,12 +4,12 @@ import { Button, Progress } from 'semantic-ui-react';
 import FormLicense from './formAscent';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
-import LicenseProvider from '../../../providers/escalafon/LicenseProvider';
+import AscentProvider from '../../../providers/escalafon/AscentProvider';
 import Swal from 'sweetalert2';
 
-const licenseProvider = new LicenseProvider();
+const ascentProvider = new AscentProvider();
 
-const EditLicense = ({ license = {}, onClose = null, onUpdate = null, onDelete = null }) => {
+const EditLicense = ({ ascent = {}, onClose = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
@@ -18,8 +18,8 @@ const EditLicense = ({ license = {}, onClose = null, onUpdate = null, onDelete =
 
     const canSave = useMemo(() => {
         let required = [
-            'situacion_laboral_id', 'resolution', 'date_resolution',
-            'date_start', 'date_over', 'description'
+            'resolution', 'date_resolution', 'type_categoria_id',
+            'date_start', 'description'
         ];
         // validar
         for (let item of required) {
@@ -44,11 +44,11 @@ const EditLicense = ({ license = {}, onClose = null, onUpdate = null, onDelete =
         let answer = await Confirm('info', `¿Estás seguro en guardar los cambios?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await licenseProvider.update(license.id, form)
+        await ascentProvider.update(ascent.id, form)
         .then(async res => {
-            let { message, license } = res.data;
+            let { message, ascent } = res.data;
             let newForm = Object.assign({}, form);
-            newForm = { ...form, ...license };
+            newForm = { ...form, ...ascent };
             await Swal.fire({ icon: 'success', text: message });
             if (typeof onUpdate == 'function') await onUpdate(newForm);
             setEdit(false)
@@ -63,11 +63,11 @@ const EditLicense = ({ license = {}, onClose = null, onUpdate = null, onDelete =
         let answer = await Confirm('warning', `¿Estás seguro en eliminar?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await licenseProvider.delete(license.id)
+        await ascentProvider.delete(ascent.id)
         .then(async res => {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
-            if (typeof onDelete == 'function') await onDelete(license);
+            if (typeof onDelete == 'function') await onDelete(ascent);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });
@@ -75,7 +75,7 @@ const EditLicense = ({ license = {}, onClose = null, onUpdate = null, onDelete =
     }
 
     useEffect(() => {
-        if (!edit) setForm(Object.assign({}, license))
+        if (!edit) setForm(Object.assign({}, ascent))
     }, [edit]);
 
     return (

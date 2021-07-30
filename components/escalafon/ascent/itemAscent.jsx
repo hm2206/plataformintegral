@@ -1,28 +1,25 @@
 import React, { useState } from 'react';
 import { Button } from 'semantic-ui-react';
 import moment from 'moment'
-import EditLicense from './editAscent';
+import EditAscent from './editAscent';
 import Show from '../../show';
 
-const ItemAscent = ({ license, onUpdate = null, onDelete = null }) => {
+const ItemAscent = ({ ascent, onUpdate = null, onDelete = null }) => {
 
     const [option, setOption] = useState("");
 
     return (
         <div className="card">
             <div className="card-header">
-                Resolución: {license?.resolution}
+                Resolución: {ascent?.resolution}
             </div>
             <div className="card-body">
                 <div className="row">
                     <div className="col-md-12">
-                        <div className="mb-2"><b>Tipo. Licencia: </b> {license?.situacion_laboral?.nombre}</div>
-                        <div className="mb-2"><b>Fecha Resolución: </b> {moment(license?.date_start).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>Fecha Inicio: </b> {moment(license?.date_start).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>Fecha Termino: </b> {moment(license?.date_over).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>Dias Usados: </b> {license?.days_used}</div>
-                        <div className="mb-2"><b>Tipo: </b> <span className="badge badge-primary">{license?.is_pay ? 'Con Gose' : 'Sin Gose'}</span></div>
-                        <div className="mb-2"><b>Descripción: </b> {license?.description}</div>
+                        <div className="mb-2"><b>Tip. categoría: </b> <span className="badge badge-dark">{ascent?.type_categoria?.descripcion}</span></div>
+                        <div className="mb-2"><b>Fecha Resolución: </b> {moment(ascent?.date_start).format('DD/MM/YYYY')}</div>
+                        <div className="mb-2"><b>Fecha Inicio: </b> {moment(ascent?.date_start).format('DD/MM/YYYY')}</div>
+                        <div className="mb-2"><b>Descripción: </b> {ascent?.description}</div>
                     </div>
                 </div>
             </div>
@@ -37,9 +34,9 @@ const ItemAscent = ({ license, onUpdate = null, onDelete = null }) => {
             </div>
             {/* editar permission */}
             <Show condicion={option == 'EDIT'}>
-                <EditLicense
+                <EditAscent
                     onClose={() => setOption("")}
-                    license={license}
+                    ascent={ascent}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
                 />
