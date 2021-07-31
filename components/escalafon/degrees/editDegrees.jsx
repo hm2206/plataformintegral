@@ -4,13 +4,13 @@ import { Button, Progress } from 'semantic-ui-react';
 import FormDesgrees from './formDegrees';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
-import LicenseProvider from '../../../providers/escalafon/LicenseProvider';
+import DegreeProvider from '../../../providers/escalafon/DegreeProvider';
 import Swal from 'sweetalert2';
 import FormDegrees from './formDegrees';
 
-const licenseProvider = new LicenseProvider();
+const degreeProvider = new DegreeProvider();
 
-const EditDegrees = ({ license = {}, onClose = null, onUpdate = null, onDelete = null }) => {
+const EditDegrees = ({ degree = {}, onClose = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
@@ -19,8 +19,8 @@ const EditDegrees = ({ license = {}, onClose = null, onUpdate = null, onDelete =
 
     const canSave = useMemo(() => {
         let required = [
-            'situacion_laboral_id', 'resolution', 'date_resolution',
-            'date_start', 'date_over', 'description'
+            'type_degree_id', 'institution', 'document_number',
+            'date', 'description'
         ];
         // validar
         for (let item of required) {
@@ -45,11 +45,11 @@ const EditDegrees = ({ license = {}, onClose = null, onUpdate = null, onDelete =
         let answer = await Confirm('info', `¿Estás seguro en guardar los cambios?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await licenseProvider.update(license.id, form)
+        await degreeProvider.update(degree.id, form)
         .then(async res => {
-            let { message, license } = res.data;
+            let { message, degree } = res.data;
             let newForm = Object.assign({}, form);
-            newForm = { ...form, ...license };
+            newForm = { ...form, ...degree };
             await Swal.fire({ icon: 'success', text: message });
             if (typeof onUpdate == 'function') await onUpdate(newForm);
             setEdit(false)
@@ -64,11 +64,11 @@ const EditDegrees = ({ license = {}, onClose = null, onUpdate = null, onDelete =
         let answer = await Confirm('warning', `¿Estás seguro en eliminar?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await licenseProvider.delete(license.id)
+        await degreeProvider.delete(degree.id)
         .then(async res => {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
-            if (typeof onDelete == 'function') await onDelete(license);
+            if (typeof onDelete == 'function') await onDelete(degree);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });
@@ -76,7 +76,7 @@ const EditDegrees = ({ license = {}, onClose = null, onUpdate = null, onDelete =
     }
 
     useEffect(() => {
-        if (!edit) setForm(Object.assign({}, license))
+        if (!edit) setForm(Object.assign({}, degree))
     }, [edit]);
 
     return (

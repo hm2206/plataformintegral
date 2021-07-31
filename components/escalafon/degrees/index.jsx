@@ -4,13 +4,10 @@ import Show from '../../show';
 import CreateDegrees from './createDegrees';
 import { BtnFloat } from '../../Utils';
 import ItemDegrees from './itemDegrees';
-import InfoProvider from '../../../providers/escalafon/InfoProvider';
+import WorkProvider from '../../../providers/escalafon/WorkProvider';
 import { Button } from 'semantic-ui-react';
-import ItemInfo from '../infos/itemInfo';
-import collect from 'collect.js';
-import { SelectWorkInfo } from '../../select/escalafon';
 
-const infoProvider = new InfoProvider();
+const workProvider = new WorkProvider();
 
 const Placeholder = () => {
 
@@ -48,14 +45,14 @@ const Degrees = ({ work }) => {
     // obtener permissions
     const getDatos = async (add = false) => {
         setCurrentLoading(true);
-        await infoProvider.licenses(current_info.id, { page: current_page })
+        await workProvider.degrees(work.id, { page: current_page })
         .then(res => {
-            let { success, message, licenses } = res.data;
+            let { success, message, degrees } = res.data;
             if (!success) throw new Error(message);
             setError(false);
-            setCurrentTotal(licenses.total);
-            setCurrentLastPage(licenses.lastPage);
-            setCurrentData(add ? [...current_data, ...licenses.data] : licenses.data);
+            setCurrentTotal(degrees.total);
+            setCurrentLastPage(degrees.lastPage);
+            setCurrentData(add ? [...current_data, ...degrees.data] : degrees.data);
         })
         .catch(() => setError(true))
         setCurrentLoading(false);
@@ -66,10 +63,10 @@ const Degrees = ({ work }) => {
         getDatos();
     }
 
-    const onUpdate = async (permission) => {
+    const onUpdate = async (degree) => {
         let newDatos = [];
         await current_data?.filter(d => {
-            if (d.id == permission.id) newDatos.push(permission);
+            if (d.id == degree.id) newDatos.push(degree);
             else newDatos.push(d);
             return d;
         });
@@ -81,22 +78,6 @@ const Degrees = ({ work }) => {
         setOption("");
         getDatos();
     }
-
-    const handleInfo = (e, { value, options }) => {
-        let plucked = collect(options).pluck('value').toArray();
-        let index = plucked.indexOf(value);
-        if (index < 0) return; 
-        let obj = options[index];
-        setCurrentInfo(obj?.obj || {});
-    }
-
-    useEffect(() => {
-        if (current_info?.id) {
-            setIsRefresh(true);
-            setCurrentPage(1);
-            setCurrentTotal(0);
-        }
-    }, [current_info?.id]);
 
     useEffect(() => {
         if (current_page > 1) getDatos(true);
@@ -116,7 +97,7 @@ const Degrees = ({ work }) => {
         <div className="col-md-12">
             <h5>
                 Listado de Formación Académica
-                <Show condicion={current_info?.id && !current_loading}>
+                <Show condicion={!current_loading}>
                     <span className="close cursor-pointer"
                         onClick={() => {
                             setCurrentPage(1);
@@ -131,13 +112,19 @@ const Degrees = ({ work }) => {
         </div>
 
         <div className="col-md-12">
-            {current_data.map((d, indexD) => 
-                <ItemDegrees key={`grado-lista-${indexD}`}
-                    license={d}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                />
-            )}
+            <div className="row">
+                {current_data.map((d, indexD) => 
+                    <div className="col-md-6"
+                        key={`grado-lista-${indexD}`}
+                    >
+                        <ItemDegrees
+                            degree={d}
+                            onUpdate={onUpdate}
+                            onDelete={onDelete}
+                        />
+                    </div>
+                )}
+            </div>
 
             {/* no hay registros */}
             <Show condicion={!current_loading && !current_data?.length}>
@@ -166,7 +153,7 @@ const Degrees = ({ work }) => {
 
         <Show condicion={option == options.CREATE}>
             <CreateDegrees
-                info={current_info}
+                work={work}
                 onClose={() => setOption("")}
                 onSave={onSave}
             />

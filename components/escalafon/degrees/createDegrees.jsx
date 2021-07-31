@@ -3,12 +3,12 @@ import Modal from '../../modal';
 import { Button } from 'semantic-ui-react';
 import FormDesgrees from './formDegrees';
 import { Confirm } from '../../../services/utils';
-import LicenseProvider from '../../../providers/escalafon/LicenseProvider';
+import DegreeProvider from '../../../providers/escalafon/DegreeProvider';
 import Swal from 'sweetalert2';
 
-const licenseProvider = new LicenseProvider();
+const degreeProvider = new DegreeProvider();
 
-const CreateDegrees = ({ info = {}, onClose = null, onSave = null }) => {
+const CreateDegrees = ({ work = {}, onClose = null, onSave = null }) => {
 
     const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
@@ -16,8 +16,8 @@ const CreateDegrees = ({ info = {}, onClose = null, onSave = null }) => {
 
     const readySave = useMemo(() => {
         let required = [
-            'situacion_laboral_id', 'resolution', 'date_resolution',
-            'date_start', 'date_over', 'description'
+            'type_degree_id', 'institution', 'document_number',
+            'date', 'description'
         ];
         // validar
         for (let item of required) {
@@ -42,12 +42,12 @@ const CreateDegrees = ({ info = {}, onClose = null, onSave = null }) => {
         if (!answer) return;
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
-        payload.info_id = info.id;
-        await licenseProvider.store(payload)
+        payload.work_id = work.id;
+        await degreeProvider.store(payload)
         .then(res => {
-            let { message, license } = res.data;
+            let { message, degree } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            if (typeof onSave == 'function') onSave(license);
+            if (typeof onSave == 'function') onSave(degree);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
             setErrors(err.errors || {});

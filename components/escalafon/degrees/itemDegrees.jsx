@@ -4,25 +4,22 @@ import moment from 'moment'
 import EditDegrees from './editDegrees';
 import Show from '../../show';
 
-const ItemDegrees = ({ license, onUpdate = null, onDelete = null }) => {
+const ItemDegrees = ({ degree, onUpdate = null, onDelete = null }) => {
 
     const [option, setOption] = useState("");
 
     return (
         <div className="card">
             <div className="card-header">
-                Resolución: {license?.resolution}
+                N° Documento: {degree?.document_number}
             </div>
             <div className="card-body">
                 <div className="row">
                     <div className="col-md-12">
-                        <div className="mb-2"><b>Tipo. Licencia: </b> {license?.situacion_laboral?.nombre}</div>
-                        <div className="mb-2"><b>Fecha Resolución: </b> {moment(license?.date_start).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>Fecha Inicio: </b> {moment(license?.date_start).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>Fecha Termino: </b> {moment(license?.date_over).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>Dias Usados: </b> {license?.days_used}</div>
-                        <div className="mb-2"><b>Tipo: </b> <span className="badge badge-primary">{license?.is_pay ? 'Con Gose' : 'Sin Gose'}</span></div>
-                        <div className="mb-2"><b>Descripción: </b> {license?.description}</div>
+                        <div className="mb-2"><b>Tipo. Grado: </b> {degree?.type_degree?.name}</div>
+                        <div className="mb-2"><b>Institución: </b> {moment(degree?.date_start).format('DD/MM/YYYY')}</div>
+                        <div className="mb-2"><b>N° Documento: </b> {degree?.type_degree?.name}</div>
+                        <div className="mb-2"><b>Descripción: </b> {degree?.description}</div>
                     </div>
                 </div>
             </div>
@@ -39,7 +36,7 @@ const ItemDegrees = ({ license, onUpdate = null, onDelete = null }) => {
             <Show condicion={option == 'EDIT'}>
                 <EditDegrees
                     onClose={() => setOption("")}
-                    license={license}
+                    degree={degree}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
                 />

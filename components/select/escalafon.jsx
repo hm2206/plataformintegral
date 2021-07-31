@@ -172,6 +172,25 @@ const SelectWorkInfo = ({
     />
 }
 
+const SelectTypeDegree = ({ id = "id", name, value, onChange, error = false, refresh = true, onReady = null }) => {
+    return <SelectBase 
+        execute={true}
+        api={escalafon}
+        url={`type_degrees`}
+        id={`select-type_degrees-${name}`}
+        value={id}
+        text="name"
+        obj="type_degrees"
+        name={name}
+        valueChange={`${value || ""}`}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Tipo. Grado"
+        refresh={refresh}
+        onReady={onReady}
+        error={error}
+    />
+}
+
 
 export { 
     SelectAfp,
@@ -181,4 +200,5 @@ export {
     SelectWorkConfigVacation,
     SelectTypePermission,
     SelectWorkInfo,
+    SelectTypeDegree,
 };

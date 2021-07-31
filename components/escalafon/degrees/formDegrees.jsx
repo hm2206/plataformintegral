@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form, Select } from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
+import { SelectTypeDegree } from '../../select/escalafon'
 
 const FormDegrees = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null, disabled = false }) => {
 
@@ -10,15 +11,15 @@ const FormDegrees = ({ children, form = {}, errors = {}, className = null, readO
     return (
         <Form className={className}>
             <div className="row">
-                <Form.Field className="col-md-12 mb-3" error={errors?.grado?.[0] ? true : false}>
-                    <label htmlFor="">Grado <b className="text-red">*</b></label>
-                    <input type="text" 
-                        name="grado"
-                        readOnly={readOnly.includes('grado') || disabled}
-                        value={form?.grado || ""}
-                        onChange={(e) => handleChange(e,  e.target)}
+                <Form.Field className="col-md-12 mb-3" error={errors?.type_degree_id?.[0] ? true : false}>
+                    <label htmlFor="">Tip. Grado <b className="text-red">*</b></label>
+                    <SelectTypeDegree
+                        name="type_degree_id"
+                        readOnly={readOnly.includes('type_degree_id') || disabled}
+                        value={form?.type_degree_id || ""}
+                        onChange={(e, obj) => handleChange(e,  obj)}
                     />
-                    <label htmlFor="">{errors?.grado?.[0] || ""}</label>
+                    <label htmlFor="">{errors?.type_degree_id?.[0] || ""}</label>
                 </Form.Field>
 
                 <Form.Field className="col-md-12 mb-3" error={errors?.institution?.[0] ? true : false}>
