@@ -3,10 +3,10 @@ import Modal from '../../modal';
 import { Button } from 'semantic-ui-react';
 import FormDisplacement from './formDisplacement';
 import { Confirm } from '../../../services/utils';
-import LicenseProvider from '../../../providers/escalafon/LicenseProvider';
+import DisplacementProvider from '../../../providers/escalafon/DisplacementProvider';
 import Swal from 'sweetalert2';
 
-const licenseProvider = new LicenseProvider();
+const displacementProvider = new DisplacementProvider();
 
 const CreateDisplacement = ({ info = {}, onClose = null, onSave = null }) => {
 
@@ -16,8 +16,8 @@ const CreateDisplacement = ({ info = {}, onClose = null, onSave = null }) => {
 
     const readySave = useMemo(() => {
         let required = [
-            'situacion_laboral_id', 'resolution', 'date_resolution',
-            'date_start', 'date_over', 'description'
+            'resolution', 'date_resolution', 'date_start', 'date_over', 
+            'dependencia_id', 'perfil_laboral_id', 'description'
         ];
         // validar
         for (let item of required) {
@@ -38,16 +38,16 @@ const CreateDisplacement = ({ info = {}, onClose = null, onSave = null }) => {
     }
 
     const handleSave = async () => {
-        let answer = await Confirm('info', '¿Estas seguro en guardar la licencia?', 'Guardar');
+        let answer = await Confirm('info', '¿Estas seguro en guardar el desplazamiento?', 'Guardar');
         if (!answer) return;
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
         payload.info_id = info.id;
-        await licenseProvider.store(payload)
+        await displacementProvider.store(payload)
         .then(res => {
-            let { message, license } = res.data;
+            let { message, displacement } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            if (typeof onSave == 'function') onSave(license);
+            if (typeof onSave == 'function') onSave(displacement);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
             setErrors(err.errors || {});

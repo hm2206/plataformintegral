@@ -4,25 +4,24 @@ import moment from 'moment'
 import EditLicense from './editDisplacement';
 import Show from '../../show';
 
-const ItemAscent = ({ license, onUpdate = null, onDelete = null }) => {
+const ItemAscent = ({ displacement, onUpdate = null, onDelete = null }) => {
 
     const [option, setOption] = useState("");
 
     return (
         <div className="card">
             <div className="card-header">
-                Resolución: {license?.resolution}
+                Resolución: {displacement?.resolution}
             </div>
             <div className="card-body">
                 <div className="row">
                     <div className="col-md-12">
-                        <div className="mb-2"><b>Tipo. Licencia: </b> {license?.situacion_laboral?.nombre}</div>
-                        <div className="mb-2"><b>Fecha Resolución: </b> {moment(license?.date_start).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>Fecha Inicio: </b> {moment(license?.date_start).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>Fecha Termino: </b> {moment(license?.date_over).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>Dias Usados: </b> {license?.days_used}</div>
-                        <div className="mb-2"><b>Tipo: </b> <span className="badge badge-primary">{license?.is_pay ? 'Con Gose' : 'Sin Gose'}</span></div>
-                        <div className="mb-2"><b>Descripción: </b> {license?.description}</div>
+                        <div className="mb-2"><b>Fecha Resolución: </b> {moment(displacement?.date_start).format('DD/MM/YYYY')}</div>
+                        <div className="mb-2"><b>Fecha Inicio: </b> {moment(displacement?.date_start).format('DD/MM/YYYY')}</div>
+                        <div className="mb-2"><b>Fecha Termino: </b> {moment(displacement?.date_over).format('DD/MM/YYYY')}</div>
+                        <div className="mb-2"><b>Dependencia: </b> {displacement?.dependencia?.nombre}</div>
+                        <div className="mb-2"><b>Perfil Laboral: </b> <span className="badge badge-dark">{displacement?.perfil_laboral?.nombre}</span></div>
+                        <div className="mb-2"><b>Descripción: </b> {displacement?.description}</div>
                     </div>
                 </div>
             </div>
@@ -39,7 +38,7 @@ const ItemAscent = ({ license, onUpdate = null, onDelete = null }) => {
             <Show condicion={option == 'EDIT'}>
                 <EditLicense
                     onClose={() => setOption("")}
-                    license={license}
+                    displacement={displacement}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
                 />
