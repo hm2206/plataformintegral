@@ -3,10 +3,10 @@ import Modal from '../../modal';
 import { Button } from 'semantic-ui-react';
 import FormMerit from './formMerit';
 import { Confirm } from '../../../services/utils';
-import LicenseProvider from '../../../providers/escalafon/LicenseProvider';
+import MeritProvider from '../../../providers/escalafon/MeritProvider';
 import Swal from 'sweetalert2';
 
-const licenseProvider = new LicenseProvider();
+const meritProvider = new MeritProvider();
 
 const CreateMerit = ({ info = {}, onClose = null, onSave = null }) => {
 
@@ -15,10 +15,7 @@ const CreateMerit = ({ info = {}, onClose = null, onSave = null }) => {
     const [current_loading, setCurrentLoading] = useState(false);
 
     const readySave = useMemo(() => {
-        let required = [
-            'situacion_laboral_id', 'resolution', 'date_resolution',
-            'date_start', 'date_over', 'description'
-        ];
+        let required = ['date', 'modo', 'title', 'description'];
         // validar
         for (let item of required) {
             let value = form[item];
@@ -38,16 +35,16 @@ const CreateMerit = ({ info = {}, onClose = null, onSave = null }) => {
     }
 
     const handleSave = async () => {
-        let answer = await Confirm('info', '¿Estas seguro en guardar la licencia?', 'Guardar');
+        let answer = await Confirm('info', '¿Estas seguro en guardar la mérito/desmérito?', 'Guardar');
         if (!answer) return;
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
         payload.info_id = info.id;
-        await licenseProvider.store(payload)
+        await meritProvider.store(payload)
         .then(res => {
-            let { message, license } = res.data;
+            let { message, merit } = res.data;
             Swal.fire({ icon: 'success', text: message });
-            if (typeof onSave == 'function') onSave(license);
+            if (typeof onSave == 'function') onSave(merit);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
             setErrors(err.errors || {});

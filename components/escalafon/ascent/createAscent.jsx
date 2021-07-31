@@ -63,6 +63,7 @@ const CreateAscent = ({ info = {}, onClose = null, onSave = null }) => {
         >
             <FormAscent className="card-body"
                 form={form}
+                cargo_id={info?.cargo_id}
                 errors={errors}
                 onChange={handleInput}
             >

@@ -1,21 +1,12 @@
-import moment from 'moment';
-import React, { useMemo } from 'react';
-import { Form, Checkbox } from 'semantic-ui-react';
-import { SelectTypeCategoria } from '../../select/cronograma';
+import React from 'react';
+import { Form } from 'semantic-ui-react';
+import { SelectCargoTypeCategoria } from '../../select/cronograma';
 
-const FormAscent = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null, disabled = false }) => {
+const FormAscent = ({ cargo_id, children, form = {}, errors = {}, className = null, readOnly = [], onChange = null, disabled = false }) => {
 
     const handleChange = (e, { name, value }) => {
         if (typeof onChange == 'function') onChange(e, { name, value });
     }
-
-    const displayDaysUser = useMemo(() => {
-        if (!form?.date_start || !form?.date_over) return 0;
-        let date_start = moment(form?.date_start);
-        let date_over = moment(form?.date_over);
-        let duration = date_over.diff(date_start, 'days').valueOf() + 1;
-        return duration
-    }, [form]);
 
     return (
         <Form className={className}>
@@ -44,7 +35,8 @@ const FormAscent = ({ children, form = {}, errors = {}, className = null, readOn
 
                 <Form.Field className="col-md-6 mb-3" error={errors?.type_categoria_id?.[0] ? true : false}>
                     <label htmlFor="">Tip Categoría <b className="text-red">*</b></label>
-                    <SelectTypeCategoria
+                    <SelectCargoTypeCategoria
+                        cargo_id={cargo_id}
                         name="type_categoria_id"
                         disabled={readOnly.includes('type_categoria_id') || disabled}
                         value={form?.type_categoria_id || ""}

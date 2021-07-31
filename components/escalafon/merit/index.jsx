@@ -48,14 +48,14 @@ const Merit = ({ work }) => {
     // obtener permissions
     const getDatos = async (add = false) => {
         setCurrentLoading(true);
-        await infoProvider.licenses(current_info.id, { page: current_page })
+        await infoProvider.merits(current_info.id, { page: current_page })
         .then(res => {
-            let { success, message, licenses } = res.data;
+            let { success, message, merits } = res.data;
             if (!success) throw new Error(message);
             setError(false);
-            setCurrentTotal(licenses.total);
-            setCurrentLastPage(licenses.lastPage);
-            setCurrentData(add ? [...current_data, ...licenses.data] : licenses.data);
+            setCurrentTotal(merits.total);
+            setCurrentLastPage(merits.lastPage);
+            setCurrentData(add ? [...current_data, ...merits.data] : merits.data);
         })
         .catch(() => setError(true))
         setCurrentLoading(false);
@@ -66,10 +66,10 @@ const Merit = ({ work }) => {
         getDatos();
     }
 
-    const onUpdate = async (permission) => {
+    const onUpdate = async (merit) => {
         let newDatos = [];
         await current_data?.filter(d => {
-            if (d.id == permission.id) newDatos.push(permission);
+            if (d.id == merit.id) newDatos.push(merit);
             else newDatos.push(d);
             return d;
         });
@@ -152,7 +152,7 @@ const Merit = ({ work }) => {
             <div className="col-md-8">
                 {current_data.map((d, indexD) => 
                     <ItemMerit key={`grado-lista-${indexD}`}
-                        license={d}
+                        merit={d}
                         onUpdate={onUpdate}
                         onDelete={onDelete}
                     />

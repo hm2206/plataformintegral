@@ -4,7 +4,7 @@ import moment from 'moment'
 import EditAscent from './editAscent';
 import Show from '../../show';
 
-const ItemAscent = ({ ascent, onUpdate = null, onDelete = null }) => {
+const ItemAscent = ({ ascent, info, onUpdate = null, onDelete = null }) => {
 
     const [option, setOption] = useState("");
 
@@ -37,6 +37,7 @@ const ItemAscent = ({ ascent, onUpdate = null, onDelete = null }) => {
                 <EditAscent
                     onClose={() => setOption("")}
                     ascent={ascent}
+                    info={info}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
                 />

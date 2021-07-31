@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 
 const ascentProvider = new AscentProvider();
 
-const EditLicense = ({ ascent = {}, onClose = null, onUpdate = null, onDelete = null }) => {
+const EditLicense = ({ info, ascent = {}, onClose = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
@@ -87,6 +87,7 @@ const EditLicense = ({ ascent = {}, onClose = null, onUpdate = null, onDelete = 
         >
             <FormLicense className="card-body"
                 form={form}
+                cargo_id={info?.cargo_id}
                 errors={errors}
                 disabled={current_loading}
                 onChange={handleInput}

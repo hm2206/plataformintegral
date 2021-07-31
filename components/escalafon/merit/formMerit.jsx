@@ -22,43 +22,43 @@ const FormMerit = ({ children, form = {}, errors = {}, className = null, readOnl
                 </Form.Field>
                 
 
-                <Form.Field className="col-md-6 mb-3" error={errors?.accion?.[0] ? true : false}>
-                    <label htmlFor="">Acción<b className="text-red">*</b></label>
+                <Form.Field className="col-md-6 mb-3" error={errors?.modo?.[0] ? true : false}>
+                    <label htmlFor="">Modo<b className="text-red">*</b></label>
                     <Select
-                        name="accion"
+                        name="modo"
                         placeholder="Seleccionar"
                         options={[
-                            { key: "MERITO", value: "MERITO", text: "Mérito" },
-                            { key: "DESMERITO", value: "DEMERITO", text: "Demérito" },
+                            { key: "MERIT", value: "MERIT", text: "Mérito" },
+                            { key: "DEMERIT", value: "DEMERIT", text: "Demérito" },
                         ]}
-                        value={`${form.accion || ""}`}
+                        value={`${form.modo || ""}`}
                         onChange={(e, obj) => handleChange(e, obj)}
-                        disabled={readOnly.includes('accion') || disabled}
+                        disabled={readOnly.includes('modo') || disabled}
                     />
-                    <label htmlFor="">{errors?.accion?.[0] || ""}</label>
+                    <label htmlFor="">{errors?.modo?.[0] || ""}</label>
                 </Form.Field>
 
-                <Form.Field className="col-md-12 mb-3" error={errors?.otorgado?.[0] ? true : false}>
-                    <label htmlFor="">Otorgado <b className="text-red">*</b> </label>
+                <Form.Field className="col-md-12 mb-3" error={errors?.title?.[0] ? true : false}>
+                    <label htmlFor="">Titulo <b className="text-red">*</b> </label>
                     <input type="text" 
-                        name="otorgado"
-                        readOnly={readOnly.includes('otorgado') || disabled}
-                        value={form?.otorgado || ""}
+                        name="title"
+                        readOnly={readOnly.includes('title') || disabled}
+                        value={form?.title || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
-                    <label htmlFor="">{errors?.otorgado?.[0] || ""}</label>
+                    <label htmlFor="">{errors?.title?.[0] || ""}</label>
                 </Form.Field>
 
 
-                <Form.Field className="col-md-12 mb-3" error={errors?.detalles?.[0] ? true : false}>
-                    <label htmlFor="">Detalles <b className="text-red">*</b></label>
+                <Form.Field className="col-md-12 mb-3" error={errors?.description?.[0] ? true : false}>
+                    <label htmlFor="">Descripción <b className="text-red">*</b></label>
                     <textarea rows="3"
-                        name="detalles"
-                        readOnly={readOnly.includes('detalles') || disabled}
-                        value={form?.detalles || ""}
+                        name="description"
+                        readOnly={readOnly.includes('description') || disabled}
+                        value={form?.description || ""}
                         onChange={(e) => handleChange(e,  e.target)}
                     />
-                    <label htmlFor="">{errors?.detalles?.[0] || ""}</label>
+                    <label htmlFor="">{errors?.description?.[0] || ""}</label>
                 </Form.Field>
 
                 {children || null}

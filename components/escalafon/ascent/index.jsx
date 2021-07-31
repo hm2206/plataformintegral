@@ -153,6 +153,7 @@ const Ascent = ({ work }) => {
                 {current_data.map((d, indexD) => 
                     <ItemAscent key={`grado-lista-${indexD}`}
                         ascent={d}
+                        info={current_info}
                         onUpdate={onUpdate}
                         onDelete={onDelete}
                     />

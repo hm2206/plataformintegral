@@ -4,12 +4,12 @@ import { Button, Progress } from 'semantic-ui-react';
 import FormMerit from './formMerit';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
-import LicenseProvider from '../../../providers/escalafon/LicenseProvider';
+import MeritProvider from '../../../providers/escalafon/MeritProvider';
 import Swal from 'sweetalert2';
 
-const licenseProvider = new LicenseProvider();
+const meritProvider = new MeritProvider();
 
-const EditMerit = ({ license = {}, onClose = null, onUpdate = null, onDelete = null }) => {
+const EditMerit = ({ merit = {}, onClose = null, onUpdate = null, onDelete = null }) => {
 
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
@@ -17,10 +17,7 @@ const EditMerit = ({ license = {}, onClose = null, onUpdate = null, onDelete = n
     const [current_loading, setCurrentLoading] = useState(false);
 
     const canSave = useMemo(() => {
-        let required = [
-            'situacion_laboral_id', 'resolution', 'date_resolution',
-            'date_start', 'date_over', 'description'
-        ];
+        let required = ['date', 'modo', 'title', 'description'];
         // validar
         for (let item of required) {
             let value = form[item];
@@ -44,11 +41,11 @@ const EditMerit = ({ license = {}, onClose = null, onUpdate = null, onDelete = n
         let answer = await Confirm('info', `¿Estás seguro en guardar los cambios?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await licenseProvider.update(license.id, form)
+        await meritProvider.update(merit.id, form)
         .then(async res => {
-            let { message, license } = res.data;
+            let { message, merit } = res.data;
             let newForm = Object.assign({}, form);
-            newForm = { ...form, ...license };
+            newForm = { ...form, ...merit };
             await Swal.fire({ icon: 'success', text: message });
             if (typeof onUpdate == 'function') await onUpdate(newForm);
             setEdit(false)
@@ -63,11 +60,11 @@ const EditMerit = ({ license = {}, onClose = null, onUpdate = null, onDelete = n
         let answer = await Confirm('warning', `¿Estás seguro en eliminar?`, 'Estoy seguro');
         if (!answer) return;
         setCurrentLoading(true);
-        await licenseProvider.delete(license.id)
+        await meritProvider.delete(merit.id)
         .then(async res => {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
-            if (typeof onDelete == 'function') await onDelete(license);
+            if (typeof onDelete == 'function') await onDelete(merit);
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
         });
@@ -75,7 +72,7 @@ const EditMerit = ({ license = {}, onClose = null, onUpdate = null, onDelete = n
     }
 
     useEffect(() => {
-        if (!edit) setForm(Object.assign({}, license))
+        if (!edit) setForm(Object.assign({}, merit))
     }, [edit]);
 
     return (
