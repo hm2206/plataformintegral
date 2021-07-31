@@ -17,8 +17,9 @@ const ItemDegrees = ({ degree, onUpdate = null, onDelete = null }) => {
                 <div className="row">
                     <div className="col-md-12">
                         <div className="mb-2"><b>Tipo. Grado: </b> {degree?.type_degree?.name}</div>
-                        <div className="mb-2"><b>Institución: </b> {moment(degree?.date_start).format('DD/MM/YYYY')}</div>
-                        <div className="mb-2"><b>N° Documento: </b> {degree?.type_degree?.name}</div>
+                        <div className="mb-2"><b>Institución: </b> {degree?.institution}</div>
+                        <div className="mb-2"><b>N° Documento: </b> {degree?.document_number}</div>
+                        <div className="mb-2"><b>Fecha: </b> {moment(degree?.date).format('DD/MM/YYYY')}</div>
                         <div className="mb-2"><b>Descripción: </b> {degree?.description}</div>
                     </div>
                 </div>
