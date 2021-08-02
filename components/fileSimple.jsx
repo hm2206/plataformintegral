@@ -26,13 +26,14 @@ const extensions = {
     mp4: icons.video,
 };
 
-const FileSimple = ({ name = "archivo.tmp", url = null, size = 0, extname = "tmp", date = '2021-02-04 11:20:01', onDelete = null, loading = false }) => {
+const FileSimple = ({ name = "archivo.tmp", url = null, size = 0, extname = "tmp", date = '2021-02-04 11:20:01', onDelete = null, onClick = null, loading = false }) => {
 
     const extension = extensions[extname] || {}
 
     // generar link
     const handleLink = (e) => {
         e.preventDefault();
+        if (typeof onClick == 'function') return onClick(e);
         if (!url) return false;
         let a = document.createElement('a');
         a.target = '_blank';

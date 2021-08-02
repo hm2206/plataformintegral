@@ -16,7 +16,7 @@ const CreateDisplacement = ({ info = {}, onClose = null, onSave = null }) => {
 
     const readySave = useMemo(() => {
         let required = [
-            'resolution', 'date_resolution', 'date_start', 'date_over', 
+            'resolution', 'date_resolution', 'date_start', 
             'dependencia_id', 'perfil_laboral_id', 'description'
         ];
         // validar

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from 'semantic-ui-react';
 import moment from 'moment'
 import EditLicense from './editDisplacement';
+import ListFile from '../file/listFile';
 import Show from '../../show';
 
 const ItemAscent = ({ displacement, onUpdate = null, onDelete = null }) => {
@@ -28,6 +29,10 @@ const ItemAscent = ({ displacement, onUpdate = null, onDelete = null }) => {
             <div className="card-footer">
                 <div className="card-body text-right">
                     <Button.Group size="mini">
+                        <Button color="black" basic onClick={() => setOption("FILE")}>
+                            <i className="far fa-file-alt"></i>
+                        </Button>
+
                         <Button onClick={() => setOption("EDIT")}>
                             <i className="fas fa-pencil-alt"></i>
                         </Button>
@@ -41,6 +46,15 @@ const ItemAscent = ({ displacement, onUpdate = null, onDelete = null }) => {
                     displacement={displacement}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
+                />
+            </Show>
+            {/* mostrar archivos */}
+            <Show condicion={option == 'FILE'}>
+                <ListFile
+                    onClose={() => setOption(false)}
+                    objectId={displacement?.id}
+                    objectType="App/Models/Displacement"
+                    multiple={true}
                 />
             </Show>
         </div>

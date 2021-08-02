@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Button } from 'semantic-ui-react';
 import moment from 'moment'
 import EditLicense from './editMerit';
+import ListFile from '../file/listFile';
 import Show from '../../show';
 
 const ItemMerit = ({ merit, onUpdate = null, onDelete = null }) => {
@@ -32,6 +33,10 @@ const ItemMerit = ({ merit, onUpdate = null, onDelete = null }) => {
             <div className="card-footer">
                 <div className="card-body text-right">
                     <Button.Group size="mini">
+                        <Button color="black" basic onClick={() => setOption("FILE")}>
+                            <i className="far fa-file-alt"></i>
+                        </Button>
+
                         <Button onClick={() => setOption("EDIT")}>
                             <i className="fas fa-pencil-alt"></i>
                         </Button>
@@ -45,6 +50,15 @@ const ItemMerit = ({ merit, onUpdate = null, onDelete = null }) => {
                     merit={merit}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
+                />
+            </Show>
+            {/* mostrar archivos */}
+            <Show condicion={option == 'FILE'}>
+                <ListFile
+                    onClose={() => setOption(false)}
+                    objectId={merit?.id}
+                    objectType="App/Models/Merit"
+                    multiple={true}
                 />
             </Show>
         </div>

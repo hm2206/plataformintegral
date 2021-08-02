@@ -3,6 +3,7 @@ import { Button } from 'semantic-ui-react';
 import moment from 'moment'
 import EditDegrees from './editDegrees';
 import Show from '../../show';
+import ListFile from '../file/listFile';
 
 const ItemDegrees = ({ degree, onUpdate = null, onDelete = null }) => {
 
@@ -27,6 +28,10 @@ const ItemDegrees = ({ degree, onUpdate = null, onDelete = null }) => {
             <div className="card-footer">
                 <div className="card-body text-right">
                     <Button.Group size="mini">
+                        <Button color="black" basic onClick={() => setOption("FILE")}>
+                            <i className="far fa-file-alt"></i>
+                        </Button>
+
                         <Button onClick={() => setOption("EDIT")}>
                             <i className="fas fa-pencil-alt"></i>
                         </Button>
@@ -40,6 +45,15 @@ const ItemDegrees = ({ degree, onUpdate = null, onDelete = null }) => {
                     degree={degree}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
+                />
+            </Show>
+            {/* mostrar archivos */}
+            <Show condicion={option == 'FILE'}>
+                <ListFile
+                    onClose={() => setOption(false)}
+                    objectId={degree?.id}
+                    objectType="App/Models/Degree"
+                    multiple={true}
                 />
             </Show>
         </div>

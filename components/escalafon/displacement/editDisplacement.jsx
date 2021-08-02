@@ -4,7 +4,8 @@ import { Button, Progress } from 'semantic-ui-react';
 import FormDisplacement from './formDisplacement';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
-import DisplacementProvider from '../../../providers/escalafon/DisplacementProvider';
+import DisplacementProvider from '../../../providers/escalafon/DisplacementProvider'
+import ListFile from '../file/listFile';;
 import Swal from 'sweetalert2';
 
 const displacementProvider = new DisplacementProvider();
@@ -18,7 +19,7 @@ const EditDisplacement = ({ displacement = {}, onClose = null, onUpdate = null, 
 
     const canSave = useMemo(() => {
         let required = [
-            'resolution', 'date_resolution', 'date_start', 'date_over', 
+            'resolution', 'date_resolution', 'date_start', 
             'dependencia_id', 'perfil_laboral_id', 'description'
         ];
         // validar

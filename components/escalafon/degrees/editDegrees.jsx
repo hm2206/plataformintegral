@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Modal from '../../modal';
 import { Button, Progress } from 'semantic-ui-react';
-import FormDesgrees from './formDegrees';
 import Show from '../../show';
 import { Confirm } from '../../../services/utils';
 import DegreeProvider from '../../../providers/escalafon/DegreeProvider';
@@ -16,6 +15,7 @@ const EditDegrees = ({ degree = {}, onClose = null, onUpdate = null, onDelete = 
     const [edit, setEdit] = useState(false);
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
+    const [add_file, setAddFile] = useState(false)
 
     const canSave = useMemo(() => {
         let required = [

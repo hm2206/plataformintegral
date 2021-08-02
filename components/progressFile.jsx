@@ -18,7 +18,7 @@ const ProgressFile = ({
 }) => {
 
     // estados
-    const [is_paso, setIsPaso] = useState(stepDefault);
+    const [is_paso, setIsPaso] = useState("INITIAL");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState(message);
     const [is_upload, setIsUpload] = useState(false);
@@ -87,6 +87,11 @@ const ProgressFile = ({
             setIsUpload(false);
         }
     }
+
+    // estado default
+    useEffect(() => {
+        setIsPaso(stepDefault)
+    }, [file])
 
     // mostrar información
     useEffect(() => {
