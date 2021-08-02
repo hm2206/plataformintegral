@@ -1,9 +1,11 @@
-import React,  { useEffect, useState } from 'react';
+import React,  { useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { tramite, onProgress } from '../services/apis';
 import Show from './show';
 import Swal from 'sweetalert2';
 import { Button } from 'semantic-ui-react';
+import { credencials } from '../env.json'
+import { AuthContext } from '../contexts/AuthContext'
 
 const options = {
     IFRAME: 'IFRAME',
@@ -24,9 +26,11 @@ const Visualizador = ({
     onDownload = null, 
     onClose = null, 
     onUpdate = null, 
-    onPrint = null,
     is_observation = true, is_print = false,
 }) => {
+
+    // auth
+    const auth_context = useContext(AuthContext)
 
     // estados
     const [current_url, setCurrentUrl] = useState("");
@@ -37,12 +41,25 @@ const Visualizador = ({
     const [current_observation, setCurrentObservation] = useState(observation);
     const [current_loading, setCurrentLoading] = useState(false);
     const [current_percent, setCurrentPercent] = useState(0);
-    const action = actions[extname] || "";
+
+    const currentAction = useMemo(() => {
+        return actions[extname] || "";
+    }, [extname])
+
+    const options = {
+        responseType: 'blob',
+        onDownloadProgress: (evt) => onProgress(evt, setCurrentPercent),
+        headers: {
+            ClientId: credencials?.ClientId,
+            ClientSecret: credencials?.ClientSecret,
+            Authorization: `Bearer ${auth_context?.token}`
+        }
+    }
 
     // obtener archivo
     const getFile = async () => {
         setCurrentLoading(true);
-        await axios.get(url, { responseType: 'blob', onDownloadProgress: (evt) => onProgress(evt, setCurrentPercent)})
+        await axios.get(url, options)
         .then(async res => {
             let type = res.headers['content-type'];
             let blob = new Blob([res.data], { type });
@@ -146,7 +163,7 @@ const Visualizador = ({
                             <i className="fas fa-download"></i>
                         </button>
 
-                        <Show condicion={canPrint.includes(action) && is_print}>
+                        <Show condicion={canPrint.includes(currentAction) && is_print}>
                             <button className="btn text-white font-15"
                                 disabled={!is_download}
                                 onClick={printFile}
@@ -163,15 +180,15 @@ const Visualizador = ({
                 </Show>
             </div>
             <div className="h-100">
-                <Show condicion={action == options.IFRAME}>
+                <Show condicion={currentAction == 'IFRAME'}>
                     <iframe src={current_url} width="100%" height="92%" style={{ border: "0px", objectFit: 'contain' }} id={id}/>
                 </Show>
-                <Show condicion={action == options.IMAGE}>
+                <Show condicion={currentAction == 'IMAGE'}>
                     <div className="row justify-content-center h-100">
                         <img src={current_url} alt={name} style={{ objectFit: 'contain', maxHeight: "100%" }}/>
                     </div>
                 </Show>
-                <Show condicion={is_download && !action}>
+                <Show condicion={is_download && !currentAction}>
                     <div className="text-center h-100 row justify-content-center align-items-center">
                         <div className="col-12">
                             <span onClick={downloadFile} className="btn btn-outline-light cursor-pointer">

@@ -10,6 +10,7 @@ import { EntityProvider } from '../contexts/EntityContext';
 import { SocketProvider } from '../contexts/SocketContext';
 import { NotificationProvider } from '../contexts/notification/NotificationContext';
 import router from 'next/router';
+import Cookies from 'js-cookie';
 
 export const AuthContext = createContext();
 
@@ -18,12 +19,10 @@ export const AuthProvider = ({ children }) => {
 
     // estados
     const [auth, setAuth] = useState({});
-
-    // app context
-    const { auth_token } = useContext(AppContext);
+    const [token, setToken] = useState(null)
 
     // auth context
-    const { getAuth, logout, is_logged, loading, removeToken } = useAuth(auth_token);
+    const { getAuth, logout, is_logged, loading, removeToken } = useAuth();
 
     // obtener el auth
     const handleAuth = async () => {
@@ -31,10 +30,15 @@ export const AuthProvider = ({ children }) => {
         setAuth(authTemp);
     }
 
+    const recoveryToken = () => {
+        setToken(Cookies.get('auth_token') || null);
+    }
+
     // executar el auth
     useEffect(() => {
         handleAuth();
-    }, [auth_token]);
+        recoveryToken();
+    }, []);
 
     // no se pudo loggear
     useEffect(() => {
@@ -46,7 +50,7 @@ export const AuthProvider = ({ children }) => {
 
     // response
     return (
-        <AuthContext.Provider value={{ logout, is_logged, auth, setAuth, loading }}>
+        <AuthContext.Provider value={{ logout, is_logged, auth, setAuth, loading, token }}>
             <EntityProvider>
                 <SocketProvider>
                     <NotificationProvider>

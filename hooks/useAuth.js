@@ -26,7 +26,7 @@ const useAuth = () => {
         setLoading(true);
         let { user, success } = await authentication.get('me')
             .then(res => res.data)
-            .catch(err => ({ success: false, user: {} }));
+            .catch(() => ({ success: false, user: {} }));
         setLoading(false);
         setIsLogged(success);
         return user;
