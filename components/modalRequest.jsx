@@ -28,7 +28,8 @@ const PlaceholderItem = () => {
 
 const schemaData = {
     image: "",
-    text: ""
+    text: "",
+    badge: "",
 };
 
 const ModalRequest = ({ 
@@ -83,6 +84,7 @@ const ModalRequest = ({
                 __id: d[verifyHidden],
                 image: renderObj('image', d),
                 text: renderObj('text', d),
+                badge: renderObj('badge', d),
                 obj: d
             });
         }
@@ -168,7 +170,10 @@ const ModalRequest = ({
                                 <Image avatar src={obj.image || '/img/base.png'} 
                                     style={{ objectFit: 'cover' }}
                                 />
-                                <List.Content><span className="uppercase">{obj.text || ""}</span></List.Content>
+                                <List.Content>
+                                    <span className="uppercase">{obj.text || ""}</span>
+                                    <span className="badge badge-dark ml-1">{obj?.badge || ''}</span>
+                                </List.Content>
                             </List.Item>
                         )}
                         {/* no hay registros */}
