@@ -258,7 +258,7 @@ const ListAssistance = () => {
                             {assistances?.data?.map((a, indexA) => 
                                 <ItemAssistance assistance={a}
                                     index={indexA}
-                                    group={a.schedule_id != assistances?.data?.[indexA + 1]?.schedule_id ? true : false}
+                                    group={a.person_id != assistances?.data?.[indexA + 1]?.person_id ? true : false}
                                     key={`list-assistance-table-${indexA}`}
                                 />
                             )}

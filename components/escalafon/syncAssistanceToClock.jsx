@@ -6,6 +6,7 @@ import Skeleton from 'react-loading-skeleton';
 import ClockProvider from '../../providers/escalafon/ClockProvider';
 import { EntityContext } from '../../contexts/EntityContext';
 import { useEffect } from 'react';
+import { AssistanceContext } from '../../contexts/escalafon/AssistanceContext';
 
 // providers
 const clockProvider = new ClockProvider(); 
@@ -26,6 +27,7 @@ const ItemClock = ({ object = {} }) => {
 
     // entity
     const { entity_id } = useContext(EntityContext);
+    const { year, month } = useContext(AssistanceContext)
 
     // estado
     const [current_clock, setCurrentClock] = useState(object);
@@ -41,9 +43,8 @@ const ItemClock = ({ object = {} }) => {
 
     const asyncAssistances = async () => {
         setCurrentLoading(true);
-        await clockProvider.syncAssistance(current_clock.id, {}, options)
-        .then(res => {
-            let { clocks } = res.data;
+        await clockProvider.syncAssistance(current_clock.id, { year, month }, options)
+        .then(() => {
             setIsError(false);
             setCurrentClock({ ...current_clock, sync: 1 });
         }).catch(err => setIsError(true))
@@ -82,7 +83,7 @@ const ItemClock = ({ object = {} }) => {
     )
 }
 
-const SyncAssistanceToClock = ({ onClose = null }) => {
+const SyncAssistanceToClock = ({ onClose = null, year = null, month = null }) => {
 
     // entity
     const { entity_id } = useContext(EntityContext);

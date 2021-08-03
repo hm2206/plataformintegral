@@ -75,7 +75,7 @@ const ItemAssistance = ({ index, assistance = {}, group = false }) => {
     return (
         <tr style={{ borderBottom: group ? '2px solid #000' : '' }}>
             <td>{index + 1}</td>
-            <td className="capitalize">{assistance?.person?.fullname}</td>
+            <td className="capitalize">{assistance?.person?.fullname} {assistance.schedule_id}</td>
             <td className="text-center">
                 <span className="badge badge-dark"> 
                     <i className="fas fa-clock mr-1"></i>

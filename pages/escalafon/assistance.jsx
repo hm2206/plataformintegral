@@ -7,8 +7,21 @@ import CreateAssistance from '../../components/escalafon/createAssistance';
 import SyncAssistanceToClock from '../../components/escalafon/syncAssistanceToClock';
 import { EntityContext } from '../../contexts/EntityContext';
 import Show from '../../components/show';
-import { AssistanceProvider } from '../../contexts/escalafon/AssistanceContext';
+import { AssistanceContext, AssistanceProvider } from '../../contexts/escalafon/AssistanceContext';
 import { Message } from 'semantic-ui-react';
+
+const WrapperSyncClock = () => {
+
+    const { year, month, setOption } = useContext(AssistanceContext)
+
+    return (
+        <SyncAssistanceToClock 
+            year={year}
+            month={month}
+            onClose={() => setOption("")}
+        />
+    )
+}
 
 const Assistance = ({ pathname, query }) =>  {
 
@@ -72,7 +85,7 @@ const Assistance = ({ pathname, query }) =>  {
                 </Show>
                 {/* sincronizar asistencia */}
                 <Show condicion={option == 'SYNC-ASSISTANCE'}>
-                    <SyncAssistanceToClock onClose={() => setOption("")}/>
+                    <WrapperSyncClock/>
                 </Show>
             </div>
         </AssistanceProvider>
