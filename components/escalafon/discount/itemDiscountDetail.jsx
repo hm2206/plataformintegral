@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Show from '../../show';
+import ItemInfoSchedule from './itemInfoSchedule';
 
 const letterTypes = {
     vacation: "App/Models/Vacation",
@@ -33,6 +34,8 @@ const ItemDiscountDetail = ({ date = {} }) => {
     const discounts =  date?.discounts || [];
     const isDiscounts = discounts?.length || 0; 
 
+    const [option, setOption] = useState("")
+
     const currentStatus = useMemo(() => {
         return date?.schedule?.status;
     }, [date]);
@@ -65,8 +68,13 @@ const ItemDiscountDetail = ({ date = {} }) => {
         return null;
     }, [isSuccess, isDanger, isWarning]);
 
+    const handleInfo = () => {
+        if (!isSuccess && !isWarning && !IsPrimary) return;
+        setOption("INFO")
+    }
+
     return (
-        <th className={`text-center font-11 ${styleClass}`}>
+        <th className={`text-center font-11 ${styleClass}`} onDoubleClick={handleInfo}>
             <Show condicion={!isDanger}
                 predeterminado={<span className="cursor-pointer" title={`Descuento: ${currentDiscount}`}>F</span>}
             >
@@ -100,6 +108,14 @@ const ItemDiscountDetail = ({ date = {} }) => {
                         <ItemDetail discount={d}/>
                     </span>    
                 )}  
+            </Show>
+
+            {/* info de la schedule */}
+            <Show condicion={option == 'INFO'}>
+                <ItemInfoSchedule
+                    date={date}
+                    onClose={() => setOption("")}
+                />
             </Show>
         </th>
     )
