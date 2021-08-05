@@ -26,7 +26,7 @@ const ItemInfo = ({ info = {}, onEdit = null }) => {
             <div className="card-body">
                 <div className="mb-2"><b>Resolución: </b>{info?.resolucion}</div>
                 <div className="mb-2"><b>Fecha de Resolución: </b>{info?.fecha_de_resolucion}</div>
-                <div className="mb-2"><b>Fecha de Incio: </b>{info?.fecha_de_inicio}</div>
+                <div className="mb-2"><b>Fecha de Incio: </b>{info?.fecha_de_ingreso}</div>
                 <div className="mb-2"><b>Fecha de cese: </b>{info?.fecha_de_cese}</div>
                 <div className="mb-2"><b>Plaza: </b>{info?.plaza}</div>
                 <div className="mb-2"><b>P.A.P: </b>{info?.pap}</div>
