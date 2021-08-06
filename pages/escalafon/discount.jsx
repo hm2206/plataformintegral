@@ -108,7 +108,7 @@ const Discount = ({ pathname, query }) => {
     }, [year, month]);
 
     const countColumns = useMemo(() => {
-        return countDays + 9;
+        return countDays + 8;
     }, [countDays]);
 
     const isNextPage = useMemo(() => {
@@ -268,7 +268,6 @@ const Discount = ({ pathname, query }) => {
                                                 <th className="text-center no-wrap">TOT <br /> MIN</th>
                                                 <th className="text-center no-wrap">(*) <br /> TOTAL <br /> DESC.</th>
                                                 <th className="text-center no-wrap">DCTO <br /> X <br /> MIN</th>
-                                                <th className="text-center no-wrap">DIAS L.</th>
                                                 <th className="text-center no-wrap">BASE DE <br /> CALCULO</th>
                                             </tr>
                                         </thead>

@@ -42,7 +42,7 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                     <label>Fecha</label>
                     <input type="date"
                         name="date"
-                        readOnly={readOnly.includes('date')}
+                        readOnly={readOnly.includes('date') || disabled}
                         value={form?.date || ""}
                         onChange={(e) => handleChange(e, e.target)}
                     />
@@ -111,6 +111,37 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                         />
                         <label htmlFor="">{errors?.delay_start?.[0] || ""}</label>
                     </Form.Field>
+                </Show>
+
+                <Show condicion={form?.status != 'D'}>
+                    <Form.Field className="col-md-6 mb-3" error={errors?.status?.[0] ? true : false}>
+                        <label htmlFor="">Estado <b className="text-red">*</b></label>
+                        <Select placeholder="Selecionar Estado"
+                            options={[
+                                { key: "A", value: "A", text: "Asistencia" },
+                                { key: "F", value: "F", text: "Falta" },
+                            ]}
+                            disabled={readOnly.includes('status') || disabled}
+                            name="status"
+                            onChange={(e, obj) => handleChange(e, obj)}
+                            value={form?.status || ""}
+                        />
+                        <label htmlFor="">{errors?.status?.[0] || ""}</label>
+                    </Form.Field>
+
+                    <Show condicion={form?.status == 'A'}>
+                        <Form.Field className="col-md-6 mb-3" error={errors?.discount?.[0] ? true : false}>
+                            <label htmlFor="">Descuento</label>
+                            <input type="number" 
+                                step="any"
+                                name="discount"
+                                readOnly={readOnly.includes('discount') || disabled}
+                                value={form?.discount || 0}
+                                onChange={(e) => handleChange(e, e.target)}
+                            />
+                            <label htmlFor="">{errors?.discount?.[0] || ""}</label>
+                        </Form.Field>
+                    </Show>
                 </Show>
 
                 <Form.Field className="col-md-12 mb-3" error={errors?.delay_over?.[0] ? true : false}>

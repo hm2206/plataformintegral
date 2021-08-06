@@ -1,7 +1,15 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect, useContext } from 'react'
 import Modal from '../../modal'
-import { Input, Select } from 'semantic-ui-react'
+import { Button } from 'semantic-ui-react'
 import Show from '../../show'
+import FormSchedule from '../schedule/formSchedule'
+import { Confirm } from '../../../services/utils'
+import { AppContext } from '../../../contexts/AppContext'
+import ScheduleProvider from '../../../providers/escalafon/ScheduleProvider'
+import Swal from 'sweetalert2'
+
+// providers
+const scheduleProvider = new ScheduleProvider();
 
 const ItemVacation = ({ item = {} }) => {
     return (
@@ -78,6 +86,42 @@ const ItemDetalle = ({ detalle = {} }) => {
 
 const ItemInfoSchedule = ({ onClose = null, date = {} }) => {
 
+    const [current_schedule, setCurrentSchedule] = useState({})
+    const [errors, setErrors] = useState({})
+    const [current_edit, setCurrentEdit] = useState(false)
+
+    const app_context = useContext(AppContext)
+
+    const handleInput = (e, { name, value }) => {
+        let newForm = Object.assign({}, current_schedule);
+        newForm[name] = value;
+        setCurrentSchedule(newForm)
+        let newErrors = Object.assign({}, errors)
+        newErrors[name] = [];
+        setErrors(newErrors)
+        setCurrentEdit(true)
+    }
+
+    const handleIsEdit = async () => {
+        let answer = await Confirm('warning', '¿Estás seguro en guardar los cambios?', 'Guardar Cambios');
+        if (!answer) return;
+        app_context.setCurrentLoading(true)
+        await scheduleProvider.isEdit(current_schedule?.id, current_schedule)
+        .then(async res => {
+            let updateSchedule = res?.data?.schedule || {};
+            app_context.setCurrentLoading(false)
+            await Swal.fire({ icon: 'success', text: 'Los cambios se guardaron correctamente' })
+            setCurrentSchedule(prev => ({ ...prev, ...updateSchedule }))
+        }).catch(() => {
+            app_context.setCurrentLoading(false)
+            Swal.fire({ icon: 'error', text: 'No se pudó guardar los cambios' })
+        })
+    }
+
+    useEffect(() => {
+        setCurrentSchedule(date?.schedule || {})
+    }, [date?.schedule])
+
     return (
         <Modal show={true}
             isClose={onClose}
@@ -88,67 +132,24 @@ const ItemInfoSchedule = ({ onClose = null, date = {} }) => {
             }
         >
             <div className="card-body font-14 text-left">
-                <div className="row">
-                    <div className="col-md-12 mb-3">
-                        <label>Fecha</label>
-                        <Input type="date" 
-                            fluid
-                            value={date?.date}
-                            readOnly
-                        />
-                    </div>
-                    
+                <div className="row"> 
                     <Show condicion={date?.schedule}>
-                        <div className="col-12">
-                            <hr />
-                            <h4 className="mt-1"><i className="fas fa-calendar"></i> Horario</h4>
-                            <hr />
+                        <div className="card-body">
+                            <FormSchedule
+                                readOnly={['date', 'modo', 'time_start', 'time_over', 'delay_start']}
+                                form={current_schedule}
+                                onChange={handleInput}
+                            >
+                                <Show condicion={!current_schedule?.is_block && current_edit}>
+                                    <div className="col-md-12 text-right">
+                                        <hr />
+                                        <Button color="blue" onClick={handleIsEdit}>
+                                            <i className="fas fa-sync"></i> Actualizar
+                                        </Button>
+                                    </div>
+                                </Show>
+                            </FormSchedule>
                         </div>
-
-                        <div className="col-md-6 mb-3">
-                            <label>Modo</label>
-                            <Select disabled
-                                value={date?.schedule?.modo}
-                                options={[
-                                    { key: "ALL", value: "ALL", text: "Entrada/Salida" },
-                                    { key: "ENTRY", value: "ENTRY", text: "Entrada" },
-                                    { key: "EXIT", value: "EXIT", text: "Salida" }
-                                ]}
-                            />
-                        </div>
-                        
-                        <Show condicion={date?.schedule?.time_start}>
-                            <div className="col-md-6">
-                                <label>Hora de Ingreso</label>
-                                <Input type="time" 
-                                    fluid
-                                    value={date?.schedule?.time_start}
-                                    readOnly
-                                />
-                            </div>
-                        </Show>
-
-                        <Show condicion={date?.schedule?.time_over}>
-                            <div className="col-md-6">
-                                <label>Hora de Salida</label>
-                                <Input type="time" 
-                                    fluid
-                                    value={date?.schedule?.time_over}
-                                    readOnly
-                                />
-                            </div>
-                        </Show>
-
-                        <Show condicion={date?.schedule?.time_over}>
-                            <div className="col-md-6">
-                                <label>Descuento <small>(MIN)</small></label>
-                                <Input type="text" 
-                                    fluid
-                                    value={date?.schedule?.discount}
-                                    readOnly
-                                />
-                            </div>
-                        </Show>
                     </Show>
 
                     <Show condicion={date?.discounts?.length}>

@@ -61,15 +61,15 @@ const ItemDiscountDetail = ({ date = {} }) => {
     }, [currentStatus]);
 
     const styleClass = useMemo(() => {
-        if (isSuccess) return 'success';
+        if (isSuccess) return '';
         if (isDanger) return 'danger';
-        if (isWarning) return 'warning';
+        if (isWarning) return '';
         if (IsPrimary) return 'primary'
         return null;
     }, [isSuccess, isDanger, isWarning]);
 
     const handleInfo = () => {
-        if (!isSuccess && !isWarning && !IsPrimary) return;
+        if (!isSuccess && !isWarning && !IsPrimary && !isDanger) return;
         setOption("INFO")
     }
 
@@ -79,7 +79,7 @@ const ItemDiscountDetail = ({ date = {} }) => {
                 predeterminado={<span className="cursor-pointer" title={`Descuento: ${currentDiscount}`}>F</span>}
             >
                 <Show condicion={!isSuccess}
-                    predeterminado={<div className="cursor-pointer">A</div>}
+                    predeterminado={<div className="cursor-pointer">.</div>}
                 >
                     <Show condicion={isWarning}>
                         <span className="cursor-pointer" title={`Descuento: ${currentDiscount}`}>

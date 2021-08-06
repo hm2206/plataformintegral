@@ -38,6 +38,12 @@ class ScheduleProvider extends BaseProvider  {
         .catch(err => this.handleError(err));
     }
 
+    isEdit = async (id, body = {}, config = {}, ctx = null) => {
+        return await escalafon.post(`${this.collection}/${id}/is_edit?_method=PUT`, body, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
 }
 
 export default ScheduleProvider;
