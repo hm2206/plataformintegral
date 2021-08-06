@@ -1,7 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import ItemDiscountDetail from './itemDiscountDetail';
+import DiscountProvider from '../../../providers/escalafon/DiscountProvider'
+import Swal from 'sweetalert2';
+import { AppContext } from '../../../contexts/AppContext'
+
+const discountProvider = new DiscountProvider();
 
 const ItemDiscount = ({ index = 0, discount = {} }) => {
+
+    const app_context = useContext(AppContext)
 
     const [current_discount, setCurrentDiscount] = useState({}) 
 
@@ -12,7 +19,17 @@ const ItemDiscount = ({ index = 0, discount = {} }) => {
     const handleEditDays = async () => {
         let answer = await prompt(`¿Estas seguro en editar el dia?`, current_discount?.days);
         if (!answer || answer == current_discount?.days) return;
-        alert(answer);
+        app_context.setCurrentLoading(true)
+        await discountProvider.update(discount?.discount_id, {  days: answer})
+        .then(({ data }) => {
+            app_context.setCurrentLoading(false)
+            let updateDiscount = data?.discount;
+            Swal.fire({ icon: 'success', text: 'Los cambios se guardarón correctamente!' })
+            setCurrentDiscount(prev => ({ ...prev, ...updateDiscount }))
+        }).catch(() => {
+            app_context.setCurrentLoading(false)
+            Swal.fire({ icon: 'error', text: 'No se pudó guardar los datos' })
+        })
     }
 
     useEffect(() => {

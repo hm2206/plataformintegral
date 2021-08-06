@@ -31,7 +31,7 @@ const ItemPermission = ({ item = {} }) => {
         <>
             <div className="mb-1">Tipo Permiso: <span className="badge badge-primary">{item?.type_permission?.description}</span></div>
             <div className="mb-1">Tipo Documento: <span className="badge badge-dark">{item?.option}</span></div>
-            <div className="mb-1">N° Documento: {item?.ballot_number}</div>
+            <div className="mb-1">N° Documento: {item?.document_number}</div>
             <div className="mb-1">Fecha Inicio: {item?.date_start}</div>
             <div className="mb-1">Fecha Termino: {item?.date_over}</div>
             <div className="mb-1">Justificación: {item?.justification}</div>
