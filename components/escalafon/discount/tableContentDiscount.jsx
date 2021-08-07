@@ -16,7 +16,7 @@ const PlaceholderTable = () => {
     )
 }
 
-const TableContentDiscount = ({ is_fetch, year, month }) => {
+const TableContentDiscount = ({ is_fetch, year, month, type_categoria_id }) => {
 
     const [current_loading, setCurrentLoading] = useState(false);
     const [datos, setDatos] = useState([]);
@@ -24,7 +24,7 @@ const TableContentDiscount = ({ is_fetch, year, month }) => {
 
     const getDiscountDetails = async () => {
         setCurrentLoading(true);
-        await discountProvider.preViewDetails(year, month)
+        await discountProvider.preViewDetails(year, month, { type_categoria_id })
         .then(res => {
             let { details } = res.data;
             setDatos(details);

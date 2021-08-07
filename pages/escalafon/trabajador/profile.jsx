@@ -8,7 +8,6 @@ import InfoGeneral from '../../../components/escalafon/infoGeneral';
 import atob from 'atob';
 import Infos from '../../../components/escalafon/infos/index';
 import Ballot from '../../../components/escalafon/ballots/index';
-import Permission from '../../../components/escalafon/permission/index';
 import Ascent from '../../../components/escalafon/ascent/index';
 import Degrees from '../../../components/escalafon/degrees/index';
 import Family from '../../../components/escalafon/family/index';
@@ -58,8 +57,7 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     { key: "schedule", text: "Horarios" },
                     { key: "papeletas", text: "Papeletas" },
                     { key: "vacation", text: "Vacaciones" },
-                    { key: "permiso", text: "Permisos" },
-                    { key: "licencia", text: "Licencias" },
+                    { key: "licencia", text: "Licencias/Permisos" },
                     { key: "ascenso", text: "Ascensos" },
                     { key: "desplazamiento", text: "Desplazamientos" },
                     { key: "merito", text: "Mérito/Demérito" },
@@ -86,9 +84,6 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                     </Show>
                     <Show condicion={option == 'vacation'}>
                         <ConfigVacation work={work}/>
-                    </Show>
-                    <Show condicion={option == 'permiso'}>
-                        <Permission work={work}/>
                     </Show>
                     <Show condicion={option == 'licencia'}>
                         <License work={work}/>

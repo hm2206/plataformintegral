@@ -8,6 +8,7 @@ import DiscountProvider from '../../providers/escalafon/DiscountProvider';
 import TableContentDiscount from '../../components/escalafon/discount/tableContentDiscount';
 import Skeleton from 'react-loading-skeleton';
 import ItemDiscount from '../../components/escalafon/discount/itemDiscount';
+import { SelectTypeCategoria } from '../../components/select/cronograma'
 import { Confirm } from '../../services/utils';
 import moment from 'moment';
 import Swal from 'sweetalert2';
@@ -89,6 +90,7 @@ const Discount = ({ pathname, query }) => {
     // estados
     const [year, setYear] = useState();
     const [month, setMonth] = useState();
+    const [type_categoria_id, setTypeCategoriaId] = useState("")
     const [current_loading, setCurrentLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [last_page, setLastPage] = useState(0);
@@ -117,7 +119,7 @@ const Discount = ({ pathname, query }) => {
 
     const getDiscounts = async (add = false) => {
         setCurrentLoading(true);
-        await discountProvider.preView(year, month, { page })
+        await discountProvider.preView(year, month, { page, type_categoria_id })
         .then(res => {
             let { discounts } = res.data;
             setIsError(false);
@@ -176,7 +178,7 @@ const Discount = ({ pathname, query }) => {
     // cambio de fecha y que sea valida
     useEffect(() => {
         if (dateIsValid) defaultRefresh();
-    }, [year, month]);
+    }, [year, month, type_categoria_id]);
 
     useEffect(() => {
         if (is_fetch) getDiscounts(page > 1 ? true : false);
@@ -243,6 +245,13 @@ const Discount = ({ pathname, query }) => {
                                                 { key: "Nov", value: 11, text: "Noviembre" },
                                                 { key: "Dic", value: 12, text: "Diciembre" }
                                             ]}
+                                        />
+                                    </div>
+
+                                    <div className="col-md-3">
+                                        <SelectTypeCategoria
+                                            value={type_categoria_id}
+                                            onChange={(e, obj) => setTypeCategoriaId(obj.value)}
                                         />
                                     </div>
 
@@ -316,6 +325,7 @@ const Discount = ({ pathname, query }) => {
                                             <TableContentDiscount
                                                 year={year}
                                                 month={month}
+                                                type_categoria_id={type_categoria_id}
                                                 is_fetch={is_fetch}
                                             />
                                         </div>
