@@ -16,7 +16,7 @@ const CreateConfigVacation = ({ work = {}, onClose = null, onSave = null }) => {
     const [current_loading, setCurrentLoading] = useState(false);
 
     const readySave = useMemo(() => {
-        let required = ['year', 'scheduled_days'];
+        let required = ['year', 'scheduled_days', 'date_start', 'date_over'];
         // validar
         for (let item of required) {
             let value = form[item];

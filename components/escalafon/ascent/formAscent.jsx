@@ -12,7 +12,7 @@ const FormAscent = ({ cargo_id, children, form = {}, errors = {}, className = nu
         <Form className={className}>
             <div className="row">
                 <Form.Field className="col-md-6 mb-3" error={errors?.resolution?.[0] ? true : false}>
-                    <label htmlFor="">Resolución <b className="text-red">*</b></label>
+                    <label htmlFor="">Documento que autoriza <b className="text-red">*</b></label>
                     <input type="text" 
                         name="resolution"
                         readOnly={readOnly.includes('resolution') || disabled}
@@ -23,7 +23,7 @@ const FormAscent = ({ cargo_id, children, form = {}, errors = {}, className = nu
                 </Form.Field>
 
                 <Form.Field className="col-md-6 mb-3" error={errors?.date_resolution?.[0] ? true : false}>
-                    <label htmlFor="">Fecha de Resolución <b className="text-red">*</b></label>
+                    <label htmlFor="">Fecha de Documento que autoriza <b className="text-red">*</b></label>
                     <input type="date" 
                         name="date_resolution"
                         readOnly={readOnly.includes('date_resolution') || disabled}

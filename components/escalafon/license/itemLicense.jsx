@@ -12,13 +12,13 @@ const ItemLicense = ({ license, onUpdate = null, onDelete = null }) => {
     return (
         <div className="card">
             <div className="card-header">
-                Resolución: {license?.resolution}
+                Documento que autoriza: {license?.resolution}
             </div>
             <div className="card-body">
                 <div className="row">
                     <div className="col-md-12">
                         <div className="mb-2"><b>Tipo. Licencia: </b> {license?.situacion_laboral?.nombre}</div>
-                        <div className="mb-2"><b>Fecha Resolución: </b> {moment(license?.date_start).format('DD/MM/YYYY')}</div>
+                        <div className="mb-2"><b>Fecha Documento que autoriza: </b> {moment(license?.date_start).format('DD/MM/YYYY')}</div>
                         <div className="mb-2"><b>Fecha Inicio: </b> {moment(license?.date_start).format('DD/MM/YYYY')}</div>
                         <div className="mb-2"><b>Fecha Termino: </b> {moment(license?.date_over).format('DD/MM/YYYY')}</div>
                         <div className="mb-2"><b>Dias Usados: </b> {license?.days_used}</div>

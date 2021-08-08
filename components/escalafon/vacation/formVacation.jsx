@@ -44,7 +44,7 @@ const FormVacation = ({ children, form = {}, errors = {}, className = null, read
                 </Form.Field>
 
                 <Form.Field className="col-md-8 mb-3" error={errors?.resolucion?.[0] ? true : false}>
-                    <label htmlFor="">Resolución <b className="text-red">*</b></label>
+                    <label htmlFor="">N° Documento <b className="text-red">*</b></label>
                     <input type="text" 
                         name="resolucion"
                         readOnly={readOnly.includes('resolucion') || disabled}

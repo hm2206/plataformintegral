@@ -33,6 +33,28 @@ const FormConfigVacation = ({ children, form = {}, errors = {}, className = null
                     <label htmlFor="">{errors?.scheduled_days?.[0] || ""}</label>
                 </Form.Field>
 
+                <Form.Field className="col-md-6 mb-3" error={errors?.date_start?.[0] ? true : false}>
+                    <label htmlFor="">Fecha de Inicio<b className="text-red">*</b></label>
+                    <input type="date" 
+                        name="date_start"
+                        readOnly={readOnly.includes('date_start') || disabled}
+                        value={form?.date_start || ""}
+                        onChange={(e) => handleChange(e,  e.target)}
+                    />
+                    <label htmlFor="">{errors?.date_start?.[0] || ""}</label>
+                </Form.Field>
+
+                <Form.Field className="col-md-6 mb-3" error={errors?.date_over?.[0] ? true : false}>
+                    <label htmlFor="">Fecha de Termino<b className="text-red">*</b></label>
+                    <input type="date" 
+                        name="date_over"
+                        readOnly={readOnly.includes('date_over') || disabled}
+                        value={form?.date_over || ""}
+                        onChange={(e) => handleChange(e,  e.target)}
+                    />
+                    <label htmlFor="">{errors?.date_over?.[0] || ""}</label>
+                </Form.Field>
+
                 {children || null}
             </div>
         </Form>

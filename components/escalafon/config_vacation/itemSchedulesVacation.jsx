@@ -39,23 +39,6 @@ const ItemInfoVacation = ({ info }) => {
         }
     }
 
-    const getPapeletas = async () => {
-        setCurrentLoading(true);
-        await infoProvider.ballots(info.id)
-        .then(async res => {
-            let { ballots } = res.data;
-            let payload = [];
-            await ballots?.forEach(ballot => {
-                // add datos
-                payload.push(formatterEvent(ballot));
-            });
-            // agregar eventos
-            setEvents(payload);
-        })
-        .catch(err => console.log(err));
-        setCurrentLoading(false);
-    }
-
     const handleConfigVacation = async (e, { value, options }) => {
         let allIndexs = collect(options).pluck('value').toArray();
         let index = allIndexs.indexOf(value);

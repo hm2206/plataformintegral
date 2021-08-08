@@ -10,6 +10,28 @@ const FormMerit = ({ children, form = {}, errors = {}, className = null, readOnl
     return (
         <Form className={className}>
             <div className="row">
+                <Form.Field className="col-md-6 mb-3" error={errors?.resolution?.[0] ? true : false}>
+                    <label htmlFor="">Documento que autoriza <b className="text-red">*</b></label>
+                    <input type="text" 
+                        name="resolution"
+                        readOnly={readOnly.includes('resolution') || disabled}
+                        value={form?.resolution || ""}
+                        onChange={(e) => handleChange(e,  e.target)}
+                    />
+                    <label htmlFor="">{errors?.resolution?.[0] || ""}</label>
+                </Form.Field>
+
+                <Form.Field className="col-md-6 mb-3" error={errors?.date_resolution?.[0] ? true : false}>
+                    <label htmlFor="">Fecha de Documento que autoriza <b className="text-red">*</b></label>
+                    <input type="date" 
+                        name="date_resolution"
+                        readOnly={readOnly.includes('date_resolution') || disabled}
+                        value={form?.date_resolution || ""}
+                        onChange={(e) => handleChange(e,  e.target)}
+                    />
+                    <label htmlFor="">{errors?.date_resolution?.[0] || ""}</label>
+                </Form.Field>
+                
                 <Form.Field className="col-md-6 mb-3" error={errors?.date?.[0] ? true : false}>
                     <label htmlFor="">Fecha <b className="text-red">*</b></label>
                     <input type="date" 

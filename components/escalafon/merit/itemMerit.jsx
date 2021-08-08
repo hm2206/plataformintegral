@@ -23,7 +23,8 @@ const ItemMerit = ({ merit, onUpdate = null, onDelete = null }) => {
             <div className="card-body">
                 <div className="row">
                     <div className="col-md-12">
-                        <div className="mb-2"><b>Titulo: </b> <b><u>{merit?.title}</u></b></div>
+                        <div className="mb-2"><b>Documento que autoriza: </b> <b><u>{merit?.resolution}</u></b></div>
+                        <div className="mb-2"><b>Fecha Documento que autoriza: </b> {moment(merit?.date_resolution).format('DD/MM/YYYY')}</div>
                         <div className="mb-2"><b>Modo: </b> <span className={`badge ${metaData?.className}`}>{metaData?.displayText}</span></div>
                         <div className="mb-2"><b>Fecha: </b> {moment(merit?.date).format('DD/MM/YYYY')}</div>
                         <div className="mb-2"><b>Descripción: </b> {merit?.description}</div>
