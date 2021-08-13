@@ -9,33 +9,6 @@ import ItemPlanTrabajo from './itemPlanTrabajo';
 import { BtnFloat } from '../Utils';
 import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
 
-const situacions = {
-    PENDIENTE: {
-        text: "Pendiente/Registrado",
-        color: "#263238"
-    },
-    ENVIADO: {
-        text: "Enviado para revisión",
-        color: "#0d47a1"
-    },
-    OBSERVADO: {
-        text: "Observado",
-        color: "#ff9800"
-    },
-    APROBADO: {
-        text: "Aprobado",
-        color: "#66bb6a"
-    },
-    RESERVA: {
-        text: "Aprobado con Reservas",
-        color: "#26c6da"
-    },
-    DESAPROBADO: {
-        text: "Desaprobado",
-        color: "#d50000"
-    }
-}
-
 const Placeholder = () => {
     const datos = [1, 2, 3, 4, 5];
     return datos.map(d => 
@@ -125,17 +98,6 @@ const TabPlanTrabajo = () => {
                 </table>
             </div>
 
-            {/* <div className="mt-5">
-                <b className="font-13"><u>Situación del Informe</u></b>
-                <div className="font-12">
-                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['PENDIENTE'].color }}></div> {situacions['PENDIENTE'].text}</div>
-                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['ENVIADO'].color }}></div> {situacions['ENVIADO'].text}</div>
-                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['OBSERVADO'].color }}></div> {situacions['OBSERVADO'].text}</div>
-                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['APROBADO'].color }}></div> {situacions['APROBADO'].text}</div>
-                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['RESERVA'].color }}></div> {situacions['RESERVA'].text}</div>
-                    <div><div style={{ width: "10px", display: "inline-block", height: "10px", background: situacions['DESAPROBADO'].color }}></div> {situacions['DESAPROBADO'].text}</div>
-                </div>
-            </div> */}
             {/* crear plan de trabajo */}
             <Show condicion={project.state != 'OVER'}>
                 <BtnFloat onClick={() => setIsCreate(true)}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
@@ -8,10 +8,14 @@ import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../../components/boardSimple';
 import { system_store } from '../../../services/verify.json';
+import CreatePerson from '../../../components/authentication/person/createPerson'
+import Show from '../../../components/show'
 
 const IndexPerson = ({ pathname, query, success, people }) => {
 
     const [query_search, setQuerySearch] = useState(query.query_search || "");
+    const [option, setOption] = useState()
+    const [is_refresh, setIsRefresh] = useState(false)
     
     // next page
     const handlePage = async (e, { activePage }) => {
@@ -42,13 +46,19 @@ const IndexPerson = ({ pathname, query, success, people }) => {
         }
     }
 
-    // crear people
-    const handleCreate = async () => {
-        let { push } = Router;
-        let newQuery = {};
-        newQuery.href = btoa(`${location.href}`)
-        push({ pathname: `${pathname}/create`, query: newQuery });
+    const onSave = (person) => {
+        setQuerySearch(person?.document_number)
+        setOption("");
+        setIsRefresh(true)
     }
+
+    useEffect(() => {
+        if (is_refresh) handleSearch();
+    }, [is_refresh])
+
+    useEffect(() => {
+        if (is_refresh) setIsRefresh(false);
+    }, [is_refresh]);
 
     // renderizar
     return (
@@ -93,7 +103,7 @@ const IndexPerson = ({ pathname, query, success, people }) => {
                                     <div className="col-xs col-2">
                                         <Button color="blue"
                                             fluid
-                                            onClick={handleSearch}
+                                            onClick={() => setIsRefresh(true)}
                                         >
                                             <i className="fas fa-search"></i>
                                         </Button>
@@ -115,11 +125,18 @@ const IndexPerson = ({ pathname, query, success, people }) => {
                         </div>
                     </div>
 
-                    <BtnFloat
-                        onClick={handleCreate}
+                    {/* crear nueva persona */}
+                    <Show condicion={option == 'CREATE'}
+                        predeterminado={
+                            <BtnFloat onClick={() => setOption('CREATE')}>
+                                <i className="fas fa-plus"></i>
+                            </BtnFloat>
+                        }
                     >
-                        <i className="fas fa-plus"></i>
-                    </BtnFloat>
+                        <CreatePerson onSave={onSave}
+                            onClose={() => setOption("")}
+                        />
+                    </Show>
                 </Form>
             </BoardSimple>
         </div>
@@ -134,7 +151,7 @@ IndexPerson.getInitialProps = async (ctx) => {
     query.page = typeof query.page != 'undefined' ? query.page : 1;
     query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
     // request
-    let query_string = `page=${query.query_search}&query_search=${query.query_search}`;
+    let query_string = `page=${query.page}&query_search=${query.query_search}`;
     let { success, people } = await authentication.get(`person?${query_string}`, {}, ctx)
         .then(res =>  res.data)
         .catch(err => ({ success: false, people: {} }))

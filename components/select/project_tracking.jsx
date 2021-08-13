@@ -165,10 +165,10 @@ const SelectMedioPago = ({ id = "id", name, value, onChange, refresh = false, di
             />
 }
 
-const SelectPlanTrabajoActivity = ({ id = "id", name, value, plan_trabajo_id, onChange, refresh = false, disabled = false, execute = true, except = 0, verify = 0, objective_id = "" }) => {
+const SelectPlanTrabajoActivity = ({ id = "id", name, value, plan_trabajo_id, onChange, refresh = false, disabled = false, execute = true, except = 0, verify = 0, objective_id = "", principal = false }) => {
     return <SelectBase 
                 api={projectTracking}
-                url={`plan_trabajo/${plan_trabajo_id}/activity?except=${except}&verify=${verify}&objective_id=${objective_id}`}
+                url={`plan_trabajo/${plan_trabajo_id}/activity?except=${except}&verify=${verify}&objective_id=${objective_id}&principal=${principal ? 1 : 0}`}
                 id={`select-medio_pago-${id}-${name}`}
                 value={id}
                 text="title"

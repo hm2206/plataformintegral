@@ -35,11 +35,11 @@ const FormPerson = ({ form = {}, unlock = false, image = null, errors = {}, onCh
     return (
         <Form>
             <div className="row">
-                <div className="col-md-4 mb-3">
+                <div className="col-md-3 mb-3">
                     <div className="row justify-content-center">
                         <Image circular src={image || '/img/perfil.jpg'} 
                             size="small"
-                            style={{ width: "150px", height: "150px", objectFit: "contain" }}
+                            className="imagen-circle mb-1"
                         />
                         <div className="col-md-12 text-center">
                             <label htmlFor="image" className="text-primary cursor-pointer" 
@@ -264,7 +264,7 @@ const FormPerson = ({ form = {}, unlock = false, image = null, errors = {}, onCh
 
                         <div className="col-md-6 mb-3">
                             <Form.Field error={errors.email_contact && errors.email_contact[0] ? true : false}>
-                                <label htmlFor="">Correo de Contacto</label>
+                                <label htmlFor="">Correo de Contacto <b className="text-red">*</b></label>
                                 <input type="text"
                                     name="email_contact"
                                     placeholder="Ingrese el correo de contacto"
@@ -278,7 +278,7 @@ const FormPerson = ({ form = {}, unlock = false, image = null, errors = {}, onCh
 
                         <div className="col-md-6 mb-3">
                             <Form.Field error={errors.phone && errors.phone[0] ? true : false}>
-                                <label htmlFor="">Teléfono</label>
+                                <label htmlFor="">Teléfono <b className="text-red">*</b></label>
                                 <input type="text"
                                     name="phone"
                                     value={form.phone || ''}

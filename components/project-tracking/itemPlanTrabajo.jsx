@@ -6,6 +6,7 @@ import ExecutePlanTrabajo from './executePlanTrabajo';
 import AnualPlanTrabajo from './anualPlanTrabajo';
 import Anexos from './anexos';
 import ReportPlanTrabajo from './reportPlanTrabajo';
+import PreviewPlanTrabajo from './project/plan_trabajo/previewPlanTrabajo'
 import { Button } from 'semantic-ui-react';
 import Show from '../show';
 
@@ -58,9 +59,8 @@ const ItemPlanTrabajo = ({ plan_trabajo }) => {
                 </div>
                 {/* dialogos */}
                 <Show condicion={option == 'info'}>
-                    <InfoPlanTrabajo
-                        plan_trabajo={plan_trabajo}
-                        isClose={(e) => setOption("")}
+                    <PreviewPlanTrabajo plan_trabajo={plan_trabajo} 
+                        onClose={() => setOption("")}
                     />
                 </Show>
 

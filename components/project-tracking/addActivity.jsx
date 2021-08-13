@@ -26,7 +26,7 @@ const Placeholder = () => {
 }
 
 // agregar actividad
-const AddActivity = ({ objective, isClose, onCreate }) => {
+const AddActivity = ({ objective, isClose, isPrincipal = true }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -62,7 +62,7 @@ const AddActivity = ({ objective, isClose, onCreate }) => {
     // obtener activities
     const getActivities = async (add = false) => {
         setCurrentLoading(true);
-        await projectTracking.get(`objective/${objective.id}/activity?page=${activities.page || 1}`)
+        await projectTracking.get(`objective/${objective.id}/activity?page=${activities.page || 1}?principal=1`)
             .then(({ data }) => {
                 let payload = { 
                     last_page: data.activities.lastPage,

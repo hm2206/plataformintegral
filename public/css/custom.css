@@ -725,3 +725,11 @@ div.right-panel
   margin-top: 35px;
   padding-left: 10px;
 }
+
+
+.imagen-circle {
+    width: 150px!important; 
+    height: 150px!important;
+    object-fit: contain;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+}
