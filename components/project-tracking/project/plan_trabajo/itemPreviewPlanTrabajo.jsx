@@ -7,7 +7,8 @@ import ListMedioVerification from '../../listMedioVerification'
 import ItemPreviewGasto from './itemPreviewGasto'
 import Skeleton from 'react-loading-skeleton';
 import collect from 'collect.js';
-import { Message } from 'semantic-ui-react'
+import { Button, Form } from 'semantic-ui-react'
+import AddActivity from '../../addActivity';
 
 
 const Placeholder = () => {
@@ -42,6 +43,7 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
     const [current_meta, setCurrentMeta] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
     const [block, setBlock] = useState(false);
+    const [current_objective, setCurrentObjective] = useState({})
 
     const getSaldoFinanciero = async () => {
         setCurrentLoading(true);
@@ -78,6 +80,11 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
         setCurrentObjectives(newObjectives);
     }
 
+    const addActivity = async (obj) => {
+        setCurrentObjective(obj)
+        setOption("add_activity")
+    }
+
     // primera carga
     useEffect(() => {
         if (plan_trabajo.id || refresh) getSaldoFinanciero();
@@ -100,6 +107,7 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                         <th className="text-center" width="10%">TOTAL PROG.</th>
                                         <th className="text-center" width="10%">TOTAL EJEC.</th>
                                         <th className="text-center" width="10%">TOTAL SALDO</th>
+                                        <th className="text-center" width="10%">Opciones</th>    
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -108,6 +116,15 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                         <td className="font-13 text-right">{currencyFormatter.format(obj.total_programado, { code: 'PEN' })}</td>
                                         <td className="font-13 text-right">{currencyFormatter.format(obj.total_ejecutado, { code: 'PEN' })}</td>
                                         <td className={`font-13 text-right ${obj.total_saldo < 0 ? 'text-red' : ''}`}>{currencyFormatter.format(obj.total_saldo, { code: 'PEN' })}</td>
+                                        <td className="text-center">
+                                            <Button.Group size="mini">
+                                                <Button title="Agregar actividades"
+                                                    onClick={() => addActivity(obj)}
+                                                >
+                                                    <i className="fas fa-clock"></i>
+                                                </Button>
+                                            </Button.Group>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -249,6 +266,17 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                 meta={current_meta}
                 isClose={() => setOption("")}
             />
+        </Show>
+
+        {/* agregar activity */}
+        <Show condicion={option  == 'add_activity'}>
+            <Form>
+                <AddActivity isClose={() => setOption("")}
+                    objective={current_objective}
+                    isPrincipal={false}
+                    isMeta={false}
+                />
+            </Form>
         </Show>
     </Fragment>)
 }

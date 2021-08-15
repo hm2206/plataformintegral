@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Button, Form, Checkbox } from 'semantic-ui-react';
+import { Button } from 'semantic-ui-react';
 import Modal from '../modal'
 import { AppContext } from '../../contexts/AppContext';
 import { ProjectContext } from '../../contexts/project-tracking/ProjectContext'
@@ -26,7 +26,7 @@ const Placeholder = () => {
 }
 
 // agregar actividad
-const AddActivity = ({ objective, isClose, isPrincipal = true }) => {
+const AddActivity = ({ objective, isClose, isPrincipal = true, isMeta = true }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -62,7 +62,7 @@ const AddActivity = ({ objective, isClose, isPrincipal = true }) => {
     // obtener activities
     const getActivities = async (add = false) => {
         setCurrentLoading(true);
-        await projectTracking.get(`objective/${objective.id}/activity?page=${activities.page || 1}?principal=1`)
+        await projectTracking.get(`objective/${objective.id}/activity?page=${activities.page || 1}&principal=${isPrincipal ? 1 : 0}`)
             .then(({ data }) => {
                 let payload = { 
                     last_page: data.activities.lastPage,
@@ -83,6 +83,7 @@ const AddActivity = ({ objective, isClose, isPrincipal = true }) => {
         let datos = Object.assign({}, form);
         datos.objective_id = objective.id;
         datos.programado = JSON.stringify(form.programado);
+        datos.principal = isPrincipal ? 1 : 0;
         await projectTracking.post(`activity`, datos)
         .then(res => {
             app_context.setCurrentLoading(false);
@@ -182,15 +183,17 @@ const AddActivity = ({ objective, isClose, isPrincipal = true }) => {
                         </div>
                     </div>
 
-                    <div className="col-md-12">
-                        <hr/>
-                    </div>
+                    <Show condicion={isMeta}>
+                        <div className="col-md-12">
+                            <hr/>
+                        </div>
 
-                    <div className="col-md-12">
-                        <AddMetaToActivity
-                            objective={objective}
-                        />
-                    </div>
+                        <div className="col-md-12">
+                            <AddMetaToActivity
+                                objective={objective}
+                            />
+                        </div>
+                    </Show>
                 </div>
             </div>
         </Modal>
