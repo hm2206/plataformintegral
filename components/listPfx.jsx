@@ -52,10 +52,10 @@ const ListPfx = ({ classSkeleton = null, classBody = null, onClick = null, disab
                             <div className="col-md-12 mb-2 font-10">
                                 <b>{cer.serial_number}</b>
                                 <hr/>
-                                <div>CommonName: <b>{cer.subject && cer.subject.commonName || ""}</b></div>
-                                <div>serialName: <b>{cer.subject && cer.subject.serialName || ""}</b></div>
-                                <div>emailAddress: <b>{cer.subject && cer.subject.emailAddress || ""}</b></div>
-                                <div>title: <b>{cer.subject && cer.subject.title || ""}</b></div>
+                                <div>CommonName: <b>{cer?.subject?.commonName || ""}</b></div>
+                                <div>serialName: <b>{cer?.subject?.serialName || ""}</b></div>
+                                <div>emailAddress: <b>{cer?.subject?.emailAddress || ""}</b></div>
+                                <div>title: <b>{cer?.subject?.title || cer?.subject?.organizationName || ""}</b></div>
                             </div>
                         </div>
                     </div>
