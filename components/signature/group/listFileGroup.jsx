@@ -11,6 +11,7 @@ import { AppContext } from '../../../contexts';
 import AuthGroupProvider from '../../../providers/signature/auth/AuthGroupProvider';
 import Swal from 'sweetalert2';
 import { groupTypes } from '../../../contexts/signature/GroupReducer';
+import Visualizador from '../../visualizador'
 
 // provedores
 const fileProvider = new FileProvider();
@@ -36,7 +37,7 @@ const PlaceholderItem = () => {
     )
 }
 
-const ItemAction = ({ file, onDelete = null }) => {
+const ItemAction = ({ file, onClick = null }) => {
 
     // group
     const  { group, dispatch }= useContext(GroupContext);
@@ -89,6 +90,7 @@ const ItemAction = ({ file, onDelete = null }) => {
                 date={file.created_at || ""}
                 extname={file.extname || ""}
                 onDelete={is_action.includes(group.status) ? () => handleDelete() : null}
+                onClick={onClick}
             /> 
         </div>
     );
@@ -104,13 +106,14 @@ const ListFileGroup = () => {
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
-    const [datos, setDatos] = useState([]);
     const [current_page, setCurrentPage] = useState(1);
     const [current_last_page, setCurrentLastPage] = useState(0);
     const [current_total, setCurrentTotal] = useState(0);
     const [is_refresh, setIsRefresh] = useState(false);
     const [query_search, setQuerySearch] = useState("");
     const [current_processing, setCurrentProcessing] = useState(false);
+    const [option, setOption] = useState();
+    const [current_file, setCurrentFile] = useState({})
 
     // config options
     const configOptions = {
@@ -135,12 +138,6 @@ const ListFileGroup = () => {
         setCurrentLoading(false);
     }
 
-    // eliminar file del files
-    const onDelete = async (index) => {
-        let newData = [...datos];
-        newData.splice(index, 1);
-        setDatos(newData);
-    }
 
     // download zip
     const donwloadZip = async () => {
@@ -156,6 +153,12 @@ const ListFileGroup = () => {
             app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'error', text: err.message });
         });
+    }
+
+    // renderizar file
+    const handleClick = (file) => {
+        setOption("render_file")
+        setCurrentFile(file)
     }
 
     // primera carga
@@ -228,7 +231,7 @@ const ListFileGroup = () => {
                 {download?.map((d, indexD) =>
                     <div className="col-md-3" key={`file-list-uploaded-${indexD}`}>
                         <ItemAction file={d}
-                            onDelete={() => onDelete(indexD)}
+                            onClick={() => handleClick(d)}
                         /> 
                     </div>
                 )}
@@ -251,6 +254,17 @@ const ListFileGroup = () => {
                         <i className="fas fa-arrow-down"></i> Obtener más regístros
                     </Button>
                 </div>
+                {/* visualizador */}
+                <Show condicion={option == 'render_file'}>
+                    <Visualizador
+                        id="render-visualizador-file"
+                        is_observation={false}
+                        name={current_file?.name}
+                        extname={current_file?.extname}
+                        url={current_file?.url}
+                        onClose={() => setOption("")}
+                    />
+                </Show>
             </div>
         </>
     );
