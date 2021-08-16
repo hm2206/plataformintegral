@@ -167,14 +167,14 @@ const SlugGroup = ({ pathname, query, success, group }) => {
                                             <UploadFileGroup/>
                                             <hr/>
                                         </div>
-
-                                        <dic className="col-md-12 mb-1">
-                                            <Button color="red" onClick={handleDelete}>
-                                                <i className="fas fa-trash"></i> Eliminar Grupo de Firma
-                                            </Button>
-                                            <hr />
-                                        </dic>
                                     </Show>
+
+                                    <dic className="col-md-12 mb-1">
+                                        <Button color="red" onClick={handleDelete}>
+                                            <i className="fas fa-trash"></i> Eliminar Grupo de Firma
+                                        </Button>
+                                        <hr />
+                                    </dic>
 
                                     <div className="col-md-12">
                                         {/* listar archivos */}

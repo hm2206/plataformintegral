@@ -50,9 +50,9 @@ const ListTeam = () => {
                 let { certificate } = t || {};
                 payload.push({
                     id: t.id,
-                    title: certificate.person && certificate.person.fullname || "",
+                    title: certificate?.person?.fullname || "",
                     classNameTitle: "capitalize",
-                    description: certificate.subject && certificate.subject.title || "",
+                    description: certificate?.subject?.title || certificate?.subject?.organizationName || "",
                     check: t.verify ? true : false,
                     _delete: true,
                 })
