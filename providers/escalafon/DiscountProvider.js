@@ -36,7 +36,8 @@ class DiscountProvider extends BaseProvider  {
         query.page = typeof query.page != 'undefined' ? query.page : 1;
         query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
         query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : '';
-        let query_string = `page=${query.page}&query_search=${query.query_search}&type_categoria_id=${query.type_categoria_id}`;
+        query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : '';
+        let query_string = `page=${query.page}&query_search=${query.query_search}&cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}`;
         // request
         return await escalafon.get(`${this.collection}/${year}/${month}/pre_view?${query_string}`, config, ctx)
             .then(res => res)
@@ -45,7 +46,8 @@ class DiscountProvider extends BaseProvider  {
 
     preViewDetails = async (year, month, query = {}, config = {}, ctx = null) => {
         query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : '';
-        let query_string = `type_categoria_id=${query.type_categoria_id}`
+        query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : '';
+        let query_string = `cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}`
         // request
         return await escalafon.get(`${this.collection}/${year}/${month}/pre_view_details?${query_string}`, config, ctx)
             .then(res => res)

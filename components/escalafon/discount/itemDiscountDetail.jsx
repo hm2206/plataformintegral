@@ -24,12 +24,12 @@ const ItemDetail = ({ discount }) => {
         } else if (letterTypes.permission == current_type) {
             return 'P'
         } else return null;
-    }, [discount]);
+    }, [discount?.discount]);
 
     return displayText;
 }
 
-const ItemDiscountDetail = ({ date = {} }) => {
+const ItemDiscountDetail = ({ date = {}, info = {} }) => {
 
     const discounts =  date?.discounts || [];
     const isDiscounts = discounts?.length || 0; 
@@ -38,27 +38,28 @@ const ItemDiscountDetail = ({ date = {} }) => {
 
     const currentStatus = useMemo(() => {
         return date?.schedule?.status;
-    }, [date]);
+    }, [date?.schedule]);
 
     const currentDiscount = useMemo(() => {
-        return date?.schedule?.discount;
-    }, [date]);
+        let value = date?.schedule?.discount
+        return  value ? parseInt(date?.schedule?.discount) : 0;
+    }, [date?.schedule]);
 
     const isSuccess = useMemo(() => {
         return !isDiscounts && currentStatus == 'A' && !currentDiscount;
-    }, [currentStatus]);
+    }, [currentStatus, currentDiscount]);
 
     const isDanger = useMemo(() => {
         return currentStatus == 'F';
-    }, [currentStatus]);
+    }, [currentStatus, currentDiscount]);
 
     const isWarning = useMemo(() => {
         return currentStatus == 'A' && !isSuccess;
-    }, [currentStatus]);
+    }, [currentStatus, currentDiscount]);
 
     const IsPrimary = useMemo(() => {
         return (currentStatus == 'D' || !isWarning) && isDiscounts;
-    }, [currentStatus]);
+    }, [currentStatus, currentDiscount]);
 
     const styleClass = useMemo(() => {
         if (isSuccess) return '';
@@ -113,6 +114,7 @@ const ItemDiscountDetail = ({ date = {} }) => {
             {/* info de la schedule */}
             <Show condicion={option == 'INFO'}>
                 <ItemInfoSchedule
+                    info={info}
                     date={date}
                     onClose={() => setOption("")}
                 />

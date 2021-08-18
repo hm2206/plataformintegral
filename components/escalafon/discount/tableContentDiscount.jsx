@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import Show from '../../show';
 import DiscountProvider from '../../../providers/escalafon/DiscountProvider';
 import Skeleton from 'react-loading-skeleton';
+import { DiscountContext } from '../../../contexts/escalafon/DiscountContext';
 
 const discountProvider = new DiscountProvider();
 
@@ -16,15 +17,18 @@ const PlaceholderTable = () => {
     )
 }
 
-const TableContentDiscount = ({ is_fetch, year, month, type_categoria_id }) => {
+const TableContentDiscount = () => {
 
+    const { year, month, cargo_id, type_categoria_id } = useContext(DiscountContext)
+
+    const [datos, setDatos] = useState([])
     const [current_loading, setCurrentLoading] = useState(false);
-    const [datos, setDatos] = useState([]);
+    const [is_refresh, setIsRefresh] = useState(false);
     const [is_error, setIsError] = useState([]);
 
-    const getDiscountDetails = async () => {
+    const getDetails = async () => {
         setCurrentLoading(true);
-        await discountProvider.preViewDetails(year, month, { type_categoria_id })
+        await discountProvider.preViewDetails(year, month, { type_categoria_id, cargo_id })
         .then(res => {
             let { details } = res.data;
             setDatos(details);
@@ -34,15 +38,26 @@ const TableContentDiscount = ({ is_fetch, year, month, type_categoria_id }) => {
     }
 
     useEffect(() => {
-        if (is_fetch) getDiscountDetails();
-    }, [is_fetch]);
+        setIsRefresh(true);
+    }, [year, month, cargo_id, type_categoria_id]);
+    
+    useEffect(() => {
+        if (is_refresh) getDetails()
+    }, [is_refresh]);
+
+    useEffect(() => {
+        if (is_refresh) setIsRefresh(false);
+    }, [is_refresh]);
     
     return (
         <div className="table-responsive">
             <table className="table-excel font-12">
                 <thead>
                     <tr>
-                        <th width="70%" colSpan="2" className="text-center no-wrap">DONDE:</th>
+                        <th width="10%" className="text-center no-wrap">
+                            <i className="fas fa-sync cursor-pointer" onClick={() => setIsRefresh(true)}></i>
+                        </th>
+                        <th width="60%" className="text-center no-wrap">DONDE:</th>
                         <th width="30%" className="text-center no-wrap">N° TRAB</th>
                     </tr>
                 </thead>
@@ -60,7 +75,7 @@ const TableContentDiscount = ({ is_fetch, year, month, type_categoria_id }) => {
                     {/* no hay datos */}
                     <Show condicion={!current_loading && !datos.length}>
                         <tr>
-                            <th colSpan="2" className="text-center font-13">No hay regístros disponibles</th>
+                            <th colSpan="3" className="text-center font-13">No hay regístros disponibles</th>
                         </tr>
                     </Show>
                     {/* loading de datos */}

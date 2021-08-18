@@ -7,6 +7,8 @@ import { Confirm } from '../../../services/utils'
 import { AppContext } from '../../../contexts/AppContext'
 import ScheduleProvider from '../../../providers/escalafon/ScheduleProvider'
 import Swal from 'sweetalert2'
+import { DiscountContext } from '../../../contexts/escalafon/DiscountContext'
+import { discountTypes } from '../../../contexts/escalafon/DiscountReducer'
 
 // providers
 const scheduleProvider = new ScheduleProvider();
@@ -84,7 +86,10 @@ const ItemDetalle = ({ detalle = {} }) => {
     )
 }
 
-const ItemInfoSchedule = ({ onClose = null, date = {} }) => {
+const ItemInfoSchedule = ({ onClose = null, date = {}, info = {} }) => {
+
+    // discount
+    const { dispatch } = useContext(DiscountContext)
 
     const [current_schedule, setCurrentSchedule] = useState({})
     const [errors, setErrors] = useState({})
@@ -109,9 +114,14 @@ const ItemInfoSchedule = ({ onClose = null, date = {} }) => {
         await scheduleProvider.isEdit(current_schedule?.id, current_schedule)
         .then(async res => {
             let updateSchedule = res?.data?.schedule || {};
+            let discount = res?.data?.discount || {};
             app_context.setCurrentLoading(false)
             await Swal.fire({ icon: 'success', text: 'Los cambios se guardaron correctamente' })
             setCurrentSchedule(prev => ({ ...prev, ...updateSchedule }))
+            let updateInfo = discount;
+            updateInfo.id = info.id;
+            dispatch({ type: discountTypes.UPDATE_INFO, payload: updateInfo })
+            dispatch({ type: discountTypes.UPDATE_SCHEDULE, payload: updateSchedule })
         }).catch(() => {
             app_context.setCurrentLoading(false)
             Swal.fire({ icon: 'error', text: 'No se pudó guardar los cambios' })
