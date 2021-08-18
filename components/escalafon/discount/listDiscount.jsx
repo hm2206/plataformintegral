@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useMemo } from "react";
 import moment from "moment";
 import Show from '../../show'
 import Skeleton from 'react-loading-skeleton';
+import TableContentDiscount from "./tableContentDiscount";
 import { DiscountContext } from "../../../contexts/escalafon/DiscountContext";
 import { discountTypes } from "../../../contexts/escalafon/DiscountReducer";
 import ItemDiscount from './itemDiscount'
@@ -133,12 +134,7 @@ const ListDiscount = () => {
                 {/* info */}
                 <div className="row">
                     <div className="col-5">
-                        {/* <TableContentDiscount
-                            year={state?.year}
-                            month={month}
-                            type_categoria_id={type_categoria_id}
-                            is_fetch={is_fetch}
-                        /> */}
+                        <TableContentDiscount/>
                     </div>
                 </div>
             </div>
