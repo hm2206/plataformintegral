@@ -22,6 +22,7 @@ export const discountTypes = {
     ADD_PAGE: 'ADD[PAGE]',
     SET_LAST_PAGE: 'SET[LAST_PAGE]',
     SET_TOTAL: 'SET[TOTAL]',
+    UPDATE_INFO: 'UPDATE[INFO]',
     UPDATE_SCHEDULE: 'UPDATE[SCHEDULE]'
 }
 
@@ -58,6 +59,17 @@ export const DiscountReducer = (state = initialStates, action = {}) => {
             return newState
         case discountTypes.SET_TOTAL: 
             newState.total = payload;
+            return newState;
+        case discountTypes.UPDATE_INFO:
+            let updateInfo = payload || {}
+            newState.data.map(info => {
+                if (info.id != updateInfo.id) return info;
+                info.base = updateInfo.base;
+                info.count = updateInfo.count;
+                info.discount = updateInfo.discount;
+                info.discount_min = updateInfo.discount_min;
+                return info;
+            });
             return newState;
         case discountTypes.UPDATE_SCHEDULE:
             let updateSchedule = payload || {}

@@ -114,9 +114,13 @@ const ItemInfoSchedule = ({ onClose = null, date = {}, info = {} }) => {
         await scheduleProvider.isEdit(current_schedule?.id, current_schedule)
         .then(async res => {
             let updateSchedule = res?.data?.schedule || {};
+            let discount = res?.data?.discount || {};
             app_context.setCurrentLoading(false)
             await Swal.fire({ icon: 'success', text: 'Los cambios se guardaron correctamente' })
             setCurrentSchedule(prev => ({ ...prev, ...updateSchedule }))
+            let updateInfo = discount;
+            updateInfo.id = info.id;
+            dispatch({ type: discountTypes.UPDATE_INFO, payload: updateInfo })
             dispatch({ type: discountTypes.UPDATE_SCHEDULE, payload: updateSchedule })
         }).catch(() => {
             app_context.setCurrentLoading(false)
