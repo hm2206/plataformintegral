@@ -8,15 +8,29 @@ import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext'; 
-import { parseCookies } from 'nookies';
+import { AppContext } from '../../../contexts';
+import ReportProvider from '../../../providers/escalafon/ReportProvider'
+import Swal from 'sweetalert2';
+import Visualizador from '../../../components/visualizador';
+import { Confirm } from '../../../services/utils'
+import Show from '../../../components/show'
+
+const reportProvider = new ReportProvider();
 
 const IndexWork = ({ pathname, query, success, works }) => {
 
     // estados
     const [query_search, setQuerySearch] = useState(query.query_search || "");
+    const [current_file, setCurrentFile] = useState({})
+
+    const isFile = Object.keys(current_file || {}).length
+
+    // app
+    const app_context = useContext(AppContext);
 
     // entity
     const entity_context = useContext(EntityContext);
+    
 
     // obtener opciones
     const handleOption = async (obj, key, index) => {
@@ -55,6 +69,35 @@ const IndexWork = ({ pathname, query, success, works }) => {
         push({ pathname: `${pathname}/create`, query: newQuery });
     }
 
+    const reportGeneral = async () => {
+        let answer = await Confirm('info', `¿Deseas generar el reporte de trabajadores activos?`, 'Generar')
+        if (!answer) return; 
+        app_context.setCurrentLoading(true);
+        reportProvider.general()
+        .then(res => {
+            let name = "reporte-general.pdf"
+            let file = new File([res.data], name);
+            let url = URL.createObjectURL(res.data);
+            let extname = "pdf";
+            let size = file.size
+            setCurrentFile({ name, url, extname, size });
+            app_context.setCurrentLoading(false);
+        }).catch(err => {
+            Swal.fire("No se pudó generar el reporte");
+            app_context.setCurrentLoading(false);
+        })
+    }
+
+    const onOption = (e, index, obj) => {
+        switch (obj.key) {
+            case 'pdf-work':
+                reportGeneral();
+                break;
+            default:
+                break;
+        }
+    }
+
     useEffect(() => {
         entity_context.fireEntity({ render: true });
         return () => entity_context.fireEntity({ render: false });
@@ -68,7 +111,10 @@ const IndexWork = ({ pathname, query, success, works }) => {
                 title="Trabajadores"
                 info={["Listado de trabajadores"]}
                 bg="danger"
-                options={[]}
+                options={[
+                    { key: "pdf-work", title: "Generar reporte de trabajadores activos", icon: "fas fa-file-pdf" }
+                ]}
+                onOption={onOption}
             >
                 <Form>
                     <div className="col-md-12">
@@ -130,6 +176,18 @@ const IndexWork = ({ pathname, query, success, works }) => {
                         <i className="fas fa-plus"></i>
                     </BtnFloat>
                 </Form>
+
+                {/* visualizador */}
+                <Show condicion={isFile}>
+                    <Visualizador id="visualizador-item"
+                        onClose={() => setCurrentFile({})}
+                        name={current_file?.name}
+                        extname={current_file?.extname}
+                        url={current_file?.url}
+                        is_observation={false}
+                        is_print={true}
+                    />
+                </Show>
             </BoardSimple>
         </div>
     )

@@ -26,7 +26,7 @@ const Placeholder = () => {
 }
 
 // agregar actividad
-const AddActivity = ({ objective, isClose, isPrincipal = true, isMeta = true }) => {
+const AddActivity = ({ objective, isClose, plan_trabajo = {}, onSave = null }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -40,6 +40,7 @@ const AddActivity = ({ objective, isClose, isPrincipal = true, isMeta = true }) 
     const [next, setNext] = useState(false);   
     const [refresh_table, setRefreshTable] = useState(false); 
     const [current_loading, setCurrentLoading] = useState(false);
+    const isPlanTrabajo = Object.keys(plan_trabajo || {}).length
  
     // cambiar form
     const handleInput = ({ name, value }) => {
@@ -62,7 +63,7 @@ const AddActivity = ({ objective, isClose, isPrincipal = true, isMeta = true }) 
     // obtener activities
     const getActivities = async (add = false) => {
         setCurrentLoading(true);
-        await projectTracking.get(`objective/${objective.id}/activity?page=${activities.page || 1}&principal=${isPrincipal ? 1 : 0}`)
+        await projectTracking.get(`objective/${objective.id}/activity?page=${activities.page || 1}&principal=${isPlanTrabajo ? 0 : 1}`)
             .then(({ data }) => {
                 let payload = { 
                     last_page: data.activities.lastPage,
@@ -83,16 +84,17 @@ const AddActivity = ({ objective, isClose, isPrincipal = true, isMeta = true }) 
         let datos = Object.assign({}, form);
         datos.objective_id = objective.id;
         datos.programado = JSON.stringify(form.programado);
-        datos.principal = isPrincipal ? 1 : 0;
+        datos.plan_trabajo_id = plan_trabajo?.id || null;
         await projectTracking.post(`activity`, datos)
-        .then(res => {
+        .then(async res => {
             app_context.setCurrentLoading(false);
-            let { message } = res.data;
-            Swal.fire({ icon: 'success', text: message });
+            let { message, activity } = res.data;
+            await Swal.fire({ icon: 'success', text: message });
             setForm({});
             setErrors({});
             setRefreshTable(true);
             getActivities();
+            if (typeof onSave == 'function') onSave(activity)
         }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
         setRefreshTable(false);
     }
@@ -109,6 +111,7 @@ const AddActivity = ({ objective, isClose, isPrincipal = true, isMeta = true }) 
             titulo={<span><i className="fas fa-clock"></i> Control de Actividad</span>}
             isClose={isClose}
             md="12"
+            height="80vh"
         >  
             <div className="card-body">
                 <div className="row">
@@ -166,6 +169,7 @@ const AddActivity = ({ objective, isClose, isPrincipal = true, isMeta = true }) 
                                     >
                                         {activities?.data?.map((act, indexA) => 
                                             <ItemActivity  key={`result-activity-${indexA}`}
+                                                plan_trabajo={plan_trabajo}
                                                 activity={act}
                                             />
                                         )}
@@ -183,7 +187,7 @@ const AddActivity = ({ objective, isClose, isPrincipal = true, isMeta = true }) 
                         </div>
                     </div>
 
-                    <Show condicion={isMeta}>
+                    <Show condicion={!isPlanTrabajo}>
                         <div className="col-md-12">
                             <hr/>
                         </div>

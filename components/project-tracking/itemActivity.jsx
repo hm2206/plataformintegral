@@ -9,7 +9,7 @@ import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 
-const ItemActivity = ({ activity }) => {
+const ItemActivity = ({ activity, plan_trabajo = {} }) => {
 
     // project
     const { project, dispatch } = useContext(ProjectContext);
@@ -35,6 +35,7 @@ const ItemActivity = ({ activity }) => {
         setCurrentLoading(true);
         let payload = Object.assign({}, form);
         payload.programado = JSON.stringify(payload.programado);
+        payload.plan_trabajo_id = plan_trabajo.id || null;
         await projectTracking.post(`activity/${activity.id}/update`,  payload)
         .then(res => {
             let { message } = res.data;

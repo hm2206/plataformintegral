@@ -47,7 +47,7 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
 
     const getSaldoFinanciero = async () => {
         setCurrentLoading(true);
-        await projectTracking.get(`plan_trabajo/${plan_trabajo.id}/financiamiento`)
+        await projectTracking.get(`plan_trabajo/${plan_trabajo.id}/financiamiento?principal=0`)
         .then(res => {
             let { objectives } = res.data;
             setCurrentObjectives(objectives);
@@ -273,8 +273,8 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
             <Form>
                 <AddActivity isClose={() => setOption("")}
                     objective={current_objective}
-                    isPrincipal={false}
-                    isMeta={false}
+                    plan_trabajo={plan_trabajo}
+                    onSave={getSaldoFinanciero}
                 />
             </Form>
         </Show>
