@@ -210,8 +210,9 @@ IndexWork.getInitialProps = async (ctx) => {
     // filtros
     query.page = typeof query.page != 'undefined' ? query.page : 1;
     query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
+    query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
     // request
-    let { success, works } = await escalafon.get(`works?page=${query.page}&query_search=${query.query_search}`, {}, ctx)
+    let { success, works } = await escalafon.get(`works?page=${query.page}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
     .then(res => res.data)
     .catch(err => ({ success: false, works: {} }));
     // response
