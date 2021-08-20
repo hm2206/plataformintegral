@@ -13,6 +13,7 @@ import ReportProvider from '../../../providers/escalafon/ReportProvider'
 import Swal from 'sweetalert2';
 import Visualizador from '../../../components/visualizador';
 import { Confirm } from '../../../services/utils'
+import { SelectCargo } from '../../../components/select/cronograma'
 import Show from '../../../components/show'
 
 const reportProvider = new ReportProvider();
@@ -21,6 +22,7 @@ const IndexWork = ({ pathname, query, success, works }) => {
 
     // estados
     const [query_search, setQuerySearch] = useState(query.query_search || "");
+    const [cargo_id, setCargoId] = useState(query.cargo_id || "")
     const [current_file, setCurrentFile] = useState({})
 
     const isFile = Object.keys(current_file || {}).length
@@ -51,6 +53,7 @@ const IndexWork = ({ pathname, query, success, works }) => {
         let { push } = Router;
         query.page = 1;
         query.query_search = query_search;
+        query.cargo_id = cargo_id;
         push({ pathname, query });
     }
 
@@ -73,7 +76,7 @@ const IndexWork = ({ pathname, query, success, works }) => {
         let answer = await Confirm('info', `¿Deseas generar el reporte de trabajadores activos?`, 'Generar')
         if (!answer) return; 
         app_context.setCurrentLoading(true);
-        reportProvider.general()
+        reportProvider.general({ cargo_id })
         .then(res => {
             let name = "reporte-general.pdf"
             let file = new File([res.data], name);
@@ -136,7 +139,7 @@ const IndexWork = ({ pathname, query, success, works }) => {
                         >
                             <div className="col-md-12 mt-2">
                                 <div className="row">
-                                    <div className="col-md-7 mb-1 col-10">
+                                    <div className="col-md-6 mb-1 col-12">
                                         <Form.Field>
                                             <input type="text" 
                                                 placeholder="Buscar trabajador por: Apellidos y Nombres"
@@ -145,6 +148,13 @@ const IndexWork = ({ pathname, query, success, works }) => {
                                                 onChange={({ target }) => setQuerySearch(target.value)}
                                             />
                                         </Form.Field>
+                                    </div>
+
+                                    <div className="col-md-4 mb-1 col-8">
+                                        <SelectCargo
+                                            value={cargo_id}
+                                            onChange={(e, obj) => setCargoId(obj.value)}
+                                        />
                                     </div>
 
                                     <div className="col-xs col-2">
