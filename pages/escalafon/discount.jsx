@@ -2,16 +2,20 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
 import Show from '../../components/show';
-import { Message, Form, Select, Button } from 'semantic-ui-react';
+import { Message, Form, Button } from 'semantic-ui-react';
 import { EntityContext } from '../../contexts/EntityContext';
 import { SelectTypeCategoria, SelectCargo } from '../../components/select/cronograma'
+import { SelectConfigDiscount } from '../../components/select/escalafon'
 import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
+import { BtnFloat } from '../../components/Utils'
 import { AppContext } from '../../contexts/AppContext';
 import { DiscountProvider, DiscountContext } from '../../contexts/escalafon/DiscountContext'
 import { discountTypes } from '../../contexts/escalafon/DiscountReducer'
 import ListDiscount from '../../components/escalafon/discount/listDiscount'
 import DiscountProviderRequest from '../../providers/escalafon/DiscountProvider';
+import CreateConfigDiscount from '../../components/escalafon/config_discounts/createConfigDiscount'
+import moment from 'moment';
 
 const discountProviderRequest = new DiscountProviderRequest
 
@@ -24,7 +28,11 @@ const WrapperDiscount = () => {
     const { entity_id, fireEntity } = useContext(EntityContext);
 
     // discount
-    const { year, month, cargo_id, type_categoria_id, dispatch, defaultRefresh, current_loading } = useContext(DiscountContext)
+    const { year, config_discount, dispatch, cargo_id, type_categoria_id, defaultRefresh, current_loading } = useContext(DiscountContext)
+
+    // estados
+    const [option, setOption] = useState("")
+    const [is_refresh, setIsRefresh] = useState(false);
 
     const handleOption = async (e, index, obj) => {
         switch (obj.key) {
@@ -51,10 +59,34 @@ const WrapperDiscount = () => {
         });
     }
 
+    const handleDefaultYear = () => {
+        let payload = moment().year();
+        dispatch({ type: discountTypes.SET_YEAR, payload });
+    }
+
+    const handleConfigDiscount = (e, { value, options = [] }) => {
+        let current_config = options.find(o => o.value == value);
+        let payload = current_config?.obj || {}
+        dispatch({ type: discountTypes.SET_CONFIG_DISCOUNT, payload })
+    }
+
+    const onSave = () => {
+        setOption("");
+        setIsRefresh(true)
+    }
+
     useEffect(() => {
         fireEntity({ render: true })
         return () => fireEntity({ render: false })
     }, []);
+
+    useEffect(() => {
+        handleDefaultYear();
+    }, []);
+
+    useEffect(() => {
+        if (is_refresh) setIsRefresh(false);
+    }, [is_refresh]);
 
     return (
         <BoardSimple
@@ -94,24 +126,11 @@ const WrapperDiscount = () => {
                                 </div>
 
                                 <div className="col-6 col-md-2 mb-2">
-                                    <Select
-                                        placeholder="Seleccionar Mes"
-                                        value={month || ""}
-                                        onChange={(e, obj) => dispatch({ type: discountTypes.SET_MONTH, payload: obj.value })}
-                                        options={[
-                                            { key: "Ene", value: 1, text: "Enero" },
-                                            { key: "Feb", value: 2, text: "Febrero" },
-                                            { key: "Mar", value: 3, text: "Marzo" },
-                                            { key: "Abr", value: 4, text: "Abril" },
-                                            { key: "May", value: 5, text: "Mayo" },
-                                            { key: "Jun", value: 6, text: "Junio" },
-                                            { key: "Jul", value: 7, text: "Julio" },
-                                            { key: "Ago", value: 8, text: "Agosto" },
-                                            { key: "Sep", value: 9, text: "Septiembre" },
-                                            { key: "Oct", value: 10, text: "Octubre" },
-                                            { key: "Nov", value: 11, text: "Noviembre" },
-                                            { key: "Dic", value: 12, text: "Diciembre" }
-                                        ]}
+                                    <SelectConfigDiscount year={year}
+                                        refresh={year || is_refresh}
+                                        name="config_discount_id"
+                                        value={config_discount?.id}
+                                        onChange={handleConfigDiscount}
                                     />
                                 </div>
 
@@ -134,7 +153,7 @@ const WrapperDiscount = () => {
                                 <div className="col-2">
                                     <Button color="blue"
                                         fluid
-                                        disabled={current_loading}
+                                        disabled={current_loading || !config_discount?.id}
                                         onClick={defaultRefresh}
                                     >
                                         <i className="fas fa-search"></i>
@@ -145,6 +164,15 @@ const WrapperDiscount = () => {
                            
                         {/* listado de discount */}
                         <ListDiscount/>
+
+                        {/* crear configuración */}
+                        <BtnFloat onClick={() => setOption('create_config')}>
+                            <i className="fas fa-plus"></i>
+                        </BtnFloat>
+                        <CreateConfigDiscount show={option == 'create_config'}
+                            onClose={() => setOption("")}
+                            onSave={onSave}
+                        />
                         
                     </div>
                 </Show>

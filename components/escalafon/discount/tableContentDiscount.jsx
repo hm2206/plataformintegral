@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Show from '../../show';
-import DiscountProvider from '../../../providers/escalafon/DiscountProvider';
+import ConfigDiscountProvider from '../../../providers/escalafon/ConfigDiscountProvider';
 import Skeleton from 'react-loading-skeleton';
 import { DiscountContext } from '../../../contexts/escalafon/DiscountContext';
 
-const discountProvider = new DiscountProvider();
+const configDiscountProvider = new ConfigDiscountProvider();
 
 const PlaceholderTable = () => {
     const datos = [1, 2, 3, 4, 5, 6];
@@ -19,7 +19,7 @@ const PlaceholderTable = () => {
 
 const TableContentDiscount = () => {
 
-    const { year, month, cargo_id, type_categoria_id } = useContext(DiscountContext)
+    const { config_discount, cargo_id, type_categoria_id } = useContext(DiscountContext)
 
     const [datos, setDatos] = useState([])
     const [current_loading, setCurrentLoading] = useState(false);
@@ -28,7 +28,7 @@ const TableContentDiscount = () => {
 
     const getDetails = async () => {
         setCurrentLoading(true);
-        await discountProvider.preViewDetails(year, month, { type_categoria_id, cargo_id })
+        await configDiscountProvider.headDiscounts(config_discount?.id, { type_categoria_id, cargo_id })
         .then(res => {
             let { details } = res.data;
             setDatos(details);
@@ -39,7 +39,7 @@ const TableContentDiscount = () => {
 
     useEffect(() => {
         setIsRefresh(true);
-    }, [year, month, cargo_id, type_categoria_id]);
+    }, [config_discount?.id, cargo_id, type_categoria_id]);
     
     useEffect(() => {
         if (is_refresh) getDetails()

@@ -192,6 +192,33 @@ const SelectTypeDegree = ({ id = "id", name, value, onChange, error = false, ref
 }
 
 
+const SelectConfigDiscount = ({ id = "id", year = null, name, value, onChange, error = false, refresh = true, onReady = null, displayText = null }) => {
+
+    const defaultDisplayText = (el) => {
+        if (typeof displayText == 'function') return displayText(el)
+        return `${ moment(`${el?.year}-${el?.month}`, 'YYYY-MM').format('MMMM')}`.toUpperCase();
+    }
+
+    return <SelectBase 
+        execute={true}
+        api={escalafon}
+        url={`config_discounts?query_search=${year}`}
+        id={`select-config_discounts-${name}`}
+        value={id}
+        text="name"
+        obj="config_discounts"
+        name={name}
+        valueChange={`${value || ""}`}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Config. Descuento"
+        refresh={refresh}
+        displayText={defaultDisplayText}
+        onReady={onReady}
+        error={error}
+    />
+}
+
+
 export { 
     SelectAfp,
     SelectBanco,
@@ -201,4 +228,5 @@ export {
     SelectTypePermission,
     SelectWorkInfo,
     SelectTypeDegree,
+    SelectConfigDiscount,
 };

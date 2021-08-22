@@ -1,9 +1,9 @@
 import { createContext, useState, useMemo, useReducer, useEffect } from 'react'
 import moment from 'moment';
 import { DiscountReducer, discountTypes, initialStates } from './DiscountReducer'
-import DiscountProviderRequest from '../../providers/escalafon/DiscountProvider'
+import ConfigDiscountProvider from '../../providers/escalafon/ConfigDiscountProvider'
 
-const discountProviderRequest = new DiscountProviderRequest();
+const configDiscountProvider = new ConfigDiscountProvider();
 
 export const DiscountContext = createContext(initialStates);
 
@@ -19,14 +19,16 @@ export const DiscountProvider = ({ children = null }) => {
 
     // memos
     const dateIsValid = useMemo(() => {
-        let validate = moment(`${state.year}-${state.month}`, 'YYYY-MM').isValid();
+        let formatDate = `${state.config_discount?.year}-${state.config_discount?.month}`;
+        let validate = moment(formatDate, 'YYYY-MM').isValid();
         return validate ? true : false;
-    }, [state.year, state.month]);
+    }, [state?.config_discount?.id]);
 
     const countDays = useMemo(() => {
-        let daysInMonth = moment(`${state.year}-${state.month}`, 'YYYY-MM').daysInMonth();
+        let formatDate = `${state.config_discount?.year}-${state.config_discount?.month}`;
+        let daysInMonth = moment(formatDate, 'YYYY-MM').daysInMonth();
         return daysInMonth || 0;
-    }, [state.year, state.month]);
+    }, [state?.config_discount?.id]);
 
     const countColumns = useMemo(() => {
         return countDays + 8;
@@ -42,12 +44,6 @@ export const DiscountProvider = ({ children = null }) => {
         setIsRefresh(true)
     }
 
-    const defaultDate = () => {
-        let current_date = moment().subtract(1, 'month');
-        dispatch({ type: discountTypes.SET_YEAR, payload: current_date.year() })
-        dispatch({ type: discountTypes.SET_MONTH, payload: current_date.month() + 1 })
-    }
-
     const getDiscounts = async (add = false) => {
         setCurrentLoading(true);
         let queryParams = {
@@ -56,7 +52,7 @@ export const DiscountProvider = ({ children = null }) => {
             cargo_id: state.cargo_id
         }
         // request
-        await discountProviderRequest.preView(state.year, state.month, queryParams)
+        await configDiscountProvider.discounts(state?.config_discount?.id, queryParams)
         .then(res => {
             let { discounts } = res.data;
             setIsError(false);
@@ -69,12 +65,12 @@ export const DiscountProvider = ({ children = null }) => {
     }
 
     useEffect(() => {
-        defaultDate();
-    }, []);
+        dispatch({ type: discountTypes.SET_CONFIG_DISCOUNT, payload: {} });
+    }, [state?.year]);
 
     useEffect(() => {
         if (dateIsValid) defaultRefresh();
-    }, [state.year, state.month, state.type_categoria_id, state.cargo_id]);
+    }, [state?.config_discount?.id, state?.cargo_id, state?.type_categoria_id]);
 
     useEffect(() => {
         if (state.page > 1) getDiscounts(true)

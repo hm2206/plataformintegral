@@ -88,7 +88,7 @@ const ListDiscount = () => {
                             <th className="text-center no-wrap" witdh="300px">APELLIDOS  Y  NOMBRES</th>
                             <th className="text-center no-wrap" witdh="300px">N° DOCUMENTO</th>
                             <th className="text-center no-wrap" width="50px">CAT. NIV.</th>
-                            <MonthHeaders year={state?.year} month={state?.month}/>
+                            <MonthHeaders year={state?.config_discount?.year || 0} month={state?.config_discount?.month || 0}/>
                             <th className="text-center no-wrap">TOT <br /> MIN</th>
                             <th className="text-center no-wrap">(*) <br /> TOTAL <br /> DESC.</th>
                             <th className="text-center no-wrap">DCTO <br /> X <br /> MIN</th>

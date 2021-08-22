@@ -111,7 +111,9 @@ const ItemInfoSchedule = ({ onClose = null, date = {}, info = {} }) => {
         let answer = await Confirm('warning', '¿Estás seguro en guardar los cambios?', 'Guardar Cambios');
         if (!answer) return;
         app_context.setCurrentLoading(true)
-        await scheduleProvider.isEdit(current_schedule?.id, current_schedule)
+        let payload = Object.assign({}, current_schedule);
+        payload.discount_id = info.discount_id;
+        await scheduleProvider.isEdit(current_schedule?.id, payload)
         .then(async res => {
             let updateSchedule = res?.data?.schedule || {};
             let discount = res?.data?.discount || {};

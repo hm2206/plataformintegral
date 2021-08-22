@@ -2,6 +2,7 @@
 
 export const initialStates = {
     year: "",
+    config_discount: {},
     month: "",
     type_categoria_id: "",
     cargo_id: "",
@@ -13,6 +14,7 @@ export const initialStates = {
 
 export const discountTypes = {
     SET_YEAR: "SET[YEAR]",
+    SET_CONFIG_DISCOUNT: "SET[CONFIG_DISCOUNT]",
     SET_MONTH: "SET[MONTH]",
     SET_TYPE_CATEGORIA_ID: "SET[TYPE_CATEGORIA_ID]",
     SET_CARGO_ID: "SET[CARGO_ID]",
@@ -33,6 +35,10 @@ export const DiscountReducer = (state = initialStates, action = {}) => {
         case discountTypes.SET_YEAR:
             newState.year = payload
             return newState;
+        case discountTypes.SET_CONFIG_DISCOUNT:
+            let setConfigDiscount = payload || {};
+            newState.config_discount = setConfigDiscount;
+            return newState
         case discountTypes.SET_MONTH:
             newState.month = payload
             return newState;
