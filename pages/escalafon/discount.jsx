@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
 import Show from '../../components/show';
@@ -13,11 +13,11 @@ import { AppContext } from '../../contexts/AppContext';
 import { DiscountProvider, DiscountContext } from '../../contexts/escalafon/DiscountContext'
 import { discountTypes } from '../../contexts/escalafon/DiscountReducer'
 import ListDiscount from '../../components/escalafon/discount/listDiscount'
-import DiscountProviderRequest from '../../providers/escalafon/DiscountProvider';
+import ConfigDiscountProvider from '../../providers/escalafon/ConfigDiscountProvider';
 import CreateConfigDiscount from '../../components/escalafon/config_discounts/createConfigDiscount'
 import moment from 'moment';
 
-const discountProviderRequest = new DiscountProviderRequest
+const configDiscountProvider = new ConfigDiscountProvider
 
 const WrapperDiscount = () => {
 
@@ -33,6 +33,7 @@ const WrapperDiscount = () => {
     // estados
     const [option, setOption] = useState("")
     const [is_refresh, setIsRefresh] = useState(false);
+    
 
     const handleOption = async (e, index, obj) => {
         switch (obj.key) {
@@ -69,6 +70,59 @@ const WrapperDiscount = () => {
         let payload = current_config?.obj || {}
         dispatch({ type: discountTypes.SET_CONFIG_DISCOUNT, payload })
     }
+
+    const handleVerified = async () => {
+        let answer = await Confirm("warning", "¿Estás seguro en verificar los descuentos?", "Verificar");
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        await configDiscountProvider.verified(config_discount?.id)
+        .then(() => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'success', text: 'Los descuentos se verificarón correctamente!' })
+            let payload = Object.assign(config_discount, { status: 'VERIFIED' });
+            dispatch({ type: discountTypes.SET_CONFIG_DISCOUNT, payload })
+        }).catch(() => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: 'No se pudó verificar los descuentos' })
+        })
+    }
+
+    const handleAccepted = async () => {
+        let answer = await Confirm("warning", "¿Estás seguro en aceptar los descuentos?", "Verificar");
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        await configDiscountProvider.accepted(config_discount?.id)
+        .then(() => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'success', text: 'Los descuentos se aceptarón correctamente!' })
+            let payload = Object.assign(config_discount, { status: 'ACCEPTED' });
+            dispatch({ type: discountTypes.SET_CONFIG_DISCOUNT, payload })
+        }).catch(() => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: 'No se pudó aceptar los descuentos' })
+        })
+    }
+
+    const btnStatus = {
+        START: {
+            theme: "btn-warning",
+            icon: "fas fa-check",
+            title: "Verificar Descuentos",  
+            handle: handleVerified
+        },
+        VERIFIED: {
+            theme: "btn-primary",
+            icon: "fas fa-clipboard-check",
+            title: "Aceptar Descuentos",
+            handle: handleAccepted
+        }
+    }
+
+    // memos
+    const currentBtn = useMemo(() => {
+        let btn = btnStatus[config_discount?.status];
+        return btn || {}
+    }, [config_discount?.status]);
 
     const onSave = () => {
         setOption("");
@@ -165,14 +219,24 @@ const WrapperDiscount = () => {
                         {/* listado de discount */}
                         <ListDiscount/>
 
+                        {/* buttons de status */}
+                        <Show condicion={config_discount?.id && currentBtn?.icon}>
+                            <BtnFloat theme={currentBtn?.theme} 
+                                onClick={currentBtn?.handle || null}>
+                                <i className={currentBtn?.icon}></i>
+                            </BtnFloat>
+                        </Show>
+
                         {/* crear configuración */}
-                        <BtnFloat onClick={() => setOption('create_config')}>
-                            <i className="fas fa-plus"></i>
-                        </BtnFloat>
-                        <CreateConfigDiscount show={option == 'create_config'}
-                            onClose={() => setOption("")}
-                            onSave={onSave}
-                        />
+                        <Show condicion={!config_discount?.id}>
+                            <BtnFloat onClick={() => setOption('create_config')}>
+                                <i className="fas fa-plus"></i>
+                            </BtnFloat>
+                            <CreateConfigDiscount show={option == 'create_config'}
+                                onClose={() => setOption("")}
+                                onSave={onSave}
+                            />
+                        </Show>
                         
                     </div>
                 </Show>

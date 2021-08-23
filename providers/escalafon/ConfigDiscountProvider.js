@@ -45,6 +45,18 @@ class ConfigDiscountProvider extends BaseProvider  {
             .catch(err => this.handleError(err));
     }
 
+    verified = async (id, body = {}, config = {}, ctx = null) => {
+        return await escalafon.post(`${this.collection}/${id}/verified?_method=PUT`, body, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
+    accepted = async (id, body = {}, config = {}, ctx = null) => {
+        return await escalafon.post(`${this.collection}/${id}/accepted?_method=PUT`, body, config, ctx)
+        .then(res => res)
+        .catch(err => this.handleError(err));
+    }
+
 }
 
 export default ConfigDiscountProvider;
