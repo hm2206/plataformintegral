@@ -217,7 +217,17 @@ const WrapperDiscount = () => {
                         </Form>
                            
                         {/* listado de discount */}
-                        <ListDiscount/>
+                        <Show condicion={config_discount?.id}
+                            predeterminado={
+                                <div className="pl-2 pr-2 pt-2">
+                                    <Message warning>
+                                        Seleccionar Configuración de descuento
+                                    </Message>
+                                </div>
+                            }
+                        >
+                            <ListDiscount/>
+                        </Show>
 
                         {/* buttons de status */}
                         <Show condicion={config_discount?.id && currentBtn?.icon}>
