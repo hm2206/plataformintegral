@@ -28,10 +28,11 @@ const WrapperDiscount = () => {
     const { entity_id, fireEntity } = useContext(EntityContext);
 
     // discount
-    const { year, config_discount, dispatch, cargo_id, type_categoria_id, defaultRefresh, current_loading } = useContext(DiscountContext)
+    const { year, config_discount, dispatch, cargo_id, type_categoria_id, defaultRefresh, setCurrentLoading, current_loading } = useContext(DiscountContext)
 
     // estados
     const [option, setOption] = useState("")
+    const [loading, setLoading] = useState(false);
     const [is_refresh, setIsRefresh] = useState(false);
     
 
@@ -128,6 +129,18 @@ const WrapperDiscount = () => {
         setOption("");
         setIsRefresh(true)
     }
+
+    const findConfigDiscount = async () => {
+        setLoading(true)
+        await configDiscountProvider.show(config_discount?.id) 
+        .then(({ data }) => dispatch({ type: discountTypes.SET_CONFIG_DISCOUNT, payload: data?.config_discount || {} }))
+        .catch((err) => console.log(err.message))
+        setLoading(false)
+    }
+
+    useEffect(() => {
+        if (config_discount?.id) findConfigDiscount();
+    }, [config_discount?.id]);
 
     useEffect(() => {
         fireEntity({ render: true })
@@ -232,6 +245,7 @@ const WrapperDiscount = () => {
                         {/* buttons de status */}
                         <Show condicion={config_discount?.id && currentBtn?.icon}>
                             <BtnFloat theme={currentBtn?.theme} 
+                                loading={current_loading}
                                 onClick={currentBtn?.handle || null}>
                                 <i className={currentBtn?.icon}></i>
                             </BtnFloat>
@@ -239,7 +253,9 @@ const WrapperDiscount = () => {
 
                         {/* crear configuración */}
                         <Show condicion={!config_discount?.id}>
-                            <BtnFloat onClick={() => setOption('create_config')}>
+                            <BtnFloat loading={current_loading}
+                                 onClick={() => setOption('create_config')}
+                            >
                                 <i className="fas fa-plus"></i>
                             </BtnFloat>
                             <CreateConfigDiscount show={option == 'create_config'}
