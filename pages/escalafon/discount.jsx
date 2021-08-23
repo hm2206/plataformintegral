@@ -16,8 +16,13 @@ import ListDiscount from '../../components/escalafon/discount/listDiscount'
 import ConfigDiscountProvider from '../../providers/escalafon/ConfigDiscountProvider';
 import CreateConfigDiscount from '../../components/escalafon/config_discounts/createConfigDiscount'
 import moment from 'moment';
+import uid from 'uid';
 
 const configDiscountProvider = new ConfigDiscountProvider
+
+const headOptions = [
+    { key: "generate-discount", icon: "fas fa-download", title: "Generar descuentos" }
+]
 
 const WrapperDiscount = () => {
 
@@ -49,7 +54,7 @@ const WrapperDiscount = () => {
         let answer = await Confirm('warning', `¿Estas seguro en generar el descuento?`);
         if (!answer) return;
         app_context.setCurrentLoading(true);
-        discountProviderRequest.process(year, month)
+        configDiscountProvider.process_discounts(config_discount?.id)
         .then(async res => {
             app_context.setCurrentLoading(false);
             let { message } = res.data;
@@ -123,11 +128,16 @@ const WrapperDiscount = () => {
     const currentBtn = useMemo(() => {
         let btn = btnStatus[config_discount?.status];
         return btn || {}
-    }, [config_discount?.status]);
+    }, [config_discount?.status])
+    
+    const reloadConfig = useMemo(() => {
+        return uid(4);
+    }, [year, is_refresh]);
 
-    const onSave = () => {
+    const onSave = (data) => {
         setOption("");
         setIsRefresh(true)
+        dispatch({ type: discountTypes.SET_CONFIG_DISCOUNT, payload: data });
     }
 
     const findConfigDiscount = async () => {
@@ -139,13 +149,13 @@ const WrapperDiscount = () => {
     }
 
     useEffect(() => {
-        if (config_discount?.id) findConfigDiscount();
-    }, [config_discount?.id]);
-
-    useEffect(() => {
         fireEntity({ render: true })
         return () => fireEntity({ render: false })
     }, []);
+
+    useEffect(() => {
+        if (config_discount?.id) findConfigDiscount();
+    }, [config_discount?.id]);
 
     useEffect(() => {
         handleDefaultYear();
@@ -161,9 +171,7 @@ const WrapperDiscount = () => {
             info={["Control de descuentos de faltas y tardanzas"]}
             bg="danger"
             onOption={handleOption}
-            options={[
-                { key: "generate-discount", icon: "fas fa-download", title: "Generar descuentos" }
-            ]}
+            options={config_discount?.id ? headOptions : []}
         >
             <div className="card-body">
                 <Show condicion={entity_id}
@@ -194,7 +202,7 @@ const WrapperDiscount = () => {
 
                                 <div className="col-6 col-md-2 mb-2">
                                     <SelectConfigDiscount year={year}
-                                        refresh={year || is_refresh}
+                                        refresh={reloadConfig}
                                         name="config_discount_id"
                                         value={config_discount?.id}
                                         onChange={handleConfigDiscount}
