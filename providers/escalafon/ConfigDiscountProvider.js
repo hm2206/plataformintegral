@@ -27,7 +27,7 @@ class ConfigDiscountProvider extends BaseProvider  {
     }
 
     process_discounts = async (id, body = {}, config = {}, ctx = null) => {
-        return await escalafon.post(`${this.collection}/${id}`, body, config, ctx)
+        return await escalafon.post(`${this.collection}/${id}/process_discounts`, body, config, ctx)
         .then(res => res)
         .catch(err => this.handleError(err));
     }
