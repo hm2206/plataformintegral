@@ -89,7 +89,7 @@ const ItemDetalle = ({ detalle = {} }) => {
 const ItemInfoSchedule = ({ onClose = null, date = {}, info = {} }) => {
 
     // discount
-    const { dispatch } = useContext(DiscountContext)
+    const { dispatch, config_discount } = useContext(DiscountContext)
 
     const [current_schedule, setCurrentSchedule] = useState({})
     const [errors, setErrors] = useState({})
@@ -130,6 +130,10 @@ const ItemInfoSchedule = ({ onClose = null, date = {}, info = {} }) => {
         })
     }
 
+    const canEdit = useMemo(() => {
+        return config_discount?.status == 'START';
+    }, [config_discount?.status]);
+
     useEffect(() => {
         setCurrentSchedule(date?.schedule || {})
     }, [date?.schedule])
@@ -151,8 +155,9 @@ const ItemInfoSchedule = ({ onClose = null, date = {}, info = {} }) => {
                                 readOnly={['date', 'modo', 'time_start', 'time_over', 'delay_start']}
                                 form={current_schedule}
                                 onChange={handleInput}
+                                disabled={!canEdit}
                             >
-                                <Show condicion={!current_schedule?.is_block && current_edit}>
+                                <Show condicion={canEdit && current_edit}>
                                     <div className="col-md-12 text-right">
                                         <hr />
                                         <Button color="blue" onClick={handleIsEdit}>
