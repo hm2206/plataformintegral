@@ -9,6 +9,9 @@ import { SelectBanco, SelectAfp } from '../select/escalafon';
 import { AppContext } from '../../contexts/AppContext'
 import EditPerson from '../authentication/person/editPerson';
 import Router from 'next/dist/client/router';
+import AssingTrabajadorEntity from '../contrato/assingTrabajadorEntity'
+import { BtnFloat } from '../Utils'
+import btoa from 'btoa'
 
 const InfoGeneral = ({ work }) => {
 
@@ -16,7 +19,8 @@ const InfoGeneral = ({ work }) => {
     const app_context = useContext(AppContext);
 
     const options = {
-        EDIT_PERSON: 'EDIT[PERSON]'
+        EDIT_PERSON: 'EDIT[PERSON]',
+        SEARCH_WORK: 'SEARCH[WORK]',
     }
 
     // estados
@@ -71,6 +75,14 @@ const InfoGeneral = ({ work }) => {
             setEdit(false);
             Swal.fire({ icon: 'success', text: message });
         }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
+    }
+
+    const handleObj = async (obj) => {
+        setOption("");
+        let { pathname, query, push }  = Router;
+        let id = btoa(obj.id);
+        query.id = id;
+        push({ pathname, query })
     }
 
     useEffect(() => {
@@ -330,6 +342,17 @@ const InfoGeneral = ({ work }) => {
                         onSave={onSavePerson}
                     />
                 </Show>
+                {/* assign trabajador */}
+                <BtnFloat theme="btn-warning"
+                    onClick={() => setOption(options.SEARCH_WORK)}
+                >
+                    <i className="fas fa-search"></i>
+                </BtnFloat>
+
+                <AssingTrabajadorEntity show={option == options.SEARCH_WORK}
+                    isClose={() => setOption("")}
+                    getAdd={handleObj}
+                />
             </>
         );
 }
