@@ -156,6 +156,7 @@ const ItemPreview = ({ activity, block, gasto, onVerifyTecnica = null, onBlock =
                                     size="mini"
                                     disabled={block}
                                     icon="check"
+                                    className="mb-1"
                                     onClick={handleVerifyTecnica}
                                 />
 
@@ -173,6 +174,7 @@ const ItemPreview = ({ activity, block, gasto, onVerifyTecnica = null, onBlock =
                                     basic
                                     size="mini"
                                     icon="save"
+                                    className="mb-1"
                                     onClick={handleUpdate}
                                 />
 

@@ -9,6 +9,7 @@ import Skeleton from 'react-loading-skeleton';
 import collect from 'collect.js';
 import { Button, Form } from 'semantic-ui-react'
 import AddActivity from '../../addActivity';
+import AddGasto from '../../addGasto';
 
 
 const Placeholder = () => {
@@ -44,6 +45,7 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
     const [current_loading, setCurrentLoading] = useState(false);
     const [block, setBlock] = useState(false);
     const [current_objective, setCurrentObjective] = useState({})
+    const [current_activity, setCurrentActivity] = useState({})
 
     const getSaldoFinanciero = async () => {
         setCurrentLoading(true);
@@ -140,6 +142,7 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                         <th className="text-center" width="10%">TOTAL PROG.</th>
                                         <th className="text-center" width="10%">TOTAL EJEC.</th>
                                         <th className="text-center" width="10%">TOTAL SALDO</th>
+                                        <th className="text-center" width="5%" title="Agregar actividad">ADD</th>
                                         <th className="text-center" width="5%" title="Verificación Técnica">VT</th>
                                     </tr>
                                 </thead>
@@ -151,6 +154,16 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                                 <th className="font-13 text-right">{currencyFormatter.format(act.total_programado, { code: 'PEN' })}</th>
                                                 <th className="font-13 text-right">{currencyFormatter.format(act.total_ejecutado, { code: 'PEN' })}</th>
                                                 <th className={`font-13 text-right ${act.total_saldo < 0 ? 'text-red' : ''}`}>{currencyFormatter.format(act.total_saldo, { code: 'PEN' })}</th>
+                                                <td className="text-center bg-white">
+                                                    <span className="badge badge-primary cursor-pointer"
+                                                        onClick={() => {
+                                                            setCurrentActivity(act);
+                                                            setOption('add_gasto');
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-plus"></i>
+                                                    </span>
+                                                </td>
                                                 <td className="text-center bg-white">
                                                     <Show condicion={!act.pre_verify_tecnica}
                                                         predeterminado={
@@ -277,6 +290,18 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                     onSave={getSaldoFinanciero}
                 />
             </Form>
+        </Show>
+
+        {/* agregar gastos */}
+        <Show condicion={option == 'add_gasto'}>
+            <AddGasto activity={current_activity}
+                principal={false}
+                isClose={() => setOption("")}
+                onSave={() => {
+                    setOption("")
+                    getSaldoFinanciero()
+                }}
+            />
         </Show>
     </Fragment>)
 }

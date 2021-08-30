@@ -10,7 +10,7 @@ import { SelectPresupuesto, SelectMedida, SelectRubro } from '../select/project_
 import Swal from 'sweetalert2';
 import { projectTypes } from '../../contexts/project-tracking/ProjectReducer';
 
-const AddGasto = ({ isClose, activity, onSave = null }) => {
+const AddGasto = ({ isClose, activity, onSave = null, principal = true }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -39,6 +39,7 @@ const AddGasto = ({ isClose, activity, onSave = null }) => {
         app_context.setCurrentLoading(true);
         let datos = Object.assign({}, form);
         datos.activity_id = activity.id;
+        datos.principal = principal ? 1 : 0
         await projectTracking.post(`gasto`, datos)
         .then(res => {
             app_context.setCurrentLoading(false);
