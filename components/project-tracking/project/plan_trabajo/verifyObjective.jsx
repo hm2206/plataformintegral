@@ -3,6 +3,7 @@ import { Button } from 'semantic-ui-react'
 import Show from '../../../show'
 import { projectTracking } from '../../../../services/apis'
 import CreateConfigObjective from '../config_objective/createConfigObjective';
+import EditConfigObjective from '../config_objective/editConfigObjective';
 
 const VerifyObjective = ({ objective = {}, plan_trabajo = {}, status = 'PREVIEW', children = null }) => {
 
@@ -36,17 +37,27 @@ const VerifyObjective = ({ objective = {}, plan_trabajo = {}, status = 'PREVIEW'
     return (
         <Show condicion={!current_config.id}
             predeterminado={
-                <Button.Group size="mini">
-                    {children}
-                    <Button color="green" 
-                        title="Verificado"
-                        onClick={() => setOption('edit')}
-                        disabled={current_loading}
-                        loading={current_loading}
-                    >
-                        <i className="fas fa-check"></i>
-                    </Button>
-                </Button.Group>
+                <>
+                    <Button.Group size="mini">
+                        {children}
+                        <Button color="green" 
+                            title="Verificado"
+                            onClick={() => setOption('edit')}
+                            disabled={current_loading}
+                            loading={current_loading}
+                        >
+                            <i className="fas fa-check"></i>
+                        </Button>
+                    </Button.Group>
+
+                    <Show condicion={option == 'edit'}>
+                        <EditConfigObjective
+                            config={current_config}
+                            onClose={() => setOption("")}
+                            onSave={() => setIsRefresh(true)}
+                        />
+                    </Show>
+                </>
             }
         >
             <Button.Group size="mini">
