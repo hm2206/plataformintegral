@@ -10,6 +10,7 @@ import collect from 'collect.js';
 import { Button, Form } from 'semantic-ui-react'
 import AddActivity from '../../addActivity';
 import AddGasto from '../../addGasto';
+import VerifyObjective from './verifyObjective'
 
 
 const Placeholder = () => {
@@ -99,7 +100,9 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
             predeterminado={<Placeholder/>}
         >
             {current_objectives.map((obj, indexO) => 
-                <div className="card" style={{ border: "1.5px solid #000" }}>
+                <div className="card" style={{ border: "1.5px solid #000" }}
+                    key={`item-objective-financiero-${indexO}`}
+                >
                     <div className="card-header">
                     <div className="table-responsive">
                             <table className="table">
@@ -107,8 +110,6 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                     <tr>
                                         <th>Objectivo/Componente</th>
                                         <th className="text-center" width="10%">TOTAL PROG.</th>
-                                        <th className="text-center" width="10%">TOTAL EJEC.</th>
-                                        <th className="text-center" width="10%">TOTAL SALDO</th>
                                         <th className="text-center" width="10%">Opciones</th>    
                                     </tr>
                                 </thead>
@@ -116,16 +117,17 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                     <tr>
                                         <td>{obj.title}</td>
                                         <td className="font-13 text-right">{currencyFormatter.format(obj.total_programado, { code: 'PEN' })}</td>
-                                        <td className="font-13 text-right">{currencyFormatter.format(obj.total_ejecutado, { code: 'PEN' })}</td>
-                                        <td className={`font-13 text-right ${obj.total_saldo < 0 ? 'text-red' : ''}`}>{currencyFormatter.format(obj.total_saldo, { code: 'PEN' })}</td>
                                         <td className="text-center">
-                                            <Button.Group size="mini">
+                                            <VerifyObjective 
+                                                objective={obj}
+                                                plan_trabajo={plan_trabajo}
+                                            >
                                                 <Button title="Agregar actividades"
                                                     onClick={() => addActivity(obj)}
                                                 >
                                                     <i className="fas fa-clock"></i>
                                                 </Button>
-                                            </Button.Group>
+                                            </VerifyObjective>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -140,8 +142,6 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                     <tr>
                                         <th className="text-center">ACTIVIDAD</th>
                                         <th className="text-center" width="10%">TOTAL PROG.</th>
-                                        <th className="text-center" width="10%">TOTAL EJEC.</th>
-                                        <th className="text-center" width="10%">TOTAL SALDO</th>
                                         <th className="text-center" width="5%" title="Agregar actividad">ADD</th>
                                         <th className="text-center" width="5%" title="Verificación Técnica">VT</th>
                                     </tr>
@@ -152,8 +152,6 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                             <tr>
                                                 <th className="font-14">{act.title}</th>
                                                 <th className="font-13 text-right">{currencyFormatter.format(act.total_programado, { code: 'PEN' })}</th>
-                                                <th className="font-13 text-right">{currencyFormatter.format(act.total_ejecutado, { code: 'PEN' })}</th>
-                                                <th className={`font-13 text-right ${act.total_saldo < 0 ? 'text-red' : ''}`}>{currencyFormatter.format(act.total_saldo, { code: 'PEN' })}</th>
                                                 <td className="text-center bg-white">
                                                     <span className="badge badge-primary cursor-pointer"
                                                         onClick={() => {
@@ -178,12 +176,12 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                             <Show condicion={act?.gastos?.length}
                                                 predeterminado={
                                                     <tr>
-                                                        <td colSpan="6" className="text-center font-11">No hay registros disponibles</td>
+                                                        <td colSpan="4" className="text-center font-11">No hay registros disponibles</td>
                                                     </tr>
                                                 }
                                             >                                
                                                 <tr>
-                                                    <td colSpan="6">
+                                                    <td colSpan="4">
                                                         <table className="table table-bordered">
                                                             <thead className="text-center font-11">
                                                                 <tr>
@@ -193,7 +191,6 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                                                     <th>COSTO UNITARIO</th>
                                                                     <th>CANTIDAD</th>
                                                                     <th>COSTO TOTAL</th>
-                                                                    <th>EJEC.</th>
                                                                     <th width="5%" colSpan="2">VT</th>
                                                                 </tr>
                                                             </thead>

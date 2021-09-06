@@ -23,10 +23,6 @@ const ItemPreview = ({ activity, block, gasto, onVerifyTecnica = null, onBlock =
         return currencyFormatter.format(gasto?.total, { code: 'PEN' })
     }, [gasto.total]);
 
-    const displayEjecutado = useMemo(() => {
-        return currencyFormatter.format(gasto?.ejecutado, { code: 'PEN' })
-    }, [gasto.ejecutado]);
-
     const handleVerifyTecnica = async () => {
         let answer = await Confirm('info', '¿Deseas realizar la verificación técnica?', 'Verificar');
         if (!answer) return false;
@@ -131,7 +127,6 @@ const ItemPreview = ({ activity, block, gasto, onVerifyTecnica = null, onBlock =
             >
                 {displayTotal}
             </th>
-            <th className="bg-white text-right" width="200px">{displayEjecutado}</th>
             {/* verificación técnica */}
             <th className="bg-white">
                 <div className="text-center">
@@ -141,7 +136,7 @@ const ItemPreview = ({ activity, block, gasto, onVerifyTecnica = null, onBlock =
                                 size="mini"
                                 color="green"
                                 onClick={handleVerifyTecnica}
-                                disabled={gasto.verify_financiera}
+                                disabled={gasto.verify_financiera ? true : false}
                             />
                         }
                     >
