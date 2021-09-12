@@ -20,7 +20,6 @@ const VerifyObjective = ({ objective = {}, plan_trabajo = {}, status = 'PREVIEW'
             setIsError(false)
             let { config_objectives } = data
             let config = config_objectives.find(c => c.status == status);
-            console.log(config)
             setCurrentConfig(config || {})
         }).catch(err => setIsError(true))
         setCurrentLoading(false)

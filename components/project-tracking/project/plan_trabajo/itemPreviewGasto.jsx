@@ -11,7 +11,6 @@ const ItemPreview = ({ activity, block, gasto, onVerifyTecnica = null, onBlock =
 
     // estados
     const [current_gasto, setCurrentGasto] = useState({});
-    const [is_detalle, setIsDetalle] = useState(false);
     const [current_loading, setCurrentLoading] = useState(false);
     const [edit, setEdit] = useState(false);
 
@@ -24,20 +23,16 @@ const ItemPreview = ({ activity, block, gasto, onVerifyTecnica = null, onBlock =
     }, [gasto.total]);
 
     const handleVerifyTecnica = async () => {
-        let answer = await Confirm('info', '¿Deseas realizar la verificación técnica?', 'Verificar');
+        let answer = await Confirm('info', '¿Deseas realizar la verificación del gasto?', 'Verificar');
         if (!answer) return false;
         setCurrentLoading(true);
-        await projectTracking.post(`gasto/${gasto.id}/verify_tecnica?_method=PUT&verify=${gasto.verify_tecnica ? 0 : 1}`)
+        await projectTracking.post(`gasto/${gasto.id}/preview_verify?_method=PUT`)
         .then(async res => {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
             if (typeof onVerifyTecnica == 'function') onVerifyTecnica(gasto);
         }).catch(err => handleErrorRequest(err));
         setCurrentLoading(false);
-    }
-
-    const handleVerifyFinanciera = async () => {
-        if (typeof onVerifyFinanciera == 'function') onVerifyFinanciera(gasto);
     }
 
     const handleInput = ({ name, value }) => {
@@ -128,62 +123,64 @@ const ItemPreview = ({ activity, block, gasto, onVerifyTecnica = null, onBlock =
                 {displayTotal}
             </th>
             {/* verificación técnica */}
-            <th className="bg-white">
-                <div className="text-center">
-                    <Show condicion={!gasto?.verify_tecnica}
-                        predeterminado={
-                            <Button icon="check"
-                                size="mini"
-                                color="green"
-                                onClick={handleVerifyTecnica}
-                                disabled={gasto.verify_financiera ? true : false}
-                            />
-                        }
-                    >
-                        <Show condicion={!current_loading}
+            <Show condicion={activity.preview_verify_tecnica}>
+                <th className="bg-white">
+                    <div className="text-center">
+                        <Show condicion={!gasto?.preview_verify}
                             predeterminado={
-                                <Button loading={current_loading}/>
+                                <Button icon="check"
+                                    size="mini"
+                                    color="green"
+                                    onClick={handleVerifyTecnica}
+                                    disabled={gasto.preview_verify ? true : false}
+                                />
                             }
                         >
-                            <Show condicion={!edit}>
-                                <Button color="green"
-                                    basic
-                                    size="mini"
-                                    disabled={block}
-                                    icon="check"
-                                    className="mb-1"
-                                    onClick={handleVerifyTecnica}
-                                />
+                            <Show condicion={!current_loading}
+                                predeterminado={
+                                    <Button loading={current_loading}/>
+                                }
+                            >
+                                <Show condicion={!edit}>
+                                    <Button color="green"
+                                        basic
+                                        size="mini"
+                                        disabled={block}
+                                        icon="check"
+                                        className="mb-1"
+                                        onClick={handleVerifyTecnica}
+                                    />
 
-                                <Button color="black"
-                                    basic
-                                    size="mini"
-                                    disabled={block}
-                                    icon="edit"
-                                    onClick={() => setEdit(true)}
-                                />
-                            </Show>
+                                    <Button color="black"
+                                        basic
+                                        size="mini"
+                                        disabled={block}
+                                        icon="edit"
+                                        onClick={() => setEdit(true)}
+                                    />
+                                </Show>
 
-                            <Show condicion={edit}>
-                                <Button color="blue"
-                                    basic
-                                    size="mini"
-                                    icon="save"
-                                    className="mb-1"
-                                    onClick={handleUpdate}
-                                />
+                                <Show condicion={edit}>
+                                    <Button color="blue"
+                                        basic
+                                        size="mini"
+                                        icon="save"
+                                        className="mb-1"
+                                        onClick={handleUpdate}
+                                    />
 
-                                <Button color="red"
-                                    basic
-                                    size="mini"
-                                    icon="cancel"
-                                    onClick={() => setEdit(false)}
-                                />
+                                    <Button color="red"
+                                        basic
+                                        size="mini"
+                                        icon="cancel"
+                                        onClick={() => setEdit(false)}
+                                    />
+                                </Show>
                             </Show>
                         </Show>
-                    </Show>
-                </div>
-            </th>
+                    </div>
+                </th>
+            </Show>
         </tr>
     )
 }

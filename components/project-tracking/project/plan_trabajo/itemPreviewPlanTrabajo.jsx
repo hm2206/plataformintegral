@@ -11,6 +11,7 @@ import { Button, Form } from 'semantic-ui-react'
 import AddActivity from '../../addActivity';
 import AddGasto from '../../addGasto';
 import VerifyObjective from './verifyObjective'
+import ActivityVerify from '../activity/activityVerify';
 
 
 const Placeholder = () => {
@@ -35,9 +36,6 @@ const Placeholder = () => {
 }
 
 const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
-
-    // app
-    const app_context = useContext(AppContext);
 
     // estados
     const [current_objectives, setCurrentObjectives] = useState([]);
@@ -163,13 +161,14 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                                     </span>
                                                 </td>
                                                 <td className="text-center bg-white">
-                                                    <Show condicion={!act.pre_verify_tecnica}
-                                                        predeterminado={
-                                                            <span className="badge badge-success cursor-pointer"><i className="fas fa-check"></i></span>
-                                                        }
+                                                    <span className={`badge badge-${act.preview_verify_tecnica ? 'success' : 'danger'} cursor-pointer`}
+                                                        onClick={() => {
+                                                            setOption("verify_tecnica")
+                                                            setCurrentActivity(act)
+                                                        }}
                                                     >
-                                                        <span className="badge badge-danger"><i className="fas fa-times"></i></span>
-                                                    </Show>
+                                                        <i className={`fas fa-${act.preview_verify_tecnica ? 'check' : 'times'}`}></i>
+                                                    </span>
                                                 </td>
                                             </tr>    
 
@@ -191,7 +190,21 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                                                     <th>COSTO UNITARIO</th>
                                                                     <th>CANTIDAD</th>
                                                                     <th>COSTO TOTAL</th>
-                                                                    <th width="5%" colSpan="2">VT</th>
+                                                                    <th width="5%" colSpan="2">
+                                                                        <Show condicion={act.preview_verify_financiera}
+                                                                            predeterminado={<span className="badge badge-danger"><i className="fas fa-times"></i></span>}
+                                                                        >
+                                                                            <span className="badge badge-success cursor-pointer"
+                                                                                title="Verificación financiera"
+                                                                                onClick={() => {
+                                                                                    setOption('verify_financiera')
+                                                                                    setCurrentActivity(act)
+                                                                                }}
+                                                                            >
+                                                                                <i className="fas fa-check"></i>
+                                                                            </span>
+                                                                        </Show>
+                                                                    </th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -201,7 +214,7 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                                                                         activity={act}
                                                                         gasto={gas}
                                                                         onUpdate={async () => await getSaldoFinanciero()}
-                                                                        onVerifyTecnica={() => handleVerify(indexO, act, gas, 'verify_tecnica')}
+                                                                        onVerifyTecnica={getSaldoFinanciero}
                                                                         block={block}
                                                                         onBlock={(value) => setBlock(value)}
                                                                     />
@@ -287,6 +300,25 @@ const ItemPreviewPlanTrabajo = ({ plan_trabajo, refresh }) => {
                     onSave={getSaldoFinanciero}
                 />
             </Form>
+        </Show>
+
+        {/* verificación tecnica de activity */}
+        <Show condicion={option == 'verify_tecnica'}>
+            <ActivityVerify title="Verificación Técnica"
+                activity={current_activity}
+                onSave={getSaldoFinanciero}
+                onClose={() => setOption("")}
+            />
+        </Show>
+
+        {/* verificación financiera de activity */}
+        <Show condicion={option == 'verify_financiera'}>
+            <ActivityVerify title="Verificación Financiera"
+                mode="PREVIEW_FINANCIERA"
+                activity={current_activity}
+                onSave={getSaldoFinanciero}
+                onClose={() => setOption("")}
+            />
         </Show>
 
         {/* agregar gastos */}
