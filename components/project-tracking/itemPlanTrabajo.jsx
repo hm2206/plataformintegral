@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import currentFormatter from 'currency-formatter';
-import InfoPlanTrabajo from './infoPlanTrabajo';
-import ExecutePlanTrabajo from './executePlanTrabajo';
+import ExecutePlanTrabajo from './project/plan_trabajo/executePlanTrabajo';
 import AnualPlanTrabajo from './anualPlanTrabajo';
 import Anexos from './anexos';
 import ReportPlanTrabajo from './reportPlanTrabajo';
@@ -59,7 +58,8 @@ const ItemPlanTrabajo = ({ plan_trabajo }) => {
                 </div>
                 {/* dialogos */}
                 <Show condicion={option == 'info'}>
-                    <PreviewPlanTrabajo plan_trabajo={plan_trabajo} 
+                    <PreviewPlanTrabajo 
+                        plan_trabajo={plan_trabajo} 
                         onClose={() => setOption("")}
                     />
                 </Show>
@@ -67,7 +67,7 @@ const ItemPlanTrabajo = ({ plan_trabajo }) => {
                 <Show condicion={option == 'execute'}>
                     <ExecutePlanTrabajo
                         plan_trabajo={plan_trabajo}
-                        isClose={(e) => setOption("")}
+                        onClose={(e) => setOption("")}
                     />
                 </Show>
 

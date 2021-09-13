@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import Modal from '../modal';
+import Modal from '../../../modal';
 import currencyFormatter from 'currency-formatter';
 import { Form, Accordion, Button } from 'semantic-ui-react';
-import AddDetalle from './addDetalle';
-import ListDetalle from './listDetalle';
-import { Confirm } from '../../services/utils';
-import { handleErrorRequest, projectTracking } from '../../services/apis';
+import AddDetalle from '../../addDetalle';
+import ListDetalle from '../../listDetalle';
+import { Confirm } from '../../../../services/utils';
+import { handleErrorRequest, projectTracking } from '../../../../services/apis';
 import Swal from 'sweetalert2';
-import Show from '../show';
+import Show from '../../../show';
 
 const VerifyFinanciera = ({ gasto, isClose = null, onVerifycationFinanciera = null }) => {
 
@@ -23,7 +23,7 @@ const VerifyFinanciera = ({ gasto, isClose = null, onVerifycationFinanciera = nu
         let answer = await Confirm('info', '¿Deseas realizar la verificación Financiera?', 'Verificar');
         if (!answer) return false;
         setCurrentLoading(true);
-        await projectTracking.post(`gasto/${gasto.id}/verify_financiera?_method=PUT&verify=${gasto.verify_financiera ? 0 : 1}`)
+        await projectTracking.post(`gasto/${gasto.id}/execute_verify?_method=PUT&verify=${gasto.verify_financiera ? 0 : 1}`)
         .then(async res => {
             let { message } = res.data;
             await Swal.fire({ icon: 'success', text: message });
@@ -92,7 +92,7 @@ const VerifyFinanciera = ({ gasto, isClose = null, onVerifycationFinanciera = nu
                         styled
                     >
                         {/* crear comprobantes */}
-                        <Show condicion={!gasto?.verify_financiera}>
+                        <Show condicion={!gasto?.execute_verify}>
                             <Accordion.Title 
                                 active={current_index == 0}
                                 index={0}
@@ -110,7 +110,7 @@ const VerifyFinanciera = ({ gasto, isClose = null, onVerifycationFinanciera = nu
                         </Show>
                         {/* listar comprobantes */}
                         <Accordion.Title 
-                            active={current_index == 1}
+                            active={gasto?.execute_verify ? true : current_index == 1}
                             index={1}
                             onClick={handleIndex}
                         >
@@ -124,7 +124,7 @@ const VerifyFinanciera = ({ gasto, isClose = null, onVerifycationFinanciera = nu
                     </Accordion>
                 </div>
 
-                <Show condicion={!gasto?.verify_financiera}>
+                <Show condicion={!gasto?.execute_verify}>
                     <div className="col-12 mt-3 text-right">
                         <Button color="teal" 
                             onClick={handleVerifyFinanciera}

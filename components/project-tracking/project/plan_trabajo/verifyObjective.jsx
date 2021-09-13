@@ -76,6 +76,7 @@ const VerifyObjective = ({ objective = {}, plan_trabajo = {}, status = 'PREVIEW'
                     onSave={() => setIsRefresh(true)}
                     objective={objective}
                     plan_trabajo={plan_trabajo}
+                    status={status}
                 />
             </Show>
         </Show>
