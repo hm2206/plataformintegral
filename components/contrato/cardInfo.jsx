@@ -10,13 +10,13 @@ const CardInfo = ({ info = {} }) => {
         <Form>
             <div className="row">
                 <div className="col-md-4 mt-3 text-center">
-                    <img src={info && info.person && info.person.image_images && info.person.image_images.image_200x200 || '/img/perfil.jpg'}
+                    <img src={info?.person?.image_images?.image_200x200 || '/img/perfil.jpg'}
                         style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "50%" }}
                     />
                                             
                     <div className="row">
                         <div className="col-md-12 mt-3">
-                            <h3 className="text-center uppercase">{info && info.person ? info.person.fullname : ''}</h3>
+                            <h3 className="text-center uppercase">{info?.person?.fullname || ''}</h3>
                         </div>
 
                         <div className="col-md-12 mt-5 text-left">
@@ -24,7 +24,7 @@ const CardInfo = ({ info = {} }) => {
                             <input type="text"
                                 disabled
                                 readOnly
-                                value={info && info.person && info.person.document_type || ""}
+                                value={info?.person?.document_type || ""}
                                 disabled
                             />
                         </div>
@@ -35,7 +35,7 @@ const CardInfo = ({ info = {} }) => {
                                 <input type="text"
                                     disabled
                                     readOnly
-                                    value={info && info.person && info.person.document_number || ""}
+                                    value={info?.person?.document_number || ""}
                                 />
                             </Form.Field>
                         </div>

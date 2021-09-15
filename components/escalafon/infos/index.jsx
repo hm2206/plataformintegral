@@ -35,6 +35,7 @@ const Infos = ({ work }) => {
     const [error, setError] = useState(false);
     const [estado, setEstado] = useState(1);
     const [option, setOption] = useState();
+    const [current_info, setCurrentInfo] = useState({})
 
     // obtener contratos
     const getInfos = async (add = false) => {
@@ -59,6 +60,11 @@ const Infos = ({ work }) => {
         q.id = btoa(obj.id);
         q.href = btoa(Router.asPath);
         Router.push({ pathname: path, query: q });
+    }
+
+    const handleAdd = (obj) => {
+        setCurrentInfo(obj);
+        setOption('CREATE');
     }
 
     const handleSave = () => {
@@ -98,7 +104,10 @@ const Infos = ({ work }) => {
         
         {current_infos.map((i, indexI) => 
             <div className="col-md-6" key={`info-list-${i.id}-${indexI}`}>
-                <ItemInfo info={i} onEdit={() => handleEdit(i)}/>
+                <ItemInfo info={i} 
+                    onEdit={() => handleEdit(i)}
+                    onAdd={() => handleAdd(i)}
+                />
             </div>
         )}
 
@@ -113,6 +122,7 @@ const Infos = ({ work }) => {
 
         <Show condicion={option == 'CREATE'}>
             <CreateInfo 
+                infoDefault={current_info}
                 onClose={() => setOption()}
                 work={work}
                 onSave={handleSave}

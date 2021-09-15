@@ -1,11 +1,15 @@
 import React, { useMemo } from 'react';
 import Show from '../../show';
 
-const ItemInfo = ({ info = {}, onEdit = null }) => {
+const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
 
     const isEdit = useMemo(() => {
         return typeof onEdit == 'function';
     }, [onEdit]);
+
+    const isAdd = useMemo(() => {
+        return typeof onAdd == 'function';
+    }, [onAdd])
 
     return (
         <div className="card">
@@ -16,8 +20,19 @@ const ItemInfo = ({ info = {}, onEdit = null }) => {
                 <span className="badge badge-primary">
                     {info?.type_categoria?.descripcion}
                 </span> 
+
+                <Show condicion={isAdd}>
+                    <span className="close cursor-pointer ml-3" 
+                        title="Crear un nuevo contrato apartir del contrato selecionado"
+                        onClick={onAdd}
+                    >
+                        <i className="fas fa-plus"></i>
+                    </span>
+                </Show>
                 
                 <Show condicion={isEdit}>
+                    
+
                     <span className="close cursor-pointer" onClick={onEdit}>
                         <i className="fas fa-pencil-alt fa-sm"></i>
                     </span>

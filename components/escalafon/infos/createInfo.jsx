@@ -8,9 +8,9 @@ import Swal from 'sweetalert2'
 
 const infoProvider = new InfoProvider();
 
-const CreateInfo = ({ work = {}, onClose = null, onSave = null }) => {
+const CreateInfo = ({ work = {}, infoDefault = {}, onClose = null, onSave = null }) => {
 
-    const [form, setForm] = useState({});
+    const [form, setForm] = useState(infoDefault);
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
 
