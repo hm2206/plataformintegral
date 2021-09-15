@@ -83,7 +83,7 @@ const CreateAssistance = ({ onClose = null }) => {
             Swal.fire({ icon: 'success', text: message });
             setIsError(false);
             setErrors({});
-            setForm(prev => ({ ...prev, schedule_id: "" }));
+            setForm(prev => ({ ...prev, schedule_id: "", description: "" }));
         }).catch(err => {
             Swal.fire({ icon: 'error', text: err.message });
             setErrors(err.errors || {});
@@ -147,6 +147,17 @@ const CreateAssistance = ({ onClose = null }) => {
                         onChange={({ target }) => handleInput(target)}
                     />
                     <label>{errors?.record_time?.[0] || ""}</label>
+                </Form.Field>
+
+                <Form.Field className="mb-3" error={errors?.description?.[0] ? true : false}>
+                    <label>Descripción <b className="text-red">*</b></label>
+                    <textarea type="time"
+                        rows="4"
+                        name="description"
+                        value={form.description || ""}
+                        onChange={({ target }) => handleInput(target)}
+                    />
+                    <label>{errors?.description?.[0] || ""}</label>
                 </Form.Field>
             </Form>
             <div className="card-footer">
