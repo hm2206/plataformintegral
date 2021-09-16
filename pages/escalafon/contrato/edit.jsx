@@ -195,6 +195,76 @@ const Edit = ({ success, info, query }) => {
                                                 />
                                             </Form.Field>
                                         </div>
+
+                                        <div className="col-md-6 mt-3 text-left">
+                                            <Form.Field>
+                                                <label htmlFor="">Ley Social <b className="text-red">*</b></label>
+                                                <input type="text" 
+                                                    readOnly
+                                                    value={info.work?.afp?.afp || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-6 mt-3 text-left">
+                                            <Form.Field>
+                                                <label htmlFor="">Fecha de Afiliación</label>
+                                                <input type="date" 
+                                                    readOnly
+                                                    value={info.work?.fecha_de_afiliacion || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-6 mt-3 text-left">
+                                            <Form.Field>
+                                                <label htmlFor="">N° CUSSP</label>
+                                                <input type="text" 
+                                                    readOnly 
+                                                    value={info.work?.numero_de_cussp || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-6 mt-3 text-left">
+                                            <Form.Field>
+                                                <label htmlFor="">N° Essalud</label>
+                                                <input type="text" 
+                                                    readOnly
+                                                    value={info.work?.numero_de_essalud || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-12 mt-3 text-left">
+                                            <Form.Field>
+                                                <label htmlFor="">Banco <b className="text-red">*</b></label>
+                                                <input type="text" 
+                                                    readOnly
+                                                    value={info.work?.banco?.nombre || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-12 mt-3 text-left">
+                                            <Form.Field>
+                                                <label htmlFor="">N° Cuenta</label>
+                                                <input type="text" 
+                                                    readOnly
+                                                    value={info.work?.numero_de_cuenta || ""} 
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-12 mt-3 text-left">
+                                            <Form.Field>
+                                                <label htmlFor="">Prima Seguro</label>
+                                                <Checkbox toggle 
+                                                    checked={info.work?.prima_seguro ? true : false} 
+                                                    disabled
+                                                />
+                                            </Form.Field>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -413,76 +483,6 @@ const Edit = ({ success, info, query }) => {
                                                     onChange={({target}) => handleInput(target)}
                                                 />
                                                 <label>{errors.fecha_de_cese && errors.fecha_de_cese[0] || ""}</label>
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mt-3">
-                                            <Form.Field>
-                                                <label htmlFor="">Ley Social <b className="text-red">*</b></label>
-                                                <input type="text" 
-                                                    readOnly
-                                                    value={info.work?.afp?.afp || ""} 
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mt-3">
-                                            <Form.Field>
-                                                <label htmlFor="">Fecha de Afiliación</label>
-                                                <input type="date" 
-                                                    readOnly
-                                                    value={info.work?.fecha_de_afiliacion || ""} 
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mt-3">
-                                            <Form.Field>
-                                                <label htmlFor="">N° CUSSP</label>
-                                                <input type="text" 
-                                                    readOnly 
-                                                    value={info.work?.numero_de_cussp || ""} 
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mt-3">
-                                            <Form.Field>
-                                                <label htmlFor="">N° Essalud</label>
-                                                <input type="text" 
-                                                    readOnly
-                                                    value={info.work?.numero_de_essalud || ""} 
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mt-3">
-                                            <Form.Field>
-                                                <label htmlFor="">Banco <b className="text-red">*</b></label>
-                                                <input type="text" 
-                                                    readOnly
-                                                    value={info.work?.banco?.nombre || ""} 
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mt-3">
-                                            <Form.Field>
-                                                <label htmlFor="">N° Cuenta</label>
-                                                <input type="text" 
-                                                    readOnly
-                                                    value={info.work?.numero_de_cuenta || ""} 
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mt-3">
-                                            <Form.Field>
-                                                <label htmlFor="">Prima Seguro</label>
-                                                <Checkbox toggle 
-                                                    checked={info.work?.prima_seguro ? true : false} 
-                                                    disabled
-                                                />
                                             </Form.Field>
                                         </div>
 
