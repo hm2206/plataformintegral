@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import Show from '../../show';
+import { Button } from 'semantic-ui-react'
 
 const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
 
@@ -20,23 +21,6 @@ const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
                 <span className="badge badge-primary">
                     {info?.type_categoria?.descripcion}
                 </span> 
-
-                <Show condicion={isAdd}>
-                    <span className="close cursor-pointer ml-3" 
-                        title="Crear un nuevo contrato apartir del contrato selecionado"
-                        onClick={onAdd}
-                    >
-                        <i className="fas fa-plus"></i>
-                    </span>
-                </Show>
-                
-                <Show condicion={isEdit}>
-                    
-
-                    <span className="close cursor-pointer" onClick={onEdit}>
-                        <i className="fas fa-pencil-alt fa-sm"></i>
-                    </span>
-                </Show>
             </div>
             <div className="card-body">
                 <div className="mb-2"><b>Resolución: </b>{info?.resolucion}</div>
@@ -50,6 +34,23 @@ const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
                     <span className={`badge ml-1 mr-1 badge-${info?.estado ? 'success' : 'danger'}`}>
                         {info?.estado ? 'Activo' : 'Terminado'}
                     </span>
+                </div>
+            </div>
+            <div className="card-footer">
+                <div className="card-body text-right">
+                    <Button.Group size="mini">
+                        <Button onClick={onAdd}
+                            title="Crear un nuevo contrato apartir del contrato selecionado" 
+                        >
+                            <i className="fas fa-plus"></i>
+                        </Button>
+
+                        <Button onClick={onEdit}
+                            title="Editar Contrato"
+                        >
+                            <i className="fas fa-pencil-alt"></i>
+                        </Button>
+                    </Button.Group>
                 </div>
             </div>
         </div>
