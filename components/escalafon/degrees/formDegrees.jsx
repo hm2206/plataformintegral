@@ -33,6 +33,17 @@ const FormDegrees = ({ children, form = {}, errors = {}, className = null, readO
                     <label htmlFor="">{errors?.institution?.[0] || ""}</label>
                 </Form.Field>
 
+                <Form.Field className="col-md-12 mb-3" error={errors?.place?.[0] ? true : false}>
+                    <label htmlFor="">Lugar <b className="text-red">*</b> </label>
+                    <input type="text" 
+                        name="place"
+                        readOnly={readOnly.includes('place') || disabled}
+                        value={form?.place || ""}
+                        onChange={(e) => handleChange(e,  e.target)}
+                    />
+                    <label htmlFor="">{errors?.place?.[0] || ""}</label>
+                </Form.Field>
+
                 <Form.Field className="col-md-6 mb-3" error={errors?.document_number?.[0] ? true : false}>
                     <label htmlFor="">N° Documento <b className="text-red">*</b></label>
                     <input type="text" 

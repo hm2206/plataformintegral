@@ -17,6 +17,7 @@ const ItemAscent = ({ ascent, info, onUpdate = null, onDelete = null }) => {
             <div className="card-body">
                 <div className="row">
                     <div className="col-md-12">
+                        <div className="mb-2"><b>Ascenso: </b> {ascent?.ascent}</div>
                         <div className="mb-2"><b>Tip. categoría: </b> <span className="badge badge-dark">{ascent?.type_categoria?.descripcion}</span></div>
                         <div className="mb-2"><b>Fecha Resolución: </b> {moment(ascent?.date_start).format('DD/MM/YYYY')}</div>
                         <div className="mb-2"><b>Fecha Inicio: </b> {moment(ascent?.date_start).format('DD/MM/YYYY')}</div>

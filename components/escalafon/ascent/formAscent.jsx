@@ -57,6 +57,17 @@ const FormAscent = ({ cargo_id, children, form = {}, errors = {}, className = nu
                     <label htmlFor="">{errors?.date_start?.[0] || ""}</label>
                 </Form.Field>
 
+                <Form.Field className="col-md-12 mb-3" error={errors?.ascent?.[0] ? true : false}>
+                    <label htmlFor="">Ascenso <b className="text-red">*</b></label>
+                    <input type="text" 
+                        name="ascent"
+                        readOnly={readOnly.includes('ascent') || disabled}
+                        value={form?.ascent || ""}
+                        onChange={(e) => handleChange(e,  e.target)}
+                    />
+                    <label htmlFor="">{errors?.ascent?.[0] || ""}</label>
+                </Form.Field>
+
                 <Form.Field className="col-md-12 mb-3" error={errors?.description?.[0] ? true : false}>
                     <label htmlFor="">Descripción <b className="text-red">*</b></label>
                     <textarea rows="3"
