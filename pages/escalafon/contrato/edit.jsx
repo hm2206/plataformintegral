@@ -35,8 +35,8 @@ const Edit = ({ success, info, query }) => {
     const [old, setOld] = useState({});
     const [errors, setErrors] = useState({});
 
-     // cargar entity
-     useEffect(() => {
+    // cargar entity
+    useEffect(() => {
         entity_context.fireEntity({ render: true, disabled: true, entity_id: info.entity_id });
         return () => entity_context.fireEntity({ render: false, disabled: false });
     }, []);
@@ -47,7 +47,7 @@ const Edit = ({ success, info, query }) => {
             setForm(info);
             setOld(JSON.parse(JSON.stringify(info)));
         }
-    }, []);
+    }, [info?.id]);
 
     // cancelar edición
     const cancelInfo = async () => {
@@ -100,7 +100,7 @@ const Edit = ({ success, info, query }) => {
             await Swal.fire({ icon: 'success', text: message });
             let { push, pathname } = Router;
             query.id = btoa(restore.id);
-            push({ pathname, query });
+            await push({ pathname, query });
         }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
@@ -123,7 +123,7 @@ const Edit = ({ success, info, query }) => {
     const handleOption = async (e, index, obj) => {
         switch (obj.key) {
             case 'restaurar':
-                restaurar();
+                await restaurar();
                 break;
             default:
                 break;
@@ -149,14 +149,14 @@ const Edit = ({ success, info, query }) => {
                             <div className="row">
                                 <div className="col-md-12 mb-3">
                                     <div>
-                                        <Message color={form.estado ? 'green' : 'red'}>
+                                        <Message color={form?.estado ? 'green' : 'red'}>
                                             <div className="row">
                                                 <div className="col-md-10">
-                                                    <b>El contrato está {info.estado ? 'habilitado' : 'deshabilitado'}</b>
+                                                    <b>El contrato está {info?.estado ? 'habilitado' : 'deshabilitado'}</b>
                                                 </div>
                                                 <div className="col-md-2 text-right">
                                                     <Checkbox toggle
-                                                        checked={form.estado ? true : false}
+                                                        checked={form?.estado ? true : false}
                                                         onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
                                                         disabled={!edit}
                                                         name="estado"
