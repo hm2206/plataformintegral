@@ -23,6 +23,8 @@ const PlaceholderTable = () => {
             <td><Skeleton/></td>
             <td><Skeleton/></td>
             <td><Skeleton/></td>
+            <td><Skeleton/></td>
+            <td><Skeleton/></td>
         </tr>
     );
 }
@@ -48,8 +50,8 @@ const ListAssistance = () => {
 
     // memos
     const isFilter = useMemo(() => {
-        return year && month && day
-    }, [year, month, day]);
+        return year && month
+    }, [year, month]);
 
     const array_months = useMemo(() => {
         let payload = [];
@@ -67,7 +69,7 @@ const ListAssistance = () => {
 
     const array_days = useMemo(() => {
         let last_day = parseInt(moment(`${year}-${month}-01`).add(1, "month").subtract(1, "day").format('D'));
-        let payload = [];
+        let payload = [{ key: 'all', value: '', text: 'Todos' }];
         for (let index = 1; index <= last_day; index++) {
             let text = moment(`${year}-${month}-${index}`).format('DD');
             payload.push({
@@ -87,8 +89,7 @@ const ListAssistance = () => {
 
     const getAssistances = async (add = false) => {
         setCurrentLoading(true);
-        let date = `${year}-${month}-${day}`
-        await assistanceProvider.index({ page: assistances.page, date, query_search }, options)
+        await assistanceProvider.index({ page: assistances.page, year, month, day, query_search }, options)
         .then(res => {
             let { assistances } = res.data;
             let payload = {
@@ -111,7 +112,7 @@ const ListAssistance = () => {
         let answer = await Confirm("info", `¿Estás seguro en generar el reporte en PDF?`, 'Generar PDF');
         if (!answer) return setOption("");
         app_context.setCurrentLoading(true);
-        await assistanceProvider.reportMonthly({ year, month, query_search })
+        await assistanceProvider.reportMonthly({ year, month, day, query_search })
         .then(res => {
             app_context.setCurrentLoading(false);
             let file = new File([res.data], 'report-pdf.pdf');
@@ -155,9 +156,8 @@ const ListAssistance = () => {
     }, []);
 
     useEffect(() => {
-        if (day) handleSearch();
-        else dispatch({ type: assistanceTypes.SET_ASSISTANCES, payload: { page: 1, last_page: 0, total: 0, data: [] } });
-    }, [day]);
+        handleSearch();
+    }, [day, month]);
 
     useEffect(() => {
         if (entity_id && is_refresh) getAssistances();
@@ -242,14 +242,16 @@ const ListAssistance = () => {
                 
                 <h4>Resultados: {assistances?.data?.length} de {assistances.total || 0}</h4>
 
-                <div className="table-responsive">
+                <div className="table-responsive" style={{  minHeight: '80vh' }}>
                     <table className="table table-bordered table-stripe">
                         <thead>
                             <tr>
                                 <th width="7%" className="text-center">ID#</th>
                                 <th>Apellidos y Nombres</th>
+                                <th width="15%" className="text-center">Fecha</th>
                                 <th width="15%" className="text-center">Tiempo marcado</th>
                                 <th width="10%" className="text-center">Tipo</th>
+                                <th width="15%" className="text-center">Descripción</th>
                                 <th width="10%" className="text-center">Opciones</th>
                             </tr>
                         </thead>
@@ -268,14 +270,14 @@ const ListAssistance = () => {
                             >
                                 <Show condicion={!assistances.total}>
                                     <tr>
-                                        <td colSpan="5" className="text-center">No hay regístros disponibles</td>
+                                        <td colSpan="7" className="text-center">No hay regístros disponibles</td>
                                     </tr>
                                 </Show>
                             </Show>
                             {/* obtener más regíster */}
                             <Show condicion={(assistances?.last_page >= assistances?.page + 1)}>
                                 <tr>
-                                    <th colSpan="5">
+                                    <th colSpan="7">
                                         <Button fluid 
                                             disabled={current_loading}
                                             onClick={nextPage}

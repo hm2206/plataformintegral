@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { Button, Select } from 'semantic-ui-react';
+import React, { useState, useContext, useMemo } from 'react';
+import { Button, Select, TextArea } from 'semantic-ui-react';
 import AssistanceProvider from '../../providers/escalafon/AssistanceProvider';
 import moment from 'moment';
 import Show from '../show';
@@ -33,7 +33,6 @@ const ItemAssistance = ({ index, assistance = {}, group = false }) => {
     // estados
     const [form, setForm] = useState(assistance);
     const [current_loading, setCurrentLoading] = useState(false);
-    const [is_render, setIsRender] = useState(true);
     const [edit, setEdit] = useState(false);
 
     const handleUpdate = async () => {
@@ -69,13 +68,17 @@ const ItemAssistance = ({ index, assistance = {}, group = false }) => {
         setForm(newForm);
     }
 
-    if (!is_render) return null;
+    const displayFecha = useMemo(() => {
+        let format = moment(assistance?.schedule?.date, 'YYYY-MM-DD');
+        return format.isValid() ? format.format('DD/MM/YYYY') : null;
+    }, [assistance])
 
     // render
     return (
         <tr style={{ borderBottom: group ? '2px solid #000' : '' }}>
             <td>{index + 1}</td>
             <td className="capitalize">{assistance?.person?.fullname}</td>
+            <td className="text-center">{displayFecha}</td>
             <td className="text-center">
                 <span className="badge badge-dark"> 
                     <i className="fas fa-clock mr-1"></i>
@@ -97,6 +100,17 @@ const ItemAssistance = ({ index, assistance = {}, group = false }) => {
                             { key: 'ENTRY', value: 'ENTRY', text: 'Entrada' },
                             { key: 'EXIT', value: 'EXIT', text: 'Salida' },
                         ]}
+                    />
+                </Show>
+            </td>
+            <td className="text-center">
+                <Show condicion={edit}
+                    predeterminado={form?.description}
+                >
+                    <TextArea name="description"
+                        className="form-control"
+                        value={form.description || ""}
+                        onChange={(e, obj) => handleInput(obj)}
                     />
                 </Show>
             </td>
