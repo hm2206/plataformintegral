@@ -54,7 +54,7 @@ const WrapperDiscount = () => {
         let answer = await Confirm('warning', `¿Estas seguro en generar el descuento?`);
         if (!answer) return;
         app_context.setCurrentLoading(true);
-        configDiscountProvider.process_discounts(config_discount?.id)
+        await configDiscountProvider.process_discounts(config_discount?.id)
         .then(async res => {
             app_context.setCurrentLoading(false);
             let { message } = res.data;
