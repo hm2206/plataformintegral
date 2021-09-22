@@ -1,0 +1,13 @@
+
+.card.active {
+    border: 1px solid #2887f3;
+}
+
+.card.active > * {
+    color: #2887f3;
+}
+
+.card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
