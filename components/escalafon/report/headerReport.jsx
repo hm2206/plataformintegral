@@ -30,12 +30,6 @@ const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile 
             config: <div></div>
         },
         { 
-            type: "hon",
-            title: "Honomástico", 
-            icon: "fas fa-birthday-cake",
-            config: <div></div>
-        },
-        { 
             type: "tra",
             title: "Trabajadores Activos", 
             icon: "fas fa-praying-hands",

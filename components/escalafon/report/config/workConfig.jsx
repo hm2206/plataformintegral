@@ -10,8 +10,8 @@ const WorkConfig = ({ setFile = null, setBlock = null }) => {
 
     const [form, setForm] = useState({});
 
-    const reportPdf = useRequestBlob({ request: reportProvider.general });
-    const reportExcel = useRequestBlob({ request: reportProvider.general });
+    const reportPdf = useRequestBlob({ request: reportProvider.general, name: "report-general.pdf", extname: "pdf" });
+    const reportExcel = useRequestBlob({ request: reportProvider.general, name: "report-general.xlsx", extname: "xlsx" });
 
     const handleInput = ({ name, value }) => {
         setForm(prev => ({ ...prev, [name]: value }));
@@ -21,27 +21,36 @@ const WorkConfig = ({ setFile = null, setBlock = null }) => {
         return reportPdf.loading || reportExcel.loading;
     }, [reportPdf.loading, reportExcel.loading]);
 
+    const handlePdf = () => {
+        setBlock(true);
+        reportPdf.setQuery({ ...form, type: 'pdf' })
+        reportPdf.setExecute(true);
+    }
+
+    const handleExcel = () => {
+        setBlock(true);
+        reportExcel.setQuery({ ...form, type: 'excel' })
+        reportExcel.setExecute(true);
+    }
+
     useEffect(() => {
         if (reportPdf?.file?.name) setFile(reportPdf?.file)
     }, [reportPdf.file]);
 
     useEffect(() => {
-        reportPdf.setParams([form]);
-        reportExcel.setParams([form]);
-    }, [form]);
+        if (reportExcel?.file?.name) setFile(reportExcel?.file)
+    }, [reportExcel.file]);
+
+    useEffect(() => {
+        if (reportPdf?.isError) setBlock(false)
+    }, [reportPdf.isError]);
+
+    useEffect(() => {
+        if (reportExcel?.isError) setBlock(false)
+    }, [reportExcel.isError]);
 
     return (
         <>
-            <div className="form-group">
-                <label>Buscar por: Apellidos y Nombres</label>
-                <Input fluid
-                    disabled={isDisabled}
-                    name="query_search"
-                    placeholder="Buscar..."
-                    value={form?.query_search || null}
-                    onChange={({ target }) => handleInput(target)}
-                />
-            </div>
             <div className="form-group">
                 <label>Partición Pre.</label>
                 <SelectCargo
@@ -66,16 +75,14 @@ const WorkConfig = ({ setFile = null, setBlock = null }) => {
                 <Button.Group size="medium">
                     <Button color="green" 
                         basic
+                        onClick={handleExcel}
                         disabled={isDisabled}
                         loading={reportExcel.loading}
                     >
                         <i className="fas fa-file-excel"></i> Excel
                     </Button>
                     <Button color="red"
-                        onClick={() => {
-                            setBlock(true);
-                            reportPdf.setExecute(true);
-                        }}
+                        onClick={handlePdf}
                         disabled={isDisabled}
                         loading={reportPdf.loading}
                     >

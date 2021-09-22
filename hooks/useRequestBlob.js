@@ -1,24 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
-const useRequestBlob = ({ request }) => {
+const useRequestBlob = ({ name, extname, request, params = [] }) => {
 
     const [loading, setLoading] = useState(false);
     const [file, setFile] = useState({});
     const [execute, setExecute] = useState(false)
-    const [params, setParams] = useState([]);
+    const [query, setQuery] = useState({});
+    const [isError, setIsError] = useState(false);
+
+    let requestArgs = params.length ? [...params, query] : [query];
 
     const handleRequestBlob = async () => {
         setLoading(true);
-        await request(...params)
+        await request(...requestArgs)
         .then(({ data }) => {
-            let name = "reporte-general.pdf"
             let file = new File([data], name);
             let url = URL.createObjectURL(data);
-            let extname = "pdf";
             let size = file.size
             setFile({ name, url, extname, size })
-        }).catch(() =>  Swal.fire("No se pudó generar el reporte"))
+            setIsError(false);
+        }).catch(() =>  {
+            setIsError(true)
+            Swal.fire("No se pudó generar el reporte")
+        })
         setLoading(false);
     }
 
@@ -30,7 +35,7 @@ const useRequestBlob = ({ request }) => {
         if (execute) setExecute(false);
     }, [execute]);
 
-    return { file, loading, setExecute, setParams }
+    return { file, loading, setExecute, setQuery, isError }
 }
 
 
