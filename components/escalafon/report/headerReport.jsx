@@ -1,6 +1,7 @@
 import React from 'react'
 import ItemCard from './itemCard'
 import WorkConfig from './config/workConfig'
+import BallotConfig from './config/ballotConfig'
 
 const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile = null, setBlock = null }) => {
 
@@ -27,7 +28,7 @@ const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile 
             type: "pap",
             title: "Papeletas", 
             icon: "fas fa-file-alt",
-            config: <div></div>
+            config: <BallotConfig {...props}/>
         },
         { 
             type: "tra",
