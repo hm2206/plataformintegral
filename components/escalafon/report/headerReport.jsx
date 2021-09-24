@@ -2,6 +2,7 @@ import React from 'react'
 import ItemCard from './itemCard'
 import WorkConfig from './config/workConfig'
 import BallotConfig from './config/ballotConfig'
+import LicenseConfig from './config/licenseConfig'
 
 const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile = null, setBlock = null }) => {
 
@@ -22,7 +23,7 @@ const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile 
             type: "lic",
             title: "Licencias/Permisos", 
             icon: "fas fa-id-badge",
-            config: <div></div>
+            config: <LicenseConfig {...props}/>
         },
         { 
             type: "pap",
