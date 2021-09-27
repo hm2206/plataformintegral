@@ -46,6 +46,18 @@ class ReportProvider extends BaseProvider  {
             .catch(err => this.handleError(err));
     }
 
+    vacations = async (query = {}, config = {  responseType: 'blob' }, ctx = null) => {
+        query.year =  typeof query.year != 'undefined' ? query.year : currentDate.year();
+        query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
+        query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : "";
+        query.type = typeof query.type != 'undefined' ? query.type : "";
+        let query_string = `year=${query.year}&month=${query.month}&cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}&type=${query.type}`;
+        // request
+        return await escalafon.get(`${this.collection}/vacations?${query_string}`, config, ctx)
+            .then(res => res)
+            .catch(err => this.handleError(err));
+    }
+
 }
 
 export default ReportProvider;

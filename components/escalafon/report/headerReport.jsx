@@ -3,6 +3,7 @@ import ItemCard from './itemCard'
 import WorkConfig from './config/workConfig'
 import BallotConfig from './config/ballotConfig'
 import LicenseConfig from './config/licenseConfig'
+import VacationConfig from './config/vacationConfig'
 
 const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile = null, setBlock = null }) => {
 
@@ -17,7 +18,7 @@ const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile 
             type: "vac",
             title: "Vacaciones", 
             icon: "fas fa-suitcase",
-            config: null
+            config: <VacationConfig {...props}/>
         },
         { 
             type: "lic",
