@@ -39,17 +39,21 @@ const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
             <div className="card-footer">
                 <div className="card-body text-right">
                     <Button.Group size="mini">
-                        <Button onClick={onAdd}
-                            title="Crear un nuevo contrato apartir del contrato selecionado" 
-                        >
-                            <i className="fas fa-plus"></i>
-                        </Button>
+                        <Show condicion={onAdd}>
+                            <Button onClick={onAdd}
+                                title="Crear un nuevo contrato apartir del contrato selecionado" 
+                            >
+                                <i className="fas fa-plus"></i>
+                            </Button>
+                        </Show>
 
-                        <Button onClick={onEdit}
-                            title="Editar Contrato"
-                        >
-                            <i className="fas fa-pencil-alt"></i>
-                        </Button>
+                        <Show condicion={onEdit}>
+                            <Button onClick={onEdit}
+                                title="Editar Contrato"
+                            >
+                                <i className="fas fa-pencil-alt"></i>
+                            </Button>
+                        </Show>
                     </Button.Group>
                 </div>
             </div>

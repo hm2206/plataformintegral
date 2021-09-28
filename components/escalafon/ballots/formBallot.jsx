@@ -24,6 +24,11 @@ const motivos = [
         value: "COMISION_DE_SERVICIO",
         text: "Comisión de Servicio"
     },
+    {
+        key: "OTROS",
+        value: "OTROS",
+        text: "Otros"
+    },
 ]
 
 
