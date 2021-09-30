@@ -87,7 +87,7 @@ const EditBallot = ({ ballot = {}, info = {}, onClose = null, onUpdate = null, o
                 form={form}
                 errors={errors}
                 disabled={current_loading || !info?.estado}
-                readOnly={['schedule_id', 'total']}
+                readOnly={['total']}
                 onChange={handleInput}
                 info_id={info?.id}
                 isEdit={true}

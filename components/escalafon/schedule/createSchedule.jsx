@@ -71,6 +71,7 @@ const CreateSchedule = ({ info = {}, date,  onClose = null, onSave = null }) => 
                 form={form}
                 errors={errors}
                 readOnly={['date']}
+                hidden={['status', 'discount']}
                 onChange={handleInput}
             >
                 <div className="col-md-12 text-right">

@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import Show from '../../show';
 import { Form, Select } from 'semantic-ui-react';
 
-const FormSchedule = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null, disabled = false }) => {
+const FormSchedule = ({ children, form = {}, errors = {}, className = null, readOnly = [], hidden = [], onChange = null, disabled = false }) => {
 
     const handleChange = (e, { name, value }) => {
         if (typeof onChange == 'function') onChange(e, { name, value });
@@ -114,33 +114,37 @@ const FormSchedule = ({ children, form = {}, errors = {}, className = null, read
                 </Show>
 
                 <Show condicion={form?.status != 'D'}>
-                    <Form.Field className="col-md-6 mb-3" error={errors?.status?.[0] ? true : false}>
-                        <label htmlFor="">Estado <b className="text-red">*</b></label>
-                        <Select placeholder="Selecionar Estado"
-                            options={[
-                                { key: "A", value: "A", text: "Asistencia" },
-                                { key: "F", value: "F", text: "Falta" },
-                            ]}
-                            disabled={readOnly.includes('status') || disabled}
-                            name="status"
-                            onChange={(e, obj) => handleChange(e, obj)}
-                            value={form?.status || ""}
-                        />
-                        <label htmlFor="">{errors?.status?.[0] || ""}</label>
-                    </Form.Field>
-
-                    <Show condicion={form?.status == 'A'}>
-                        <Form.Field className="col-md-6 mb-3" error={errors?.discount?.[0] ? true : false}>
-                            <label htmlFor="">Descuento</label>
-                            <input type="number" 
-                                step="any"
-                                name="discount"
-                                readOnly={readOnly.includes('discount') || disabled}
-                                value={form?.discount || 0}
-                                onChange={(e) => handleChange(e, e.target)}
+                    <Show condicion={!hidden.includes('status')}>
+                        <Form.Field className="col-md-6 mb-3" error={errors?.status?.[0] ? true : false}>
+                            <label htmlFor="">Estado <b className="text-red">*</b></label>
+                            <Select placeholder="Selecionar Estado"
+                                options={[
+                                    { key: "A", value: "A", text: "Asistencia" },
+                                    { key: "F", value: "F", text: "Falta" },
+                                ]}
+                                disabled={readOnly.includes('status') || disabled}
+                                name="status"
+                                onChange={(e, obj) => handleChange(e, obj)}
+                                value={form?.status || ""}
                             />
-                            <label htmlFor="">{errors?.discount?.[0] || ""}</label>
+                            <label htmlFor="">{errors?.status?.[0] || ""}</label>
                         </Form.Field>
+                    </Show>
+
+                    <Show condicion={!hidden.includes('discount')}>
+                        <Show condicion={form?.status == 'A'}>
+                            <Form.Field className="col-md-6 mb-3" error={errors?.discount?.[0] ? true : false}>
+                                <label htmlFor="">Descuento</label>
+                                <input type="number" 
+                                    step="any"
+                                    name="discount"
+                                    readOnly={readOnly.includes('discount') || disabled}
+                                    value={form?.discount || 0}
+                                    onChange={(e) => handleChange(e, e.target)}
+                                />
+                                <label htmlFor="">{errors?.discount?.[0] || ""}</label>
+                            </Form.Field>
+                        </Show>
                     </Show>
                 </Show>
 

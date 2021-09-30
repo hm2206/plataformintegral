@@ -98,6 +98,7 @@ const EditSchedule = ({ schedule = {}, info = {}, onClose = null, onReplicar = n
                 form={form}
                 errors={errors}
                 readOnly={['date']}
+                hidden={['status', 'discount']}
                 onChange={handleInput}
             >
                 <Show condicion={isModify && info?.estado}>

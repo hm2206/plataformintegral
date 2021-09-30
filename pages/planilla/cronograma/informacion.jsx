@@ -24,6 +24,7 @@ import SearchCronograma from '../../../components/cronograma/searchCronograma';
 import { credencials } from '../../../env.json';
 import ModalReport from '../../../components/cronograma/modalReport';
 import ChangeMeta from '../../../components/cronograma/changeMeta';
+import Discount from '../../../components/cronograma/discount'
 import { AUTHENTICATE } from '../../../services/auth';
 import BoardSimple from '../../../components/boardSimple';
 import HeaderCronograma from '../../../components/cronograma/headerCronograma';
@@ -397,6 +398,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
             case 'imp-descuento':
             case 'change-meta':
             case 'sync-config-desct':
+            case 'discount':
             case 'report':
                 setOption(name);
                 break;
@@ -571,10 +573,11 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                                         { key: 'sync-descuento', text: "Agregar Descuentos", icon: "arrow circle down" },
                                                         { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
                                                         { key: 'sync-obligacion', text: "Agregar Obl. Judiciales", icon: "arrow circle arrow down" },
-                                                        { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
-                                                        { key: "sync-config-desct", text: "Sync. Desc. Global", icon: "cloud upload" },
-                                                        { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
                                                         { key: "change-meta", text: "Cambio de Metas", icon: "exchange" },
+                                                        { key: "discount", text: "Dsto. Escalafón", icon: "balance scale" },
+                                                        { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
+                                                        { key: "sync-config-desct", text: "Sync. Desc. Global", icon: "cloud upload" },
+                                                        { key: "sync-config", text: "Sync. Configuraciones", icon: "cloud download" },
                                                         { key: "processing", text: "Procesar Cronograma", icon: "database" },
                                                         { key: "report", text: "Reportes", icon: "file text outline" },
                                                     ]}
@@ -754,6 +757,13 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     
             <Show condicion={option == 'sync-config-desc'}>
                 <ChangeMeta
+                    cronograma={cronograma}
+                    isClose={(e) => setOption("")}
+                />
+            </Show>
+
+            <Show condicion={option == 'discount'}>
+                <Discount
                     cronograma={cronograma}
                     isClose={(e) => setOption("")}
                 />
