@@ -62,11 +62,13 @@ const SelectConfigAssistance = ({ id = "id", year, month, name, value, onChange,
 const SelectInfoSchedule = ({ id = "id", info_id, year, month, name, value, onChange, error = false, refresh = true, onReady = null, disabled = false }) => {
 
     const displayText = (el) => {
-        let text = el?.modo == 'EXIT' ? 'Salida' : 'Entrada';
         let time_start = moment(el?.time_start, 'HH:mm').format('HH:mm A');
         let time_over = moment(el?.time_over, 'HH:mm').format('HH:mm A');
-        let textTime = el?.modo == 'EXIT' ? time_over : `${time_start} Salida: ${time_over}`;
-        return `${el?.date} | ${text}: ${textTime}`
+        let textAll = `Entrada: ${time_start} Salida: ${time_over}`;
+        let textEntry = `Entrada: ${time_start}`;
+        let textExit = `Salida: ${time_over}`;
+        let textTime = el.modo == 'ALL' ? textAll : el.modo == 'ENTRY' ? textEntry : textExit;
+        return `${el?.date} | ${textTime}`
     }
 
     return <SelectBase 
