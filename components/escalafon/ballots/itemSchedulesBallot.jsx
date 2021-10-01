@@ -191,11 +191,9 @@ const ItemInfoSchedules = ({ info }) => {
                 </div>
             </div>
             {/* crear ballot */}
-            <Show condicion={info?.estado}>
-                <BtnFloat onClick={() => setOption(options.CREATE)}>
-                    <i className="fas fa-plus"></i>
-                </BtnFloat>
-            </Show>
+            <BtnFloat onClick={() => setOption(options.CREATE)}>
+                <i className="fas fa-plus"></i>
+            </BtnFloat>
         </>
     )
 } 

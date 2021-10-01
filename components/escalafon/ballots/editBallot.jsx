@@ -94,47 +94,45 @@ const EditBallot = ({ ballot = {}, info = {}, onClose = null, onUpdate = null, o
                 year={displayDate.year()}
                 month={displayDate.month() + 1}
             >
-                <Show condicion={info?.estado}>
-                    <div className="col-md-12 text-right">
-                        <Show condicion={edit}
-                            predeterminado={
-                                <Show condicion={canDelete}>
-                                    <Show condicion={!current_loading}
-                                        predeterminado={
-                                            <div>
-                                                <Progress active percent={100} color="blue" inverted/>
-                                            </div>
-                                        }
-                                    >
-                                        <Button color="red" 
-                                            disabled={current_loading} 
-                                            onClick={handleDelete}
-                                        > 
-                                            <i className="fas fa-trash"></i> Eliminar
-                                        </Button>
-                                    </Show>
+                <div className="col-md-12 text-right">
+                    <Show condicion={edit}
+                        predeterminado={
+                            <Show condicion={canDelete}>
+                                <Show condicion={!current_loading}
+                                    predeterminado={
+                                        <div>
+                                            <Progress active percent={100} color="blue" inverted/>
+                                        </div>
+                                    }
+                                >
+                                    <Button color="red" 
+                                        disabled={current_loading} 
+                                        onClick={handleDelete}
+                                    > 
+                                        <i className="fas fa-trash"></i> Eliminar
+                                    </Button>
                                 </Show>
-                            }
-                        >
-                                <hr />
-                                <Button color="red" 
-                                    disabled={current_loading} 
-                                    basic
-                                    onClick={() => setEdit(false)}
-                                >
-                                    <i className="fas fa-times"></i> Cancelar
-                                </Button>
+                            </Show>
+                        }
+                    >
+                            <hr />
+                            <Button color="red" 
+                                disabled={current_loading} 
+                                basic
+                                onClick={() => setEdit(false)}
+                            >
+                                <i className="fas fa-times"></i> Cancelar
+                            </Button>
 
-                                <Button color="teal" 
-                                    disabled={current_loading} 
-                                    loading={current_loading}
-                                    onClick={handleUpdate}
-                                >
-                                    <i className="fas fa-sync"></i> Guardar cambios
-                                </Button>
-                        </Show>
-                    </div>
-                </Show>
+                            <Button color="teal" 
+                                disabled={current_loading} 
+                                loading={current_loading}
+                                onClick={handleUpdate}
+                            >
+                                <i className="fas fa-sync"></i> Guardar cambios
+                            </Button>
+                    </Show>
+                </div>
             </FormBallot>
         </Modal>
     )
