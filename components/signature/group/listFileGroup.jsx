@@ -184,7 +184,7 @@ const ListFileGroup = () => {
     return (
         <>
             <div className="row">
-                <div className="col-md-10 col-10"><h5><i className="far fa-file-pdf"></i> Lista de Archivos</h5></div>
+                <div className="col-md-10 col-10"><h5><i className="far fa-file-pdf"></i> Lista de Archivos ({current_total})</h5></div>
                 <Show condicion={group.status == 'OVER'}>
                     <div className="col-md-2 text-right col-2">
                         <Button size="mini"
@@ -229,7 +229,7 @@ const ListFileGroup = () => {
 
                 {/* lista de archivos */}
                 {download?.map((d, indexD) =>
-                    <div className="col-md-3" key={`file-list-uploaded-${indexD}`}>
+                    <div className="col-md-3 col-sm-6" key={`file-list-uploaded-${indexD}`}>
                         <ItemAction file={d}
                             onClick={() => handleClick(d)}
                         /> 

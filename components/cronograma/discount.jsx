@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Modal from '../modal'
 import usePaginate from '../../hooks/usePaginate';
 import { unujobs } from '../../services/apis'
@@ -29,11 +29,18 @@ const PlaceholderItem = () => {
 }
 
 const DiscountItem = ({ data }) => {
+
+    const applyDiscount = useMemo(() => {
+        return parseInt(data?.neto) ? true : false;
+    }, [data]);
+
     return (
-        <List.Item>
+        <List.Item className={!applyDiscount ? 'text-muted' : ''}>
             <List.Content floated='right'>
-                <Button color="blue">
-                    <i className="fas fa-plus"></i>
+                <Button color="red"
+                    disabled={!applyDiscount}
+                >
+                    {data?.monto}
                 </Button>
             </List.Content>
             <Image avatar src={data?.person?.image_images?.image_50x50 || '/img/base.png'} 
@@ -41,7 +48,8 @@ const DiscountItem = ({ data }) => {
             />
             <List.Content>
                 <span className="uppercase">{data?.person.fullname}</span>
-                <span className="badge badge-dark ml-2">{data?.displayCategoria}</span>
+                <span className="badge badge-primary ml-2">{data?.displayCategoria}</span>
+                <span className="badge badge-dark ml-2">{data?.neto}</span>
             </List.Content>
         </List.Item>
     )
