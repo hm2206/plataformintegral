@@ -10,6 +10,7 @@ import Aportacion from './aportacion';
 import Obligacion from './obligacion';
 import Sindicato from './sindicato';
 import Detallado from './detallado';
+import Discount from './discount';
 
 const TabCronograma = (props) => {
 
@@ -87,6 +88,14 @@ const TabCronograma = (props) => {
             render: () => (
                 <Tab.Pane style={styles}>
                     <Aportacion/>
+                </Tab.Pane>
+            )
+        },
+        {
+            menuItem: {key: 'escalafon', icon: 'calendar', content: 'Escalafón', disabled: edit || loading || block },
+            render: () => (
+                <Tab.Pane style={styles}>
+                    <Discount/>
                 </Tab.Pane>
             )
         }

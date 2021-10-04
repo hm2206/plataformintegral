@@ -1,99 +1,168 @@
-import React, { useMemo, useState } from 'react';
-import Modal from '../modal'
-import usePaginate from '../../hooks/usePaginate';
-import { unujobs } from '../../services/apis'
-import { List, Button, Image } from 'semantic-ui-react'
-import Skeleton from 'react-loading-skeleton'
-import Show from '../show'
+import React, { useContext, useEffect, useState, Fragment } from 'react';
+import { unujobs } from '../../services/apis';
+import { Button, Form, Select, Icon } from 'semantic-ui-react';
+import { Confirm, parseOptions } from '../../services/utils';
+import Swal from 'sweetalert2';
+import Show from '../show';
+import Skeleton from 'react-loading-skeleton';
+import { CronogramaContext } from '../../contexts/cronograma/CronogramaContext';
+import { AppContext } from '../../contexts/AppContext';
+import usePaginate from '../../hooks/usePaginate'
 
-const PlaceholderItem = () => {
-    // render
-    return (
-        <List.Item>
-            <List.Content>
-                <div className="mb-1">
-                    <Skeleton height="40px"/>
-                </div>
-                <div className="mb-1">
-                    <Skeleton height="40px"/>
-                </div>
-                <div className="mb-1">
-                    <Skeleton height="40px"/>
-                </div>
-                <div className="mb-1">
-                    <Skeleton height="40px"/>
-                </div>
-            </List.Content>
-        </List.Item>
-    )
-}
+const PlaceHolderButton = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
-const DiscountItem = ({ data }) => {
+const FragmentAportacion = () => (
+    <div className="col-md-4 mb-3">
+        <PlaceHolderButton/>
+    </div>
+)
 
-    const applyDiscount = useMemo(() => {
-        return parseInt(data?.neto) ? true : false;
-    }, [data]);
+const PlaceholderAportacion = () => {
+
+    const datos = [1, 2, 3, 4];
 
     return (
-        <List.Item className={!applyDiscount ? 'text-muted' : ''}>
-            <List.Content floated='right'>
-                <Button color="red"
-                    disabled={!applyDiscount}
-                >
-                    {data?.monto}
-                </Button>
-            </List.Content>
-            <Image avatar src={data?.person?.image_images?.image_50x50 || '/img/base.png'} 
-                style={{ objectFit: 'cover' }}
-            />
-            <List.Content>
-                <span className="uppercase">{data?.person.fullname}</span>
-                <span className="badge badge-primary ml-2">{data?.displayCategoria}</span>
-                <span className="badge badge-dark ml-2">{data?.neto}</span>
-            </List.Content>
-        </List.Item>
-    )
+        <Fragment>
+            {datos.map(d => <Fragment key={`aportacion-placeholder-${d}`}>
+                <FragmentAportacion/>
+                <FragmentAportacion/>
+                <FragmentAportacion/>
+            </Fragment>)}
+        </Fragment>
+    );
 }
 
-const Discount = ({ cronograma, isClose = null }) => {
 
-    const [datos, setDatos] = useState([]);
+const Discount = () => {
 
-    const config = {
-        headers: { CronogramaId: cronograma?.id }
-    }
+    // cronograma
+    const { edit, setEdit, send, setSend, loading, historial, setBlock, cronograma, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
+    const [discounts, setDiscounts] = useState([]);
+    const [old, setOld] = useState([]);
+    const [error, setError] = useState(false);
+
+    // app
+    const app_context = useContext(AppContext);
 
     // hooks
-    const request = usePaginate({ api: unujobs, url: `cronograma/${cronograma?.id}/discounts`, config }, (data, add) => {
-        setDatos(add ? [...datos, ...data] : data);
-    })
+    const request = usePaginate({ api: unujobs, url: `historial/${historial.id}/discounts`, execute: false }, (data, add) => {
+        setDiscounts(add ? [...discounts, ...data] : data); 
+        setOld(add ? [...discounts, ...data] : data);
+    });
+
+    // monto
+    const handleMonto = async (index, value, obj) => {
+        let newMonto = Object.assign({}, obj);
+        let newDiscounts = JSON.parse(JSON.stringify(discounts));
+        newMonto.send = true;
+        newMonto.monto = value;
+        newDiscounts[index] = newMonto;
+        setDiscounts(newDiscounts);
+    }
+
+    // actualizar discounts
+    const update = async () => {
+        const form = new FormData();
+        let datos = await discounts.filter(rem => rem.send == true);
+        form.append('_method', 'PUT');
+        datos.map((d, index) => {
+            let attributes = Object.keys(d);
+            attributes.forEach(a => {
+                let allow = ['id', 'monto'];
+                if (!allow.includes(a)) return;
+                form.append(`discounts[${index}][${a}]`, d[a]);
+            });
+        });
+        // valdiar que se modificarón los datos
+        if (!datos.length)  await Swal.fire({ icon: 'warning', text: 'No se encontraron cambios' });
+        // send changes
+        else {
+            app_context.setCurrentLoading(true);
+            await unujobs.post(`historial/${historial.id}/discounts`, form, { headers: { CronogramaID: cronograma.id } })
+            .then(async () => {
+                app_context.setCurrentLoading(false);
+                await Swal.fire({ icon: 'success', text: "Los cambios se guardarón correctamente!" });
+                setEdit(false);
+                request.setIsRefresh(true);
+            })
+            .catch(() => {
+                app_context.setCurrentLoading(false);
+                Swal.fire({ icon: 'error', text: "No se pudó guardar los cambios" });
+            });
+        }   
+        setSend(false);
+        setBlock(false);
+    }
+    
+    // primera carga
+    useEffect(() => {
+        setIsEditable(true);
+        setIsUpdatable(true);
+        if (historial.id) request.setIsRefresh(true);
+        return () => {}
+    }, [historial.id]);
+
+    useEffect(() => {
+        setBlock(request.loading);
+    }, [request.loading]);
+
+    useEffect(() => {
+        if (!edit && !send) setDiscounts(old);
+    }, [!edit]);
+
+    // update discounts
+    useEffect(() => {
+        if (send) update();
+    }, [send]);
+
+
+    // eliminar aportacion
+    // const deleteAportacion = async (id, index) => {
+    //     let answer = await Confirm("warning", `¿Deseas elminar la aportacion del empleador?`);
+    //     if (answer) {
+    //         app_context.setCurrentLoading(true);
+    //         setBlock(true);
+    //         await unujobs.post(`aportacion/${id}`, { _method: "DELETE" })
+    //         .then(async res => {
+    //             app_context.setCurrentLoading(false);
+    //             let { success, message } = res.data;
+    //             if (!success) throw new Error(message);
+    //             await Swal.fire({ icon: 'success', text: message });
+    //             let newAportaciones = JSON.parse(JSON.stringify(aportaciones));
+    //             newAportaciones.splice(index, 1);
+    //             setAportaciones(newAportaciones);
+    //             setOld(JSON.parse(JSON.stringify(newAportaciones)));
+    //             setEdit(false);
+    //         }).catch(err => {
+    //             app_context.setCurrentLoading(false);
+    //             Swal.fire({ icon: 'error', text: err.message });
+    //         });
+    //         setBlock(false);
+    //     }
+    // }
 
     return (
-        <Modal titulo={<span><i className="fas fa-balance-scale"></i> Descuento Escalafonario</span>}
-            show={true}
-            isClose={isClose}
+    <Form className="row">
+        <Show condicion={!loading && !request.loading}
+            predeterminado={<PlaceholderAportacion/>}
         >
-            <div className="card-body">
-                <List divided verticalAlign='middle'>
-                    {datos.map(d => 
-                        <DiscountItem key={`list-info-${d.id}`}
-                            data={d}
-                        />
-                    )}
-
-                    <Show condicion={request.loading}>
-                        <PlaceholderItem/>
-                    </Show>
-
-                    <List.Item>
-                        <Button fluid disabled={request.loading || !request.canNext}>
-                            <i className="fas fa-arrow-down"></i> Obtener más datos
-                        </Button>
-                    </List.Item>
-                </List>
-            </div>
-        </Modal>
-    )
+            {discounts.map((obj, index) => 
+                <div  key={`remuneracion-${obj.id}`}
+                    className="col-md-4 mb-1 col-lg-4"
+                >
+                    <b className="mb-1">{obj.name}</b>
+                    <input type="number"
+                        step="any" 
+                        value={obj.monto || ""}
+                        disabled={!edit}
+                        onChange={({target}) => handleMonto(index, target.value, obj)}
+                        min="0"
+                    />
+                </div>
+            )}
+        </Show>
+    </Form>)
 }
+
 
 export default Discount;

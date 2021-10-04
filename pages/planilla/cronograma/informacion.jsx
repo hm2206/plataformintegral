@@ -24,7 +24,7 @@ import SearchCronograma from '../../../components/cronograma/searchCronograma';
 import { credencials } from '../../../env.json';
 import ModalReport from '../../../components/cronograma/modalReport';
 import ChangeMeta from '../../../components/cronograma/changeMeta';
-import Discount from '../../../components/cronograma/discount'
+import AddDiscount from '../../../components/cronograma/addDiscount'
 import { AUTHENTICATE } from '../../../services/auth';
 import BoardSimple from '../../../components/boardSimple';
 import HeaderCronograma from '../../../components/cronograma/headerCronograma';
@@ -763,7 +763,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
             </Show>
 
             <Show condicion={option == 'discount'}>
-                <Discount
+                <AddDiscount
                     cronograma={cronograma}
                     isClose={(e) => setOption("")}
                 />
