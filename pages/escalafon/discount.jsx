@@ -21,7 +21,8 @@ import uid from 'uid';
 const configDiscountProvider = new ConfigDiscountProvider
 
 const headOptions = [
-    { key: "generate-discount", icon: "fas fa-download", title: "Generar descuentos" }
+    { key: "generate-discount", icon: "fas fa-download", title: "Generar descuentos" },
+    { key: "export-discount", icon: "fas fa-file-excel", title: "Exportar Descuentos" },
 ]
 
 const WrapperDiscount = () => {
@@ -45,6 +46,8 @@ const WrapperDiscount = () => {
         switch (obj.key) {
             case 'generate-discount':
                 await generateDiscount();
+            case 'export-discount':
+                await exportDiscount();
             default:
                 return;
         }
@@ -63,6 +66,23 @@ const WrapperDiscount = () => {
         }).catch(err => {
             app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'warning', text: err.message });
+        });
+    }
+
+    const exportDiscount = async () => {
+        let answer = await Confirm('warning', `¿Estas seguro en exportar los descuento?`);
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        await configDiscountProvider.discounts(config_discount?.id, { type: 'excel' }, { responseType: 'blob' })
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(res.data);
+            a.target = '_blank';
+            a.click();
+        }).catch(() => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'warning', text: "No se pudó exportar los descuentos" });
         });
     }
 

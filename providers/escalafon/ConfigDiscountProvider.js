@@ -33,10 +33,11 @@ class ConfigDiscountProvider extends BaseProvider  {
     }
 
     discounts = async (id, query = {}, config = {}, ctx = null) => {
+        query.type = typeof query.type != 'undefined' ? query.type : 'json';
         query.page = typeof query.page != 'undefined' ? query.page : 1;
         query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : '';
         query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : '';
-        let query_string = `page=${query.page}&cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}`;
+        let query_string = `page=${query.page}&cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}&type=${query.type}`;
         // request
         return await escalafon.get(`${this.collection}/${id}/discounts?${query_string}`, config, ctx)
             .then(res => res)
