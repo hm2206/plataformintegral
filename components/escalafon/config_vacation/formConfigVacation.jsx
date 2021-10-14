@@ -1,4 +1,6 @@
+import moment from 'moment';
 import React from 'react';
+import { useMemo } from 'react';
 import { Form } from 'semantic-ui-react';
 
 const FormConfigVacation = ({ children, form = {}, errors = {}, className = null, readOnly = [], onChange = null, disabled = false }) => {
@@ -6,6 +8,13 @@ const FormConfigVacation = ({ children, form = {}, errors = {}, className = null
     const handleChange = (e, { name, value }) => {
         if (typeof onChange == 'function') onChange(e, { name, value });
     }
+
+    const displayDays = useMemo(() => {
+        const start = moment(form.date_start, 'YYYY-MM-DD');
+        const over = moment(form.date_over, 'YYYY-MM-DD');
+        const diff = over.diff(start, 'days').valueOf();
+        return diff >= 0 ? diff + 1 : 0;
+    }, [form]);
 
     return (
         <Form className={className}>
@@ -26,9 +35,8 @@ const FormConfigVacation = ({ children, form = {}, errors = {}, className = null
                     <label htmlFor="">Dias Programados<b className="text-red">*</b></label>
                     <input type="number" 
                         name="scheduled_days"
-                        readOnly={readOnly.includes('scheduled_days') || disabled}
-                        value={form?.scheduled_days || ""}
-                        onChange={(e) => handleChange(e,  e.target)}
+                        readOnly={true}
+                        value={displayDays}
                     />
                     <label htmlFor="">{errors?.scheduled_days?.[0] || ""}</label>
                 </Form.Field>
