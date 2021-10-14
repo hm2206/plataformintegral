@@ -4,6 +4,7 @@ import WorkConfig from './config/workConfig'
 import BallotConfig from './config/ballotConfig'
 import LicenseConfig from './config/licenseConfig'
 import VacationConfig from './config/vacationConfig'
+import InfoConfig from './config/infoConfig'
 
 const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile = null, setBlock = null }) => {
 
@@ -38,7 +39,12 @@ const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile 
             icon: "fas fa-praying-hands",
             config: <WorkConfig {...props}/>
         },
-        
+        {
+            type: "info",
+            title: "Fecha de Cese",
+            icon: "fas fa-calendar",
+            config: <InfoConfig {...props}/>
+        }
     ]
 
     const handleClick = (e, data) => typeof onClick == 'function' ? onClick(e, data) : null;
