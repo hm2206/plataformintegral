@@ -60,7 +60,7 @@
             "icon": "/img/report-boleta.png",
             "buttons": [
                 { 
-                    "key": "otro", 
+                    "key": "bolete-normal", 
                     "text": "Vizualizar", 
                     "icon": "fas fa-file", 
                     "color": "red", 
@@ -70,6 +70,15 @@
                     "head": {
                         "type": "text/html"
                     }
+                },
+                { 
+                    "key": "boleta-airhsp", 
+                    "text": "Boleta AIRHSP", 
+                    "icon": "fas fa-file-pdf", 
+                    "color": "red", 
+                    "url": "pdf/boleta_airhsp/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "link"
                 }
             ],
             "filters": ["meta", "cargo"]

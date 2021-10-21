@@ -62,6 +62,7 @@ const getButtons = async (names = []) => {
         {value: "planilla", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/planilla/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "planilla-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "pdf/planilla/{id}?format=excel", params: ["id"], action: "link"},
         {value: "boleta", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/boleta?cronograma_id={id}", params: ["id"], action: "blob", type: "text/html"},
+        {value: "boleta_airhsp", text: "Generar AIRHSP", color: "red", icon: "file text pdf", url: "pdf/boleta_airhsp/{id}", params: ["id"], action: "link"},
         {value: "pay", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/pago/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "pay-txt", text: "Descargar txt", color: "gray", icon: "download", url: "pdf/pago/{id}?format=txt", params: ["id"], action: "blob", type: "text/plain", download: true},
         {value: "pay-csv", text: "Descargar csv", color: "olive", icon: "download", url: "pdf/pago/{id}?format=csv", params: ["id"], action: "blob", type: "text/csv", download: true},
@@ -115,7 +116,7 @@ const Selectfiltros = ({ cronograma, name, value, onChange }) => {
 const reports = [
     {key: "general", value: "general", text: "Reporte General", icon: "file text outline", filtros: ['meta_id', 'cargo_id'], buttons: ['general']},
     {key: "planilla", value: "planilla", text: "Reporte de Planilla", icon: "file text outline", filtros: ['meta_id', 'cargo_id'], buttons: ['planilla', 'planilla-excel']},
-    {key: "boleta", value: "boleta", text: "Reporte de Boleta", icon: "file text outline", filtros: ['meta_id', 'cargo_id', 'duplicate'], buttons: ['boleta']},
+    {key: "boleta", value: "boleta", text: "Reporte de Boleta", icon: "file text outline", filtros: ['meta_id', 'cargo_id', 'duplicate'], buttons: ['boleta', 'boleta_airhsp']},
     {key: "pago", value: "pago", text: "Reporte Medio de Pago", icon: "file text outline", filtros: ['pago_id', 'type_categoria_id'], buttons: ['pay', 'pay-txt', 'pay-csv']},
     {key: "afp", value: "afp", text: "Reporte de AFP y ONP", icon: "file text outline", filtros: ['afp_id'], buttons: ['afp', 'afp-net']},
     {key: "remuneracion", value: "remuneracion", text: "Reporte de Remuneraciones", icon: "file text outline", filtros: ['type_remuneracion_id', 'cargo_id', 'type_categoria_id', 'meta_id', 'negativo'], buttons: ['remuneracion']},
