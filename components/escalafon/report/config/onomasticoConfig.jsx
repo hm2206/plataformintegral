@@ -3,8 +3,10 @@ import { SelectCargo, SelectTypeCategoria } from '../../../select/cronograma'
 import { Input, Button } from 'semantic-ui-react'
 import ReportProvider from '../../../../providers/escalafon/ReportProvider'
 import useRequestBlob from '../../../../hooks/useRequestBlob'
+import moment from 'moment';
 
 const reportProvider = new ReportProvider();
+const currentMonth = moment();
 
 const OnomasticoConfig = ({ setFile = null, setBlock = null }) => {
 
@@ -32,6 +34,10 @@ const OnomasticoConfig = ({ setFile = null, setBlock = null }) => {
         reportExcel.setQuery({ ...form, type: 'excel' })
         reportExcel.setExecute(true);
     }
+
+    useEffect(() => {
+        setForm({ month: currentMonth.month() + 1 });
+    }, [])
 
     useEffect(() => {
         if (reportPdf?.file?.name) setFile(reportPdf?.file)
