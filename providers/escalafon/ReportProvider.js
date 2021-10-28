@@ -24,7 +24,7 @@ class ReportProvider extends BaseProvider  {
         query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
         query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : "";
         query.type = typeof query.type != 'undefined' ? query.type : "";
-        let query_string = `cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}&type=${query.type}`;
+        let query_string = `cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}&type=${query.type}&month=${query.month}`;
         // request
         return await escalafon.get(`${this.collection}/onomastico?${query_string}`, config, ctx)
             .then(res => res)
