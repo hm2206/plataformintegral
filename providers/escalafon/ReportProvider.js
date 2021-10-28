@@ -20,11 +20,12 @@ class ReportProvider extends BaseProvider  {
     }
 
     onomastico = async (query = {}, config = {  responseType: 'blob' }, ctx = null) => {
+        query.year = typeof query.year != 'undefined' ? query.year : "";
         query.month = typeof query.month != 'undefined' ? query.month : "";
         query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
         query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : "";
         query.type = typeof query.type != 'undefined' ? query.type : "";
-        let query_string = `cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}&type=${query.type}&month=${query.month}`;
+        let query_string = `cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}&type=${query.type}&year=${query.year}&month=${query.month}`;
         // request
         return await escalafon.get(`${this.collection}/onomastico?${query_string}`, config, ctx)
             .then(res => res)

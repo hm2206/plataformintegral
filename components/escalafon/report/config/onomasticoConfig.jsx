@@ -6,7 +6,7 @@ import useRequestBlob from '../../../../hooks/useRequestBlob'
 import moment from 'moment';
 
 const reportProvider = new ReportProvider();
-const currentMonth = moment();
+const currentDate = moment();
 
 const OnomasticoConfig = ({ setFile = null, setBlock = null }) => {
 
@@ -36,7 +36,10 @@ const OnomasticoConfig = ({ setFile = null, setBlock = null }) => {
     }
 
     useEffect(() => {
-        setForm({ month: currentMonth.month() + 1 });
+        setForm({
+            year: currentDate.year(), 
+            month: currentDate.month() + 1,
+        });
     }, [])
 
     useEffect(() => {
