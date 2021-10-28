@@ -52,6 +52,17 @@ const OnomasticoConfig = ({ setFile = null, setBlock = null }) => {
     return (
         <>
             <div className="form-group">
+                <label>Mes <b className="text-red">*</b></label>
+                <Input fluid
+                    type="number"
+                    disabled={isDisabled}
+                    name="month"
+                    value={form?.month || ""}
+                    onChange={(e, obj) => handleInput(obj)}
+                />
+            </div>
+
+            <div className="form-group">
                 <label>Partición Pre.</label>
                 <SelectCargo
                     disabled={isDisabled}
@@ -60,6 +71,7 @@ const OnomasticoConfig = ({ setFile = null, setBlock = null }) => {
                     onChange={(e, obj) => handleInput(obj)}
                 />
             </div>
+
             <div className="form-group">
                 <label>Tip. Categoría</label>
                 <SelectTypeCategoria

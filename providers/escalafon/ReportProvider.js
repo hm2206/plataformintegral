@@ -20,6 +20,7 @@ class ReportProvider extends BaseProvider  {
     }
 
     onomastico = async (query = {}, config = {  responseType: 'blob' }, ctx = null) => {
+        query.month = typeof query.month != 'undefined' ? query.month : "";
         query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
         query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : "";
         query.type = typeof query.type != 'undefined' ? query.type : "";
