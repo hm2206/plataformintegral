@@ -5,6 +5,7 @@ import BallotConfig from './config/ballotConfig'
 import LicenseConfig from './config/licenseConfig'
 import VacationConfig from './config/vacationConfig'
 import InfoConfig from './config/infoConfig'
+import OnomasticoConfig from './config/onomasticoConfig'
 
 const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile = null, setBlock = null }) => {
 
@@ -44,6 +45,12 @@ const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile 
             title: "Fecha de Cese",
             icon: "fas fa-calendar",
             config: <InfoConfig {...props}/>
+        },
+        {
+            type: "onomastico",
+            title: "Onomástico",
+            icon: "fas fa-birthday-cake",
+            config: <OnomasticoConfig {...props}/>
         }
     ]
 
