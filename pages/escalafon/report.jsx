@@ -4,8 +4,11 @@ import HeaderReport from '../../components/escalafon/report/headerReport'
 import BodyReport from '../../components/escalafon/report/bodyReport'
 import { AUTHENTICATE } from '../../services/auth';
 import { Body, BtnBack } from '../../components/Utils';
+import { EntityContext } from '../../contexts/EntityContext';
 
 const Report = () => {
+
+    const entityContext = useContext(EntityContext);
 
     const [currentReport, setCurrentReport] = useState({})
     const [file, setFile] = useState({})
@@ -14,6 +17,11 @@ const Report = () => {
     const handleClick = (e, data) => {
         setCurrentReport(data);
     }
+
+    useEffect(() => {
+        entityContext.fireEntity({ render: true });
+        return () => entityContext.fireEntity({ render: false });
+    }, []);
 
     return (
         <Fragment>

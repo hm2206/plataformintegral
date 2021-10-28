@@ -25,31 +25,10 @@ const PlaceholderTable = () => {
 
 const ItemClock = ({ object = {} }) => {
 
-    // entity
-    const { entity_id } = useContext(EntityContext);
-    const { year, month } = useContext(AssistanceContext)
-
     // estado
     const [current_clock, setCurrentClock] = useState(object);
     const [current_loading, setCurrentLoading] = useState(false);
     const [is_error, setIsError] = useState(false);
-
-    // config
-    const options = {
-        headers: {
-            EntityId: entity_id
-        }
-    }
-
-    const asyncAssistances = async () => {
-        setCurrentLoading(true);
-        await clockProvider.syncAssistance(current_clock.id, { year, month }, options)
-        .then(() => {
-            setIsError(false);
-            setCurrentClock({ ...current_clock, sync: 1 });
-        }).catch(err => setIsError(true))
-        setCurrentLoading(false);
-    }
 
     // render
     return (
@@ -71,9 +50,7 @@ const ItemClock = ({ object = {} }) => {
                 >
                     <Button color="black" 
                         size="mini"
-                        disabled={current_loading}
-                        loading={current_loading}
-                        onClick={asyncAssistances}
+                        disabled={true}
                     >
                         <i className="fas fa-arrow-down"></i>
                     </Button>

@@ -86,22 +86,9 @@ const ItemAssistance = ({ index, assistance = {}, group = false }) => {
                 </span>
             </td>
             <td className="text-center">
-                <Show condicion={edit}
-                    predeterminado={
-                        <span className={current_status.className}>
-                            {current_status.text}
-                        </span>
-                    }
-                >
-                    <Select name="status"
-                        value={form.status || ""}
-                        onChange={(e, obj) => handleInput(obj)}
-                        options={[
-                            { key: 'ENTRY', value: 'ENTRY', text: 'Entrada' },
-                            { key: 'EXIT', value: 'EXIT', text: 'Salida' },
-                        ]}
-                    />
-                </Show>
+                <span className={current_status.className}>
+                    {current_status.text}
+                </span>
             </td>
             <td className="text-center">
                 <Show condicion={edit}
