@@ -85,7 +85,10 @@ IntegrationApp.getInitialProps = async ({ ctx, Component }) => {
 	// obtener el app
 	const { success, app } = await authentication.get('app/me')
 		.then(res => res.data)
-		.catch(err => ({ success: false, app: {} }));
+		.catch(err => {
+			console.log(err);
+			return ({ success: false, app: { state: 0, message: err.message } })
+		});
 	// obtener token
 	const auth_token = await AUTH(ctx);
 	// obtener pathname, query
