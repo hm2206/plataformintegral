@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import Show from '../../components/show';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../services/auth';
-import { Form, Button, Pagination } from 'semantic-ui-react';
+import { Form, Button, Pagination, Select } from 'semantic-ui-react';
 import { unujobs } from '../../services/apis';
 import Swal from 'sweetalert2';
 import BoardSimple from '../../components/boardSimple';
@@ -61,7 +61,7 @@ const ItemBoleta = ({ data, is_check = false, onClick = null }) => {
 }
 
 
-const IndexBoleta = ({ pathname, query, success, historial }) => {
+const IndexBoleta = ({ pathname, query, historial }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -71,6 +71,7 @@ const IndexBoleta = ({ pathname, query, success, historial }) => {
 
     // estados
     const [query_search, setQuerySearch] = useState("");
+    const [type_boleta, setTypeBoleta] = useState("boleta");
     const [historial_select, setHistorialSelect] = useState([]);
 
     // realizar busqueda
@@ -86,7 +87,8 @@ const IndexBoleta = ({ pathname, query, success, historial }) => {
         let answer = await Confirm("warning", `¿Estas seguro en generar las boletas?`, 'Generar');
         if (!answer) return false;
         app_context.setCurrentLoading(true);
-        let path = `pdf/boleta?historial_id[]=${historial_select.join('&historial_id[]=')}&edit=1&zoom=98.5%`;
+        let queryIds = `historial_id[]=${historial_select.join('&historial_id[]=')}&edit=1&zoom=98.5%`;
+        let path = `pdf/${type_boleta}?${queryIds}`;
         await unujobs.post(path)
         .then(async ({ data }) => {
             app_context.setCurrentLoading(false);
@@ -152,6 +154,19 @@ const IndexBoleta = ({ pathname, query, success, historial }) => {
                                         name="query_search"
                                         value={query_search || ""}
                                         onChange={({ target }) => setQuerySearch(target.value || "")}
+                                    />
+                                </Form.Field>
+                            </div>
+                            <div className="col-md-4 mb-1 col-4 col-sm-4 col-xl-3">
+                                <Form.Field>
+                                    <Select  placeholder="Tipo de Boleta"
+                                        name="type_boleta"
+                                        options={[
+                                            { key: 'default', value: 'boleta', text: 'Predeterminada' },
+                                            { key: 'airhsp', value: 'boleta_airhsp', text: 'Airhsp' }
+                                        ]}
+                                        value={type_boleta || "boleta"}
+                                        onChange={(e, obj) => setTypeBoleta(obj.value || "")}
                                     />
                                 </Form.Field>
                             </div>
