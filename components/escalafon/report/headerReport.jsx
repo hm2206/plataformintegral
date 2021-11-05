@@ -56,7 +56,7 @@ const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile 
         {
             type: "schedules",
             title: "Asistencia",
-            icon: "fas fa-birthday-cake",
+            icon: "fas fa-clipboard-list",
             config: <ScheduleConfig {...props}/>
         }
     ]
