@@ -6,6 +6,7 @@ import LicenseConfig from './config/licenseConfig'
 import VacationConfig from './config/vacationConfig'
 import InfoConfig from './config/infoConfig'
 import OnomasticoConfig from './config/onomasticoConfig'
+import ScheduleConfig from './config/scheduleConfig'
 
 const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile = null, setBlock = null }) => {
 
@@ -51,6 +52,12 @@ const HeaderReport = ({ block = false, activeType = "", onClick = null, setFile 
             title: "Onomástico",
             icon: "fas fa-birthday-cake",
             config: <OnomasticoConfig {...props}/>
+        },
+        {
+            type: "schedules",
+            title: "Asistencia",
+            icon: "fas fa-birthday-cake",
+            config: <ScheduleConfig {...props}/>
         }
     ]
 

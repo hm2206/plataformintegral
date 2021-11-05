@@ -22,7 +22,7 @@ const useRequestBlob = ({ name, extname, request, params = [] }) => {
             setIsError(false);
         }).catch(() =>  {
             setIsError(true)
-            Swal.fire("No se pudó generar el reporte")
+            Swal.fire({ icon: 'warning', text: "No se pudó generar el reporte" })
         })
         setLoading(false);
     }
