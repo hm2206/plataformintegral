@@ -19,10 +19,13 @@ const FormInfo = ({ form = {}, errors = {}, disabled = false, onChange = null, c
             <div className="row w-100">
                 <div className="col-md-4 mb-3">
                     <Form.Field>
-                        <label htmlFor="">ID</label>
+                        <label htmlFor="">Código AIRHSP</label>
                         <input type="text"
-                            disabled
-                            value="AUTOGENERADO"
+                            name="code_airhsp"
+                            value={form.code_airhsp}
+                            placeholder="Código de AIRHSP"
+                            onChange={(e) => handleInput(e, e.target)}
+                            disabled={disabled}
                         />
                     </Form.Field>
                 </div>

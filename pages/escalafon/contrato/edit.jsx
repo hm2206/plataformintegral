@@ -424,6 +424,18 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
+                                                <label htmlFor="">Código AIRHSP</label>
+                                                <input type="text" 
+                                                    readOnly={!edit} 
+                                                    name="code_airhsp" 
+                                                    value={form.code_airhsp || ""}
+                                                    onChange={({target}) => handleInput(target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
                                                 <label htmlFor="">Plaza</label>
                                                 <input type="text" 
                                                     readOnly={!edit} 
