@@ -41,18 +41,18 @@ const ConfigVacation = ({ work }) => {
         setCurrentConfigVacation(tmpOption?.obj || {});
     }
 
-    const handleReport = async () => {
+    const handleReport = async (type = 'pdf', extname = 'pdf') => {
         let answer = await Confirm('info', `¿Estas seguro en generar el reporte de vacaciones?`, 'Generar');
         if (!answer) return;
         app_context.setCurrentLoading(true);
-        await workProvider.reportVacations(work.id)
+        await workProvider.reportVacations(work.id, { type })
         .then(res => {
             app_context.setCurrentLoading(false);
-            let file = new File([res.data], 'reporte-vacacion.pdf');
+            let file = new File([res.data], `reporte-vacacion.${extname}`);
             let url = URL.createObjectURL(res.data);
             setCurrentFile({
                 name: file.name,
-                extname: 'pdf',
+                extname: extname,
                 url,
                 size: file?.size
             });
@@ -109,13 +109,23 @@ const ConfigVacation = ({ work }) => {
                         </div>
 
                         <Show condicion={true}>
-                            <div className="col-md-2 col-2 mb-2">
+                            <div className="col-md-1 col-1 mb-2">
                                 <Button color="red" 
                                     fluid 
                                     basic
                                     onClick={handleReport}
                                 >
                                     <i className="fas fa-file-pdf"></i>
+                                </Button>
+                            </div>
+
+                            <div className="col-md-1 col-1 mb-2">
+                                <Button color="olive" 
+                                    fluid 
+                                    basic
+                                    onClick={() => handleReport('excel', 'xlsx')}
+                                >
+                                    <i className="fas fa-file-excel"></i>
                                 </Button>
                             </div>
                         </Show>

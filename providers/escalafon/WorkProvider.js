@@ -43,7 +43,8 @@ class WorkProvider extends BaseProvider  {
 
     reportVacations = async (id, query = {}, config = {  responseType: 'blob' }, ctx = null) => {
         query.page = typeof query.page != 'undefined' ? query.page : 1;
-        let query_string = `page=${query.page}`;
+        query.type = typeof query.type != 'undefined' ? query.type : 'pdf';
+        let query_string = `page=${query.page}&type=${query.type}`;
         // request
         return await escalafon.get(`${this.collection}/${id}/report_vacations?${query_string}`, config, ctx)
             .then(res => res)
