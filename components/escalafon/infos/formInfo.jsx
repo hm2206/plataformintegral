@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Form, Select } from 'semantic-ui-react';
+import { Checkbox, Form, Select } from 'semantic-ui-react';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../select/authentication';
 import { SelectPlanilla, SelectMeta, SelectCargo, SelectCargoTypeCategoria, SelectSitacionLaboral, SelectTypeAportacion } from '../../select/cronograma';
 import { pap } from '../../../services/storage.json';
@@ -291,6 +291,18 @@ const FormInfo = ({ form = {}, errors = {}, disabled = false, onChange = null, c
                             disabled={disabled}
                         />
                         <label>{errors && errors.observacion && errors.observacion[0]}</label>
+                    </Form.Field>
+                </div>
+
+                <div className="col-md-12 mb-3 text-right">
+                    <Form.Field error={errors && errors.observacion && errors.observacion[0] ? true : false}>
+                        <label htmlFor="">Estado <b className="text-red">*</b></label>
+                        <Checkbox name="estado" 
+                            toggle
+                            checked={form.estado == 1}
+                            onChange={(e, obj) => handleInput(e, { name: 'estado', value: obj.checked ? 1 : 0 })}
+                            disabled={disabled}
+                        />
                     </Form.Field>
                 </div>
 
