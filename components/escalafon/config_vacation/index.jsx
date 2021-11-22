@@ -45,7 +45,7 @@ const ConfigVacation = ({ work }) => {
         let answer = await Confirm('info', `¿Estas seguro en generar el reporte de vacaciones?`, 'Generar');
         if (!answer) return;
         app_context.setCurrentLoading(true);
-        await workProvider.reportVacations(work.id, { type })
+        await workProvider.reportVacations(work.id, { type, year: current_config_vacation?.year })
         .then(res => {
             app_context.setCurrentLoading(false);
             let file = new File([res.data], `reporte-vacacion.${extname}`);
