@@ -113,7 +113,7 @@ const ConfigVacation = ({ work }) => {
                                 <Button color="red" 
                                     fluid 
                                     basic
-                                    onClick={handleReport}
+                                    onClick={() => handleReport('pdf', 'pdf')}
                                 >
                                     <i className="fas fa-file-pdf"></i>
                                 </Button>
