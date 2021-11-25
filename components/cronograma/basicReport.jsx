@@ -63,7 +63,7 @@ const SelectDuplicate = (props) =>  <Select
 const getButtons = async (names = []) => {
     let datos = [
         {value: "general", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/general/{id}", params: ["id"], action: "link", api: "unujobs"},
-        {value: "general-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "cronograms/{id}/report/general.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
+        {value: "general-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "cronogramas/{id}/report/general.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "planilla", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/planilla/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "planilla-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "pdf/planilla/{id}?format=excel", params: ["id"], action: "link", api: "unujobs"},
         {value: "boleta", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/boleta?cronograma_id={id}", params: ["id"], action: "blob", type: "text/html"},
