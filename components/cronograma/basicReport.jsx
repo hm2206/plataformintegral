@@ -1,17 +1,21 @@
 import React, { useContext, useState, Fragment } from 'react';
 import { Body, BtnSelect } from '../Utils';
 import { InputCredencias, InputAuth, InputEntity } from '../../services/utils';
-import Router from 'next/dist/client/router';
 import { Form, Select } from 'semantic-ui-react';
 import Show from '../show';
 import ContentControl from '../contentControl';
-import { handleErrorRequest, unujobs } from '../../services/apis';
+import { handleErrorRequest, unujobs, microPlanilla } from '../../services/apis';
 import {
     SelectCronogramaAfp, SelectCronogramaMeta, SelectCronogramaCargo, SelectCronogramaTypeCategoria, 
     SelectCronogramaTypeRemuneracion, SelectCronogramaTypeDescuento, SelectCronogramaTypeDetalle,
     SelectCronogramaTypeAportacion
 } from '../select/cronograma';
 import { AppContext } from '../../contexts/AppContext';
+
+const clientApi = {
+    unujobs, 
+    microPlanilla,
+}
 
 // selector de monto
 const SelectMontos = (props) =>  <Select
@@ -58,20 +62,21 @@ const SelectDuplicate = (props) =>  <Select
 // botones de acciones
 const getButtons = async (names = []) => {
     let datos = [
-        {value: "general", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/general/{id}", params: ["id"], action: "link"},
+        {value: "general", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/general/{id}", params: ["id"], action: "link", api: "unujobs"},
+        {value: "general-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "cronograms/{id}/report/general.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "planilla", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/planilla/{id}", params: ["id"], action: "blob", type: "text/html"},
-        {value: "planilla-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "pdf/planilla/{id}?format=excel", params: ["id"], action: "link"},
+        {value: "planilla-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "pdf/planilla/{id}?format=excel", params: ["id"], action: "link", api: "unujobs"},
         {value: "boleta", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/boleta?cronograma_id={id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "boleta_airhsp", text: "Generar AIRHSP", color: "red", icon: "file text pdf", url: "pdf/boleta_airhsp/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "pay", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/pago/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "pay-txt", text: "Descargar txt", color: "gray", icon: "download", url: "pdf/pago/{id}?format=txt", params: ["id"], action: "blob", type: "text/plain", download: true},
         {value: "pay-csv", text: "Descargar csv", color: "olive", icon: "download", url: "pdf/pago/{id}?format=csv", params: ["id"], action: "blob", type: "text/csv", download: true},
         {value: "afp", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/afp/{id}", params: ["id"], action: "blob", type: "text/html"},
-        {value: "afp-net", text: "Descargar AFP NET", color: "olive", icon: "download", url: "pdf/afp_net/{id}", params: ["id"], action: "link"},
+        {value: "afp-net", text: "Descargar AFP NET", color: "olive", icon: "download", url: "pdf/afp_net/{id}", params: ["id"], action: "link", api: "unujobs"},
         {value: "remuneracion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/remuneracion/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "descuento", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/descuento/{id}", params: ["id"], action: "blob", type: "text/html"},
-        {value: "descuento-csv", text: "Exportar a Excel", color: "olive", icon: "file text excel", url: "pdf/descuento/{id}?format=excel", params: ["id"], action: "link" },
-        {value: "descuento-consolidado", text: "Consolidado", color: "olive", icon: "file text excel", url: "exports/cronograma/{id}/descuento_consolidado", params: ["id"], action: "link" },
+        {value: "descuento-csv", text: "Exportar a Excel", color: "olive", icon: "file text excel", url: "pdf/descuento/{id}?format=excel", params: ["id"], action: "link", api: "unujobs" },
+        {value: "descuento-consolidado", text: "Consolidado", color: "olive", icon: "file text excel", url: "exports/cronograma/{id}/descuento_consolidado", params: ["id"], action: "link", api: "unujobs" },
         {value: "judicial", text: "Lista Beneficiarios", color: "red", icon: "file text outline", url: "pdf/judicial/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "judicial-pay", text: "Generar Pagos", color: "red", icon: "file text outline", url: "pdf/judicial/{id}/pago", params: ["id"], action: "blob", type: "text/html"},
         {value: "judicial-pay-txt", text: "Generar txt Pagos", color: "gray", icon: "download", url: "pdf/judicial/{id}/pago?format=txt", params: ["id"], action: "blob", type: "text/plain", download: true},
@@ -79,9 +84,9 @@ const getButtons = async (names = []) => {
         {value: "aportacion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/aportacion/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "personal", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/personal/{id}", params: ["id"], action: "blob", type: "text/html"},
         {value: "personal-csv", text: "Descargar csv", color: "olive", icon: "download", url: "pdf/personal/{id}?format=csv", params: ["id"], action: "blob", type: "text/csv", download: true},
-        {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}", params: ["id"], action: "link"},
-        {value: "ejecucion-pay", text: "Generar pago PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/pago", params: ["id"], action: "link"},
-        {value: "ejecucion-total", text: "Generar eje. Total PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/total", params: ["id"], action: "link"},
+        {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}", params: ["id"], action: "link", api: "unujobs"},
+        {value: "ejecucion-pay", text: "Generar pago PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/pago", params: ["id"], action: "link", api: "unujobs"},
+        {value: "ejecucion-total", text: "Generar eje. Total PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/total", params: ["id"], action: "link", api: "unujobs"},
         {value: "compromiso-siaf", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/compromiso_siaf/{id}", params: ["id"], action: "link"},
     ];
     // response
@@ -164,6 +169,7 @@ const BasicReport = ({ cronograma, basic }) => {
     const handleClick = async (e, obj) => {
         app_context.setCurrentLoading(true);
         if (obj.action == 'link') {
+            let api = clientApi[obj.api];
             let query = await genetateQuery();
             let link = await handleUrl(obj.url, obj.params);
             let form_current = document.createElement('form');
@@ -176,7 +182,7 @@ const BasicReport = ({ cronograma, basic }) => {
             // add form al body
             document.body.appendChild(form_current);
             let simbol = await /[?]/.test(link)  ? '&' : '?';
-            form_current.action = `${unujobs.path}/${link}${simbol}${query}`;
+            form_current.action = `${api.path}/${link}${simbol}${query}`;
             form_current.method = 'POST';
             form_current.target = '_blank';
             form_current.submit();
