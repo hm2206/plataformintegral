@@ -34,6 +34,7 @@ const BodyReport = ({ reportType = {}, setFile = null, file = {}, setBlock = nul
                     extname={file?.extname}
                     url={file?.url}
                     is_observation={false}
+                    is_print
                     onClose={() => {
                         setFile({});
                         setBlock(false);
