@@ -71,7 +71,6 @@ const DialogReport = ({ work, onClose = null, onFile = null }) => {
           <div className='col-md-3 col-6'>
             <Button color='red'
               onClick={() => handleReport('pdf', 'pdf')}
-              disabled={!years.length}
               fluid
             >
               <i className='fas fa-file-pdf'></i> PDF
@@ -81,7 +80,6 @@ const DialogReport = ({ work, onClose = null, onFile = null }) => {
           <div className='col-md-3 col-6'>
             <Button color='green'
               onClick={() => handleReport('excel', 'xlsx')}
-              disabled={!years.length}
               fluid
             >
               <i className='fas fa-file-excel'></i> EXCEL
