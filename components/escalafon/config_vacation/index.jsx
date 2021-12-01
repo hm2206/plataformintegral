@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import collect from 'collect.js';
 import { SelectWorkConfigVacation } from '../../select/escalafon';
 import CreateConfigVacation from './createConfigVacation';
@@ -7,25 +7,18 @@ import { Button } from 'semantic-ui-react'
 import moment from 'moment';
 import Show from '../../show'
 import Vacation from '../vacation/index';
-import { Confirm } from '../../../services/utils';
-import WorkProvider from '../../../providers/escalafon/WorkProvider';
-import { AppContext } from '../../../contexts/AppContext';
-import Swal from 'sweetalert2';
 import Visualizador from '../../visualizador'
+import DialogReport from './dialogReport';
 moment.locale('es');
-
-const workProvider = new WorkProvider();
 
 const options = {
     CREATE: 'create',
-    VIEW_FILE: 'edit'
+    VIEW_FILE: 'edit',
+    VIEW_REPORT: 'report'
 }
 
 
 const ConfigVacation = ({ work }) => {
-
-    // app
-    const app_context = useContext(AppContext);
 
     // estados
     const [current_config_vacation, setCurrentConfigVacation] = useState({});
@@ -41,31 +34,14 @@ const ConfigVacation = ({ work }) => {
         setCurrentConfigVacation(tmpOption?.obj || {});
     }
 
-    const handleReport = async (type = 'pdf', extname = 'pdf') => {
-        let answer = await Confirm('info', `¿Estas seguro en generar el reporte de vacaciones?`, 'Generar');
-        if (!answer) return;
-        app_context.setCurrentLoading(true);
-        await workProvider.reportVacations(work.id, { type, year: current_config_vacation?.year })
-        .then(res => {
-            app_context.setCurrentLoading(false);
-            let file = new File([res.data], `reporte-vacacion.${extname}`);
-            let url = URL.createObjectURL(res.data);
-            setCurrentFile({
-                name: file.name,
-                extname: extname,
-                url,
-                size: file?.size
-            });
-            setOption(options.VIEW_FILE);
-        }).catch(err => {
-            app_context.setCurrentLoading(false);
-            Swal.fire({ icon: 'error', text: 'No se pudó generar el reporte' });
-        })
-    }
-
     const onSave = () => {
         setIsAdd(true);
         setOption("");
+    }
+
+    const handleFile = (file) => {
+        setCurrentFile(file);
+        setOption(options.VIEW_FILE);
     }
 
     const onUpdate = async (config_vacation) => {
@@ -113,19 +89,9 @@ const ConfigVacation = ({ work }) => {
                                 <Button color="red" 
                                     fluid 
                                     basic
-                                    onClick={() => handleReport('pdf', 'pdf')}
+                                    onClick={() => setOption(options.VIEW_REPORT)}
                                 >
-                                    <i className="fas fa-file-pdf"></i>
-                                </Button>
-                            </div>
-
-                            <div className="col-md-1 col-1 mb-2">
-                                <Button color="olive" 
-                                    fluid 
-                                    basic
-                                    onClick={() => handleReport('excel', 'xlsx')}
-                                >
-                                    <i className="fas fa-file-excel"></i>
+                                    <i className="fas fa-file-pdf"></i> Reportes
                                 </Button>
                             </div>
                         </Show>
@@ -177,6 +143,13 @@ const ConfigVacation = ({ work }) => {
                     is_print={true}
                     onClose={() => setOption("")}
                 />
+            </Show>
+            {/* reportes */}
+            <Show condicion={option == options.VIEW_REPORT}>
+                <DialogReport work={work}
+                    onClose={() => setOption("")}
+                    onFile={handleFile}
+                /> 
             </Show>
         </>
     )
