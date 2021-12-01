@@ -34,7 +34,7 @@ class ReportProvider extends BaseProvider  {
 
     ballots = async (query = {}, config = {  responseType: 'blob' }, ctx = null) => {
         query.year =  typeof query.year != 'undefined' ? query.year : currentDate.year();
-        query.month =  typeof query.month != 'undefined' ? query.month : currentDate.month() + 1;
+        query.month =  typeof query.month != 'undefined' ? query.month : '';
         query.day =  typeof query.day != 'undefined' ? query.day : '';
         query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
         query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : "";

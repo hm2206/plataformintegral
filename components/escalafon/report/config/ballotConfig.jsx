@@ -37,8 +37,7 @@ const BallotConfig = ({ setFile = null, setBlock = null }) => {
     useEffect(() => {
         let currentDate = moment();
         setForm({ 
-            year: currentDate.year(),
-            month: currentDate.month() + 1
+            year: currentDate.year()
         })
     }, [])
 
@@ -71,7 +70,7 @@ const BallotConfig = ({ setFile = null, setBlock = null }) => {
                 />
             </div>
             <div className="form-group">
-                <label>Mes <b className="text-red">*</b></label>
+                <label>Mes</label>
                 <Input fluid
                     min="1"
                     max="12"
