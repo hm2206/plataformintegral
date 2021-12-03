@@ -1,13 +1,12 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { AUTHENTICATE } from '../../../services/auth';
-import { Body, BtnBack, BtnFloat } from '../../../components/Utils';
-import { handleErrorRequest, unujobs } from '../../../services/apis';
+import { BtnBack, BtnFloat } from '../../../components/Utils';
+import { handleErrorRequest, unujobs, microPlanilla } from '../../../services/apis';
 import { Form, Button, List, Image, Select } from 'semantic-ui-react';
 import Show from '../../../components/show';
-import Router from 'next/router';
 import BoardSimple from '../../../components/boardSimple';
 import HeaderCronograma from '../../../components/cronograma/headerCronograma';
-import { backUrl, Confirm } from '../../../services/utils';
+import { Confirm } from '../../../services/utils';
 import atob from 'atob';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts';
@@ -42,7 +41,7 @@ const PlaceholderHistorial = () => {
 }
 
 
-const CronogramaEmail = ({ pathname, query, success, cronograma }) => {
+const CronogramaEmail = ({ query, success, cronograma }) => {
 
     // validar data
     if (!success) return <NotFoundData/>
@@ -114,17 +113,11 @@ const CronogramaEmail = ({ pathname, query, success, cronograma }) => {
         let answer = await Confirm('warning', `¿Desea enviar correos de las boletas informativas?`, 'Enviar');
         if (!answer) return false;
         app_context.setCurrentLoading(true);
-        await unujobs.post(`cronograma/${cronograma.id}/send_email`, { errors: JSON.stringify(errors) }, { headers: { CronogramaID: cronograma.id }})
+        await microPlanilla.post(`cronogramas/${cronograma.id}/sendMail`)
         .then(async res => {
             app_context.setCurrentLoading(false);
-            let { success, message, next } = res.data;
-            if (!success) throw new Error(message);
-            if (next) setIsNext(true);
-            else {
-                let message = "El envio de correos a terminado correctamente";
-                await Swal.fire({ icon: 'success', text: message });
-                getSentEmail();
-            }
+            let { count } = res.data;
+            Swal.fire({ icon: 'success', text: `Se están procesando ${count} envios de correos` })
         })
         .catch(async err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
