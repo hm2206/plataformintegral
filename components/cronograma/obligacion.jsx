@@ -309,7 +309,23 @@ const Obligacion = () => {
                             </Show>
                         </div>
 
-                        <Show condicion={obl.is_porcentaje}>
+                        <Show condicion={obl.is_porcentaje}
+                            predeterminado={
+                                <Show condicion={edit}>
+                                    <div className='col-md-2 mb-2'>
+                                        <Form.Field>
+                                            <label htmlFor="">Opción</label>
+                                            <Button color="red"
+                                                fluid
+                                                onClick={(e) => deleteObligacion(obl.id)}
+                                            >
+                                                <i className="fas fa-trash-alt"></i> Eliminar
+                                            </Button>
+                                        </Form.Field>
+                                    </div>
+                                </Show>
+                            }
+                        >
                             <div className="col-md-2 mb-2">
                                 <Form.Field>
                                     <label htmlFor="">Aplica Bonificaciones</label>
