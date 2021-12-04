@@ -10,6 +10,7 @@ import { AppContext } from '../../../contexts/AppContext';
 import Show from '../../../components/show';
 import BoardSimple from '../../../components/boardSimple';
 import UpdateRemuneracionMassive from '../../../components/contrato/updateRemuneracionMassive';
+import SyncRemuneracionMassive from '../../../components/contrato/syncRemuneracionMassive';
 import { EntityContext } from '../../../contexts/EntityContext';
 
 const Contrato = ({ success, infos, query }) => {
@@ -75,6 +76,7 @@ const Contrato = ({ success, infos, query }) => {
     const handleBoard = (e, index, obj) => {
         switch (obj.key) {
             case 'UPDATE_REMUNERACION_MASSIVE':
+            case 'SYNC_REMUNERACION_MASSIVE':
                 setOption(obj.key);
                 break;
             default:
@@ -100,7 +102,8 @@ const Contrato = ({ success, infos, query }) => {
                 info={["Listado de contratos"]}
                 bg="danger"
                 options={[
-                    { key: "UPDATE_REMUNERACION_MASSIVE", title: 'Actualizar masivamente', icon: 'fas fa-coins' }
+                    { key: "UPDATE_REMUNERACION_MASSIVE", title: 'Actualizar masivamente', icon: 'fas fa-coins' },
+                    { key: "SYNC_REMUNERACION_MASSIVE", title: 'Sincronizar masivamente', icon: 'fas fa-sync' }
                 ]}
                 onOption={handleBoard}
             >
@@ -192,6 +195,10 @@ const Contrato = ({ success, infos, query }) => {
 
                 <Show condicion={option == 'UPDATE_REMUNERACION_MASSIVE'}>
                     <UpdateRemuneracionMassive isClose={(e) => setOption("")}/>
+                </Show>
+
+                <Show condicion={option == 'SYNC_REMUNERACION_MASSIVE'}>
+                    <SyncRemuneracionMassive isClose={(e) => setOption("")}/>
                 </Show>
             </BoardSimple>
     </div>)
