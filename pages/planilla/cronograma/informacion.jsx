@@ -24,6 +24,7 @@ import SearchCronograma from '../../../components/cronograma/searchCronograma';
 import { credencials } from '../../../env.json';
 import ModalReport from '../../../components/cronograma/modalReport';
 import ChangeMeta from '../../../components/cronograma/changeMeta';
+import ChangeCargo from '../../../components/cronograma/changeCargo';
 import AddDiscount from '../../../components/cronograma/addDiscount'
 import { AUTHENTICATE } from '../../../services/auth';
 import BoardSimple from '../../../components/boardSimple';
@@ -307,8 +308,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
             .then(async res => {
                 app_context.setCurrentLoading(false);
                 let { success, message } = res.data;
-                if (!success) throw new Error(messsage);
-                await Swal.fire({ icon: 'success', text: message });
+                await Swal.fire({ icon: 'success', text: message || 'Los tokens se generarón correctamente!' });
                 await findHistorial();
             }).catch(err => {
                 app_context.setCurrentLoading(false);
@@ -397,6 +397,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
             case 'remu-massive':
             case 'imp-descuento':
             case 'change-meta':
+            case 'change-cargo':
             case 'sync-config-desct':
             case 'discount':
             case 'report':
@@ -574,6 +575,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                                         { key: "sync-aportacion", text: "Agregar Aportaciones", icon: "arrow circle down" },
                                                         { key: 'sync-obligacion', text: "Agregar Obl. Judiciales", icon: "arrow circle arrow down" },
                                                         { key: "change-meta", text: "Cambio de Metas", icon: "exchange" },
+                                                        { key: "change-cargo", text: "Cambio de Partición Presp.", icon: "exchange" },
                                                         { key: "discount", text: "Dsto. Escalafón", icon: "balance scale" },
                                                         { key: "imp-descuento", text: "Importar Descuentos", icon: "cloud upload" },
                                                         { key: "sync-config-desct", text: "Sync. Desc. Global", icon: "cloud upload" },
@@ -750,6 +752,13 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
 
             <Show condicion={option == 'change-meta'}>
                 <ChangeMeta
+                    cronograma={cronograma}
+                    isClose={(e) => setOption("")}
+                />
+            </Show>
+
+            <Show condicion={option == 'change-cargo'}>
+                <ChangeCargo
                     cronograma={cronograma}
                     isClose={(e) => setOption("")}
                 />
