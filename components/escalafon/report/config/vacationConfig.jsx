@@ -1,37 +1,70 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { SelectCargo, SelectTypeCategoria } from '../../../select/cronograma'
-import { Input, Button } from 'semantic-ui-react'
+import { Input, Button, Checkbox } from 'semantic-ui-react'
 import ReportProvider from '../../../../providers/escalafon/ReportProvider'
 import useRequestBlob from '../../../../hooks/useRequestBlob'
+import Show from '../../../show';
 import moment from 'moment';
 
 const reportProvider = new ReportProvider();
 
+const OptionButton = ({ 
+    onClickPdf = null, 
+    onClickExcel = null, 
+    disabled = false, 
+    loadingPdf = false,
+    loadingExcel = false 
+}) => {
+    return (
+        <div className="for-group text-right">
+            <hr />
+            <Button.Group size="medium">
+                <Button color="green" 
+                    basic
+                    onClick={onClickExcel}
+                    disabled={disabled}
+                    loading={loadingExcel}
+                >
+                    <i className="fas fa-file-excel"></i> Excel
+                </Button>
+                <Button color="red"
+                    onClick={onClickPdf}
+                    disabled={disabled}
+                    loading={loadingPdf}
+                >
+                    <i className="fas fa-file-pdf"></i> PDF
+                </Button>
+            </Button.Group>
+        </div>
+    )
+}
+
 const VacationConfig = ({ setFile = null, setBlock = null }) => {
 
     const [form, setForm] = useState({});
+    const [isActual, setIsActual] = useState(false);
 
-    const reportPdf = useRequestBlob({ request: reportProvider.vacations, name: "report-license.pdf", extname: "pdf" });
-    const reportExcel = useRequestBlob({ request: reportProvider.vacations, name: "report-license.xlsx", extname: "xlsx" });
+    const reportBasicPdf = useRequestBlob({ request: reportProvider.vacationBasics, name: "report-vacations-basic.pdf", extname: "pdf" });
+    const reportBasicExcel = useRequestBlob({ request: reportProvider.vacationBasics, name: "report-vacations-basic.xlsx", extname: "xlsx" });
 
     const handleInput = ({ name, value }) => {
         setForm(prev => ({ ...prev, [name]: value }));
     }
 
     const isDisabled = useMemo(() => {
-        return reportPdf.loading || reportExcel.loading;
-    }, [reportPdf.loading, reportExcel.loading]);
+        return reportBasicPdf.loading || reportBasicExcel.loading;
+    }, [reportBasicPdf.loading, reportBasicExcel.loading]);
 
     const handlePdf = () => {
         setBlock(true);
-        reportPdf.setQuery({ ...form, type: 'pdf' })
-        reportPdf.setExecute(true);
+        reportBasicPdf.setQuery({ ...form, type: 'pdf' })
+        reportBasicPdf.setExecute(true);
     }
 
     const handleExcel = () => {
         setBlock(true);
-        reportExcel.setQuery({ ...form, type: 'excel' })
-        reportExcel.setExecute(true);
+        reportBasicExcel.setQuery({ ...form, type: 'excel' })
+        reportBasicExcel.setExecute(true);
     }
 
     useEffect(() => {
@@ -43,72 +76,68 @@ const VacationConfig = ({ setFile = null, setBlock = null }) => {
     }, [])
 
     useEffect(() => {
-        if (reportPdf?.file?.name) setFile(reportPdf?.file)
-    }, [reportPdf.file]);
+        if (reportBasicPdf?.file?.name) setFile(reportBasicPdf?.file)
+    }, [reportBasicPdf.file]);
 
     useEffect(() => {
-        if (reportExcel?.file?.name) setFile(reportExcel?.file)
-    }, [reportExcel.file]);
+        if (reportBasicExcel?.file?.name) setFile(reportBasicExcel?.file)
+    }, [reportBasicExcel.file]);
 
     useEffect(() => {
-        if (reportPdf?.isError) setBlock(false)
-    }, [reportPdf.isError]);
+        if (reportBasicPdf?.isError) setBlock(false)
+    }, [reportBasicPdf.isError]);
 
     useEffect(() => {
-        if (reportExcel?.isError) setBlock(false)
-    }, [reportExcel.isError]);
+        if (reportBasicExcel?.isError) setBlock(false)
+    }, [reportBasicExcel.isError]);
 
     return (
         <>
-            <div className="form-group">
-                <label>Año <b className="text-red">*</b></label>
-                <Input fluid
-                    type="number"
-                    disabled={isDisabled}
-                    name="year"
-                    value={form?.year || ""}
-                    onChange={(e, obj) => handleInput(obj)}
+            <div className='form-group'>
+                <Checkbox toggle
+                    checked={isActual}
+                    onChange={() => setIsActual(prev => !prev)}
+                    label='Vacaciones Actuales'
                 />
             </div>
-            <div className="form-group">
-                <label>Partición Pre.</label>
-                <SelectCargo
-                    disabled={isDisabled}
-                    name="cargo_id"
-                    value={form?.cargo_id}
-                    onChange={(e, obj) => handleInput(obj)}
-                />
-            </div>
-            <div className="form-group">
-                <label>Tip. Categoría</label>
-                <SelectTypeCategoria
-                    disabled={isDisabled}
-                    name="type_categoria_id"
-                    value={form?.type_categoria_id}
-                    onChange={(e, obj) => handleInput(obj)}
-                />
-            </div>
-
-            <div className="for-group text-right">
-                <hr />
-                <Button.Group size="medium">
-                    <Button color="green" 
-                        basic
-                        onClick={handleExcel}
+            <Show condicion={!isActual}
+                predeterminado={
+                    <OptionButton
                         disabled={isDisabled}
-                        loading={reportExcel.loading}
-                    >
-                        <i className="fas fa-file-excel"></i> Excel
-                    </Button>
-                    <Button color="red"
-                        onClick={handlePdf}
+                        loadingPdf={reportBasicPdf.loading}
+                        loadingExcel={reportBasicExcel.loading}
+                        onClickPdf={handlePdf}
+                        onClickExcel={handleExcel}
+                    />
+                }
+            >
+                <div className="form-group">
+                    <label>Partición Pre.</label>
+                    <SelectCargo
                         disabled={isDisabled}
-                        loading={reportPdf.loading}
-                    >
-                        <i className="fas fa-file-pdf"></i> PDF
-                    </Button>
-                </Button.Group>
-            </div>
+                        name="cargo_id"
+                        value={form?.cargo_id}
+                        onChange={(e, obj) => handleInput(obj)}
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Tip. Categoría</label>
+                    <SelectTypeCategoria
+                        disabled={isDisabled}
+                        name="type_categoria_id"
+                        value={form?.type_categoria_id}
+                        onChange={(e, obj) => handleInput(obj)}
+                    />
+                </div>
+                {/* options buttons */}
+                <OptionButton
+                    disabled={isDisabled}
+                    loadingExcel={reportBasicExcel.loading}
+                    loadingPdf={reportBasicPdf.loading}
+                    onClickPdf={handlePdf}
+                    onClickExcel={handleExcel}
+                />
+            </Show>
         </>
     )
 }

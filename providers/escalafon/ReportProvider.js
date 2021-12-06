@@ -71,6 +71,17 @@ class ReportProvider extends BaseProvider  {
             .catch(err => this.handleError(err));
     }
 
+    vacationBasics = async (query = {}, config = {  responseType: 'blob' }, ctx = null) => {
+        query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
+        query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : "";
+        query.type = typeof query.type != 'undefined' ? query.type : "";
+        let query_string = `${query.month}&cargo_id=${query.cargo_id}&type_categoria_id=${query.type_categoria_id}&type=${query.type}`;
+        // request
+        return await escalafon.get(`${this.collection}/vacation_basics?${query_string}`, config, ctx)
+            .then(res => res)
+            .catch(err => this.handleError(err));
+    }
+
     infos = async (query = {}, config = {  responseType: 'blob' }, ctx = null) => {
         query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
         query.type_categoria_id = typeof query.type_categoria_id != 'undefined' ? query.type_categoria_id : "";
