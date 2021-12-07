@@ -47,13 +47,26 @@ const VacationConfig = ({ setFile = null, setBlock = null }) => {
     const reportBasicPdf = useRequestBlob({ request: reportProvider.vacationBasics, name: "report-vacations-basic.pdf", extname: "pdf" });
     const reportBasicExcel = useRequestBlob({ request: reportProvider.vacationBasics, name: "report-vacations-basic.xlsx", extname: "xlsx" });
 
+    const reportCurrentPdf = useRequestBlob({ request: reportProvider.vacations, name: "report-vacations.pdf", extname: "pdf" });
+    const reportCurrentExcel = useRequestBlob({ request: reportProvider.vacations, name: "report-vacations.xlsx", extname: "xlsx" });
+
     const handleInput = ({ name, value }) => {
         setForm(prev => ({ ...prev, [name]: value }));
     }
 
     const isDisabled = useMemo(() => {
-        return reportBasicPdf.loading || reportBasicExcel.loading;
-    }, [reportBasicPdf.loading, reportBasicExcel.loading]);
+        return (
+            reportBasicPdf.loading || 
+            reportBasicExcel.loading ||
+            reportCurrentPdf.loading ||
+            reportCurrentExcel.loading
+        )
+    }, [
+        reportBasicPdf.loading, 
+        reportBasicExcel.loading,
+        reportCurrentPdf.loading,
+        reportCurrentExcel.loading,
+    ]);
 
     const handlePdf = () => {
         setBlock(true);
@@ -67,14 +80,19 @@ const VacationConfig = ({ setFile = null, setBlock = null }) => {
         reportBasicExcel.setExecute(true);
     }
 
-    useEffect(() => {
-        let currentDate = moment();
-        setForm({ 
-            year: currentDate.year(),
-            month: currentDate.month() + 1
-        })
-    }, [])
+    const handleCurrentPdf = () => {
+        setBlock(true);
+        reportCurrentPdf.setQuery({ ...form, type: 'pdf' })
+        reportCurrentPdf.setExecute(true);
+    }
 
+    const handleCurrentExcel = () => {
+        setBlock(true);
+        reportCurrentExcel.setQuery({ ...form, type: 'excel' })
+        reportCurrentExcel.setExecute(true);
+    }
+
+    // report basic
     useEffect(() => {
         if (reportBasicPdf?.file?.name) setFile(reportBasicPdf?.file)
     }, [reportBasicPdf.file]);
@@ -91,6 +109,24 @@ const VacationConfig = ({ setFile = null, setBlock = null }) => {
         if (reportBasicExcel?.isError) setBlock(false)
     }, [reportBasicExcel.isError]);
 
+    
+    // report current
+    useEffect(() => {
+        if (reportCurrentPdf?.file?.name) setFile(reportCurrentPdf?.file)
+    }, [reportCurrentPdf.file]);
+    
+    useEffect(() => {
+        if (reportCurrentExcel?.file?.name) setFile(reportCurrentExcel?.file)
+    }, [reportCurrentExcel.file]);
+
+    useEffect(() => {
+        if (reportCurrentPdf?.isError) setBlock(false)
+    }, [reportCurrentPdf.isError]);
+
+    useEffect(() => {
+        if (reportCurrentExcel?.isError) setBlock(false)
+    }, [reportCurrentExcel.isError]);
+
     return (
         <>
             <div className='form-group'>
@@ -100,17 +136,7 @@ const VacationConfig = ({ setFile = null, setBlock = null }) => {
                     label='Vacaciones Actuales'
                 />
             </div>
-            <Show condicion={!isActual}
-                predeterminado={
-                    <OptionButton
-                        disabled={isDisabled}
-                        loadingPdf={reportBasicPdf.loading}
-                        loadingExcel={reportBasicExcel.loading}
-                        onClickPdf={handlePdf}
-                        onClickExcel={handleExcel}
-                    />
-                }
-            >
+            
                 <div className="form-group">
                     <label>Partición Pre.</label>
                     <SelectCargo
@@ -129,6 +155,17 @@ const VacationConfig = ({ setFile = null, setBlock = null }) => {
                         onChange={(e, obj) => handleInput(obj)}
                     />
                 </div>
+            <Show condicion={!isActual}
+                predeterminado={
+                    <OptionButton
+                        disabled={isDisabled}
+                        loadingPdf={reportBasicPdf.loading}
+                        loadingExcel={reportBasicExcel.loading}
+                        onClickPdf={handleCurrentPdf}
+                        onClickExcel={handleCurrentExcel}
+                    />
+                }
+            >
                 {/* options buttons */}
                 <OptionButton
                     disabled={isDisabled}
