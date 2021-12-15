@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import Show from '../../show';
 import { Button } from 'semantic-ui-react'
+import moment from 'moment';
 
 const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
 
@@ -11,6 +12,24 @@ const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
     const isAdd = useMemo(() => {
         return typeof onAdd == 'function';
     }, [onAdd])
+
+    const displayDateResolution = useMemo(() => {
+        return info?.fecha_de_resolucion 
+            ? moment(info?.fecha_de_resolucion).format('DD/MM/YYYY')
+            : '';
+    }, [info]);
+
+    const displayDateStart = useMemo(() => {
+        return info?.fecha_de_ingreso 
+            ? moment(info?.fecha_de_ingreso).format('DD/MM/YYYY')
+            : '';
+    }, [info]);
+
+    const displayDateOver = useMemo(() => {
+        return info?.fecha_de_cese 
+            ? moment(info?.fecha_de_cese).format('DD/MM/YYYY')
+            : '';
+    }, [info]);
 
     return (
         <div className="card">
@@ -25,9 +44,9 @@ const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
             <div className="card-body">
                 <div className="mb-2"><b>ID: </b>{info?.id}</div>
                 <div className="mb-2"><b>Resolución: </b>{info?.resolucion}</div>
-                <div className="mb-2"><b>Fecha de Resolución: </b>{info?.fecha_de_resolucion}</div>
-                <div className="mb-2"><b>Fecha de Incio: </b>{info?.fecha_de_ingreso}</div>
-                <div className="mb-2"><b>Fecha de cese: </b>{info?.fecha_de_cese}</div>
+                <div className="mb-2"><b>Fecha de Resolución: </b>{displayDateResolution}</div>
+                <div className="mb-2"><b>Fecha de Incio: </b>{displayDateStart}</div>
+                <div className="mb-2"><b>Fecha de cese: </b>{displayDateOver}</div>
                 <div className="mb-2"><b>Plaza: </b>{info?.plaza}</div>
                 <div className="mb-2"><b>P.A.P: </b>{info?.pap}</div>
                 <div className="mb-2">
