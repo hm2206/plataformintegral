@@ -47,6 +47,9 @@ const TrabajadorID = ({ pathname, query, success, work }) => {
                 titulo={work?.person?.fullname}
                 email={work?.person?.email_contact}
                 image={work?.person?.image ? `${work?.person?.image_images?.image_200x200}` : '/img/perfil.jpg'}
+                documentNumber={work?.person?.document_number}
+                birhday={work?.person?.date_of_birth}
+                cargo={work?.perfil_laboral?.nombre}
             />
 
             <NavCover
