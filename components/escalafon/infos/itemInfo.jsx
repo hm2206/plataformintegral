@@ -47,6 +47,8 @@ const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
                 <div className="mb-2"><b>Fecha de Resolución: </b>{displayDateResolution}</div>
                 <div className="mb-2"><b>Fecha de Incio: </b>{displayDateStart}</div>
                 <div className="mb-2"><b>Fecha de cese: </b>{displayDateOver}</div>
+                <div className="mb-2"><b>Dependencia: </b>{info?.dependencia?.nombre}</div>
+                <div className="mb-2"><b>Cargo: </b>{info?.perfil_laboral?.nombre}</div>
                 <div className="mb-2"><b>Plaza: </b>{info?.plaza}</div>
                 <div className="mb-2"><b>P.A.P: </b>{info?.pap}</div>
                 <div className="mb-2">
