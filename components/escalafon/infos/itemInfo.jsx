@@ -43,6 +43,8 @@ const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
             </div>
             <div className="card-body">
                 <div className="mb-2"><b>ID: </b>{info?.id}</div>
+                <div className="mb-2"><b>Tip. Trabajador: </b>{info?.type_cargo?.description}</div>
+                <div className="mb-2"><b>Condición: </b>{info?.pap}</div>
                 <div className="mb-2"><b>Resolución: </b>{info?.resolucion}</div>
                 <div className="mb-2"><b>Fecha de Resolución: </b>{displayDateResolution}</div>
                 <div className="mb-2"><b>Fecha de Incio: </b>{displayDateStart}</div>

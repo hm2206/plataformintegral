@@ -11,7 +11,7 @@ import ContentControl from '../../../components/contentControl';
 import atob from 'atob';
 import btoa from 'btoa';
 import { AppContext } from '../../../contexts/AppContext';
-import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta, SelectSitacionLaboral } from '../../../components/select/cronograma';
+import { SelectPlanilla, SelectCargo, SelectCargoTypeCategoria, SelectMeta, SelectSitacionLaboral, SelectTypeCargo } from '../../../components/select/cronograma';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../../components/select/authentication';
 import storage from '../../../services/storage.json';
 import BoardSimple from '../../../components/boardSimple';
@@ -302,6 +302,23 @@ const Edit = ({ success, info, query }) => {
                                         </div>
 
                                         <div className="col-md-4 mt-3">
+                                            <Form.Field error={errors.type_cargo_id && errors.type_cargo_id[0] || ""}>
+                                                <label htmlFor="">Tipo de Trabajador <b className="text-red">*</b></label>
+                                                <Show condicion={!edit}
+                                                    predeterminado={
+                                                        <SelectTypeCargo name="type_cargo_id"
+                                                            value={form.type_cargo_id}
+                                                            onChange={(e, obj) => handleInput(obj)}
+                                                            displayText={(dato) => dato?.description}
+                                                        />}
+                                                >
+                                                    <input type="text" value={form.type_cargo?.description || ""} readOnly/>
+                                                </Show>
+                                                <label>{errors.type_cargo_id && errors.type_cargo_id[0] || ""}</label>
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
                                             <Form.Field error={errors.pap && errors.pap[0] || ""}>
                                                 <label htmlFor="">P.A.P <b className="text-red">*</b></label>
                                                 <Show condicion={!edit}
@@ -412,24 +429,36 @@ const Edit = ({ success, info, query }) => {
 
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
-                                                <label htmlFor="">{info.is_pay ? 'Remunerada' : 'No Remunerada'}</label>
-                                                <Checkbox toggle
-                                                    checked={form.is_pay ? true : false} 
-                                                    disabled={!edit}
-                                                    name="is_pay"
-                                                    onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-md-4 mt-3">
-                                            <Form.Field>
                                                 <label htmlFor="">Código AIRHSP</label>
                                                 <input type="text" 
                                                     readOnly={!edit} 
                                                     name="code_airhsp" 
                                                     value={form.code_airhsp || ""}
                                                     onChange={({target}) => handleInput(target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">Código Asistencia</label>
+                                                <input type="text" 
+                                                    readOnly={!edit} 
+                                                    name="code" 
+                                                    value={form.code || ""}
+                                                    onChange={({target}) => handleInput(target)}
+                                                />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field>
+                                                <label htmlFor="">{info.is_pay ? 'Remunerada' : 'No Remunerada'}</label>
+                                                <Checkbox toggle
+                                                    checked={form.is_pay ? true : false} 
+                                                    disabled={!edit}
+                                                    name="is_pay"
+                                                    onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
                                                 />
                                             </Form.Field>
                                         </div>

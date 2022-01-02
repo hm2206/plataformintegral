@@ -21,8 +21,9 @@ const SelectPlanilla = ({ id = "id", name, value, onChange, refresh = false, dis
 }
 
 
-const SelectTypeCargo = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+const SelectTypeCargo = ({ id = "id", name, value, onChange, refresh = false, disabled = false, displayText = null }) => {
     return <SelectBase 
+                displayText={displayText}
                 api={unujobs}
                 url={`type_cargo`}
                 id={`select-tyep_cargo-${id}-${name}`}
