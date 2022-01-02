@@ -3,6 +3,7 @@ import { Checkbox, Form, Select } from 'semantic-ui-react';
 import { SelectDependencia, SelectDependenciaPerfilLaboral } from '../../select/authentication';
 import { SelectPlanilla, SelectMeta, SelectCargo, SelectCargoTypeCategoria, SelectTypeCargo, SelectSitacionLaboral, SelectTypeAportacion } from '../../select/cronograma';
 import { pap } from '../../../services/storage.json';
+import { SelectHourhand } from '../../select/escalafon';
 
 const FormInfo = ({ form = {}, errors = {}, disabled = false, onChange = null, children = null }) => {
 
@@ -174,6 +175,19 @@ const FormInfo = ({ form = {}, errors = {}, disabled = false, onChange = null, c
                 </div>
 
                 <div className="col-md-4 mb-3">
+                    <Form.Field error={errors.situacion_laboral_id && errors.situacion_laboral_id[0] ? true : false}>
+                        <label htmlFor="">Situación Laboral <b className="text-red">*</b></label>
+                        <SelectSitacionLaboral
+                            disabled={disabled}
+                            name="situacion_laboral_id"
+                            value={form.situacion_laboral_id}
+                            onChange={handleInput}
+                        />
+                        <b className="text-red">{errors && errors.situacion_laboral_id && errors.situacion_laboral_id[0]}</b>
+                    </Form.Field>
+                </div>
+
+                <div className="col-md-4 mb-3">
                     <Form.Field error={errors && errors.dependencia_id && errors.dependencia_id[0] ? true : false}>
                         <label htmlFor="">Dependencia/Oficina <b className="text-red">*</b></label>
                         <SelectDependencia
@@ -206,9 +220,9 @@ const FormInfo = ({ form = {}, errors = {}, disabled = false, onChange = null, c
                     <Form.Field>
                         <label htmlFor="">Código Asistencia</label>
                         <input type="text" 
-                            name="plaza"
+                            name="code"
                             value={form?.code || null}
-                            placeholder="Plaza"
+                            placeholder="código de asistencia"
                             onChange={(e) => handleInput(e, e.target)}
                             disabled={disabled}
                         />
@@ -216,15 +230,40 @@ const FormInfo = ({ form = {}, errors = {}, disabled = false, onChange = null, c
                 </div>
 
                 <div className="col-md-4 mb-3">
-                    <Form.Field error={errors.situacion_laboral_id && errors.situacion_laboral_id[0] ? true : false}>
-                        <label htmlFor="">Situación Laboral <b className="text-red">*</b></label>
-                        <SelectSitacionLaboral
+                    <Form.Field error={errors.hourhand_id && errors.hourhand_id[0] ? true : false}>
+                        <label htmlFor="">Horario</label>
+                        <SelectHourhand
                             disabled={disabled}
-                            name="situacion_laboral_id"
-                            value={form.situacion_laboral_id}
+                            name="hourhand_id"
+                            value={form.hourhand_id}
                             onChange={handleInput}
                         />
-                        <b className="text-red">{errors && errors.situacion_laboral_id && errors.situacion_laboral_id[0]}</b>
+                        <b className="text-red">{errors && errors.hourhand_id && errors.hourhand_id[0]}</b>
+                    </Form.Field>
+                </div>
+
+                <div className="col-md-4 mb-3">
+                    <Form.Field>
+                        <label htmlFor="">N° Ruc</label>
+                        <input type="text" 
+                            placeholder="N° Ruc"
+                            name="ruc"
+                            value={form.ruc || ""}
+                            onChange={(e) => handleInput(e, e.target)}
+                            disabled={disabled}
+                        />
+                    </Form.Field>
+                </div>
+
+                <div className="col-md-4">
+                    <Form.Field>
+                        <label htmlFor="">Aportacion Empleador</label>
+                        <SelectTypeAportacion
+                            name="type_aportacion_id"
+                            value={form?.type_aportacion_id}
+                            onChange={handleInput}
+                            disabled={disabled}
+                        />
                     </Form.Field>
                 </div>
 
@@ -281,31 +320,6 @@ const FormInfo = ({ form = {}, errors = {}, disabled = false, onChange = null, c
                             disabled={disabled}
                         />
                         <label htmlFor="">{errors && errors.fecha_de_cese && errors.fecha_de_cese[0]}</label>
-                    </Form.Field>
-                </div>
-
-                <div className="col-md-4">
-                    <Form.Field>
-                        <label htmlFor="">Aportacion Empleador</label>
-                        <SelectTypeAportacion
-                            name="type_aportacion_id"
-                            value={form?.type_aportacion_id}
-                            onChange={handleInput}
-                            disabled={disabled}
-                        />
-                    </Form.Field>
-                </div>
-
-                <div className="col-md-4 mb-3">
-                    <Form.Field>
-                        <label htmlFor="">N° Ruc</label>
-                        <input type="text" 
-                            placeholder="N° Ruc"
-                            name="ruc"
-                            value={form.ruc || ""}
-                            onChange={(e) => handleInput(e, e.target)}
-                            disabled={disabled}
-                        />
                     </Form.Field>
                 </div>
                 

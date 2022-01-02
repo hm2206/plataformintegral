@@ -17,6 +17,7 @@ import storage from '../../../services/storage.json';
 import BoardSimple from '../../../components/boardSimple';
 import NotFoundData from '../../../components/notFoundData'
 import { EntityContext } from '../../../contexts/EntityContext';
+import { SelectHourhand } from '../../../components/select/escalafon';
 
 const Edit = ({ success, info, query }) => {
 
@@ -276,7 +277,7 @@ const Edit = ({ success, info, query }) => {
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectPlanilla name="planilla_id" value={form.planilla_id} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
-                                                    <input type="text" value={form.planilla?.nombre || ""} readOnly/>
+                                                    <input type="text" value={form?.planilla?.nombre || ""} readOnly/>
                                                 </Show>
                                                 <label>{errors.planilla_id && errors.planilla_id[0] || ""}</label>
                                             </Form.Field>
@@ -288,7 +289,7 @@ const Edit = ({ success, info, query }) => {
                                                 <Show condicion={!edit}
                                                     predeterminado={<SelectCargo name="cargo_id" value={form.cargo_id} onChange={(e, obj) => handleInput(obj)}/>}
                                                 >
-                                                    <input type="text" value={form.cargo?.descripcion || ""} readOnly/>
+                                                    <input type="text" value={form?.cargo?.descripcion || ""} readOnly/>
                                                 </Show>
                                                 <label>{errors.cargo_id && errors.cargo_id[0] || ""}</label>
                                             </Form.Field>
@@ -297,7 +298,7 @@ const Edit = ({ success, info, query }) => {
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">Ext. Presupuestal</label>
-                                                <input type="text" value={info.cargo?.ext_pptto || ""} readOnly/>
+                                                <input type="text" value={info?.cargo?.ext_pptto || ""} readOnly/>
                                             </Form.Field>
                                         </div>
 
@@ -312,7 +313,7 @@ const Edit = ({ success, info, query }) => {
                                                             displayText={(dato) => dato?.description}
                                                         />}
                                                 >
-                                                    <input type="text" value={form.type_cargo?.description || ""} readOnly/>
+                                                    <input type="text" value={form?.type_cargo?.description || ""} readOnly/>
                                                 </Show>
                                                 <label>{errors.type_cargo_id && errors.type_cargo_id[0] || ""}</label>
                                             </Form.Field>
@@ -343,7 +344,7 @@ const Edit = ({ success, info, query }) => {
                                                             />
                                                         }
                                                 >
-                                                    <input type="text" value={info.type_categoria?.descripcion} readOnly/>
+                                                    <input type="text" value={info?.type_categoria?.descripcion} readOnly/>
                                                 </Show>
                                                 <label>{errors.type_categoria_id && errors.type_categoria_id[0] || ""}</label>
                                             </Form.Field>
@@ -375,7 +376,7 @@ const Edit = ({ success, info, query }) => {
                                         <div className="col-md-4 mt-3">
                                             <Form.Field>
                                                 <label htmlFor="">Meta</label>
-                                                <input type="text" value={info.meta?.meta} readOnly/>
+                                                <input type="text" value={info?.meta?.meta} readOnly/>
                                             </Form.Field>
                                         </div>
 
@@ -388,7 +389,7 @@ const Edit = ({ success, info, query }) => {
                                                         onChange={(e, obj) => handleInput(obj)}
                                                     />}
                                                 >
-                                                    <input type="text" readOnly value={info.dependencia?.nombre}/>
+                                                    <input type="text" readOnly value={info?.dependencia?.nombre}/>
                                                 </Show>
                                                 <label>{errors.dependencia_id && errors.dependencia_id[0] || ""}</label>
                                             </Form.Field>
@@ -421,7 +422,7 @@ const Edit = ({ success, info, query }) => {
                                                         onChange={(e, obj) => handleInput(obj)}
                                                     />}
                                                 >
-                                                    <input type="text" readOnly value={form.situacion_laboral?.nombre || ""}/>
+                                                    <input type="text" readOnly value={form?.situacion_laboral?.nombre || ""}/>
                                                 </Show>
                                                 <label>{errors.situacion_laboral_id && errors.situacion_laboral_id[0] || ""}</label>
                                             </Form.Field>
@@ -448,6 +449,21 @@ const Edit = ({ success, info, query }) => {
                                                     value={form.code || ""}
                                                     onChange={({target}) => handleInput(target)}
                                                 />
+                                            </Form.Field>
+                                        </div>
+
+                                        <div className="col-md-4 mt-3">
+                                            <Form.Field error={errors.hourhand_id && errors.hourhand_id[0] || ""}>
+                                                <label htmlFor="">Horario</label>
+                                                <Show condicion={!edit}
+                                                    predeterminado={<SelectHourhand name="hourhand_id" 
+                                                        value={form.hourhand_id}
+                                                        onChange={(e, obj) => handleInput(obj)}
+                                                    />}
+                                                >
+                                                    <input type="text" readOnly value={form?.hourhand?.name || ""}/>
+                                                </Show>
+                                                <label>{errors.hourhand_id && errors.hourhand_id[0] || ""}</label>
                                             </Form.Field>
                                         </div>
 

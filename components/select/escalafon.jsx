@@ -220,6 +220,26 @@ const SelectConfigDiscount = ({ id = "id", year = null, name, value, onChange, e
     />
 }
 
+const SelectHourhand = ({ id = "id", name, value, onChange, error = false, refresh = true, onReady = null, displayText = null }) => {
+
+    return <SelectBase 
+        execute={true}
+        api={escalafon}
+        url={`hourhands`}
+        id={`select-hourhand-${name}`}
+        value={id}
+        text="name"
+        obj="hourhand"
+        name={name}
+        valueChange={`${value || ""}`}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Horario"
+        refresh={refresh}
+        displayText={displayText}
+        onReady={onReady}
+        error={error}
+    />
+}
 
 export { 
     SelectAfp,
@@ -231,4 +251,5 @@ export {
     SelectWorkInfo,
     SelectTypeDegree,
     SelectConfigDiscount,
+    SelectHourhand,
 };
