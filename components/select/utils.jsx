@@ -76,11 +76,20 @@ const SelectBase = ({
         let query = `${url}`.split('?');
         let newParams = query[1] ? `&${query[1]}` : "";
         let newUrl = query[0] || "";
-        await api.get(`${newUrl}?page=${page}${newParams}`, { headers })
+        await api.get(`${newUrl}?page=${page}${newParams}&limit=200`, { headers })
             .then(async res => {
+                const attributes = Object.keys(res.data);
                 let { success, message } = res.data;
                 let is_array = res.data[obj];
-                if (Array.isArray(is_array)) {
+                if (attributes.includes('items')) {
+                    let tmpDatos = res.data['items'];
+                    let newDatos = await settingSelect({ is_new: true, data: tmpDatos, index: { key: id, value, text }, displayText });
+                    setDatos(newDatos);
+                    setIsError(false);
+                    setLoading(false);
+                    setIsReady(true);
+                    setCurrentExecute(false);
+                } else if (Array.isArray(is_array)) {
                     let tmpDatos = res.data[obj];
                     let newDatos = await settingSelect({ is_new: true, data: tmpDatos, index: { key: id, value, text }, displayText });
                     setDatos(newDatos);
