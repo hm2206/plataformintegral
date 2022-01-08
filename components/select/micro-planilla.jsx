@@ -1,8 +1,46 @@
 import React from 'react';
 import { SelectBase } from './utils';
 import { microPlanilla } from '../../services/apis';
-import moment from 'moment'
 
+
+const SelectPlanilla = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+        api={microPlanilla}
+        url={`planillas`}
+        id={`select-planillas-${id}-${name}`}
+        value={id}
+        text="name"
+        obj="planillas"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Planillas"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
+const SelectPim = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+        api={microPlanilla}
+        url={`pims`}
+        id={`select-pims-${id}-${name}`}
+        value={id}
+        text="name"
+        obj="pims"
+        name={name}
+        displayText={(data) => {
+            return `Meta ${data?.code} [${data?.cargo?.extension}]`;
+        }}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Planillas"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
 
 const SelectAfp = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
@@ -130,6 +168,25 @@ const SelectHourhand = ({ id = "id", name, value, onChange, refresh = false, dis
     />
 }
 
+const SelectWorkToContract = ({ id = "id", workId, name, value, onChange, refresh = false, disabled = false, displayText = null }) => {
+    return <SelectBase 
+        api={microPlanilla}
+        url={`works/${workId}/contracts`}
+        id={`select-worl-contracts-${id}-${name}`}
+        value={id}
+        text="resolution"
+        obj="contracts"
+        name={name}
+        displayText={displayText}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Contrato"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
 export { 
     SelectAfp,
     SelectBank,
@@ -138,4 +195,7 @@ export {
     SelectDependency,
     SelectProfile,
     SelectHourhand,
+    SelectWorkToContract,
+    SelectPlanilla,
+    SelectPim,
 };

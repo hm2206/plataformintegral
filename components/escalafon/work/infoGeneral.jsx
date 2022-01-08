@@ -66,7 +66,6 @@ const InfoGeneral = ({ work }) => {
         if (!answer) return;
         app_context.setCurrentLoading(true);
         let form = Object.assign({}, current_work);
-        form.bankId = parseInt(`${form.bankId}`);
         form.afpId = parseInt(`${form.afpId}`);
         form.isPrimaSeguro = form.isPrimaSeguro == true;
         await microPlanilla.put(`works/${work.id}`, form)
@@ -116,6 +115,10 @@ const InfoGeneral = ({ work }) => {
 
                         <div className="col-md-8">
                             <b><i className="fas fa-user"></i> Datos Personales</b>
+
+                            <span className="close text-dark cursor-pointer" onClick={() => setOption(options.EDIT_PERSON)}>
+                                <i className="fas fa-pencil-alt fas-ms"></i>
+                            </span>
                             <hr/>
                             <div className="row">
                                 <div className="col-md-6 mb-2">
@@ -217,8 +220,8 @@ const InfoGeneral = ({ work }) => {
                                         <label htmlFor="">Fecha de Ingreso <b className="text-red">*</b></label>
                                         <input type="date" 
                                             value={current_work.dateOfAdmission || ""}
-                                            qname="dateOfAdmission"
-                                            readOnly
+                                            name="dateOfAdmission"
+                                            onChange={(e) => handleInput(e.target)}
                                         />
                                         <label>{errors?.dateOfAdmission?.[0]}</label>
                                     </Form.Field>
@@ -227,8 +230,7 @@ const InfoGeneral = ({ work }) => {
                                 <div className="col-md-6 mb-2">
                                     <Form.Field>
                                         <label htmlFor="">Ley Social <b className="text-red">*</b></label>
-                                    <SelectAfp
-                                        disabled
+                                        <SelectAfp
                                             name="afpId"
                                             value={current_work.afpId}
                                             onChange={(e, data) => handleInput(data)}
@@ -238,22 +240,23 @@ const InfoGeneral = ({ work }) => {
 
                                 <div className="col-md-6 mb-2">
                                     <Form.Field>
-                                    <label htmlFor="">N° Cussp</label>
-                                    <input type="text" 
-                                        readOnly
-                                        value={current_work.numberOfCussp || ""}
-                                    />
+                                        <label htmlFor="">N° Cussp</label>
+                                        <input type="text" 
+                                            value={current_work.numberOfCussp || ""}
+                                            name="numberOfCussp"
+                                            onChange={(e) => handleInput(e.target)}
+                                        />
                                     </Form.Field>
                                 </div>
 
                                 <div className="col-md-6 mb-2">
-                                <Form.Field>
-                                    <label htmlFor="">Fecha de Afiliación</label>
-                                    <input type="date" 
-                                        value={current_work.affiliationOfDate || ""}
-                                        name="affiliationOfDate"
-                                        readOnly
-                                    />
+                                    <Form.Field>
+                                        <label htmlFor="">Fecha de Afiliación</label>
+                                        <input type="date" 
+                                            value={current_work.affiliationOfDate || ""}
+                                            name="affiliationOfDate"
+                                            onChange={(e) => handleInput(e.target)}
+                                        />
                                     </Form.Field>
                                 </div>
 
@@ -262,7 +265,8 @@ const InfoGeneral = ({ work }) => {
                                         <label htmlFor="">N° Essalud</label>
                                         <input type="text" 
                                             value={current_work.numberOfEssalud || ""}
-                                            readOnly
+                                            name="numberOfEssalud"
+                                            onChange={(e) => handleInput(e.target)}
                                         />
                                     </Form.Field>
                                 </div>
@@ -278,15 +282,46 @@ const InfoGeneral = ({ work }) => {
                                             placeholder="Select. Prima Seguro"
                                             value={current_work.isPrimaSeguro}
                                             name="isPrimaSeguro"
-                                            disabled
+                                            onChange={(e, obj) => handleInput(obj)}
                                         />
                                     </Form.Field>
+                                </div>
+
+                                <div className="col-md-12 mt-4 text-right col-12">
+                                    <Show condicion={edit}>
+                                        <div className="row">
+                                            <div className="col-6">
+                                                <Button color="red"
+                                                    fluid
+                                                    onClick={leaveForm}
+                                                >
+                                                    <i className="fas fa-trash-alt"></i> Cancelar Cambios
+                                                </Button>
+                                            </div>
+                                            <div className="col-6">
+                                                <Button color="teal"
+                                                    fluid
+                                                    onClick={updateWork}
+                                                >
+                                                    <i className="fas fa-save"></i> Actualizar Información
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </Show>
+                                    
+                                    <hr/>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </Form>
-            
+                {/* editar */}
+                <Show condicion={option == options.EDIT_PERSON}>
+                    <EditPerson person={person}
+                        onClose={() => setOption("")}
+                        onSave={onSavePerson}
+                    />
+                </Show>
                 {/* assign trabajador */}
                 <BtnFloat theme="btn-warning"
                     onClick={() => setOption(options.SEARCH_WORK)}

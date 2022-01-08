@@ -4,9 +4,9 @@ import NavCover from '../../../components/trabajador/navCover';
 import { AUTHENTICATE } from '../../../services/auth';
 import { microPlanilla } from '../../../services/apis';
 import Show from '../../../components/show';
-import InfoGeneral from '../../../components/escalafon/work/infoGeneral';
+import InfoGeneral from '../../../components/planilla/work/infoGeneral';
 import atob from 'atob';
-import Infos from '../../../components/escalafon/contract/index';
+import Infos from '../../../components/planilla/infos/index';
 import NotFoundData from '../../../components/notFoundData';
 import { EntityContext } from '../../../contexts/EntityContext';
 
