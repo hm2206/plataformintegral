@@ -21,10 +21,10 @@ const SelectPlanilla = ({ id = "id", name, value, onChange, refresh = false, dis
     />
 }
 
-const SelectPim = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+const SelectPim = ({ id = "id", year, name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
         api={microPlanilla}
-        url={`pims`}
+        url={`pims?year=${year}`}
         id={`select-pims-${id}-${name}`}
         value={id}
         text="name"
@@ -36,7 +36,7 @@ const SelectPim = ({ id = "id", name, value, onChange, refresh = false, disabled
         valueChange={value || ""}
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
         placeholder="Seleccionar Planillas"
-        refresh={refresh}
+        refresh={refresh || year}
         execute={true}
         disabled={disabled}
     />

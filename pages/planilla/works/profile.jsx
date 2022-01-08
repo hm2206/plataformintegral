@@ -46,7 +46,7 @@ const TrabajadorID = ({ success, work }) => {
                 active={option}
                 options={[
                     { key: "general", text: "Información General" },
-                    { key: "info", text: "Contratos" }
+                    { key: "info", text: "Configuración de Pago" }
                 ]}
                 getOption={(key) => setOption(key)}
             />

@@ -8,13 +8,18 @@ import Swal from 'sweetalert2'
 
 const CreateInfo = ({ work = {}, contract = {}, onClose = null, onSave = null }) => {
 
-    const [form, setForm] = useState({ state: true, ...contract });
+    const [form, setForm] = useState({
+        isEmail: true,
+        isSync: true,
+        isCheck: true
+    });
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
 
     const isSave = useMemo(() => {
         let required = [
-            'planillaId', 'pimId'
+            'planillaId', 'pimId',
+            'bankId'
         ];
         // validar
         for (let attr of required) {
@@ -39,8 +44,8 @@ const CreateInfo = ({ work = {}, contract = {}, onClose = null, onSave = null })
         if (!answer) return;
         setCurrentLoading(true);
         let newForm = Object.assign({}, form);
-        newForm.workId = parseInt(`${work.id}`);
-        await microPlanilla.post('contracts', newForm)
+        newForm.contractId = parseInt(`${contract.id}`);
+        await microPlanilla.post('infos', newForm)
         .then(async res => {
             await Swal.fire({
                 icon: 'success',

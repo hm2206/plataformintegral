@@ -2,8 +2,6 @@ import React, { useState, useEffect, Fragment } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import Show from '../../show'
 import { microPlanilla } from '../../../services/apis';
-import Router from 'next/router';
-import btoa from 'btoa';
 import { Select } from 'semantic-ui-react'
 import { BtnFloat } from '../../Utils';
 import CreateInfo from './create-contract';
@@ -37,48 +35,47 @@ const Infos = ({ work }) => {
     const [estado, setEstado] = useState(true);
     const [option, setOption] = useState();
     const [current_info, setCurrentInfo] = useState({})
-    const [current, setCurrent] = useState({});
 
     // obtener contratos
     const getInfos = async (add = false) => {
-        setCurrentLoading(true);
-        const params = new URLSearchParams();
-        if (estado !== "") params.set('state', estado)
-        await microPlanilla.get(`works/${work.id}/contracts`, { params })
-            .then(res => {
-                const { items, meta } = res.data;
-                setCurrentInfos(add ? [...current_infos, ...items] : items);
-                setCurrenTotal(meta.totalItems || 0);
-                setPage(meta.currentPage || 1);
-                setCurrentLastPage(meta.totalPages || 0);
-            }).catch(err => setError(true))
-        setCurrentLoading(false);
+      setCurrentLoading(true);
+      const params = new URLSearchParams();
+      if (estado !== "") params.set('state', estado)
+      await microPlanilla.get(`works/${work.id}/contracts`, { params })
+          .then(res => {
+              const { items, meta } = res.data;
+              setCurrentInfos(add ? [...current_infos, ...items] : items);
+              setCurrenTotal(meta.totalItems || 0);
+              setPage(meta.currentPage || 1);
+              setCurrentLastPage(meta.totalPages || 0);
+          }).catch(err => setError(true))
+      setCurrentLoading(false);
     }
 
     const handleAdd = (obj) => {
-        setCurrentInfo(obj);
-        setOption('CREATE');
+      setCurrentInfo(obj);
+      setOption('CREATE');
     }
 
     const handleEdit = (obj) => {
-        setCurrentInfo(obj);
-        setOption('EDIT');
+      setCurrentInfo(obj);
+      setOption('EDIT');
     }
 
     const handleSave = () => {
-        setOption("");
-        getInfos();
+      setOption("");
+      getInfos();
     }
 
     // primera carga
     useEffect(() => {
-        getInfos();
-        return () => {
-            setCurrentInfos([]);
-            setPage(1);
-            setCurrenTotal(0);
-            setCurrentLastPage(0);
-        }
+      getInfos();
+      return () => {
+          setCurrentInfos([]);
+          setPage(1);
+          setCurrenTotal(0);
+          setCurrentLastPage(0);
+      }
     }, [estado]);
 
     // render

@@ -6,8 +6,9 @@ import moment from 'moment';
 import { BtnFloat } from '../../Utils';
 import CreateInfo from './create-info.jsx';
 import ItemInfo from './item-info';
-import EditContract from './edit-info';
+import ItemContract from '../contract/item-contract';
 import { SelectWorkToContract } from '../../select/micro-planilla';
+import EditInfo from './edit-info';
 
 const Placeholder = () => {
 
@@ -28,13 +29,45 @@ const Infos = ({ work }) => {
 
   // estados
   const [current_loading, setCurrentLoading] = useState(false);
+  const [current_infos, setCurrentInfos] = useState([]);
+  const [page, setPage] = useState(1);
+  const [current_total, setCurrenTotal] = useState(0);
+  const [current_last_page, setCurrentLastPage] = useState(0);
+  const [error, setError] = useState(false);
+  const [estado, setEstado] = useState(true);
+  const [currentInfo, setCurrentInfo] = useState({})
   const [option, setOption] = useState();
-  const [current_info, setCurrentInfo] = useState({})
+  const [currentContract, setCurrentContract] = useState({})
   
   const handleInputInfo = ({ options = [], value }) => {
     const current = options.find(c => c.value == value);
-    setCurrentInfo(current?.obj || {});
+    setCurrentContract(current?.obj || {});
   }
+
+  // obtener contratos
+  const getInfos = async (add = false) => {
+    setCurrentLoading(true);
+    const params = new URLSearchParams();
+    if (estado !== "") params.set('state', estado)
+    await microPlanilla.get(`contracts/${currentContract.id}/infos?limit=100`, { params })
+      .then(res => {
+        const { items, meta } = res.data;
+        setCurrentInfos(add ? [...current_infos, ...items] : items);
+        setCurrenTotal(meta.totalItems || 0);
+        setPage(meta.currentPage || 1);
+        setCurrentLastPage(meta.totalPages || 0);
+      }).catch(err => setError(true))
+    setCurrentLoading(false);
+  }
+
+  const handleEdit = (obj) => {
+    setOption('EDIT')
+    setCurrentInfo(obj);
+  }
+
+  useEffect(() => {
+    if (currentContract?.id) getInfos();
+  }, [currentContract]);
 
   // render
   return (
@@ -45,7 +78,7 @@ const Infos = ({ work }) => {
           <SelectWorkToContract
             workId={work.id}
             onChange={(e, obj) => handleInputInfo(obj)}
-            value={`${current_info?.id || ''}`}
+            value={`${currentContract?.id || ''}`}
             displayText={(data) => {
               return `${data?.typeCategory?.name} | ${data?.resolution} | ${moment(data?.dateOfResolution).format('DD/MM/YYYY')}`;
             }}
@@ -54,12 +87,24 @@ const Infos = ({ work }) => {
         <hr/>
       </div>
       
-      <Show condicion={Object.keys(current_info).length}>
+      <Show condicion={Object.keys(currentContract).length}>
         <div className="col-md-6 col-lg-4 col-sm-12 mb-2">
-          <ItemInfo info={current_info} />
+          <ItemContract info={currentContract} />
         </div>
 
-        <div className='col-md-6 col-lg-8 col-sm-12 mb-2'></div>
+        <div className='col-md-6 col-lg-8 col-sm-12 mb-2'>
+          {current_infos?.map((i, indexI) => 
+            <div className="mb-3" key={`info-list-${i.id}-${indexI}`}>
+              <ItemInfo info={i} 
+                onEdit={() => handleEdit(i)}
+              />
+            </div>
+          )}
+
+          <Show condicion={current_loading}>
+            <Placeholder/>
+          </Show>
+        </div>
 
         {/*  crear info */}
         <BtnFloat theme="btn-success"
@@ -72,20 +117,21 @@ const Infos = ({ work }) => {
 
       <Show condicion={option == 'CREATE'}>
         <CreateInfo 
-          contract={current_info}
+          contract={currentContract}
           onClose={() => setOption()}
           work={work}
         />
       </Show>
 
-      {/* <Show condicion={option == 'EDIT'}>
-        <EditContract 
-          infoDefault={current_info}
+      <Show condicion={option == 'EDIT'}>
+        <EditInfo 
+          infoDefault={currentInfo}
           onClose={() => setOption()}
           work={work}
-          onSave={handleSave}
+          contract={currentContract}
+          // onSave={handleSave}
         />
-      </Show> */}
+      </Show>
     </div>
   )
 }

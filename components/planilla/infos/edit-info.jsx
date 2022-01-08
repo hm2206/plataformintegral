@@ -6,7 +6,7 @@ import { Confirm } from '../../../services/utils';
 import { microPlanilla } from '../../../services/apis';
 import Swal from 'sweetalert2'
 
-const EditContract = ({ work = {}, infoDefault = {}, onClose = null, onSave = null }) => {
+const EditInfo = ({ work = {}, contract = {}, infoDefault = {}, onClose = null, onSave = null }) => {
 
     const [form, setForm] = useState({ state: true, ...infoDefault });
     const [errors, setErrors] = useState({});
@@ -14,9 +14,8 @@ const EditContract = ({ work = {}, infoDefault = {}, onClose = null, onSave = nu
 
     const isSave = useMemo(() => {
         let required = [
-            'dependencyId', 'condition', 
-            'profileId', 'resolution', 'dateOfResolution',
-            'dateOfAdmission', 'hourhandId'
+            'planillaId', 'pimId', 
+            'bankId'
         ];
         // validar
         for (let attr of required) {
@@ -41,7 +40,7 @@ const EditContract = ({ work = {}, infoDefault = {}, onClose = null, onSave = nu
         if (!answer) return;
         setCurrentLoading(true);
         let newForm = Object.assign({}, form);
-        await microPlanilla.put(`contracts/${infoDefault.id}`, newForm)
+        await microPlanilla.put(`infos/${infoDefault.id}`, newForm)
         .then(async res => {
             await Swal.fire({
                 icon: 'success',
@@ -66,6 +65,9 @@ const EditContract = ({ work = {}, infoDefault = {}, onClose = null, onSave = nu
                 <FormInfo form={form} 
                     errors={errors}
                     onChange={handleInput}
+                    contract={contract}
+                    isEdit={true}
+                    disabled={current_loading}
                 >
                     <div className="col-md-12 text-right">
                         <hr />
@@ -83,4 +85,4 @@ const EditContract = ({ work = {}, infoDefault = {}, onClose = null, onSave = nu
     )
 }
 
-export default EditContract;
+export default EditInfo;
