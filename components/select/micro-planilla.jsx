@@ -168,7 +168,7 @@ const SelectHourhand = ({ id = "id", name, value, onChange, refresh = false, dis
     />
 }
 
-const SelectWorkToContract = ({ id = "id", workId, name, value, onChange, refresh = false, disabled = false, displayText = null }) => {
+const SelectWorkToContract = ({ id = "id", workId, name, value, onChange, onReady, refresh = false, disabled = false, displayText = null }) => {
     return <SelectBase 
         api={microPlanilla}
         url={`works/${workId}/contracts`}
@@ -184,6 +184,7 @@ const SelectWorkToContract = ({ id = "id", workId, name, value, onChange, refres
         refresh={refresh}
         execute={true}
         disabled={disabled}
+        onReady={onReady}
     />
 }
 

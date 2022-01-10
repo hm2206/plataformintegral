@@ -38,6 +38,7 @@ const Infos = ({ work }) => {
   const [currentInfo, setCurrentInfo] = useState({})
   const [option, setOption] = useState();
   const [currentContract, setCurrentContract] = useState({})
+  const [isRefresh, setIsRefresh] = useState(false);
   
   const handleInputInfo = ({ options = [], value }) => {
     const current = options.find(c => c.value == value);
@@ -60,6 +61,11 @@ const Infos = ({ work }) => {
     setCurrentLoading(false);
   }
 
+  const selectDefault = (options = []) => {
+    const object = options[1] || {};
+    setCurrentContract(object?.obj || {});
+  }
+
   const handleEdit = (obj) => {
     setOption('EDIT')
     setCurrentInfo(obj);
@@ -69,6 +75,14 @@ const Infos = ({ work }) => {
     if (currentContract?.id) getInfos();
   }, [currentContract]);
 
+  useEffect(() => {
+    if (isRefresh) getInfos();
+  }, [isRefresh])
+
+  useEffect(() => {
+    if (isRefresh) setIsRefresh(false);
+  }, [isRefresh]);
+
   // render
   return (
     <div className="row">
@@ -76,6 +90,7 @@ const Infos = ({ work }) => {
         <h5 className="ml-3">Listado configuración de pago</h5>
         <div className="col-md-6 col-lg-4 col-12 col-sm-12">
           <SelectWorkToContract
+            onReady={selectDefault}
             workId={work.id}
             onChange={(e, obj) => handleInputInfo(obj)}
             value={`${currentContract?.id || ''}`}
@@ -123,6 +138,10 @@ const Infos = ({ work }) => {
         <CreateInfo 
           contract={currentContract}
           onClose={() => setOption()}
+          onSave={() => {
+            setIsRefresh(true)
+            setOption()
+          }}
           work={work}
         />
       </Show>
@@ -133,7 +152,7 @@ const Infos = ({ work }) => {
           onClose={() => setOption()}
           work={work}
           contract={currentContract}
-          // onSave={handleSave}
+          onSave={() => setIsRefresh(true)}
         />
       </Show>
     </div>

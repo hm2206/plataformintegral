@@ -171,7 +171,7 @@ const ConfigAportation = ({ info = {}, onClose = null }) => {
   return (
     <Modal show={true}
       isClose={onClose}
-      md="5"
+      md="6 col-sm-8"
       height="50%"
       disabled={current_loading}
       titulo={<span><i className="fas fa-cogs"></i> Configuración de Aportación Empleador</span>}

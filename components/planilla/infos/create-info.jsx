@@ -6,7 +6,7 @@ import { Confirm } from '../../../services/utils';
 import { microPlanilla } from '../../../services/apis';
 import Swal from 'sweetalert2'
 
-const CreateInfo = ({ work = {}, contract = {}, onClose = null, onSave = null }) => {
+const CreateInfo = ({ contract = {}, onClose = null, onSave = null }) => {
 
     const [form, setForm] = useState({
         isEmail: true,
