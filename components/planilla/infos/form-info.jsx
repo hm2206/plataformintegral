@@ -134,6 +134,17 @@ const FormInfo = ({ isEdit = false, contract = {}, form = {}, errors = {}, disab
           </Form.Field>
         </div>
 
+        <Show condicion={isEdit}>
+          <div className='col-md-12 text-right mb-3'>
+            <Form.Field>
+              <label>Estado</label>
+              <div className={`badge badge-${form?.state ? 'success' : 'danger'}`}>
+                {form?.state ? 'Activo' : 'Terminado'}
+              </div>
+            </Form.Field>
+          </div>
+        </Show>
+
         {children}
       </div>
     </Form>

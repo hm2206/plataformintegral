@@ -115,6 +115,9 @@ export const unujobs = {
     put: async (path, body = { }, config = { }, ctx) => {
         return axios.put(`${url.MICRO_PLANILLA}/${path}`, body, await ConfigHeaders(ctx, config));
     },
+    delete: async (path, body = { }, config = { }, ctx) => {
+        return axios.delete(`${url.MICRO_PLANILLA}/${path}`, await ConfigHeaders(ctx, config));
+    },
     fetch: async (path, config = { }, ctx) => {
         return fetch(`${url.MICRO_PLANILLA}/${path}`, await ConfigHeaders(ctx, config));
     },

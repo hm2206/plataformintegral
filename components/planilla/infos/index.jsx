@@ -93,6 +93,10 @@ const Infos = ({ work }) => {
         </div>
 
         <div className='col-md-6 col-lg-8 col-sm-12 mb-2'>
+          <div>
+            Lista de pagos en planilla
+            <hr />
+          </div>
           {current_infos?.map((i, indexI) => 
             <div className="mb-3" key={`info-list-${i.id}-${indexI}`}>
               <ItemInfo info={i} 

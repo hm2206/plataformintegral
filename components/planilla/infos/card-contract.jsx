@@ -119,11 +119,9 @@ const CardContract = ({ contract = {} }) => {
       <div className="col-md-12 mb-3 text-right">
         <Form.Field>
           <label htmlFor="">Estado</label>
-          <Checkbox name="state" 
-            toggle
-            checked={contract.state}
-            readOnly
-          />
+          <div className={`badge badge-${contract?.state ? 'success' : 'danger'}`}>
+            {contract?.state ? 'Activo' : 'Terminado'}
+          </div>
         </Form.Field>
       </div>
     </>

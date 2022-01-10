@@ -172,7 +172,7 @@ const SelectWorkToContract = ({ id = "id", workId, name, value, onChange, refres
     return <SelectBase 
         api={microPlanilla}
         url={`works/${workId}/contracts`}
-        id={`select-worl-contracts-${id}-${name}`}
+        id={`select-work-contracts-${id}-${name}`}
         value={id}
         text="resolution"
         obj="contracts"
@@ -181,6 +181,63 @@ const SelectWorkToContract = ({ id = "id", workId, name, value, onChange, refres
         valueChange={value || ""}
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
         placeholder="Seleccionar Contrato"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
+const SelectTypeRemuneration = ({ id = "id", name, value, onChange, refresh = false, disabled = false, displayText = null }) => {
+    return <SelectBase 
+        api={microPlanilla}
+        url={`typeRemunerations`}
+        id={`select-type-remunerations-${id}-${name}`}
+        value={id}
+        text="name"
+        obj="typeRemunerations"
+        name={name}
+        displayText={displayText}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Tip. Remuneración"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
+const SelectTypeDiscount = ({ id = "id", name, value, onChange, refresh = false, disabled = false, displayText = null }) => {
+    return <SelectBase 
+        api={microPlanilla}
+        url={`typeDiscounts`}
+        id={`select-type-discount-${id}-${name}`}
+        value={id}
+        text="description"
+        obj="typeDiscounts"
+        name={name}
+        displayText={(data) => (`${data.code}.- ${data.description}`)}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Tip. Descuentos"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
+const SelectTypeAportation = ({ id = "id", name, value, onChange, refresh = false, disabled = false, displayText = null }) => {
+    return <SelectBase 
+        api={microPlanilla}
+        url={`typeAportations`}
+        id={`select-type-aportation-${id}-${name}`}
+        value={id}
+        text="name"
+        obj="typeAportations"
+        name={name}
+        displayText={(data) => (`${data.code}.- ${data.name}`)}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Tip. Aportacion"
         refresh={refresh}
         execute={true}
         disabled={disabled}
@@ -198,4 +255,7 @@ export {
     SelectWorkToContract,
     SelectPlanilla,
     SelectPim,
+    SelectTypeRemuneration,
+    SelectTypeDiscount,
+    SelectTypeAportation,
 };
