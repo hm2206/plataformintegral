@@ -6,9 +6,10 @@ import {
   SelectProfile,
   SelectHourhand
 } from '../../select/micro-planilla';
+import Show from '../../show';
 import { pap } from '../../../services/storage.json';
 
-const FormInfo = ({ form = {}, errors = {}, disabled = false, onChange = null, children = null }) => {
+const FormInfo = ({ isEdit = false, form = {}, errors = {}, disabled = false, onChange = null, children = null }) => {
 
   const handleInput = (e, { name, value }) => {
     if (typeof onChange == 'function') onChange(e, { name, value });
@@ -198,17 +199,18 @@ const FormInfo = ({ form = {}, errors = {}, disabled = false, onChange = null, c
           </Form.Field>
         </div>
 
-        <div className="col-md-12 mb-3 text-right">
-          <Form.Field error={errors && errors.state && errors.state[0] ? true : false}>
-            <label htmlFor="">Estado <b className="text-red">*</b></label>
-            <Checkbox name="state" 
+        <Show condicion={isEdit}>
+          <div className="col-md-12 mb-3 text-right">
+            <Form.Field>
+              <label htmlFor="">Estado</label>
+              <Checkbox name="state" 
                 toggle
                 checked={form.state}
-                onChange={(e, obj) => handleInput(e, { name: 'state', value: obj.checked })}
-                disabled={disabled}
-            />
-          </Form.Field>
-        </div>
+                disabled
+              />
+            </Form.Field>
+          </div>
+        </Show>
 
         {children}
       </div>

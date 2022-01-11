@@ -63,9 +63,10 @@ const EditContract = ({ work = {}, infoDefault = {}, onClose = null, onSave = nu
             titulo={<span><i className="fas fa-file-alt"></i> Editar Contrato</span>}
         >
             <div className="card-body">
-                <FormInfo form={form} 
+                <FormInfo form={form}
                     errors={errors}
                     onChange={handleInput}
+                    isEdit={true}
                 >
                     <div className="col-md-12 text-right">
                         <hr />
