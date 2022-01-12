@@ -7,14 +7,14 @@ import { Form, Button, Pagination } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import { Confirm } from '../../../services/utils';
-import { unujobs } from '../../../services/apis';
+import { microPlanilla } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext';
 
 
-const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
+const CronogramaIndex = ({ pathname, query, cronogramas }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -108,7 +108,7 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
             >
                 <Datatable
                     isFilter={false}
-                    headers={ ["#ID", "Planilla", "Sede", "F. Creado", "N° Trabajadores", "Estado"]}
+                    headers={ ["#ID", "Planilla", "F. Creado", "N° Trabajadores", "Estado"]}
                     index={
                         [
                             {
@@ -116,7 +116,7 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
                                 type: "text"
                             }, 
                             {
-                                key: "planilla.nombre",
+                                key: "planilla.name",
                                 type: "text",
                                 children: [
                                     {
@@ -127,25 +127,20 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
                                 ]
                             }, 
                             {
-                                key: "sede.descripcion",
-                                type: "text"
-                            }, 
-                            {
-                                key: "created_at",
+                                key: "createdAt",
                                 type: "date"
                             },
                             {
-                                key: "historial_count",
+                                key: "historialsCount",
                                 type: "icon",
                                 bg: 'dark'
                             },
                             {
-                                key: "estado",
+                                key: "state",
                                 type: "option",
                                 data: [
                                     { key: 1, text: "En Curso", className: "badge-success" },
-                                    { key: 0, text: "Cerrada", className: "badge-danger" },
-                                    { key: 2, text: "Anulada", className: "badge-red" }
+                                    { key: 0, text: "Cerrada", className: "badge-danger" }
                                 ]
                             }
                         ]
@@ -153,21 +148,11 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
                     options={
                         [
                             {
-                                key: "error",
-                                icon: "fas fa-bug",
-                                className: "bg-red",
-                                title: "Corregir errores",
-                                rules: {
-                                    key: "error",
-                                    value: 1
-                                }
-                            },
-                            {
                                 key: "edit",
                                 icon: "fas fa-pencil-alt",
                                 title: "Editar cronograma",
                                 rules: {
-                                    key: "estado",
+                                    key: "state",
                                     value: 1
                                 }
                             }, 
@@ -175,39 +160,14 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
                                 key: "informacion",
                                 icon: "fas fa-info",
                                 title: "Visualizar cronograma detalladamente",
-                                rules: {
-                                    key: "estado",
-                                    value: 1,
-                                    or: {
-                                        key: "error",
-                                        value: 0
-                                    }
-                                }
-                            }, 
-                            {
-                                key: "informacion",
-                                icon: "fas fa-info",
-                                title: "Visualizar cronograma detalladamente",
-                                rules: {
-                                    key: "estado",
-                                    value: 0,
-                                    or: {
-                                        key: "error",
-                                        value: 0
-                                    }
-                                }
                             },
                             {
                                 key: "add",
                                 icon: "fas fa-user-plus",
                                 title: "Agregar trabajadores al cronograma",
                                 rules: {
-                                    key: "estado",
-                                    value: 1,
-                                    or: {
-                                        key: "error",
-                                        value: 0
-                                    }
+                                    key: "state",
+                                    value: 1
                                 }
                             }, 
                             {
@@ -215,12 +175,8 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
                                 icon: "fas fa-user-minus",
                                 title: "Eliminar trabajadores al cronograma",
                                 rules: {
-                                    key: "estado",
-                                    value: 1,
-                                    or: {
-                                        key: "error",
-                                        value: 0
-                                    }
+                                    key: "state",
+                                    value: 1
                                 }
                             }, 
                             {
@@ -228,7 +184,7 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
                                 icon: "fas fa-paper-plane",
                                 title: "Enviar correo",
                                 rules: {
-                                    key: "estado",
+                                    key: "state",
                                     value: 0
                                 }
                             },
@@ -240,7 +196,7 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
                         ]
                     }
                     getOption={getOption}
-                    data={cronogramas.data || []}>
+                    data={cronogramas.items || []}>
                     <Form className="mb-3">
                         <div className="row">
                             <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
@@ -323,9 +279,9 @@ CronogramaIndex.getInitialProps = async (ctx) => {
     query.mes = typeof query.mes != 'undefined' ? query.mes : fecha.getMonth() + 1;
     // obtener datos
     let query_string = `page=${query.page}&year=${query.year}&mes=${query.mes}`;
-    let { success, cronogramas } = await unujobs.get(`cronograma?${query_string}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, cronogramas: {} }))
+    let { success, cronogramas } = await microPlanilla.get(`cronogramas?${query_string}`, {}, ctx)
+        .then(res => ({ success: true, cronogramas: res.data }))
+        .catch(() => ({ success: false, cronogramas: {} }));
     // response
     return { pathname, query, success, cronogramas }; 
 }
