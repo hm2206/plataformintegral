@@ -1,0 +1,357 @@
+{
+    "filters": [
+        { "key": "meta", "placeholder": "Select. Meta", "name": "meta_id", "resource": "metas", "index": ["id", "id", "metaID"] },
+        { "key": "cargo", "placeholder": "Select. Cargo", "name": "cargo_id", "resource": "cargos", "index": ["id", "id", "descripcion"] },
+        { "key": "categoria", "placeholder": "Select. categoria", "name": "type_categoria_id", "resource": "type_categorias", "index": ["id", "id", "descripcion"] },
+        { "key": "type_categoria", "placeholder": "Select Tip. Categoría", "name": "type_categoria_id", "resource": "categorias", "index": ["id", "id", "descripcion"] },
+        { "key": "afp", "placeholder": "Select. AFP", "name": "afp_id", "resource": "afps", "index": ["afp_id", "afp_id", "afp"] },
+        { "key": "pay", "placeholder": "Pago en Cheque", "name": "pago_id", "resource": "pagos", "index": ["key", "value", "text"] },
+        { "key": "type_remuneracion", "placeholder": "Select Tip. Remuneración", "name": "type_remuneracion_id", "resource": "type_remuneraciones", "index": ["key", "id", "alias"] },
+        { "key": "type_descuento", "placeholder": "Select Tip. Descuento", "name": "type_descuento_id", "resource": "type_descuentos", "index": ["key", "id", "descripcion"] },
+        { "key": "type_detalle", "placeholder": "Select Tip. Detalle", "name": "type_detalle_id", "resource": "type_detalles", "index": ["key", "id", "descripcion"] },
+        { "key": "type_aportacion", "placeholder": "Select Tip. Aportación", "name": "type_aportacion_id", "resource": "type_aportaciones", "index": ["key", "id", "descripcion"] },
+        { "key": "negativo", "placeholder": "Select Condicion", "name": "negativo", "resource": "negativos", "index": ["key", "value", "text"] },
+        { "key": "neto", "placeholder": "Select Condicion", "name": "neto", "resource": "netos", "index": ["key", "value", "text"] }
+    ],
+    "data": [
+        {
+            "key": "general",
+            "value": "general",
+            "text": "Reporte General",
+            "icon": "/img/report-base.png",
+            "buttons": [
+                { 
+                    "key": "view", 
+                    "text": "Generar PDF", 
+                    "icon": "fas fa-file-pdf", 
+                    "color": "red", 
+                    "url": "pdf/general/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "link"
+                }
+            ],
+            "filters": ["meta"]
+        },
+        {
+            "key": "planilla",
+            "value": "planilla",
+            "text": "Reporte de Planilla",
+            "icon": "/img/report-planilla.png",
+            "buttons": [
+                { 
+                    "key": "render", 
+                    "text": "Visualizar", 
+                    "icon": "fas fa-file-pdf", 
+                    "color": "red", 
+                    "url": "pdf/planilla/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                }
+            ],
+            "filters": ["meta", "cargo"]
+        },
+        {
+            "key": "boleta",
+            "value": "boleta",
+            "text": "Reporte de Boleta",
+            "icon": "/img/report-boleta.png",
+            "buttons": [
+                { 
+                    "key": "bolete-normal", 
+                    "text": "Vizualizar", 
+                    "icon": "fas fa-file", 
+                    "color": "red", 
+                    "url": "pdf/boleta/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                },
+                { 
+                    "key": "boleta-airhsp", 
+                    "text": "Boleta AIRHSP", 
+                    "icon": "fas fa-file-pdf", 
+                    "color": "red", 
+                    "url": "pdf/boleta_airhsp/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "link"
+                }
+            ],
+            "filters": ["meta", "cargo"]
+        },
+        {
+            "key": "pago",
+            "value": "pago",
+            "text": "Reporte Medio de Pago",
+            "icon": "/img/report-simple.png",
+            "buttons": [
+                { 
+                    "key": "render", 
+                    "text": "Visualizar", 
+                    "icon": "fas fa-file-pdf", 
+                    "color": "red", 
+                    "url": "pdf/pago/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                },
+                { 
+                    "key": "render", 
+                    "text": "txt", 
+                    "icon": "fas fa-download", 
+                    "color": "black", 
+                    "url": "pdf/pago/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "body": [
+                        { "key": "format", "value": "txt" }
+                    ],
+                    "action": "download",
+                    "head": {
+                        "type": "text/txt"
+                    }
+                },
+                { 
+                    "key": "render", 
+                    "text": "csv", 
+                    "icon": "fas fa-download", 
+                    "color": "green", 
+                    "url": "pdf/pago/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "body": [
+                        { "key": "format", "value": "csv" }
+                    ],
+                    "action": "download",
+                    "head": {
+                        "type": "text/csv"
+                    }
+                }
+            ],
+            "filters": ["pay", "type_categoria"]
+        },
+        {
+            "key": "afp",
+            "value": "afp",
+            "text": "Reporte de AFP y ONP",
+            "icon": "/img/report-simple.png",
+            "buttons": [
+                { 
+                    "key": "render", 
+                    "text": "Visualizar", 
+                    "icon": "fas fa-file-pdf", 
+                    "color": "red", 
+                    "url": "pdf/afp/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                }
+            ],
+            "filters": ["afp"]
+        },
+        {
+            "key": "remuneracion",
+            "value": "remuneracion",
+            "text": "Reporte de Remuneraciones",
+            "icon": "/img/report-simple.png",
+            "buttons": [
+                { 
+                    "key": "render", 
+                    "text": "Visualizar", 
+                    "icon": "fas fa-file-pdf", 
+                    "color": "red", 
+                    "url": "pdf/remuneracion/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                }
+            ],
+            "filters": ["type_remuneracion"]
+        },
+        {
+            "key": "descuento",
+            "value": "descuento",
+            "text": "Reporte de Descuentos",
+            "icon": "/img/report-simple.png",
+            "buttons": [
+                { 
+                    "key": "render", 
+                    "text": "Visualizar", 
+                    "icon": "fas fa-file-file", 
+                    "color": "red", 
+                    "url": "pdf/descuento/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                }
+            ],
+            "filters": ["type_descuento"]
+        },
+        {
+            "key": "obligacion",
+            "value": "obligacion",
+            "text": "Reporte de Obligaciones Judiciales",
+            "icon": "/img/report-simple.png",
+            "buttons": [
+                { 
+                    "key": "render", 
+                    "text": "Lista", 
+                    "icon": "fas fa-file-pdf", 
+                    "color": "red", 
+                    "url": "pdf/judicial/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                },
+                { 
+                    "key": "render", 
+                    "text": "Pago", 
+                    "icon": "fas fa-file-pdf", 
+                    "color": "red", 
+                    "url": "pdf/judicial/{cronograma_id}/pago", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                },
+                { 
+                    "key": "render", 
+                    "text": "txt", 
+                    "icon": "fas fa-download", 
+                    "color": "black", 
+                    "url": "pdf/judicial/{cronograma_id}/pago", 
+                    "params": ["cronograma_id"],
+                    "body": [
+                        { "key": "format", "value": "txt" }
+                    ],
+                    "action": "download",
+                    "head": {
+                        "type": "text/plain"
+                    }
+                }
+            ],
+            "filters": ["pay", "type_categoria"]
+        },
+        {
+            "key": "detallado",
+            "value": "detallado",
+            "text": "Reporte de Descuentos Detallados",
+            "icon": "/img/report-simple.png",
+            "buttons": [
+                { 
+                    "key": "render", 
+                    "text": "Visualizar", 
+                    "icon": "fas fa-file-file", 
+                    "color": "red", 
+                    "url": "pdf/detalle/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                }
+            ],
+            "filters": ["type_detalle"]
+        },
+        {
+            "key": "aportacion",
+            "value": "aportacion",
+            "text": "Reporte de Aportacion al Empleador",
+            "icon": "/img/report-simple.png",
+            "buttons": [
+                { 
+                    "key": "render", 
+                    "text": "Visualizar", 
+                    "icon": "fas fa-file-file", 
+                    "color": "red", 
+                    "url": "pdf/aportacion/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                }
+            ],
+            "filters": ["type_aportacion"]
+        },
+        {
+            "key": "personal",
+            "value": "personal",
+            "text": "Reporte de Personal",
+            "icon": "/img/report-simple.png",
+            "buttons": [
+                { 
+                    "key": "render", 
+                    "text": "Visualizar", 
+                    "icon": "fas fa-file-alt", 
+                    "color": "red", 
+                    "url": "pdf/personal/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "body": [
+                        { "key": "format", "value": "html" }
+                    ],
+                    "action": "blob",
+                    "head": {
+                        "type": "text/html"
+                    }
+                },
+                { 
+                    "key": "render", 
+                    "text": "txt", 
+                    "icon": "fas fa-download", 
+                    "color": "black", 
+                    "url": "pdf/personal/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "body": [
+                        { "key": "format", "value": "txt" }
+                    ],
+                    "action": "download",
+                    "head": {
+                        "type": "text/plain"
+                    }
+                }
+            ],
+            "filters": ["negativo", "cargo", "categoria"]
+        },
+        {
+            "key": "ejecucion",
+            "value": "ejecucion",
+            "text": "Reporte de Ejecucion de Planilla",
+            "icon": "/img/report-simple.png",
+            "buttons": [
+                { 
+                    "key": "view", 
+                    "text": "Generar PDF", 
+                    "icon": "fas fa-file-alt", 
+                    "color": "red", 
+                    "url": "pdf/ejecucion/{cronograma_id}", 
+                    "params": ["cronograma_id"],
+                    "action": "link"
+                },
+                { 
+                    "key": "view", 
+                    "text": "Generar pago PDF", 
+                    "icon": "fas fa-file-alt", 
+                    "color": "red", 
+                    "url": "pdf/ejecucion/{cronograma_id}/pago", 
+                    "params": ["cronograma_id"],
+                    "action": "link"
+                }
+            ],
+            "filters": ["neto"]
+        }
+    ]
+}
