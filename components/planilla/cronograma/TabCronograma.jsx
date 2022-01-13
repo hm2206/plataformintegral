@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 import { Tab } from 'semantic-ui-react'
 import Work from './work';
-// import Afectacion from './afectacion';
+import Afectacion from './afectacion';
 // import Remuneracion from './remuneracion';
 // import Descuento from './descuento.jsx';
 // import Aportacion from './aportacion';
@@ -13,15 +13,15 @@ import Work from './work';
 
 const TabCronograma = (props) => {
 
-    const { edit, active, block, setActive, loading, setIsEditable, cronograma } = useContext(CronogramaContext);
+  const { edit, active, block, setActive, loading, setIsEditable, cronograma } = useContext(CronogramaContext);
 
-    const onTabChange = (e, { activeIndex }) => {
-        setActive(activeIndex);
-    }
+  const onTabChange = (e, { activeIndex }) => {
+    setActive(activeIndex);
+  }
 
-    let styles = {
-        border: '0px'
-    }
+  let styles = {
+    border: '0px'
+  }
 
   const panes = [
     { 
@@ -36,7 +36,7 @@ const TabCronograma = (props) => {
       menuItem: {key: 'afectacion', icon: 'cogs', content: 'Config. Trab.', disabled: edit || loading || block },
       render: () => (
         <Tab.Pane style={styles}>
-            {/* <Afectacion/> */}
+          <Afectacion/>
         </Tab.Pane>
       )
     },

@@ -119,101 +119,101 @@ const FooterCronograma = () => {
                     </Show>
 
                     <Show condicion={!edit && total}>
-                            <div className="col-md-12 mb-1 col-sm-12 col-12">
-                                <div className="row">
-                                    <div className="col-md-4 col-ms-4 col-4">
-                                        <Button  
-                                            color="black"
-                                            disabled={loading || edit || block}
-                                            onClick={previus}
+                        <div className="col-md-12 mb-1 col-sm-12 col-12">
+                            <div className="row">
+                                <div className="col-md-4 col-ms-4 col-4">
+                                    <Button  
+                                        color="black"
+                                        disabled={loading || edit || block}
+                                        onClick={previus}
+                                        fluid
+                                    >
+                                        <Icon name="triangle left"/>
+                                    </Button>
+                                </div>
+
+                                <Show condicion={total}>
+                                    <div className="col-md-4 col-4 mb-1">
+                                        <Button color="black"
                                             fluid
+                                            disabled={loading || block}
                                         >
-                                            <Icon name="triangle left"/>
+                                            {page} de {total}
                                         </Button>
                                     </div>
+                                </Show>
 
-                                    <Show condicion={total}>
-                                        <div className="col-md-4 col-4 mb-1">
-                                            <Button color="black"
-                                                fluid
-                                                disabled={loading || block}
-                                            >
-                                                {page} de {total}
-                                            </Button>
-                                        </div>
-                                    </Show>
+                                <div className="col-md-4 col-4 col-sm-4">
+                                    <Button 
+                                        fluid
+                                        color="black"
+                                        disabled={loading || edit || block}
+                                        onClick={next}
+                                    >
+                                        <Icon name="triangle right"/>
+                                    </Button>    
+                                </div>      
+                            </div>    
+                        </div>
+                    </Show>
+                </div>
+            </div>
 
-                                    <div className="col-md-4 col-4 col-sm-4">
-                                        <Button 
-                                            fluid
-                                            color="black"
-                                            disabled={loading || edit || block}
-                                            onClick={next}
-                                        >
-                                            <Icon name="triangle right"/>
-                                        </Button>    
-                                    </div>      
-                                </div>    
+            <Show condicion={cronograma.state}>                     
+                <div className="col-md-3 col-lg-4 col-sm-5 col-12">
+                    <div className="row justify-content-end">
+                        <Show condicion={is_updatable && edit}>
+                            <div className="col-md-6 mb-1 col-6">
+                                <Button
+                                    fluid
+                                    color="blue"
+                                    loading={send}
+                                    disabled={loading || !edit || block || send}
+                                    onClick={async (e) => await handleConfirm()}
+                                >
+                                    <i className="fas fa-save mr-1"></i>
+                                </Button>    
+                            </div>                
+                        </Show>
+
+                        <Show condicion={!edit}>
+                            <div className="col-md-6 mb-1 col-6">
+                                <Show condicion={!loading}
+                                    predeterminado={<PlaceholderButton/>}
+                                >
+                                    <Button
+                                        color="red"
+                                        basic
+                                        fluid
+                                        disabled={loading || block}
+                                        onClick={e => setOption('cerrar')}
+                                    >
+                                        <i className="fas fa-lock mr-1"></i>
+                                    </Button>   
+                                </Show> 
+                            </div>                
+                        </Show>
+
+                        <Show condicion={!loading && total && cronograma.state}
+                            predeterminado={<div className="col-md-6 col-6 col-sm-12"><PlaceholderButton/></div>}
+                        >
+                            <div className={`col-md-6 ${edit ? 'col-6' : 'col-6 col-sm-12'}`}>
+                                <Show condicion={is_editable}
+                                    predeterminado={<span></span>}
+                                >
+                                    <Button color={edit ? 'red' : 'teal'}
+                                        disabled={loading || block || send}
+                                        onClick={(e) => edit ? setCancel(true) : setEdit(true)}
+                                        fluid
+                                    >
+                                        <i title={edit ? 'Cancelar' : 'Editar'} className={edit ? 'fas fa-times mr-1' : 'fas fa-pencil-alt mr-1'}></i> 
+                                    </Button>
+                                </Show>
                             </div>
                         </Show>
                     </div>
                 </div>
-
-                <Show condicion={cronograma.estado}>                     
-                    <div className="col-md-3 col-lg-4 col-sm-5 col-12">
-                        <div className="row justify-content-end">
-                            <Show condicion={is_updatable && edit}>
-                                <div className="col-md-6 mb-1 col-6">
-                                    <Button
-                                        fluid
-                                        color="blue"
-                                        loading={send}
-                                        disabled={loading || !edit || block || send}
-                                        onClick={async (e) => await handleConfirm()}
-                                    >
-                                        <i className="fas fa-save mr-1"></i>
-                                    </Button>    
-                                </div>                
-                            </Show>
-
-                            <Show condicion={!edit}>
-                                <div className="col-md-6 mb-1 col-6">
-                                    <Show condicion={!loading}
-                                        predeterminado={<PlaceholderButton/>}
-                                    >
-                                        <Button
-                                            color="red"
-                                            basic
-                                            fluid
-                                            disabled={loading || block}
-                                            onClick={e => setOption('cerrar')}
-                                        >
-                                            <i className="fas fa-lock mr-1"></i>
-                                        </Button>   
-                                    </Show> 
-                                </div>                
-                            </Show>
-
-                            <Show condicion={!loading && total && cronograma.state}
-                                predeterminado={<div className="col-md-6 col-6 col-sm-12"><PlaceholderButton/></div>}
-                            >
-                                <div className={`col-md-6 ${edit ? 'col-6' : 'col-6 col-sm-12'}`}>
-                                    <Show condicion={is_editable}
-                                        predeterminado={<span></span>}
-                                    >
-                                        <Button color={edit ? 'red' : 'teal'}
-                                            disabled={loading || block || send}
-                                            onClick={(e) => edit ? setCancel(true) : setEdit(true)}
-                                            fluid
-                                        >
-                                            <i title={edit ? 'Cancelar' : 'Editar'} className={edit ? 'fas fa-times mr-1' : 'fas fa-pencil-alt mr-1'}></i> 
-                                        </Button>
-                                    </Show>
-                                </div>
-                            </Show>
-                        </div>
-                    </div>
-                </Show>
+            </Show>
 
             <Show condicion={total && !cronograma.state}>
                 <div className="col-md-2 mb-1 col-6">
