@@ -61,7 +61,7 @@ const SelectBase = ({
     onReady, defaultDatos = [], execute, refresh, url, api, 
     obj, id, value, text, name, onChange, valueChange, onDefaultValue = null,
     displayText = null, onData = null, placeholder = 'Seleccionar', 
-    headers = { 'ContentType': 'application/json' },
+    headers = { 'ContentType': 'application/json' }, active = false,
     disabled = false, error = false, defaultValue = null }) => {
 
     const [datos, setDatos] = useState([])
@@ -173,18 +173,19 @@ const SelectBase = ({
             </div>
         :   loading 
             ?   <Skeleton height="37px"/>
-            :   <Select fluid
-                    wrapSelection={false}
-                    search
-                    disabled={loading || disabled}
-                    placeholder={loading ? 'Cargando...' : placeholder}
-                    options={defaultDatos.length ? defaultDatos : datos}
-                    name={name}
-                    onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-                    value={`${valueChange || ""}`}
-                    compact
-                    error={error}
-                />
+            : <Select fluid
+                className={active ? 'input-active' : ''}
+                wrapSelection={false}
+                search
+                disabled={loading || disabled}
+                placeholder={loading ? 'Cargando...' : placeholder}
+                options={defaultDatos.length ? defaultDatos : datos}
+                name={name}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                value={`${valueChange || ""}`}
+                compact
+                error={error}
+            />
 }
 
 

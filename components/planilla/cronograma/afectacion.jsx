@@ -1,16 +1,17 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { unujobs, microPlanilla } from '../../../services/apis';
 import { Form, Checkbox } from 'semantic-ui-react';
-import Show from '../../show';
+import { SelectPim } from '../../select/micro-planilla';
 import Swal from 'sweetalert2';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../../contexts/AppContext';
 import Skeleton from 'react-loading-skeleton';
 import { useMemo } from 'react';
+import Show from '../../show';
 
 const PlaceHolderInput = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
-const InputCustom = ({ type = 'text', title, value, name, errors = {}, md = "3", readOnly = false, onChange = null, children = null }) => {
+const InputCustom = ({ type = 'text', title, value, name, errors = {}, md = "3", readOnly = false, onChange = null, children = null, loading = false }) => {
   const displayError = (text) => {
     return errors?.[text]?.[0] || '';
   }
@@ -20,28 +21,33 @@ const InputCustom = ({ type = 'text', title, value, name, errors = {}, md = "3",
       error={displayError(name) ? true : false}
     >
       <b>{title}</b>
-      {children
-        ? children :
-        <input type={type}
-          className={readOnly ? null : 'input-active'}
-          name={name}
-          readOnly={readOnly}
-          onChange={({ target }) => typeof onChange == 'function' ? onChange(target) : null}
-          value={value}
-        />
-      }
-      <label>{displayError(name)}</label>
+      <Show condicion={!loading}
+        predeterminado={<PlaceHolderInput/>}
+      >
+        {children
+          ? children :
+          <input type={type}
+            className={readOnly ? null : 'input-active'}
+            name={name}
+            readOnly={readOnly}
+            onChange={({ target }) => typeof onChange == 'function' ? onChange(target) : null}
+            value={value || ''}
+          />
+        }
+        <label>{displayError(name)}</label>
+      </Show>
     </Form.Field>
   )
 }
 
-const CheckboxCustom = ({ title, checked, name, errors, readOnly, onChange = null, md = "3" }) => {
+const CheckboxCustom = ({ title, checked, name, errors, readOnly, onChange = null, md = "3", loading = false }) => {
 
   return (
     <InputCustom
       title={title}
       errors={errors}
       md={md}
+      loading={loading}
     >
       <div className='mt-2'>
         <Checkbox toggle
@@ -58,16 +64,18 @@ const CheckboxCustom = ({ title, checked, name, errors, readOnly, onChange = nul
   )
 }
 
-const TexareaCustom = ({ title, value, name, errors, readOnly, onChange = null, md = "9" }) => {
+const TexareaCustom = ({ title, value, name, errors, readOnly, onChange = null, md = "9", loading = false }) => {
   return (
     <InputCustom
       title={title}
       errors={errors}
       md={md}
+      loading={loading}
     >
       <textarea rows={4}
+        className={readOnly ? '' : 'input-active'}
         name={name}
-        value={value}
+        value={value || ''}
         readOnly={readOnly}
         onChange={({ target }) => typeof onChange == 'function' ? onChange(target) : null}
       />
@@ -101,10 +109,6 @@ const Afectacion = () => {
     return `${currentPim?.code}.- ${currentPim?.meta?.name}`;
   }, [currentPim]);
 
-  const displayPayToDay = useMemo(() => {
-    return `${historial?.days} / ${cronograma?.numberOfDays}`;
-  }, [historial]);
-
   // change inputs
   const handleInput = ({ name, value }) => {
     let newForm = Object.assign({}, historial);
@@ -115,29 +119,42 @@ const Afectacion = () => {
     setErrors(newErrors);
   }
 
+  // change int
+  const handleIntToInput = ({ name, value }) => {
+    if (!value) return handleInput({ name, value });
+    const newValue = parseInt(`${value}`);
+    handleInput({ name, value: newValue });
+  }
+
   // actualizar historial
   const updateHistorial = async () => {
     app_context.setCurrentLoading(true);
-    let form = Object.assign({}, historial);
-    form._method = 'PUT';
-    await unujobs.post(`historial/${historial.id}`, form, { headers: { CronogramaID: historial.cronograma_id } })
+    let payload = Object.assign({}, {});
+    payload.pimId = parseInt(`${historial?.pimId}`);
+    payload.days = parseInt(`${historial?.days}`);
+    payload.bankId = parseInt(`${historial?.bankId}`);
+    payload.numberOfAccount = historial?.numberOfAccount || '';
+    payload.isCheck = historial.isCheck == true;
+    payload.isPay = historial.isPay == true;
+    payload.observation = historial?.observation || '';
+    await microPlanilla.put(`historials/${historial.id}`, payload, { headers: { CronogramaId: historial.cronograma_id } })
       .then(async res => {
+        const newHistorial = res.data;
         app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
+        await Swal.fire({
+          icon: 'success',
+          text: 'Los cambios se guardarón correctamente!'
+        });
         setEdit(false);
         setErrors({});
         setRefresh(true);
       }).catch(err => {
-        try {
-          app_context.setCurrentLoading(false);
-          let { message, errors } = err.response.data;
-          setErrors(errors);
-          Swal.fire({ icon: 'warning', text: 'Datos incorrectos' });
-        } catch (error) {
-          Swal.fire({ icon: 'error', text: err.message });
-        }
+        app_context.setCurrentLoading(false);
+        setErrors(err?.response?.data?.errors || {});
+        Swal.fire({
+          icon: 'error',
+          text: 'No se pudo guardar los datos'
+        });
       });
     setSend(false);
     setBlock(false);
@@ -208,15 +225,15 @@ const Afectacion = () => {
         name="leySocial"
         value={displayAfp}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
         title="N° Cussp"
         name="numberOfCussp"
         value={historial?.numberOfCussp}
-        errors={errors}
-        readOnly={!edit}
-        onChange={handleInput}
+        readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -224,17 +241,16 @@ const Afectacion = () => {
         title="Fecha de Afiliación"
         name="affiliationOfDate"
         value={historial?.affiliationOfDate}
-        errors={errors}
-        readOnly={!edit}
-        onChange={handleInput}
+        readOnly={true}
+        loading={loading}
       />
 
       <CheckboxCustom
         title="Prima Seguro"
         name="isPrimaSeguro"
         checked={historial?.isPrimaSeguro}
-        onChange={handleInput}
-        readOnly={!edit}
+        readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -243,6 +259,7 @@ const Afectacion = () => {
         name="dateOfAdmission"
         value={currentContract?.dateOfAdmission}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -251,24 +268,23 @@ const Afectacion = () => {
         name="terminationDate"
         value={currentContract?.terminationDate}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
         title="N° Autogenerado"
         name="numberOfEssalud"
         value={historial?.numberOfEssalud}
-        errors={errors}
-        readOnly={!edit}
-        onChange={handleInput}
+        readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
         title="Plaza"
         name="plaza"
-        value={historial?.plaza || null}
-        errors={errors}
-        readOnly={!edit}
-        onChange={handleInput}
+        value={historial?.plaza}
+        readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -276,6 +292,7 @@ const Afectacion = () => {
         name="name"
         value={currentTypeCargo?.name}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -283,6 +300,7 @@ const Afectacion = () => {
         name="condition"
         value={currentContract?.condition}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -290,6 +308,7 @@ const Afectacion = () => {
         name="name"
         value={currentContract?.typeCategory?.name}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -297,13 +316,25 @@ const Afectacion = () => {
         name="pim"
         value={displayPim}
         readOnly={true}
-      />
-
+        loading={loading}
+      >
+        {edit
+          ? <SelectPim
+              onChange={(e, obj) => handleIntToInput(obj)}
+              year={cronograma?.year}
+              name="pimId"
+              value={`${historial?.pimId}`}
+              active={true}
+            />
+          : null}
+      </InputCustom>
+      
       <InputCustom
         title="Meta"
         name="meta"
         value={displayMeta}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -312,6 +343,7 @@ const Afectacion = () => {
         name="description"
         value={currentPim?.cargo?.description}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -319,6 +351,7 @@ const Afectacion = () => {
         name="extension"
         value={currentPim?.cargo?.extension}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -327,6 +360,7 @@ const Afectacion = () => {
         name="name"
         value={currentContract?.dependency?.name}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
@@ -334,13 +368,17 @@ const Afectacion = () => {
         name="name"
         value={currentContract?.profile?.name}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
-        title="Dias Lab."
-        name="extension"
-        value={displayPayToDay}
-        readOnly={true}
+        type="number"
+        title={"Días Lab"}
+        name="days"
+        value={historial?.days}
+        readOnly={!edit}
+        onChange={handleInput}
+        loading={loading}
       />
 
       <InputCustom
@@ -348,15 +386,17 @@ const Afectacion = () => {
         name="name"
         value={historial?.bank?.name}
         readOnly={true}
+        loading={loading}
       />
 
       <InputCustom
         md="6"
         title="N° Cuenta"
-        name="numberOrAccount"
-        value={historial?.numberOrAccount || null}
+        name="numberOfAccount"
+        value={historial?.numberOfAccount}
         readOnly={!edit}
         onChange={handleInput}
+        loading={loading}
       />
 
       <CheckboxCustom
@@ -365,6 +405,7 @@ const Afectacion = () => {
         checked={historial?.isCheck}
         onChange={handleInput}
         readOnly={!edit}
+        loading={loading}
       />
 
       <div className="col-12">
@@ -374,9 +415,10 @@ const Afectacion = () => {
               md="12"
               title="Observación"
               name="observation"
-              value={historial?.observation || null}
+              value={historial?.observation}
               readOnly={!edit}
               onChange={handleInput}
+              loading={loading}
             />
           </div>
           <div className="col-md-3">
@@ -387,6 +429,7 @@ const Afectacion = () => {
               checked={historial?.isPay}
               onChange={handleInput}
               readOnly={!edit}
+              loading={loading}
             />
             
             <CheckboxCustom
@@ -395,6 +438,7 @@ const Afectacion = () => {
               name="isPay"
               checked={historial?.info?.isEmail}
               readOnly={true}
+              loading={loading}
             />
           </div>
         </div>

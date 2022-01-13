@@ -21,12 +21,14 @@ const SelectPlanilla = ({ id = "id", principal = true, name, value, onChange, re
     />
 }
 
-const SelectPim = ({ id = "id", year, name, value, onChange, refresh = false, disabled = false }) => {
+const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
+        active={active}
         api={microPlanilla}
         url={`pims?year=${year}`}
         id={`select-pims-${id}-${name}`}
         value={id}
+        defaultDatos={defaultDatos}
         text="name"
         obj="pims"
         name={name}

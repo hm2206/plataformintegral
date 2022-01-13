@@ -212,7 +212,7 @@ const Work = () => {
         </Show>
       </div>
 
-      <div className="col-md-3 mb-3">
+      <div className="col-md-6 mb-3">
         <Show condicion={isHistorial && !loading}
           predeterminado={<PlaceholderInput/>}
         >
