@@ -21,6 +21,43 @@ const SelectPlanilla = ({ id = "id", principal = true, name, value, onChange, re
     />
 }
 
+const SelectMeta = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+        api={microPlanilla}
+        url={`metas`}
+        id={`select-metas-${id}-${name}`}
+        value={id}
+        text="name"
+        obj="metas"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Planillas"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
+const SelectCargo = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+        api={microPlanilla}
+        url={`cargos`}
+        id={`select-cargos-${id}-${name}`}
+        value={id}
+        text="name"
+        obj="cargos"
+        name={name}
+        displayText={(data) => (`${data.name} | ${data.extension}`)}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Partición Presp."
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
 const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
         active={active}
@@ -248,6 +285,8 @@ const SelectTypeAportation = ({ id = "id", name, value, onChange, refresh = fals
 }
 
 export { 
+    SelectMeta,
+    SelectCargo,
     SelectAfp,
     SelectBank,
     SelectTypeCargo,

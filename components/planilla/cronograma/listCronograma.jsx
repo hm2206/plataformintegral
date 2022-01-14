@@ -6,7 +6,6 @@ import { Form, Button, Pagination } from 'semantic-ui-react';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import { Confirm } from '../../../services/utils';
-import { microPlanilla } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../boardSimple';
