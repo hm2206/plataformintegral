@@ -3,7 +3,7 @@ import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContex
 import { Tab } from 'semantic-ui-react'
 import Work from './work';
 import Afectacion from './afectacion';
-// import Remuneracion from './remuneracion';
+import Remuneracion from './remuneracion';
 // import Descuento from './descuento.jsx';
 // import Aportacion from './aportacion';
 // import Obligacion from './obligacion';
@@ -44,7 +44,7 @@ const TabCronograma = (props) => {
       menuItem: {key: 'remuneracion', icon: 'dollar', content: 'Remuneración', disabled: edit || loading || block },
       render: () => (
         <Tab.Pane style={styles}>
-            {/* <Remuneracion/> */}
+          <Remuneracion/>
         </Tab.Pane>
       )
     },
