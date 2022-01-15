@@ -174,7 +174,7 @@ const Remuneracion = () => {
       >
         {remuneraciones.map((obj, index) => 
           <ItemRemuneration
-            key={`remuneracion-${obj.id}`}
+            key={`remuneracion-${obj.id}-${index}`}
             remuneration={obj}
             edit={edit}
           />

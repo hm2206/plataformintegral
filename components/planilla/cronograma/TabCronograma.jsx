@@ -4,7 +4,7 @@ import { Tab } from 'semantic-ui-react'
 import Work from './work';
 import Afectacion from './afectacion';
 import Remuneracion from './remuneracion';
-// import Descuento from './descuento.jsx';
+import Descuento from './descuento.jsx';
 // import Aportacion from './aportacion';
 // import Obligacion from './obligacion';
 // import Sindicato from './sindicato';
@@ -52,7 +52,7 @@ const TabCronograma = (props) => {
       menuItem: {key: 'descuento', icon: 'arrow down cart', content: 'Descuentos', disabled: edit || loading || block },
       render: () => (
         <Tab.Pane style={styles}>
-          {/* <Descuento/> */}
+          <Descuento/>
         </Tab.Pane>
       )
     },
