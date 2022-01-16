@@ -6,9 +6,8 @@ import Afectacion from './afectacion';
 import Remuneracion from './remuneracion';
 import Descuento from './descuento.jsx';
 import Aportacion from './aportacion';
+import Sindicato from './sindicato';
 // import Obligacion from './obligacion';
-// import Sindicato from './sindicato';
-// import Detallado from './detallado';
 // import Discount from './discount';
 
 const TabCronograma = (props) => {
@@ -60,10 +59,10 @@ const TabCronograma = (props) => {
 
   const otherPanes = [
     {
-      menuItem: {key: 'detallado', icon: 'briefcase', content: 'Más descuentos', disabled: edit || loading || block },
+      menuItem: {key: 'sindicato', icon: 'users', content: 'Afiliación', disabled: edit || loading || block },
       render: () => (
         <Tab.Pane style={styles}>
-          {/* <Detallado/> */}
+          <Sindicato/>
         </Tab.Pane>
       )
     },
@@ -72,14 +71,6 @@ const TabCronograma = (props) => {
       render: () => (
         <Tab.Pane style={styles}>
           {/* <Obligacion/> */}
-        </Tab.Pane>
-      )
-    },
-    {
-      menuItem: {key: 'sindicato', icon: 'users', content: 'Afiliación', disabled: edit || loading || block },
-      render: () => (
-        <Tab.Pane style={styles}>
-          {/* <Sindicato/> */}
         </Tab.Pane>
       )
     },
