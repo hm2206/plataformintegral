@@ -7,8 +7,7 @@ import Remuneracion from './remuneracion';
 import Descuento from './descuento.jsx';
 import Aportacion from './aportacion';
 import Sindicato from './sindicato';
-// import Obligacion from './obligacion';
-// import Discount from './discount';
+import Obligacion from './obligacion';
 
 const TabCronograma = (props) => {
 
@@ -70,7 +69,7 @@ const TabCronograma = (props) => {
       menuItem: {key: 'obligacion', icon: 'balance scale', content: 'Obligaciones', disabled: edit || loading || block },
       render: () => (
         <Tab.Pane style={styles}>
-          {/* <Obligacion/> */}
+          <Obligacion/>
         </Tab.Pane>
       )
     },

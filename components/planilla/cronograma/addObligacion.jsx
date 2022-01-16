@@ -1,13 +1,13 @@
 import React, { useContext, useState } from 'react';
-import Modal from '../modal';
+import Modal from '../../modal';
 import { Form, Select, Checkbox, Button } from 'semantic-ui-react';
-import storage from '../../services/storage.json';
-import Show from '../show';
-import AssignPerson from '../authentication/user/assignPerson';
-import { SelectTypeDescuento, SelectBanco } from '../select/cronograma';
-import { AppContext } from '../../contexts/AppContext';
-import { Confirm } from '../../services/utils';
-import { unujobs } from '../../services/apis';
+import storage from '../../../services/storage.json';
+import Show from '../../show';
+import AssignPerson from '../../authentication/user/assignPerson';
+import { SelectTypeDescuento, SelectBanco } from '../../select/cronograma';
+import { AppContext } from '../../../contexts/AppContext';
+import { Confirm } from '../../../services/utils';
+import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import moment from 'moment';
 
