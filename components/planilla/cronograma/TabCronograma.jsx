@@ -5,7 +5,7 @@ import Work from './work';
 import Afectacion from './afectacion';
 import Remuneracion from './remuneracion';
 import Descuento from './descuento.jsx';
-// import Aportacion from './aportacion';
+import Aportacion from './aportacion';
 // import Obligacion from './obligacion';
 // import Sindicato from './sindicato';
 // import Detallado from './detallado';
@@ -87,15 +87,7 @@ const TabCronograma = (props) => {
       menuItem: {key: 'aportacion', icon: 'certificate', content: 'Aporte Empleador', disabled: edit || loading || block },
       render: () => (
         <Tab.Pane style={styles}>
-          {/* <Aportacion/> */}
-        </Tab.Pane>
-      )
-    },
-    {
-      menuItem: {key: 'escalafon', icon: 'calendar', content: 'Escalafón', disabled: edit || loading || block },
-      render: () => (
-        <Tab.Pane style={styles}>
-          {/* <Discount/> */}
+          <Aportacion/>
         </Tab.Pane>
       )
     }
