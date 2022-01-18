@@ -9,12 +9,14 @@ import { Button, Input } from 'semantic-ui-react';
 import { useRouter } from 'next/router';
 import { format } from 'currency-formatter';
 import EditPim from './edit-pim';
+import ChangePim from './change-pim';
 
 const ListPims = ({ pim, pathname, query }) => {
 
   const entity_context = useContext(EntityContext);
   const router = useRouter();
 
+  const [isEntry, setIsEntry] = useState(false);
   const [option, setOption] = useState();
   const [year, setYear] = useState(query.year);
   const [currentPim, setCurrentPim] = useState(undefined);
@@ -32,6 +34,12 @@ const ListPims = ({ pim, pathname, query }) => {
   const handleSave = () => {
     setOption();
     handleSearch();
+  }
+
+  const handleChangePim = (pim, isEntry) => {
+    setCurrentPim(pim);
+    setOption('CHANGE');
+    setIsEntry(isEntry)
   }
 
   useEffect(() => {
@@ -86,27 +94,40 @@ const ListPims = ({ pim, pathname, query }) => {
                     <th className='text-right'>Monto</th>
                     <th className='text-right'>Executado</th>
                     <th className='text-right'>Saldo</th>
+                    <th className='text-center'>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pim?.items?.map(item => 
-                    <tr className='cursor-pointer'
-                      onDoubleClick={() => handleDoubleClick(item)}
-                    >
-                      <td>{item?.id}</td>
-                      <td>{item?.code}</td>
-                      <td>{item?.year}</td>
-                      <td>{item?.meta?.name}</td>
-                      <td>{item?.cargo?.name}</td>
-                      <td>{item?.cargo?.extension}</td>
-                      <td className='text-right'>
+                    <tr onDoubleClick={() => handleDoubleClick(item)}>
+                      <td className='cursor-pointer'>{item?.id}</td>
+                      <td className='cursor-pointer'>{item?.code}</td>
+                      <td className='cursor-pointer'>{item?.year}</td>
+                      <td className='cursor-pointer'>{item?.meta?.name}</td>
+                      <td className='cursor-pointer'>{item?.cargo?.name}</td>
+                      <td className='cursor-pointer'>{item?.cargo?.extension}</td>
+                      <td className='text-right cursor-pointer'>
                         <b>{format(item?.amount, { code: 'PEN' })}</b>
                       </td>
-                      <td className='text-right'>
+                      <td className='text-right cursor-pointer'>
                         <b>{format(item?.executedAmount, { code: 'PEN' })}</b>
                       </td>
-                      <td className='text-right'>
+                      <td className='text-right cursor-pointer'>
                         <b>{format(item?.diffAmount, { code: 'PEN' })}</b>
+                      </td>
+                      <td className='text-center'>
+                        <span className='text-success mr-2 cursor-pointer'
+                          title='Aumentar Presupuesto'
+                          onClick={() => handleChangePim(item, true)}
+                        >
+                          <i className="fas fa-plus"></i>
+                        </span>
+                        <span className='text-danger ml-2 cursor-pointer'
+                          title='Quitar Presupuesto'
+                          onClick={() => handleChangePim(item, false)}
+                        >
+                          <i className="fas fa-minus"></i>
+                        </span>
                       </td>
                     </tr>  
                   )}
@@ -132,6 +153,19 @@ const ListPims = ({ pim, pathname, query }) => {
         <EditPim
           onClose={() => setOption()}
           pim={currentPim}
+          onSave={handleSearch}
+        />
+      </Show>
+      {/* change pims max */}
+      <Show condicion={option == 'CHANGE'}>
+        <ChangePim
+          pim={currentPim}
+          isEntry={isEntry}
+          onClose={() => setOption()}
+          onSave={() => {
+            setOption();
+            handleSearch();
+          }}
         />
       </Show>
     </dic>

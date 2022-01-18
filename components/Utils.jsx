@@ -41,7 +41,7 @@ const InputFile = ({ id, name, onChange, error = false, children = null, title =
 
 
 const DropZone = ({ 
-  id, name, onChange, error = false, 
+  id = 'dropzone', name, onChange, error = false, 
   multiple = true, children = null, 
   title = "Select", accept = "*", 
   icon = 'image', label = null, 

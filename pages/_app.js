@@ -14,6 +14,7 @@ import Show from '../components/show';
 
 // css
 import '../styles/main.scss';
+import 'react-toastify/dist/ReactToastify.css';
 
 // context
 import { AppProvider } from '../contexts';

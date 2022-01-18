@@ -1,6 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Form } from 'semantic-ui-react';
+import { microPlanilla } from '../../../services/apis';
 import { SelectMeta, SelectCargo } from '../../select/micro-planilla';
+import { toast, ToastContainer } from 'react-toastify';
+import { useEffect } from 'react';
 
 const Input = ({ type = 'text', name = '', value, onChange = null, disabled = false }) => {
 
@@ -63,6 +66,9 @@ const Field = ({
 
 const FormPim = ({ form = {}, onChange = null, isEdit = false, loading = false }) => {
 
+  const [currentLoading, setCurrentLoading] = useState(false);
+  const [isLogs, setIsLogs] = useState(false);
+
   const handleIntInput = ({ name, value }) => {
     let newValue = value;
     if (value) newValue = parseInt(`${value}`);
@@ -79,9 +85,27 @@ const FormPim = ({ form = {}, onChange = null, isEdit = false, loading = false }
     }
   }
 
+  const findPim = async () => {
+    setCurrentLoading(true);
+    await microPlanilla.get(`pims/${form?.id}`)
+      .then(({ data }) => setIsLogs(data?.isLogs))
+    .catch(() => toast.error('No se pudo obtener el pim'))
+    setCurrentLoading(false);
+  }
+
   const displayCargo = useMemo(() => {
     return `${form?.cargo?.name} | ${form?.cargo?.extension}`
   }, [form?.cargo]);
+
+  const isEditAmount = useMemo(() => {
+    const executedAmount = parseFloat(`${form?.executedAmount}`);
+    if (executedAmount > 0) return false;
+    return true;
+  }, [form]);
+
+  useEffect(() => {
+    if (form?.id) findPim();
+  }, [form?.id])
 
   return (
     <>
@@ -142,9 +166,11 @@ const FormPim = ({ form = {}, onChange = null, isEdit = false, loading = false }
           onChange={handleFloatInput}
           name="amount"
           value={form?.amount}
-          disabled={loading}
+          disabled={loading || !isEditAmount || isLogs}
         />
-    </Form> 
+      </Form> 
+      {/* alert */}
+      <ToastContainer/>
     </>
   )
 }
