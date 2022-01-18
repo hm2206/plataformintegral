@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import Datatable from '../../../components/datatable';
 import Router from 'next/router';
 import btoa from 'btoa';
@@ -9,7 +9,6 @@ import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../boardSimple';
-import { EntityContext } from '../../../contexts/EntityContext';
 import CreateCronograma from './create-cronograma';
 
 
@@ -18,20 +17,11 @@ const ListCronograma = ({ principal = true, pathname, query, cronogramas }) => {
     // app
     const app_context = useContext(AppContext);
 
-    // entity
-    const entity_context = useContext(EntityContext);
-
     // estados
     const [options, setOptions] = useState();
     const [year, setYear] = useState(query.year || "");
     const [mes, setMes] = useState(query.mes || "");
     const [block, setBlock] = useState(false);
-
-    // setting entity
-    useEffect(() => {
-        entity_context.fireEntity({ render: true });
-        return () => entity_context.fireEntity({ render: false });
-    }, []);
 
     // búscar
     const handleSearch = async () => {
@@ -43,8 +33,9 @@ const ListCronograma = ({ principal = true, pathname, query, cronogramas }) => {
 
     // refresh to create
     const handleSave = (cronograma) => {
+        setOptions();
         setYear(cronograma.year);
-        setMes(cronograma.mes);
+        setMes(cronograma.month);
         handleSearch();
     }
 

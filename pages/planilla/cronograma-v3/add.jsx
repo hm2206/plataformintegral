@@ -7,9 +7,9 @@ import BoardSimple from '../../../components/boardSimple'
 import HeaderCronograma from '../../../components/planilla/cronograma/headerCronograma'
 import { EntityContext } from '../../../contexts/EntityContext';
 import NotFoundData from '../../../components/notFoundData';
-import RemoveHistorial from '../../../components/planilla/cronograma/remove-historial';
+import ListHistorial from '../../../components/planilla/cronograma/list-historial';
 
-const RemoveCronograma = ({ success, cronograma }) => {
+const AddCronograma = ({ success, cronograma }) => {
 
   // validar data
   if (!success) return <NotFoundData/>
@@ -20,7 +20,7 @@ const RemoveCronograma = ({ success, cronograma }) => {
   useEffect(() => {
     entity_context.fireEntity({ render: true });
     return () => entity_context.fireEntity({ render: false });
-  }, []);
+  }, [entity_context]);
 
   // render
   return (
@@ -33,7 +33,7 @@ const RemoveCronograma = ({ success, cronograma }) => {
           bg="light"
           options={[]}
         >
-          <RemoveHistorial cronograma={cronograma}/>
+          <ListHistorial cronograma={cronograma}/>
         </BoardSimple>
       </div>
     </>
@@ -41,7 +41,7 @@ const RemoveCronograma = ({ success, cronograma }) => {
 };
 
 // server rendering
-RemoveCronograma.getInitialProps = async (ctx) => {
+AddCronograma.getInitialProps = async (ctx) => {
   await AUTHENTICATE(ctx);
   let { query, pathname } = ctx;
   // obtener id
@@ -55,4 +55,4 @@ RemoveCronograma.getInitialProps = async (ctx) => {
 }
 
 // export 
-export default RemoveCronograma;
+export default AddCronograma;

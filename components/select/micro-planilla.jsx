@@ -74,7 +74,7 @@ const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, on
         }}
         valueChange={value || ""}
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-        placeholder="Seleccionar Planillas"
+        placeholder="Seleccionar PIM"
         refresh={refresh || year}
         execute={true}
         disabled={disabled}

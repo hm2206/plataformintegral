@@ -122,7 +122,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
 
   // configurar entity
   useEffect(() => {
-    entity_context.fireEntity({ render: true, disabled: true, entity_id: cronograma.campusId });
+    entity_context.fireEntity({ render: true, disabled: true, entity_id: cronograma.entity_id });
     return () => entity_context.fireEntity({ render: false, disabled: false });
   }, []);
 

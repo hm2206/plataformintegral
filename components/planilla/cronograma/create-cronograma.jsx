@@ -7,7 +7,6 @@ import Swal from 'sweetalert2';
 import { SelectPlanilla } from '../../select/micro-planilla';
 import { AppContext } from '../../../contexts';
 import { EntityContext } from '../../../contexts/EntityContext';
-import SelectCronogramaCreate from './selectCronogramaCreate';
 import Modal from '../../modal';
 
 const schemaDefault = {
@@ -63,10 +62,6 @@ const CreateCronograma = ({ principal = true, onClose = null, onSave =  null }) 
       if (is_ready) setForm({ ...form, remanente: 0 });
   }, [form.adicional]);
 
-  const handleMode = ({ value }) => {
-    setMode(value);
-  }
-
   // guardar los datos
   const save = async () => {
     let answer = await Confirm("warning", `¿Estás seguro en crear el cronograma?`, 'Crear')
@@ -116,7 +111,7 @@ const CreateCronograma = ({ principal = true, onClose = null, onSave =  null }) 
         <div className="row justify-content-center">
           <Form action="#" className="col-md-12" onSubmit={(e) => e.preventDefault()}>
             <div className="row justify-content-between">
-              <Form.Field className="col-md-6" error={errors.planillaId && errors.planillaId[0] ? true : false}>
+              <Form.Field className="col-md-12" error={errors.planillaId && errors.planillaId[0] ? true : false}>
                 <label htmlFor="" className="text-left">Planilla <b className="text-danger">*</b></label>
                 <SelectPlanilla
                   name="planillaId"
@@ -155,21 +150,6 @@ const CreateCronograma = ({ principal = true, onClose = null, onSave =  null }) 
                 />
                 <label htmlFor="">{errors.mes && errors.mes[0] || ""}</label>
               </Form.Field>
-
-              <Show condicion={!form.adicional}>
-                <Form.Field className="text-left col-md-6">
-                  <label htmlFor="">Modo de creación <b className="text-danger">*</b></label>
-                  <SelectCronogramaCreate
-                    principal={principal}
-                    onChange={handleMode}
-                    disabled={!form?.planillaId}
-                    planillaId={form?.planillaId}
-                  />
-                </Form.Field>
-                <Show condicion={mode !== 'NEW'}>
-                  <div className="col-md-6 col-12"></div>
-                </Show>
-              </Show>
 
               <div className="col-12"></div>
 
@@ -215,8 +195,7 @@ const CreateCronograma = ({ principal = true, onClose = null, onSave =  null }) 
             <div className="col-md-12 mt-3 text-right">
               <Button
                 color="teal"
-                disabled={!mode}
-                onClick={mode == 'NEW' ? save : clone}
+                onClick={save}
               >
                 <i className="fas fa-save"></i> Guardar
               </Button>
