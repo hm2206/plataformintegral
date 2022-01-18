@@ -84,6 +84,8 @@ const ListPims = ({ pim, pathname, query }) => {
                     <th>Partición Presp.</th>
                     <th>Extensión Presp.</th>
                     <th className='text-right'>Monto</th>
+                    <th className='text-right'>Executado</th>
+                    <th className='text-right'>Saldo</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -99,6 +101,12 @@ const ListPims = ({ pim, pathname, query }) => {
                       <td>{item?.cargo?.extension}</td>
                       <td className='text-right'>
                         <b>{format(item?.amount, { code: 'PEN' })}</b>
+                      </td>
+                      <td className='text-right'>
+                        <b>{format(item?.executedAmount, { code: 'PEN' })}</b>
+                      </td>
+                      <td className='text-right'>
+                        <b>{format(item?.diffAmount, { code: 'PEN' })}</b>
                       </td>
                     </tr>  
                   )}
