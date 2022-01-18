@@ -29,6 +29,11 @@ const ListPims = ({ pim, pathname, query }) => {
     setCurrentPim(obj);
   }
 
+  const handleSave = () => {
+    setOption();
+    handleSearch();
+  }
+
   useEffect(() => {
     entity_context.fireEntity({ render: true });
     return () => entity_context.fireEntity({ render: false });
@@ -109,8 +114,9 @@ const ListPims = ({ pim, pathname, query }) => {
       </BtnFloat>
       {/* crear pims */}
       <Show condicion={option == 'CREATE'}>
-        <CreatePim
+        <CreatePim year={year}
           onClose={() => setOption()}
+          onSave={handleSave}
         />
       </Show>
       {/* edit pims */}

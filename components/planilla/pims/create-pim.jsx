@@ -6,11 +6,12 @@ import FormPim from './form-pim';
 import { microPlanilla } from '../../../services/apis';
 import Swal from 'sweetalert2';
 
-const CreatePim = ({ onClose = null, onSave = null }) => {
+const CreatePim = ({ onClose = null, onSave = null, year = 2022 }) => {
 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    amount: 0
+    amount: 0,
+    year
   })
 
   const handleInput = ({ name, value }) => { 
@@ -19,14 +20,16 @@ const CreatePim = ({ onClose = null, onSave = null }) => {
 
   const handleSave = async () => {
     setLoading(true)
-    await microPlanilla.post(`pims`, form)
-      .then((res) => {
+    const payload = Object.assign({}, form);
+    payload.year = parseInt(`${payload.year}`);
+    await microPlanilla.post(`pims`, payload)
+      .then(async (res) => {
         setForm({})
-        if (typeof onSave == 'function') onSave(res.data);
-        Swal.fire({
+        await Swal.fire({
           icon: 'success',
           text: `Los datos se guardaron correctamente!`
         })
+        if (typeof onSave == 'function') onSave(res.data);
       }).catch(() => {
         Swal.fire({
           icon: 'error',

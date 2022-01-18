@@ -71,6 +71,14 @@ const FormPim = ({ form = {}, onChange = null, isEdit = false, loading = false }
     }
   }
 
+  const handleFloatInput = ({ name, value }) => {
+    let newValue = value;
+    if (value) newValue = parseFloat(`${value}`);
+    if (typeof onChange == 'function') {
+      onChange({ name, value: newValue });
+    }
+  }
+
   const displayCargo = useMemo(() => {
     return `${form?.cargo?.name} | ${form?.cargo?.extension}`
   }, [form?.cargo]);
@@ -122,17 +130,16 @@ const FormPim = ({ form = {}, onChange = null, isEdit = false, loading = false }
 
         <Field title="Año"
           type="number"
-          isRequired={!isEdit}
-          onChange={onChange}
+          isRequired={true}
           name="year"
           value={form?.year}
-          disabled={loading || isEdit}
+          disabled={true}
         />
 
         <Field title="Monto"
           isRequired
           type="number"
-          onChange={onChange}
+          onChange={handleFloatInput}
           name="amount"
           value={form?.amount}
           disabled={loading}
