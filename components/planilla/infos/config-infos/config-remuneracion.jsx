@@ -21,7 +21,7 @@ const Placeholder = () => {
   );  
 }
 
-const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, onUpdate = null, onDelete = null }) => {
+const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, disabled = false, onUpdate = null, onDelete = null }) => {
 
   const { typeRemuneration } = infoTypeRemuneration;
 
@@ -104,6 +104,7 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, onUpdate = null, onDe
           readOnly={!isEdit || currentLoading}
           onChange={(e, obj) => setAmount(parseFloat(`${obj.value}`))}
           value={amount}
+          disabled={disabled}
         />
       </td>
       <td>
@@ -112,6 +113,7 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, onUpdate = null, onDe
           onChange={(e, obj) => setIsBase(obj.checked)}
           checked={isBase}
           readOnly={!isEdit || currentLoading}
+          disabled={disabled}
         />
       </td>
       <td className='text-center'>
@@ -119,7 +121,7 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, onUpdate = null, onDe
           <Show condicion={isEdit} predeterminado={
             <>
               <Button color='red'
-                disabled={currentLoading}
+                disabled={currentLoading || disabled}
                 loading={(currentLoading && option == events.DELETE)}
                 onClick={handleDelete}
               >
@@ -128,7 +130,7 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, onUpdate = null, onDe
               <Button color='blue'
                 basic
                 onClick={() => setIsEdit(true)}
-                disabled={currentLoading}
+                disabled={currentLoading || disabled}
               >
                 <i className="fas fa-pencil-alt"></i>
               </Button>
@@ -136,13 +138,13 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, onUpdate = null, onDe
           }>
             <Button color='blue'
               onClick={handleUpdate}
-              disabled={currentLoading}
+              disabled={currentLoading || disabled}
               loading={(currentLoading && option == events.UPDATE)}
             >
               <i className="fas fa-sync"></i>
             </Button>
             <Button color='red'
-              disabled={currentLoading}
+              disabled={currentLoading || disabled}
               onClick={() => setIsEdit(false)}
             >
               <i className="fas fa-times"></i>
@@ -245,7 +247,7 @@ const CreateTypeRemuneration = ({ info = {}, onSave = null }) => {
   )
 }
 
-const ConfigRemuneracion = ({ info = {}, onClose = null, onSave = null }) => {
+const ConfigRemuneracion = ({ info = {}, disabled = false, onClose = null, onSave = null }) => {
 
   const [current_loading, setCurrentLoading] = useState(false);
   const [currentMeta, setCurrentMeta] = useState({});
@@ -257,11 +259,15 @@ const ConfigRemuneracion = ({ info = {}, onClose = null, onSave = null }) => {
     await microPlanilla.get(`infos/${info.id}/typeRemunerations?limit=100`)
       .then(res => {
         const { meta, items } = res.data;
-        console.log(items)
         setCurrentMeta(meta)
         setCurrentData(prev => add ? [...prev, ...items] : items)
       }).catch(err => console.log(err))
     setCurrentLoading(false);
+  }
+
+  const handleSave = () => {
+    setIsRefresh(true)
+    if (typeof onSave == 'function') onSave();
   }
 
   useEffect(() => {
@@ -297,7 +303,7 @@ const ConfigRemuneracion = ({ info = {}, onClose = null, onSave = null }) => {
           <tbody>
             {/* crear remuneraciones */}
             <CreateTypeRemuneration
-              onSave={() => setIsRefresh(true)}
+              onSave={handleSave}
               info={info}
             />
             {/* listar remuneraciones */}
@@ -307,6 +313,7 @@ const ConfigRemuneracion = ({ info = {}, onClose = null, onSave = null }) => {
                 infoTypeRemuneration={d}
                 onUpdate={() => setIsRefresh(true)}
                 onDelete={() => setIsRefresh(true)}
+                disabled={disabled}
               />
             )}
             {/* loading */}

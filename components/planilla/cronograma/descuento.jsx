@@ -8,6 +8,9 @@ import Skeleton from 'react-loading-skeleton';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../../contexts/AppContext';
 import Resume from './resume';
+import useProcessCronograma from './hooks/useProcessCronograma';
+import { ToastContainer } from 'react-toastify';
+import ConfigDiscount from '../infos/config-infos/config-discount';
 
 const PlaceHolderButton = ({ count = 1 }) => <Skeleton height="38px" count={count}/>
 
@@ -31,7 +34,7 @@ const PlaceholderDescuento = () => (
     </Fragment>
 );
 
-const ItemDiscount = ({ loading = false, discount = {}, cronograma = {}, edit = false }) => {
+const ItemDiscount = ({ loading = false, discount = {}, cronograma = {}, historial = {}, edit = false }) => {
 
   const [amount, setAmount] = useState(discount?.amount || 0);
 
@@ -54,7 +57,6 @@ const ItemDiscount = ({ loading = false, discount = {}, cronograma = {}, edit = 
       <Show condicion={discount.isEdit && !discount.isSync}>
         <span className={`ml-1 ${edit ? 'cursor-pointer' : 'disabled'} font-9 badge badge-${discount.isSync ? 'dark' : 'danger'}`}
           title={`Sincronizar descuento global ${!discount.isSync ? '(Modificado)' : ''}`}
-          // onClick={(e) => syncDescuento(obj)}
         >
           <i className="fas fa-sync"></i>
         </span>
@@ -66,9 +68,9 @@ const ItemDiscount = ({ loading = false, discount = {}, cronograma = {}, edit = 
             <div className={!cronograma.remanente && edit ? 'col-md-9 col-9' : 'col-md-12 col-12'}>
               <input type="number"
                 step="any" 
+                className={edit ? 'input-active' : ''}
                 value={amount}
                 readOnly={!edit}
-                // onChange={({target}) => handleMonto(index, target.value, obj)}
                 min="0"
               />
             </div>
@@ -77,7 +79,6 @@ const ItemDiscount = ({ loading = false, discount = {}, cronograma = {}, edit = 
               <div className="col-md-3 col-3">
                 <Button 
                   icon="asl"
-                  // onClick={(e) => handleEdit(obj, 0)}
                   style={{ width: "100%", height: "100%" }}
                   size="small"
                   basic
@@ -109,7 +110,6 @@ const ItemDiscount = ({ loading = false, discount = {}, cronograma = {}, edit = 
               <div className="col-md-3 col-3">
                 <Button 
                   icon="wait"
-                  // onClick={(e) => handleEdit(obj, 1)}
                   style={{ width: "100%", height: "100%" }}
                   size="small"
                   disabled={loading || !edit}>
@@ -127,17 +127,19 @@ const Descuento = () => {
 
   // cronograma
   const { edit, setEdit, loading, send, historial, setBlock, setSend, cronograma, setIsEditable, setIsUpdatable, setRefresh } = useContext(CronogramaContext);
-  const [total_bruto, setTotalBruto] = useState(0);
-  const [total_desct, setTotalDesct] = useState(0);
-  const [base, setBase] = useState(0);
-  const [total_neto, setTotalNeto] = useState(0);
   const [current_loading, setCurrentLoading] = useState(true);
   const [descuentos, setDescuentos] = useState([]);
   const [old, setOld] = useState([]);
   const [error, setError] = useState(false);
+  const [options, setOptions] = useState();
+  const processCronograma = useProcessCronograma(cronograma);
 
   // app
   const app_context = useContext(AppContext);
+
+  const objectOptions = {
+    ADD_DISCOUNT: "ADD_DISCOUNT"
+  }
 
   const findDescuento = async () => {
     setCurrentLoading(true);
@@ -157,6 +159,12 @@ const Descuento = () => {
     setBlock(false);
   }
 
+  const handleProccess = () => {
+    processCronograma.processing()
+      .then(() => setRefresh(true))
+      .catch(() => null)
+  }
+
   // primera entrada
   useEffect(() => {
     setIsEditable(true);
@@ -169,42 +177,6 @@ const Descuento = () => {
   useEffect(() => {
     if (!edit && !send) setDescuentos(old);
   }, [!edit]);
-
-  // cambiar montos
-  const handleMonto = (index, value, obj) => {
-    let newMonto = Object.assign({}, obj);
-    let newDescuentos = JSON.parse(JSON.stringify(descuentos));
-    newMonto.send = true;
-    newMonto.monto = value;
-    newDescuentos[index] = newMonto;
-    setDescuentos(newDescuentos);
-  }
-    
-  // sincronizar descuentos
-  const syncDescuento = async (obj) => {
-    if (!edit) return false;
-    let answer = await Confirm(`warning`, `¿Estas seguro en sincronizar ${obj.descripcion}?`, 'Estoy seguro');
-    if (!answer) return false;
-    const form = {};
-    form.monto = obj.monto;
-    form._method = 'PUT';
-    // send changes
-    app_context.setCurrentLoading(true);
-    await unujobs.post(`descuento/${obj.id}/sync`, form, { headers: { CronogramaID: historial.cronograma_id } })
-    .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        setEdit(false);
-        await findDescuento();
-    }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-    });
-    setSend(false);
-    setBlock(false);
-  }
 
   // actualizar descuentos
   const updateDescuentos = async () => {
@@ -286,9 +258,35 @@ const Descuento = () => {
             discount={obj}
             edit={edit}
             cronograma={cronograma}
+            historial={historial}
           />
         )}
       </Show>
+
+      {/* open cronograma */}
+      <Show condicion={cronograma?.state && edit}>
+        <div className="col-md-3 mb-3">
+          <Button fluid
+            className='mt-4'
+            onClick={() => setOptions(objectOptions.ADD_DISCOUNT)}>
+            <i className="fas fa-plus"></i>
+          </Button>
+        </div>
+      </Show>
+
+      <div className="col-12 py-5"></div>
+
+      {/* add remunerations */}
+      <Show condicion={options == objectOptions.ADD_DISCOUNT}>
+        <ConfigDiscount
+          info={historial?.info || {}}
+          onClose={() => setOptions()}
+          onSave={handleProccess}
+          disabled={true}
+        />
+      </Show>
+      {/* toast */}
+      <ToastContainer/>
     </Form>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import Modal from '../../../modal';
-import { Checkbox, Input, Button } from 'semantic-ui-react';
+import { Input, Button } from 'semantic-ui-react';
 import { SelectTypeDiscount } from '../../../select/micro-planilla';
 import { microPlanilla } from '../../../../services/apis';
 import { useEffect } from 'react';
@@ -20,7 +20,7 @@ const Placeholder = () => {
   );  
 }
 
-const ItemTypeDiscount = ({ infoTypeDiscount = {}, onUpdate = null, onDelete = null }) => {
+const ItemTypeDiscount = ({ infoTypeDiscount = {}, disabled = false, onUpdate = null, onDelete = null }) => {
 
   const { typeDiscount } = infoTypeDiscount;
 
@@ -101,6 +101,7 @@ const ItemTypeDiscount = ({ infoTypeDiscount = {}, onUpdate = null, onDelete = n
           readOnly={!isEdit || currentLoading}
           onChange={(e, obj) => setAmount(parseFloat(`${obj.value}`))}
           value={amount}
+          disabled={disabled || disabled}
         />
       </td>
       <td className='text-center'>
@@ -108,7 +109,7 @@ const ItemTypeDiscount = ({ infoTypeDiscount = {}, onUpdate = null, onDelete = n
           <Show condicion={isEdit} predeterminado={
             <>
               <Button color='red'
-                disabled={currentLoading}
+                disabled={currentLoading || disabled}
                 loading={(currentLoading && option == events.DELETE)}
                 onClick={handleDelete}
               >
@@ -117,7 +118,7 @@ const ItemTypeDiscount = ({ infoTypeDiscount = {}, onUpdate = null, onDelete = n
               <Button color='blue'
                 basic
                 onClick={() => setIsEdit(true)}
-                disabled={currentLoading}
+                disabled={currentLoading || disabled}
               >
                 <i className="fas fa-pencil-alt"></i>
               </Button>
@@ -131,7 +132,7 @@ const ItemTypeDiscount = ({ infoTypeDiscount = {}, onUpdate = null, onDelete = n
               <i className="fas fa-sync"></i>
             </Button>
             <Button color='red'
-              disabled={currentLoading}
+              disabled={currentLoading || disabled}
               onClick={() => setIsEdit(false)}
             >
               <i className="fas fa-times"></i>
@@ -226,7 +227,7 @@ const CreateTypeDiscount = ({ info = {}, onSave = null }) => {
   )
 }
 
-const ConfigDiscount = ({ info = {}, onClose = null, onSave = null }) => {
+const ConfigDiscount = ({ info = {}, disabled = false, onClose = null, onSave = null }) => {
 
   const [current_loading, setCurrentLoading] = useState(false);
   const [currentMeta, setCurrentMeta] = useState({});
@@ -243,6 +244,11 @@ const ConfigDiscount = ({ info = {}, onClose = null, onSave = null }) => {
         setCurrentData(prev => add ? [...prev, ...items] : items)
       }).catch(err => console.log(err))
     setCurrentLoading(false);
+  }
+
+  const handleSave = () => {
+    setIsRefresh(true)
+    if (typeof onSave == 'function') onSave();
   }
 
   useEffect(() => {
@@ -277,7 +283,7 @@ const ConfigDiscount = ({ info = {}, onClose = null, onSave = null }) => {
           <tbody>
             {/* crear remuneraciones */}
             <CreateTypeDiscount
-              onSave={() => setIsRefresh(true)}
+              onSave={handleSave}
               info={info}
             />
             {/* listar remuneraciones */}
@@ -287,6 +293,7 @@ const ConfigDiscount = ({ info = {}, onClose = null, onSave = null }) => {
                 infoTypeDiscount={d}
                 onUpdate={() => setIsRefresh(true)}
                 onDelete={() => setIsRefresh(true)}
+                disabled={disabled}
               />
             )}
             {/* loading */}

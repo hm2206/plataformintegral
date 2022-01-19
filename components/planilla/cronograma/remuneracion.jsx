@@ -1,12 +1,15 @@
-import React, { useContext, useState, useEffect, Fragment } from 'react';
+import React, { useContext, useState, useEffect, Fragment, useMemo } from 'react';
 import { microPlanilla } from '../../../services/apis';
-import { Form } from 'semantic-ui-react';
+import { Form, Button } from 'semantic-ui-react';
 import Swal from 'sweetalert2';
 import Show from '../../show';
 import Skeleton from 'react-loading-skeleton';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../../contexts/AppContext';
 import Resume from './resume';
+import ConfigRemuneration from '../infos/config-infos/config-remuneracion';
+import useProcessCronograma from './hooks/useProcessCronograma';
+import { ToastContainer } from 'react-toastify';
 
 const PlaceHolderButton = ({ count = 1 }) => <Skeleton height="38px" count={count}/>
 
@@ -40,6 +43,10 @@ const ItemRemuneration = ({ remuneration = {}, edit = false }) => {
     setAmount(newValue);
   }
 
+  const canEdit = useMemo(() => { 
+    return (remuneration?.isEdit && edit);
+  }, [remuneration])
+
   return (
     <div className="col-md-3 mb-3">
       <span className={remuneration?.amount > 0 ? 'text-red' : ''}>
@@ -60,6 +67,7 @@ const ItemRemuneration = ({ remuneration = {}, edit = false }) => {
         <input type="number"
           step="any" 
           value={amount}
+          className={canEdit ? 'input-active' : ''}
           disabled={!remuneration?.isEdit || !edit}
           onChange={({ target }) => handleInput(target)}
           min="0"
@@ -72,18 +80,20 @@ const ItemRemuneration = ({ remuneration = {}, edit = false }) => {
 const Remuneracion = () => {
 
   // cronograma
-  const { edit, setEdit, send, setSend, loading, historial, setBlock, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
-  const [total_bruto, setTotalBruto] = useState(0);
-  const [total_desct, setTotalDesct] = useState(0);
-  const [base, setBase] = useState(0);
-  const [total_neto, setTotalNeto] = useState(0);
+  const { cronograma, setRefresh, edit, setEdit, send, setSend, loading, historial, setBlock, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
   const [current_loading, setCurrentLoading] = useState(true);
   const [remuneraciones, setRemuneraciones] = useState([]);
   const [old, setOld] = useState([]);
   const [error, setError] = useState(false);
+  const [options, setOptions] = useState();
+  const processCronograma = useProcessCronograma(cronograma);
 
   // app
   const app_context = useContext(AppContext);
+
+  const objectOptions = {
+    ADD_REMUNERATION: "ADD_REMUNERATION"
+  }
 
   const findRemuneracion = async () => {
     setCurrentLoading(true);
@@ -113,15 +123,6 @@ const Remuneracion = () => {
   useEffect(() => {
     if (!edit && !send) setRemuneraciones(old);
   }, [edit]);
-
-  const handleMonto = async (index, value, obj) => {
-    let newMonto = Object.assign({}, obj);
-    let newRemuneraciones = JSON.parse(JSON.stringify(remuneraciones));
-    newMonto.send = true;
-    newMonto.monto = value;
-    newRemuneraciones[index] = newMonto;
-    setRemuneraciones(newRemuneraciones);
-  }
   
   const updateRemuneraciones = async () => {
     const form = new FormData();
@@ -148,6 +149,12 @@ const Remuneracion = () => {
     }   
     setSend(false);
     setBlock(false);
+  }
+
+  const handleProccess = () => {
+    processCronograma.processing()
+      .then(() => setRefresh(true))
+      .catch(() => null)
   }
 
   // update remuneraciones
@@ -180,8 +187,31 @@ const Remuneracion = () => {
           />
         )}
       </Show>   
+
+      {/* open cronograma */}
+      <Show condicion={cronograma?.state && edit}>
+        <div className="col-md-3 mb-3">
+          <Button fluid
+            className='mt-4'
+            onClick={() => setOptions(objectOptions.ADD_REMUNERATION)}>
+            <i className="fas fa-plus"></i>
+          </Button>
+        </div>
+      </Show>
       
       <div className="col-12 py-5"></div>
+     
+      {/* add remunerations */}
+      <Show condicion={options == objectOptions.ADD_REMUNERATION}>
+        <ConfigRemuneration
+          info={historial?.info || {}}
+          onClose={() => setOptions()}
+          onSave={handleProccess}
+          disabled={true}
+        />
+      </Show>
+      {/* toast */}
+      <ToastContainer/>
     </Form>
   )
 }
