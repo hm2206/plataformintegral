@@ -61,7 +61,7 @@ const SelectBase = ({
     onReady, defaultDatos = [], execute, refresh, url, api, 
     obj, id, value, text, name, onChange, valueChange, onDefaultValue = null,
     displayText = null, onData = null, placeholder = 'Seleccionar', 
-    headers = { 'ContentType': 'application/json' },
+    headers = { 'ContentType': 'application/json' }, active = false,
     disabled = false, error = false, defaultValue = null }) => {
 
     const [datos, setDatos] = useState([])
@@ -76,11 +76,20 @@ const SelectBase = ({
         let query = `${url}`.split('?');
         let newParams = query[1] ? `&${query[1]}` : "";
         let newUrl = query[0] || "";
-        await api.get(`${newUrl}?page=${page}${newParams}`, { headers })
+        await api.get(`${newUrl}?page=${page}${newParams}&limit=200`, { headers })
             .then(async res => {
+                const attributes = Object.keys(res.data);
                 let { success, message } = res.data;
                 let is_array = res.data[obj];
-                if (Array.isArray(is_array)) {
+                if (attributes.includes('items')) {
+                    let tmpDatos = res.data['items'];
+                    let newDatos = await settingSelect({ is_new: true, data: tmpDatos, index: { key: id, value, text }, displayText });
+                    setDatos(newDatos);
+                    setIsError(false);
+                    setLoading(false);
+                    setIsReady(true);
+                    setCurrentExecute(false);
+                } else if (Array.isArray(is_array)) {
                     let tmpDatos = res.data[obj];
                     let newDatos = await settingSelect({ is_new: true, data: tmpDatos, index: { key: id, value, text }, displayText });
                     setDatos(newDatos);
@@ -164,18 +173,19 @@ const SelectBase = ({
             </div>
         :   loading 
             ?   <Skeleton height="37px"/>
-            :   <Select fluid
-                    wrapSelection={false}
-                    search
-                    disabled={loading || disabled}
-                    placeholder={loading ? 'Cargando...' : placeholder}
-                    options={defaultDatos.length ? defaultDatos : datos}
-                    name={name}
-                    onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-                    value={`${valueChange || ""}`}
-                    compact
-                    error={error}
-                />
+            : <Select fluid
+                className={active ? 'input-active' : ''}
+                wrapSelection={false}
+                search
+                disabled={loading || disabled}
+                placeholder={loading ? 'Cargando...' : placeholder}
+                options={defaultDatos.length ? defaultDatos : datos}
+                name={name}
+                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+                value={`${valueChange || ""}`}
+                compact
+                error={error}
+            />
 }
 
 

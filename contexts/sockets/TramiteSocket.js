@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect } from 'react';
 import useSocket from '../../hooks/useSocket';
-import { ws } from '../../env.json';
 import { AuthContext } from '../AuthContext';
 
 export const TramiteSocket = createContext();
@@ -8,7 +7,8 @@ export const TramiteSocket = createContext();
 export const TramiteSocketProvider = ({ children }) => {
 
     // config socket
-    const { host, path } = ws.API_SOCKET;
+    const host = process?.env?.NEXT_PUBLIC_WS_SOCKET_URL || ''
+    const path = process?.env?.NEXT_PUBLIC_WS_SOCKET_PATH || ''
     // auth
     const { auth, is_logged } = useContext(AuthContext);
 

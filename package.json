@@ -102,6 +102,7 @@
     "react-markdown-reader": "^1.2.0",
     "react-redux": "^7.2.0",
     "react-select": "^5.2.1",
+    "react-toastify": "^8.1.0",
     "react-vertical-timeline-component": "^3.0.2",
     "reactjs-pdf-view": "^1.0.8",
     "redux": "^4.0.5",

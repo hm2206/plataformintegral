@@ -1,6 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import io from 'socket.io-client';
-import { credencials } from '../env.json';
 import { AuthContext } from '../contexts/AuthContext';
 
 const useSocket = ({ host, path }) => {
@@ -24,8 +23,8 @@ const useSocket = ({ host, path }) => {
             forceNew: true,
             auth: {
                 Authorization: `Bearer ${token?.token}`,
-                ClientId: credencials.ClientId,
-                ClientSecret: credencials.ClientSecret
+                ClientId: process?.env?.NEXT_PUBLIC_CLIENT_ID || '',
+                ClientSecret: process?.env?.NEXT_PUBLIC_CLIENT_SECRET || ''
             },
         });
         setSocket(socketTemp);

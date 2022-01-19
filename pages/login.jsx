@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 import { authentication } from '../services/apis';
 import Cookies from 'js-cookie';
 import Show from '../components/show';
-import { app } from '../env.json';
 import Link from 'next/link';
 import DownloadApps from '../components/downloadApps';
 import VerificarAuthentication from '../components/verificarAuthentication';
@@ -80,7 +79,7 @@ const Login = ({ pathname, query }) => {
 
             <header
                 id="auth-header"
-                className={`auth-header bg-${app.theme}`}
+                className={`auth-header bg-default`}
                 style={{ paddingTop: "3em", backgroundImage: `url(${app_context.app.cover && app_context.app.cover || '/img/fondo.jpg'})` }}
             >
 
@@ -148,7 +147,7 @@ const Login = ({ pathname, query }) => {
                 <div className="form-group">
                     <button
                         disabled={current_loading || !form.password || !form.email}
-                        className={`btn btn-lg btn-primary btn-block btn-${app.theme}`}
+                        className={`btn btn-lg btn-primary btn-block btn-default`}
                         onClick={login}
                     >
                         {current_loading ? "Verificando...." : "Iniciar Sesión"}
@@ -177,7 +176,7 @@ const Login = ({ pathname, query }) => {
 
             <footer className="auth-footer text-center">
                 {" "}
-                © 2019 - {new Date().getFullYear()} {app_context.app && app_context.app.name} | Todos Los Derechos Reservados <a href="#">Privacidad</a> y
+                © 2019 - {new Date().getFullYear()} {app_context?.app?.name} | Todos Los Derechos Reservados <a href="#">Privacidad</a> y
                 <a href="#">Terminos</a>
             </footer>
 

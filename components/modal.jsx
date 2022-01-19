@@ -31,7 +31,7 @@ const Modal = ({ titulo, show = false, children = null, isClose, md, disabled = 
         <div style={{ display: "flex", height: "100%", justifyContent: "center", alignItems: "center", }}>
           <div
             className={`col-md-${md ? md : "6"} card`}
-            style={{ position: "relative", maxHeight: "95vh", height: height ? height : 'auto', background: 'white', overflow: 'auto'}}
+            style={{ position: "relative", minHeight: height, maxHeight: '95%', height: 'auto', background: 'white', overflow: 'auto'}}
           >
             <div className={`card-header ${classHeader}`}>
               {titulo}

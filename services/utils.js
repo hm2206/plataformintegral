@@ -1,4 +1,3 @@
-import { credencials } from '../env.json';
 import Cookies from 'js-cookie';
 
 export const parseOptions = (
@@ -67,10 +66,8 @@ export const urlStringQuery = (path = "", query = {}) => {
     let newPath = newString[0];
     let index = 0;
     // crendenciales
-    for (let cre in credencials) {
-        newPath += index == 0 ? `?${cre}=${credencials[cre]}` : `&${cre}=${credencials[cre]}`;
-        index++;
-    }
+    newPath += `?ClientId=${process?.env?.NEXT_PUBLIC_CLIENT_ID}`;
+    newPath += `&ClientSecret=${process?.env?.NEXT_PUBLIC_CLIENT_SECRET}`
     // add query
     for (let q in query) {
         newPath += `&${q}=${query[q]}`;
@@ -83,10 +80,16 @@ export const urlStringQuery = (path = "", query = {}) => {
 
 export const InputCredencias = () => {
     let inputs = [];
-    for(let cre in credencials) {
+
+    const credentials = {
+        ClientId: process?.env?.NEXT_PUBLIC_CLIENT_ID,
+        ClientSecret: process?.env?.NEXT_PUBLIC_CLIENT_SECRET
+    }
+
+    for(let cre in credentials) {
         let input = document.createElement('input');
         input.name = cre;
-        input.value = credencials[cre];
+        input.value = credentials[cre];
         input.hidden = true;
         inputs.push(input);
     }

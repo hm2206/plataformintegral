@@ -1,7 +1,5 @@
 import Cookies from "js-cookie";
 import { createContext, useContext, useEffect, useState } from "react";
-import { AppContext } from '../contexts/AppContext';
-import { useRouter } from 'next/router'
 
 export const EntityContext = createContext();
 

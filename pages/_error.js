@@ -1,6 +1,4 @@
 import React, { Component, Fragment } from 'react';
-import Head from 'next/head'
-import { app } from '../env.json';
 
 
 export default class Error extends Component

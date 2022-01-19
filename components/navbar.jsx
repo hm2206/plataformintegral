@@ -20,9 +20,6 @@ const extendView = ['medium', 'long', 'x-long'];
 
 const Navbar = () => {
 
-	// app context
-	const { env } = useContext(AppContext);
-
 	// screen context
 	const { mode, toggle, setToggle, fullscreen, setFullscreen } = useContext(ScreenContext);
 
@@ -59,7 +56,7 @@ const Navbar = () => {
 	// renderizar
     return (
 		<Fragment>
-			<header className={`app-header app-header-dark bg-${env.app.theme}`}>
+			<header className={`app-header app-header-dark bg-default`}>
 				<div className="top-bar">
 					<div className="top-bar-brand" 
 						style={{ display: fullscreen || !extendView.includes(mode) ? 'none' : 'flex' }}

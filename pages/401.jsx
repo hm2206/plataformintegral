@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react';
 import Head from 'next/head'
-import { app } from '../env.json';
 import Router from 'next/router';
 
 
@@ -11,7 +10,7 @@ export default class Error extends Component
         return (
             <Fragment>
                 <Head>
-                    <title>{app.name} | No Autorizado</title>
+                    <title>Integración | No Autorizado</title>
                 </Head>
 
                 <div className="col-md-12">

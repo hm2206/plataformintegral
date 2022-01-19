@@ -4,7 +4,7 @@ import { AppContext } from '../contexts/AppContext';
 
 const AppHeader = () => {
 
-    const { env, app } = useContext(AppContext);
+    const { app } = useContext(AppContext);
 
     // response
     return (
@@ -12,8 +12,8 @@ const AppHeader = () => {
             <meta charSet="utf-8"></meta>
             <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></meta>
             {/* titulo */}
-            <title>{app.name || env.app && env.app.name || ""}</title>
-            <link rel="shortcut icon" href={app.icon_images && app.icon_images.icon_50x50}></link>
+            <title>{app.name || "Integración"}</title>
+            <link rel="shortcut icon" href={app?.icon_images?.icon_50x50}></link>
             <meta name="theme-color" content="#3063A0"></meta>
             <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,600,700,900" rel="stylesheet" type="text/css" />
             <link rel="stylesheet" href="/css/open-iconic-bootstrap.min.css" />
@@ -28,7 +28,7 @@ const AppHeader = () => {
             <script src="/js/popper.min.js"></script>
             <script src="/js/bootstrap.min.js"></script>
             {/* css dinamico */}
-            <link rel="stylesheet" href={env.app.css || ""} />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" />
             <link rel="stylesheet" href="/css/page_loading.css" />
             {/* {<link rel="stylesheet" href="/css/no_auth_page_loading.css" />} */}
             {/* custom */}

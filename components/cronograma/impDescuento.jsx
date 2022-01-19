@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import Modal from '../modal';
-import { Icon, Select, Form, Button } from 'semantic-ui-react';
+import { Icon, Form, Button } from 'semantic-ui-react';
 import { unujobs } from '../../services/apis';
 import Router from 'next/router';
 import atob from 'atob';
-import { parseOptions, Confirm } from '../../services/utils';
+import { Confirm } from '../../services/utils';
 import Swal from 'sweetalert2';
 import Show from '../../components/show';
-import { url } from '../../env.json';
 import { SelectCronogramaTypeDescuento} from '../select/cronograma';
 
 export default class ImpDescuento extends Component
@@ -144,7 +143,7 @@ export default class ImpDescuento extends Component
                                     </Button> 
                                     <br/>
                                     <ul className="pl-5 text-left mt-3">
-                                        <li>1. Descargar Formato. <a href={`${url.URL_UNUJOBS || ""}/formatos/validar_descuento.xlsx`} target="_blank" className="text-success"><i className="fas fa-file-excel"></i> Archivo Excel</a></li>
+                                        <li>1. Descargar Formato. <a href={`${process?.env?.NEXT_PUBLIC_URL_UNUJOBS || ""}/formatos/validar_descuento.xlsx`} target="_blank" className="text-success"><i className="fas fa-file-excel"></i> Archivo Excel</a></li>
                                         <li>2. Rellenar los campos correspondientes.</li>
                                         <li>3. Subir el archivo del formato </li>
                                         <li>4. Esperar que el sistema valide el archivo.</li>
