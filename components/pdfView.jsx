@@ -10,7 +10,6 @@ import { getPositions } from 'node-signature/client';
 import axios from 'axios';
 import { onProgress } from '../services/apis';
 import { AuthContext } from '../contexts/AuthContext';
-import pdfjsLib from 'pdfjs-dist';
 import qrCode from 'qrcode';
 
 const PdfView = ({ 
@@ -70,41 +69,6 @@ const PdfView = ({
 
     const handleInput = ({ name, value }, callback) => {
         if (typeof callback == 'function') callback(value)
-    }
-
-    const renderPage = async () => {
-        if (page <= 0) return false;
-        // obtener pdf
-        let link = await URL.createObjectURL(pdfBlob);
-        let loadTaskPdf = pdfjsLib.getDocument(link);
-        loadTaskPdf.promise.then(async tmpPdf => {
-            let contentPdf = document.getElementById('content-render');
-            let nextPage = parseInt(`${page}`);
-            let tmpPage = await tmpPdf.getPage(nextPage);
-            let scale = 1;
-            let viewport = await tmpPage.getViewport(scale);
-
-            if (viewport.width >= contentPdf.clientWidth) {
-                viewport = await tmpPage.getViewport(0.6);
-                console.log(viewport);
-            }
-
-            let current_height = viewport.height;
-            let current_width = viewport.width;
-
-            let canvas = document.getElementById('render-pdf-canvas');
-            let context = canvas.getContext('2d');
-            canvas.height = current_height;
-            canvas.width = current_width;
-
-            let renderContext = {
-                canvasContext: context,
-                viewport: viewport
-            };
-
-            await tmpPage.render(renderContext);
-        });
-
     }
 
     const handleClose = async (e) => {
