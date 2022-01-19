@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import Modal from '../modal';
+import Modal from '../../modal';
 import atob from 'atob';
 import { Form, Button, Loader, List } from 'semantic-ui-react';
-import { unujobs } from '../../services/apis';
-import Show from '../show';
+import { unujobs } from '../../../services/apis';
+import Show from '../../show';
 import Swal from 'sweetalert2';
 
 export default class SendEmail extends Component

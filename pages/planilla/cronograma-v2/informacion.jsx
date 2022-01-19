@@ -11,7 +11,6 @@ import atob from 'atob';
 import Skeleton from 'react-loading-skeleton';
 import NotFound from '../../../components/notFound';
 import { parseUrl, Confirm, InputCredencias, InputAuth, InputEntity } from '../../../services/utils';
-import { SelectCronogramaCargo, SelectCronogramaTypeCategoria } from '../../../components/select/cronograma';
 import Router from 'next/router';
 import TabCronograma from '../../../components/planilla/cronograma/TabCronograma';
 import Swal from 'sweetalert2';

@@ -4,10 +4,8 @@ import moment from 'moment';
 import { microPlanilla, handleErrorRequest } from '../../../services/apis';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
-import Show from '../../show';
-import { SelectBank, SelectAfp } from '../../select/micro-planilla';
+import { SelectAfp } from '../../select/micro-planilla';
 import { AppContext } from '../../../contexts/AppContext'
-import EditPerson from '../../authentication/person/editPerson';
 import Router from 'next/dist/client/router';
 import AssingTrabajadorEntity from '../../contrato/assingTrabajadorEntity'
 import { BtnFloat } from '../../Utils'
