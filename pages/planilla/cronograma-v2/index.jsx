@@ -1,9 +1,7 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { AUTHENTICATE } from '../../../services/auth';
 import { microPlanilla } from '../../../services/apis';
 import ListCronograma from '../../../components/planilla/cronograma/listCronograma'
-import { useEffect } from 'react';
-import { useContext } from 'react';
 import { EntityContext } from '../../../contexts/EntityContext';
 
 const CronogramaIndex = ({ pathname, query, cronogramas }) => {

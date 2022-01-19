@@ -96,13 +96,6 @@ const IndexWork = ({ pathname, query, success, works }) => {
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-1 col-8">
-                                        <SelectCargo
-                                            value={cargo_id}
-                                            onChange={(e, obj) => setCargoId(obj.value)}
-                                        />
-                                    </div>
-
                                     <div className="col-xs col-2">
                                         <Button color="blue"
                                             fluid

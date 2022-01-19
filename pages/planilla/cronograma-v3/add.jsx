@@ -7,7 +7,7 @@ import BoardSimple from '../../../components/boardSimple'
 import HeaderCronograma from '../../../components/planilla/cronograma/headerCronograma'
 import { EntityContext } from '../../../contexts/EntityContext';
 import NotFoundData from '../../../components/notFoundData';
-import ListHistorial from '../../../components/planilla/cronograma/list-historial';
+import AddHistorial from '../../../components/planilla/cronograma/add-historial';
 
 const AddCronograma = ({ success, cronograma }) => {
 
@@ -18,8 +18,8 @@ const AddCronograma = ({ success, cronograma }) => {
   const entity_context = useContext(EntityContext);
   
   useEffect(() => {
-    entity_context.fireEntity({ render: true });
-    return () => entity_context.fireEntity({ render: false });
+    entity_context.fireEntity({ render: true, entity_id: cronograma.campusId, disabled: true });
+    return () => entity_context.fireEntity({ render: false, disabled: false });
   }, [entity_context]);
 
   // render
@@ -33,7 +33,7 @@ const AddCronograma = ({ success, cronograma }) => {
           bg="light"
           options={[]}
         >
-          <ListHistorial cronograma={cronograma}/>
+          <AddHistorial cronograma={cronograma}/>
         </BoardSimple>
       </div>
     </>

@@ -1,6 +1,6 @@
-import React, { Fragment, useState, Component, useEffect, useContext } from "react";
+import React, { Fragment, useState, useEffect, useContext } from "react";
 import Show from "./show";
-import { Dropdown, Button, Icon, Form, Header, Progress } from 'semantic-ui-react';
+import { Dropdown, Button, Icon, Form, Header, Progress, Select } from 'semantic-ui-react';
 import Swal from "sweetalert2";
 import Modal from './modal';
 import Skeleton from 'react-loading-skeleton';
@@ -11,8 +11,7 @@ import { formatBytes } from '../services/utils';
 import Router from 'next/router';
 import atob from 'atob';
 import { ScreenContext } from '../contexts/ScreenContext'
-import { EntityContext } from "../contexts/EntityContext";
-import { AppContext } from "../contexts";
+import moment from 'moment';
 
 const InputFile = ({ id, name, onChange, error = false, children = null, title = "Select", accept = "*", icon = 'image', label = null }) => {
 
@@ -692,6 +691,48 @@ const SimpleList = ({ title, count, icon = "oi oi-chat", bg = "success", onClick
   )
 }
 
+const SelectMonth = ({ name, value, onChange = null, disabled = false }) => {
+  const [datos, setDatos] = useState([]);
+
+  const handleMonths = () => {
+    const months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    const newDatos = [];
+    months.forEach(m => {
+      const text = moment().month(m).format('MMMM');
+      newDatos.push({
+        key: `month-iter-${m}`,
+        text,
+        value: m + 1
+      })
+    });
+    // setting
+    setDatos([
+      { key: 'initial-month', text: 'Seleccionar', value: '' },
+      ...newDatos
+    ]);
+  }
+
+  const handleOnChange = ({ value }) => {
+    if (typeof onChange == 'function') {
+      onChange({ name, value });
+    }
+  }
+
+  useEffect(() => {
+    handleMonths();
+  }, [])
+
+  return (
+    <Select options={datos}
+      onChange={(e, obj) => handleOnChange(obj)}
+      className="capitalize"
+      name={name}
+      value={value || ''}
+      placeholder="Seleccionar Mes"
+      disabled={disabled}
+    />
+  )
+}
 
 export {
   Content,
@@ -715,5 +756,6 @@ export {
   DropZone,
   SimpleListContent,
   SimpleList,
-  funcBack
+  funcBack,
+  SelectMonth,
 };

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 import { Tab } from 'semantic-ui-react'
 import Work from './work';
@@ -12,6 +12,10 @@ import Obligacion from './obligacion';
 const TabCronograma = (props) => {
 
   const { edit, active, block, setActive, loading, setIsEditable, cronograma } = useContext(CronogramaContext);
+
+  const isPrincipal = useMemo(() => {
+    return cronograma?.planilla?.principal
+  }, [cronograma])
 
   const onTabChange = (e, { activeIndex }) => {
     setActive(activeIndex);
@@ -85,7 +89,7 @@ const TabCronograma = (props) => {
 
   return (
     <Tab
-      panes={cronograma.remanente ? panes : [...panes, ...otherPanes]} 
+      panes={isPrincipal && !cronograma.remanente ? [...panes, ...otherPanes] : panes} 
       menu={props.menu} 
       activeIndex={active} 
       onTabChange={onTabChange} 

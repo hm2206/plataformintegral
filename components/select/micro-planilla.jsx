@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { SelectBase } from './utils';
 import { microPlanilla } from '../../services/apis';
 
 
-const SelectPlanilla = ({ id = "id", principal = true, name, value, onChange, refresh = false, disabled = false }) => {
+const SelectPlanilla = ({ id = "id", principal = undefined, name, value, onChange, refresh = false, disabled = false }) => {
+    
+    const queryString = useMemo(() => {
+        const params = new URLSearchParams();
+        if (typeof principal != 'undefined') {
+            params.set('principal', principal);
+        }
+
+        return params.toString();
+    }, [principal])
+    
     return <SelectBase 
         api={microPlanilla}
-        url={`planillas?principal=${principal}`}
+        url={`planillas?${queryString}`}
         id={`select-planillas-${id}-${name}`}
         value={id}
         text="name"

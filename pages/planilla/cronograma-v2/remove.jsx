@@ -18,8 +18,8 @@ const RemoveCronograma = ({ success, cronograma }) => {
   const entity_context = useContext(EntityContext);
   
   useEffect(() => {
-    entity_context.fireEntity({ render: true });
-    return () => entity_context.fireEntity({ render: false });
+    entity_context.fireEntity({ render: true, entity_id: cronograma.campusId, disabled: true });
+    return () => entity_context.fireEntity({ render: false, disabled: false });
   }, []);
 
   // render
@@ -28,7 +28,7 @@ const RemoveCronograma = ({ success, cronograma }) => {
       <div className="col-md-12">
         <BoardSimple
           title={<HeaderCronograma cronograma={cronograma}/>}
-          info={["Agregar trabajadores al cronograma"]}
+          info={["Remover trabajadores del cronograma"]}
           prefix={<BtnBack/>}
           bg="light"
           options={[]}

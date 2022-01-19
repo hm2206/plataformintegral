@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Form, Button, Checkbox } from 'semantic-ui-react';
+import { Form, Button, Checkbox, Select } from 'semantic-ui-react';
 import Show from '../../show';
 import { microPlanilla } from '../../../services/apis';
 import { Confirm } from '../../../services/utils';
@@ -8,13 +8,12 @@ import { SelectPlanilla } from '../../select/micro-planilla';
 import { AppContext } from '../../../contexts';
 import { EntityContext } from '../../../contexts/EntityContext';
 import Modal from '../../modal';
+import { SelectMonth } from '../../Utils';
 
 const schemaDefault = {
     year: (new Date).getFullYear(), 
-    mes: (new Date).getMonth() + 1,
-    dias: 30,
-    adicional: 0,
-    type_id: 0,
+    month: (new Date).getMonth() + 1,
+    adicional: false
 }
 
 const CreateCronograma = ({ principal = true, onClose = null, onSave =  null }) => {
@@ -29,7 +28,6 @@ const CreateCronograma = ({ principal = true, onClose = null, onSave =  null }) 
   const [is_ready, setIsReady] = useState(false);
   const [form, setForm] = useState({});
   const [errors, setErrors] = useState({});
-  const [mode, setMode] = useState(undefined);
 
   // manejador de cambios de form
   const handleInput = ({ name, value }) => {
@@ -83,24 +81,7 @@ const CreateCronograma = ({ principal = true, onClose = null, onSave =  null }) 
     });
   }
 
-  const clone = async () => {
-    let answer = await Confirm("warning", `¿Estás seguro en clonar el cronograma?`, 'Clonar')
-    if (!answer) return false;
-    app_context.setCurrentLoading(true);
-    const payload = Object.assign({}, form);
-    payload.campusId = entity_context.entity_id;
-    await microPlanilla.post(`cronogramas/${mode}/clone`, payload)
-    .then(async () => {
-        app_context.setCurrentLoading(false);
-        await Swal.fire({ icon: 'success', text: `El cronograma se clonó correctamente!` });
-        setForm({ ...schemaDefault })
-    }).catch(() => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: 'No se pudo guardar los datos' })
-    });
-  }
-
-    // renderizado
+  // renderizado
   return (
     <Modal show={true}
       md="8"
@@ -138,22 +119,18 @@ const CreateCronograma = ({ principal = true, onClose = null, onSave =  null }) 
 
               <Form.Field className="col-md-6" error={errors.mes && errors.mes[0] ? true : false}>
                 <label htmlFor="">Mes <b className="text-danger">*</b></label>
-                <input
-                  className="text-left"
-                  type="number"
+                <SelectMonth
+                  disabled={true}
                   name="month"
-                  min="1"
-                  max="12"
-                  value={form.month || ""}  
-                  onChange={({ target }) => handleIntInput(target)}
-                  placeholder='Ingrese el mes'
+                  value={form?.month || ''}  
+                  onChange={(target) => handleIntInput(target)}
                 />
                 <label htmlFor="">{errors.mes && errors.mes[0] || ""}</label>
               </Form.Field>
 
               <div className="col-12"></div>
 
-              <Show condicion={mode === 'NEW'}>
+              <Show condicion={form?.planillaId}>
                 <Form.Field className="col-md-6">
                   <label htmlFor="">¿Es una planilla adicional?</label>
                   <div>
@@ -166,7 +143,7 @@ const CreateCronograma = ({ principal = true, onClose = null, onSave =  null }) 
                 </Form.Field>
               </Show>
 
-              <Show condicion={mode === 'NEW' && form.adicional == 1}>
+              <Show condicion={form.adicional == 1}>
                 <Form.Field className="col-md-6">
                   <label htmlFor="">¿Es una planilla remanente?</label>
                   <div>

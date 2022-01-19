@@ -18,8 +18,8 @@ const AddCronograma = ({ success, cronograma }) => {
   const entity_context = useContext(EntityContext);
   
   useEffect(() => {
-    entity_context.fireEntity({ render: true });
-    return () => entity_context.fireEntity({ render: false });
+    entity_context.fireEntity({ render: true, entity_id: cronograma.campusId, disabled: true });
+    return () => entity_context.fireEntity({ render: false, disabled: false });
   }, [entity_context]);
 
   // render
