@@ -45,7 +45,7 @@ const ItemRemuneration = ({ remuneration = {}, edit = false }) => {
 
   const canEdit = useMemo(() => { 
     return (remuneration?.isEdit && edit);
-  }, [remuneration])
+  }, [remuneration, edit])
 
   return (
     <div className="col-md-3 mb-3">
