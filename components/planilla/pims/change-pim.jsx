@@ -6,6 +6,7 @@ import { DropZone } from '../../Utils';
 import Show from '../../show';
 import { ToastContainer, toast } from 'react-toastify';
 import { microPlanilla } from '../../../services/apis';
+import Swal from 'sweetalert2';
 
 const ChangePim = ({ pim = {}, isEntry = true, onClose = null, onSave = null }) => {
 
@@ -45,13 +46,16 @@ const ChangePim = ({ pim = {}, isEntry = true, onClose = null, onSave = null }) 
   const handleSave = async () => {
     setLoading(true);
     toast.dismiss();
-    const payload = {};
-    payload.pimId = pim.id;
-    payload.amount = parseFloat(`${form.amount}`);
-    payload.mode = isEntry ? 'ENTRY' : 'EGRESS';
+    const payload = new FormData();
+    payload.set('pimId', pim.id);
+    payload.set('amount', parseFloat(`${form.amount}`));
+    payload.set('mode', isEntry ? 'ENTRY' : 'EGRESS');
+    payload.set('observation', form?.observation || null);
+    payload.set('file', form?.file || null);
     await microPlanilla.post(`pimLogs`, payload)
       .then(async res => {
-        await toast.success("El regístro se guardo correctamente!");
+        const successMsg = "El regístro se guardo correctamente!"
+        await Swal.fire({ icon: 'success', text: successMsg });
         if (typeof onSave == 'function') onSave(res.data);
       }).catch(() => {
         toast.error("El regístro no se pudo guardar!", {
