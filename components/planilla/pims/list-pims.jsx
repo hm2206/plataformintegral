@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import { format } from 'currency-formatter';
 import EditPim from './edit-pim';
 import ChangePim from './change-pim';
+import CalcPim from './calc-pim';
 
 const ListPims = ({ pim, pathname, query }) => {
 
@@ -60,7 +61,7 @@ const ListPims = ({ pim, pathname, query }) => {
           <div className="card">
             <div className="card-header">
               <div className="row">
-                <div className="col-md-4 col-10 mb-2">
+                <div className="col-md-4 col-12 mb-2">
                   <Input type='number'
                     fluid
                     name="year"
@@ -68,13 +69,17 @@ const ListPims = ({ pim, pathname, query }) => {
                     onChange={(e, data) => setYear(data.value)}
                   />
                 </div>
-                <div className="col-2 mb-2">
+                <div className="col-12 col-md-4 mb-2">
                   <Button basic
                     color='primary'
                     onClick={handleSearch}
                   >
                     <i className="fas fa-search"></i>
                   </Button>
+
+                  <CalcPim year={year}
+                    onCalc={handleSearch}
+                  />
                 </div>
               </div>
             </div>
