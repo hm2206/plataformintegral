@@ -11,7 +11,6 @@ import atob from 'atob';
 import Skeleton from 'react-loading-skeleton';
 import NotFound from '../../../components/notFound';
 import { parseUrl, Confirm, InputCredencias, InputAuth, InputEntity } from '../../../services/utils';
-import { SelectCronogramaCargo, SelectCronogramaTypeCategoria } from '../../../components/select/cronograma';
 import Router from 'next/router';
 import TabCronograma from '../../../components/planilla/cronograma/TabCronograma';
 import Swal from 'sweetalert2';
@@ -21,7 +20,6 @@ import ImpDescuento from '../../../components/planilla/cronograma/impDescuento';
 import Open from '../../../components/planilla/cronograma/open';
 import Cerrar from '../../../components/planilla/cronograma/close';
 import SearchCronograma from '../../../components/planilla/cronograma/searchCronograma';
-import { credencials } from '../../../env.json';
 import ModalReport from '../../../components/planilla/cronograma/modalReport';
 import ChangeMeta from '../../../components/planilla/cronograma/changeMeta';
 import ChangeCargo from '../../../components/planilla/cronograma/changeCargo';
@@ -338,8 +336,8 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
       // payload
       let payload = {
           token_verify: historial && historial.token_verify || "",
-          ClientId: credencials.ClientId,
-          ClientSecret: credencials.ClientSecret
+          ClientId: process?.env?.NEXT_PUBLIC_CLIENT_ID,
+          ClientSecret: process?.env?.NEXT_PUBLIC_CLIENT_SECRET
       }
       // request
       await unujobs.post(`my_boleta`, payload)

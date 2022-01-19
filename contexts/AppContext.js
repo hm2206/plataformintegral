@@ -13,7 +13,7 @@ export const AppContext = createContext();
 
 
 // exportando provedores
-export const AppProvider = ({ children, success, app, env, pathname, query }) => {
+export const AppProvider = ({ children, success, app, pathname, query }) => {
 
     // screen context
     const { toggle, setToggle } = useContext(ScreenContext);
@@ -75,7 +75,6 @@ export const AppProvider = ({ children, success, app, env, pathname, query }) =>
         <AppContext.Provider value={{ 
                 success, 
                 app, 
-                env, 
                 pathname, 
                 query,
                 is_internet, 

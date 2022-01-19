@@ -4,7 +4,6 @@ import { tramite, onProgress } from '../services/apis';
 import Show from './show';
 import Swal from 'sweetalert2';
 import { Button } from 'semantic-ui-react';
-import { credencials } from '../env.json'
 import { AuthContext } from '../contexts/AuthContext'
 
 const options = {
@@ -50,8 +49,8 @@ const Visualizador = ({
         responseType: 'blob',
         onDownloadProgress: (evt) => onProgress(evt, setCurrentPercent),
         headers: {
-            ClientId: credencials?.ClientId,
-            ClientSecret: credencials?.ClientSecret,
+            ClientId: process?.env?.NEXT_PUBLIC_CLIENT_ID,
+            ClientSecret: process?.env?.NEXT_PUBLIC_CLIENT_SECRET,
             Authorization: `Bearer ${auth_context?.token}`
         }
     }

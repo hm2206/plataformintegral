@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import App from 'next/app';
-import env from '../env.json';
 import { ScreenProvider } from '../contexts/ScreenContext';
 import { AuthProvider } from '../contexts/AuthContext'; 
 import Router from 'next/router';
@@ -43,7 +42,7 @@ Router.onRouteChangeError = () => {
 const IntegrationApp = ({ app, success, pageProps, Component, auth_token, pathname, query }) => {
 
 	// propos components
-	let appProps = { success, app, env, pathname, query }
+	let appProps = { success, app, pathname, query }
 
 	// recoveri token
 	const recoveryToken = () => {

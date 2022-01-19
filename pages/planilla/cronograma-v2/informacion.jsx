@@ -20,7 +20,6 @@ import ImpDescuento from '../../../components/planilla/cronograma/impDescuento';
 import Open from '../../../components/planilla/cronograma/open';
 import Cerrar from '../../../components/planilla/cronograma/close';
 import SearchCronograma from '../../../components/planilla/cronograma/searchCronograma';
-import { credencials } from '../../../env.json';
 import ModalReport from '../../../components/planilla/cronograma/modalReport';
 import ChangeMeta from '../../../components/planilla/cronograma/changeMeta';
 import ChangeCargo from '../../../components/planilla/cronograma/changeCargo';
@@ -337,8 +336,8 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
       // payload
       let payload = {
           token_verify: historial && historial.token_verify || "",
-          ClientId: credencials.ClientId,
-          ClientSecret: credencials.ClientSecret
+          ClientId: process?.env?.NEXT_PUBLIC_CLIENT_ID,
+          ClientSecret: process?.env?.NEXT_PUBLIC_CLIENT_SECRET
       }
       // request
       await unujobs.post(`my_boleta`, payload)

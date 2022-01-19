@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import Modal from './modal';
 import{ Feed } from 'semantic-ui-react';
-import Router from 'next/router';
-import { apps } from '../env.json';
+
+const apps = [];
 
 export default class DownloadApps extends Component
 {

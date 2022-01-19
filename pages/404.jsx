@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react';
 import Head from 'next/head'
-import { app } from '../env.json';
 
 
 export default class Error extends Component
@@ -10,7 +9,7 @@ export default class Error extends Component
         return (
             <Fragment>
                 <Head>
-                    <title>{app.name} | Error: Página no encontrada!</title>
+                    <title>Integración | Error: Página no encontrada!</title>
                 </Head>
 
                 <div className="col-md-12">
