@@ -271,8 +271,6 @@ const Remuneracion = () => {
           disabled={true}
         />
       </Show>
-      {/* toast */}
-      <ToastContainer/>
     </Form>
   )
 }
