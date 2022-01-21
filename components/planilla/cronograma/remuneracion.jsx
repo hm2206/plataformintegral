@@ -146,6 +146,10 @@ const Remuneracion = () => {
     ADD_REMUNERATION: "ADD_REMUNERATION"
   }
 
+  const headers = {
+    CronogramaId: historial.cronogramaId
+  }
+
   const findRemuneracion = async () => {
     setCurrentLoading(true);
     setBlock(true);
@@ -183,7 +187,7 @@ const Remuneracion = () => {
     }
     // send changes
     app_context.setCurrentLoading(true);
-    await microPlanilla.put(`historials/${historial.id}/remuneracions`, form, { headers: { CronogramaID: historial.cronogramaId } })
+    await microPlanilla.put(`historials/${historial.id}/remunerations`, { remunerations: form }, { headers })
     .then(() => {
       app_context.setCurrentLoading(false);
       toast.success(`Los cambios se guardarón correctamente!`)
