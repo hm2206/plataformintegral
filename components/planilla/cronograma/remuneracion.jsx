@@ -195,6 +195,9 @@ const Remuneracion = () => {
         hideProgressBar: true
       });
     });
+    // enaled
+    setSend(false);
+    setBlock(false);
   }
 
   const handleProccess = () => {
