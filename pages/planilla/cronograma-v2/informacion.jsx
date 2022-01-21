@@ -56,6 +56,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
   const [option, setOption] = useState('');
   const [refresh, setRefresh] = useState(false);
   const [historial, setHistorial] = useState({});
+  const [isProcessing, setIsProcessing] = useState(cronograma.processing || false);
   const [config_edad, setConfigEdad] = useState({});
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -97,7 +98,9 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
       .then(async res => {
         let { items, meta } = res.data;
         const currentHistorial = items[0] || {};
+        if (!currentHistorial?.id) throw new Error();
         // setting
+        setIsProcessing(currentHistorial?.cronograma?.processing || false);
         setHistorial(currentHistorial);
         setConfigEdad({});
         setTotal(meta?.totalItems);
@@ -202,7 +205,10 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     let answer = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
     if (!answer) return;
     await processCronograma.processing()
-      .then(() => findHistorial())
+      .then(() => {
+        setIsProcessing(true);
+        findHistorial();
+      })
       .catch(() => (null))
   }
 
@@ -364,10 +370,17 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                 La configuración de pago no está sincronizada
                               </Message>
                             </Show>
-                            {/* mensaje cuando el trabajador superó el limite de edad */}
-                            <Show condicion={config_edad && config_edad.valido == 0}>
+                            {/* mensaje cuando el cronograma debe procesarce */}
+                            <Show condicion={!loading && cronograma.state && isProcessing}>
                               <Message color="yellow">
-                                El trabajador ya superó el limite de edad({config_edad.limite_edad}) establecido en la partición presupuestal.
+                                Se encontró actualizaciones de la configuración de pago.
+                                <div className="text-right">
+                                  <span className='ml-2 text-primary cursor-pointer'
+                                    onClick={processing}
+                                  >
+                                    <u>Procesar Cronograma</u>
+                                  </span>
+                                </div>
                               </Message>
                             </Show>
                             {/* mensaje cuento el cronograma esta cerrado y el trabajador no tiene generado su token */}

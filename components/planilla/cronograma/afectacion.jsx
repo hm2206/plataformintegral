@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { microPlanilla } from '../../../services/apis';
-import useProcessCronograma from './hooks/useProcessCronograma';
 import { Form, Checkbox } from 'semantic-ui-react';
 import { SelectPim } from '../../select/micro-planilla';
 import Swal from 'sweetalert2';
@@ -9,7 +8,6 @@ import { AppContext } from '../../../contexts/AppContext';
 import Skeleton from 'react-loading-skeleton';
 import { useMemo } from 'react';
 import Show from '../../show';
-import { ToastContainer, toast } from 'react-toastify';
 
 const PlaceHolderInput = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
@@ -93,9 +91,6 @@ const Afectacion = () => {
   const [currentPim, setCurrentPim] = useState({});
   const [currentTypeCargo, setCurrentTypeCargo] = useState({});
 
-  // hooks
-  const processCronograma = useProcessCronograma(cronograma);
-  
   // app
   const app_context = useContext(AppContext);
 
@@ -105,8 +100,7 @@ const Afectacion = () => {
   }, [historial])
 
   const displayAfp = useMemo(() => {
-    if (!historial?.afp?.private) return historial?.afp?.name;
-    return `${historial?.afp?.name} ${historial?.afp?.typeAfp}`;
+    return historial?.afp || {}
   }, [historial?.afp]);
 
   const displayPim = useMemo(() => {
@@ -224,7 +218,7 @@ const Afectacion = () => {
       <InputCustom
         title="Ley Social"
         name="leySocial"
-        value={displayAfp}
+        value={`${displayAfp.name} ${displayAfp.isPrivate ? displayAfp.typeAfp : ''}`}
         readOnly={true}
         loading={loading}
       />
