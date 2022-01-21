@@ -138,6 +138,7 @@ const Remuneracion = () => {
   const [options, setOptions] = useState();
   const processCronograma = useProcessCronograma(cronograma);
   const [form, setForm] = useState([]);
+  const [isRefresh, setIsRefresh] = useState(false);
 
   // app
   const app_context = useContext(AppContext);
@@ -191,8 +192,9 @@ const Remuneracion = () => {
     .then(() => {
       app_context.setCurrentLoading(false);
       toast.success(`Los cambios se guardarón correctamente!`)
-      setEdit(false);
       findRemuneracion();
+      setEdit(false);
+      setIsRefresh(true);
     }).catch(() => {
       app_context.setCurrentLoading(false);
       toast.error(`Ocurrio un error al guardar los datos!`, {
@@ -225,13 +227,14 @@ const Remuneracion = () => {
   useEffect(() => {
       if (send) updateRemuneraciones();
   }, [send]);
- 
+
   return (
     <Form className="row">
       <div className="col-md-12">
-        <Resume
+        <Resume 
+          onReady={() => setIsRefresh(false)}
           id={historial?.id}
-          refresh={send}
+          refresh={current_loading}
           loading={loading}
         />
       </div>

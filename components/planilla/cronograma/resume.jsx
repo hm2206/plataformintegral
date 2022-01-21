@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 
 const PlaceHolderButton = ({ count = 1 }) => <Skeleton height="38px" count={count}/>
 
-const Resume = ({ id, refresh = false, loading = false }) => {
+const Resume = ({ id, refresh = true, loading = false, onReady = null }) => {
   
   const [data, setData] = useState({});
   const [currentLoading, setCurrentLoading] = useState(false);
@@ -20,15 +20,12 @@ const Resume = ({ id, refresh = false, loading = false }) => {
       .then(res => setData(res.data))
       .catch(() => setData({}))
     setCurrentLoading(false);
+    if (typeof onReady == 'function') onReady();
   }
 
   useEffect(() => {
-    if (id) findResume();
-  }, [id]);
-
-  useEffect(() => {
-    if (refresh) findResume();
-  }, [refresh]);
+    if (refresh && id) findResume();
+  }, [refresh, id]);
 
   return (
     <div className="row justify-content-center">
