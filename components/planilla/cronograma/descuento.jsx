@@ -269,7 +269,6 @@ const Descuento = () => {
           info={historial?.info || {}}
           onClose={() => setOptions()}
           onSave={handleProccess}
-          disabled={true}
         />
       </Show>
     </Form>

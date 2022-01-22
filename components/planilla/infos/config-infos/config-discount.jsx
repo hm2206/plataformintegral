@@ -291,8 +291,8 @@ const ConfigDiscount = ({ info = {}, disabled = false, onClose = null, onSave = 
               <ItemTypeDiscount
                 key={`list-item-type-discount-${index}`}
                 infoTypeDiscount={d}
-                onUpdate={() => setIsRefresh(true)}
-                onDelete={() => setIsRefresh(true)}
+                onUpdate={handleSave}
+                onDelete={handleSave}
                 disabled={disabled}
               />
             )}

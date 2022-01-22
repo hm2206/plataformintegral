@@ -272,7 +272,6 @@ const Remuneracion = () => {
           info={historial?.info || {}}
           onClose={() => setOptions()}
           onSave={handleProccess}
-          disabled={true}
         />
       </Show>
     </Form>

@@ -311,8 +311,8 @@ const ConfigRemuneracion = ({ info = {}, disabled = false, onClose = null, onSav
               <ItemTypeRemuneration
                 key={`list-item-type-remuneration-${index}`}
                 infoTypeRemuneration={d}
-                onUpdate={() => setIsRefresh(true)}
-                onDelete={() => setIsRefresh(true)}
+                onUpdate={handleSave}
+                onDelete={handleSave}
                 disabled={disabled}
               />
             )}
