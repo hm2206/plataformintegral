@@ -8,7 +8,7 @@ import { AppContext } from '../../../contexts/AppContext';
 import Resume from './resume';
 import ConfigRemuneration from '../infos/config-infos/config-remuneracion';
 import useProcessCronograma from './hooks/useProcessCronograma';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const PlaceHolderButton = ({ count = 1 }) => <Skeleton height="38px" count={count}/>
 
@@ -37,11 +37,11 @@ const ToggleEditRemuneration = ({ isEdit = false, onToggle = null }) => {
   const toggleEdit = () => typeof onToggle == 'function' ? onToggle(!isEdit) : null;
 
   return (
-    <span title={`Edición ${isEdit ? 'habilitada' : 'bloqueada'}`}
+    <span title={isEdit ? 'Edición habilitada' : 'Automatico'}
       className={`toggle-edit badge badge-${isEdit ? 'primary' : 'light'} cursor-pointer`}
       onClick={toggleEdit}
     >
-      <i className={`fas fa-${isEdit ? 'pencil-alt' : 'lock'}`}></i>
+      <i className={`fas fa-${isEdit ? 'pencil-alt' : 'clock'}`}></i>
     </span>
   )
 }
@@ -136,9 +136,8 @@ const Remuneracion = () => {
   const [remuneraciones, setRemuneraciones] = useState([]);
   const [error, setError] = useState(false);
   const [options, setOptions] = useState();
-  const processCronograma = useProcessCronograma(cronograma);
   const [form, setForm] = useState([]);
-  const [isRefresh, setIsRefresh] = useState(false);
+  const processCronograma = useProcessCronograma(cronograma);
 
   // app
   const app_context = useContext(AppContext);
@@ -194,7 +193,6 @@ const Remuneracion = () => {
       toast.success(`Los cambios se guardarón correctamente!`)
       findRemuneracion();
       setEdit(false);
-      setIsRefresh(true);
     }).catch(() => {
       app_context.setCurrentLoading(false);
       toast.error(`Ocurrio un error al guardar los datos!`, {
@@ -232,7 +230,6 @@ const Remuneracion = () => {
     <Form className="row">
       <div className="col-md-12">
         <Resume 
-          onReady={() => setIsRefresh(false)}
           id={historial?.id}
           refresh={current_loading}
           loading={loading}
@@ -262,7 +259,7 @@ const Remuneracion = () => {
           <Button fluid
             className='mt-4'
             onClick={() => setOptions(objectOptions.ADD_REMUNERATION)}>
-            <i className="fas fa-plus"></i>
+            <i className="fas fa-cog"></i>
           </Button>
         </div>
       </Show>

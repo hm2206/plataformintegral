@@ -1,15 +1,13 @@
-import React, { useContext, useState, useEffect, Fragment } from 'react';
+import React, { useContext, useState, useEffect, Fragment, useMemo } from 'react';
 import { microPlanilla } from '../../../services/apis';
-import { Button, Form, Input, Icon } from 'semantic-ui-react';
-import Swal from 'sweetalert2';
+import { Button, Form } from 'semantic-ui-react';
 import Show from '../../show';
-import { Confirm } from '../../../services/utils';
 import Skeleton from 'react-loading-skeleton';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../../contexts/AppContext';
 import Resume from './resume';
 import useProcessCronograma from './hooks/useProcessCronograma';
-import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import ConfigDiscount from '../infos/config-infos/config-discount';
 
 const PlaceHolderButton = ({ count = 1 }) => <Skeleton height="38px" count={count}/>
@@ -34,90 +32,91 @@ const PlaceholderDescuento = () => (
     </Fragment>
 );
 
-const ItemDiscount = ({ loading = false, discount = {}, cronograma = {}, historial = {}, edit = false }) => {
+const ToggleEditDiscount = ({ isEdit = false, onToggle = null }) => {
+
+  const toggleEdit = () => typeof onToggle == 'function' ? onToggle(!isEdit) : null;
+
+  return (
+    <span title={isEdit ? 'Edición habilitada' : 'Calculo Automático'}
+      className={`toggle-edit badge badge-${isEdit ? 'primary' : 'light'} cursor-pointer`}
+      onClick={toggleEdit}
+    >
+      <i className={`fas fa-${isEdit ? 'pencil-alt' : 'clock'}`}></i>
+    </span>
+  )
+}
+
+const ItemDiscount = ({ discount = {}, edit = false, onModify = null }) => {
 
   const [amount, setAmount] = useState(discount?.amount || 0);
+  const [isEdit, setIsEdit] = useState(discount?.isEdit || false);
 
   const handleInput = ({ value }) => {
     let newValue = value;
-    if (value) newValue = parseInt(`${value}`);
+    if (value) newValue = parseFloat(`${value}`);
     setAmount(newValue);
+    onHandleInput(isEdit, newValue);
   }
+
+  const handleEdit = (newEdit) => {
+    setIsEdit(newEdit);
+    onHandleInput(newEdit, amount);
+  }
+
+  const onHandleInput = (newEdit, newAmount) => {
+    const obj = {
+      id: discount?.id,
+      isEdit: newEdit,
+      amount: parseFloat(`${newAmount || 0}`)
+    }
+    // emitter
+    if (typeof onModify == 'function') onModify(obj);
+  }
+
+  const canEdit = useMemo(() => { 
+    return (isEdit && edit);
+  }, [isEdit, edit])
+
+  useEffect(() => {
+    if (!edit) {
+      setAmount(discount?.amount || 0);
+      setIsEdit(discount?.isEdit || false);
+    }
+  }, [edit]);
+
+  useEffect(() => {
+    if (!isEdit) setAmount(discount?.amount || 0);
+  }, [isEdit]);
 
   return (
     <div className="col-md-3 mb-3">
-      <span className={amount > 0 ? 'text-red' : ''}>
-        {discount?.typeDiscount?.code}
-      </span>
-        .-
-      <span className={amount > 0 ? 'text-primary' : ''}>
-        {discount?.typeDiscount?.description}
-      </span>
-              
-      <Show condicion={discount.isEdit && !discount.isSync}>
-        <span className={`ml-1 ${edit ? 'cursor-pointer' : 'disabled'} font-9 badge badge-${discount.isSync ? 'dark' : 'danger'}`}
-          title={`Sincronizar descuento global ${!discount.isSync ? '(Modificado)' : ''}`}
-        >
-          <i className="fas fa-sync"></i>
+      <span>
+        <span className={amount > 0 ? 'text-red' : ''}>
+          {discount?.typeDiscount?.code}
         </span>
-      </Show>
+          .-
+        <span className={amount > 0 ? 'text-primary' : ''}>
+          {discount?.typeDiscount?.description}
+        </span>
+      </span>
 
       <Form.Field>
-        <div className="row justify-aligns-center mt-1">
-          <Show condicion={discount.isEdit}>
-            <div className={!cronograma.remanente && edit ? 'col-md-9 col-9' : 'col-md-12 col-12'}>
-              <input type="number"
-                step="any" 
-                className={edit ? 'input-active' : ''}
-                value={amount}
-                readOnly={!edit}
-                min="0"
-              />
-            </div>
-
-            <Show condicion={!cronograma.remanente && edit}>
-              <div className="col-md-3 col-3">
-                <Button 
-                  icon="asl"
-                  style={{ width: "100%", height: "100%" }}
-                  size="small"
-                  basic
-                  readOnly={loading || !edit || !historial.isPay}>
-                </Button>
-              </div>
-            </Show>
-          </Show>
-
-          <Show condicion={!discount.isEdit}>
-            <Show condicion={!edit}>
-              <div className="col-md-12 col-12">
-                <Input icon='wait' iconPosition='left' 
-                  value={amount || 0} 
-                  readOnly
-                />
-              </div>
-            </Show>
-
-            <Show condicion={edit}>
-              <div className="col-md-9 col-9">
-                <input type="number"
-                  step="any" 
-                  value={amount}
-                  readOnly
-                  min="0"
-                />
-              </div>
-              <div className="col-md-3 col-3">
-                <Button 
-                  icon="wait"
-                  style={{ width: "100%", height: "100%" }}
-                  size="small"
-                  disabled={loading || !edit}>
-                </Button>
-              </div>
-            </Show>
-          </Show>
-        </div>
+        {/* toggle */}
+        <Show condicion={edit}>
+          <ToggleEditDiscount
+            isEdit={isEdit}
+            onToggle={handleEdit}
+          />
+        </Show>
+        {/* input */}
+        <input type="number"
+          step="any" 
+          value={amount}
+          className={canEdit ? 'input-active' : ''}
+          disabled={!edit || !isEdit}
+          onChange={({ target }) => handleInput(target)}
+          min="0"
+        />
       </Form.Field>
     </div>
   )
@@ -129,9 +128,9 @@ const Descuento = () => {
   const { edit, setEdit, loading, send, historial, setBlock, setSend, cronograma, setIsEditable, setIsUpdatable, setRefresh } = useContext(CronogramaContext);
   const [current_loading, setCurrentLoading] = useState(true);
   const [descuentos, setDescuentos] = useState([]);
-  const [old, setOld] = useState([]);
   const [error, setError] = useState(false);
   const [options, setOptions] = useState();
+  const [form, setForm] = useState([]);
   const processCronograma = useProcessCronograma(cronograma);
 
   // app
@@ -141,6 +140,10 @@ const Descuento = () => {
     ADD_DISCOUNT: "ADD_DISCOUNT"
   }
 
+  const headers = {
+    CronogramaId: historial.cronogramaId
+  }
+
   const findDescuento = async () => {
     setCurrentLoading(true);
     setBlock(true);
@@ -148,11 +151,9 @@ const Descuento = () => {
       .then(({ data }) => {
         const { items } = data;
         setDescuentos(items || []);
-        setOld(items || []);
       })
       .catch(() => {
         setDescuentos([]);
-        setOld([]);
         setError(true);
       });
     setCurrentLoading(false);
@@ -165,6 +166,13 @@ const Descuento = () => {
       .catch(() => null)
   }
 
+  const handleForm = (obj = {}) => {
+    const newForm = form.filter(f => f.id != obj.id);
+    // add
+    newForm.push(obj);
+    return setForm(newForm);
+  }
+
   // primera entrada
   useEffect(() => {
     setIsEditable(true);
@@ -175,59 +183,39 @@ const Descuento = () => {
 
   // cancelar edit
   useEffect(() => {
-    if (!edit && !send) setDescuentos(old);
+    if (!edit && !send) setForm([]);
   }, [!edit]);
 
   // actualizar descuentos
   const updateDescuentos = async () => {
-    const form = new FormData();
-    let datos = await descuentos.filter(des => des.send == true);
-    form.append('_method', 'PUT');
-    form.append('descuentos', JSON.stringify(datos));
+    toast.dismiss();
     // valdiar que se modificarón los datos
-    if (!datos.length) return await Swal.fire({ icon: 'warning', text: 'No se encontraron cambios' });
-    // send changes
-    else {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`descuento/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        setEdit(false);
-        await findDescuento();
+    if (!form.length) {
+      toast.warning("No se encontraron cambios", { 
+        hideProgressBar: true
       })
-      .catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      });
-    }
-    setSend(false);
-    setBlock(false);
-  }
-
-  // editar descuento
-  const handleEdit = async (obj, edit = 0) => {
-    let answer = await Confirm("warning", `Deseas ${edit ? 'Desactivar' : 'Activar'} el calculo automático para "${obj.descripcion}"`, "Confirmar");
-    if (answer) {
-      app_context.setCurrentLoading(true);
-      setBlock(true);
-      await unujobs.post(`descuento/${obj.id}/edit`, { _method: 'PUT', edit }, { headers: { CronogramaID: cronograma.id, EntityId: cronograma.entity_id } })
-      .then(async res => { 
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        setEdit(false);
-        setRefresh(true);
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      })
+      // cancel
       setSend(false);
       setBlock(false);
+      return;
     }
+    // send changes
+    app_context.setCurrentLoading(true);
+    await microPlanilla.put(`historials/${historial.id}/discounts`, { discounts: form }, { headers })
+    .then(() => {
+      app_context.setCurrentLoading(false);
+      toast.success(`Los cambios se guardarón correctamente!`)
+      findDescuento();
+      setEdit(false);
+    }).catch(() => {
+      app_context.setCurrentLoading(false);
+      toast.error(`Ocurrio un error al guardar los datos!`, {
+        hideProgressBar: true
+      });
+    });
+    // enaled
+    setSend(false);
+    setBlock(false);
   }
 
   // update descuentos
@@ -240,7 +228,7 @@ const Descuento = () => {
       <div className="col-md-12">
         <Resume
           id={historial?.id}
-          refresh={send}
+          refresh={current_loading}
           loading={loading}
         />
       </div>
@@ -257,8 +245,7 @@ const Descuento = () => {
             key={`list-item-discount-${index}`}
             discount={obj}
             edit={edit}
-            cronograma={cronograma}
-            historial={historial}
+            onModify={handleForm}
           />
         )}
       </Show>
@@ -269,7 +256,7 @@ const Descuento = () => {
           <Button fluid
             className='mt-4'
             onClick={() => setOptions(objectOptions.ADD_DISCOUNT)}>
-            <i className="fas fa-plus"></i>
+            <i className="fas fa-cog"></i>
           </Button>
         </div>
       </Show>
@@ -285,11 +272,8 @@ const Descuento = () => {
           disabled={true}
         />
       </Show>
-      {/* toast */}
-      <ToastContainer/>
     </Form>
   )
 }
-
 
 export default Descuento;

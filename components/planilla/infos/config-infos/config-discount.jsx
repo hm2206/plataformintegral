@@ -104,7 +104,7 @@ const ItemTypeDiscount = ({ infoTypeDiscount = {}, disabled = false, onUpdate = 
           disabled={disabled || disabled}
         />
       </td>
-      <td className='text-center'>
+      <td className='text-right'>
         <Button.Group size='mini'>
           <Show condicion={isEdit} predeterminado={
             <>
@@ -214,7 +214,7 @@ const CreateTypeDiscount = ({ info = {}, onSave = null }) => {
           disabled={currentLoading}
         />
       </td>
-      <td className='text-center'>
+      <td className='text-right'>
         <Button color='teal'
           disabled={!isCan || currentLoading}
           onClick={handleSave}
@@ -275,9 +275,9 @@ const ConfigDiscount = ({ info = {}, disabled = false, onClose = null, onSave = 
         <table className='table table-striped'>
           <thead>
             <tr>
-              <th width="40%">Descuento</th>
+              <th width="50%">Descuento</th>
               <th className='text-left' width='25%'>Monto</th>
-              <th className='text-center'>Opciones</th>
+              <th className='text-right'>Opciones</th>
             </tr>
           </thead>
           <tbody>
