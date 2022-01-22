@@ -68,6 +68,25 @@ const SelectCargo = ({ id = "id", name, value, onChange, refresh = false, disabl
     />
 }
 
+const SelectTypeAffiliation = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+        api={microPlanilla}
+        url={`typeAffiliations`}
+        id={`select-type_affiliations-${id}-${name}`}
+        value={id}
+        text="name"
+        obj="typeAffiliations"
+        displayText={(data) => `${data?.typeDiscount?.code}.- ${data?.name}`}
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Tip. Afiliación"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
 const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
         active={active}
@@ -310,4 +329,5 @@ export {
     SelectTypeRemuneration,
     SelectTypeDiscount,
     SelectTypeAportation,
+    SelectTypeAffiliation,
 };
