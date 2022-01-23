@@ -8,7 +8,6 @@ import { useMemo } from 'react';
 import CreateAffiliation from './create-affiliation';
 import { Confirm } from '../../../services/utils';
 import { toast } from 'react-toastify';
-import { AppContext } from '../../../contexts';
 
 const PlaceHolderButton = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
@@ -55,7 +54,7 @@ const PlaceholderSindicato = () => {
   );
 }
 
-const SindicatoItem = ({ affiliation = {}, edit = false, onDelete = null, onEdit = null }) => {
+const SindicatoItem = ({ affiliation = {}, edit = false, onDelete = null, onUpdate = null }) => {
 
   const [amount, setAmount] = useState(affiliation?.amount);
   const [isPercent, setIsPercent] = useState(affiliation?.isPercent);
@@ -100,14 +99,21 @@ const SindicatoItem = ({ affiliation = {}, edit = false, onDelete = null, onEdit
     setPercent(affiliation?.percent)
   }
 
-  const handleOnEdit = () => {
-    const obj = {
-      id: affiliation.id,
-      isPercent,
-      amount: isPercent ? percent : amount
-    }
-    // send 
-    if (typeof onEdit == 'function') onEdit(obj);
+  const handleSave = async () => {
+    const answer = await Confirm('warning', '¿Estás seguro guardar los cambios?');
+    if (!answer) return;
+    setCurrentLoading(true);
+    const payload = {};
+    payload.isPercent = isPercent == true;
+    payload.amount = isPercent ? parseFloat(`${percen}`) : parseFloat(`${amount}`);
+    await microPlanilla.put(`affiliations/${affiliation?.id}`, payload)
+    .then(() => {
+      toast.success(`El regístro se actualizó correctamente!`)
+      if (typeof onUpdate == 'function') onUpdate(affiliation);
+    }).catch(() => {
+      toast.error(`No se pudó actualizar el regístro!`)
+    });
+    setCurrentLoading(false)
   }
 
   useEffect(() => {
@@ -117,10 +123,6 @@ const SindicatoItem = ({ affiliation = {}, edit = false, onDelete = null, onEdit
       setPercent(affiliation?.percent || 0);
     }
   }, [edit]);
-
-  useEffect(() => {
-    if (edit) handleOnEdit();
-  }, [amount, isPercent, percent]);
 
   return (
     <div className="col-md-6 col-lg-3 mb-2 col-12">
@@ -148,7 +150,7 @@ const SindicatoItem = ({ affiliation = {}, edit = false, onDelete = null, onEdit
           </Show>
         </div>
         {/* monto */}
-        <div className='col-10'>
+        <div className='col-12'>
           {/* toggle edit */}
           <Show condicion={edit}>
             <ToggleEditDiscount
@@ -175,15 +177,6 @@ const SindicatoItem = ({ affiliation = {}, edit = false, onDelete = null, onEdit
             />
           </Show>
         </div>
-        {/* delete */}
-        <div className='col-2 text-right'> 
-          <Button color='red'
-            fluid
-            disabled={!edit || currentLoading}
-            icon="trash"
-            onClick={handleDelete}
-          />
-        </div>
         {/* fecha */}
         <Show condicion={isOver}>
           <div className="col-12">
@@ -191,6 +184,33 @@ const SindicatoItem = ({ affiliation = {}, edit = false, onDelete = null, onEdit
               className='mb-2'
               value={displayTypeAffiliationDate}
             />
+          </div>
+        </Show>
+        {/* options */}
+        <Show condicion={edit}>
+          <div className='col-12 text-right'> 
+            <Button.Group>
+              <Show condicion={!currentLoading}
+                predeterminado={
+                  <Button
+                    label="Cargando"
+                    loading
+                  />
+                }
+              >
+                <Button color='blue'
+                  disabled={!edit}
+                  basic
+                  icon="save"
+                  onClick={handleSave}
+                />
+                <Button color='red'
+                  disabled={!edit}
+                  icon="trash"
+                  onClick={handleDelete}
+                />
+              </Show>
+            </Button.Group>
           </div>
         </Show>
         <hr />
@@ -202,21 +222,14 @@ const SindicatoItem = ({ affiliation = {}, edit = false, onDelete = null, onEdit
 const Sindicato = () => {
 
   // cronograma
-  const { edit, setEdit, setRefresh, loading, historial, setBlock, cronograma, send, setSend, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
+  const { edit, setRefresh, loading, historial, setBlock, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
   const [current_loading, setCurrentLoading] = useState(true);
   const [sindicatos, setSindicatos] = useState([]);
   const [error, setError] = useState(false);
   const [options, setOptions] = useState();
-  const [form, setForm] = useState([]);
-
-  const app_context = useContext(AppContext);
 
   const switchOptions = {
     CREATE: "CREATE"
-  }
-
-  const headers = {
-    CronogramaId: historial.cronogramaId
   }
 
   // obtener descuentos detallados
@@ -245,61 +258,14 @@ const Sindicato = () => {
     setRefresh(true);
     setOptions();
   }
-
-  const handleForm = (obj = {}) => {
-    const newForm = form.filter(f => f.id != obj.id);
-    // add
-    newForm.push(obj);
-    return setForm(newForm);
-  }
-
-  const updateAffiliations = async () => {
-    toast.dismiss();
-    // valdiar que se modificarón los datos
-    if (!form.length) {
-      toast.warning("No se encontraron cambios", {
-        hideProgressBar: true
-      })
-      // cancel
-      setSend(false);
-      setBlock(false);
-      return;
-    }
-    // send changes
-    app_context.setCurrentLoading(true);
-    await microPlanilla.put(`historials/${historial.id}/affiliations`, { affiliations: form }, { headers })
-      .then(() => {
-        app_context.setCurrentLoading(false);
-        toast.success(`Los cambios se guardarón correctamente!`)
-        findSindicato();
-        setEdit(false);
-      }).catch(() => {
-        app_context.setCurrentLoading(false);
-        toast.error(`Ocurrio un error al guardar los datos!`, {
-          hideProgressBar: true
-        });
-      });
-    // enaled
-    setSend(false);
-    setBlock(false);
-  }
     
   // primera carga
   useEffect(() => {
     setIsEditable(true);
-    setIsUpdatable(true);
+    setIsUpdatable(false);
     if (historial.id) findSindicato();
     return () => { }
   }, [historial.id]);
-  
-  // update affiliations
-  useEffect(() => {
-    if (send) updateAffiliations();
-  }, [send]);
-
-  useEffect(() => {
-    if (!edit) setForm([]);
-  }, [edit])
 
   return (
     <Form className="row">
@@ -336,12 +302,10 @@ const Sindicato = () => {
             edit={edit}
             affiliation={obj}
             onDelete={handleDelete}
-            onEdit={handleForm}
+            onUpdate={handleSave}
           />
         )}
       </Show>
-
-      {JSON.stringify(form)}
 
       {/* Crear */}
       <Show condicion={options == switchOptions.CREATE}>
