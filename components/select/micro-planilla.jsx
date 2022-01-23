@@ -128,7 +128,7 @@ const SelectAfp = ({ id = "id", name, value, onChange, refresh = false, disabled
     />
 }
 
-const SelectBank = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
+const SelectBank = ({ id = "id", name, active = false, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
         api={microPlanilla}
         url={`banks`}
@@ -143,6 +143,7 @@ const SelectBank = ({ id = "id", name, value, onChange, refresh = false, disable
         refresh={refresh}
         execute={true}
         disabled={disabled}
+        active={active}
     />
 }
 

@@ -22,7 +22,8 @@ export const FieldCustom = ({ errors = {}, name = "", title = "", required = fal
 export const InputCustom = ({ type = "text",
   errors = {}, name = "", title = "",
   required = false, value = null,
-  onChange = null, className = null
+  onChange = null, className = null,
+  readOnly = false
 }) => {
 
   const handleInput = ({ target = {} }) => {
@@ -43,7 +44,8 @@ export const InputCustom = ({ type = "text",
         name={name}
         value={value || ''}
         onChange={handleInput}
-        className={className || ``}
+        className={`${readOnly ? '' : 'input-active'} ${className || ``}`}
+        readOnly={readOnly}
       />
     </FieldCustom>
   )
@@ -52,7 +54,8 @@ export const InputCustom = ({ type = "text",
 export const ToggleCustom = ({
   errors = {}, name = "", title = "",
   required = false, value = false,
-  onChange = null, className = null
+  onChange = null, className = null,
+  disabled = false
 }) => {
 
   const handleInput = (obj = {}) => {
@@ -75,6 +78,7 @@ export const ToggleCustom = ({
           checked={value || false}
           onChange={(e, obj) => handleInput(obj)}
           className={className || ``}
+          disabled={disabled}
         />
       </div>
     </FieldCustom>
