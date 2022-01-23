@@ -11,6 +11,7 @@ const CreateAffiliation = ({ info = {}, onClose = null, onSave = null }) => {
 
   const [form, setForm] = useState({});
   const [currentLoading, setCurrentLoading] = useState(false);
+  const [currentType, setCurrentType] = useState({});
 
   const handleInput = ({ name, value }) => {
     setForm(prev => ({ 
@@ -24,7 +25,7 @@ const CreateAffiliation = ({ info = {}, onClose = null, onSave = null }) => {
     if (!answer) return;
     const payload = {};
     payload.infoId = info?.id;
-    payload.typeAffiliationId = parseInt(`${form?.typeAffiliationId}`);
+    payload.typeAffiliationId = parseInt(`${currentType.id}`);
     payload.isPercent = form?.isPercent == true;
     payload.amount = parseFloat(`${form?.amount || 0}`);
     if (form.terminationDate) {
@@ -49,6 +50,18 @@ const CreateAffiliation = ({ info = {}, onClose = null, onSave = null }) => {
     setCurrentLoading(false);
   }
 
+  const handleType = ({ options = [], value }) => {
+    const option = options.find(opt => opt.value == value);
+    if (!option) return setCurrentType({});
+    const obj = option.obj || {}
+    setCurrentType(obj);
+    setForm(prev => ({
+      ...prev,
+      isPercent: obj.isPercent,
+      amount: obj.isPercent ? obj.percent : obj.amount
+    }));
+  }
+
   return (
     <Modal show={true}
       md="7 col-sm-9 col-11"
@@ -63,8 +76,8 @@ const CreateAffiliation = ({ info = {}, onClose = null, onSave = null }) => {
           >
             <SelectTypeAffiliation
               name="typeAffiliationId"
-              value={form?.typeAffiliationId}
-              onChange={(e, obj) => handleInput(obj)}
+              value={currentType?.id}
+              onChange={(e, obj) => handleType(obj)}
             />
           </FieldCustom>
 
