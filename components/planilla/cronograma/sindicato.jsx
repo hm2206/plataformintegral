@@ -4,10 +4,8 @@ import { Button, Form } from 'semantic-ui-react';
 import Show from '../../show';
 import Skeleton from 'react-loading-skeleton';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
-import { AppContext } from '../../../contexts/AppContext';
 import { useMemo } from 'react';
 import CreateAffiliation from './create-affiliation';
-import useProcessCronograma from './hooks/useProcessCronograma';
 import { Confirm } from '../../../services/utils';
 import { toast } from 'react-toastify';
 
@@ -152,8 +150,6 @@ const Sindicato = () => {
   const [error, setError] = useState(false);
   const [options, setOptions] = useState();
 
-  const processCronograma = useProcessCronograma(cronograma);
-
   const switchOptions = {
     CREATE: "CREATE"
   }
@@ -175,15 +171,14 @@ const Sindicato = () => {
     setCurrentLoading(false);
   }
 
-  const handleProcess = async () => {
-    setOptions();
-    processCronograma.processing()
-    .then(() => setRefresh(true));
-  }
-
   const handleDelete = async (affiliation = {}) => {
     const newSindicatos = sindicatos.filter(sin => sin.id != affiliation.id);
     setSindicatos(newSindicatos);
+  }
+
+  const handleSave = () => {
+    setRefresh(true);
+    setOptions();
   }
     
   // primera carga
@@ -238,7 +233,7 @@ const Sindicato = () => {
         <CreateAffiliation
           info={historial?.info}
           onClose={() => setOptions()}
-          onSave={handleProcess}
+          onSave={handleSave}
         />
       </Show>
     </Form>
