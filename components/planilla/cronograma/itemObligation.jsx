@@ -11,11 +11,11 @@ import { useContext } from 'react';
 import { AppContext } from '../../../contexts/AppContext';
 import { microPlanilla } from '../../../services/apis';
 
-const ItemObligation = ({ obligation = {}, onUpdate = null, edit = false }) => {
+const ItemObligation = ({ obligation = {}, onUpdate = null, onDelete = null, edit = false }) => {
 
   const [isShow, setIsShow] = useState(false);
   const [errors, setErrors] = useState({});
-  const [form, setForm] = useState({});
+  const [form, setForm] = useState(obligation);
   const [currentLoading, setCurrentLoading] = useState(false);
 
   const app_context = useContext(AppContext);
@@ -35,22 +35,6 @@ const ItemObligation = ({ obligation = {}, onUpdate = null, edit = false }) => {
     }))
   }
 
-  const defaultClearForm = () => {
-    setForm({
-      documentTypeId: obligation?.documentTypeId,
-      documentNumber: obligation?.documentNumber,
-      bankId: obligation?.bankId,
-      numberOfAccount: obligation?.numberOfAccount,
-      isCheck: obligation?.isCheck || false,
-      isPercent: obligation?.isPercent || false,
-      percent: obligation?.percent || 0,
-      amount: obligation?.amount || 0,
-      observation: obligation?.observation,
-      mode: obligation?.mode || 'DEFAULT',
-      isBonification: obligation?.isBonification || false
-    })
-  }
-
   const handleDelete = async () => {
     const answer = await Confirm('warning', '¿Estás seguro e eliminar el regístro?');
     if (!answer) return;
@@ -58,7 +42,7 @@ const ItemObligation = ({ obligation = {}, onUpdate = null, edit = false }) => {
     await microPlanilla.delete(`obligations/${obligation?.id}`)
     .then(() => {
       toast.success(`El regístro se actualizó correctamente!`)
-      if (typeof onUpdate == 'function') onUpdate();
+      if (typeof onDelete == 'function') onDelete(obligation);
     }).catch(() => {
       toast.error(`No se pudó actualizar el regístro!`)
     });
@@ -70,7 +54,7 @@ const ItemObligation = ({ obligation = {}, onUpdate = null, edit = false }) => {
     if (!answer) return;
     app_context.setCurrentLoading(true)
     const payload = {};
-    payload.documentTypeId = parseInt(`${form?.documentTypeId}`);
+    payload.documentTypeId = form?.documentTypeId;
     payload.documentNumber = form?.documentNumber;
     payload.bankId = parseInt(`${form?.bankId}`);
     payload.numberOfAccount = form?.numberOfAccount || '';
@@ -93,7 +77,7 @@ const ItemObligation = ({ obligation = {}, onUpdate = null, edit = false }) => {
   }
 
   useEffect(() => {
-    if (!edit) defaultClearForm()
+    if (!edit) setForm(obligation);
   }, [edit])
 
   return (
@@ -154,7 +138,7 @@ const ItemObligation = ({ obligation = {}, onUpdate = null, edit = false }) => {
               <span className='close text-primary'
                 style={{ opacity: 1, fontSize: '18px' }}
               >
-                <b>{format(form?.amount, { code: 'PEN' })}</b>
+                <b>{format(obligation?.amount, { code: 'PEN' })}</b>
               </span>
               <hr />
             </h5>

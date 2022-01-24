@@ -44,7 +44,7 @@ const PlaceholderObligaciones = () => (
 const Obligacion = () => {
 
   // cronograma
-  const { edit, setEdit, loading, send, historial, setBlock, setSend, cronograma, setIsEditable, setIsUpdatable, cancel } = useContext(CronogramaContext);
+  const { edit, loading, historial, setBlock, setIsEditable, setIsUpdatable, cancel } = useContext(CronogramaContext);
   const [current_loading, setCurrentLoading] = useState(true);
   const [obligaciones, setObligaciones] = useState([]);
   const [error, setError] = useState(false);
@@ -65,6 +65,17 @@ const Obligacion = () => {
       });
     setCurrentLoading(false);
     setBlock(false);
+  }
+
+  const handleSave = () => {
+    setCurrentOption();
+    findObligaciones();
+  }
+
+  const handleDelete = (obligation = {}) => {
+    const newObligation = obligaciones
+      .filter(obl => obl.id != obligation.id);
+    setObligaciones(newObligation);
   }
 
   // primera carga
@@ -125,6 +136,8 @@ const Obligacion = () => {
             key={`item-obligation-${index}`}
             obligation={obl}
             edit={edit}
+            onDelete={handleDelete}
+            onUpdate={handleSave}
           />
         )}
       </Show>
@@ -132,7 +145,7 @@ const Obligacion = () => {
       <Show condicion={current_option == 'create'}>
         <AddObligacion
           onClose={() => setCurrentOption()}
-          onSave={() => findObligaciones()}
+          onSave={handleSave}
           info={historial?.info}
         />
       </Show>
