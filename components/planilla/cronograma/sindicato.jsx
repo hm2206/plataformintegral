@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import CreateAffiliation from './create-affiliation';
 import { Confirm } from '../../../services/utils';
 import { toast } from 'react-toastify';
+import NotRegister from './not-register';
 
 const PlaceHolderButton = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
@@ -225,6 +226,7 @@ const Sindicato = () => {
   const { edit, setRefresh, loading, historial, setBlock, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
   const [current_loading, setCurrentLoading] = useState(true);
   const [sindicatos, setSindicatos] = useState([]);
+  const [total, setTotal] = useState(0);
   const [error, setError] = useState(false);
   const [options, setOptions] = useState();
 
@@ -238,11 +240,13 @@ const Sindicato = () => {
     setBlock(true);
     await microPlanilla.get(`historials/${historial.id}/affiliations`)
       .then(({ data }) => {
-        let { items } = data;
+        let { items, meta } = data;
         setSindicatos(items || []);
         setBlock(false);
+        setTotal(meta?.totalItems || 0);
       }).catch(() => {
         setSindicatos([]);
+        setTotal(0);
         setError(true);
         setBlock(false);
       });
@@ -305,6 +309,13 @@ const Sindicato = () => {
             onUpdate={handleSave}
           />
         )}
+      </Show>
+
+      {/* no hay regístros */}
+      <Show condicion={!total && !current_loading}>
+        <div className="col-12">
+          <NotRegister/>
+        </div>
       </Show>
 
       {/* Crear */}

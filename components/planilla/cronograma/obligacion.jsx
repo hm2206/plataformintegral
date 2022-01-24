@@ -6,6 +6,7 @@ import Skeleton from 'react-loading-skeleton';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 import AddObligacion from './addObligacion';
 import ItemObligation from './itemObligation';
+import NotRegister from './not-register';
 
 const PlaceHolderButton = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
@@ -47,6 +48,7 @@ const Obligacion = () => {
   const { edit, loading, historial, setBlock, setIsEditable, setIsUpdatable, cancel } = useContext(CronogramaContext);
   const [current_loading, setCurrentLoading] = useState(true);
   const [obligaciones, setObligaciones] = useState([]);
+  const [total, setTotal] = useState(0);
   const [error, setError] = useState(false);
   const [current_option, setCurrentOption] = useState("");
 
@@ -56,11 +58,13 @@ const Obligacion = () => {
     setBlock(true);
     await microPlanilla.get(`historials/${historial.id}/obligations?limit=100`)
       .then(({ data }) => {
-        let { items } = data;
+        let { items, meta } = data;
         setObligaciones(items || []);
+        setTotal(meta?.totalItems || 0)
       })
       .catch(() => {
         setObligaciones([]);
+        setTotal(0)
         setError(true);
       });
     setCurrentLoading(false);
@@ -122,11 +126,7 @@ const Obligacion = () => {
               </div>
           </div>
         }
-      >
-        <h4 className="col-md-12 mt-1">
-          <Icon name="list alternate" /> Lista de Obligaciones Judiciales:
-        </h4>
-      </Show>
+      />
 
       <Show condicion={!loading && !current_loading}
         predeterminado={<PlaceholderObligaciones/>}
@@ -140,6 +140,13 @@ const Obligacion = () => {
             onUpdate={handleSave}
           />
         )}
+
+        {/* no hay regístros */}
+        <Show condicion={!total}>
+          <div className="col-12">
+            <NotRegister/>
+          </div>
+        </Show>
       </Show>
 
       <Show condicion={current_option == 'create'}>
