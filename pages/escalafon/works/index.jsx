@@ -8,27 +8,12 @@ import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext'; 
-import { AppContext } from '../../../contexts';
-import ReportProvider from '../../../providers/escalafon/ReportProvider'
-import Swal from 'sweetalert2';
-import Visualizador from '../../../components/visualizador';
-import { Confirm } from '../../../services/utils'
-import { SelectCargo } from '../../../components/select/cronograma'
-import Show from '../../../components/show'
-
-const reportProvider = new ReportProvider();
 
 const IndexWork = ({ pathname, query, success, works }) => {
 
     // estados
-    const [query_search, setQuerySearch] = useState(query.query_search || "");
+    const [query_search, setQuerySearch] = useState(query.querySearch || "");
     const [cargo_id, setCargoId] = useState(query.cargo_id || "")
-    const [current_file, setCurrentFile] = useState({})
-
-    const isFile = Object.keys(current_file || {}).length
-
-    // app
-    const app_context = useContext(AppContext);
 
     // entity
     const entity_context = useContext(EntityContext);
@@ -52,7 +37,7 @@ const IndexWork = ({ pathname, query, success, works }) => {
     const handleSearch = () => {
         let { push } = Router;
         query.page = 1;
-        query.query_search = query_search;
+        query.querySearch = query_search;
         query.cargo_id = cargo_id;
         push({ pathname, query });
     }
@@ -62,43 +47,6 @@ const IndexWork = ({ pathname, query, success, works }) => {
         let { push } = Router;
         query.page = activePage;
         await push({ pathname, query });
-    }
-
-    // crear trabajador
-    const handleCreate = async () => {
-        let { push } = Router;
-        let newQuery = {};
-        newQuery.href = btoa(`${location.href}`)
-        push({ pathname: `${pathname}/create`, query: newQuery });
-    }
-
-    const reportGeneral = async () => {
-        let answer = await Confirm('info', `¿Deseas generar el reporte de trabajadores activos?`, 'Generar')
-        if (!answer) return; 
-        app_context.setCurrentLoading(true);
-        reportProvider.general({ cargo_id })
-        .then(res => {
-            let name = "reporte-general.pdf"
-            let file = new File([res.data], name);
-            let url = URL.createObjectURL(res.data);
-            let extname = "pdf";
-            let size = file.size
-            setCurrentFile({ name, url, extname, size });
-            app_context.setCurrentLoading(false);
-        }).catch(err => {
-            Swal.fire("No se pudó generar el reporte");
-            app_context.setCurrentLoading(false);
-        })
-    }
-
-    const onOption = (e, index, obj) => {
-        switch (obj.key) {
-            case 'pdf-work':
-                reportGeneral();
-                break;
-            default:
-                break;
-        }
     }
 
     useEffect(() => {
@@ -114,10 +62,7 @@ const IndexWork = ({ pathname, query, success, works }) => {
                 title="Trabajadores"
                 info={["Listado de trabajadores"]}
                 bg="danger"
-                options={[
-                    { key: "pdf-work", title: "Generar reporte de trabajadores activos", icon: "fas fa-file-pdf" }
-                ]}
-                onOption={onOption}
+                options={[]}
             >
                 <Form>
                     <div className="col-md-12">
@@ -150,13 +95,6 @@ const IndexWork = ({ pathname, query, success, works }) => {
                                         </Form.Field>
                                     </div>
 
-                                    <div className="col-md-4 mb-1 col-8">
-                                        <SelectCargo
-                                            value={cargo_id}
-                                            onChange={(e, obj) => setCargoId(obj.value)}
-                                        />
-                                    </div>
-
                                     <div className="col-xs col-2">
                                         <Button color="blue"
                                             fluid
@@ -181,23 +119,7 @@ const IndexWork = ({ pathname, query, success, works }) => {
                             />
                         </div>
                     </div>
-
-                    <BtnFloat onClick={handleCreate}>
-                        <i className="fas fa-plus"></i>
-                    </BtnFloat>
                 </Form>
-
-                {/* visualizador */}
-                <Show condicion={isFile}>
-                    <Visualizador id="visualizador-item"
-                        onClose={() => setCurrentFile({})}
-                        name={current_file?.name}
-                        extname={current_file?.extname}
-                        url={current_file?.url}
-                        is_observation={false}
-                        is_print={true}
-                    />
-                </Show>
             </BoardSimple>
         </div>
     )
@@ -209,10 +131,10 @@ IndexWork.getInitialProps = async (ctx) => {
     let { pathname, query } = ctx;
     // filtros
     query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
+    query.querySearch = typeof query.querySearch != 'undefined' ? query.querySearch : "";
     query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
     // request
-    let { success, works } = await microPlanilla.get(`works?page=${query.page}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
+    let { success, works } = await microPlanilla.get(`works?page=${query.page}&querySearch=${query.querySearch}&cargo_id=${query.cargo_id}`, {}, ctx)
     .then(res => ({ success: true, works: res.data }))
     .catch(() => ({ success: false, works: {} }));
     // response
