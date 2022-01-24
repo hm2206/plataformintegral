@@ -175,15 +175,6 @@ const ListCronograma = ({ principal = true, pathname, query, cronogramas }) => {
                                 }
                             }, 
                             {
-                                key: "email",
-                                icon: "fas fa-paper-plane",
-                                title: "Enviar correo",
-                                rules: {
-                                    key: "state",
-                                    value: 0
-                                }
-                            },
-                            {
                                 key: "report",
                                 icon: "fas fa-file-alt",
                                 title: "Reportes"
