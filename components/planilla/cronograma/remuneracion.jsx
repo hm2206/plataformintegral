@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect, Fragment, useMemo } from 'react';
 import { microPlanilla } from '../../../services/apis';
 import { Form, Button } from 'semantic-ui-react';
-import Swal from 'sweetalert2';
 import Show from '../../show';
 import Skeleton from 'react-loading-skeleton';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
@@ -9,7 +8,7 @@ import { AppContext } from '../../../contexts/AppContext';
 import Resume from './resume';
 import ConfigRemuneration from '../infos/config-infos/config-remuneracion';
 import useProcessCronograma from './hooks/useProcessCronograma';
-import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const PlaceHolderButton = ({ count = 1 }) => <Skeleton height="38px" count={count}/>
 
@@ -33,28 +32,72 @@ const PlaceholderRemuneracion = () => (
   </Fragment>
 );
 
-const ItemRemuneration = ({ remuneration = {}, edit = false }) => {
+const ToggleEditRemuneration = ({ isEdit = false, onToggle = null }) => {
+
+  const toggleEdit = () => typeof onToggle == 'function' ? onToggle(!isEdit) : null;
+
+  return (
+    <span title={isEdit ? 'Edición habilitada' : 'Automatico'}
+      className={`toggle-edit badge badge-${isEdit ? 'primary' : 'light'} cursor-pointer`}
+      onClick={toggleEdit}
+    >
+      <i className={`fas fa-${isEdit ? 'pencil-alt' : 'clock'}`}></i>
+    </span>
+  )
+}
+
+const ItemRemuneration = ({ remuneration = {}, edit = false, onModify = null }) => {
 
   const [amount, setAmount] = useState(remuneration?.amount || 0);
+  const [isEdit, setIsEdit] = useState(remuneration?.isEdit || false);
 
   const handleInput = ({ value }) => {
     let newValue = value;
-    if (value) newValue = parseInt(`${value}`);
+    if (value) newValue = parseFloat(`${value}`);
     setAmount(newValue);
+    onHandleInput(isEdit, newValue);
+  }
+
+  const handleEdit = (newEdit) => {
+    setIsEdit(newEdit);
+    onHandleInput(newEdit, amount);
+  }
+
+  const onHandleInput = (newEdit, newAmount) => {
+    const obj = {
+      id: remuneration?.id,
+      isEdit: newEdit,
+      amount: parseFloat(`${newAmount || 0}`)
+    }
+    // emitter
+    if (typeof onModify == 'function') onModify(obj);
   }
 
   const canEdit = useMemo(() => { 
-    return (remuneration?.isEdit && edit);
-  }, [remuneration, edit])
+    return (isEdit && edit);
+  }, [isEdit, edit])
+
+  useEffect(() => {
+    if (!edit) {
+      setAmount(remuneration?.amount || 0);
+      setIsEdit(remuneration?.isEdit || false);
+    }
+  }, [edit]);
+
+  useEffect(() => {
+    if (!isEdit) setAmount(remuneration?.amount || 0);
+  }, [isEdit]);
 
   return (
     <div className="col-md-3 mb-3">
-      <span className={remuneration?.amount > 0 ? 'text-red' : ''}>
-        {remuneration?.typeRemuneration?.code}
-      </span>
-        .-
-      <span className={remuneration?.amount > 0 ? 'text-primary' : ''}>
-        {remuneration?.typeRemuneration?.name}
+      <span>
+        <span className={remuneration?.amount > 0 ? 'text-red' : ''}>
+          {remuneration?.typeRemuneration?.code}
+        </span>
+          .-
+        <span className={remuneration?.amount > 0 ? 'text-primary' : ''}>
+          {remuneration?.typeRemuneration?.name}
+        </span>
       </span>
 
       <Show condicion={remuneration?.isBase}>
@@ -64,11 +107,19 @@ const ItemRemuneration = ({ remuneration = {}, edit = false }) => {
       </Show>
 
       <Form.Field>
+        {/* toggle */}
+        <Show condicion={edit}>
+          <ToggleEditRemuneration
+            isEdit={isEdit}
+            onToggle={handleEdit}
+          />
+        </Show>
+        {/* input */}
         <input type="number"
           step="any" 
           value={amount}
           className={canEdit ? 'input-active' : ''}
-          disabled={!remuneration?.isEdit || !edit}
+          disabled={!edit || !isEdit}
           onChange={({ target }) => handleInput(target)}
           min="0"
         />
@@ -83,9 +134,9 @@ const Remuneracion = () => {
   const { cronograma, setRefresh, edit, setEdit, send, setSend, loading, historial, setBlock, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
   const [current_loading, setCurrentLoading] = useState(true);
   const [remuneraciones, setRemuneraciones] = useState([]);
-  const [old, setOld] = useState([]);
   const [error, setError] = useState(false);
   const [options, setOptions] = useState();
+  const [form, setForm] = useState([]);
   const processCronograma = useProcessCronograma(cronograma);
 
   // app
@@ -95,6 +146,10 @@ const Remuneracion = () => {
     ADD_REMUNERATION: "ADD_REMUNERATION"
   }
 
+  const headers = {
+    CronogramaId: historial.cronogramaId
+  }
+
   const findRemuneracion = async () => {
     setCurrentLoading(true);
     setBlock(true);
@@ -102,51 +157,49 @@ const Remuneracion = () => {
       .then(({ data }) => {
         let { items } = data;
         setRemuneraciones(items);
-        setOld(items);
       })
       .catch(() => {
         setRemuneraciones([]);
-        setOld([]);
         setError(true);
       });
     setCurrentLoading(false);
     setBlock(false);
   }
 
-  useEffect(() => {
-    setIsEditable(true);
-    setIsUpdatable(true);
-    if (historial.id) findRemuneracion();
-    return () => {}
-  }, [historial.id]);
+  const handleForm = (obj = {}) => {
+    const newForm = form.filter(f => f.id != obj.id);
+    // add
+    newForm.push(obj);
+    return setForm(newForm);
+  }
 
-  useEffect(() => {
-    if (!edit && !send) setRemuneraciones(old);
-  }, [edit]);
-  
   const updateRemuneraciones = async () => {
-    const form = new FormData();
-    let datos = await remuneraciones.filter(rem => rem.send == true);
-    form.append('_method', 'PUT');
-    form.append('remuneraciones', JSON.stringify(datos));
+    toast.dismiss();
     // valdiar que se modificarón los datos
-    if (!datos.length)  await Swal.fire({ icon: 'warning', text: 'No se encontraron cambios' });
+    if (!form.length) {
+      toast.warning("No se encontraron cambios", { 
+        hideProgressBar: true
+      })
+      // cancel
+      setSend(false);
+      setBlock(false);
+      return;
+    }
     // send changes
-    else {app_context.setCurrentLoading(true);
-        await unujobs.post(`remuneracion/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
-        .then(async res => {
-            app_context.setCurrentLoading(false);
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
-            await Swal.fire({ icon: 'success', text: message });
-            setEdit(false);
-            await findRemuneracion();
-        })
-        .catch(err => {
-            app_context.setCurrentLoading(false);
-            Swal.fire({ icon: 'error', text: err.message })
-        });
-    }   
+    app_context.setCurrentLoading(true);
+    await microPlanilla.put(`historials/${historial.id}/remunerations`, { remunerations: form }, { headers })
+    .then(() => {
+      app_context.setCurrentLoading(false);
+      toast.success(`Los cambios se guardarón correctamente!`)
+      findRemuneracion();
+      setEdit(false);
+    }).catch(() => {
+      app_context.setCurrentLoading(false);
+      toast.error(`Ocurrio un error al guardar los datos!`, {
+        hideProgressBar: true
+      });
+    });
+    // enaled
     setSend(false);
     setBlock(false);
   }
@@ -157,23 +210,34 @@ const Remuneracion = () => {
       .catch(() => null)
   }
 
+  useEffect(() => {
+    setIsEditable(true);
+    setIsUpdatable(true);
+    if (historial.id) findRemuneracion();
+    return () => {}
+  }, [historial.id]);
+
+  useEffect(() => {
+    if (!edit && !send) setForm([]);
+  }, [edit]);
+
   // update remuneraciones
   useEffect(() => {
       if (send) updateRemuneraciones();
   }, [send]);
- 
+
   return (
     <Form className="row">
       <div className="col-md-12">
-        <Resume
+        <Resume 
           id={historial?.id}
-          refresh={send}
+          refresh={current_loading}
           loading={loading}
         />
       </div>
         
       <div className="col-md-12">
-        <hr/>
+        <hr />
       </div>
 
       <Show condicion={!loading && !current_loading}
@@ -184,17 +248,18 @@ const Remuneracion = () => {
             key={`remuneracion-${obj.id}-${index}`}
             remuneration={obj}
             edit={edit}
+            onModify={handleForm}
           />
         )}
       </Show>   
 
-      {/* open cronograma */}
+      {/* open remunerations */}
       <Show condicion={cronograma?.state && edit}>
         <div className="col-md-3 mb-3">
           <Button fluid
             className='mt-4'
             onClick={() => setOptions(objectOptions.ADD_REMUNERATION)}>
-            <i className="fas fa-plus"></i>
+            <i className="fas fa-cog"></i>
           </Button>
         </div>
       </Show>
@@ -207,15 +272,11 @@ const Remuneracion = () => {
           info={historial?.info || {}}
           onClose={() => setOptions()}
           onSave={handleProccess}
-          disabled={true}
         />
       </Show>
-      {/* toast */}
-      <ToastContainer/>
     </Form>
   )
 }
-
 
 export default Remuneracion;
 

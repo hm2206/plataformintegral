@@ -9,16 +9,19 @@ const useProcessCronograma = (cronograma = {}) => {
   const processing = () => {
     return new Promise(async (resolve, reject) => {
       setLoading(true);
+      toast.dismiss();
+      toast.info("Procesando cronograma...");
       await microPlanilla.post(`cronogramas/${cronograma?.id}/process`)
         .then(res => {
+          toast.dismiss();
           toast.success("El cronograma se proceso correctamente!", {
-            progress: undefined
+            hideProgressBar: true
           });
           resolve(res);
         })
         .catch(err => {
           toast.error("No se pudo procesar el cronograma", {
-            progress: undefined
+            hideProgressBar: true
           });
           reject(err);
         })

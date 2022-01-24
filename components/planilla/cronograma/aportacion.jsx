@@ -7,7 +7,8 @@ import Show from '../../show';
 import Skeleton from 'react-loading-skeleton';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 import { AppContext } from '../../../contexts/AppContext';
-import { SelectTypeAportation } from '../../select/micro-planilla';
+import ConfigAportation from '../infos/config-infos/config-aportation';
+import { toast } from 'react-toastify';
 
 const PlaceHolderButton = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
@@ -40,7 +41,24 @@ const PlaceholderAportacion = () => {
   );
 }
 
-const ItemAportation = ({ aportation = {}, edit = false }) => {
+const ItemAportation = ({ aportation = {}, edit = false, onDelete = null }) => {
+
+  const [currentLoading, setCurrentLoading] = useState(false);
+
+  const deleteAportacion = async () => {
+    let answer = await Confirm("warning", `¿Deseas elminar la aportacion del empleador?`);
+    if (!answer) return;
+    setCurrentLoading(true);
+    await microPlanilla.delete(`aportations/${aportation.id}`)
+    .then(() => {
+      toast.success(`El regístro se elimino correctamante!`)
+      if (typeof onDelete == 'function') onDelete(aportation);
+    }).catch(() => {
+      toast.error(`No se pudo eliminar el regístro`);
+    });
+    setCurrentLoading(false);
+  }
+
   return (
     <div className="col-md-12 mb-1 col-lg-4">
       <div className="row">
@@ -57,8 +75,8 @@ const ItemAportation = ({ aportation = {}, edit = false }) => {
         <div className="col-md-2 col-2 col-lg-2">
           <Button color="red"
             fluid
-            // onClick={(e) => deleteAportacion(obj.id, index)}
-            disabled={!edit}
+            onClick={deleteAportacion}
+            disabled={!edit || currentLoading}
           >
             <i className="fas fa-trash"></i>
           </Button>
@@ -71,15 +89,19 @@ const ItemAportation = ({ aportation = {}, edit = false }) => {
 const Aportacion = () => {
 
   // cronograma
-  const { edit, setEdit, loading, historial, setBlock, cronograma, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
+  const { edit, setRefresh, loading, historial, setBlock, cronograma, setIsEditable, setIsUpdatable } = useContext(CronogramaContext);
   const [current_loading, setCurrentLoading] = useState(true);
   const [aportaciones, setAportaciones] = useState([]);
   const [old, setOld] = useState([]);
   const [error, setError] = useState(false);
-  const [form, setForm] = useState({});
+  const [options, setOptions] = useState();
     
   // app
   const app_context = useContext(AppContext);
+
+  const objectOptions = {
+    ADD_APORTATION: "ADD_APORTATION"
+  }
 
   // obtener aportacion empleador
   const findAportacion = async () => {
@@ -99,6 +121,16 @@ const Aportacion = () => {
       });
     setCurrentLoading(false);
   }
+
+  const handleSave = () => {
+    setRefresh(true);
+    setOptions();
+  }
+
+  const handleDelete = (aportation = {}) => {
+    const newAportations = aportaciones.filter(a => a.id != aportation.id);
+    setAportaciones(newAportations);
+  }
     
   // primera carga
   useEffect(() => {
@@ -108,85 +140,20 @@ const Aportacion = () => {
     return () => {}
   }, [historial.id]);
 
-  // crear aportacion
-  const createAportacion = async () => {
-    let answer = await Confirm("warning", `¿Deseas agregar la aportación de empleador?`, 'Aceptar');
-    if (answer) {
-      app_context.setCurrentLoading(true);
-      setBlock(true);
-      await unujobs.post('aportacion', {
-        historial_id: historial.id,
-        type_aportacion_id: form.type_aportacion_id || ""
-      })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        await findAportacion();
-        setEdit(false);
-      })
-      .catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      });
-      setBlock(false);
-    }
-  }
-
-  // eliminar aportacion
-  const deleteAportacion = async (id, index) => {
-    let answer = await Confirm("warning", `¿Deseas elminar la aportacion del empleador?`);
-    if (answer) {
-      app_context.setCurrentLoading(true);
-      setBlock(true);
-      await unujobs.post(`aportacion/${id}`, { _method: "DELETE" })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        let newAportaciones = JSON.parse(JSON.stringify(aportaciones));
-        newAportaciones.splice(index, 1);
-        setAportaciones(newAportaciones);
-        setOld(JSON.parse(JSON.stringify(newAportaciones)));
-        setEdit(false);
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message });
-      });
-      setBlock(false);
-    }
-  }
-
-  // cambios en el form
-  const handleInput = ({ name, value }) => {
-    let newValue = value;
-    if (value) newValue = parseInt(`${value}`);
-    setForm(prev => ({ ...prev, [name]: newValue }));
-  }
-
   return (
     <Form className="row">
       <div className="col-md-12">
         <div className="row">
-          <div className="col-md-8 col-lg-5 col-10">
-            <SelectTypeAportation
-              name="typeAportationId"
-              value={form.typeAportationId}
-              onChange={(e, obj) => handleInput(obj)}
-              disabled={!edit}
-            />
-          </div>
+          <div className="col-md-8 col-12"></div>
 
-          <div className="col-xs col-lg-2 col-md-4 col-2">
+          <div className="col-xs col-lg-2 col-md-4 col-12">
             <Show condicion={!loading && !current_loading}
               predeterminado={<PlaceHolderButton/>}
             >
               <Button color="green"
                 fluid
-                disabled={!edit || !form.type_aportacion_id}
-                onClick={createAportacion}    
+                disabled={!edit}
+                onClick={() => setOptions(objectOptions.ADD_APORTATION)}    
               >
                 <i className="fas fa-plus"></i>
               </Button>
@@ -207,8 +174,18 @@ const Aportacion = () => {
             key={`remuneracion-${obj.id}-${index}`}
             aportation={obj}
             edit={edit}
+            onDelete={handleDelete}
           />
         )}
+      </Show>
+     
+      {/* add obligations */}
+      <Show condicion={options == objectOptions.ADD_APORTATION}>
+        <ConfigAportation
+          info={historial?.info || {}}
+          onClose={() => setOptions()}
+          onSave={handleSave}
+        />
       </Show>
     </Form>)
 }

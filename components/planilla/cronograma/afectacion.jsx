@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { unujobs, microPlanilla } from '../../../services/apis';
+import { microPlanilla } from '../../../services/apis';
 import { Form, Checkbox } from 'semantic-ui-react';
 import { SelectPim } from '../../select/micro-planilla';
 import Swal from 'sweetalert2';
@@ -88,17 +88,19 @@ const Afectacion = () => {
   const { cronograma, historial, setHistorial, setBlock, edit, setEdit, send, setSend, setIsEditable, setIsUpdatable, loading, cancel, setRefresh } = useContext(CronogramaContext);
   const [old, setOld] = useState({});
   const [errors, setErrors] = useState({});
-  const [currentContract, setCurrentContract] = useState({});
   const [currentPim, setCurrentPim] = useState({});
   const [currentTypeCargo, setCurrentTypeCargo] = useState({});
-  
+
   // app
   const app_context = useContext(AppContext);
 
   // memos
+  const displayContract = useMemo(() => {
+    return historial?.info?.contract || {}
+  }, [historial])
+
   const displayAfp = useMemo(() => {
-    if (!historial?.afp?.private) return historial?.afp?.name;
-    return `${historial?.afp?.name} ${historial?.afp?.typeAfp}`;
+    return historial?.afp || {}
   }, [historial?.afp]);
 
   const displayPim = useMemo(() => {
@@ -137,14 +139,14 @@ const Afectacion = () => {
     payload.isCheck = historial.isCheck == true;
     payload.isPay = historial.isPay == true;
     payload.observation = historial?.observation || '';
-    await microPlanilla.put(`historials/${historial.id}`, payload, { headers: { CronogramaId: historial.cronograma_id } })
-      .then(async res => {
-        const newHistorial = res.data;
+    await microPlanilla.put(`historials/${historial?.id}`, payload, { headers: { CronogramaId: cronograma.id } })
+      .then(async () => {
         app_context.setCurrentLoading(false);
         await Swal.fire({
           icon: 'success',
           text: 'Los cambios se guardarón correctamente!'
         });
+        // procesar cronograma
         setEdit(false);
         setErrors({});
         setRefresh(true);
@@ -160,17 +162,6 @@ const Afectacion = () => {
     setBlock(false);
   }
 
-  // obtener datos
-  const findContract = async () => {
-    await microPlanilla.get(`contracts/${historial?.info?.contractId}`)
-      .then(async res => {
-        const contract = res.data;
-        setCurrentContract(contract);
-        await findTypeCargoToContract(contract?.typeCategory?.typeCargoId);
-      })
-      .catch(() => setCurrentContract({}))
-  }
-
   // obtener pim
   const findPim = async () => {
     await microPlanilla.get(`pims/${historial?.pimId}`)
@@ -179,7 +170,8 @@ const Afectacion = () => {
   }
 
   // obtener typeCargo
-  const findTypeCargoToContract = async (id) => {
+  const findTypeCargoToContract = async () => {
+    const id = displayContract?.typeCategory?.typeCargoId || '_error';
     await microPlanilla.get(`typeCargos/${id}`)
       .then(res => setCurrentTypeCargo(res.data))
       .catch(() => setCurrentTypeCargo({}))
@@ -188,14 +180,17 @@ const Afectacion = () => {
   // obtener contract
   useEffect(() => {
     if (!historial?.id) {
-      setCurrentContract({});
       setCurrentPim({});
       return;
     }
     // default
-    findContract();
     findPim()
   }, [historial?.id])
+
+  // obtener tipo cargos
+  useEffect(() => {
+    if (displayContract?.id) findTypeCargoToContract();
+  }, [displayContract]);
 
   // primera carga o cada cambio de historial
   useEffect(() => {
@@ -223,7 +218,7 @@ const Afectacion = () => {
       <InputCustom
         title="Ley Social"
         name="leySocial"
-        value={displayAfp}
+        value={`${displayAfp.name} ${displayAfp.isPrivate ? displayAfp.typeAfp : ''}`}
         readOnly={true}
         loading={loading}
       />
@@ -257,7 +252,7 @@ const Afectacion = () => {
         type="date"
         title="Fecha de Ingreso"
         name="dateOfAdmission"
-        value={currentContract?.dateOfAdmission}
+        value={displayContract?.dateOfAdmission}
         readOnly={true}
         loading={loading}
       />
@@ -266,7 +261,7 @@ const Afectacion = () => {
         type="date"
         title="Fecha de Cese"
         name="terminationDate"
-        value={currentContract?.terminationDate}
+        value={displayContract?.terminationDate}
         readOnly={true}
         loading={loading}
       />
@@ -298,7 +293,7 @@ const Afectacion = () => {
       <InputCustom
         title="Condición"
         name="condition"
-        value={currentContract?.condition}
+        value={displayContract?.condition}
         readOnly={true}
         loading={loading}
       />
@@ -306,7 +301,7 @@ const Afectacion = () => {
       <InputCustom
         title="Tip. Categoría"
         name="name"
-        value={currentContract?.typeCategory?.name}
+        value={displayContract?.typeCategory?.name}
         readOnly={true}
         loading={loading}
       />
@@ -358,7 +353,7 @@ const Afectacion = () => {
         md="6"
         title="Dependencia/Oficina"
         name="name"
-        value={currentContract?.dependency?.name}
+        value={displayContract?.dependency?.name}
         readOnly={true}
         loading={loading}
       />
@@ -366,7 +361,7 @@ const Afectacion = () => {
       <InputCustom
         title="Perfil Laboral"
         name="name"
-        value={currentContract?.profile?.name}
+        value={displayContract?.profile?.name}
         readOnly={true}
         loading={loading}
       />
@@ -443,7 +438,6 @@ const Afectacion = () => {
           </div>
         </div>
       </div>
-
     </Form>
   )
 }

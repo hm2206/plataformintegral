@@ -2,13 +2,11 @@ import React, { Fragment, useState, useContext, useEffect } from 'react';
 import { microPlanilla } from '../../../services/apis';
 import { Button, Form, Icon } from 'semantic-ui-react';
 import Show from '../../show';
-import Swal from 'sweetalert2';
-import {  Confirm } from '../../../services/utils';
 import Skeleton from 'react-loading-skeleton';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
-import { AppContext } from '../../../contexts/AppContext';
 import AddObligacion from './addObligacion';
 import ItemObligation from './itemObligation';
+import NotRegister from './not-register';
 
 const PlaceHolderButton = ({ count = 1, height = "38px" }) => <Skeleton height={height} count={count}/>
 
@@ -47,16 +45,12 @@ const PlaceholderObligaciones = () => (
 const Obligacion = () => {
 
   // cronograma
-  const { edit, setEdit, loading, send, historial, setBlock, setSend, cronograma, setIsEditable, setIsUpdatable, cancel } = useContext(CronogramaContext);
+  const { edit, loading, historial, setBlock, setIsEditable, setIsUpdatable, cancel } = useContext(CronogramaContext);
   const [current_loading, setCurrentLoading] = useState(true);
   const [obligaciones, setObligaciones] = useState([]);
-  const [old, setOld] = useState([]);
+  const [total, setTotal] = useState(0);
   const [error, setError] = useState(false);
-  const [form, setForm] = useState({});
   const [current_option, setCurrentOption] = useState("");
-
-  // app
-  const app_context = useContext(AppContext);
 
   // obtener descuentos detallados
   const findObligaciones = async () => {
@@ -64,98 +58,42 @@ const Obligacion = () => {
     setBlock(true);
     await microPlanilla.get(`historials/${historial.id}/obligations?limit=100`)
       .then(({ data }) => {
-        let { items } = data;
+        let { items, meta } = data;
         setObligaciones(items || []);
-        setOld(items || []);
+        setTotal(meta?.totalItems || 0)
       })
       .catch(() => {
         setObligaciones([]);
-        setOld([]);
+        setTotal(0)
         setError(true);
       });
     setCurrentLoading(false);
     setBlock(false);
   }
 
+  const handleSave = () => {
+    setCurrentOption();
+    findObligaciones();
+  }
+
+  const handleDelete = (obligation = {}) => {
+    const newObligation = obligaciones
+      .filter(obl => obl.id != obligation.id);
+    setObligaciones(newObligation);
+  }
+
   // primera carga
   useEffect(() => {
     setIsEditable(true);
-    setIsUpdatable(true);
+    setIsUpdatable(false);
     if (historial.id) findObligaciones();
     return () => {}
   }, [historial.id]);
 
-  // modificar obligaciones del cronograma
-  const handleInput = ({ name, value }, index = 0) => {
-    let newObligaciones = JSON.parse(JSON.stringify(obligaciones));
-    let newObject = Object.assign({}, newObligaciones[index]);
-    newObject[name] = value;
-    newObligaciones[index] = newObject;
-    setObligaciones(newObligaciones);
-  }
-
-  // actualizar las obligaciones del cronograma
-  const updateObligacion = async () => {
-    app_context.setCurrentLoading(true);
-    let form = new FormData;
-    form.append('obligaciones', JSON.stringify(obligaciones));
-    await unujobs.post(`obligacion/${historial.id}/all`, form, { headers: { CronogramaID: historial.cronograma_id } })
-    .then(async res => {
-      app_context.setCurrentLoading(false);
-      let { success, message } = res.data;
-      if (!success) throw new Error(message);
-      await Swal.fire({ icon: 'success', text: message });
-      findObligaciones();
-      setEdit(false);
-    })
-    .catch(err => {
-      app_context.setCurrentLoading(true);
-      Swal.fire({ icon: 'error', text: err.message })
-    });
-    setBlock(false);
-    setSend(false);
-  }
-
-  // cancelar cambios en las obligaciones
-  const cancelObligacion = async () => {
-    setObligaciones(JSON.parse(JSON.stringify(old)));
-  }
-
-  // quitar del cronograma la obligacion
-  const deleteObligacion = async (id) => {
-    let answer = await Confirm('warning', '¿Deseas eliminar la obligación judicial?', 'Confirmar')
-    if (answer) {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`obligacion/${id}`, { _method: 'DELETE' }, { headers: { CronogramaID: historial.cronograma_id } })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        findObligaciones();
-        setEdit(false);
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      });
-      setBlock(false);
-      setSend(false);
-    }
-  }
-
-  // update obligaciones
-  useEffect(() => {
-    if (send) updateObligacion();
-  }, [send]);
-    
-  // cancelar edicion
-  useEffect(() => {
-    if (cancel) cancelObligacion();
-  }, [cancel]);
-
   // render
   return (
     <Form className="row">
+      <div className="col-md-9"></div>
       <div className="col-md-3">
         <Show condicion={!loading && !current_loading}
           predeterminado={<PlaceHolderButton/>}
@@ -188,11 +126,7 @@ const Obligacion = () => {
               </div>
           </div>
         }
-      >
-        <h4 className="col-md-12 mt-1">
-          <Icon name="list alternate" /> Lista de Obligaciones Judiciales:
-        </h4>
-      </Show>
+      />
 
       <Show condicion={!loading && !current_loading}
         predeterminado={<PlaceholderObligaciones/>}
@@ -202,21 +136,28 @@ const Obligacion = () => {
             key={`item-obligation-${index}`}
             obligation={obl}
             edit={edit}
+            onDelete={handleDelete}
+            onUpdate={handleSave}
           />
         )}
+
+        {/* no hay regístros */}
+        <Show condicion={!total}>
+          <div className="col-12">
+            <NotRegister/>
+          </div>
+        </Show>
       </Show>
 
       <Show condicion={current_option == 'create'}>
         <AddObligacion
-          isClose={(e) => setCurrentOption("")}
-          onSave={(e) => findObligaciones()}
-          info_id={historial.info_id}
-          historial_id={historial.id}
+          onClose={() => setCurrentOption()}
+          onSave={handleSave}
+          info={historial?.info}
         />
       </Show>
     </Form>
   )
 }
-
 
 export default Obligacion;

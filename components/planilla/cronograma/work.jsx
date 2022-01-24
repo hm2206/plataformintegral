@@ -1,20 +1,25 @@
-import React, { useEffect, Fragment, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { Form, Select } from 'semantic-ui-react';
 import Show from '../../show';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 import Skeleton from 'react-loading-skeleton';
+import { useMemo } from 'react';
 
 const PlaceholderInput = () => <Skeleton height="37px"/> 
 
 const Work = () => {
 
-    const { historial, setBlock, loading, setIsEditable } = useContext(CronogramaContext);
-    const isHistorial = Object.keys(historial).length;
+  const { historial, setBlock, loading, setIsEditable } = useContext(CronogramaContext);
+  const isHistorial = Object.keys(historial).length;
+  
+  const displayWork = useMemo(() => {
+    return historial?.info?.contract?.work || {};
+  }, [historial])
 
-    useEffect(() => {
-        setIsEditable(false);
-        if (historial.id) setBlock(false);
-    }, [historial.id]);
+  useEffect(() => {
+    setIsEditable(false);
+    if (historial.id) setBlock(false);
+  }, [historial.id]);
 
   return (
     <div className="row">
@@ -27,7 +32,7 @@ const Work = () => {
             <input type="text" 
                 name="ape_pat"
                 className="uppercase"
-                value={historial?.work?.person?.ape_pat}
+                value={displayWork?.person?.ape_pat}
                 readOnly
             />
           </Form.Field>
@@ -43,7 +48,7 @@ const Work = () => {
               <input type="text" 
                 className="uppercase"
                 name="ape_mat"
-                value={historial?.work?.person?.ape_mat}
+                value={displayWork?.person?.ape_mat}
                 readOnly
               />
             </Show>
@@ -59,7 +64,7 @@ const Work = () => {
               <input type="text" 
                 className="uppercase"
                 name="name"
-                value={historial?.work?.person?.name}
+                value={displayWork?.person?.name}
                 readOnly
               />
             </Form.Field>
@@ -81,7 +86,7 @@ const Work = () => {
                 {key: "i", value: "I", text: "No Binario"}
               ]}
               name="gender"
-              value={historial?.work?.person?.gender}
+              value={displayWork?.person?.gender}
               disabled
             />
           </Show>
@@ -97,7 +102,7 @@ const Work = () => {
             <input
               type="text"
               readOnly
-              value={historial?.work?.person?.document_type?.name}
+              value={displayWork?.person?.document_type?.name}
             />
           </Show>
         </Form.Field>
@@ -111,7 +116,7 @@ const Work = () => {
             <label>N° Documento</label>
             <input type="text" 
               name="document_number"
-              value={historial?.work?.person?.document_number}
+              value={displayWork?.person?.document_number}
               readOnly
             />
           </Form.Field>
@@ -126,7 +131,7 @@ const Work = () => {
             <label>Fecha de Nacimiento</label>
             <input type="date" 
               name="date_of_birth"
-              value={historial?.work?.person?.date_of_birth || ''}
+              value={displayWork?.person?.date_of_birth || ''}
               readOnly
             />
           </Form.Field>
@@ -141,7 +146,7 @@ const Work = () => {
             <label>Edad</label>
             <input type="text" 
               name="age"
-              value={`${historial?.work?.person?.edad || ""}`}
+              value={`${displayWork?.person?.edad || ""}`}
               readOnly
             />
           </Form.Field> 
@@ -157,7 +162,7 @@ const Work = () => {
             <input type="text"
               className="uppercase"
               name="profession"
-              value={historial?.work?.person?.profession || ''}
+              value={displayWork?.person?.profession || ''}
               readOnly
             />
           </Form.Field>
@@ -174,7 +179,7 @@ const Work = () => {
               name="cod_dep"
               className="uppercase"
               readOnly
-              value={historial?.work?.person?.badge?.departamento || ""}
+              value={displayWork?.person?.badge?.departamento || ""}
             />
           </Form.Field>
         </Show>
@@ -190,7 +195,7 @@ const Work = () => {
               className="uppercase"
               name="cod_pro"
               readOnly
-              value={historial?.work?.person?.badge?.provincia || ""}
+              value={displayWork?.person?.badge?.provincia || ""}
             />
           </Form.Field>
         </Show>
@@ -206,7 +211,7 @@ const Work = () => {
               name="cod_dis"
               className="uppercase"
               readOnly
-              value={historial?.work?.person?.badge?.distrito || ""}
+              value={displayWork?.person?.badge?.distrito || ""}
             />
           </Form.Field>
         </Show>
@@ -221,7 +226,7 @@ const Work = () => {
             <input type="text" 
               name="address"
               className="uppercase"
-              value={historial?.work?.person?.address || ''}
+              value={displayWork?.person?.address || ''}
               readOnly
             />
           </Form.Field>      
@@ -236,7 +241,7 @@ const Work = () => {
             <label>Correo Electrónico</label>
             <input type="text" 
               name="email_contact"
-              value={historial?.work?.person?.email_contact || ''}
+              value={displayWork?.person?.email_contact || ''}
               readOnly
             />
           </Form.Field> 
@@ -251,7 +256,7 @@ const Work = () => {
             <label>N° Teléfono</label>
             <input type="text"  
               name="phone"
-              value={historial?.work?.person?.phone || ""}
+              value={displayWork?.person?.phone || ""}
               readOnly
             />
           </Form.Field> 

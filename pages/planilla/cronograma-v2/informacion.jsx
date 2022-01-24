@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { DrownSelect, BtnFloat, BtnBack } from '../../../components/Utils';
 import { Button, Form, Message, Icon } from 'semantic-ui-react';
 import { Row } from 'react-bootstrap';
@@ -30,6 +30,8 @@ import HeaderCronograma from '../../../components/planilla/cronograma/headerCron
 import SyncConfigDescuento from '../../../components/planilla/cronograma/syncConfigDescuento'
 import { EntityContext } from '../../../contexts/EntityContext';
 import NotFoundData from '../../../components/notFoundData';
+import useProcessCronograma from '../../../components/planilla/cronograma/hooks/useProcessCronograma';
+import { ToastContainer } from 'react-toastify';
 
 const FooterCronograma = dynamic(() => import('../../../components/planilla/cronograma/footerCronograma'), { ssr: false });
 
@@ -48,9 +50,13 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
   // entity
   const entity_context = useContext(EntityContext);
 
+  // hooks
+  const processCronograma = useProcessCronograma(cronograma);
+
   const [option, setOption] = useState('');
   const [refresh, setRefresh] = useState(false);
   const [historial, setHistorial] = useState({});
+  const [isProcessing, setIsProcessing] = useState(cronograma.processing || false);
   const [config_edad, setConfigEdad] = useState({});
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -93,9 +99,8 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
         let { items, meta } = res.data;
         const currentHistorial = items[0] || {};
         if (!currentHistorial?.id) throw new Error();
-        const currentWork = await findWork(currentHistorial?.info?.contractId);
-        currentHistorial.work = currentWork;
         // setting
+        setIsProcessing(currentHistorial?.cronograma?.processing || false);
         setHistorial(currentHistorial);
         setConfigEdad({});
         setTotal(meta?.totalItems);
@@ -112,11 +117,10 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     setLoading(false);
   } 
 
-  const findWork = async (id) => {
-    return await microPlanilla.get(`contracts/${id}/work`)
-      .then(async res => res.data)
-      .catch(() => ({}));
-  }
+  // display person
+  const displayPerson = useMemo(() => {
+    return historial?.info?.contract?.work?.person || {}
+  }, [historial]);
 
   // configurar entity
   useEffect(() => {
@@ -196,117 +200,16 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     await push({ pathname, query });
   }
 
-  // sincronizar remuneraciones
-  const syncRemuneracion = async () => {
-    let response = await Confirm("warning", "¿Desea agregar las remuneraciones a los trabajadores?", "Confirmar");
-    if (response) {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`cronograma/${cronograma.id}/add_remuneracion`, {}, { headers: getHeaders() })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        findHistorial();
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      })
-    }
-  }
-
-  // sincronización aportaciones
-  const syncAportacion = async () => {
-    let response = await Confirm("warning", "¿Desea agregar las aportaciones a los trabajadores?", "Confirmar");
-    if (response) {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`cronograma/${cronograma.id}/add_aportacion`, {}, { headers: getHeaders() })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        findHistorial();
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      })
-    }
-  }
-
-  // sincronizar descuentos
-  const syncDescuentos = async () => {
-    let response = await Confirm("warning", "¿Desea agregar los descuentos a los trabajadores?", "Confirmar");
-    if (response) {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`cronograma/${cronograma.id}/add_descuento`, {}, { headers: getHeaders() })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        findHistorial();
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      })
-    }
-  }
-
-  // sincronizar obligaciones
-  const syncObligaciones = async () => {
-    let response = await Confirm("warning", "¿Desea agregar las obligaciones judiciales a los trabajadores?", "Confirmar");
-    if (response) {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`cronograma/${cronograma.id}/add_obligacion`, {}, { headers: getHeaders() })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      })
-    }
-  }
-
   // procesar cronograma
   const processing = async () => {
-    let response = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
-    if (response) {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`cronograma/${cronograma.id}/processing`, {}, { headers: getHeaders() })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
+    let answer = await Confirm("warning", "¿Desea procesar el Cronograma?", "Confirmar");
+    if (!answer) return;
+    await processCronograma.processing()
+      .then(() => {
+        setIsProcessing(true);
         findHistorial();
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
       })
-    }
-  }
-
-  // sincronizar configuraciones del cronograma
-  const syncConfigs = async () => {
-    let response = await Confirm("warning", "¿Desea Sincronizar las Configuraciones?", "Confirmar");
-    if (response) {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`cronograma/${cronograma.id}/sync_configs`, {}, { headers: getHeaders() })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        if (!success) throw new Error(message);
-        await Swal.fire({ icon: 'success', text: message });
-        await findHistorial();
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      })
-    }
+      .catch(() => (null))
   }
 
   // generar token a las boletas del cronograma
@@ -324,33 +227,6 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
         app_context.setCurrentLoading(false);
         Swal.fire({ icon: 'error', text: err.message })
       })
-    }
-  }
-
-  // obtener boleta valida
-  const verifyBoleta = async (e) => {
-    e.preventDefault();
-    let answer = await Confirm('warning', '¿Desea visualizar la boleta verificada del trabajador actual?', 'Ir');
-    if (answer) {
-      app_context.setCurrentLoading(true);
-      // payload
-      let payload = {
-          token_verify: historial && historial.token_verify || "",
-          ClientId: process?.env?.NEXT_PUBLIC_CLIENT_ID,
-          ClientSecret: process?.env?.NEXT_PUBLIC_CLIENT_SECRET
-      }
-      // request
-      await unujobs.post(`my_boleta`, payload)
-        .then(res => {
-            app_context.setCurrentLoading(false);
-            let { data } = res;
-            let blob = new Blob([data], { type: 'text/html' });
-            let newPrint = window.open(URL.createObjectURL(blob))
-            newPrint.onload = () => newPrint.print();
-        }).catch(err => {
-            app_context.setCurrentLoading(false);
-            Swal.fire({ icon: 'error', text: 'No se pudo obtener la boleta verificada!' })
-        });
     }
   }
 
@@ -419,23 +295,8 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
           newQuery.href = pathname;
           await push({ pathname: parseUrl(pathname, name), query: newQuery });
           break;
-      case 'sync-remuneracion':
-          await syncRemuneracion();
-          break;
-      case 'sync-aportacion':
-          await syncAportacion();
-          break;
-      case 'sync-descuento':
-          await syncDescuentos();
-          break;
-      case 'sync-obligacion':
-          await syncObligaciones();
-          break;
       case 'processing':
           await processing();
-          break;
-      case 'sync-config':
-          await syncConfigs();
           break;
       case 'generate-token':
           await generateToken();
@@ -504,15 +365,22 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                       <div className="card-" style={{ minHeight: "80vh" }}>
                         <div className="card-header">
                             {/* mensaje cuando el trabajador tiene saldo negativo o neutro */}
-                            <Show condicion={historial.total_neto < 0}>
-                              <Message color="red">
-                                El trabajador tiene saldo negativo de ({historial.total_neto})
+                            <Show condicion={!loading && cronograma.state && !historial.isSync}>
+                              <Message color="yellow">
+                                La configuración de pago no está sincronizada
                               </Message>
                             </Show>
-                            {/* mensaje cuando el trabajador superó el limite de edad */}
-                            <Show condicion={config_edad && config_edad.valido == 0}>
+                            {/* mensaje cuando el cronograma debe procesarce */}
+                            <Show condicion={!loading && cronograma.state && isProcessing}>
                               <Message color="yellow">
-                                El trabajador ya superó el limite de edad({config_edad.limite_edad}) establecido en la partición presupuestal.
+                                Se encontró actualizaciones de la configuración de pago.
+                                <div className="text-right">
+                                  <span className='ml-2 text-primary cursor-pointer'
+                                    onClick={processing}
+                                  >
+                                    <u>Procesar Cronograma</u>
+                                  </span>
+                                </div>
                               </Message>
                             </Show>
                             {/* mensaje cuento el cronograma esta cerrado y el trabajador no tiene generado su token */}
@@ -546,16 +414,14 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                   predeterminado={<Skeleton/>}
                                 >
                                   <Show condicion={historial.token_verify}>
-                                    <a href="#" title="Boleta verificada"
-                                      onClick={verifyBoleta}
-                                    >
+                                    <a href="#" title="Boleta verificada">
                                       <i className="fas fa-qrcode text-warning mr-2"></i>
-                                      <span className="text-dark">BOLETA DE "{historial?.work?.person?.fullname || "NO HAY TRABAJADOR"}"</span>
+                                      <span className="text-dark">BOLETA DE "{displayPerson?.fullname || "NO HAY TRABAJADOR"}"</span>
                                     </a>
                                   </Show>
 
                                   <Show condicion={!historial.token_verify}>
-                                    <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{historial?.work?.person?.fullname || "NO HAY TRABAJADOR"}"
+                                    <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{displayPerson?.fullname || "NO HAY TRABAJADOR"}"
                                   </Show> 
                                                 
                                   {/* link temporal del reporte de renta */}
@@ -577,7 +443,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                     button
                                     icon="options"
                                     labeled
-                                    disabled={loading|| edit || block}
+                                    disabled={loading|| edit || block || processCronograma.loading}
                                     options={[
                                       { key: "change-meta", text: "Cambio de PIM", icon: "exchange" },
                                       { key: "discount", text: "Dsto. Escalafón", icon: "balance scale" },
@@ -595,7 +461,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                     button
                                     icon="options"
                                     labeled
-                                    disabled={loading || edit || block}
+                                    disabled={loading || edit || block || processCronograma.loading}
                                     options={[
                                       { key: "generate-token", text: "Generar Token", icon: "cloud upload" },
                                       { key: "plame", text: `${!cronograma.plame ? 'Aplicar' : 'No aplicar'} al PDT-PLAME`, icon: "balance scale"},
@@ -611,7 +477,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
 
                           <div className="card-body" style={{ marginBottom: "10em" }}>
                             <Row>
-                              <form className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1" onSubmit={async (e) => {
+                              <form className="col-md-6 col-lg-3 col-12 col-sm-6 mb-1" onSubmit={e => {
                                   e.preventDefault();
                                   setPage(1);
                                   setIsFilter(true);
@@ -628,34 +494,6 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                   />  
                                 </Form.Field>
                               </form>
-
-                              {/* <div className="col-md-6 col-12 mb-1 col-sm-6 col-lg-3">
-                                <Form.Field>
-                                  <SelectCronogramaCargo
-                                    execute={false}
-                                    refresh={cronograma.id || false}
-                                    name="cargo_id"
-                                    cronograma_id={cronograma.id}
-                                    value={form.cargo_id}
-                                    onChange={(e, obj) => handleInput(obj)}
-                                    disabled={loading || edit || block}
-                                  />
-                                </Form.Field>
-                              </div> */}
-                                                          
-                              {/* <div className="col-md-6 col-sm-6 col-lg-3 mb-1 col-12">
-                                <Form.Field>
-                                  <SelectCronogramaTypeCategoria
-                                    execute={false}
-                                    refresh={cronograma.id || false}
-                                    name="type_categoria_id"
-                                    cronograma_id={cronograma.id}
-                                    value={form.type_categoria_id}
-                                    onChange={(e, obj) => handleInput(obj)}
-                                    disabled={loading || edit || block}
-                                  />
-                                </Form.Field>
-                              </div> */}
                                                           
                               <div className="col-md-3 col-lg-2 col-6 mb-1">
                                 <Button color="black"
@@ -674,7 +512,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                               <div className="col-md-1 col-lg-1 col-6 mb-1">
                                 <Button color="olive"
                                   fluid
-                                  onClick={handleExport}
+                                  // onClick={handleExport}
                                   title="Exporta los datos a excel"
                                   disabled={loading || edit || block || !isHistorial}
                                 >
@@ -787,6 +625,9 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
         show={option == 'search_cronograma' ? true : false}
         onSelect={handleSelect}
       />
+
+      {/* toast */}
+      <ToastContainer/>
     </CronogramaProvider>
   )
 }

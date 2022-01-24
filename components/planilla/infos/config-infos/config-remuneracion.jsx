@@ -107,7 +107,7 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, disabled = false, onU
           disabled={disabled}
         />
       </td>
-      <td>
+      <td className='text-center'>
         <Checkbox toggle
           name='isBase'
           onChange={(e, obj) => setIsBase(obj.checked)}
@@ -116,7 +116,7 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, disabled = false, onU
           disabled={disabled}
         />
       </td>
-      <td className='text-center'>
+      <td className='text-right'>
         <Button.Group size='mini'>
           <Show condicion={isEdit} predeterminado={
             <>
@@ -226,7 +226,7 @@ const CreateTypeRemuneration = ({ info = {}, onSave = null }) => {
           disabled={currentLoading}
         />
       </td>
-      <td>
+      <td className='text-center'>
         <Checkbox toggle
           name='isBase'
           onChange={(e, obj) => handleInput({ ...obj, value: obj.checked })}
@@ -234,7 +234,7 @@ const CreateTypeRemuneration = ({ info = {}, onSave = null }) => {
           disabled={currentLoading}
         />
       </td>
-      <td className='text-center'>
+      <td className='text-right'>
         <Button color='teal'
           disabled={!isCan || currentLoading}
           onClick={handleSave}
@@ -294,10 +294,10 @@ const ConfigRemuneracion = ({ info = {}, disabled = false, onClose = null, onSav
         <table className='table table-striped'>
           <thead>
             <tr>
-              <th width="40%">Remuneración</th>
+              <th width="45%">Remuneración</th>
               <th className='text-left' width='25%'>Monto</th>
-              <th className='text-left' width='10%'>Base Imp.</th>
-              <th className='text-center'>Opciones</th>
+              <th className='text-center' width='10%'>Base Imp.</th>
+              <th className='text-right'>Opciones</th>
             </tr>
           </thead>
           <tbody>
@@ -311,8 +311,8 @@ const ConfigRemuneracion = ({ info = {}, disabled = false, onClose = null, onSav
               <ItemTypeRemuneration
                 key={`list-item-type-remuneration-${index}`}
                 infoTypeRemuneration={d}
-                onUpdate={() => setIsRefresh(true)}
-                onDelete={() => setIsRefresh(true)}
+                onUpdate={handleSave}
+                onDelete={handleSave}
                 disabled={disabled}
               />
             )}
