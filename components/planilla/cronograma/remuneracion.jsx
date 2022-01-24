@@ -253,7 +253,7 @@ const Remuneracion = () => {
         )}
       </Show>   
 
-      {/* open cronograma */}
+      {/* open remunerations */}
       <Show condicion={cronograma?.state && edit}>
         <div className="col-md-3 mb-3">
           <Button fluid

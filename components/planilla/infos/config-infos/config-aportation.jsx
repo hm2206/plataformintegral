@@ -138,7 +138,7 @@ const CreateTypeAportation = ({ info = {}, onSave = null }) => {
   )
 }
 
-const ConfigAportation = ({ info = {}, onClose = null }) => {
+const ConfigAportation = ({ info = {}, onClose = null, onSave = null }) => {
 
   const [current_loading, setCurrentLoading] = useState(false);
   const [currentMeta, setCurrentMeta] = useState({});
@@ -156,6 +156,11 @@ const ConfigAportation = ({ info = {}, onClose = null }) => {
     setCurrentLoading(false);
   }
 
+  const handleSave = () => {
+    if (typeof onSave == 'function') onSave();
+    setIsRefresh(true)
+  }
+
   useEffect(() => {
     getData();
   }, []);
@@ -171,7 +176,7 @@ const ConfigAportation = ({ info = {}, onClose = null }) => {
   return (
     <Modal show={true}
       isClose={onClose}
-      md="6 col-sm-8"
+      md="6 col-sm-10 col-11"
       height="50%"
       disabled={current_loading}
       titulo={<span><i className="fas fa-cogs"></i> Configuración de Aportación Empleador</span>}
@@ -187,7 +192,7 @@ const ConfigAportation = ({ info = {}, onClose = null }) => {
           <tbody>
             {/* crear remuneraciones */}
             <CreateTypeAportation
-              onSave={() => setIsRefresh(true)}
+              onSave={handleSave}
               info={info}
             />
             {/* listar remuneraciones */}
