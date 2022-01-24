@@ -8,12 +8,11 @@ import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext'; 
-import { SelectCargo } from '../../../components/select/cronograma'
 
 const IndexWork = ({ pathname, query, success, works }) => {
 
     // estados
-    const [query_search, setQuerySearch] = useState(query.query_search || "");
+    const [query_search, setQuerySearch] = useState(query.querySearch || "");
     const [cargo_id, setCargoId] = useState(query.cargo_id || "")
 
     // entity
@@ -38,7 +37,7 @@ const IndexWork = ({ pathname, query, success, works }) => {
     const handleSearch = () => {
         let { push } = Router;
         query.page = 1;
-        query.query_search = query_search;
+        query.querySearch = query_search;
         query.cargo_id = cargo_id;
         push({ pathname, query });
     }
@@ -132,10 +131,10 @@ IndexWork.getInitialProps = async (ctx) => {
     let { pathname, query } = ctx;
     // filtros
     query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
+    query.querySearch = typeof query.querySearch != 'undefined' ? query.querySearch : "";
     query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
     // request
-    let { success, works } = await microPlanilla.get(`works?page=${query.page}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
+    let { success, works } = await microPlanilla.get(`works?page=${query.page}&querySearch=${query.querySearch}&cargo_id=${query.cargo_id}`, {}, ctx)
     .then(res => ({ success: true, works: res.data }))
     .catch(() => ({ success: false, works: {} }));
     // response
