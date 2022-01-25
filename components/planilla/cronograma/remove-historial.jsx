@@ -44,6 +44,10 @@ const ItemHistorial = ({ historial = {}, isCheck = false, onToggleCheck = null }
     }
   }
 
+  const displayFullname = useMemo(() => {
+    return `${displayContract?.work?.person?.lastname} ${displayContract?.work?.person?.name}`;
+  }, [displayContract]);
+
   return (
     <List.Item>
       <List.Content floated='right'>
@@ -55,12 +59,12 @@ const ItemHistorial = ({ historial = {}, isCheck = false, onToggleCheck = null }
           <i className={`fas fa-${isCheck ? 'trash' : 'plus'}`}></i>
         </Button>
       </List.Content>
-      <Image avatar src={displayContract?.work?.person?.image_images?.image_50x50 || '/img/base.png'} 
+      <Image avatar src={'/img/base.png'} 
         style={{ objectFit: 'cover' }}
       />
       <List.Content>
         <span className="uppercase mt-1">
-          {displayContract?.work?.person?.fullname || ''}
+          {displayFullname || ''}
         </span>
         <br/>
         <span className="badge badge-dark mt-1 mb-2">
