@@ -29,17 +29,20 @@ const TrabajadorID = ({ success, work }) => {
         return () => entity_context.fireEntity({ render: false, disabled: false });
     }, []);
 
+    const fullname = useMemo(() => {
+        return `${work?.person?.lastname} ${work?.person?.name}`
+    }, [work]);
+
     // render
     return <Fragment>
         <div className="col-md-12">
             <Cover
                 back
-                titulo={work?.person?.fullname}
-                email={work?.person?.email_contact}
-                image={work?.person?.image ? `${work?.person?.image_images?.image_200x200}` : '/img/perfil.jpg'}
-                documentNumber={work?.person?.document_number}
+                titulo={fullname}
+                email={work?.person?.emailContact}
+                image={'/img/perfil.jpg'}
+                documentNumber={work?.person?.documentNumber}
                 birhday={work?.person?.date_of_birth}
-                cargo={work?.infoCurrent?.perfil_laboral?.nombre}
             />
 
             <NavCover

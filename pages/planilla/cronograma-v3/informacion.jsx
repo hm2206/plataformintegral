@@ -42,7 +42,7 @@ const PlaceholderAvatar = () => <Skeleton circle={true} height="75px" width="75p
 const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
 
   // validar data
-  if (!success) return <NotFoundData/>
+  if (!success) return <NotFoundData />
 
   // context app
   const app_context = useContext(AppContext);
@@ -68,7 +68,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
   const [last_page, setLastPage] = useState(0);
   const [block, setBlock] = useState(false);
   const [form, setForm] = useState({});
-  const [is_editable, setIsEditable] = useState(true); 
+  const [is_editable, setIsEditable] = useState(true);
   const [is_updatable, setIsUpdatable] = useState(true);
   const [change_page, setChangePage] = useState(false);
   const [cancel, setCancel] = useState(false);
@@ -115,12 +115,16 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
       });
     // datos cargados
     setLoading(false);
-  } 
+  }
 
   // display person
   const displayPerson = useMemo(() => {
     return historial?.info?.contract?.work?.person || {}
   }, [historial]);
+
+  const fullname = useMemo(() => {
+    return `${displayPerson.lastname} ${displayPerson.name}` 
+  }, [displayPerson]);
 
   // configurar entity
   useEffect(() => {
@@ -416,12 +420,12 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                   <Show condicion={historial.token_verify}>
                                     <a href="#" title="Boleta verificada">
                                       <i className="fas fa-qrcode text-warning mr-2"></i>
-                                      <span className="text-dark">BOLETA DE "{displayPerson?.fullname || "NO HAY TRABAJADOR"}"</span>
+                                      <span className="text-dark">BOLETA DE "{fullname || "NO HAY TRABAJADOR"}"</span>
                                     </a>
                                   </Show>
 
                                   <Show condicion={!historial.token_verify}>
-                                    <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{displayPerson?.fullname || "NO HAY TRABAJADOR"}"
+                                    <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{fullname || "NO HAY TRABAJADOR"}"
                                   </Show> 
                                                 
                                   {/* link temporal del reporte de renta */}

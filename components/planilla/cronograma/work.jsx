@@ -25,34 +25,34 @@ const Work = () => {
     <div className="row">
       <div className="col-md-3 mb-3">
         <Show condicion={isHistorial && !loading}
-            predeterminado={<PlaceholderInput/>}
+          predeterminado={<PlaceholderInput/>}
         >
           <Form.Field>
-            <label>Apellido Paterno</label>
-            <input type="text" 
-                name="ape_pat"
-                className="uppercase"
-                value={displayWork?.person?.ape_pat}
-                readOnly
+            <label>Abrev.</label>
+            <input type="text"
+              className="uppercase"
+              name="profession"
+              value={displayWork?.person?.prefix || ''}
+              readOnly
             />
           </Form.Field>
         </Show>
       </div>
 
-      <div className="col-md-3 mb-3">
+      <div className="col-md-6 mb-3">
+        <Show condicion={isHistorial && !loading}
+            predeterminado={<PlaceholderInput/>}
+        >
           <Form.Field>
-            <Show condicion={isHistorial && !loading}
-                predeterminado={<PlaceholderInput/>}
-            >
-              <label>Apellido Materno</label>
-              <input type="text" 
+            <label>Apellidos</label>
+            <input type="text" 
+                name="ape_pat"
                 className="uppercase"
-                name="ape_mat"
-                value={displayWork?.person?.ape_mat}
+                value={displayWork?.person?.lastname}
                 readOnly
-              />
-            </Show>
+            />
           </Form.Field>
+        </Show>
       </div>
 
       <div className="col-md-3 mb-3">
@@ -102,7 +102,7 @@ const Work = () => {
             <input
               type="text"
               readOnly
-              value={displayWork?.person?.document_type?.name}
+              value={displayWork?.person?.documentType?.name}
             />
           </Show>
         </Form.Field>
@@ -116,7 +116,7 @@ const Work = () => {
             <label>N° Documento</label>
             <input type="text" 
               name="document_number"
-              value={displayWork?.person?.document_number}
+              value={displayWork?.person?.documentNumber}
               readOnly
             />
           </Form.Field>
@@ -131,38 +131,7 @@ const Work = () => {
             <label>Fecha de Nacimiento</label>
             <input type="date" 
               name="date_of_birth"
-              value={displayWork?.person?.date_of_birth || ''}
-              readOnly
-            />
-          </Form.Field>
-        </Show>
-      </div>
-
-      <div className="col-md-3 mb-3">
-        <Show condicion={isHistorial && !loading}
-          predeterminado={<PlaceholderInput/>}
-        >
-          <Form.Field>
-            <label>Edad</label>
-            <input type="text" 
-              name="age"
-              value={`${displayWork?.person?.edad || ""}`}
-              readOnly
-            />
-          </Form.Field> 
-        </Show>
-      </div>
-
-      <div className="col-md-3 mb-3">
-        <Show condicion={isHistorial && !loading}
-          predeterminado={<PlaceholderInput/>}
-        >
-          <Form.Field>
-            <label>Profesión Abrev.</label>
-            <input type="text"
-              className="uppercase"
-              name="profession"
-              value={displayWork?.person?.profession || ''}
+              value={displayWork?.person?.dateOfBirth || ''}
               readOnly
             />
           </Form.Field>
@@ -179,13 +148,13 @@ const Work = () => {
               name="cod_dep"
               className="uppercase"
               readOnly
-              value={displayWork?.person?.badge?.departamento || ""}
+              value={displayWork?.person?.badge?.departament || ""}
             />
           </Form.Field>
         </Show>
       </div>
 
-      <div className="col-md-3 mb-3">
+      <div className="col-md-6 mb-3">
         <Show condicion={isHistorial && !loading}
           predeterminado={<PlaceholderInput/>}
         >
@@ -195,7 +164,7 @@ const Work = () => {
               className="uppercase"
               name="cod_pro"
               readOnly
-              value={displayWork?.person?.badge?.provincia || ""}
+              value={displayWork?.person?.badge?.province || ""}
             />
           </Form.Field>
         </Show>
@@ -211,7 +180,7 @@ const Work = () => {
               name="cod_dis"
               className="uppercase"
               readOnly
-              value={displayWork?.person?.badge?.distrito || ""}
+              value={displayWork?.person?.badge?.district || ""}
             />
           </Form.Field>
         </Show>
@@ -241,7 +210,7 @@ const Work = () => {
             <label>Correo Electrónico</label>
             <input type="text" 
               name="email_contact"
-              value={displayWork?.person?.email_contact || ''}
+              value={displayWork?.person?.emailContact || ''}
               readOnly
             />
           </Form.Field> 
