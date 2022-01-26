@@ -43,6 +43,10 @@ const ItemHistorial = ({ info = {}, isCheck = false, onToggleCheck = null }) => 
       onToggleCheck(info?.id, !isCheck);
     }
   }
+  
+  const displayFullname = useMemo(() => {
+    return `${displayWork?.person?.lastname} ${displayWork?.person?.name}`;
+  }, [displayWork]);
 
   return (
     <List.Item>
@@ -55,12 +59,12 @@ const ItemHistorial = ({ info = {}, isCheck = false, onToggleCheck = null }) => 
           <i className={`fas fa-${isCheck ? 'check' : 'plus'}`}></i>
         </Button>
       </List.Content>
-      <Image avatar src={displayWork?.person?.image_images?.image_50x50 || '/img/base.png'} 
+      <Image avatar src={'/img/base.png'} 
         style={{ objectFit: 'cover' }}
       />
       <List.Content>
         <span className="uppercase mt-1">
-          {displayWork?.person?.fullname || ''}
+          {displayFullname|| ''}
         </span>
         <br/>
         <span className="badge badge-dark mt-1 mb-2">
