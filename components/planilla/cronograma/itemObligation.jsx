@@ -258,7 +258,7 @@ const ItemObligation = ({ obligation = {}, onUpdate = null, onDelete = null, edi
 
                 <Button color='blue'
                   onClick={handleUpdate}
-                  disabled={currentLoading}
+                  disabled={currentLoading || !edit}
                   loading={currentLoading}
                   fluid
                 >

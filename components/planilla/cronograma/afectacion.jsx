@@ -169,14 +169,6 @@ const Afectacion = () => {
       .catch(() => setCurrentPim({}))
   }
 
-  // obtener typeCargo
-  const findTypeCargoToContract = async () => {
-    const id = displayContract?.typeCategory?.typeCargoId || '_error';
-    await microPlanilla.get(`typeCargos/${id}`)
-      .then(res => setCurrentTypeCargo(res.data))
-      .catch(() => setCurrentTypeCargo({}))
-  }
-
   // obtener contract
   useEffect(() => {
     if (!historial?.id) {
@@ -186,11 +178,6 @@ const Afectacion = () => {
     // default
     findPim()
   }, [historial?.id])
-
-  // obtener tipo cargos
-  useEffect(() => {
-    if (displayContract?.id) findTypeCargoToContract();
-  }, [displayContract]);
 
   // primera carga o cada cambio de historial
   useEffect(() => {
@@ -285,7 +272,7 @@ const Afectacion = () => {
       <InputCustom
         title="Tip. Trabajador"
         name="name"
-        value={currentTypeCargo?.name}
+        value={displayContract?.typeCategory?.typeCargo?.name}
         readOnly={true}
         loading={loading}
       />
