@@ -2,7 +2,7 @@ import React,  { Fragment, useContext, useEffect, useMemo, useState } from 'reac
 import Cover from '../../../components/trabajador/cover';
 import NavCover from '../../../components/trabajador/navCover';
 import { AUTHENTICATE } from '../../../services/auth';
-import { microPlanilla } from '../../../services/apis';
+import { microScale } from '../../../services/apis';
 import Show from '../../../components/show';
 import InfoGeneral from '../../../components/planilla/work/infoGeneral';
 import atob from 'atob';
@@ -71,10 +71,10 @@ const TrabajadorID = ({ success, work }) => {
 
 // server
 TrabajadorID.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
+    AUTHENTICATE(ctx);
     let { query, pathname } = ctx;
     let id = atob(query.id || "") || "_error";
-    let { success, work } = await microPlanilla.get(`works/${id}`, {}, ctx)
+    let { success, work } = await microScale.get(`works/${id}`, {}, ctx)
         .then(res => ({ success: true, work: res.data }))
         .catch(() => ({ success: false, work: {} }));
     // response

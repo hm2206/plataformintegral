@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Form, Button, Select } from 'semantic-ui-react';
+import { Form, Select } from 'semantic-ui-react';
 import moment from 'moment';
 import { microPlanilla, handleErrorRequest } from '../../../services/apis';
 import { Confirm } from '../../../services/utils';
@@ -290,18 +290,6 @@ const InfoGeneral = ({ work }) => {
                   </div>
               </div>
         </Form>
-    
-        {/* assign trabajador */}
-        <BtnFloat theme="btn-warning"
-            onClick={() => setOption(options.SEARCH_WORK)}
-        >
-            <i className="fas fa-search"></i>
-        </BtnFloat>
-
-        <AssingTrabajadorEntity show={option == options.SEARCH_WORK}
-            isClose={() => setOption("")}
-            getAdd={handleObj}
-        />
     </>
   );
 }

@@ -50,14 +50,14 @@ const Infos = ({ work }) => {
     setCurrentLoading(true);
     const params = new URLSearchParams();
     if (estado !== "") params.set('state', estado)
-    await microPlanilla.get(`contracts/${currentContract.id}/infos?limit=100`, { params })
+    await microPlanilla.get(`infos?limit=100&contractId=${currentContract.id}`, { params })
       .then(res => {
         const { items, meta } = res.data;
         setCurrentInfos(add ? [...current_infos, ...items] : items);
         setCurrenTotal(meta.totalItems || 0);
         setPage(meta.currentPage || 1);
         setCurrentLastPage(meta.totalPages || 0);
-      }).catch(err => setError(true))
+      }).catch(() => setError(true))
     setCurrentLoading(false);
   }
 
