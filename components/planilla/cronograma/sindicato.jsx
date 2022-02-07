@@ -106,7 +106,7 @@ const SindicatoItem = ({ affiliation = {}, edit = false, onDelete = null, onUpda
     setCurrentLoading(true);
     const payload = {};
     payload.isPercent = isPercent == true;
-    payload.amount = isPercent ? parseFloat(`${percen}`) : parseFloat(`${amount}`);
+    payload.amount = isPercent ? parseFloat(`${percent}`) : parseFloat(`${amount}`);
     await microPlanilla.put(`affiliations/${affiliation?.id}`, payload)
     .then(() => {
       toast.success(`El regístro se actualizó correctamente!`)
