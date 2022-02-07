@@ -70,12 +70,6 @@ const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
               >
                 <i className="fas fa-chess-pawn"></i>
               </Button>
-            
-              <Button onClick={onAdd}
-                title="Sincronizar Remuneración y Descuentos" 
-              >
-                <i className="fas fa-sync"></i>
-              </Button>
             </Button.Group>
           </div>
         </div>

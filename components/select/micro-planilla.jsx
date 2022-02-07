@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { SelectBase } from './utils';
-import { microPlanilla } from '../../services/apis';
+import { microAuth, microPlanilla, microScale } from '../../services/apis';
 
 
 const SelectPlanilla = ({ id = "id", principal = undefined, name, value, onChange, refresh = false, disabled = false }) => {
@@ -112,7 +112,7 @@ const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, on
 
 const SelectAfp = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
-        api={microPlanilla}
+        api={microScale}
         url={`afps`}
         id={`select-afp-${id}-${name}`}
         value={id}
@@ -130,7 +130,7 @@ const SelectAfp = ({ id = "id", name, value, onChange, refresh = false, disabled
 
 const SelectBank = ({ id = "id", name, active = false, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
-        api={microPlanilla}
+        api={microAuth}
         url={`banks`}
         id={`select-banks-${id}-${name}`}
         value={id}
@@ -239,7 +239,7 @@ const SelectHourhand = ({ id = "id", name, value, onChange, refresh = false, dis
 
 const SelectWorkToContract = ({ id = "id", workId, name, value, onChange, onReady, refresh = false, disabled = false, displayText = null }) => {
     return <SelectBase 
-        api={microPlanilla}
+        api={microScale}
         url={`works/${workId}/contracts`}
         id={`select-work-contracts-${id}-${name}`}
         value={id}

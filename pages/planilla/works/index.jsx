@@ -1,9 +1,8 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { BtnFloat } from '../../../components/Utils';
 import Router from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Button, Form, Pagination } from 'semantic-ui-react'
-import { microPlanilla } from '../../../services/apis';
+import { microScale } from '../../../services/apis';
 import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../../components/boardSimple';
@@ -134,7 +133,7 @@ IndexWork.getInitialProps = async (ctx) => {
     query.querySearch = typeof query.querySearch != 'undefined' ? query.querySearch : "";
     query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
     // request
-    let { success, works } = await microPlanilla.get(`works?page=${query.page}&querySearch=${query.querySearch}&cargo_id=${query.cargo_id}`, {}, ctx)
+    let { success, works } = await microScale.get(`works?page=${query.page}&querySearch=${query.querySearch}&cargo_id=${query.cargo_id}`, {}, ctx)
     .then(res => ({ success: true, works: res.data }))
     .catch(() => ({ success: false, works: {} }));
     // response

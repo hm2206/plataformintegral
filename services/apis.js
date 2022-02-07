@@ -99,6 +99,51 @@ export const unujobs = {
     path: process?.env?.NEXT_PUBLIC_UNUJOBS
 };
 
+/**
+ * api para consumir el sistema de micro-scale
+ */
+ export const microAuth = {
+    get: async (path, config = { }, ctx) => {
+        return axios.get(`${process?.env?.NEXT_PUBLIC_MICRO_AUTH}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    post: async (path, body = { }, config = { }, ctx) => {
+        return axios.post(`${process?.env?.NEXT_PUBLIC_MICRO_AUTH}/${path}`, body, await ConfigHeaders(ctx, config));
+    },
+    put: async (path, body = { }, config = { }, ctx) => {
+        return axios.put(`${process?.env?.NEXT_PUBLIC_MICRO_AUTH}/${path}`, body, await ConfigHeaders(ctx, config));
+    },
+    delete: async (path, config = { }, ctx) => {
+        return axios.delete(`${process?.env?.NEXT_PUBLIC_MICRO_AUTH}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    fetch: async (path, config = { }, ctx) => {
+        return fetch(`${process?.env?.NEXT_PUBLIC_MICRO_AUTH}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    path: process?.env?.NEXT_PUBLIC_MICRO_AUTH
+};
+
+
+/**
+ * api para consumir el sistema de micro-scale
+ */
+ export const microScale = {
+    get: async (path, config = { }, ctx) => {
+        return axios.get(`${process?.env?.NEXT_PUBLIC_MICRO_SCALE}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    post: async (path, body = { }, config = { }, ctx) => {
+        return axios.post(`${process?.env?.NEXT_PUBLIC_MICRO_SCALE}/${path}`, body, await ConfigHeaders(ctx, config));
+    },
+    put: async (path, body = { }, config = { }, ctx) => {
+        return axios.put(`${process?.env?.NEXT_PUBLIC_MICRO_SCALE}/${path}`, body, await ConfigHeaders(ctx, config));
+    },
+    delete: async (path, config = { }, ctx) => {
+        return axios.delete(`${process?.env?.NEXT_PUBLIC_MICRO_SCALE}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    fetch: async (path, config = { }, ctx) => {
+        return fetch(`${process?.env?.NEXT_PUBLIC_MICRO_SCALE}/${path}`, await ConfigHeaders(ctx, config));
+    },
+    path: process?.env?.NEXT_PUBLIC_MICRO_SCALE
+};
+
 
 /**
  * api para consumir el sistema de micro-planilla
