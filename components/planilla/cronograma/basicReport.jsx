@@ -84,7 +84,7 @@ const getButtons = async (names = []) => {
         {value: "aportacion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/aportacion/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "personal", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/personal/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "personal-csv", text: "Descargar csv", color: "olive", icon: "download", url: "pdf/personal/{id}?format=csv", params: ["id"], action: "blob", type: "text/csv", download: true, api: "unujobs"},
-        {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}", params: ["id"], action: "link", api: "unujobs"},
+        {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportEjecucion.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "ejecucion-pay", text: "Generar pago PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/pago", params: ["id"], action: "link", api: "unujobs"},
         {value: "ejecucion-total", text: "Generar eje. Total PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/total", params: ["id"], action: "link", api: "unujobs"},
         {value: "compromiso-siaf", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/compromiso_siaf/{id}", params: ["id"], action: "link", api: "unujobs"},
