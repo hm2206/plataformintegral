@@ -62,7 +62,7 @@ const SelectDuplicate = (props) =>  <Select
 // botones de acciones
 const getButtons = async (names = []) => {
     let datos = [
-        {value: "general", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/general/{id}", params: ["id"], action: "link", api: "unujobs"},
+        {value: "general", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportGeneral.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "general-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "cronogramas/{id}/report/general.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "planilla", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/planilla/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "planilla-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "pdf/planilla/{id}?format=excel", params: ["id"], action: "link", api: "unujobs"},
@@ -119,7 +119,7 @@ const Selectfiltros = ({ cronograma, name, value, onChange }) => {
 
 // reportes
 const reports = [
-    {key: "general", value: "general", text: "Reporte General", icon: "file text outline", filtros: ['meta_id', 'cargo_id'], buttons: ['general', 'general-excel']},
+    {key: "general", value: "general", text: "Reporte General", icon: "file text outline", filtros: ['pimCode', 'cargoId'], buttons: ['general', 'general-excel']},
     {key: "planilla", value: "planilla", text: "Reporte de Planilla", icon: "file text outline", filtros: ['meta_id', 'cargo_id'], buttons: ['planilla', 'planilla-excel']},
     {key: "boleta", value: "boleta", text: "Reporte de Boleta", icon: "file text outline", filtros: ['meta_id', 'cargo_id', 'duplicate'], buttons: ['boleta', 'boleta_airhsp']},
     {key: "pago", value: "pago", text: "Reporte Medio de Pago", icon: "file text outline", filtros: ['pago_id', 'type_categoria_id'], buttons: ['pay', 'pay-txt', 'pay-csv']},
@@ -181,9 +181,9 @@ const BasicReport = ({ cronograma, basic }) => {
             form_current.appendChild(InputEntity());
             // add form al body
             document.body.appendChild(form_current);
-            let simbol = await /[?]/.test(link)  ? '&' : '?';
+            let simbol = /[?]/.test(link)  ? '&' : '?';
             form_current.action = `${api.path}/${link}${simbol}${query}`;
-            form_current.method = 'POST';
+            form_current.method = 'GET';
             form_current.target = '_blank';
             form_current.submit();
             document.body.removeChild(form_current);
