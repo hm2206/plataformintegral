@@ -21,10 +21,10 @@ const clientApi = {
 const SelectMontos = (props) =>  <Select
     {...props}
     fluid
-    placeholder="Brutos"
+    placeholder="Netos"
     options={[
-        { key: "SELECT_MONTO_BRUTOS", value: true, text: "Brutos" },
-        { key: "SELECT_MONTO_NETOS", value: false, text: "Netos" }
+        { key: "SELECT_MONTO_BRUTOS", value: "false", text: "Brutos" },
+        { key: "SELECT_MONTO_NETOS", value: "true", text: "Netos" }
     ]}
 />
 
@@ -70,9 +70,7 @@ const SelectDuplicate = (props) =>  <Select
 const getButtons = async (names = []) => {
     let datos = [
         {value: "general", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportGeneral.pdf", params: ["id"], action: "link", api: "microPlanilla"},
-        {value: "general-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "cronogramas/{id}/report/general.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "planilla", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/planilla/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
-        {value: "planilla-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "pdf/planilla/{id}?format=excel", params: ["id"], action: "link", api: "unujobs"},
         {value: "boleta", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/boleta?cronograma_id={id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "boleta_airhsp", text: "Generar AIRHSP", color: "red", icon: "file text pdf", url: "pdf/boleta_airhsp/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "pay", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportPay.pdf", params: ["id"], action: "link", api: "microPlanilla"},
@@ -81,7 +79,6 @@ const getButtons = async (names = []) => {
         {value: "afp-net", text: "Descargar AFP NET", color: "olive", icon: "download", url: "pdf/afp_net/{id}", params: ["id"], action: "link", api: "unujobs"},
         {value: "remuneracion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/remuneracion/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "descuento", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/descuento/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
-        {value: "descuento-csv", text: "Exportar a Excel", color: "olive", icon: "file text excel", url: "pdf/descuento/{id}?format=excel", params: ["id"], action: "link", api: "unujobs" },
         {value: "descuento-consolidado", text: "Consolidado", color: "olive", icon: "file text excel", url: "exports/cronograma/{id}/descuento_consolidado", params: ["id"], action: "link", api: "unujobs" },
         {value: "judicial", text: "Lista Beneficiarios", color: "red", icon: "file text outline", url: "pdf/judicial/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "judicial-pay", text: "Generar Pagos", color: "red", icon: "file text outline", url: "pdf/judicial/{id}/pago", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
@@ -89,7 +86,6 @@ const getButtons = async (names = []) => {
         {value: "detalle", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/detalle/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "aportacion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/aportacion/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "personal", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/personal/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
-        {value: "personal-csv", text: "Descargar csv", color: "olive", icon: "download", url: "pdf/personal/{id}?format=csv", params: ["id"], action: "blob", type: "text/csv", download: true, api: "unujobs"},
         {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportEjecucion.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "ejecucion-pay", text: "Generar pago PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/pago", params: ["id"], action: "link", api: "unujobs"},
         {value: "ejecucion-total", text: "Generar eje. Total PDF", color: "red", icon: "file text outline", url: "pdf/ejecucion/{id}/total", params: ["id"], action: "link", api: "unujobs"},
@@ -114,7 +110,7 @@ const Selectfiltros = ({ cronograma, name, value, onChange }) => {
         type_descuento_id: <SelectCronogramaTypeDescuento value={value} cronograma_id={cronograma.id} name="type_descuento_id" onChange={onChange}/>,
         type_detalle_id: <SelectCronogramaTypeDetalle value={value} cronograma_id={cronograma.id} name="type_detalle_id" onChange={onChange}/>,
         type_aportacion_id: <SelectCronogramaTypeAportacion value={value} cronograma_id={cronograma.id} name="type_aportacion_id" onChange={onChange}/>,
-        neto: <SelectMontos value={`${value || ""}`} name="neto" onChange={onChange}/>,
+        neto: <SelectMontos value={`${value || "false"}`} name="neto" onChange={onChange}/>,
         negativo: <SelectValores value={`${value || ""}`} name="negativo" onChange={onChange}/>,
         duplicate: <SelectDuplicate value={`${value || ""}`} name="duplicate" onChange={onChange}/>,
     }
@@ -135,8 +131,7 @@ const reports = [
     {key: "detallado", value: "detallado", text: "Reporte de Descuentos Detallados", icon: "file text outline", filtros: ['type_detalle_id'], buttons: ['detalle']},
     {key: "aportacion", value: "aportacion", text: "Reporte de Aportaciones", icon: "file text outline", filtros: ['type_aportacion_id'], buttons: ['aportacion']},
     {key: "personal", value: "personal", text: "Reporte de Personal", icon: "file text outline", filtros: ['negativo', 'cargo_id', 'type_categoria_id', 'meta_id'], buttons: ['personal', 'personal-csv']},
-    {key: "ejecucion", value: "ejecucion", text: "Reporte de Ejecucion de Planilla", icon: "file text outline", filtros: ['neto'], buttons: ['ejecucion', 'ejecucion-pay', 'ejecucion-total']},
-    {key: "compromiso", value: "compromiso", text: "Reporte Compromiso Siaf", icon: "file text outline", filtros: [], buttons: ['compromiso-siaf']}
+    {key: "ejecucion", value: "ejecucion", text: "Reporte de Ejecucion de Planilla", icon: "file text outline", filtros: ['neto'], buttons: ['ejecucion', 'ejecucion-pay', 'ejecucion-total']}
 ];
 
 
