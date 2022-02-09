@@ -1,6 +1,5 @@
 import React, { useContext, useState, Fragment } from 'react';
 import { Body, BtnSelect } from '../../Utils';
-import { InputCredencias, InputAuth, InputEntity } from '../../../services/utils';
 import { Form, Select } from 'semantic-ui-react';
 import Show from '../../show';
 import ContentControl from '../../contentControl';
@@ -10,6 +9,7 @@ import {
     SelectCronogramaTypeRemuneracion, SelectCronogramaTypeDescuento, SelectCronogramaTypeDetalle,
     SelectCronogramaTypeAportacion
 } from '../../select/cronograma';
+import { SelectTypeCategory } from '../../select/micro-planilla';
 import { AppContext } from '../../../contexts/AppContext';
 
 const clientApi = {
@@ -20,17 +20,18 @@ const clientApi = {
 // selector de monto
 const SelectMontos = (props) =>  <Select
     {...props}
-    placeholder="Todos"
+    fluid
+    placeholder="Brutos"
     options={[
-        { key: "SELECT_MONTO_ALL", value: "", text: "Todos" },
-        { key: "SELECT_MONTO_BRUTOS", value: "0", text: "Brutos" },
-        { key: "SELECT_MONTO_NETOS", value: "1", text: "Netos" }
+        { key: "SELECT_MONTO_BRUTOS", value: true, text: "Brutos" },
+        { key: "SELECT_MONTO_NETOS", value: false, text: "Netos" }
     ]}
 />
 
 // selector de valores
 const SelectValores = (props) =>  <Select
     {...props}
+    fluid
     placeholder="Todos"
     options={[
         { key: "SELECT_MONTO_ALL", value: "", text: "Todos" },
@@ -40,14 +41,20 @@ const SelectValores = (props) =>  <Select
 />
 
 // selector de metodo de pago
-const SelectPay = (props) =>  <Select
-    {...props}
-    placeholder="Pago por Cheque"
-    options={[
-        { key: "SELECT_MONTO_POSITIVOS", value: "1", text: "Cuenta" },
-        { key: "SELECT_MONTO_NEGATIVOS", value: "0", text: "Cheque" }
-    ]}
-/>
+const SelectPay = (props) => {
+    
+    return (
+        <Select
+            fluid
+            {...props}
+            placeholder="Pago por Cuenta"
+            options={[
+                { key: "SELECT_MONTO_POSITIVOS", value: "false", text: "Cuenta" },
+                { key: "SELECT_MONTO_NEGATIVOS", value: "true", text: "Cheque" }
+            ]}
+        />
+    )
+}
 
 // selector de duplicado
 const SelectDuplicate = (props) =>  <Select
@@ -68,9 +75,8 @@ const getButtons = async (names = []) => {
         {value: "planilla-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "pdf/planilla/{id}?format=excel", params: ["id"], action: "link", api: "unujobs"},
         {value: "boleta", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/boleta?cronograma_id={id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "boleta_airhsp", text: "Generar AIRHSP", color: "red", icon: "file text pdf", url: "pdf/boleta_airhsp/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
-        {value: "pay", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/pago/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
-        {value: "pay-txt", text: "Descargar txt", color: "gray", icon: "download", url: "pdf/pago/{id}?format=txt", params: ["id"], action: "blob", type: "text/plain", download: true, api: "unujobs"},
-        {value: "pay-csv", text: "Descargar csv", color: "olive", icon: "download", url: "pdf/pago/{id}?format=csv", params: ["id"], action: "blob", type: "text/csv", download: true, api: "unujobs"},
+        {value: "pay", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportPay.pdf", params: ["id"], action: "link", api: "microPlanilla"},
+        {value: "pay-txt", text: "Descargar txt", color: "gray", icon: "download", url: "cronogramas/{id}/reportPay.txt", params: ["id"], action: "link", download: true, api: "microPlanilla"},
         {value: "afp", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/afp/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "afp-net", text: "Descargar AFP NET", color: "olive", icon: "download", url: "pdf/afp_net/{id}", params: ["id"], action: "link", api: "unujobs"},
         {value: "remuneracion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/remuneracion/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
@@ -102,8 +108,8 @@ const Selectfiltros = ({ cronograma, name, value, onChange }) => {
     const filtros = {
         meta_id: <SelectCronogramaMeta value={value} name="meta_id" cronograma_id={cronograma.id} onChange={onChange}/>,
         cargo_id: <SelectCronogramaCargo value={value} cronograma_id={cronograma.id} name="cargo_id" onChange={onChange}/>,
-        type_categoria_id: <SelectCronogramaTypeCategoria value={value} cronograma_id={cronograma.id} name="type_categoria_id" onChange={onChange}/>,
-        pago_id: <SelectPay value={`${value || ""}`} name="pago_id" onChange={onChange}/>,
+        typeCategoryId: <SelectTypeCategory value={value} cronograma_id={cronograma.id} name="type_categoria_id" onChange={onChange}/>,
+        isCheck: <SelectPay value={`${value || "false"}`} name="isCheck" onChange={onChange}/>,
         afp_id: <SelectCronogramaAfp value={value} cronograma_id={cronograma.id} name="afp_id" onChange={onChange}/>,
         type_remuneracion_id: <SelectCronogramaTypeRemuneracion value={value} cronograma_id={cronograma.id} name="type_remuneracion_id" onChange={onChange}/>,
         type_descuento_id: <SelectCronogramaTypeDescuento value={value} cronograma_id={cronograma.id} name="type_descuento_id" onChange={onChange}/>,
@@ -122,7 +128,7 @@ const reports = [
     {key: "general", value: "general", text: "Reporte General", icon: "file text outline", filtros: ['pimCode', 'cargoId'], buttons: ['general', 'general-excel']},
     {key: "planilla", value: "planilla", text: "Reporte de Planilla", icon: "file text outline", filtros: ['meta_id', 'cargo_id'], buttons: ['planilla', 'planilla-excel']},
     {key: "boleta", value: "boleta", text: "Reporte de Boleta", icon: "file text outline", filtros: ['meta_id', 'cargo_id', 'duplicate'], buttons: ['boleta', 'boleta_airhsp']},
-    {key: "pago", value: "pago", text: "Reporte Medio de Pago", icon: "file text outline", filtros: ['pago_id', 'type_categoria_id'], buttons: ['pay', 'pay-txt', 'pay-csv']},
+    {key: "pago", value: "pago", text: "Reporte Medio de Pago", icon: "file text outline", filtros: ['isCheck', 'typeCategoryId'], buttons: ['pay', 'pay-txt']},
     {key: "afp", value: "afp", text: "Reporte de AFP y ONP", icon: "file text outline", filtros: ['afp_id'], buttons: ['afp', 'afp-net']},
     {key: "remuneracion", value: "remuneracion", text: "Reporte de Remuneraciones", icon: "file text outline", filtros: ['type_remuneracion_id', 'cargo_id', 'type_categoria_id', 'meta_id', 'negativo'], buttons: ['remuneracion']},
     {key: "descuento", value: "descuento", text: "Reporte de Descuentos", icon: "file text outline", filtros: ['type_descuento_id'], buttons: ['descuento', 'descuento-csv', 'descuento-consolidado']},
@@ -170,23 +176,13 @@ const BasicReport = ({ cronograma, basic }) => {
         app_context.setCurrentLoading(true);
         if (obj.action == 'link') {
             let api = clientApi[obj.api];
-            let query = await genetateQuery();
+            let query = genetateQuery();
             let link = await handleUrl(obj.url, obj.params);
-            let form_current = document.createElement('form');
-            // add auth
-            form_current.appendChild(InputAuth());
-            // add credenciales
-            InputCredencias().filter(i => form_current.appendChild(i));
-            // add EntityId
-            form_current.appendChild(InputEntity());
-            // add form al body
-            document.body.appendChild(form_current);
             let simbol = /[?]/.test(link)  ? '&' : '?';
-            form_current.action = `${api.path}/${link}${simbol}${query}`;
-            form_current.method = 'GET';
-            form_current.target = '_blank';
-            form_current.submit();
-            document.body.removeChild(form_current);
+            let a = document.createElement('a');
+            a.href = `${api.path}/${link}${simbol}${query}`;
+            a.target = '_blank';
+            a.click();
             app_context.setCurrentLoading(false);
         } else if (obj.action == 'blob') {
             let params = await genetateQuery(false);
