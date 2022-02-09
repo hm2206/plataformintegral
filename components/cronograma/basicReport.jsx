@@ -226,7 +226,9 @@ const BasicReport = ({ cronograma, basic }) => {
         let query = ``;
         let index = 0;
         let payload = {};
-        for(let obj in form) {
+        for (let obj in form) {
+            const value = form[obj];
+            if (!value) continue;
             query += index == 0 ? `${obj}=${form[obj]}` : `&${obj}=${form[obj]}`;
             payload[obj] = form[obj];
             index++;
