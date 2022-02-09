@@ -108,7 +108,7 @@ const Selectfiltros = ({ cronograma, name, value, onChange }) => {
     const filtros = {
         meta_id: <SelectCronogramaMeta value={value} name="meta_id" cronograma_id={cronograma.id} onChange={onChange}/>,
         cargo_id: <SelectCronogramaCargo value={value} cronograma_id={cronograma.id} name="cargo_id" onChange={onChange}/>,
-        typeCategoryId: <SelectTypeCategory value={value} cronograma_id={cronograma.id} name="type_categoria_id" onChange={onChange}/>,
+        typeCategoryId: <SelectTypeCategory value={value} cronograma_id={cronograma.id} name="typeCategoryId" onChange={onChange}/>,
         isCheck: <SelectPay value={`${value || "false"}`} name="isCheck" onChange={onChange}/>,
         afp_id: <SelectCronogramaAfp value={value} cronograma_id={cronograma.id} name="afp_id" onChange={onChange}/>,
         type_remuneracion_id: <SelectCronogramaTypeRemuneracion value={value} cronograma_id={cronograma.id} name="type_remuneracion_id" onChange={onChange}/>,
