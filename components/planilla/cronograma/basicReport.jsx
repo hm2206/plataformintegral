@@ -179,7 +179,7 @@ const BasicReport = ({ cronograma, basic }) => {
             a.click();
             app_context.setCurrentLoading(false);
         } else if (obj.action == 'blob') {
-            let params = await genetateQuery(false);
+            let params = genetateQuery(false);
             let link = await handleUrl(obj.url, obj.params);
             await unujobs.post(link, params)
             .then(res => {
@@ -216,7 +216,10 @@ const BasicReport = ({ cronograma, basic }) => {
         let query = ``;
         let index = 0;
         let payload = {};
-        for(let obj in form) {
+        for (let obj in form) {
+            const value = form[obj];
+            console.log(value);
+            if (!value) continue;
             query += index == 0 ? `${obj}=${form[obj]}` : `&${obj}=${form[obj]}`;
             payload[obj] = form[obj];
             index++;
