@@ -167,7 +167,7 @@ const SelectTypeCargo = ({ id = "id", name, value, onChange, refresh = false, di
 
 const SelectTypeCategory = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
-        api={microPlanilla}
+        api={microScale}
         url={`typeCategories`}
         id={`select-type-category-${id}-${name}`}
         value={id}
