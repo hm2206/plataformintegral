@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import Modal from '../../../modal';
-import { Checkbox, Input, Button } from 'semantic-ui-react';
-import { SelectTypeAportation } from '../../../select/micro-planilla';
+import { Button } from 'semantic-ui-react';
+import { SelectTypeAportation, SelectPim } from '../../../select/micro-planilla';
 import { microPlanilla } from '../../../../services/apis';
 import { useEffect } from 'react';
 import Skeleton from 'react-loading-skeleton';
@@ -14,6 +14,7 @@ const Placeholder = () => {
   return data.map(d => 
     <tr>
       <td><Skeleton/></td>
+      <td><Skeleton /></td>
       <td><Skeleton/></td>
     </tr>
   );  
@@ -21,7 +22,7 @@ const Placeholder = () => {
 
 const ItemTypeAportation = ({ infoTypeAportation = {}, onDelete = null }) => {
 
-  const { typeAportation } = infoTypeAportation;
+  const { typeAportation, pim } = infoTypeAportation;
 
   const [option, setOption] = useState("");
   const [currentLoading, setCurrentLoading] = useState(false);
@@ -57,6 +58,9 @@ const ItemTypeAportation = ({ infoTypeAportation = {}, onDelete = null }) => {
         <b>{typeAportation?.name}</b> 
         <i className="fas fa-arrow-right ml-2 mr-2"></i>
         <span className='badge badge-primary'>{typeAportation.percent}%</span>
+      </td>
+      <td>
+        Meta {pim?.code || ''} - {pim?.cargo?.name || ''} [{pim.cargo?.extension || ''}]
       </td>
       <td className='text-center'>
         <Button.Group size='mini'>
@@ -117,7 +121,7 @@ const CreateTypeAportation = ({ info = {}, onSave = null }) => {
 
   return (
     <tr>
-      <td>
+      <td width="30%">
         <SelectTypeAportation
           name="typeAportationId"
           value={form?.typeAportationId}
@@ -125,7 +129,16 @@ const CreateTypeAportation = ({ info = {}, onSave = null }) => {
           disabled={currentLoading}
         />
       </td>
-      <td className='text-center'>
+      <td width="40%">
+        <SelectPim
+          name="pimId"
+          year={new Date().getFullYear()}
+          value={form?.pimId}
+          onChange={(e, obj) => handleIntToInput(obj)}
+          disabled={currentLoading}
+        />
+      </td>
+      <td className='text-center' width="30%">
         <Button color='teal'
           disabled={!isCan || currentLoading}
           onClick={handleSave}
@@ -176,7 +189,7 @@ const ConfigAportation = ({ info = {}, onClose = null, onSave = null }) => {
   return (
     <Modal show={true}
       isClose={onClose}
-      md="6 col-sm-10 col-11"
+      md="10 col-sm-10 col-11"
       height="50%"
       disabled={current_loading}
       titulo={<span><i className="fas fa-cogs"></i> Configuración de Aportación Empleador</span>}
@@ -185,7 +198,8 @@ const ConfigAportation = ({ info = {}, onClose = null, onSave = null }) => {
         <table className='table table-striped'>
           <thead>
             <tr>
-              <th width="70%">Aportación</th>
+              <th width="35%">Aportación</th>
+              <th width="40%">Extensión</th>
               <th className='text-center'>Opciones</th>
             </tr>
           </thead>
