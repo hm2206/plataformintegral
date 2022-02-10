@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, Fragment } from 'react';
 import { microPlanilla } from '../../../services/apis';
-import { Button, Form } from 'semantic-ui-react';
+import { Button, Form, Input } from 'semantic-ui-react';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import Show from '../../show';
@@ -61,26 +61,37 @@ const ItemAportation = ({ aportation = {}, edit = false, onDelete = null }) => {
 
   return (
     <div className="col-md-12 mb-1 col-lg-4">
-      <div className="row">
-        <div className="col-md-10 col-10 col-lg-10">
-          <Button 
-            fluid
-          >
-            {aportation?.typeAportation?.code}.-{aportation?.typeAportation?.name} 
-            <i className="fas fa-arrow-right ml-1 mr-1"></i> 
-            <small className="badge badge-dark">S./ {aportation?.amount}</small>
-          </Button>
-        </div>
+      <b className='mb-2'>
+        {aportation?.typeAportation?.code}.-{aportation?.typeAportation?.name}
+      </b>
+      <div className='mb-2'>
+        <Input readOnly
+          fluid
+          value={aportation?.amount}
+        />
+      </div>
 
-        <div className="col-md-2 col-2 col-lg-2">
-          <Button color="red"
-            fluid
-            onClick={deleteAportacion}
-            disabled={!edit || currentLoading}
-          >
-            <i className="fas fa-trash"></i>
-          </Button>
-        </div>
+      <div className="mb-2">
+        <Input readOnly
+          fluid
+          value={`META ${aportation?.pim?.code || ''} - ${aportation?.pim?.meta?.name || ''}`}
+        />
+      </div>
+
+      <div className="mb-2">
+        <Input readOnly
+          fluid
+          value={`Extensión [${aportation?.pim?.cargo?.extension || ''}] - ${aportation?.pim?.cargo?.name || ''}`}
+        />
+      </div>
+
+      <div className="mb-2 text-right">
+        <Button color="red"
+          onClick={deleteAportacion}
+          disabled={!edit || currentLoading}
+        >
+          <i className="fas fa-trash"></i>
+        </Button>
       </div>
     </div>
   )

@@ -87,7 +87,15 @@ const SelectTypeAffiliation = ({ id = "id", name, value, onChange, refresh = fal
     />
 }
 
-const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, onChange, refresh = false, disabled = false }) => {
+const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, onChange, refresh = false, disabled = false, displayText = null }) => {
+    
+    const handleDisplayText = (data) => {
+        if (typeof displayText == 'function') {
+            return displayText(data);
+        }
+        return `Meta ${data?.code} [${data?.cargo?.extension}]`;
+    }
+
     return <SelectBase 
         active={active}
         api={microPlanilla}
@@ -98,9 +106,7 @@ const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, on
         text="name"
         obj="pims"
         name={name}
-        displayText={(data) => {
-            return `Meta ${data?.code} [${data?.cargo?.extension}]`;
-        }}
+        displayText={handleDisplayText}
         valueChange={value || ""}
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
         placeholder="Seleccionar PIM"
