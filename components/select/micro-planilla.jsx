@@ -93,7 +93,7 @@ const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, on
         if (typeof displayText == 'function') {
             return displayText(data);
         }
-        return `Meta ${data?.code} [${data?.cargo?.extension}]`;
+        return `Meta ${data?.code} [${data?.cargo?.extension || ''} - ${data?.cargo?.name || ''}]`;
     }
 
     return <SelectBase 

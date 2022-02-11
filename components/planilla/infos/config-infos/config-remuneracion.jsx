@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import Modal from '../../../modal';
 import { Checkbox, Input, Button } from 'semantic-ui-react';
-import { SelectTypeRemuneration } from '../../../select/micro-planilla';
+import { SelectPim, SelectTypeRemuneration } from '../../../select/micro-planilla';
 import { microPlanilla } from '../../../../services/apis';
 import { useEffect } from 'react';
 import Skeleton from 'react-loading-skeleton';
@@ -27,6 +27,7 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, disabled = false, onU
 
   const [amount, setAmount] = useState(infoTypeRemuneration.amount);
   const [isBase, setIsBase] = useState(infoTypeRemuneration.isBase);
+  const [pimId, setPimId] = useState(infoTypeRemuneration.pimId);
   const [isEdit, setIsEdit] = useState(false);
   const [option, setOption] = useState("");
   const [currentLoading, setCurrentLoading] = useState(false);
@@ -49,7 +50,11 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, disabled = false, onU
     setOption(events.UPDATE);
     setCurrentLoading(true);
     const currentAmount = parseFloat(`${amount ? amount : 0}`);
-    const payload = Object.assign({}, { amount: currentAmount , isBase });
+    const payload = Object.assign({}, {
+      amount: currentAmount,
+      isBase,
+      pimId: parseInt(pimId) || null
+    });
     await microPlanilla.put(`infoTypeRemunerations/${infoTypeRemuneration.id}`, payload)
       .then(res => {
         Swal.fire({
@@ -96,6 +101,26 @@ const ItemTypeRemuneration = ({ infoTypeRemuneration = {}, disabled = false, onU
       <td>
         <span className='badge badge-dark mr-2'>{typeRemuneration?.code}</span>
         <b>{typeRemuneration?.name}</b>
+      </td>
+      <td className='text-center'>
+        <Show condicion={isEdit}
+          predeterminado={
+            <Input type='text'
+              fluid
+              value={
+                infoTypeRemuneration?.pimId ? `Meta ${infoTypeRemuneration?.pim?.code} - ${infoTypeRemuneration?.pim?.cargo?.extension}`
+                  : 'N/A'
+              }
+            />}
+        >
+          <SelectPim
+            name="pimId"
+            value={pimId || ''}
+            year={new Date().getFullYear()}
+            onChange={(e, obj) => setPimId(obj.value)}
+            disabled={currentLoading}
+          />
+        </Show>
       </td>
       <td>
         <Input fluid
@@ -217,6 +242,15 @@ const CreateTypeRemuneration = ({ info = {}, onSave = null }) => {
           disabled={currentLoading}
         />
       </td>
+      <td className='text-center'>
+        <SelectPim
+          name="pimId"
+          value={form?.pimId}
+          year={new Date().getFullYear()}
+          onChange={(e, obj) => handleIntToInput(obj)}
+          disabled={currentLoading}
+        />
+      </td>
       <td>
         <Input fluid
           type='number'
@@ -285,7 +319,7 @@ const ConfigRemuneracion = ({ info = {}, disabled = false, onClose = null, onSav
   return (
     <Modal show={true}
       isClose={onClose}
-      md=" col-lg-8 col-md-9"
+      md=" col-lg-10 col-md-11"
       height="50%"
       disabled={current_loading}
       titulo={<span><i className="fas fa-cogs"></i> Configuración de Planilla</span>}
@@ -294,8 +328,9 @@ const ConfigRemuneracion = ({ info = {}, disabled = false, onClose = null, onSav
         <table className='table table-striped'>
           <thead>
             <tr>
-              <th width="45%">Remuneración</th>
-              <th className='text-left' width='25%'>Monto</th>
+              <th width="30%">Remuneración</th>
+              <th className='text-left' width='20%'>PIM</th>
+              <th className='text-left' width='15%'>Monto</th>
               <th className='text-center' width='10%'>Base Imp.</th>
               <th className='text-right'>Opciones</th>
             </tr>
