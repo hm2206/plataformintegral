@@ -106,6 +106,12 @@ const ItemRemuneration = ({ remuneration = {}, edit = false, onModify = null }) 
         </b>
       </Show>
 
+      <Show condicion={remuneration?.pimId}>
+        <b className="ml-1 badge badge-warning mb-1" title="PIM">
+          Meta {remuneration?.pim?.code || ''} [{remuneration?.pim?.cargo?.extension || ''}]
+        </b>
+      </Show>
+
       <Form.Field>
         {/* toggle */}
         <Show condicion={edit}>
