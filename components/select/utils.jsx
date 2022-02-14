@@ -79,8 +79,7 @@ const SelectBase = ({
         await api.get(`${newUrl}?page=${page}${newParams}&limit=200`, { headers })
             .then(async res => {
                 const attributes = Object.keys(res.data);
-                let { success, message } = res.data;
-                let is_array = res.data[obj];
+                let is_array = res.data[obj] || res.data;
                 if (attributes.includes('items')) {
                     let tmpDatos = res.data['items'];
                     let newDatos = await settingSelect({ is_new: true, data: tmpDatos, index: { key: id, value, text }, displayText });
@@ -90,7 +89,7 @@ const SelectBase = ({
                     setIsReady(true);
                     setCurrentExecute(false);
                 } else if (Array.isArray(is_array)) {
-                    let tmpDatos = res.data[obj];
+                    let tmpDatos = is_array;
                     let newDatos = await settingSelect({ is_new: true, data: tmpDatos, index: { key: id, value, text }, displayText });
                     setDatos(newDatos);
                     setIsError(false);
@@ -98,6 +97,7 @@ const SelectBase = ({
                     setIsReady(true);
                     setCurrentExecute(false);
                 } else {
+                    let { success, message } = res.data;
                     if (!success) throw new Error(message);
                     let current_last_page = 0;
                     let { lastPage, last_page, data } = res.data[obj];

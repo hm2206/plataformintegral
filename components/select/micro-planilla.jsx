@@ -134,6 +134,24 @@ const SelectAfp = ({ id = "id", name, value, onChange, refresh = false, disabled
     />
 }
 
+const SelectAfpCode = ({ id = "code", name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+        api={microScale}
+        url={`afps/toCodes`}
+        id={`select-afp-code-${id}-${name}`}
+        value={id}
+        displayText={(data) => data.name}
+        obj="afps"
+        name={name}
+        valueChange={`${value || ""}`}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Ley Social"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
 const SelectBank = ({ id = "id", name, active = false, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
         api={microAuth}
@@ -337,4 +355,5 @@ export {
     SelectTypeDiscount,
     SelectTypeAportation,
     SelectTypeAffiliation,
+    SelectAfpCode,
 };
