@@ -5,11 +5,11 @@ import Show from '../../show';
 import ContentControl from '../../contentControl';
 import { handleErrorRequest, unujobs, microPlanilla } from '../../../services/apis';
 import {
-    SelectCronogramaAfp, SelectCronogramaMeta, SelectCronogramaCargo, SelectCronogramaTypeCategoria, 
+    SelectCronogramaMeta, 
     SelectCronogramaTypeRemuneracion, SelectCronogramaTypeDescuento, SelectCronogramaTypeDetalle,
     SelectCronogramaTypeAportacion
 } from '../../select/cronograma';
-import { SelectTypeCategory, SelectCargo } from '../../select/micro-planilla';
+import { SelectTypeCategory, SelectCargo, SelectAfpCode, SelectTypeDiscount } from '../../select/micro-planilla';
 import { AppContext } from '../../../contexts/AppContext';
 
 const clientApi = {
@@ -75,10 +75,11 @@ const getButtons = async (names = []) => {
         {value: "boleta_airhsp", text: "Generar AIRHSP", color: "red", icon: "file text pdf", url: "pdf/boleta_airhsp/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "pay", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportPay.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "pay-txt", text: "Descargar txt", color: "gray", icon: "download", url: "cronogramas/{id}/reportPay.txt", params: ["id"], action: "link", download: true, api: "microPlanilla"},
-        {value: "afp", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/afp/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
-        {value: "afp-net", text: "Descargar AFP NET", color: "olive", icon: "download", url: "pdf/afp_net/{id}", params: ["id"], action: "link", api: "unujobs"},
+        {value: "afp", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportAfp.pdf", params: ["id"], action: "link", api: "microPlanilla"},
+        {value: "afp-net", text: "Descargar AFP NET", color: "olive", icon: "download", url: "cronogramas/{id}/reportAfp.xlsx?private=true", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "remuneracion", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/remuneracion/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
-        {value: "descuento", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/descuento/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
+        { value: "descuento", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportDiscount.pdf", params: ["id"], action: "link", api: "microPlanilla" },
+        {value: "descuento-xlsx", text: "Generar Excel", color: "olive", icon: "file text excel", url: "cronogramas/{id}/reportDiscount.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "descuento-consolidado", text: "Consolidado", color: "olive", icon: "file text excel", url: "exports/cronograma/{id}/descuento_consolidado", params: ["id"], action: "link", api: "unujobs" },
         {value: "judicial", text: "Lista Beneficiarios", color: "red", icon: "file text outline", url: "pdf/judicial/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "judicial-pay", text: "Generar Pagos", color: "red", icon: "file text outline", url: "pdf/judicial/{id}/pago", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
@@ -91,7 +92,7 @@ const getButtons = async (names = []) => {
         {value: "ejecucion-total", text: "Generar eje. Total PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportEjecucionTotal.pdf", params: ["id"], action: "link", api: "microPlanilla"},
     ];
     // response
-    let realDatos = await datos.filter(d => {
+    let realDatos = datos.filter(d => {
         if (names.indexOf(d.value) != -1) return d;
     });
     // response
@@ -105,9 +106,9 @@ const Selectfiltros = ({ cronograma, name, value, onChange }) => {
         cargoId: <SelectCargo value={value} cronograma_id={cronograma.id} name="cargoId" onChange={onChange}/>,
         typeCategoryId: <SelectTypeCategory value={value} cronograma_id={cronograma.id} name="typeCategoryId" onChange={onChange}/>,
         isCheck: <SelectPay value={`${value || "false"}`} name="isCheck" onChange={onChange}/>,
-        afp_id: <SelectCronogramaAfp value={value} cronograma_id={cronograma.id} name="afp_id" onChange={onChange}/>,
+        code: <SelectAfpCode value={`${value || ''}`} cronograma_id={cronograma.id} name="code" onChange={onChange}/>,
         type_remuneracion_id: <SelectCronogramaTypeRemuneracion value={value} cronograma_id={cronograma.id} name="type_remuneracion_id" onChange={onChange}/>,
-        type_descuento_id: <SelectCronogramaTypeDescuento value={value} cronograma_id={cronograma.id} name="type_descuento_id" onChange={onChange}/>,
+        typeDiscountId: <SelectTypeDiscount value={value} cronograma_id={cronograma.id} name="typeDiscountId" onChange={onChange}/>,
         type_detalle_id: <SelectCronogramaTypeDetalle value={value} cronograma_id={cronograma.id} name="type_detalle_id" onChange={onChange}/>,
         type_aportacion_id: <SelectCronogramaTypeAportacion value={value} cronograma_id={cronograma.id} name="type_aportacion_id" onChange={onChange}/>,
         neto: <SelectMontos value={`${value || "false"}`} name="neto" onChange={onChange}/>,
@@ -124,9 +125,9 @@ const reports = [
     // {key: "planilla", value: "planilla", text: "Reporte de Planilla", icon: "file text outline", filtros: ['meta_id', 'cargo_id'], buttons: ['planilla', 'planilla-excel']},
     // {key: "boleta", value: "boleta", text: "Reporte de Boleta", icon: "file text outline", filtros: ['meta_id', 'cargo_id', 'duplicate'], buttons: ['boleta', 'boleta_airhsp']},
     {key: "pago", value: "pago", text: "Reporte Medio de Pago", icon: "file text outline", filtros: ['isCheck', 'typeCategoryId'], buttons: ['pay', 'pay-txt']},
-    // {key: "afp", value: "afp", text: "Reporte de AFP y ONP", icon: "file text outline", filtros: ['afp_id'], buttons: ['afp', 'afp-net']},
+    {key: "afp", value: "afp", text: "Reporte de AFP y ONP", icon: "file text outline", filtros: ['code'], buttons: ['afp', 'afp-net']},
     // {key: "remuneracion", value: "remuneracion", text: "Reporte de Remuneraciones", icon: "file text outline", filtros: ['type_remuneracion_id', 'cargo_id', 'type_categoria_id', 'meta_id', 'negativo'], buttons: ['remuneracion']},
-    // {key: "descuento", value: "descuento", text: "Reporte de Descuentos", icon: "file text outline", filtros: ['type_descuento_id'], buttons: ['descuento', 'descuento-csv', 'descuento-consolidado']},
+    {key: "descuento", value: "descuento", text: "Reporte de Descuentos", icon: "file text outline", filtros: ['typeDiscountId'], buttons: ['descuento', 'descuento-xlsx']},
     // {key: "obligacion", value: "obligacion", text: "Reporte de Obl. Judiciales", icon: "file text outline", filtros: ['pago_id', 'type_categoria_id'], buttons: ['judicial', 'judicial-pay', 'judicial-pay-txt']},
     // {key: "detallado", value: "detallado", text: "Reporte de Descuentos Detallados", icon: "file text outline", filtros: ['type_detalle_id'], buttons: ['detalle']},
     // {key: "aportacion", value: "aportacion", text: "Reporte de Aportaciones", icon: "file text outline", filtros: ['type_aportacion_id'], buttons: ['aportacion']},
@@ -256,7 +257,7 @@ const BasicReport = ({ cronograma, basic }) => {
                                             />
                                         </Form.Field>
                                     </div>    
-                                )}
+                        )}
 
                                 <div className="col-md-12 text-center mt-5">
                                     <h1 className="mt-4" style={{ color: "#eee" }}>

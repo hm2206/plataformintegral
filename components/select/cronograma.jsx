@@ -1,6 +1,6 @@
 import React from 'react';
 import { SelectBase } from './utils';
-import { unujobs } from '../../services/apis';
+import { microScale, unujobs } from '../../services/apis';
 
 const SelectPlanilla = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
@@ -186,7 +186,7 @@ const SelectAfp = ({ id = "id", name, value, onChange, refresh = false, disabled
 
 const SelectCronogramaAfp = ({ id = "afp_id", cronograma_id, name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
-                api={unujobs}
+                api={microScale}
                 url={`cronograma/${cronograma_id}/afp`}
                 id={`select-cronograma-afp-${id}-${name}`}
                 value={id}
