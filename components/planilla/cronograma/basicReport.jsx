@@ -86,8 +86,8 @@ const getButtons = async (names = []) => {
         {value: "aportacion", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportAportation.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "aportacion-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "cronogramas/{id}/reportAportation.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "personal", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportPersonal.pdf", params: ["id"], action: "link", api: "microPlanilla" },
-        {value: "personal-excel", text: "Generar Excel", color: "olive", icon: "file text outline", url: "cronogramas/{id}/reportPersonal.pdf", params: ["id"], action: "link", api: "microPlanilla" },
-        {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text excel", url: "cronogramas/{id}/reportEjecucion.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
+        {value: "personal-excel", text: "Generar Excel", color: "olive", icon: "file text outline", url: "cronogramas/{id}/reportPersonal.xlsx", params: ["id"], action: "link", api: "microPlanilla" },
+        {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text excel", url: "cronogramas/{id}/reportEjecucion.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "ejecucion-pay", text: "Generar pago PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportEjecucionPay.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "ejecucion-total", text: "Generar eje. Total PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportEjecucionTotal.pdf", params: ["id"], action: "link", api: "microPlanilla"},
     ];
