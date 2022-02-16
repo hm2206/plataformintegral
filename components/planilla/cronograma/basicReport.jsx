@@ -4,10 +4,7 @@ import { Form, Select } from 'semantic-ui-react';
 import Show from '../../show';
 import ContentControl from '../../contentControl';
 import { handleErrorRequest, unujobs, microPlanilla } from '../../../services/apis';
-import {
-    SelectCronogramaMeta, 
-    SelectCronogramaTypeDetalle
-} from '../../select/cronograma';
+import { SelectCronogramaMeta } from '../../select/cronograma';
 import { SelectTypeCategory, SelectCargo, SelectAfpCode, SelectTypeDiscount, SelectTypeRemuneration, SelectTypeAportation, SelectTypeAffiliation } from '../../select/micro-planilla';
 import { AppContext } from '../../../contexts/AppContext';
 
@@ -34,8 +31,8 @@ const SelectValores = (props) =>  <Select
     placeholder="Todos"
     options={[
         { key: "SELECT_MONTO_ALL", value: "", text: "Todos" },
-        { key: "SELECT_MONTO_POSITIVOS", value: "0", text: "Positivos" },
-        { key: "SELECT_MONTO_NEGATIVOS", value: "1", text: "Negativos" }
+        { key: "SELECT_MONTO_POSITIVOS", value: "false", text: "Positivos" },
+        { key: "SELECT_MONTO_NEGATIVOS", value: "true", text: "Negativos" }
     ]}
 />
 
@@ -88,8 +85,9 @@ const getButtons = async (names = []) => {
         {value: "affiliation-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "cronogramas/{id}/reportAffiliation.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "aportacion", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportAportation.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "aportacion-excel", text: "Generar Excel", color: "olive", icon: "file text excel", url: "cronogramas/{id}/reportAportation.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
-        {value: "personal", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/personal/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs" },
-        {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportEjecucion.pdf", params: ["id"], action: "link", api: "microPlanilla"},
+        {value: "personal", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportPersonal.pdf", params: ["id"], action: "link", api: "microPlanilla" },
+        {value: "personal-excel", text: "Generar Excel", color: "olive", icon: "file text outline", url: "cronogramas/{id}/reportPersonal.pdf", params: ["id"], action: "link", api: "microPlanilla" },
+        {value: "ejecucion", text: "Generar PDF", color: "red", icon: "file text excel", url: "cronogramas/{id}/reportEjecucion.xlsx", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "ejecucion-pay", text: "Generar pago PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportEjecucionPay.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "ejecucion-total", text: "Generar eje. Total PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reportEjecucionTotal.pdf", params: ["id"], action: "link", api: "microPlanilla"},
     ];
@@ -114,7 +112,7 @@ const Selectfiltros = ({ cronograma, name, value, onChange }) => {
         typeAffiliationId: <SelectTypeAffiliation value={value} cronograma_id={cronograma.id} name="typeAffiliationId" onChange={onChange}/>,
         typeAportationId: <SelectTypeAportation value={value} cronograma_id={cronograma.id} name="typeAportationId" onChange={onChange}/>,
         neto: <SelectMontos value={`${value || "false"}`} name="neto" onChange={onChange}/>,
-        negativo: <SelectValores value={`${value || ""}`} name="negativo" onChange={onChange}/>,
+        negative: <SelectValores value={`${value || ""}`} name="negative" onChange={onChange}/>,
         duplicate: <SelectDuplicate value={`${value || ""}`} name="duplicate" onChange={onChange}/>,
     }
     // return
@@ -133,7 +131,7 @@ const reports = [
     // {key: "obligacion", value: "obligacion", text: "Reporte de Obl. Judiciales", icon: "file text outline", filtros: ['pago_id', 'type_categoria_id'], buttons: ['judicial', 'judicial-pay', 'judicial-pay-txt']},
     {key: "affiliation", value: "affiliation", text: "Reporte de Afiliaciones", icon: "file text outline", filtros: ['typeAffiliationId'], buttons: ['affiliation', 'affiliation-excel']},
     {key: "aportacion", value: "aportacion", text: "Reporte de Aportaciones", icon: "file text outline", filtros: ['typeAportationId'], buttons: ['aportacion', 'aportacion-excel']},
-    // {key: "personal", value: "personal", text: "Reporte de Personal", icon: "file text outline", filtros: ['negativo', 'cargo_id', 'type_categoria_id', 'meta_id'], buttons: ['personal', 'personal-csv']},
+    {key: "personal", value: "personal", text: "Reporte de Personal", icon: "file text outline", filtros: ['negative'], buttons: ['personal', 'personal-excel']},
     {key: "ejecucion", value: "ejecucion", text: "Reporte de Ejecucion de Planilla", icon: "file text outline", filtros: ['neto'], buttons: ['ejecucion', 'ejecucion-pay', 'ejecucion-total']}
 ];
 
