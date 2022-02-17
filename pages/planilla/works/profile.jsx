@@ -29,16 +29,12 @@ const TrabajadorID = ({ success, work }) => {
         return () => entity_context.fireEntity({ render: false, disabled: false });
     }, []);
 
-    const fullname = useMemo(() => {
-        return `${work?.person?.lastname} ${work?.person?.name}`
-    }, [work]);
-
     // render
     return <Fragment>
         <div className="col-md-12">
             <Cover
                 back
-                titulo={fullname}
+                titulo={work?.person?.fullName || ''}
                 email={work?.person?.emailContact}
                 image={'/img/perfil.jpg'}
                 documentNumber={work?.person?.documentNumber}
