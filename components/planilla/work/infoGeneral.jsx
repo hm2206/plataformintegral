@@ -55,42 +55,6 @@ const InfoGeneral = ({ work }) => {
         }
     }
 
-    const onSavePerson = async () => {
-        setOption("");
-        await Router.push({ pathaname: Router.pathaname, query: Router.query });
-    }
-
-    const updateWork = async () => {
-        let answer = await Confirm("warning", `¿Estás seguro en guardar los datos?`, 'Estoy Seguro')
-        if (!answer) return;
-        app_context.setCurrentLoading(true);
-        let form = Object.assign({}, current_work);
-        form.bankId = parseInt(`${form.bankId}`);
-        form.afpId = parseInt(`${form.afpId}`);
-        form.isPrimaSeguro = form.isPrimaSeguro == true;
-        await microPlanilla.put(`works/${work.id}`, form)
-        .then(res => {
-            app_context.setCurrentLoading(false);
-            setEdit(false);
-            Swal.fire({
-                icon: 'success',
-                text: "Los cambios se guardarón correctamente!"
-            });
-        }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)));
-    }
-
-    const handleObj = async (obj) => {
-        setOption("");
-        let { pathname, query, push }  = Router;
-        let id = btoa(obj.id);
-        query.id = id;
-        push({ pathname, query })
-  }
-  
-  const fullname = useMemo(() => {
-    return `${work?.person?.lastname} ${work?.person?.name}`
-  }, [work]);
-
     useEffect(() => {
         setPerson(Object.assign({}, work.person || {}));
     }, [work]);
@@ -132,7 +96,7 @@ const InfoGeneral = ({ work }) => {
                           <div className="col-md-6 mb-2">
                               <Form.Field>
                                   <label htmlFor="">Nombre Completo</label>
-                                  <input type="text" className="uppercase" value={fullname} readOnly={true}/>
+                                  <input type="text" className="uppercase" value={person?.fullName || ''} readOnly={true}/>
                               </Form.Field>
                           </div>
 

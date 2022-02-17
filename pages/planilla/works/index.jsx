@@ -66,13 +66,11 @@ const IndexWork = ({ pathname, query, success, works }) => {
                 <Form>
                     <div className="col-md-12">
                         <DataTable
-                            headers={["#ID", "Apellidos", "Nombres", "N° Documento", "N° Cussp", "Estado"]}
+                            headers={["#ID", "Apellidos y Nombres", "N° Documento", "N° Cussp", "Estado"]}
                             data={works?.items || []}
                             index={[
                                 { key: "person.id", type: "text" },
-                                { key: "person.lastname", type: "text", className: "uppercase" },
-                                { key: "person.name", type: "text", className: "uppercase" },
-                                { key: "person.documentNumber", type: "icon" },
+                                { key: "person.fullName", type: "text", className: "uppercase" },{ key: "person.documentNumber", type: "icon" },
                                 { key: "numberOfCussp", type: "icon", bg: 'dark' },
                                 { key: "state", type: "switch", bg_true: "success", bg_false: "danger", is_true: "Activo", is_false: "Inactivo" }
                             ]}
