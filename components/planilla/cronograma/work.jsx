@@ -48,7 +48,7 @@ const Work = () => {
             <input type="text" 
                 name="ape_pat"
                 className="uppercase"
-                value={displayWork?.person?.lastname}
+                value={`${displayWork?.person?.lastname} ${displayWork?.person?.secondaryName || ''}`}
                 readOnly
             />
           </Form.Field>
