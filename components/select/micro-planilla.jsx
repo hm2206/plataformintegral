@@ -116,6 +116,27 @@ const SelectPim = ({ id = "id", year, active, defaultDatos = [], name, value, on
     />
 }
 
+const SelectPimCode = ({ id = "code", year, active, defaultDatos = [], name, value, onChange, refresh = false, disabled = false }) => {
+
+    return <SelectBase 
+        active={active}
+        api={microPlanilla}
+        url={`pims/toCode?year=${year}`}
+        id={`select-pims-code-${id}-${name}`}
+        value={id}
+        defaultDatos={defaultDatos}
+        text="code"
+        obj="pims"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar PIM CODE"
+        refresh={refresh || year}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
 const SelectAfp = ({ id = "id", name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
         api={microScale}
@@ -338,8 +359,50 @@ const SelectTypeAportation = ({ id = "id", name, value, onChange, refresh = fals
     />
 }
 
+const SelectCronogramaToPimCode = ({ id = "code", cronogramaId, year, active, defaultDatos = [], name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+        active={active}
+        api={microPlanilla}
+        url={`cronogramas/${cronogramaId}/pimCode`}
+        id={`select-cronogramas-pims-code-${id}-${name}`}
+        value={id}
+        defaultDatos={defaultDatos}
+        text="code"
+        obj="pims"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar PIM CODE"
+        refresh={refresh || year}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
+const SelectCronogramaToCargos = ({ id = "id", cronogramaId, year, active, defaultDatos = [], name, value, onChange, refresh = false, disabled = false }) => {
+    return <SelectBase 
+        active={active}
+        api={microPlanilla}
+        url={`cronogramas/${cronogramaId}/cargos`}
+        id={`select-cronogramas-cargos-${id}-${name}`}
+        value={id}
+        defaultDatos={defaultDatos}
+        text="name"
+        obj="cargos"
+        displayText={(data) => `${data.name} [${data.extension}]`}
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar extensión"
+        refresh={refresh || year}
+        execute={true}
+        disabled={disabled}
+    />
+}
+
 export { 
     SelectMeta,
+    SelectPimCode,
     SelectCargo,
     SelectAfp,
     SelectBank,
@@ -356,4 +419,6 @@ export {
     SelectTypeAportation,
     SelectTypeAffiliation,
     SelectAfpCode,
+    SelectCronogramaToPimCode,
+    SelectCronogramaToCargos,
 };
