@@ -209,7 +209,7 @@ const IndexBoleta = ({ pathname, query, historial }) => {
                 <div className="text-center">
                     <hr/>
                     <Pagination activePage={query.page || 1} 
-                        totalPages={historial.last_page || 0}
+                        totalPages={historial.totalPages || 0}
                         onPageChange={handlePage}
                     />
                 </div>
