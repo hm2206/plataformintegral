@@ -74,8 +74,8 @@ const SelectDuplicate = (props) =>  <Select
 const getButtons = async (names = []) => {
     let datos = [
         {value: "general", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reports/general.pdf", params: ["id"], action: "link", api: "microPlanilla"},
-        {value: "planilla", text: "Generar PDF", color: "red", icon: "file text outline", url: "pdf/planilla/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
-        {value: "boleta", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reports/ticket.pdf?limit=200", params: ["id"], action: "link", api: "microPlanilla"},
+        {value: "planilla", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reports/spreadsheets.pdf?limit=200", params: ["id"], action: "link", api: "microPlanilla"},
+        {value: "boleta", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reports/tickets.pdf?limit=200", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "boleta_airhsp", text: "Generar AIRHSP", color: "red", icon: "file text pdf", url: "pdf/boleta_airhsp/{id}", params: ["id"], action: "blob", type: "text/html", api: "unujobs"},
         {value: "pay", text: "Generar PDF", color: "red", icon: "file text outline", url: "cronogramas/{id}/reports/pay.pdf", params: ["id"], action: "link", api: "microPlanilla"},
         {value: "pay-txt", text: "Descargar txt", color: "gray", icon: "download", url: "cronogramas/{id}/reports/pay.txt", params: ["id"], action: "link", download: true, api: "microPlanilla"},
@@ -130,7 +130,7 @@ const Selectfiltros = ({ cronograma, name, value, onChange }) => {
 // reportes
 const reports = [
     {key: "general", value: "general", text: "Reporte General", icon: "file text outline", filtros: ['pimCode', 'cargoId'], buttons: ['general']},
-    // {key: "planilla", value: "planilla", text: "Reporte de Planilla", icon: "file text outline", filtros: ['meta_id', 'cargo_id'], buttons: ['planilla', 'planilla-excel']},
+    {key: "planilla", value: "planilla", text: "Reporte de Planilla", icon: "file text outline", filtros: ['pimCode', 'cargoId'], buttons: ['planilla']},
     {key: "boleta", value: "boleta", text: "Reporte de Boleta", icon: "file text outline", filtros: ['pimCode', 'cargoId'], buttons: ['boleta']},
     {key: "pago", value: "pago", text: "Reporte Medio de Pago", icon: "file text outline", filtros: ['isCheck', 'typeCategoryId'], buttons: ['pay', 'pay-txt']},
     {key: "afp", value: "afp", text: "Reporte de AFP y ONP", icon: "file text outline", filtros: ['code'], buttons: ['afp', 'afp-net']},
