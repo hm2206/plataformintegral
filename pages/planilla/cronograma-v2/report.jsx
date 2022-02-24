@@ -3,19 +3,19 @@ import { BtnBack, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import Router from 'next/dist/client/router';
 import Show from '../../../components/show';
-import { unujobs } from '../../../services/apis';
+import { microPlanilla } from '../../../services/apis';
 import SearchCronograma from '../../../components/cronograma/searchCronograma';
 import atob from 'atob'
-import BasicReport from '../../../components/cronograma/basicReport';
+import BasicReport from '../../../components/planilla/cronograma/basicReport';
 import HeaderCronograma from '../../../components/cronograma/headerCronograma';
 import BoardSimple from '../../../components/boardSimple';
 import NotFoundData from '../../../components/notFoundData';
 
 
-const Report = ({ pathname, query, success, cronograma }) => {
+const Report = ({ pathname, query, cronograma }) => {
 
     // validar data
-    if (!success) return <NotFoundData/>
+    if (!cronograma?.id) return <NotFoundData/>
 
     // estado
     const [option, setOption] = useState("");
@@ -73,15 +73,15 @@ const Report = ({ pathname, query, success, cronograma }) => {
 
 // server rendering
 Report.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
+    AUTHENTICATE(ctx);
     let { query, pathname } = ctx;
     // obtener cronograma
     let id = atob(query.id) || '__error';
-    let { success, cronograma } = await unujobs.get(`cronograma/${id}`, {}, ctx)
+    let cronograma = await microPlanilla.get(`cronogramas/${id}`, {}, ctx)
         .then(res => res.data)
-        .catch(err => ({ success: false }));
+        .catch(() => ({}));
     // response
-    return { query, pathname, success, cronograma }
+    return { query, pathname, cronograma }
 }
 
 // exportar
