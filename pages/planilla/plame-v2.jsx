@@ -1,10 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AUTHENTICATE } from '../../services/auth';
 import { microPlanilla } from '../../services/apis';
-import { InputCredencias, InputEntity, InputAuth } from '../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
 import Show from '../../components/show';
-import { getPlame } from '../../services/requests/cronograma'; 
 import Router from 'next/router';
 import { EntityContext } from '../../contexts/EntityContext';
 import BoardSimple from '../../components/boardSimple';
@@ -96,18 +94,6 @@ const PlameIndex = ({ pathname, query, cronograma }) => {
                                 <i className="fas fa-search"></i> Buscar
                             </Button>
                         </div>
-
-                        {/* <div className="col-md-2 mb-1 col-12 mt-1">
-                            <Button 
-                                fluid
-                                color="olive"
-                                disabled={!cronograma?.meta?.totalItems}
-                                onClick={(e) => handleClick(`pdf/plame/${year}/${mes}?export=1&cronograma_id[]=${ids.join('&cronograma_id[]=')}`)}
-                            >
-                                <i className="fas fa-share mr-1"></i>
-                                <span>Exportar</span>
-                            </Button>
-                        </div> */}
                     </div>
 
                     <div className="row">
@@ -154,12 +140,16 @@ const PlameIndex = ({ pathname, query, cronograma }) => {
                             <div className="col-md-12 mb-1">
                                 <div className="row">
                                     <div className="col-md-3">
-                                        <div 
-                                            className="card card-body text-primary"
-                                            style={{ cursor: 'pointer'  }}
-                                            onClick={() => handleClick(`plames/reports/${year}/${mes}/personal.pdf?cronogramaIds[]=${ids.join('&cronogramaIds[]=')}`)}
-                                        >
-                                            <span><i className="fas fa-users mr-1"></i> Reporte PLAME</span>
+                                        <div className="card card-body text-primary">
+                                            <div style={{ cursor: 'pointer'  }}
+                                                onClick={() => handleClick(`plames/reports/${year}/${mes}/personal.pdf?cronogramaIds[]=${ids.join('&cronogramaIds[]=')}`)}>
+                                                <i className="fas fa-users mr-1"></i> Reporte PLAME
+                                            </div>
+                                            <div style={{ cursor: 'pointer' }}
+                                                className="text-success mt-2"
+                                                onClick={() => handleClick(`plames/reports/${year}/${mes}/personal.xlsx?cronogramaIds[]=${ids.join('&cronogramaIds[]=')}`)}>
+                                                <i className="fas fa-file-excel mr-1"></i> Exportar PLAME
+                                            </div>
                                         </div>
                                     </div>
 
