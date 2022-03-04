@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Modal from '../../modal';
 import { Button, Form } from 'semantic-ui-react';
-import { unujobs } from '../../../services/apis';
+import { microPlanilla } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 
@@ -15,17 +15,21 @@ export default class Open extends Component
     open = async () => {
         this.setState({ loader: true });
         let { cronograma } = this.props;
-        await unujobs.post(`cronograma/${cronograma.id}/open`, {}, { headers: { CronogramaID: cronograma.id } })
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
+        await microPlanilla.put(`cronogramas/${cronograma.id}/open`, {}, { headers: { CronogramaID: cronograma.id } })
+        .then(async () => {
+            await Swal.fire({
+                icon: "success",
+                text: "El cronograma se abrío correctamente!"
+            });
             let { pathname, query, push } = Router;
             this.props.isClose();
-            if (success) await push({ pathname, query });
+            await push({ pathname, query });
             if (typeof this.props.onSave == 'function') this.props.onSave(true);
         })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            .catch(() => Swal.fire({
+                icon: 'error',
+                text: "No se pudo abrir el cronograma"
+            }));
         this.setState({ loader: false });
     }
 

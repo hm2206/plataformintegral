@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Modal from '../../modal';
 import { Button, Form } from 'semantic-ui-react';
-import { unujobs } from '../../../services/apis';
+import { microPlanilla } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Router from 'next/router';
 
@@ -15,16 +15,20 @@ export default class Close extends Component
     close = async () => {
         this.setState({ loader: true });
         let { cronograma } = this.props;
-        await unujobs.post(`cronograma/${cronograma.id}/close`, {}, { headers: { CronogramaID: cronograma.id } })
-        .then(async res => {
-            let { success, message } = res.data;
-            let icon = success ? 'success' : 'error';
-            await Swal.fire({ icon, text: message });
+        await microPlanilla.put(`cronogramas/${cronograma.id}/close`, {}, { headers: { CronogramaID: cronograma.id } })
+        .then(async () => {
+            await Swal.fire({
+                icon: "success",
+                text: "El cronograma se cerró correctamente!"
+            });
             let { pathname, query, push } = Router;
             this.props.isClose();
-            if (success) push({ pathname, query });
+            push({ pathname, query });
         })
-        .catch(err => Swal.fire({ icon: 'error', text: err.message }));
+            .catch(() => Swal.fire({
+                icon: 'error',
+                ext: "No se pudó cerrar el cronograma!"
+            }));
         this.setState({ loader: false });
     }
 
