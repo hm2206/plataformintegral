@@ -219,19 +219,17 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
   // generar token a las boletas del cronograma
   const generateToken = async () => {
     let response = await Confirm("warning", "¿Desea Generar los tokens de las boletas?", "Confirmar");
-    if (response) {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`cronograma/${cronograma.id}/generate_token`, {}, { headers: getHeaders() })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        await Swal.fire({ icon: 'success', text: message || 'Los tokens se generarón correctamente!' });
-        await findHistorial();
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      })
-    }
+    if (!response) return;
+    app_context.setCurrentLoading(true);
+    await microPlanilla.put(`cronogramas/${cronograma.id}/generateToken`, {}, { headers: getHeaders() })
+    .then(async () => {
+      app_context.setCurrentLoading(false);
+      await Swal.fire({ icon: 'success', text: 'Los tokens se generarón correctamente!' });
+      await findHistorial();
+    }).catch(() => {
+      app_context.setCurrentLoading(false);
+      Swal.fire({ icon: 'error', text: "No se pudo generar los tokens" })
+    })
   }
 
   // añadir o quitar al plame
@@ -379,7 +377,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                               </Message>
                             </Show>
                             {/* mensaje cuento el cronograma esta cerrado y el trabajador no tiene generado su token */}
-                            <Show condicion={!cronograma.state && !historial.tokenVerify}>
+                            <Show condicion={!loading && !cronograma.state && !historial.tokenVerify}>
                               <Message color="orange">
                                 Falta generar el token de verificación de pago
                               </Message>
@@ -459,7 +457,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                     disabled={loading || edit || block || processCronograma.loading}
                                     options={[
                                       { key: "generate-token", text: "Generar Token", icon: "cloud upload" },
-                                      { key: "plame", text: `${!cronograma.plame ? 'Aplicar' : 'No aplicar'} al PDT-PLAME`, icon: "balance scale"},
+                                      { key: "plame", text: `${!cronograma.isPlame ? 'Aplicar' : 'No aplicar'} al PDT-PLAME`, icon: "balance scale"},
                                       { key: "email", text: "Mail Masivos", icon: "mail" },
                                       { key: "report", text: "Reportes", icon: "file text outline" },
                                     ]}
