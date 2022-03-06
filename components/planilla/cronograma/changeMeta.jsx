@@ -3,6 +3,7 @@ import { Button, Form } from 'semantic-ui-react';
 import { unujobs } from '../../../services/apis';
 import Modal from '../../modal';
 import { SelectCronogramaMeta, SelectCronogramaCargo, SelectMeta } from '../../select/cronograma';
+import { SelectPim } from "../../select/micro-planilla";
 import { AppContext } from '../../../contexts/AppContext';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
@@ -49,15 +50,15 @@ const ChangeMeta = ({ cronograma, isClose }) => {
     return (
             <Modal
                 show={true}
-                titulo={<span><i className="fas fa-exchange-alt"></i> Cambiar Metas Pres. Masivamente</span>}
+                titulo={<span><i className="fas fa-exchange-alt"></i> Cambiar PIM Masivamente</span>}
                 md="7"
                 isClose={isClose}
             >
                 <div className="card-body">
                     <div className="row">
-                        <div className="col-md-6 mb-3">
+                        <div className="col-md-12 mb-3">
                             <Form.Field>
-                                <label htmlFor="">Meta Actual</label>
+                                <label htmlFor="">PIM Actual</label>
                                 <SelectCronogramaMeta
                                     cronograma_id={reload ? "" : cronograma.id}
                                     name="meta_id"
@@ -67,25 +68,13 @@ const ChangeMeta = ({ cronograma, isClose }) => {
                             </Form.Field>
                         </div>
 
-                        <div className="col-md-6 mb-3">
-                            <Form.Field>
-                                <label htmlFor="">Partición Pre.</label>
-                                <SelectCronogramaCargo
-                                    cronograma_id={cronograma.id}
-                                    name="cargo_id"
-                                    value={form.cargo_id}
-                                    onChange={(e, obj) => handleInput(obj)}
-                                />
-                            </Form.Field>
-                        </div>
-
                         <div className="col-md-12 mb-5">
                             <Form.Field>
-                                <label htmlFor="">Meta a Cambiar</label>
-                                <SelectMeta
+                                <label htmlFor="">PIM a Cambiar</label>
+                                <SelectPim
                                     year={cronograma.year}
-                                    name="change_meta_id"
-                                    value={form.change_meta_id}
+                                    name="pimId"
+                                    value={form.pimId}
                                     onChange={(e, obj) => handleInput(obj)}
                                 />
                             </Form.Field>

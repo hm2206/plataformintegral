@@ -219,46 +219,35 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
   // generar token a las boletas del cronograma
   const generateToken = async () => {
     let response = await Confirm("warning", "¿Desea Generar los tokens de las boletas?", "Confirmar");
-    if (response) {
-      app_context.setCurrentLoading(true);
-      await unujobs.post(`cronograma/${cronograma.id}/generate_token`, {}, { headers: getHeaders() })
-      .then(async res => {
-        app_context.setCurrentLoading(false);
-        let { success, message } = res.data;
-        await Swal.fire({ icon: 'success', text: message || 'Los tokens se generarón correctamente!' });
-        await findHistorial();
-      }).catch(err => {
-        app_context.setCurrentLoading(false);
-        Swal.fire({ icon: 'error', text: err.message })
-      })
-    }
+    if (!response) return;
+    app_context.setCurrentLoading(true);
+    await microPlanilla.put(`cronogramas/${cronograma.id}/generateToken`, {}, { headers: getHeaders() })
+    .then(async () => {
+      app_context.setCurrentLoading(false);
+      await Swal.fire({ icon: 'success', text: 'Los tokens se generarón correctamente!' });
+      await findHistorial();
+    }).catch(() => {
+      app_context.setCurrentLoading(false);
+      Swal.fire({ icon: 'error', text: "No se pudo generar los tokens" })
+    })
   }
 
   // añadir o quitar al plame
   const togglePlame = async () => {
     let answer = await Confirm('warning', `¿Estás seguro en ${cronograma.plame ? 'quitar de ' : 'aplicar al'} PDF-PLAME?`, 'Confirmar');
-    if (answer) {
-      app_context.setCurrentLoading(true);
-      // request
-      await unujobs.post(`cronograma/${cronograma.id}/plame`, {}, { headers: getHeaders() })
-        .then(async res => {
-            app_context.setCurrentLoading(false);
-            let { success, message } = res.data;
-            if (!success) throw new Error(message);
-            await Swal.fire({ icon: 'success', text: message });
-            let { push, pathname, query } = Router;
-            await push({ pathname, query });
-        }).catch(err => {
-            try {
-                app_context.setCurrentLoading(false);
-                let { data } = err.response;
-                if (typeof data != 'object') throw new Error(err.message);
-                throw new Error(data.message);
-            } catch (error) {
-                Swal.fire({ icon: 'error', text: err.message })   
-            }
-        });
-    }
+    if (!answer) return;
+    app_context.setCurrentLoading(true);
+    // request
+    await microPlanilla.put(`cronogramas/${cronograma.id}/togglePlame`, {}, { headers: getHeaders() })
+    .then(async () => {
+        app_context.setCurrentLoading(false);
+        await Swal.fire({ icon: 'success', text: "Los cambios se aplicarón correctamente!" });
+        let { push, pathname, query } = Router;
+        await push({ pathname, query });
+    }).catch(() => {
+      app_context.setCurrentLoading(false);
+      Swal.fire({ icon: 'error', text: "No se pudó guardar los cambios" })   
+    });
   }
 
   // obtener reporte anual
@@ -283,8 +272,8 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
   const handleOnSelect = async (e, { name }) => {
     let { push, pathname, query } = Router;
     switch (name) {
-      case 'desc-massive':
-      case 'remu-massive':
+      case 'massive-discount':
+      case 'massive-remuneration':
       case 'imp-descuento':
       case 'change-meta':
       case 'change-cargo':
@@ -356,7 +345,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
               bg="light"
           >
                 <div className="col-md-12 mt-3">
-                    <Show condicion={cronograma.plame}>
+                    <Show condicion={cronograma.isPlame}>
                       <Message className="disable">
                         <div><b>El cronograma aplica para el</b> <span className="badge badge-dark">PDT-PLAME</span></div>
                       </Message>
@@ -388,9 +377,9 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                               </Message>
                             </Show>
                             {/* mensaje cuento el cronograma esta cerrado y el trabajador no tiene generado su token */}
-                            <Show condicion={historial && cronograma && historial.total && !cronograma.estado && !historial.token_verify}>
+                            <Show condicion={!loading && !cronograma.state && !historial.tokenVerify}>
                               <Message color="orange">
-                                Falta generar el token de verificación del trabajador
+                                Falta generar el token de verificación de pago
                               </Message>
                             </Show>
 
@@ -450,9 +439,10 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                     disabled={loading|| edit || block || processCronograma.loading}
                                     options={[
                                       { key: "change-meta", text: "Cambio de PIM", icon: "exchange" },
-                                      { key: "discount", text: "Dsto. Escalafón", icon: "balance scale" },
-                                      { key: "imp-descuento", text: "Imp. Descuentos", icon: "cloud upload" },
-                                      { key: "sync-config-desct", text: "Sync. Desc. Global", icon: "cloud upload" },
+                                      // { key: "discount", text: "Dsto. Escalafón", icon: "balance scale" },
+                                      // { key: "imp-descuento", text: "Imp. Descuentos", icon: "cloud upload" },
+                                      { key: "massive-discount", text: "Dscto. Masivo", icon: "upload" },
+                                      { key: "massive-remuneration", text: "Remu. Masivo", icon: "upload" },
                                       { key: "processing", text: "Procesar Cronograma", icon: "database" },
                                       { key: "report", text: "Reportes", icon: "file text outline" },
                                     ]}
@@ -468,7 +458,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                     disabled={loading || edit || block || processCronograma.loading}
                                     options={[
                                       { key: "generate-token", text: "Generar Token", icon: "cloud upload" },
-                                      { key: "plame", text: `${!cronograma.plame ? 'Aplicar' : 'No aplicar'} al PDT-PLAME`, icon: "balance scale"},
+                                      { key: "plame", text: `${!cronograma.isPlame ? 'Aplicar' : 'No aplicar'} al PDT-PLAME`, icon: "balance scale"},
                                       { key: "email", text: "Mail Masivos", icon: "mail" },
                                       { key: "report", text: "Reportes", icon: "file text outline" },
                                     ]}
@@ -502,7 +492,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                               <div className="col-md-3 col-lg-2 col-6 mb-1">
                                 <Button color="black"
                                   fluid
-                                  onClick={(e) => {
+                                  onClick={() => {
                                       setPage(1);
                                       setIsFilter(true);
                                   }}
@@ -555,15 +545,11 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
         <i className="fas fa-search"></i>
       </BtnFloat>
 
-      <Show condicion={option == 'desc-massive'}>
+      <Show condicion={option == 'massive-discount'}>
         <UpdateDesctMassive isClose={(e) => setOption("")}/>
       </Show>
 
-      <Show condicion={option == 'sync-config-desct'}>
-        <SyncConfigDescuento isClose={(e) => setOption("")}/>
-      </Show>
-
-      <Show condicion={option == 'remu-massive'}>
+      <Show condicion={option == 'massive-remuneration'}>
         <UpdateRemuMassive isClose={(e) => setOption("")}/>
       </Show>
 
@@ -615,13 +601,6 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
         />
       </Show>
 
-      <Show condicion={option == 'discount'}>
-        <AddDiscount
-          cronograma={cronograma}
-          isClose={() => setOption("")}
-        />
-      </Show>
-
       {/* cambiar de cronograma */}
       <SearchCronograma 
         cronograma={cronograma}
@@ -637,7 +616,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
 }
 
 InformacionCronograma.getInitialProps = async (ctx) => {
-  await AUTHENTICATE(ctx);
+  AUTHENTICATE(ctx);
   let { query, pathname } = ctx;
   // procesos
   let id = atob(query.id) || '_error';

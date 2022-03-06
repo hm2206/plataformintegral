@@ -303,6 +303,12 @@ const SelectWorkToContract = ({ id = "id", workId, name, value, onChange, onRead
 }
 
 const SelectTypeRemuneration = ({ id = "id", name, value, onChange, refresh = false, disabled = false, displayText = null }) => {
+    
+    const handleDisplayText = (el) => {
+        if (typeof displayText == "function") return displayText(el);
+        return `${el.code}.- ${el.name}`;
+    }
+
     return <SelectBase 
         api={microPlanilla}
         url={`typeRemunerations`}
@@ -311,7 +317,7 @@ const SelectTypeRemuneration = ({ id = "id", name, value, onChange, refresh = fa
         text="name"
         obj="typeRemunerations"
         name={name}
-        displayText={displayText}
+        displayText={handleDisplayText}
         valueChange={value || ""}
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
         placeholder="Seleccionar Tip. Remuneración"
