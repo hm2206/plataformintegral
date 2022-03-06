@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../boardSimple';
 import CreateCronograma from './create-cronograma';
-
+import { microPlanilla } from "../../../services/apis";
 
 const ListCronograma = ({ principal = true, pathname, query, cronogramas }) => {
 
@@ -66,16 +66,18 @@ const ListCronograma = ({ principal = true, pathname, query, cronogramas }) => {
         let answer = await Confirm("warning", "¿Deseas exportar los cronogramas a excel?")
         if (!answer) return false;
         app_context.setCurrentLoading(true);
-        await unujobs.fetch(`exports/personal/${year}/${mes}`)
-        .then(resdata => resdata.blob())
-        .then(blob => {
+        await microPlanilla.get(`historials/${year}/${mes}/exports.xlsx`, { responseType: "blob" })
+        .then(({ data }) => {
+            app_context.setCurrentLoading(false);
             let a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
+            a.href = URL.createObjectURL(data);
             a.download = `report_${year}_${mes}.xlsx`;
             a.target = "_blank";
             a.click();
-        }).catch(err => Swal.fire({ icon: 'error', text: err.message }));
-        app_context.setCurrentLoading(false);
+        }).catch(() => {
+            Swal.fire({ icon: 'error', text: "No se puedo generar el excel" })
+            app_context.setCurrentLoading(false);
+        });
     }
 
     // siguiente página
@@ -222,7 +224,7 @@ const ListCronograma = ({ principal = true, pathname, query, cronogramas }) => {
                                 <div className="col-md-3 col-6 col-sm-12 col-xl-2">
                                     <Button 
                                         fluid
-                                        disabled={!cronogramas.total}
+                                        disabled={!cronogramas.meta?.totalItems}
                                         color="olive"
                                         onClick={handleExport}
                                     >

@@ -4,7 +4,7 @@ import { Icon, Form, Button, Checkbox } from 'semantic-ui-react';
 import { unujobs, handleErrorRequest } from '../../../services/apis';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
-import { SelectCronogramaTypeDescuento, SelectCronogramaMeta, SelectCronogramaCargo, SelectCronogramaTypeCategoria } from '../../select/cronograma';
+import { SelectTypeDiscount, SelectPim, SelectTypeCategory } from "../../select/micro-planilla";
 import { AppContext } from '../../../contexts/AppContext';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 
@@ -55,10 +55,9 @@ const UpdateDesctMassive = (props) => {
                     <div className="row">
                         <div className="col-md-12 mb-1">
                             <Form.Field>
-                                <SelectCronogramaTypeDescuento
-                                    name="type_descuento_id"
-                                    cronograma_id={cronograma.id}
-                                    value={form.type_descuento_id}
+                                <SelectTypeDiscount
+                                    name="typeDiscountId"
+                                    value={form.typeDiscountId}
                                     onChange={(e, obj) => handleInput(obj)}
                                 />
                             </Form.Field>
@@ -73,43 +72,30 @@ const UpdateDesctMassive = (props) => {
                                     <hr/>
                                 </div>
                                 
-                                <div className="col-md-6 mb-2">
+                                <div className="col-md-12 mb-3">
                                     <Form.Field>
-                                        <label htmlFor="">Meta Presp.</label>
-                                        <SelectCronogramaMeta
-                                            name="meta_id"
-                                            cronograma_id={cronograma.id}
-                                            value={form.meta_id}
+                                        <label htmlFor="">PIM</label>
+                                        <SelectPim
+                                            name="pimId"
+                                            year={cronograma.year}
+                                            value={form.pimId}
                                             onChange={(e, obj) => handleInput(obj)}
                                         />
                                     </Form.Field>
                                 </div>
 
-                                <div className="col-md-6 mb-2">
-                                    <Form.Field>
-                                        <label htmlFor="">Partición Presupuestal</label>
-                                        <SelectCronogramaCargo
-                                            name="cargo_id"
-                                            cronograma_id={cronograma.id}
-                                            value={form.cargo_id}
-                                            onChange={(e, obj) => handleInput(obj)}
-                                        />
-                                    </Form.Field>
-                                </div>
-
-                                <div className="col-md-6 mb-2">
+                                <div className="col-md-6 mb-3">
                                     <Form.Field>
                                         <label htmlFor="">Tip Categoría</label>
-                                        <SelectCronogramaTypeCategoria
-                                            name="type_categoria_id"
-                                            cronograma_id={cronograma.id}
-                                            value={form.type_categoria_id}
+                                        <SelectTypeCategory
+                                            name="typeCategoryId"
+                                            value={form.typeCategoryId}
                                             onChange={(e, obj) => handleInput(obj)}
                                         />
                                     </Form.Field>
                                 </div>
 
-                                <div className="col-md-6 mb-2">
+                                <div className="col-md-6 mb-3">
                                     <Form.Field>
                                         <label htmlFor="">Sincronizar</label>
                                         <div>
@@ -137,10 +123,10 @@ const UpdateDesctMassive = (props) => {
                             <Form.Field>
                                 <input type="number" step="any"
                                     placeholder="Ingrese un monto. Ejem. 0.00"
-                                    name="monto"
-                                    value={form.monto || ""}
+                                    name="amount"
+                                    value={form.amount || ""}
                                     onChange={(e) => handleInput(e.target)}
-                                    disabled={!form.type_descuento_id}
+                                    disabled={!form.typeDiscountId}
                                 />
                             </Form.Field>
                         </div>
@@ -148,9 +134,9 @@ const UpdateDesctMassive = (props) => {
                         <div className="col-md-3 mb-1">
                             <Button fluid color="blue"
                                 onClick={update}
-                                disabled={!form.type_descuento_id}
+                                disabled={!form.typeDiscountId}
                             >
-                                <i className="fas fa-save"></i> Guardar
+                                <i className="fas fa-sync"></i>
                             </Button>
                         </div>
                     </div>
