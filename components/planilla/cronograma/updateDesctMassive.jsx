@@ -128,7 +128,7 @@ const UpdateDesctMassive = (props) => {
                                 <input type="number" step="any"
                                     placeholder="Ingrese un monto. Ejem. 0.00"
                                     name="amount"
-                                    value={form.amount}
+                                    value={form.amount || 0}
                                     disabled={!form.typeDiscountId}
                                     onChange={({ target }) => handleInput({
                                         name: target.name,
