@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import Modal from '../../modal';
 import { Icon, Form, Button, Checkbox } from 'semantic-ui-react';
-import { unujobs, handleErrorRequest } from '../../../services/apis';
+import { microPlanilla, handleErrorRequest } from '../../../services/apis';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import { SelectTypeRemuneration, SelectPim, SelectTypeCategory } from "../../select/micro-planilla";
@@ -29,26 +29,30 @@ const UpdateRemunerationMassive = (props) => {
     // actualizar
     const update = async () => {
         let answer = await Confirm("warning", "¿Estas seguró en actualizar el descuento masivamente?", "Confirmar")
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            let datos = Object.assign({}, form);
-            datos._method = 'PUT';
-            await unujobs.post(`cronograma/${cronograma.id}/update_descuento`, datos, { headers: { CronogramaID: cronograma.id } })
-            .then(async res => {
-                app_context.setCurrentLoading(false);
-                let { success, message } = res.data;
-                if (!success) throw new Error(message);
-                await Swal.fire({ icon: 'success', text: message });
-                setForm({});
-                setRefresh(true);
-            }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
-        }
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        const payload = {
+            typeRemunerationIds: [parseInt(form.typeRemunerationId)],
+            amount: parseFloat(form.amount || 0),
+            isSync: form.isSync == true
+        };
+        // filters
+        if (form.pimId) payload.pimIds = [parseInt(form.pimId)];
+        if (form.typeCategoryId) payload.typeCategoryIds = [parseInt(form.typeCategoryId)]
+        // send request
+        await microPlanilla.put(`cronogramas/${cronograma.id}/process/remunerations`, payload, { headers: { CronogramaID: cronograma.id } })
+        .then(async res => {
+            app_context.setCurrentLoading(false);
+            await Swal.fire({ icon: 'success', text: "Los datos se guardarón correctamante!" });
+            setForm({});
+            setRefresh(true);
+        }).catch(err => handleErrorRequest(err, null, () => app_context.setCurrentLoading(false)));
     }
 
     // render
     return (
         <Modal show={true} {...props}
-            titulo={<span><Icon name="cart arrow down"/> Remuneración Masivo</span>}
+            titulo={<span><Icon name="cart arrow down"/> Remuneración Masiva</span>}
         >
             <div className="card-body">
                 <Form>
@@ -100,8 +104,8 @@ const UpdateRemunerationMassive = (props) => {
                                         <label htmlFor="">Sincronizar</label>
                                         <div>
                                             <Checkbox toggle
-                                                name="sync"
-                                                value={form.sync ? true : false}
+                                                name="isSync"
+                                                value={form.isSync ? true : false}
                                                 onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
                                             />
                                         </div>
@@ -114,14 +118,22 @@ const UpdateRemunerationMassive = (props) => {
                             <hr/>
                         </div>
 
+                        <div className="col-md-12 mb-5 text-center">
+                            <b><u>IMPORTANTE.</u></b> <br/>
+                            Al actualizar una remuneración masivamente, <br/> se desactivará el calculo automático de la remuneración!!!
+                        </div>
+
                         <div className="col-md-9 mb-1">
                             <Form.Field>
                                 <input type="number" step="any"
                                     placeholder="Ingrese un monto. Ejem. 0.00"
                                     name="amount"
-                                    value={form.amount || ""}
-                                    onChange={(e) => handleInput(e.target)}
+                                    value={form.amount || 0}
                                     disabled={!form.typeRemunerationId}
+                                    onChange={({ target }) => handleInput({
+                                        name: target.name,
+                                        value: parseFloat(target.value || 0)
+                                    })}
                                 />
                             </Form.Field>
                         </div>
