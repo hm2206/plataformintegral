@@ -32,7 +32,7 @@ export const AppProvider = ({ children, success, app, pathname, query }) => {
     const verifyApp = () => {
         let window_token = localStorage.getItem('currentWindow');
         if (window_token != current_window) {
-            setCurrentApp(false);
+            setCurrentApp(true);
             clearInterval(intervaloCurrent);
         }
     }

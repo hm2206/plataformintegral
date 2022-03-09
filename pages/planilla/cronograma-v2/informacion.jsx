@@ -21,8 +21,7 @@ import Open from '../../../components/planilla/cronograma/open';
 import Cerrar from '../../../components/planilla/cronograma/close';
 import SearchCronograma from '../../../components/planilla/cronograma/searchCronograma';
 import ModalReport from '../../../components/planilla/cronograma/modalReport';
-import ChangeMeta from '../../../components/planilla/cronograma/changeMeta';
-import ChangeCargo from '../../../components/planilla/cronograma/changeCargo';
+import ChangeMeta from '../../../components/planilla/cronograma/change-pim';
 import AddDiscount from '../../../components/planilla/cronograma/addDiscount'
 import { AUTHENTICATE } from '../../../services/auth';
 import BoardSimple from '../../../components/boardSimple';
@@ -581,20 +580,6 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
       </Show>
 
       <Show condicion={option == 'change-meta'}>
-        <ChangeMeta
-          cronograma={cronograma}
-          isClose={() => setOption("")}
-        />
-      </Show>
-
-      <Show condicion={option == 'change-cargo'}>
-        <ChangeCargo
-          cronograma={cronograma}
-          isClose={() => setOption("")}
-        />
-      </Show>
-
-      <Show condicion={option == 'sync-config-desc'}>
         <ChangeMeta
           cronograma={cronograma}
           isClose={() => setOption("")}

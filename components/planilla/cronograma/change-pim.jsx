@@ -4,6 +4,7 @@ import { microPlanilla } from '../../../services/apis';
 import Modal from '../../modal';
 import { SelectPim, SelectCronogramaToPims } from "../../select/micro-planilla";
 import { AppContext } from '../../../contexts/AppContext';
+import { CronogramaContext } from "../../../contexts/cronograma/CronogramaContext";
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 
@@ -11,6 +12,7 @@ const ChangeMeta = ({ cronograma, isClose }) => {
 
     // app
     const app_context = useContext(AppContext);
+    const { setRefresh } = useContext(CronogramaContext);
 
     // formulario
     const [form, setForm] = useState({});
@@ -26,21 +28,26 @@ const ChangeMeta = ({ cronograma, isClose }) => {
     // cambiar de meta
     const changePim = async () => {
         let answer = await Confirm("warning", `¿Deseas cambiar de meta?`);
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            await microPlanilla.put(`cronograma/${cronograma.id}/pims`, form, { headers: { CronogramaID: cronograma.id }})
-                .then(async res => {
-                    app_context.setCurrentLoading(false);
-                    setForm({});
-                    setReload(true);
-                    await Swal.fire({ icon: 'success', text: "Los cambios se guardarón correctamente!" });
-                    setReload(false);
-                })
-                .catch(err => {
-                    app_context.setCurrentLoading(false);
-                    Swal.fire({ icon: 'error', text: "No se pudo guardar los cambios correctamente!" });
-                });
+        if (!answer) return;
+        const payload = {
+            pimIds: [parseInt(`${form.pimId}`)],
+            nextPimId: parseInt(`${form.nextPimId}`)
         }
+        // send
+        app_context.setCurrentLoading(true);
+        await microPlanilla.put(`cronogramas/${cronograma.id}/process/pims`, payload, { headers: { CronogramaID: cronograma.id }})
+        .then(async () => {
+            app_context.setCurrentLoading(false);
+            setForm({});
+            setReload(true);
+            await Swal.fire({ icon: 'success', text: "Los cambios se guardarón correctamente!" });
+            setReload(false);
+            setRefresh(true);
+        })
+        .catch(() => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({ icon: 'error', text: "No se pudo guardar los cambios correctamente!" });
+        }); 
     } 
 
     // render
@@ -58,8 +65,8 @@ const ChangeMeta = ({ cronograma, isClose }) => {
                                 <label htmlFor="">PIM Actual</label>
                                 <SelectCronogramaToPims
                                     cronogramaId={reload ? "" : cronograma.id}
-                                    name="currentPimId"
-                                    value={form.currentPimId}
+                                    name="pimId"
+                                    value={form.pimId}
                                     onChange={(e, obj) => handleInput(obj)}
                                 />
                             </Form.Field>
@@ -70,8 +77,8 @@ const ChangeMeta = ({ cronograma, isClose }) => {
                                 <label htmlFor="">PIM a Cambiar</label>
                                 <SelectPim
                                     year={cronograma.year}
-                                    name="pimId"
-                                    value={form.pimId}
+                                    name="nextPimId"
+                                    value={form.nextPimId}
                                     onChange={(e, obj) => handleInput(obj)}
                                 />
                             </Form.Field>
@@ -81,7 +88,7 @@ const ChangeMeta = ({ cronograma, isClose }) => {
                             <hr/>
                             <Button 
                                 color="teal"
-                                disabled={!form.currentPimId || !form.pimId}
+                                disabled={!form.nextPimId || !form.pimId}
                                 onClick={changePim}
                             >
                                 <i className="fas fa-exchange-alt"></i> Cabiar Meta

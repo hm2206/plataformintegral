@@ -1,6 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import useAuth from '../hooks/useAuth';
-import { AppContext } from '../contexts/AppContext';
 import Navbar from '../components/navbar';
 import Sidebar from '../components/sidebar';
 import { Content } from '../components/Utils';

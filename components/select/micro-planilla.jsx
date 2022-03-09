@@ -387,7 +387,7 @@ const SelectCronogramaToPims = ({ id = "id", cronogramaId, active, defaultDatos 
         valueChange={value || ""}
         onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
         placeholder="Seleccionar PIM"
-        refresh={refresh}
+        refresh={refresh || cronogramaId}
         execute={true}
         displayText={handleDisplayText}
         disabled={disabled}

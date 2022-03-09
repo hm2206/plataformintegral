@@ -21,8 +21,7 @@ import Open from '../../../components/planilla/cronograma/open';
 import Cerrar from '../../../components/planilla/cronograma/close';
 import SearchCronograma from '../../../components/planilla/cronograma/searchCronograma';
 import ModalReport from '../../../components/planilla/cronograma/modalReport';
-import ChangeMeta from '../../../components/planilla/cronograma/changeMeta';
-import ChangeCargo from '../../../components/planilla/cronograma/changeCargo';
+import ChangeMeta from '../../../components/planilla/cronograma/change-pim';
 import AddDiscount from '../../../components/planilla/cronograma/addDiscount'
 import { AUTHENTICATE } from '../../../services/auth';
 import BoardSimple from '../../../components/boardSimple';
@@ -179,13 +178,13 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     let answer = await Confirm('warning', '¿Deseas exportar?', 'Exportar');
     if (answer) {
       app_context.setCurrentLoading(true);
-      let query = `cronograma_id=${cronograma.id}&cargo_id=${form.cargo_id || ""}&type_categoria_id=${form.type_categoria_id || ""}&query_search=${form.like || ""}`;
-      await unujobs.fetch(`exports/personal/${cronograma.year}/${cronograma.mes}?${query}`)
-      .then(resData => resData.blob())
-      .then(blob => {
+      await microPlanilla.get(`cronogramas/${cronograma.id}/reports/tickets.xlsx`, {
+        responseType: "blob"
+      })
+      .then(({ data }) => {
         app_context.setCurrentLoading(false);
         let a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
+        a.href = URL.createObjectURL(data);
         a.target = "_blank";
         a.click();
       }).catch(err => {
@@ -506,7 +505,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                               <div className="col-md-1 col-lg-1 col-6 mb-1">
                                 <Button color="olive"
                                   fluid
-                                  // onClick={handleExport}
+                                  onClick={handleExport}
                                   title="Exporta los datos a excel"
                                   disabled={loading || edit || block || !isHistorial}
                                 >
@@ -581,20 +580,6 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
       </Show>
 
       <Show condicion={option == 'change-meta'}>
-        <ChangeMeta
-          cronograma={cronograma}
-          isClose={() => setOption("")}
-        />
-      </Show>
-
-      <Show condicion={option == 'change-cargo'}>
-        <ChangeCargo
-          cronograma={cronograma}
-          isClose={() => setOption("")}
-        />
-      </Show>
-
-      <Show condicion={option == 'sync-config-desc'}>
         <ChangeMeta
           cronograma={cronograma}
           isClose={() => setOption("")}
