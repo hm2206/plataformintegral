@@ -1,9 +1,8 @@
 import React,  { useContext, useState } from 'react'
 import { Button, Form } from 'semantic-ui-react';
-import { unujobs } from '../../../services/apis';
+import { microPlanilla } from '../../../services/apis';
 import Modal from '../../modal';
-import { SelectCronogramaMeta, SelectCronogramaCargo, SelectMeta } from '../../select/cronograma';
-import { SelectPim } from "../../select/micro-planilla";
+import { SelectPim, SelectCronogramaToPims } from "../../select/micro-planilla";
 import { AppContext } from '../../../contexts/AppContext';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
@@ -25,23 +24,21 @@ const ChangeMeta = ({ cronograma, isClose }) => {
     }
 
     // cambiar de meta
-    const changeMeta = async () => {
+    const changePim = async () => {
         let answer = await Confirm("warning", `¿Deseas cambiar de meta?`);
         if (answer) {
             app_context.setCurrentLoading(true);
-            await unujobs.post(`cronograma/${cronograma.id}/change_meta`, form, { headers: { CronogramaID: cronograma.id }})
+            await microPlanilla.put(`cronograma/${cronograma.id}/pims`, form, { headers: { CronogramaID: cronograma.id }})
                 .then(async res => {
                     app_context.setCurrentLoading(false);
-                    let { success, message } = res.data;
-                    if (!success) throw new Error(message);
                     setForm({});
                     setReload(true);
-                    await Swal.fire({ icon: 'success', text: message });
+                    await Swal.fire({ icon: 'success', text: "Los cambios se guardarón correctamente!" });
                     setReload(false);
                 })
                 .catch(err => {
                     app_context.setCurrentLoading(false);
-                    Swal.fire({ icon: 'error', text: err.message });
+                    Swal.fire({ icon: 'error', text: "No se pudo guardar los cambios correctamente!" });
                 });
         }
     } 
@@ -59,10 +56,10 @@ const ChangeMeta = ({ cronograma, isClose }) => {
                         <div className="col-md-12 mb-3">
                             <Form.Field>
                                 <label htmlFor="">PIM Actual</label>
-                                <SelectCronogramaMeta
-                                    cronograma_id={reload ? "" : cronograma.id}
-                                    name="meta_id"
-                                    value={form.meta_id}
+                                <SelectCronogramaToPims
+                                    cronogramaId={reload ? "" : cronograma.id}
+                                    name="currentPimId"
+                                    value={form.currentPimId}
                                     onChange={(e, obj) => handleInput(obj)}
                                 />
                             </Form.Field>
@@ -84,8 +81,8 @@ const ChangeMeta = ({ cronograma, isClose }) => {
                             <hr/>
                             <Button 
                                 color="teal"
-                                disabled={!form.meta_id || !form.change_meta_id}
-                                onClick={changeMeta}
+                                disabled={!form.currentPimId || !form.pimId}
+                                onClick={changePim}
                             >
                                 <i className="fas fa-exchange-alt"></i> Cabiar Meta
                             </Button>

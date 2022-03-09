@@ -365,6 +365,35 @@ const SelectTypeAportation = ({ id = "id", name, value, onChange, refresh = fals
     />
 }
 
+const SelectCronogramaToPims = ({ id = "id", cronogramaId, active, defaultDatos = [], name, value, displayText, onChange, refresh = false, disabled = false }) => {
+    
+    const handleDisplayText = (data) => {
+        if (typeof displayText == 'function') {
+            return displayText(data);
+        }
+        return `Meta ${data?.code} [${data?.cargo?.extension || ''} - ${data?.cargo?.name || ''}]`;
+    }
+    
+    return <SelectBase 
+        active={active}
+        api={microPlanilla}
+        url={`cronogramas/${cronogramaId}/pims`}
+        id={`select-cronogramas-pims-${id}-${name}`}
+        value={id}
+        defaultDatos={defaultDatos}
+        text="code"
+        obj="pims"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar PIM"
+        refresh={refresh}
+        execute={true}
+        displayText={handleDisplayText}
+        disabled={disabled}
+    />
+}
+
 const SelectCronogramaToPimCode = ({ id = "code", cronogramaId, year, active, defaultDatos = [], name, value, onChange, refresh = false, disabled = false }) => {
     return <SelectBase 
         active={active}
@@ -427,4 +456,5 @@ export {
     SelectAfpCode,
     SelectCronogramaToPimCode,
     SelectCronogramaToCargos,
+    SelectCronogramaToPims,
 };
