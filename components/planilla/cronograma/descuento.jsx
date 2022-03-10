@@ -207,6 +207,7 @@ const Descuento = () => {
       toast.success(`Los cambios se guardarón correctamente!`)
       findDescuento();
       setEdit(false);
+      setForm([]);
     }).catch(() => {
       app_context.setCurrentLoading(false);
       toast.error(`Ocurrio un error al guardar los datos!`, {
