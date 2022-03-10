@@ -7,7 +7,7 @@ import { microPlanilla } from '../../../services/apis';
 import SearchCronograma from '../../../components/cronograma/searchCronograma';
 import atob from 'atob'
 import BasicReport from '../../../components/planilla/cronograma/basicReport';
-import HeaderCronograma from '../../../components/cronograma/headerCronograma';
+import HeaderCronograma from '../../../components/planilla/cronograma/headerCronograma';
 import BoardSimple from '../../../components/boardSimple';
 import NotFoundData from '../../../components/notFoundData';
 

@@ -4,7 +4,7 @@ import { Icon, Form, Button, Checkbox } from 'semantic-ui-react';
 import { microPlanilla, handleErrorRequest } from '../../../services/apis';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
-import { SelectTypeDiscount, SelectPim, SelectTypeCategory } from "../../select/micro-planilla";
+import { SelectTypeDiscount, SelectCronogramaToPims, SelectTypeCategory } from "../../select/micro-planilla";
 import { AppContext } from '../../../contexts/AppContext';
 import { CronogramaContext } from '../../../contexts/cronograma/CronogramaContext';
 
@@ -79,9 +79,9 @@ const UpdateDesctMassive = (props) => {
                                 <div className="col-md-12 mb-3">
                                     <Form.Field>
                                         <label htmlFor="">PIM</label>
-                                        <SelectPim
+                                        <SelectCronogramaToPims
                                             name="pimId"
-                                            year={cronograma.year}
+                                            cronogramaId={cronograma.id}
                                             value={form.pimId}
                                             onChange={(e, obj) => handleInput(obj)}
                                         />
