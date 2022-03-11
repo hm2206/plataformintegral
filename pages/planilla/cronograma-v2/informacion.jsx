@@ -32,6 +32,7 @@ import NotFoundData from '../../../components/notFoundData';
 import useProcessCronograma from '../../../components/planilla/cronograma/hooks/useProcessCronograma';
 import { ToastContainer } from 'react-toastify';
 import ChangePimAportation from '../../../components/planilla/cronograma/change-pim-aportation';
+import ChangePimRemuneration from '../../../components/planilla/cronograma/change-pim-remuneration';
 
 const FooterCronograma = dynamic(() => import('../../../components/planilla/cronograma/footerCronograma'), { ssr: false });
 
@@ -277,6 +278,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
       case 'imp-descuento':
       case 'change-pim':
       case 'change-pim-aportation':
+      case 'change-pim-remuneration':
       case 'sync-config-desct':
       case 'discount':
       case 'report':
@@ -439,6 +441,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                     disabled={loading|| edit || block || processCronograma.loading}
                                     options={[
                                       { key: "change-pim", text: "Cambio de PIM", icon: "exchange" },
+                                      { key: "change-pim-remuneration", text: "Cambio de PIM Remu.", icon: "exchange" },
                                       { key: "change-pim-aportation", text: "Cambio de PIM Aport.", icon: "exchange" },
                                       // { key: "discount", text: "Dsto. Escalafón", icon: "balance scale" },
                                       // { key: "imp-descuento", text: "Imp. Descuentos", icon: "cloud upload" },
@@ -590,6 +593,13 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
 
       <Show condicion={option == 'change-pim-aportation'}>
         <ChangePimAportation
+          cronograma={cronograma}
+          isClose={() => setOption("")}
+        />
+      </Show>
+
+      <Show condicion={option == 'change-pim-remuneration'}>
+        <ChangePimRemuneration
           cronograma={cronograma}
           isClose={() => setOption("")}
         />

@@ -2,13 +2,13 @@ import React,  { useContext, useState } from 'react'
 import { Button, Form } from 'semantic-ui-react';
 import { microPlanilla } from '../../../services/apis';
 import Modal from '../../modal';
-import { SelectPim, SelectCronogramaToPims, SelectTypeAportation } from "../../select/micro-planilla";
+import { SelectPim, SelectCronogramaToPims, SelectTypeRemuneration } from "../../select/micro-planilla";
 import { AppContext } from '../../../contexts/AppContext';
 import { CronogramaContext } from "../../../contexts/cronograma/CronogramaContext";
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 
-const ChangePimAportation = ({ cronograma, isClose }) => {
+const ChangePimRemuneration = ({ cronograma, isClose }) => {
 
     // app
     const app_context = useContext(AppContext);
@@ -30,13 +30,13 @@ const ChangePimAportation = ({ cronograma, isClose }) => {
         let answer = await Confirm("warning", `¿Deseas cambiar de meta?`);
         if (!answer) return;
         const payload = {
-            typeAportationIds: [parseInt(`${form.typeAportationId}`)],
             pimIds: [parseInt(`${form.pimId}`)],
+            typeRemunerationIds: [parseInt(`${form.typeRemunerationId}`)],
             nextPimId: parseInt(`${form.nextPimId}`)
         }
         // send
         app_context.setCurrentLoading(true);
-        await microPlanilla.put(`cronogramas/${cronograma.id}/process/pimAportations`, payload, { headers: { CronogramaID: cronograma.id }})
+        await microPlanilla.put(`cronogramas/${cronograma.id}/process/pimRemunerations`, payload, { headers: { CronogramaID: cronograma.id }})
         .then(async () => {
             app_context.setCurrentLoading(false);
             setForm({});
@@ -55,7 +55,7 @@ const ChangePimAportation = ({ cronograma, isClose }) => {
     return (
             <Modal
                 show={true}
-                titulo={<span><i className="fas fa-exchange-alt"></i> Cambiar PIM de Aportaciones Masivamente</span>}
+                titulo={<span><i className="fas fa-exchange-alt"></i> Cambiar PIM de Remuneración Masivamente</span>}
                 md="7"
                 isClose={isClose}
             >
@@ -63,10 +63,10 @@ const ChangePimAportation = ({ cronograma, isClose }) => {
                     <div className="row">
                         <div className="col-md-12 mb-3">
                             <Form.Field>
-                                <label htmlFor="">Tipo Aportación <b className="text-red">*</b></label>
-                                <SelectTypeAportation
-                                    name="typeAportationId"
-                                    value={form.typeAportationId}
+                                <label htmlFor="">Tipo. Remuneración <b className="text-red">*</b></label>
+                                <SelectTypeRemuneration
+                                    name="typeRemunerationId"
+                                    value={form.typeRemunerationId}
                                     onChange={(e, obj) => handleInput(obj)}
                                 />
                             </Form.Field>
@@ -100,7 +100,7 @@ const ChangePimAportation = ({ cronograma, isClose }) => {
                             <hr/>
                             <Button 
                                 color="teal"
-                                disabled={!form.typeAportationId || !form.nextPimId || !form.pimId}
+                                disabled={!form.typeRemunerationId || !form.nextPimId || !form.pimId}
                                 onClick={changePim}
                             >
                                 <i className="fas fa-exchange-alt"></i> Cabiar PIM
@@ -112,4 +112,4 @@ const ChangePimAportation = ({ cronograma, isClose }) => {
     );
 }
 
-export default ChangePimAportation;
+export default ChangePimRemuneration;
