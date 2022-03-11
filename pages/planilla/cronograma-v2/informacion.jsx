@@ -31,6 +31,7 @@ import { EntityContext } from '../../../contexts/EntityContext';
 import NotFoundData from '../../../components/notFoundData';
 import useProcessCronograma from '../../../components/planilla/cronograma/hooks/useProcessCronograma';
 import { ToastContainer } from 'react-toastify';
+import ChangePimAportation from '../../../components/planilla/cronograma/change-pim-aportation';
 
 const FooterCronograma = dynamic(() => import('../../../components/planilla/cronograma/footerCronograma'), { ssr: false });
 
@@ -274,8 +275,8 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
       case 'massive-discount':
       case 'massive-remuneration':
       case 'imp-descuento':
-      case 'change-meta':
-      case 'change-cargo':
+      case 'change-pim':
+      case 'change-pim-aportation':
       case 'sync-config-desct':
       case 'discount':
       case 'report':
@@ -437,7 +438,8 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                     labeled
                                     disabled={loading|| edit || block || processCronograma.loading}
                                     options={[
-                                      { key: "change-meta", text: "Cambio de PIM", icon: "exchange" },
+                                      { key: "change-pim", text: "Cambio de PIM", icon: "exchange" },
+                                      { key: "change-pim-aportation", text: "Cambio de PIM Aport.", icon: "exchange" },
                                       // { key: "discount", text: "Dsto. Escalafón", icon: "balance scale" },
                                       // { key: "imp-descuento", text: "Imp. Descuentos", icon: "cloud upload" },
                                       { key: "massive-discount", text: "Dscto. Masivo", icon: "upload" },
@@ -579,8 +581,15 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
         />
       </Show>
 
-      <Show condicion={option == 'change-meta'}>
+      <Show condicion={option == 'change-pim'}>
         <ChangeMeta
+          cronograma={cronograma}
+          isClose={() => setOption("")}
+        />
+      </Show>
+
+      <Show condicion={option == 'change-pim-aportation'}>
+        <ChangePimAportation
           cronograma={cronograma}
           isClose={() => setOption("")}
         />
