@@ -435,6 +435,34 @@ const SelectCronogramaToCargos = ({ id = "id", cronogramaId, year, active, defau
     />
 }
 
+const SelectListYearToWork = ({ id = "year", workId, active, displayText, defaultDatos = [], name, value, onChange, refresh = false, disabled = false }) => {
+    const handleDisplayText = (data) => {
+        if (typeof displayText == 'function') {
+            return displayText(data);
+        }
+        return `${data?.year} [${data?.historialCounts} pagos]`;
+    }
+    
+    return <SelectBase 
+        active={active}
+        api={microPlanilla}
+        url={`works/${workId}/listYear`}
+        id={`select-works-list-year-${id}-${name}`}
+        value={id}
+        defaultDatos={defaultDatos}
+        text="year"
+        obj="items"
+        name={name}
+        valueChange={value || ""}
+        onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
+        placeholder="Seleccionar Año"
+        refresh={refresh}
+        execute={true}
+        disabled={disabled}
+        displayText={handleDisplayText}
+    />
+}
+
 export { 
     SelectMeta,
     SelectPimCode,
@@ -457,4 +485,5 @@ export {
     SelectCronogramaToPimCode,
     SelectCronogramaToCargos,
     SelectCronogramaToPims,
+    SelectListYearToWork,
 };

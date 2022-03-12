@@ -7,16 +7,19 @@ import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
 import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext'; 
+import { ReportRenta } from '../../../components/planilla/work/report-renta';
+import Show from '../../../components/show';
 
-const IndexWork = ({ pathname, query, success, works }) => {
+const IndexWork = ({ pathname, query, works }) => {
 
     // estados
     const [query_search, setQuerySearch] = useState(query.querySearch || "");
-    const [cargo_id, setCargoId] = useState(query.cargo_id || "")
+    const [cargo_id] = useState(query.cargo_id || "");
+    const [options, setOptions] = useState("");
+    const [currentWork, setCurrentWork] = useState();
 
     // entity
-    const entity_context = useContext(EntityContext);
-    
+    const entity_context = useContext(EntityContext)
 
     // obtener opciones
     const handleOption = async (obj, key, index) => {
@@ -27,6 +30,10 @@ const IndexWork = ({ pathname, query, success, works }) => {
                 newQuery.href = btoa(location.href);
                 await Router.push({ pathname: `${pathname}/${key}`, query: newQuery });
                 break
+            case 'renta':
+                setOptions(key);
+                console.log(obj)
+                setCurrentWork(obj)
             default:
                 break;
         }
@@ -75,7 +82,8 @@ const IndexWork = ({ pathname, query, success, works }) => {
                                 { key: "state", type: "switch", bg_true: "success", bg_false: "danger", is_true: "Activo", is_false: "Inactivo" }
                             ]}
                             options={[
-                                { key: "profile", icon: "fas fa-info" }
+                                { key: "profile", icon: "fas fa-info" },
+                                { key: "renta", icon: "fas fa-money-check-alt" }
                             ]}
                             getOption={handleOption}
                         >
@@ -118,6 +126,13 @@ const IndexWork = ({ pathname, query, success, works }) => {
                     </div>
                 </Form>
             </BoardSimple>
+            {/* modal renta */}
+            <Show condicion={options == "renta"}>
+                <ReportRenta
+                    work={currentWork}
+                    onClose={() => setOptions("")}
+                />
+            </Show>
         </div>
     )
 }
