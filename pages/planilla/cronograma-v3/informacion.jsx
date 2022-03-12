@@ -408,14 +408,14 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                 <Show condicion={!loading}
                                   predeterminado={<Skeleton/>}
                                 >
-                                  <Show condicion={historial.token_verify}>
+                                  <Show condicion={historial.tokenVerify}>
                                     <a href="#" title="Boleta verificada">
                                       <i className="fas fa-qrcode text-warning mr-2"></i>
                                       <span className="text-dark">BOLETA DE "{fullname || "NO HAY TRABAJADOR"}"</span>
                                     </a>
                                   </Show>
 
-                                  <Show condicion={!historial.token_verify}>
+                                  <Show condicion={!historial.tokenVerify}>
                                     <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{fullname || "NO HAY TRABAJADOR"}"
                                   </Show> 
                                                 
@@ -443,8 +443,6 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                       { key: "change-pim", text: "Cambio de PIM", icon: "exchange" },
                                       { key: "change-pim-remuneration", text: "Cambio de PIM Remu.", icon: "exchange" },
                                       { key: "change-pim-aportation", text: "Cambio de PIM Aport.", icon: "exchange" },
-                                      // { key: "discount", text: "Dsto. Escalafón", icon: "balance scale" },
-                                      // { key: "imp-descuento", text: "Imp. Descuentos", icon: "cloud upload" },
                                       { key: "massive-discount", text: "Dscto. Masivo", icon: "upload" },
                                       { key: "massive-remuneration", text: "Remu. Masivo", icon: "upload" },
                                       { key: "processing", text: "Procesar Cronograma", icon: "database" },
@@ -463,7 +461,6 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                     options={[
                                       { key: "generate-token", text: "Generar Token", icon: "cloud upload" },
                                       { key: "plame", text: `${!cronograma.isPlame ? 'Aplicar' : 'No aplicar'} al PDT-PLAME`, icon: "balance scale"},
-                                      { key: "email", text: "Mail Masivos", icon: "mail" },
                                       { key: "report", text: "Reportes", icon: "file text outline" },
                                     ]}
                                     onSelect={handleOnSelect}
