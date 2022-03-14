@@ -45,7 +45,7 @@ const ItemHistorial = ({ info = {}, isCheck = false, onToggleCheck = null }) => 
   }
   
   const displayFullname = useMemo(() => {
-    return `${displayWork?.person?.lastname} ${displayWork?.person?.name}`;
+    return `${displayWork?.person?.fullName || ''}`;
   }, [displayWork]);
 
   return (
