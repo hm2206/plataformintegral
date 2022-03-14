@@ -1,13 +1,33 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import Show from '../../show';
 import { Button } from 'semantic-ui-react'
 import ConfigRemuneracion from './config-infos/config-remuneracion';
 import ConfigDiscount from './config-infos/config-discount';
 import ConfigAportation from './config-infos/config-aportation';
+import { microPlanilla } from '../../../services/apis';
+import { Confirm } from '../../../services/utils';
+import { AppContext } from "../../../contexts/AppContext";
+import Swal from 'sweetalert2';
 
 const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
 
   const [option, setOption] = useState();
+
+  const { setCurrentLoading } = useContext(AppContext);
+
+  const handleSyncConfig = async () => {
+    const  answer = await Confirm("warning", "¿Estás seguro en sincronizar la configuración de pagos?");
+    if (!answer) return;
+    setCurrentLoading(true);
+    await microPlanilla.post(`infos/${info?.id}/process/syncConfigPays`)
+    .then(() => {
+      setCurrentLoading(false);
+      Swal.fire({ icon: "success", text: "La configuración se sincronizó correctamente!" })
+    }).catch(() => {
+      setCurrentLoading(false);
+      Swal.fire({ icon: "error", text: "Ocurrio un error, vuelva a intentarlo más tarde!" })
+    });
+  }
 
   return (
     <>
@@ -69,6 +89,11 @@ const ItemInfo = ({ info = {}, onEdit = null, onAdd = null }) => {
                 title="Configurar Aportaciones del Empleador"
               >
                 <i className="fas fa-chess-pawn"></i>
+              </Button>
+              <Button onClick={handleSyncConfig}
+                title="Sincronizar todas las configuraciones"
+              >
+                <i className="fas fa-sync"></i>
               </Button>
             </Button.Group>
           </div>
