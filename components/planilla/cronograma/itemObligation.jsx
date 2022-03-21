@@ -103,7 +103,7 @@ const ItemObligation = ({ obligation = {}, onUpdate = null, onDelete = null, edi
               <Form.Field>
                 <label htmlFor="">Apellidos y Nombres</label>
                 <input type="text" 
-                  value={displayPerson?.fullname || ""}
+                  value={displayPerson?.fullName || ""}
                   readOnly
                   className="uppercase"
                 />
@@ -114,7 +114,7 @@ const ItemObligation = ({ obligation = {}, onUpdate = null, onDelete = null, edi
               <label htmlFor="">N° Documento</label>
               <input type='text'
                 readOnly
-                value={displayPerson?.document_number || ''}
+                value={displayPerson?.documentNumber || ''}
               />
             </div>
 

@@ -3,7 +3,7 @@ import Modal from '../../modal';
 import { Form, Select, Button } from 'semantic-ui-react';
 import storage from '../../../services/storage.json';
 import Show from '../../show';
-import AssignPerson from '../../authentication/user/assignPerson';
+import { AssignPersonV2 } from '../../authentication/user/assign-person-v2';
 import { SelectTypeDiscount, SelectBank } from '../../select/micro-planilla';
 import { AppContext } from '../../../contexts/AppContext';
 import { Confirm } from '../../../services/utils';
@@ -110,7 +110,7 @@ const AddObligacion = ({ onClose = null, onSave = null, info = {} }) => {
                 <input
                   type="text"
                   readOnly
-                  value={person?.document_type?.name || ""}
+                  value={person?.documentType?.name || ""}
                 />
               </Form.Field>
             </div>
@@ -121,7 +121,7 @@ const AddObligacion = ({ onClose = null, onSave = null, info = {} }) => {
                 <input
                   type="text"
                   readOnly
-                  value={person.document_number || ""}
+                  value={person.documentNumber || ""}
                 />
               </Form.Field>
             </div>
@@ -133,7 +133,7 @@ const AddObligacion = ({ onClose = null, onSave = null, info = {} }) => {
                   type="text"
                   readOnly
                   className="uppercase"
-                  value={person.fullname || ""}
+                  value={person.fullName || ""}
                 />
               </Form.Field>
             </div>
@@ -309,7 +309,7 @@ const AddObligacion = ({ onClose = null, onSave = null, info = {} }) => {
       </div>
 
       <Show condicion={option == 'assign'}>
-        <AssignPerson
+        <AssignPersonV2
           local={true}
           getAdd={addPerson}
           isClose={(e) => setOption("")}
