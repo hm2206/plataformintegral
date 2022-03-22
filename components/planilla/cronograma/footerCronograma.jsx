@@ -6,7 +6,7 @@ import { AppContext } from '../../../contexts/AppContext';
 import { Confirm } from '../../../services/utils';
 import Show from '../../show';
 import Swal from 'sweetalert2';
-import { unujobs } from '../../../services/apis';
+import { microPlanilla } from '../../../services/apis';
 
 const PlaceholderButton = () => <Skeleton height="38px"/>
 
@@ -78,26 +78,24 @@ const FooterCronograma = () => {
     // enviar email
     const sendEmail = async () => {
         let answer = await Confirm("warning", `¿Deseas enviar la boleta a su correo?`);
-        if (answer) {
-            app_context.setCurrentLoading(true);
-            setBlock(true);
-            await unujobs.post(`historial/${historial.id}/send_boleta`)
-            .then(async res => {
-                app_context.setCurrentLoading(false);
-                let { success, message } = res.data;
-                if (!success) throw new Error(message);
-                await Swal.fire({ icon: 'success', text: message });
-            }).catch(err => {
-                try {
-                    app_context.setCurrentLoading(false);
-                    let { message } = err.response.data;
-                    Swal.fire({ icon: 'error', text: message });
-                } catch (error) {
-                    Swal.fire({ icon: 'error', text: err.message });
-                }
+        if (!answer) return;
+        app_context.setCurrentLoading(true);
+        setBlock(true);
+        await microPlanilla.post(`historials/${historial.id}/sendMail`)
+        .then(async () => {
+            app_context.setCurrentLoading(false);
+            await Swal.fire({ 
+                icon: 'success', 
+                text: "se envió la boleta a su correo" 
             });
-            setBlock(false);
-        }
+        }).catch(err => {
+            app_context.setCurrentLoading(false);
+            Swal.fire({
+                icon: "error",
+                text: "No se pudo enviar la boleta"
+            })
+        });
+        setBlock(false);
     }
 
     return <div className="nav-bottom">
@@ -232,7 +230,7 @@ const FooterCronograma = () => {
                     <Button
                         fluid
                         color="orange"
-                        disabled={loading || block || !historial.isEmail}
+                        disabled={loading || block || !historial?.tokenVerify}
                         onClick={sendEmail}
                     >
                         <Icon name="send"/> { send ? 'Enviando...' : 'Enviar Email' }
