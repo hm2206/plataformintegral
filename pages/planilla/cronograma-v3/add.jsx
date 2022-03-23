@@ -42,7 +42,7 @@ const AddCronograma = ({ success, cronograma }) => {
 
 // server rendering
 AddCronograma.getInitialProps = async (ctx) => {
-  await AUTHENTICATE(ctx);
+  AUTHENTICATE(ctx);
   let { query, pathname } = ctx;
   // obtener id
   let id = atob(query.id) || "__error";

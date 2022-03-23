@@ -124,7 +124,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
   }, [historial]);
 
   const fullname = useMemo(() => {
-    return `${displayPerson.lastname} ${displayPerson.name}` 
+    return `${displayPerson?.fullName || "NO HAY TRABAJADOR"}`.toUpperCase() 
   }, [displayPerson]);
 
   // configurar entity
@@ -411,12 +411,12 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                   <Show condicion={historial.tokenVerify}>
                                     <a href="#" title="Boleta verificada">
                                       <i className="fas fa-qrcode text-warning mr-2"></i>
-                                      <span className="text-dark">BOLETA DE "{fullname || "NO HAY TRABAJADOR"}"</span>
+                                      <span className="text-dark">BOLETA DE "{fullname}"</span>
                                     </a>
                                   </Show>
 
                                   <Show condicion={!historial.tokenVerify}>
-                                    <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{fullname || "NO HAY TRABAJADOR"}"
+                                    <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{fullname}"
                                   </Show> 
                                                 
                                   {/* link temporal del reporte de renta */}
