@@ -342,7 +342,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
           <BoardSimple
               options={[]}
               title={<HeaderCronograma cronograma={cronograma}/>}
-              info={[`Información del cronograma ${historial?.sendEmail ? <span> Boleta Enviada <i className="fas fa-check-double text-success"></i></span> : ''}`]}
+              info={[`Información del cronograma`]}
               prefix={<BtnBack/>}
               bg="light"
           >
@@ -427,15 +427,10 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                   <Show condicion={!historial.tokenVerify}>
                                     <i className="fas fa-info-circle"></i> INFORMACIÓN DE "{fullname}"
                                   </Show> 
-                                                
-                                  {/* link temporal del reporte de renta */}
-                                  <Show condicion={historial?.work?.id}>
-                                    <a href="#" className="ml-3" title="Reporte de Renta"
-                                      style={{ cursor: "pointer" }}
-                                      onClick={linkRenta}
-                                    >
-                                      <i className="fas fa-link"></i>
-                                    </a>
+
+                                  {/* mensaje de boleta enviada */}
+                                  <Show condicion={historial?.sendEmail}>
+                                    <div><i className="fas fa-check-double text-success"></i> Boleta Enviada</div>
                                   </Show>
                                 </Show>
                               </div>
