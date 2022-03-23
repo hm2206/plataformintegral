@@ -342,11 +342,20 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
           <BoardSimple
               options={[]}
               title={<HeaderCronograma cronograma={cronograma}/>}
-              info={["Información del cronograma"]}
+              info={[`Información del cronograma ${historial?.sendEmail ? <span> Boleta Enviada <i className="fas fa-check-double text-success"></i></span> : ''}`]}
               prefix={<BtnBack/>}
               bg="light"
           >
                 <div className="col-md-12 mt-3">
+                    <Show condicion={cronograma.state}>
+                      <Message className="disable" info>
+                        <div><b>El envio de  boletas al correo son:</b> 
+                        <span className="badge badge-dark">5:00 am A 8:00 pm</span></div>
+                        <div><small>Solo se enviara las boletas verificadas</small></div>
+                      </Message>
+                      <hr/>
+                    </Show>
+
                     <Show condicion={cronograma.isPlame}>
                       <Message className="disable">
                         <div><b>El cronograma aplica para el</b> <span className="badge badge-dark">PDT-PLAME</span></div>
@@ -365,7 +374,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
                                 La configuración de pago no está sincronizada
                               </Message>
                             </Show>
-                            {/* mensaje cuando el cronograma debe procesarce */}
+                            {/* mensaje cuando el cronograma debe procesar */}
                             <Show condicion={!loading && cronograma.state && isProcessing}>
                               <Message color="yellow">
                                 Se encontró actualizaciones de la configuración de pago.
