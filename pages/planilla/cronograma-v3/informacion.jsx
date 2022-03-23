@@ -347,7 +347,7 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
               bg="light"
           >
                 <div className="col-md-12 mt-3">
-                    <Show condicion={cronograma.state}>
+                    <Show condicion={!cronograma.state}>
                       <Message className="disable" info>
                         <div><b>El envio de  boletas al correo son:</b> 
                         <span className="badge badge-dark">5:00 am A 8:00 pm</span></div>
