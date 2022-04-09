@@ -64,7 +64,7 @@
     "js-cookie": "^2.2.1",
     "markdown-loader": "^5.1.0",
     "material-ui": "^0.20.2",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "native-url": "^0.2.3",
     "next": "^9.5.5",
     "next-cookies": "^2.0.3",
