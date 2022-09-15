@@ -172,7 +172,7 @@ const FormPerson = ({ form = {}, unlock = false, image = null, errors = {}, onCh
                                     options={[
                                         { key: "S", value: "S", text: "Soltero(a)" },
                                         { key: "C", value: "C", text: "Casado(a)" },
-                                        { key: "D", value: "D", text: "Divorsiado(a)" },
+                                        { key: "D", value: "D", text: "Divorciado(a)" },
                                         { key: "V", value: "V", text: "Viudo(a)" },
                                         { key: "O", value: "O", text: "Conviviente(a)" }
                                     ]}
