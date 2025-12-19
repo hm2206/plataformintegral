@@ -38,8 +38,9 @@ const SlugGroup = () => {
     }, []);
 
     const fetchInitialData = async () => {
+        if (!query.slug) return setLoading(false);
         setLoading(true);
-        await signature.get(`auth/group/${query.slug || `)
+        await signature.get(`auth/group/${query.slug}`)
             .then(res => {
                 setSuccess(res.data.success);
                 setGroup(res.data.group);
@@ -85,7 +86,7 @@ const SlugGroup = () => {
 
     // manejar verificación
     const handleVerify = async () => {
-        let answer = await Confirm('warning', `¿Estás seguro en verificar?`, 'Verificar');
+        let answer = await Confirm('warning', `Estas seguro en verificar?`, 'Verificar');
         if (!answer) return false;
         app_context.setCurrentLoading(true);
         // config
@@ -108,7 +109,7 @@ const SlugGroup = () => {
 
     // manejar verificación
     const handleSigner = async () => {
-        let answer = await Confirm('warning', `¿Estás seguro en ejecutar el firmado masivo?`, 'Firmar');
+        let answer = await Confirm('warning', `Estas seguro en ejecutar el firmado masivo?`, 'Firmar');
         if (!answer) return false;
         app_context.setCurrentLoading(true);
         // request
@@ -123,7 +124,7 @@ const SlugGroup = () => {
 
     // eliminar grupo
     const handleDelete = async () => {
-        let answer = await Confirm('warning', `¿Estas seguro en eliminar?`, 'Eliminar');
+        let answer = await Confirm('warning', `Estas seguro en eliminar?`, 'Eliminar');
         if (!answer) return;
         app_context.setCurrentLoading(true);
         await signature.post(`auth/group/${group?.id}?_method=DELETE`, {}, configHeaders)
