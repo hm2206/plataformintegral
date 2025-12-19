@@ -14,7 +14,7 @@ import { EntityContext } from '../../../contexts/EntityContext';
 import { Confirm, backUrl } from '../../../services/utils';
 import { AppContext } from '../../../contexts';
 import Swal from 'sweetalert2';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Message, Button } from 'semantic-ui-react';
 
 const refreshOption = { key: 'REFRESH', title: 'Refrescar Grupo', icon: 'fas fa-sync' };
@@ -25,7 +25,29 @@ const options = [
 ]
 
 
-const SlugGroup = ({ pathname, query, success, group }) => {
+const SlugGroup = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [group, setGroup] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await signature.get(`auth/group/${query.slug || `)
+            .then(res => {
+                setSuccess(res.data.success);
+                setGroup(res.data.group);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // validar datos
     if (!success) return <NotFoundData/>
@@ -215,24 +237,6 @@ const SlugGroup = ({ pathname, query, success, group }) => {
             </GroupProvider>
         </div>
     )
-}
-
-// server
-SlugGroup.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let options = {
-        headers: { 
-            DependenciaId: query.dependencia_id,
-            GroupId: query.slug || ''
-        },
-    }
-    // request
-    let { success, group } = await signature.get(`auth/group/${query.slug || '__error'}?type=slug`, options, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, group: {} }));
-    // response
-    return { pathname, query, success, group };
 }
 
 // exportar

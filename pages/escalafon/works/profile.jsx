@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React,  { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import Cover from '../../../components/trabajador/cover';
 import NavCover from '../../../components/trabajador/navCover';
@@ -11,7 +12,29 @@ import NotFoundData from '../../../components/notFoundData';
 import { EntityContext } from '../../../contexts/EntityContext';
 
 
-const TrabajadorID = ({ success, work }) => {
+const TrabajadorID = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [work, setWork] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await microPlanilla.get(`works/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setWork(res.data.work);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [option, setOption] = useState("general");
@@ -64,18 +87,6 @@ const TrabajadorID = ({ success, work }) => {
             </Show>
         </div>
     </Fragment>
-}
-
-// server
-TrabajadorID.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    let id = atob(query.id || "") || "_error";
-    let { success, work } = await microPlanilla.get(`works/${id}`, {}, ctx)
-        .then(res => ({ success: true, work: res.data }))
-        .catch(() => ({ success: false, work: {} }));
-    // response
-    return { pathname, query, success, work }
 }
 
 // export 

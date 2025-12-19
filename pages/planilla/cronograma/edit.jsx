@@ -3,7 +3,7 @@ import { BtnBack, funcBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { Form, Button } from 'semantic-ui-react';
 import { unujobs, handleErrorRequest } from '../../../services/apis';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import Swal from 'sweetalert2'
 import { AUTHENTICATE } from '../../../services/auth';
 import Show from '../../../components/show';
@@ -15,7 +15,29 @@ import ContentControl from '../../../components/contentControl';
 import { EntityContext } from '../../../contexts/EntityContext';
 import NotFoundData from '../../../components/notFoundData';
 
-const EditCronograma = ({ pathname, query, success, cronograma }) => {
+const EditCronograma = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [cronograma, setCronograma] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`cronograma/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setCronograma(res.data.cronograma);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // validar data
     if (!success) return <NotFoundData/>
@@ -269,20 +291,6 @@ const EditCronograma = ({ pathname, query, success, cronograma }) => {
             </ContentControl>
         </Fragment>
     )
-}
-
-// server
-EditCronograma.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // obtener id
-    let id = atob(query.id) || "__error";
-    //find cronograma
-    let { success, cronograma } = await unujobs.get(`cronograma/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { pathname, query, success, cronograma };
 }
 
 // export 

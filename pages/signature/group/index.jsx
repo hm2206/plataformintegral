@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Body, BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import { Button, Message, Form } from 'semantic-ui-react'
@@ -13,7 +13,14 @@ import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext';
  
 
-const GroupPdf = ({ pathname, query }) => {
+const GroupPdf = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -159,15 +166,6 @@ const GroupPdf = ({ pathname, query }) => {
             </BoardSimple>
         </div>
     )
-}
-
-// server
-GroupPdf.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    query.dependencia_id = typeof query.dependencia_id != 'undefined' ? query.dependencia_id : "";
-    // response
-    return { pathname, query };
 }
 
 // exportar

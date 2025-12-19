@@ -27,13 +27,7 @@ const getConvocatorias = async (ctx, page = 1) => {
 
 export default class RegisterPersonal extends Component
 {
-
-    static getInitialProps  = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname } = ctx;
-        await getConvocatorias(ctx);
-        return { pathname, query, convocatorias: tmp_convocatorias };
-    };
+;
 
     state = {
         form: {
@@ -51,6 +45,7 @@ export default class RegisterPersonal extends Component
     }
 
     componentDidMount = async () => {
+        if (!AUTHENTICATE()) return;
         this.props.fireEntity({ render: true });
         this.getMetas();
         this.getDependencias();

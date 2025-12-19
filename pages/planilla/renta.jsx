@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react'
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { AUTHENTICATE } from '../../services/auth';
 import { Button, Form, Pagination } from 'semantic-ui-react'
 import { handleErrorRequest, unujobs } from '../../services/apis';
@@ -13,7 +13,29 @@ const optionkeys = {
     RENTA: 'renta'
 };
 
-const Renta = ({ pathname, query, success, works }) => {
+const Renta = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [works, setWorks] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`work/${query.year}/anual?page=${query.page}&query_search=${query.query_search}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setWorks(res.data.works);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app 
     const app_context = useContext(AppContext);
@@ -156,22 +178,6 @@ const Renta = ({ pathname, query, success, works }) => {
             </BoardSimple>
         </div>
     )
-}
-
-// server
-Renta.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // filtros
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.year = typeof query.year != 'undefined' ? query.year : new Date().getFullYear();
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-    // request
-    let { success, works } = await unujobs.get(`work/${query.year}/anual?page=${query.page}&query_search=${query.query_search}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, works: {} }));
-    // response
-    return { pathname, query, success, works };
 }
 
 // exportar

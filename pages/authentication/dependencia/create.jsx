@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -13,7 +13,14 @@ import Show from '../../../components/show';
 import { Confirm } from '../../../services/utils';
 
 
-const EditDependencia = ({ pathname, query }) => {
+const EditDependencia = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // estados
     const [form, setForm] = useState({});
@@ -148,14 +155,6 @@ const EditDependencia = ({ pathname, query }) => {
             </ContentControl>
         </Fragment>
     )
-}
-
-// server
-EditDependencia.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query }
 }
 
 // export 

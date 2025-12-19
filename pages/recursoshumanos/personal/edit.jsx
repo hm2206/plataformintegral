@@ -11,13 +11,7 @@ import { findStaff } from '../../../services/requests';
 
 export default class EditPersonal extends Component
 {
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname } = ctx;
-        let { success, staff, message } = await findStaff(ctx);
-        return { pathname, query, success, staff };
-    };
+;
 
     state = {
         form: {
@@ -41,6 +35,7 @@ export default class EditPersonal extends Component
     }
 
     componentDidMount = async () => {
+        if (!AUTHENTICATE()) return;
         let { success, staff, fireLoading } = this.props;
         if (success) {
             fireLoading(true);

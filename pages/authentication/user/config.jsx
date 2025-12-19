@@ -22,7 +22,14 @@ const actions = {
     ADD_PERMISOS: "ADD_PERMISOS",
 };
 
- const ConfigUser = ({ pathname, query, success, user }) => {
+ const ConfigUser = ({ user }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     if (!success) return <NotFoundData/>
 
@@ -258,19 +265,6 @@ const actions = {
                 </Show>
         </div>
     )
-}
-
-// server
-ConfigUser.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // obtener usuario
-    let id = query.id ? atob(query.id) : "__error";
-    const { success, user } = await authentication.get(`user/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, user: {} }));
-    // response
-    return { query, pathname, success, user };
 }
 
 // exportar

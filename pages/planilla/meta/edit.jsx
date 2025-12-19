@@ -11,9 +11,31 @@ import BoardSimple from '../../../components/boardSimple';
 import atob from 'atob';
 import Show from '../../../components/show';
 import NotFoundData from '../../../components/notFoundData';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 
-const EditMeta = ({ pathname, query, success, meta }) => {
+const EditMeta = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [meta, setMeta] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`meta/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setMeta(res.data.meta);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     if (!success) return <NotFoundData/>
 
@@ -312,20 +334,6 @@ const EditMeta = ({ pathname, query, success, meta }) => {
             </Show>
         </>
     )
-}
-
-// server
-EditMeta.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // get id
-    let id = atob(query.id || "") || "_error";
-    // request
-    let { success, meta } = await unujobs.get(`meta/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, meta: {} }));
-    // responser
-    return { pathname, query, success, meta };
 }
 
 // exportar

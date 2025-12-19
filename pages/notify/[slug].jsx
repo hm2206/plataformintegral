@@ -1,4 +1,5 @@
-import React from 'react';
+import { useRouter } from 'next/router';
+import React, { useEffect } from 'react';
 import { Body, BtnBack } from '../../components/Utils';
 import CardHeaderFeed from '../../components/cardHeaderFeed';
 import NotificationProvider from '../../providers/authentication/NotificationProvider';
@@ -12,7 +13,14 @@ import atob from 'atob';
 // providers
 const notificationProvider = new NotificationProvider();
 
-const SlugNotify = ({ pathname, query, success, notification }) => {
+const SlugNotify = ({ notification }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     if (!success) return <NotFoundData/>
 
@@ -53,16 +61,6 @@ const SlugNotify = ({ pathname, query, success, notification }) => {
             </BoardSimple>
         </div>
     );
-}
-
-SlugNotify.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let id = atob(query.slug || '_error');
-    let { success, notification } = await notificationProvider.show(id, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, notification: {} }));
-    return { pathname, query, success, notification };
 }
 
 export default SlugNotify;

@@ -92,12 +92,5 @@ const Assistance = ({ pathname, query }) =>  {
     );
 }
 
-// server
-Assistance.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    return { query, pathname }
-}
-
 // exportar
 export default Assistance;

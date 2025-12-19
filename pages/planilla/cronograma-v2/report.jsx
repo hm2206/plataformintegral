@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import { BtnBack, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -12,7 +13,14 @@ import BoardSimple from '../../../components/boardSimple';
 import NotFoundData from '../../../components/notFoundData';
 
 
-const Report = ({ pathname, query, cronograma }) => {
+const Report = ({ cronograma }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // validar data
     if (!cronograma?.id) return <NotFoundData/>
@@ -69,19 +77,6 @@ const Report = ({ pathname, query, cronograma }) => {
                 />
             </div>
         )
-}
-
-// server rendering
-Report.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    // obtener cronograma
-    let id = atob(query.id) || '__error';
-    let cronograma = await microPlanilla.get(`cronogramas/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(() => ({}));
-    // response
-    return { query, pathname, cronograma }
 }
 
 // exportar

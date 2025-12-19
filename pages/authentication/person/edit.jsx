@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import { Form, Image, Select, Button, Progress } from 'semantic-ui-react';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { authentication, handleErrorRequest, onProgress } from '../../../services/apis';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
@@ -12,7 +12,29 @@ import ContentControl from '../../../components/contentControl'
 import Show from '../../../components/show';
 import atob from 'atob';
 
-const EditPerson = ({ pathname, query, success, person }) => {
+const EditPerson = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [person, setPerson] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await authentication.get(`person/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setPerson(res.data.person);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [form, setForm] = useState({});
@@ -417,18 +439,6 @@ const EditPerson = ({ pathname, query, success, person }) => {
             </ContentControl>
         </Fragment>
     )
-}
-
-// server
-EditPerson.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let id = atob(query.id) || '__error';
-    let { success, person } = await authentication.get(`person/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, person: {} }));
-    // response
-    return { pathname, query, success, person }
 }
 
 // exportar

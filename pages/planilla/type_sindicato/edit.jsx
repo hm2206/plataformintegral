@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -15,7 +15,29 @@ import atob  from 'atob';
 import NotFoundData from '../../../components/notFoundData';
 
 
-const EditTypeSindicato = ({ pathname, query, success, type_sindicato }) => {
+const EditTypeSindicato = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [type_sindicato, setType_sindicato] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`type_sindicato/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setType_sindicato(res.data.type_sindicato);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
     
     // verificar
     if (!success) return <NotFoundData/>
@@ -178,18 +200,6 @@ const EditTypeSindicato = ({ pathname, query, success, type_sindicato }) => {
             </Show>
         </>
     )
-}
-
-// server
-EditTypeSindicato.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let {pathname, query } = ctx;
-    // request 
-    let id = atob(query.id) || '__error';
-    let { success, type_sindicato } = await unujobs.get(`type_sindicato/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, type_sindicato: {} }));
-    return { query, pathname, success, type_sindicato }
 }
 
 // exportar

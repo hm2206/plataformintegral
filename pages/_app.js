@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react'
-import App from 'next/app';
+import React, { useEffect, useState } from 'react'
 import { ScreenProvider } from '../contexts/ScreenContext';
-import { AuthProvider } from '../contexts/AuthContext'; 
-import Router from 'next/router';
+import { AuthProvider } from '../contexts/AuthContext';
+import Router, { useRouter } from 'next/router';
 import { AUTH } from '../services/auth';
 import { authentication } from '../services/apis';
 import moment from 'moment';
@@ -23,42 +22,79 @@ import Cookies from 'js-cookie';
 // config router
 Router.onRouteChangeStart = () => {
 	let loadingBrand = document.getElementById('loading-brand');
-	loadingBrand.style.display = 'block';
+	if (loadingBrand) loadingBrand.style.display = 'block';
 }
-  
+
 // state pages
 Router.onRouteChangeComplete = () => {
 	let loadingBrand = document.getElementById('loading-brand');
-	loadingBrand.style.display = 'none';
+	if (loadingBrand) loadingBrand.style.display = 'none';
 }
-  
+
 Router.onRouteChangeError = () => {
 	let loadingBrand = document.getElementById('loading-brand');
-	loadingBrand.style.display = 'none';
+	if (loadingBrand) loadingBrand.style.display = 'none';
 }
 
 
 // app main
-const IntegrationApp = ({ app, success, pageProps, Component, auth_token, pathname, query }) => {
+const IntegrationApp = ({ Component, pageProps }) => {
+	const router = useRouter();
+	const { pathname, query } = router;
 
-	// propos components
+	// estados
+	const [app, setApp] = useState({});
+	const [success, setSuccess] = useState(false);
+	const [loading, setLoading] = useState(true);
+	const [auth_token, setAuthToken] = useState("");
+
+	// props components
 	let appProps = { success, app, pathname, query }
 
 	// recoveri token
 	const recoveryToken = () => {
 		let is_auth_token = Cookies.get('auth_token');
-		let auth_token = localStorage.getItem('auth_token');
-		if (!is_auth_token && auth_token) {
-			Cookies.set('auth_token', auth_token);
+		let stored_token = localStorage.getItem('auth_token');
+		if (!is_auth_token && stored_token) {
+			Cookies.set('auth_token', stored_token);
 			Router.push('/');
 		}
 	}
 
-	// obtener token
+	// cargar datos de la app
+	const fetchApp = async () => {
+		setLoading(true);
+		await authentication.get('app/me')
+			.then(res => {
+				setSuccess(res.data.success);
+				setApp(res.data.app || {});
+			})
+			.catch(err => {
+				console.log(err);
+				setSuccess(false);
+				setApp({ state: 0, message: err.message });
+			});
+		// obtener token
+		const token = AUTH();
+		setAuthToken(token);
+		setLoading(false);
+	}
+
+	// obtener token y app al montar
 	useEffect(() => {
-		if (location) recoveryToken();
-	}, [success]);
-	
+		recoveryToken();
+		fetchApp();
+	}, []);
+
+	// loading
+	if (loading) {
+		return (
+			<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+				<div>Cargando...</div>
+			</div>
+		);
+	}
+
 	// render
 	return (
 		<ScreenProvider>
@@ -76,25 +112,6 @@ const IntegrationApp = ({ app, success, pageProps, Component, auth_token, pathna
 			</AppProvider>
 		</ScreenProvider>
 	)
-}
-
-// static get initial props
-IntegrationApp.getInitialProps = async ({ ctx, Component }) => {
-	// calls page's `getInitialProps` and fills `appProps.pageProps`
-	const pageProps = Component.getInitialProps && await Component.getInitialProps(ctx) || {};
-	// obtener el app
-	const { success, app } = await authentication.get('app/me')
-		.then(res => res.data)
-		.catch(err => {
-			console.log(err);
-			return ({ success: false, app: { state: 0, message: err.message } })
-		});
-	// obtener token
-	const auth_token = await AUTH(ctx);
-	// obtener pathname, query
-	let { pathname, query } = ctx;
-	// response 
-	return { pageProps, success, app, auth_token, pathname, query };
 }
 
 // exportar

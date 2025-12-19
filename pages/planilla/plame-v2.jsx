@@ -3,12 +3,19 @@ import { AUTHENTICATE } from '../../services/auth';
 import { microPlanilla } from '../../services/apis';
 import { Form, Button } from 'semantic-ui-react';
 import Show from '../../components/show';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { EntityContext } from '../../contexts/EntityContext';
 import BoardSimple from '../../components/boardSimple';
 
 
-const PlameIndex = ({ pathname, query, cronograma }) => {
+const PlameIndex = ({ cronograma }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // entity
     const entity_context = useContext(EntityContext);
@@ -189,20 +196,6 @@ const PlameIndex = ({ pathname, query, cronograma }) => {
                 </Form>
             </BoardSimple>
         </div>)
-}
-
-// server rendering
-PlameIndex.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let date = new Date();
-    query.mes = typeof query.mes != 'undefined' ? query.mes : date.getMonth() + 1;
-    query.year = typeof query.year != 'undefined' ? query.year : date.getFullYear();
-    const queryString = `year=${query.year}&month=${query.mes}&isPlame=1`;
-    const cronograma = await microPlanilla.get(`cronogramas?${queryString}`)
-        .then(res => res.data)
-        .catch(() => ({ items: [] }))
-    return { pathname, query, cronograma };
 }
 
 // exportar

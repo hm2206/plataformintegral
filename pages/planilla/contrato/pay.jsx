@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useState, useContext } from 'react';
 import { Button } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -19,7 +20,29 @@ import { EntityContext } from '../../../contexts/EntityContext';
 
 
 // componente principal
-const Pay = ({ pathname, query, success, info }) => {
+const Pay = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [info, setInfo] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`info/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setInfo(res.data.info);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // validar datos
     if (!success) return <NotFoundData/>
@@ -136,19 +159,6 @@ const Pay = ({ pathname, query, success, info }) => {
             </ContentControl>
         </Show>
     </Fragment>)
-}
-
-// server rendering
-Pay.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let id = atob(query.id || "") || "__error";
-    // request
-    let { success, info } = await unujobs.get(`info/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false }));
-    // response
-    return { pathname, query, success, info };
 }
 
 export default Pay;

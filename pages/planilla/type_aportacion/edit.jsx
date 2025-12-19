@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button } from 'semantic-ui-react'
 import { handleErrorRequest, unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -13,7 +13,29 @@ import ContentControl from '../../../components/contentControl';
 import { AUTHENTICATE } from '../../../services/auth';
 import NotFoundData from '../../../components/notFoundData';
 
-const TypeAportacionConfigMax = ({ success, type_aportacion, pathname, query }) => {
+const TypeAportacionConfigMax = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [type_aportacion, setType_aportacion] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`type_aportacion/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setType_aportacion(res.data.type_aportacion);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
     
     // validar datos
     if (!success) return <NotFoundData/>
@@ -188,17 +210,6 @@ const TypeAportacionConfigMax = ({ success, type_aportacion, pathname, query }) 
             </Show>
         </>
     )
-}
-
-TypeAportacionConfigMax.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let id = query.id ? atob(query.id) : '__error';
-    let { success, type_aportacion } = await unujobs.get(`type_aportacion/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, type_aportacion: {} }))
-    // response
-    return { pathname, query, type_aportacion, success };
 }
 
 export default TypeAportacionConfigMax;

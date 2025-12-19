@@ -23,6 +23,7 @@ const RoleTramite = () => {
 
     // effect
     useEffect(() => {
+        if (!AUTHENTICATE()) return;
         fireEntity({ render: true });
         return () => fireEntity({ render: false });
     }, []);
@@ -83,13 +84,6 @@ const RoleTramite = () => {
             </BoardSimple>
         </div>
     )
-}
-
-RoleTramite.getInitialProps = (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query }
 }
 
 export default RoleTramite;

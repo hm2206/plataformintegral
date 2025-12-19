@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button } from 'semantic-ui-react'
 import { authentication, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -12,7 +12,14 @@ import ContentControl from '../../../components/contentControl'
 import { Confirm } from '../../../services/utils';
 
 
-const CreateUser = ({ pathname, query }) => {
+const CreateUser = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // estados
     const [person, setPerson] = useState({});
@@ -243,14 +250,6 @@ const CreateUser = ({ pathname, query }) => {
             </Show>
         </div>
     )
-}
-
-// server
-CreateUser.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query }
 }
 
 // exportar

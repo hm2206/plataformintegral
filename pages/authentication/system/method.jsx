@@ -233,17 +233,5 @@ const SystemMethod = ({ pathname, query, success, system }) => {
     
 }
 
-// server
-SystemMethod.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx
-    let id = atob(query.id) || '__error';
-    let { success, system } = await authentication.get(`system/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, system: {} }))
-    // response
-    return { pathname, query, success, system };
-}
-
 // exportar
 export default SystemMethod;

@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useEffect, useContext, useState } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -10,7 +11,29 @@ import atob from 'atob';
 import { EntityContext } from '../../../contexts/EntityContext';
 import BoardSimple from '../../../components/boardSimple';
 
-const EditPresupuesto = ({ success, presupuesto }) => {
+const EditPresupuesto = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [presupuesto, setPresupuesto] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await projectTracking.get(`presupuesto/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setPresupuesto(res.data.presupuesto);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -142,19 +165,4 @@ const EditPresupuesto = ({ success, presupuesto }) => {
 }
 
 // rendering server
-EditPresupuesto.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    let id = `${atob(query.id || "") || ""}`
-    let { success, presupuesto } = await projectTracking.get(`presupuesto/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => {
-
-            return { success: false, presupuesto: {} }
-        })
-
-    // response
-    return { success, presupuesto, query, pathname };
-}
-
 export default EditPresupuesto;

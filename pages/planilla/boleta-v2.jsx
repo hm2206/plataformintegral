@@ -225,19 +225,4 @@ const IndexBoleta = ({ pathname, query, historial }) => {
     )
 }
 
-IndexBoleta.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // filtros
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-    // request
-    let query_string = `page=${query.page}&querySearch=${query.query_search}`;
-    let historial = await microPlanilla.get(`historials?${query_string}`, {}, ctx)
-        .then(res => res.data)
-        .catch(() => ({}));
-    // response
-    return { pathname, query, historial };
-}
-
 export default IndexBoleta;

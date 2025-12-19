@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState, useContext } from 'react';
 import { Form, Button, Select, Checkbox, Message } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { BtnBack, funcBack } from '../../../components/Utils';
 import { handleErrorRequest, escalafon, unujobs } from '../../../services/apis';
 import Show from '../../../components/show';
@@ -19,7 +19,29 @@ import NotFoundData from '../../../components/notFoundData'
 import { EntityContext } from '../../../contexts/EntityContext';
 import { SelectHourhand } from '../../../components/select/escalafon';
 
-const Edit = ({ success, info, query }) => {
+const Edit = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [info, setInfo] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await escalafon.get(`infos/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setInfo(res.data.info);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // validar datos
     if (!success) return <NotFoundData/>;
@@ -618,19 +640,6 @@ const Edit = ({ success, info, query }) => {
             </Show>
         </Fragment>
     )
-}
-
-// server rendering
-Edit.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let id = atob(query.id) || '__error';
-    // request
-    let { success, info } = await escalafon.get(`infos/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, info: {} }));
-    // response
-    return { pathname, query, success, info };
 }
 
 export default Edit;

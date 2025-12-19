@@ -45,21 +45,8 @@ export default class Convocatoria extends Component {
         this.handleInput = this.handleInput.bind(this);
         this.getOption = this.getOption.bind(this);
     }
-
-    static getInitialProps  = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let date = new Date;
-        let {query, pathname} = ctx;
-        query.page = query.page || 1;
-        query.year = query.year ? query.year : date.getFullYear();
-        query.mes = query.mes ? query.mes : date.getMonth() + 1;
-        query.estado = query.estado ? query.estado : "";
-        // get convocatoria
-        let { success, convocatoria } = await getConvocatoria(ctx) || {};
-        return { query, pathname, convocatoria, success }
-    }
-
-    componentDidMount = async () => {
+componentDidMount = async () => {
+        if (!AUTHENTICATE()) return;
         this.props.fireEntity({ render: true })
         await this.setting(this.props);
     }

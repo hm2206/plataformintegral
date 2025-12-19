@@ -1,16 +1,38 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AUTHENTICATE } from '../../../services/auth';
 import { signature } from '../../../services/apis'; 
 import { Body, BtnFloat } from '../../../components/Utils';
 import DataTable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Pagination, Button } from 'semantic-ui-react';
 import btoa from 'btoa';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext'
 
-const IndexCertificate = ({ query, success, certificates }) => {
+const IndexCertificate = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [certificates, setCertificates] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await signature.get(`certificate?page=${query.page}&query_search=${query.query_search}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setCertificates(res.data.certificates);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -141,20 +163,6 @@ const IndexCertificate = ({ query, success, certificates }) => {
                 </Body>
             </div>
     )
-}
-
-// server redering
-IndexCertificate.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query } = ctx;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-    // obtener certificados
-    let { success, certificates } = await signature.get(`certificate?page=${query.page}&query_search=${query.query_search}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { query, success, certificates };
 }
 
 export default IndexCertificate;

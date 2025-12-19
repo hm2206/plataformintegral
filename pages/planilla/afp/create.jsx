@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+import { useRouter } from 'next/router';
+import React, { useState, useContext, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { Form, Button, Select } from 'semantic-ui-react'
@@ -11,7 +12,14 @@ import { SelectTypeDescuento } from '../../../components/select/cronograma';
 import BoardSimple from '../../../components/boardSimple';
 import ContentControl from '../../../components/contentControl';
 
-const CreateAfp = ({ pathname, query }) => {
+const CreateAfp = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // estados
     const [form, setForm] = useState({ private: 0 });
@@ -260,14 +268,6 @@ const CreateAfp = ({ pathname, query }) => {
             </ContentControl>
         </>
     )
-}
-
-// precargador server
-CreateAfp.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query }; 
 }
 
 // exportar

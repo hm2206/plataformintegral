@@ -1,4 +1,5 @@
-import React, { useContext, useState } from 'react';
+import { useRouter } from 'next/router';
+import React, { useContext, useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { Form, Button, Checkbox } from 'semantic-ui-react'
@@ -10,7 +11,14 @@ import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts';
 
 
-const CreateTypeRemuneracion = () => {    
+const CreateTypeRemuneracion = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+    
 
     // app
     const app_context = useContext(AppContext);
@@ -156,14 +164,6 @@ const CreateTypeRemuneracion = () => {
             </ContentControl>
         </>
     )
-}
-
-// server
-CreateTypeRemuneracion.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query }
 }
 
 // exportar

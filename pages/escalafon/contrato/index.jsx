@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Button, Form, Select, Pagination } from 'semantic-ui-react';
 import { AUTHENTICATE } from '../../../services/auth';
 import DataTable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { escalafon } from '../../../services/apis';
 import { SelectCargo } from '../../../components/select/cronograma';
@@ -13,7 +13,29 @@ import UpdateRemuneracionMassive from '../../../components/contrato/updateRemune
 import { EntityContext } from '../../../contexts/EntityContext';
 import { BtnFloat } from '../../../components/Utils';
 
-const Contrato = ({ pathname, success, infos, query }) => {
+const Contrato = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [infos, setInfos] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await escalafon.get(`infos?page=${query.page}&estado=${query.estado}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setInfos(res.data.infos);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -177,22 +199,6 @@ const Contrato = ({ pathname, success, infos, query }) => {
                 </Form>
             </BoardSimple>
     </div>)
-}
-
-// server rendering
-Contrato.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-    query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
-    // request
-    let { success, infos } = await escalafon.get(`infos?page=${query.page}&estado=${query.estado}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false }))
-    // response
-    return { pathname, success, infos: infos || {}, query };
 }
 
 // export 

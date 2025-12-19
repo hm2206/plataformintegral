@@ -1,8 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Button, Form , Pagination } from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import {authentication} from '../../../services/apis';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
@@ -12,7 +12,14 @@ import Swal from 'sweetalert2';
 import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts/AppContext';
 
-const AppIndex = ({ pathname, query, apps }) => {
+const AppIndex = ({ apps }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext)
@@ -217,23 +224,6 @@ const AppIndex = ({ pathname, query, apps }) => {
             </BtnFloat>
         </Form>
     )
-}
-
-// server 
-AppIndex.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx; 
-    // verificar 
-    await VERIFY(ctx, system_store.AUTHENTICATION, pathname);
-    query.page = typeof query.page == 'undefined' ? 1 : query.page;
-    query.query_search = typeof query.query_search == 'undefined' ? "" : query.query_search;
-    let query_string = `page=${query.page}&query_search=${query.query_search}`;
-    // listar apps
-    let { success, apps } = await authentication.get(`app?${query_string}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, apps: {} }));
-    // response
-    return { pathname, query, success, apps };
 }
 
 // exportar

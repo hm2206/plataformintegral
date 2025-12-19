@@ -4,14 +4,36 @@ import { AUTHENTICATE } from '../../../services/auth';
 import { projectTracking } from '../../../services/apis';
 import { AppContext } from '../../../contexts/AppContext';
 import { backUrl, Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Button, Form, Checkbox } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
 import atob from 'atob';
 import { EntityContext } from '../../../contexts/EntityContext';
 
-const EditMedida = ({ success, medida }) => {
+const EditMedida = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [medida, setMedida] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await projectTracking.get(`medida/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setMedida(res.data.medida);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -140,19 +162,4 @@ const EditMedida = ({ success, medida }) => {
 }
 
 // rendering server
-EditMedida.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    let id = `${atob(query.id || "") || ""}`
-    let { success, medida } = await projectTracking.get(`medida/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => {
-
-            return { success: false, medida: {} }
-        })
-
-    // response
-    return { success, medida, query, pathname };
-}
-
 export default EditMedida;

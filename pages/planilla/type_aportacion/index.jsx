@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Pagination } from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -11,7 +11,29 @@ import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 
-const TypeAportacion = ({ pathname, query, success, type_aportaciones }) => {
+const TypeAportacion = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [type_aportaciones, setType_aportaciones] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`type_aportacion?page=${query.page}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setType_aportaciones(res.data.type_aportaciones);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // contexto
     const app_context = useContext(AppContext);
@@ -179,18 +201,6 @@ const TypeAportacion = ({ pathname, query, success, type_aportaciones }) => {
             </BtnFloat>
         </div>
     )
-}
-
-// server rendering
-TypeAportacion.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    let { success, type_aportaciones } = await unujobs.get(`type_aportacion?page=${query.page}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false }))
-    // response
-    return { success, type_aportaciones: type_aportaciones || {}, query, pathname };
 }
 
 // export

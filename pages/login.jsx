@@ -11,7 +11,7 @@ import VerificarAuthentication from '../components/verificarAuthentication';
 import { Form } from 'semantic-ui-react';
 
 
-const Login = ({ pathname, query }) => {
+const Login = () => {
 
     // app
     const app_context = useContext(AppContext);
@@ -67,6 +67,7 @@ const Login = ({ pathname, query }) => {
 
     // montar componente
     useEffect(() => {
+        GUEST();
         settingVerification();
     }, []);
 
@@ -187,12 +188,6 @@ const Login = ({ pathname, query }) => {
     )
 }
 
-// server
-Login.getInitialProps = async (ctx) => {
-    GUEST(ctx);
-    let { query, pathname } = ctx;
-    return { pathname, query };
-}
 
 // exportar
 export default Login;

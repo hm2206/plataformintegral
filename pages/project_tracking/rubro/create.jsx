@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useEffect, useContext, useState } from "react";
 import { Body, BtnBack } from "../../../components/Utils";
 import { AUTHENTICATE } from "../../../services/auth";
@@ -11,6 +12,13 @@ import Swal from "sweetalert2";
 import { EntityContext } from "../../../contexts/EntityContext";
 
 const CreateRubro = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
   // app
   const app_context = useContext(AppContext);
 
@@ -106,10 +114,6 @@ const CreateRubro = () => {
 };
 
 // rendering server
-CreateRubro.getInitialProps = async (ctx) => {
-  await AUTHENTICATE(ctx);
-  // response
-  return {};
-};
+;
 
 export default CreateRubro;

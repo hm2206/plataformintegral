@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+import { useRouter } from 'next/router';
+import React, { useState, useContext, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { Form, Button } from 'semantic-ui-react'
@@ -9,7 +10,14 @@ import BoardSimple from '../../../components/boardSimple';
 import ContentControl from '../../../components/contentControl';
 import { AUTHENTICATE } from '../../../services/auth';
 
-const TypeAportacionConfigMax = ({ pathname, query }) => {
+const TypeAportacionConfigMax = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -157,13 +165,6 @@ const TypeAportacionConfigMax = ({ pathname, query }) => {
             </ContentControl>
         </>
     )
-}
-
-TypeAportacionConfigMax.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query };
 }
 
 export default TypeAportacionConfigMax;

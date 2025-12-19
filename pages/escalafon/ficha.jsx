@@ -5,7 +5,7 @@ import { Body, BtnBack } from '../../components/Utils';
 import Show from '../../components/show';
 import { escalafon } from '../../services/apis';
 import Swal from 'sweetalert2';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import AssignTrabajadorEntity from '../../components/contrato/assingTrabajadorEntity';   
 import { AppContext } from '../../contexts/AppContext';
 import { EntityContext } from '../../contexts/EntityContext';
@@ -21,6 +21,13 @@ const parametros = [
 ];
 
 const Ficha = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -264,13 +271,6 @@ const Ficha = () => {
     )
 }
 
-
-// server
-Ficha.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    return { pathname, query }
-}
 
 // export 
 export default Ficha;

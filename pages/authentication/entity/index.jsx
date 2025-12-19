@@ -1,15 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {Button, Form, Pagination} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import {authentication} from '../../../services/apis';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import BoardSimple from '../../../components/boardSimple';
 
 
-const EntityIndex = ({ pathname, query, success, entities }) => {
+const EntityIndex = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [entities, setEntities] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await authentication.get(`entity?page=${query.page}&query_search=${query.query_search}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setEntities(res.data.entities);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [query_search, setQuerySearch] = useState("");
@@ -163,20 +185,5 @@ const EntityIndex = ({ pathname, query, success, entities }) => {
     )
 }
 
-// server
-EntityIndex.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // filtros
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-    // request
-    let { success, entities } = await authentication.get(`entity?page=${query.page}&query_search=${query.query_search}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, entity: {} }));
-    // response
-    return { pathname, query, success, entities };
-}
-    
 // exportar
 export default EntityIndex;

@@ -4,7 +4,7 @@ import { AUTHENTICATE } from '../../../services/auth';
 import { projectTracking } from '../../../services/apis';
 import { AppContext } from '../../../contexts/AppContext';
 import { backUrl, Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Button, Form } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
@@ -12,6 +12,13 @@ import { EntityContext } from '../../../contexts/EntityContext';
 import { SelectTypeProject } from '../../../components/select/project_tracking';
 
 const CreateProject = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -254,10 +261,4 @@ const CreateProject = () => {
 }
 
 // rendering server
-CreateProject.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    // response
-    return {};
-}
-
 export default CreateProject;

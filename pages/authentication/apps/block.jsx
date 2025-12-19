@@ -271,18 +271,5 @@ const BlockApp = ({ pathname, query, success, current_app }) => {
     )
 }
 
-// server
-BlockApp.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let id = atob(query.id) || '_error';
-    // request
-    let { success, app } = await authentication.get(`app/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, app: {} }));
-    // render
-    return { pathname, query, success, current_app: app };
-}
-
 // exportar
 export default BlockApp;

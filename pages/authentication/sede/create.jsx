@@ -11,19 +11,17 @@ import { AUTHENTICATE } from '../../../services/auth';
 
 export default class CreateSede extends Component
 {
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
-    }
-
-    state = {
+state = {
         loading: false,
         form: {},
         errors: {},
         files: {}
     }
+
+    componentDidMount = () => {
+        if (!AUTHENTICATE()) return;
+    }
+
 
 
     handleInput = ({ name, value }, obj = 'form') => {

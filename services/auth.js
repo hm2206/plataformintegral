@@ -1,63 +1,51 @@
-import NextCookie from 'next-cookies';
-import { setCookie, destroyCookie } from 'nookies';
+import Cookies from 'js-cookie';
 import Router from 'next/router';
 import { authentication } from './apis';
 
-export const AUTH = (ctx) => {
-    return NextCookie(ctx)['auth_token'] || "";
+// Obtener token del cliente
+export const AUTH = () => {
+    if (typeof window === 'undefined') return "";
+    return Cookies.get('auth_token') || localStorage.getItem('auth_token') || "";
 };
 
-export const AUTHENTICATE = (ctx) => {
-    // authorize
-    if (AUTH(ctx)) return true;
-    // not authorize
-    if (ctx.res) {
-        ctx.res.writeHead(302, { Location: '/login' })
-        ctx.res.end();
-        return { };
-    } 
-    // client
+// Verificar autenticación - solo cliente
+export const AUTHENTICATE = () => {
+    if (typeof window === 'undefined') return false;
+    const token = AUTH();
+    if (token) return true;
     Router.replace("/login");
-    return { };
+    return false;
 };
 
-
-export const GUEST = (ctx) => {
-    // is guest
-    if (!AUTH(ctx)) return true;
-    // is AUTHENTICATE
-    if (ctx.res) {
-        ctx.res.writeHead(302, { Location: '/' });
-        ctx.res.end();
-        return { };
-    }
-    // client
-    Router.replace("/login");
-    return { };
+// Verificar que sea invitado - solo cliente
+export const GUEST = () => {
+    if (typeof window === 'undefined') return false;
+    const token = AUTH();
+    if (!token) return true;
+    Router.replace("/");
+    return false;
 };
 
-
-export const LOGIN = (ctx, token) => {
-    setCookie(ctx, 'auth_token', token);
+// Login - guardar token
+export const LOGIN = (token) => {
+    Cookies.set('auth_token', token);
+    localStorage.setItem('auth_token', token);
 };
 
-
-export const LOGOUT = (ctx) => {
-    destroyCookie(ctx, 'auth_token');
+// Logout - eliminar token
+export const LOGOUT = () => {
+    Cookies.remove('auth_token');
+    localStorage.removeItem('auth_token');
 }
 
-export const VERIFY = async (ctx, systemSlug, name = "", type = "MODULE") => {
-    name = name ? name : ctx.pathname;
-    let { allow } = await authentication.get(`auth/permission/${systemSlug}/${type}?name=${name}`, {}, ctx)
+// Verificar permisos - solo cliente
+export const VERIFY = async (systemSlug, name = "", type = "MODULE") => {
+    if (typeof window === 'undefined') return false;
+    const pathname = name || Router.pathname;
+    let { allow } = await authentication.get(`auth/permission/${systemSlug}/${type}?name=${pathname}`)
         .then(res => res.data)
         .catch(err => ({ success: false, status: err.status || 501, allow: false }));
-    //  validar permiso
     if (allow) return true;
-    // validar server
-    if (ctx.res) {
-        ctx.res.writeHead(301, { Location: '/401' });
-        ctx.res.end();
-    }
-    // client
-    Router.replace(`/401`); 
+    Router.replace(`/401`);
+    return false;
 }

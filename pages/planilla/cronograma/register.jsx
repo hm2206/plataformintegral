@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useEffect, useState, Fragment, useContext } from 'react';
 import { Form, Button, Checkbox } from 'semantic-ui-react';
 import Show from '../../../components/show';
@@ -22,6 +23,13 @@ const schemaDefault = {
 }
 
 const RegisterCronograma = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -245,14 +253,6 @@ const RegisterCronograma = () => {
             </ContentControl>
         </Fragment>
     )
-}
-
-// server
-RegisterCronograma.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query }
 }
 
 // exportar

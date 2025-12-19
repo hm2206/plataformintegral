@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Form, Button, Pagination } from 'semantic-ui-react';
@@ -14,7 +14,29 @@ import BoardSimple from '../../../components/boardSimple';
 import { EntityContext } from '../../../contexts/EntityContext';
 
 
-const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
+const CronogramaIndex = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [cronogramas, setCronogramas] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`cronograma?${query_string}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setCronogramas(res.data.cronogramas);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -310,24 +332,6 @@ const CronogramaIndex = ({ pathname, query, success, cronogramas }) => {
             </BoardSimple>
         </div>
     )
-}
-
-// server
-CronogramaIndex.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // filtros
-    let fecha = new Date();
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.year = typeof query.year != 'undefined' ? query.year : fecha.getFullYear();
-    query.mes = typeof query.mes != 'undefined' ? query.mes : fecha.getMonth() + 1;
-    // obtener datos
-    let query_string = `page=${query.page}&year=${query.year}&mes=${query.mes}`;
-    let { success, cronogramas } = await unujobs.get(`cronograma?${query_string}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, cronogramas: {} }))
-    // response
-    return { pathname, query, success, cronogramas }; 
 }
 
 // exportar

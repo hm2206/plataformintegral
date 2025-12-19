@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+import { useRouter } from 'next/router';
+import React, { useState, useContext, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { Form, Button  } from 'semantic-ui-react'
@@ -11,7 +12,14 @@ import BoardSimple from '../../../components/boardSimple';
 import ContentControl from '../../../components/contentControl';
 
 
-const CreateTypeDetalle = ({ pathname, query }) => {
+const CreateTypeDetalle = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -104,14 +112,6 @@ const CreateTypeDetalle = ({ pathname, query }) => {
             </ContentControl>
         </>
     )
-}
-
-// server
-CreateTypeDetalle.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let {pathname, query } = ctx;
-    // responser
-    return { pathname, query };
 }
 
 // exportar

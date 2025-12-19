@@ -1,9 +1,9 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import PageNav from '../../components/pageNav';
 import { AUTHENTICATE } from '../../services/auth';
 import CardNotify from '../../components/cardNotify';
 import Show from '../../components/show';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import NotificationProvider from '../../providers/authentication/NotificationProvider';
 import { Pagination } from 'semantic-ui-react';
 import btoa from 'btoa';
@@ -11,7 +11,14 @@ import btoa from 'btoa';
 // provedores
 const notificationProvider = new NotificationProvider();
 
-const IndexNotify = ({ pathname, query, success, notification, count_read, count_no_read }) => {
+const IndexNotify = ({ notification, count_read, count_no_read }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // handleChange
     const handleOption = (e, index, obj) => {
@@ -104,36 +111,6 @@ const IndexNotify = ({ pathname, query, success, notification, count_read, count
             </div>
         </Fragment>
     )
-}
-
-// server
-IndexNotify.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // filtros
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.read = typeof query.read != 'undefined' ? query.read : '';
-    query.tab = typeof query.tab != 'undefined' ? query.tab : 'notify-all';
-    // response
-    let { success, notification, count_read, count_unread } = await notificationProvider.index(query, {}, ctx)
-        .then(res => res)
-        .catch(err => ({ success: false, notification: {}, count_read: 0, count_unread: 0 }));
-    // verificar id
-    let id = query.id;
-    if (id) {
-        // obtener notification
-        let datos = await notificationProvider.show(id, {}, ctx)
-            .then(res => res.data)
-            .catch(err => ({ success: false, notification: {}, message: err.message }))
-        // validar notification
-        if (success && datos.success) {
-            let newData = await notification.data.filter(n => n.id != datos.notification.id);
-            newData.unshift(datos.notification);
-            notification.data = newData;
-        }
-    }
-    // response
-    return { pathname, query, success, notification, count_read, count_unread };
 }
 
 // exportar

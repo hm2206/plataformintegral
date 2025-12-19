@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { BtnFloat } from '../../../components/Utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Button, Form, Pagination } from 'semantic-ui-react'
 import { escalafon } from '../../../services/apis';
@@ -18,7 +18,29 @@ import Show from '../../../components/show'
 
 const reportProvider = new ReportProvider();
 
-const IndexWork = ({ pathname, query, success, works }) => {
+const IndexWork = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [works, setWorks] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await escalafon.get(`works?page=${query.page}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setWorks(res.data.works);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [query_search, setQuerySearch] = useState(query.query_search || "");
@@ -201,22 +223,6 @@ const IndexWork = ({ pathname, query, success, works }) => {
             </BoardSimple>
         </div>
     )
-}
-
-// server
-IndexWork.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // filtros
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-    query.cargo_id = typeof query.cargo_id != 'undefined' ? query.cargo_id : "";
-    // request
-    let { success, works } = await escalafon.get(`works?page=${query.page}&query_search=${query.query_search}&cargo_id=${query.cargo_id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, works: {} }));
-    // response
-    return { pathname, query, success, works };
 }
 
 // exportar

@@ -455,14 +455,4 @@ const TypeAportacionConfigMax = ({ success, type_aportacion, pathname, query }) 
     )
 }
 
-TypeAportacionConfigMax.getInitialProps = async (ctx) => {
-    let { pathname, query } = ctx;
-    let id = query.id ? atob(query.id) : '__error';
-    let { success, type_aportacion } = await unujobs.get(`type_aportacion/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, type_aportacion: {} }))
-    // response
-    return { pathname, query, type_aportacion, success };
-}
-
 export default TypeAportacionConfigMax;

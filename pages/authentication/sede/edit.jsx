@@ -11,14 +11,7 @@ import Show from '../../../components/show';
 
 export default class EditTrabajador extends Component
 {
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname, store } = ctx;
-        return { query, pathname }
-    }
-
-    state = {
+state = {
         loader: false,
         edit: false,
         block: false,
@@ -46,6 +39,7 @@ export default class EditTrabajador extends Component
     }
 
     componentDidMount = () => {
+        if (!AUTHENTICATE()) return;
         // apis
         this.getDocumentType();
         this.getDepartamento();

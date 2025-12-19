@@ -1,7 +1,7 @@
-import React, { useContext, useState} from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {Button, Form, Select} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -13,7 +13,29 @@ import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 
 
-const Meta = ({ pathname, success, metas, query }) => {
+const Meta = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [metas, setMetas] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`meta?page=${query.page}&estado=${query.estado}&year=${query.year}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setMetas(res.data.metas);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -239,20 +261,5 @@ const Meta = ({ pathname, success, metas, query }) => {
         </Form>
     )
 }
-
-// server rending
-Meta.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
-    query.year = typeof query.year != 'undefined' ? query.year : new Date().getFullYear();
-    let { success, metas } = await unujobs.get(`meta?page=${query.page}&estado=${query.estado}&year=${query.year}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err =>  ({ success: false, metas: {} }));
-    // response
-    return { pathname, success, metas: metas || {}, query };
-}
-
 
 export default Meta;

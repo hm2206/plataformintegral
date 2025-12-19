@@ -23,6 +23,7 @@ const ConfigDependencia = () => {
 
     // effect
     useEffect(() => {
+        if (!AUTHENTICATE()) return;
         fireEntity({ render: true });
         return () => fireEntity({ render: false });
     }, []);
@@ -83,13 +84,6 @@ const ConfigDependencia = () => {
             </BoardSimple>
         </div>
     )
-}
-
-ConfigDependencia.getInitialProps = (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query }
 }
 
 export default ConfigDependencia;

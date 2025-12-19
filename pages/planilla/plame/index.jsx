@@ -6,13 +6,20 @@ import { InputCredencias, InputEntity, InputAuth } from '../../../services/utils
 import { Form, Button, Checkbox } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import { getPlame } from '../../../services/requests/cronograma'; 
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { AppContext } from '../../../contexts/AppContext';
 import { EntityContext } from '../../../contexts/EntityContext';
 import BoardSimple from '../../../components/boardSimple';
 
 
-const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
+const PlameIndex = ({ cronogramas, message }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // entity
     const entity_context = useContext(EntityContext);
@@ -207,17 +214,6 @@ const PlameIndex = ({ pathname, query, cronogramas, success, message }) => {
                 </Form>
             </BoardSimple>
         </div>)
-}
-
-// server rendering
-PlameIndex.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let date = new Date();
-    query.mes = typeof query.mes != 'undefined' ? query.mes : date.getMonth() + 1;
-    query.year = typeof query.year != 'undefined' ? query.year : date.getFullYear();
-    let { cronogramas, message, success } = await getPlame(ctx);
-    return { pathname, query, success, message, cronogramas };
 }
 
 // exportar

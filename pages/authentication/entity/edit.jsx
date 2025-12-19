@@ -1,7 +1,7 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import { BtnBack, InputFile } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button, Progress } from 'semantic-ui-react'
 import { authentication, handleErrorRequest, onProgress } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -12,7 +12,29 @@ import ContentControl from '../../../components/contentControl';
 import atob from 'atob';
 
 
-const EditEntity = ({ pathname, query, success, entity }) => {
+const EditEntity = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [entity, setEntity] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await authentication.get(`entity/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setEntity(res.data.entity);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [form, setForm] = useState({});
@@ -233,18 +255,6 @@ const EditEntity = ({ pathname, query, success, entity }) => {
             </Show>
         </Fragment>
     )
-}
-
-// server
-EditEntity.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let id = atob(query.id) || "_error";
-    let { success, entity } = await authentication.get(`entity/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, entity: {} }));
-    // response
-    return { pathname, query, success, entity };
 }
 
 // exportar

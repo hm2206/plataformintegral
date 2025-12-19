@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button } from 'semantic-ui-react'
 import { unujobs, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -15,7 +15,29 @@ import NotFoundData from '../../../components/notFoundData';
 import Show from '../../../components/show';
 
 
-const EditCargo = ({ pathname, query, success, cargo }) => {
+const EditCargo = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [cargo, setCargo] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`cargo/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setCargo(res.data.cargo);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     if (!success) return <NotFoundData/>
 
@@ -172,20 +194,6 @@ const EditCargo = ({ pathname, query, success, cargo }) => {
             </Show>
         </>
     )
-}
-
-// server
-EditCargo.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let {pathname, query } = ctx;
-    // get id
-    let id = atob(query.id || "") || "__error";
-    // request
-    let { success, cargo } = await unujobs.get(`cargo/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, cargo: {} }));
-    // responser
-    return { pathname, query, success, cargo };
 }
 
 // exportar

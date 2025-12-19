@@ -1,8 +1,8 @@
-import React, { Component, Fragment, useContext, useState } from 'react';
+import React, { Component, Fragment, useContext, useState, useEffect } from 'react';
 import { Button, Form, Pagination, Select } from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import { authentication, handleErrorRequest } from '../../../services/apis';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
@@ -13,7 +13,14 @@ import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts/AppContext';
 import { system_store } from '../../../services/verify.json';
 
-const UserIndex = ({ pathname, query, success, users }) => {
+const UserIndex = ({ users }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -208,24 +215,6 @@ const UserIndex = ({ pathname, query, success, users }) => {
             </BtnFloat>
         </Form>
     )
-}
-
-// server
-UserIndex.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    await VERIFY(ctx, system_store.AUTHENTICATION, pathname)
-    // filtros
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-    let query_string = `page=${query.page}&query_search=${query.query_search}&estado=${query.estado}`;
-    // request
-    let { success, users } = await authentication.get(`user?${query_string}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, users: {} }));
-    // response
-    return { pathname, query, success, users };
 }
 
 // exportar

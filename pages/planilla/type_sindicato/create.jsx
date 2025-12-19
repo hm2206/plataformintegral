@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+import { useRouter } from 'next/router';
+import React, { useState, useContext, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { Form, Button, Select } from 'semantic-ui-react'
@@ -12,7 +13,14 @@ import ContentControl from '../../../components/contentControl';
 import { AppContext } from '../../../contexts/AppContext';
 
 
-const CreateTypeSindicato = ({ pathname, query }) => {
+const CreateTypeSindicato = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -151,14 +159,6 @@ const CreateTypeSindicato = ({ pathname, query }) => {
             </ContentControl>
         </>
     )
-}
-
-// server
-CreateTypeSindicato.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let {pathname, query } = ctx;
-    // responser
-    return { pathname, query };
 }
 
 // exportar

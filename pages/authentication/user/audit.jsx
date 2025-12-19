@@ -9,14 +9,7 @@ import {  AUTHENTICATE } from '../../../services/auth';
 
 export default class AuditUser extends Component
 {
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
-    }
-
-    state = {
+state = {
         loading: false,
         planillas: [],
         type_cargos: [],
@@ -25,6 +18,11 @@ export default class AuditUser extends Component
         check: false,
         person: {},
     }
+
+    componentDidMount = () => {
+        if (!AUTHENTICATE()) return;
+    }
+
 
     handleInput = ({ name, value }, obj = 'form') => {
         this.setState((state, props) => {

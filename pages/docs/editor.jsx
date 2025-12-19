@@ -1,3 +1,4 @@
+import Router from 'next/router';
 import React, { Component, Fragment } from 'react';
 import { Body } from '../../components/Utils';
 import dynamic from 'next/dynamic';
@@ -10,16 +11,14 @@ const Draft = dynamic(() => import('../../components/darftEditor'), { ssr: false
 
 export default class DocsEditor extends Component
 {
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
-    }
-
-    state = {
+state = {
         save: false
     }
+
+    componentDidMount = () => {
+        if (!AUTHENTICATE()) return;
+    }
+
 
     handleSave = async (html) => {
         this.props.fireLoading(true);

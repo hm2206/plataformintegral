@@ -1,7 +1,7 @@
-import React, {Component, Fragment, useContext} from 'react';
+import React, { Component, Fragment, useContext, useEffect, useState } from 'react';
 import {Button, Form} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE, AUTH } from '../../../services/auth';
@@ -13,7 +13,29 @@ import Swal from 'sweetalert2';
 import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts';
 
-const TypeRemuneracion = ({ pathname, query, success, type_remuneraciones }) => {
+const TypeRemuneracion = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [type_remuneraciones, setType_remuneraciones] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`type_remuneracion?${query_string}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setType_remuneraciones(res.data.type_remuneraciones);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -171,21 +193,6 @@ const TypeRemuneracion = ({ pathname, query, success, type_remuneraciones }) => 
         </BtnFloat>
     </Form>
     )
-}
-
-// server
-TypeRemuneracion.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    // filters
-    let { pathname, query } = ctx;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    // request
-    let query_string = `page=${query.page}`;
-    let { success, type_remuneraciones } = await unujobs.get(`type_remuneracion?${query_string}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, type_remuneraciones: {} }));
-    // response
-    return { pathname, query, success, type_remuneraciones };
 }
 
 // exportar

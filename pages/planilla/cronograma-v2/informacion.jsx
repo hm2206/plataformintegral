@@ -620,19 +620,4 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
   )
 }
 
-InformacionCronograma.getInitialProps = async (ctx) => {
-  AUTHENTICATE(ctx);
-  let { query, pathname } = ctx;
-  // procesos
-  let id = atob(query.id) || '_error';
-  let { success, cronograma } = await microPlanilla.get(`cronogramas/${id}`, {}, ctx)
-    .then(res => ({ success: true, cronograma: res.data }))
-    .catch(() => ({
-    success: false,
-    cronograma: {}
-  }));
-  // response
-  return { query, pathname, cronograma, success };
-}
-
 export default InformacionCronograma;

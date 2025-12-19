@@ -1,6 +1,6 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button } from 'semantic-ui-react'
 import { handleErrorRequest, tramite } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -10,7 +10,14 @@ import ContentControl from '../../../components/contentControl';
 import { Confirm } from '../../../services/utils';
 
 
-const CreateTramiteType = ({ pathname, query }) => {
+const CreateTramiteType = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // estados
     const [form, setForm] = useState({});
@@ -104,14 +111,6 @@ const CreateTramiteType = ({ pathname, query }) => {
         </Fragment>
     )
 }
-
-// server
-CreateTramiteType.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query };
-} 
 
 // exportar
 export default CreateTramiteType;

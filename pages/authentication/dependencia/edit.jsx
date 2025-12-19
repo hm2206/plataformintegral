@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -13,7 +13,29 @@ import Show from '../../../components/show';
 import { Confirm } from '../../../services/utils';
 
 
-const EditDependencia = ({ pathname, query, success, dependencia }) => {
+const EditDependencia = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [dependencia, setDependencia] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await authentication.get(`dependencia/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setDependencia(res.data.dependencia);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [form, setForm] = useState(JSON.parse(JSON.stringify(dependencia || {})));
@@ -169,19 +191,6 @@ const EditDependencia = ({ pathname, query, success, dependencia }) => {
             </Show>
         </Fragment>
     )
-}
-
-// server
-EditDependencia.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // obtener dependencia
-    let id = atob(query.id) || '_error';
-    let { success, dependencia } = await authentication.get(`dependencia/${id}`, {}, ctx)
-    .then(res => (res.data))
-    .catch(err => ({ success: false, dependencia: {} }))
-    // response
-    return { pathname, query, success, dependencia }
 }
 
 // export 

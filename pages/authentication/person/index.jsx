@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { BtnFloat } from '../../../components/Utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { Button, Form, Pagination } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
@@ -11,7 +11,14 @@ import { system_store } from '../../../services/verify.json';
 import CreatePerson from '../../../components/authentication/person/createPerson'
 import Show from '../../../components/show'
 
-const IndexPerson = ({ pathname, query, success, people }) => {
+const IndexPerson = ({ people }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     const [query_search, setQuerySearch] = useState(query.query_search || "");
     const [option, setOption] = useState()
@@ -141,22 +148,6 @@ const IndexPerson = ({ pathname, query, success, people }) => {
             </BoardSimple>
         </div>
     )
-}
-
-// server
-IndexPerson.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    await VERIFY(ctx, system_store.AUTHENTICATION, pathname);
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-    // request
-    let query_string = `page=${query.page}&query_search=${query.query_search}`;
-    let { success, people } = await authentication.get(`person?${query_string}`, {}, ctx)
-        .then(res =>  res.data)
-        .catch(err => ({ success: false, people: {} }))
-    // response
-    return { pathname, query, success, people }
 }
 
 // exportar

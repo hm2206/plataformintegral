@@ -12,14 +12,7 @@ import { AUTHENTICATE } from '../../../services/auth';
 
 export default class CreatePermission extends Component
 {
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        return { pathname, query };
-    }
-
-    state = {
+state = {
         loading: false,
         planillas: [],
         type_cargos: [],
@@ -34,6 +27,7 @@ export default class CreatePermission extends Component
     }
 
     componentDidMount = () => {
+        if (!AUTHENTICATE()) return;
         this.getSystem();
     }
 

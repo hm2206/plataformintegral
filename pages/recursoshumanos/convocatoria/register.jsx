@@ -11,12 +11,7 @@ import Cookies from 'js-cookie'
 
 export default class RegisterConvocatoria extends Component
 {
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname } = ctx; 
-        return { pathname, query };
-    };
+;
 
     state = {
         numero_de_convocatoria: "",
@@ -28,6 +23,7 @@ export default class RegisterConvocatoria extends Component
     }
 
     componentDidMount = () => {
+        if (!AUTHENTICATE()) return;
         this.props.fireEntity({ render: true });
     }
 

@@ -10,11 +10,33 @@ import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 import ContentControl from '../../../components/contentControl';
 import atob from 'atob';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import NotFoundData from '../../../components/notFoundData';
 
 
-const EditTypeDetalle = ({ pathname, query, success, type_detalle }) => {
+const EditTypeDetalle = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [type_detalle, setType_detalle] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`type_detalle/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setType_detalle(res.data.type_detalle);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // verificar
     if (!success) return <NotFoundData/>
@@ -120,20 +142,6 @@ const EditTypeDetalle = ({ pathname, query, success, type_detalle }) => {
             </ContentControl>
         </>
     )
-}
-
-// server
-EditTypeDetalle.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let {pathname, query } = ctx;
-    // get id
-    let id = atob(query.id || "") || "_error";
-    // request
-    let { success, type_detalle } = await unujobs.get(`type_detalle/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, type_detalle: {} }));
-    // responser
-    return { pathname, query, success, type_detalle };
 }
 
 // exportar

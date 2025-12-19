@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Button, Form, Select } from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -12,7 +12,29 @@ import { unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
 
-const TypeDescuento = ({ success, type_descuentos, query, pathname }) => {
+const TypeDescuento = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [type_descuentos, setType_descuentos] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`type_descuento?page=${query.page}&estado=${query.estado}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setType_descuentos(res.data.type_descuentos);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estado
     const [estado, setEstado] = useState(query.estado);
@@ -207,19 +229,6 @@ const TypeDescuento = ({ success, type_descuentos, query, pathname }) => {
             </BtnFloat>
         </Form>
     )
-}
-
-// server rendering
-TypeDescuento.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
-    let { success, type_descuentos } = await unujobs.get(`type_descuento?page=${query.page}&estado=${query.estado}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { pathname, query, success, type_descuentos }
 }
 
 export default TypeDescuento;

@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { BtnBack } from '../../../components/Utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button } from 'semantic-ui-react'
 import { handleErrorRequest, tramite } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -12,7 +12,29 @@ import atob from 'atob';
 import Show from '../../../components/show';
 
 
-const CreateTramiteType = ({ pathname, query, success, tramite_type }) => {
+const CreateTramiteType = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [tramite_type, setTramite_type] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await tramite.get(`tramite_type/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setTramite_type(res.data.tramite_type);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [form, setForm] = useState({});
@@ -126,18 +148,6 @@ const CreateTramiteType = ({ pathname, query, success, tramite_type }) => {
         </Fragment>
     )
 }
-
-// server
-CreateTramiteType.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let id = atob(query.id || "") || '_error';
-    let { success, tramite_type } = await tramite.get(`tramite_type/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, tramite_type: {} }));
-    // response
-    return { pathname, query, success, tramite_type };
-} 
 
 // exportar
 export default CreateTramiteType;

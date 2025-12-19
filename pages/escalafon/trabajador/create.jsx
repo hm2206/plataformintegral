@@ -1,4 +1,5 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import {  BtnBack } from '../../../components/Utils';
 import { Confirm, parseUrl } from '../../../services/utils';
 import { Form, Button, Checkbox, Message } from 'semantic-ui-react'
@@ -14,7 +15,14 @@ import Router from 'next/router';
 import CreatePerson from '../../../components/authentication/person/createPerson'
 
 
-const CreateWork = ({ pathname, query }) => {
+const CreateWork = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        AUTHENTICATE();
+    }, []);
+
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -320,13 +328,6 @@ const CreateWork = ({ pathname, query }) => {
     )
 }
 
-// server
-CreateWork.getInititalProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query }
-}
 
 // exportar
 export default CreateWork;

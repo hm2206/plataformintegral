@@ -12,16 +12,7 @@ import { findConvocatoria } from '../../../services/requests';
 
 export default class EditConvocatoria extends Component
 {
-
-    static getInitialProps  = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let {query, pathname} = ctx;
-        let response = await findConvocatoria(ctx);
-        let { convocatoria, success } = response || {};
-        return {query, pathname, convocatoria, success }
-    }
-
-    state = {
+state = {
         numero_de_convocatoria: "",
         fecha_inicio: "",
         fecha_final: "",
@@ -43,6 +34,7 @@ export default class EditConvocatoria extends Component
     }
 
     componentDidMount = async () => {
+        if (!AUTHENTICATE()) return;
         this.props.fireLoading(true);
         await this.setting();
         await this.settingActividad();

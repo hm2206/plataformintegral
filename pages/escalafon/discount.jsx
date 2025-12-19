@@ -311,13 +311,5 @@ const Discount = ({ pathname, query }) => {
     );
 }
 
-// server
-Discount.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    return { query, pathname }
-}
-
-
 // exportar
 export default Discount;

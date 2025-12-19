@@ -1,4 +1,5 @@
-import React, { useContext, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import React, { useContext, useEffect, useState } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { microPlanilla } from '../../../services/apis';
 import atob from 'atob';
@@ -9,7 +10,29 @@ import { EntityContext } from '../../../contexts/EntityContext';
 import NotFoundData from '../../../components/notFoundData';
 import AddHistorial from '../../../components/planilla/cronograma/add-historial';
 
-const AddCronograma = ({ success, cronograma }) => {
+const AddCronograma = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [cronograma, setCronograma] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await microPlanilla.get(`cronogramas/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setCronograma(res.data.cronograma);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
   // validar data
   if (!success) return <NotFoundData/>
@@ -39,20 +62,6 @@ const AddCronograma = ({ success, cronograma }) => {
     </>
   )
 };
-
-// server rendering
-AddCronograma.getInitialProps = async (ctx) => {
-  AUTHENTICATE(ctx);
-  let { query, pathname } = ctx;
-  // obtener id
-  let id = atob(query.id) || "__error";
-  //find cronograma
-  let { success, cronograma } = await microPlanilla.get(`cronogramas/${id}`, {}, ctx)
-    .then(res => ({ success: true, cronograma: res.data }))
-    .catch(() => ({ success: false, cronograma: {} }));
-  // response
-  return { query, pathname, success, cronograma };
-}
 
 // export 
 export default AddCronograma;

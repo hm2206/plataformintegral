@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {Button, Form, Select, Pagination} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
 import { unujobs } from '../../../services/apis';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -10,7 +10,29 @@ import Swal from 'sweetalert2';
 import { Confirm } from '../../../services/utils';
 import BoardSimple from '../../../components/boardSimple';
 
-const CargoIndex = ({ pathname, query, success, cargos }) => {
+const CargoIndex = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [cargos, setCargos] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`cargo?page=${query.page}&estado=${query.estado}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setCargos(res.data.cargos);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     const [form, setForm] = useState({ estado: query.estado });
 
@@ -205,19 +227,6 @@ const CargoIndex = ({ pathname, query, success, cargos }) => {
             </BtnFloat>
         </div>
     )
-}
-
-// server rendering
-CargoIndex.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query } = ctx;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.estado = typeof query.estado != 'undefined' ? query.estado : "";
-    let { success, cargos } = await unujobs.get(`cargo?page=${query.page}&estado=${query.estado}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, cargos: {} }));
-    // response
-    return { success, query, cargos: cargos };
 }
 
 export default CargoIndex;

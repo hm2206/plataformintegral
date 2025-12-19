@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import { BtnBack, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -12,7 +13,29 @@ import BoardSimple from '../../../components/boardSimple';
 import NotFoundData from '../../../components/notFoundData';
 
 
-const Report = ({ pathname, query, success, cronograma }) => {
+const Report = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [cronograma, setCronograma] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`cronograma/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setCronograma(res.data.cronograma);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // validar data
     if (!success) return <NotFoundData/>
@@ -69,19 +92,6 @@ const Report = ({ pathname, query, success, cronograma }) => {
                 />
             </div>
         )
-}
-
-// server rendering
-Report.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    // obtener cronograma
-    let id = atob(query.id) || '__error';
-    let { success, cronograma } = await unujobs.get(`cronograma/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { query, pathname, success, cronograma }
 }
 
 // exportar

@@ -232,19 +232,4 @@ const IndexBoleta = ({ pathname, query, historial }) => {
     )
 }
 
-IndexBoleta.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // filtros
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : "";
-    // request
-    let query_string = `page=${query.page}&query_search=${query.query_search}`;
-    let { success, historial } = await unujobs.get(`historial?${query_string}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, historial: {} }));
-    // response
-    return { pathname, query, success, historial };
-}
-
 export default IndexBoleta;

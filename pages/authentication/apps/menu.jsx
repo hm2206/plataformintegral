@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BtnBack } from '../../../components/Utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Select, Button } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import Show from '../../../components/show';
@@ -14,7 +14,29 @@ const options = {
     CREATE: 'CREATE'
 }
 
-const MenuApp = ({ current_app }) => {
+const MenuApp = ({ current_ }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [app, setApp] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await authentication.get(`app/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setApp(res.data.app);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [current_loading, setCurrentLoading] = useState(false);
@@ -155,18 +177,5 @@ const MenuApp = ({ current_app }) => {
         </div>
     )
 }
-// server 
-MenuApp.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let id = atob(query.id) || '_error';
-    // request
-    let { success, app } = await authentication.get(`app/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, app: {} }));
-    // render
-    return { pathname, query, success, current_app: app };
-}
-
 // exportar 
 export default MenuApp;

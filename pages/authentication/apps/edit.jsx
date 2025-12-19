@@ -1,7 +1,7 @@
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useEffect } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -12,7 +12,29 @@ import BoardSimple from '../../../components/boardSimple';
 import ContentControl from '../../../components/contentControl';
 
 
-const EditApp = ({ pathname, query, success, current_app }) => {
+const EditApp = ({ current_ }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [app, setApp] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await authentication.get(`app/${id}?update`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setApp(res.data.app);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [errors, setErrors] = useState({});
@@ -258,20 +280,6 @@ const EditApp = ({ pathname, query, success, current_app }) => {
             </Show>
         </Fragment>
     )
-}
-
-// server
-EditApp.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // generar id
-    let id = atob(query.id || `__error`);
-    // obtener app
-    let { success, app } = await authentication.get(`app/${id}?update`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, app: {} }));
-    // response
-    return { pathname, query, success, current_app: app };
 }
 
 // exportar

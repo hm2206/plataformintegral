@@ -302,17 +302,4 @@ const CronogramaEmail = ({ query, success, cronograma }) => {
     )
 }
 
-CronogramaEmail.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // obtener id
-    let id = atob(query.id) || "__error";
-    //find cronograma
-    let { success, cronograma } = await unujobs.get(`cronograma/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { pathname, query, success, cronograma };
-}
-
 export default CronogramaEmail;

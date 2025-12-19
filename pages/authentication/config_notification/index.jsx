@@ -22,18 +22,8 @@ export default class ConfigNotificationIndex extends Component {
 
         this.getOption = this.getOption.bind(this);
     }
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let {query, pathname, store} = ctx;
-        query.page = query.page || 1;
-        query.query_search = query.query_search || "";
-        await store.dispatch(pagePermission(ctx));
-        let { page_permission } = store.getState().permission
-        return {query, pathname, page_permission}
-    }
-
-    componentDidMount = () => {
+componentDidMount = () => {
+        if (!AUTHENTICATE()) return;
         this.setting(this.props.query || {});
     }
 

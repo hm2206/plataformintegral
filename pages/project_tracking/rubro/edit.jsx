@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useEffect, useContext, useState } from "react";
 import { Body, BtnBack } from "../../../components/Utils";
 import { AUTHENTICATE } from "../../../services/auth";
@@ -11,7 +12,14 @@ import Swal from "sweetalert2";
 import atob from "atob";
 import { EntityContext } from "../../../contexts/EntityContext";
 
-const Editrubro = ({ success, rubro }) => {
+const Editrubro = ({ rubro }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
   // app
   const app_context = useContext(AppContext);
 
@@ -136,19 +144,6 @@ const Editrubro = ({ success, rubro }) => {
 };
 
 // rendering server
-Editrubro.getInitialProps = async (ctx) => {
-  await AUTHENTICATE(ctx);
-  let { query, pathname } = ctx;
-  let id = `${atob(query.id || "") || ""}`;
-  let { success, rubro } = await projectTracking
-    .get(`rubro/${id}`, {}, ctx)
-    .then((res) => res.data)
-    .catch((err) => {
-      return { success: false, rubro: {} };
-    });
-
-  // response
-  return { success, rubro, query, pathname };
-};
+;
 
 export default Editrubro;

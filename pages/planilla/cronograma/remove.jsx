@@ -304,19 +304,5 @@ const RemoveCronograma = ({ query, pathname, success, cronograma }) => {
         )
 };
 
-// server rendering
-RemoveCronograma.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    // obtener id
-    let id = atob(query.id) || "__error";
-    //find cronograma
-    let { success, cronograma } = await unujobs.get(`cronograma/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { query, pathname, success, cronograma };
-}
-
 // export 
 export default RemoveCronograma;

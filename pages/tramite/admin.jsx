@@ -7,7 +7,7 @@ import { system_store } from '../../services/verify.json';
 import { AUTHENTICATE, VERIFY } from '../../services/auth';
 import Show from '../../components/show';
 import { Button, Form, Pagination } from 'semantic-ui-react'
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Confirm } from '../../services/utils';
 import { AppContext } from '../../contexts';
 import Swal from 'sweetalert2';
@@ -22,7 +22,14 @@ const options = {
     TRACKING: 'tracking'
 }
 
-const AdminTramite = ({ pathname, query, success, tramites }) => {
+const AdminTramite = ({ tramites }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext)
@@ -250,17 +257,6 @@ const AdminTramite = ({ pathname, query, success, tramites }) => {
             </BoardSimple>
         </div>
     )
-}
-
-AdminTramite.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    await VERIFY(ctx, system_store.TRAMITE_DOCUMENTARIO, pathname);
-    let { success, tramites } = await tramiteProvider.index(query, {}, ctx)
-    .then(res => res.data)
-    .catch(() => ({ success: false, tramites: {} }))
-    // response
-    return { pathname, query, success, tramites }
 }
 
 export default AdminTramite;

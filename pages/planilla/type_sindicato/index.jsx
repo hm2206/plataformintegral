@@ -1,7 +1,7 @@
-import React, {Fragment, useContext} from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import {Button, Form, Pagination} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -11,7 +11,29 @@ import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 
-const TypeSindicato = ({ success, type_sindicatos, query }) => {
+const TypeSindicato = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [type_sindicatos, setType_sindicatos] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`type_sindicato?page=${query.page}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setType_sindicatos(res.data.type_sindicatos);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     const app_context = useContext(AppContext);
 
@@ -166,18 +188,6 @@ const TypeSindicato = ({ success, type_sindicatos, query }) => {
             </BtnFloat>
         </Form>
     )
-}
-
-// server rendering
-TypeSindicato.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query } = ctx;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    let { success, type_sindicatos } = await unujobs.get(`type_sindicato?page=${query.page}`, {}, ctx)
-        .then(res =>  res.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { query, success, type_sindicatos: type_sindicatos || {} };
 }
 
 // export 

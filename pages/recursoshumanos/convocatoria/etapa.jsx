@@ -10,15 +10,7 @@ import Show from '../../../components/show';
 
 export default class EtapaConvocatoria extends Component
 {
-
-    static getInitialProps = async (ctx) => {
-        let { query, pathname } = ctx;
-        let { success, convocatoria } = await findConvocatoria(ctx);
-        let _id = getId(ctx);
-        return { query, pathname, success, convocatoria, _id };
-    }
-
-    state = {
+state = {
         loading: false,
         staff_id: "",
         estado: "CURRICULAR",
@@ -32,6 +24,7 @@ export default class EtapaConvocatoria extends Component
     }
 
     componentDidMount = async () => {
+        if (!AUTHENTICATE()) return;
         let { convocatoria, success } = this.props;
         if (success) {
             this.props.fireEntity({ render: true, disabled: true, entity_id: convocatoria.entity_id });

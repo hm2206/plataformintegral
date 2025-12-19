@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -11,7 +11,14 @@ import BoardSimple from '../../../components/boardSimple';
 import { Fragment } from 'react';
 
 
-const CreateApps = ({ pathname, query }) => {
+const CreateApps = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // estados
     const [form, setForm] = useState({});
@@ -221,14 +228,6 @@ const CreateApps = ({ pathname, query }) => {
             </ContentControl>
         </Fragment>
     )
-}
-
-// server
-CreateApps.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // render
-    return { pathname, query }
 }
 
 // exportar

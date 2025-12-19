@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useRouter } from 'next/router';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Show from '../../components/show';
 import { DropZone } from '../../components/Utils';
@@ -8,6 +9,13 @@ import BoardSimple from '../../components/boardSimple';
 const PdfView = dynamic(() => import('../../components/pdfView'), { ssr: false });
 
 const SignerPDF = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // estados
     const [show_pdf, setShowPdf] = useState(false);
@@ -75,13 +83,6 @@ const SignerPDF = () => {
             </Show>
         </div>
     )
-}
-
-// server
-SignerPDF.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    return { query, pathname }
 }
 
 // exportar

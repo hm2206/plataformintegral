@@ -4,13 +4,20 @@ import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { EntityContext } from '../../../contexts/EntityContext';
 import BoardSimple from '../../../components/boardSimple';
 import { Form, Pagination, Button } from 'semantic-ui-react';
 import { SelectTypeProject } from '../../../components/select/project_tracking';
 
-const IndexProject = ({ pathname, query, success, projects }) => {
+const IndexProject = ({ projects }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -139,22 +146,6 @@ const IndexProject = ({ pathname, query, success, projects }) => {
             <i className="fas fa-plus"></i>
         </BtnFloat>
     </div>)
-}
-
-// server rendering
-IndexProject.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    // obtener queries y pathname
-    let { pathname, query } = ctx;
-    await VERIFY(ctx, "PROJECT_TRACKING", pathname);
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : '';
-    query.type_project_id = typeof query.type_project_id != 'undefined' ? query.type_project_id : '';
-    let { success, projects } = await projectTracking.get(`project?query_search=${query.query_search}&type_project_id=${query.type_project_id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => err.response.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { pathname, query, success, projects: projects || {} };
 }
 
 export default IndexProject;

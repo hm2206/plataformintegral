@@ -1,7 +1,7 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Form, Pagination} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -11,7 +11,29 @@ import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts';
 import BoardSimple from '../../../components/boardSimple';
 
-const TypeDetalle = ({ pathname, query, success, type_detalles }) => {
+const TypeDetalle = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [type_detalles, setType_detalles] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`type_detalle?${query_string}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setType_detalles(res.data.type_detalles);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -163,22 +185,5 @@ const TypeDetalle = ({ pathname, query, success, type_detalles }) => {
         </div>
     )
 }
-
-// server rending
-TypeDetalle.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.estado = typeof query.estado != 'undefined' ? query.estado : 1;
-    query.year = typeof query.year != 'undefined' ? query.year : new Date().getFullYear();
-    // request
-    let query_string = `page=${query.page}&estado=${query.estado}&year=${query.year}`;
-    let { success, type_detalles } = await unujobs.get(`type_detalle?${query_string}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err =>  ({ success: false, type_detalles: {} }));
-    // response
-    return { pathname, query, success, type_detalles };
-}
-
 
 export default TypeDetalle;

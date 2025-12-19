@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+import { useRouter } from 'next/router';
+import React, { useState, useContext, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import { Form, Button, Checkbox } from 'semantic-ui-react'
@@ -10,7 +11,14 @@ import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts';
 
 
-const CreateTypeDescuento = ({ pathname, query }) => {
+const CreateTypeDescuento = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -131,14 +139,6 @@ const CreateTypeDescuento = ({ pathname, query }) => {
             </ContentControl>
         </>
     )
-}
-
-// server rendering
-CreateTypeDescuento.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // response
-    return { pathname, query }
 }
 
 export default CreateTypeDescuento;

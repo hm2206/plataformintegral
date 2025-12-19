@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Pagination } from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -11,7 +11,29 @@ import Swal from 'sweetalert2';
 import { AppContext } from '../../../contexts/AppContext';
 import BoardSimple from '../../../components/boardSimple';
 
-const Afp = ({ pathname, query, success, afps }) => {
+const Afp = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [afps, setAfps] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`afp?page=${query.page}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setAfps(res.data.afps);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     const app_context = useContext(AppContext);
 
@@ -187,19 +209,6 @@ const Afp = ({ pathname, query, success, afps }) => {
         </div>
     )
 }
-
-// server rendering
-Afp.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    // get Afp
-    let { success, afps } = await unujobs.get(`afp?page=${query.page}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, afps: {} }))
-    return { pathname, query, success, afps: afps };
-}
-
 
 // export
 export default Afp;

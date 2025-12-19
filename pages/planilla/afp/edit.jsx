@@ -11,10 +11,32 @@ import { SelectTypeDescuento } from '../../../components/select/cronograma';
 import BoardSimple from '../../../components/boardSimple';
 import ContentControl from '../../../components/contentControl';
 import atob from 'atob';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import NotFoundData from '../../../components/notFoundData';
 
-const EditAfp = ({ pathname, query, success, afp }) => {
+const EditAfp = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [afp, setAfp] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`afp/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setAfp(res.data.afp);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // verificar datos
     if (!success) return <NotFoundData/>
@@ -285,20 +307,6 @@ const EditAfp = ({ pathname, query, success, afp }) => {
             </Show>
         </>
     )
-}
-
-// precargador server
-EditAfp.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // get id
-    let id = atob(query.id || "") || "_error";
-    // request
-    let { success, afp } = await unujobs.get(`afp/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, afp: {} }));
-    // responser
-    return { pathname, query, success, afp }; 
 }
 
 // exportar

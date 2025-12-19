@@ -1,13 +1,15 @@
-import React, { useContext } from 'react';
+import React, { useEffect } from 'react';
 import { AUTHENTICATE } from '../services/auth';
 import { Body } from '../components/Utils';
 import CardProfile from '../components/cardProfile';
-import CardToken from '../components/cardToken';
 import CardChangePassword from '../components/cardChangePassword';
 
 const Index = () => {
 
-    // renderizar
+    useEffect(() => {
+        AUTHENTICATE();
+    }, []);
+
     return (
         <div className="col-md-12">
             <Body>
@@ -20,7 +22,6 @@ const Index = () => {
 
                     <div className="col-md-5">
                         <CardChangePassword/>
-                        {/* <CardToken/> */}
                     </div>
                 </div>
             </Body>
@@ -28,12 +29,4 @@ const Index = () => {
     )
 }
 
-// server 
-Index.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    return { query, pathname }
-}
-
-// exportar
 export default Index;

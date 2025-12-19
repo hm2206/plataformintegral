@@ -261,19 +261,5 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     )
 }
 
-// server
-InboxIndex.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    VERIFY(ctx, system_store.TRAMITE_DOCUMENTARIO, pathname);
-    query.dependencia_id = typeof query.dependencia_id != 'undefined' ? query.dependencia_id : "";
-    // request tracking
-    let { success, role, boss } = await tramite.get(`auth/role`, { headers: { DependenciaId: query.dependencia_id } }, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, status: 501, role: {}, boss: {} }));
-    // response
-    return { pathname, query, success, role, boss };
-}
-
 // exportar
 export default InboxIndex;

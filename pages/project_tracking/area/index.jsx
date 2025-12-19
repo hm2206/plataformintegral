@@ -1,14 +1,21 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Body, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { system_store } from '../../../services/verify.json';
 import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 
-const IndexArea = ({ success, areas }) => {
+const IndexArea = ({ areas }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -57,19 +64,6 @@ const IndexArea = ({ success, areas }) => {
             <i className="fas fa-plus"></i>
         </BtnFloat>
     </div>)
-}
-
-// server rendering
-IndexArea.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    await VERIFY(ctx, system_store.PROJECT_TRACKING);
-    // request
-    let { success, areas } = await projectTracking.get(`area`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => err.response.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { success, areas: areas || {} };
 }
 
 export default IndexArea;

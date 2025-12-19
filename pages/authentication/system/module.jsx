@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button, List } from 'semantic-ui-react'
 import { authentication, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -12,7 +12,29 @@ import BoardSimple from '../../../components/boardSimple';
 import UpdateModule from '../../../components/authentication/updateModule';
 
 
-const SystemModule = ({ pathname, query, success, system }) => {
+const SystemModule = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [system, setSystem] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await authentication.get(`system/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setSystem(res.data.system);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // estados
     const [form, setForm] = useState({});
@@ -202,17 +224,5 @@ const SystemModule = ({ pathname, query, success, system }) => {
     )
 }
     
-// server
-SystemModule.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx
-    let id = atob(query.id) || '__error';
-    let { success, system } = await authentication.get(`system/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, system: {} }))
-    // response
-    return { pathname, query, success, system };
-}
-
 // exportar
 export default SystemModule;

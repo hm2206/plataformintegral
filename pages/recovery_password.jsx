@@ -204,12 +204,5 @@ const RecoveryPassword = ({ pathname, query }) => {
     )
 }
 
-// server
-RecoveryPassword.getInitialProps = (ctx) => {
-    GUEST(ctx);
-    let { query, pathname } = ctx;
-    return { query, pathname };
-}
-
 // exportar
 export default RecoveryPassword;

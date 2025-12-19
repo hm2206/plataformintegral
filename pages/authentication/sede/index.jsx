@@ -13,20 +13,21 @@ import { getSede } from '../../../services/requests/sede';
 
 export default class Index extends Component
 {
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { pathname, query } = ctx;
-        query.page = query.page || 1;
-        query.query_search = query.query_search || "";
-        let { sede, success } = await getSede(ctx);
-        return { pathname, query, success, sede };
-    }
-
-    state = {
+state = {
         loading: false,
         query_search: ""
     }
+
+    componentDidMount = () => {
+        if (!AUTHENTICATE()) return;
+        this.fetchInitialData();
+    }
+
+    fetchInitialData = async () => {
+        const { query } = this.props;
+        // TODO: Implement fetch logic from AUTHENTICATE
+    }
+
 
     setting = (props) => {
         this.setState({ query_search: props.query.query_search || "" });

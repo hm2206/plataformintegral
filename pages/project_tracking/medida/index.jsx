@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Body, BtnFloat } from '../../../components/Utils';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
 import { system_store } from '../../../services/verify.json';
 import { projectTracking } from '../../../services/apis';
 import Datatable from '../../../components/datatable';
 import { AppContext } from '../../../contexts/AppContext';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 
-const IndexMedida = ({ success, medidas }) => {
+const IndexMedida = ({ medidas }) => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // handle options
     const getOption = async (obj, key, index) => {
@@ -56,18 +63,6 @@ const IndexMedida = ({ success, medidas }) => {
                 <i className="fas fa-plus"></i>
             </BtnFloat>
         </div>)
-}
-
-// server rendering
-IndexMedida.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    await VERIFY(ctx, system_store.PROJECT_TRACKING);
-    let { success, medidas } = await projectTracking.get(`medida`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => err.response.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { success, medidas: medidas || {} };
 }
 
 export default IndexMedida;

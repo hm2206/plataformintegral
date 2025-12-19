@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {Button, Form, Select} from 'semantic-ui-react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import {BtnFloat, Body} from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -12,7 +12,29 @@ import Swal from 'sweetalert2';
 import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts/AppContext';
 
-const IndexTypeTramite = ({ pathname, query, success, tramite_type }) => {
+const IndexTypeTramite = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [tramite_type, setTramite_type] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await tramite.get(`tramite_type?${query_string}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setTramite_type(res.data.tramite_type);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -195,22 +217,6 @@ const IndexTypeTramite = ({ pathname, query, success, tramite_type }) => {
             </BtnFloat>
         </Form>
     )
-}
-
-// server
-IndexTypeTramite.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // filtros
-    query.page = typeof query.page != 'undefined' ? query.page : 1;
-    query.query_search = typeof query.query_search != 'undefined' ? query.query_search : '';
-    query.state = typeof query.state != 'undefined' ? query.state : 1;
-    let query_string = `page=${query.page}&state=${query.state}&query_search=${query.query_search}`;
-    let { success, tramite_type } = await tramite.get(`tramite_type?${query_string}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success, tramite_type: {} }));
-    // response
-    return { pathname, query, success, tramite_type }
 }
 
 // exportar

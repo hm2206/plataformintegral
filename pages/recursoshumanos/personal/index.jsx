@@ -13,20 +13,7 @@ import { Confirm } from '../../../services/utils';
 
 
 export default class StaffIndex extends Component {
-
-    static getInitialProps  = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let date = new Date;
-        let {query, pathname} = ctx;
-        query.year = query.year ? query.year : date.getFullYear();
-        query.mes = query.mes ? query.mes : date.getMonth() + 1;
-        query.page = query.page || 1;
-        query.estado = query.estado ? query.estado : "";
-        let { success, staff } = await getStaff(ctx);
-        return { query, pathname, success, staff }
-    }
-
-    state = {
+state = {
         page: false,
         loading: true,
         block: false,
@@ -36,6 +23,7 @@ export default class StaffIndex extends Component {
     }
 
     componentDidMount = () => {
+        if (!AUTHENTICATE()) return;
         this.props.fireEntity({ render: true });
         this.setting(this.props);
     }

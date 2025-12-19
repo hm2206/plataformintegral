@@ -787,19 +787,4 @@ const InformacionCronograma = ({ pathname, query, success, cronograma }) => {
     </CronogramaProvider>
 }
 
-InformacionCronograma.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    // procesos
-    let id = atob(query.id) || '_error';
-    let { success, cronograma } = await unujobs.get(`cronograma/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({
-        success: false,
-        cronograma: {}
-    }));
-    // response
-    return { query, pathname, cronograma, success };
-}
-
 export default InformacionCronograma;

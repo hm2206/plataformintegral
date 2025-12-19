@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button, Checkbox } from 'semantic-ui-react'
 import { handleErrorRequest, unujobs } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -14,7 +14,29 @@ import atob from 'atob'
 import NotFoundData from '../../../components/notFoundData'
 
 
-const EditTypeRemuneracion = ({ pathname, query, success, type_remuneracion }) => {
+const EditTypeRemuneracion = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [type_remuneracion, setType_remuneracion] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await unujobs.get(`type_remuneracion/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setType_remuneracion(res.data.type_remuneracion);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
     
     // validar data
     if (!success) return <NotFoundData/>
@@ -184,20 +206,6 @@ const EditTypeRemuneracion = ({ pathname, query, success, type_remuneracion }) =
             </Show>
         </>
     )
-}
-
-// server
-EditTypeRemuneracion.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // get id
-    let id = atob(query.id || "") || "_error";
-    // request
-    let { success, type_remuneracion } = await unujobs.get(`type_remuneracion/${id}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, type_remuneracion: {} }));
-    // responser
-    return { pathname, query, success, type_remuneracion };
 }
 
 // exportar

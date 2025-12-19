@@ -1,6 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Datatable from '../../../components/datatable';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Form, Button, Select, Pagination } from 'semantic-ui-react';
@@ -13,7 +13,29 @@ import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts/AppContext';
 
 
-const DependenciaIndex = ({ pathname, query, success, dependencia }) => {
+const DependenciaIndex = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [dependencia, setDependencia] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await authentication.get(`dependencia?${query_string}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setDependencia(res.data.dependencia);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -208,22 +230,6 @@ const DependenciaIndex = ({ pathname, query, success, dependencia }) => {
             </BoardSimple>
         </div>
     )
-}
-
-// server
-DependenciaIndex.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    query.page = typeof query.page == 'undefined' ? 1 : query.page;
-    query.query_search = typeof query.query_search == 'undefined' ? "" : query.query_search; 
-    query.type = typeof query.type == 'undefined' ? '' : query.type;
-    // obtener dependencias
-    let query_string = `page=${query.page}&query_search=${query.query_search}&type=${query.type}`;
-    let { success, dependencia } = await authentication.get(`dependencia?${query_string}`, {}, ctx)
-    .then(res => res.data)
-    .catch(err => ({ success: false, dependencia: {} }));
-    // response
-    return { pathname, query, success, dependencia }
 }
 
 // exportar

@@ -6,14 +6,7 @@ import ReactHtmlParser from 'react-html-parser';
 import Router from 'next/router';
 
 export default class IndexHelp extends Component {
-
-    static getInitialProps = async (ctx) => {
-        await AUTHENTICATE(ctx);
-        let { query, pathname } = ctx;
-        return { query, pathname };
-    }
-
-    render() {
+render() {
         return (
             <div className="col-md-12">
                 <Body>

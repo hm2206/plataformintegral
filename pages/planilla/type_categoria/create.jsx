@@ -1,4 +1,5 @@
-import React, { useContext, useState } from 'react';
+import { useRouter } from 'next/router';
+import React, { useContext, useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { AUTHENTICATE } from '../../../services/auth';
 import { Confirm } from '../../../services/utils' 
@@ -10,7 +11,14 @@ import ContentControl from '../../../components/contentControl';
 import BoardSimple from '../../../components/boardSimple';
 
 
-const CreateTypeCategoria = ({ pathname, query }) => {
+const CreateTypeCategoria = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // app
     const app_context = useContext(AppContext);
@@ -144,14 +152,6 @@ const CreateTypeCategoria = ({ pathname, query }) => {
             </ContentControl>
         </>
     )
-}
-
-// server
-CreateTypeCategoria.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let {pathname, query } = ctx;
-    // responser
-    return { pathname, query };
 }
 
 // exportar

@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 const TabProject = dynamic(() => import('../../../components/project-tracking/TabProject'), { ssr: false });
 import { BtnBack } from '../../../components/Utils';
 import { ProjectProvider } from '../../../contexts/project-tracking/ProjectContext';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { EntityContext } from '../../../contexts/EntityContext';
 import Show from '../../../components/show';
 import NotFoundData from '../../../components/notFoundData';
@@ -13,7 +13,29 @@ import BoardSimple from '../../../components/boardSimple';
 import AddExtension from '../../../components/project-tracking/addExtension';
 
 //  componente principal
-const SlugProject = ({ pathname, query, success, project }) => {
+const SlugProject = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [project, setProject] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await projectTracking.get(`project/${slug}?type=code`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setProject(res.data.project);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     if (!success) return <NotFoundData/>
 
@@ -74,18 +96,6 @@ const SlugProject = ({ pathname, query, success, project }) => {
             </ProjectProvider>
         </div>
     )
-}
-
-// server rendering
-SlugProject.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    let slug = query.slug;
-    let { success, project } = await projectTracking.get(`project/${slug}?type=code`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false, project: {} }));
-    // response
-    return { pathname, query, success, project };
 }
 
 export default SlugProject;

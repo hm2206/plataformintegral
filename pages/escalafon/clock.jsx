@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useContext, useEffect, useState } from 'react';
 import { AUTHENTICATE } from '../../services/auth';
 import BoardSimple from '../../components/boardSimple';
@@ -5,7 +6,14 @@ import { EntityContext } from '../../contexts/EntityContext';
 import CreateClock from '../../components/escalafon/createClock';
 import ListClock from '../../components/escalafon/listClock';
 
-const Clock = ({ pathname, query }) => {
+const Clock = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // entity
     const { fireEntity, entity_id } = useContext(EntityContext);
@@ -53,14 +61,6 @@ const Clock = ({ pathname, query }) => {
         </div>
     );
 }
-
-// server
-Clock.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    return { query, pathname }
-}
-
 
 // exportar
 export default Clock;

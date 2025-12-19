@@ -343,18 +343,6 @@ const  CoinTypeCategoria = ({ success, query, pathname, type_categoria }) => {
     )
 }
 
-// server rendering
-CoinTypeCategoria.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { query, pathname } = ctx;
-    // request 
-    let id = atob(query.id) || '__error';
-    let { success, type_categoria } = await unujobs.get(`type_categoria/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false }));
-    return { query, pathname, success, type_categoria }
-}
-
 // exportar
 export default CoinTypeCategoria;
 

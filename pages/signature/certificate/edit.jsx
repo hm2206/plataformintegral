@@ -4,7 +4,7 @@ import { AUTHENTICATE } from '../../../services/auth';
 import { handleErrorRequest, signature } from '../../../services/apis';
 import { AppContext } from '../../../contexts/AppContext';
 import { backUrl, Confirm } from '../../../services/utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Button, Form } from 'semantic-ui-react';
 import Show from '../../../components/show';
 import Swal from 'sweetalert2';
@@ -13,7 +13,29 @@ import atob from 'atob';
 import moment from 'moment';
 import { EntityContext } from '../../../contexts/EntityContext';
 
-const CreateCertificate = ({ pathname, query, certificate, success }) => {
+const CreateCertificate = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+    const [loading, setLoading] = useState(true);
+    const [success, setSuccess] = useState(false);
+    const [certificate, setCertificate] = useState({});
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, []);
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        await signature.get(`certificate/${id}`)
+            .then(res => {
+                setSuccess(res.data.success);
+                setCertificate(res.data.certificate);
+            })
+            .catch(err => console.error(err));
+        setLoading(false);
+    };
+
 
     // app
     const app_context = useContext(AppContext);
@@ -241,15 +263,4 @@ const CreateCertificate = ({ pathname, query, certificate, success }) => {
 }
 
 // rendering server
-CreateCertificate.getInitialProps = async (ctx) => {
-    await AUTHENTICATE(ctx);
-    let { pathname, query } = ctx; 
-    let id = atob(query.id) || '__error';
-    let { success, certificate } = await signature.get(`certificate/${id}`, {}, ctx)
-        .then(res => res.data)
-        .catch(err => ({ success: false }));
-    // response
-    return { pathname, query, success, certificate };
-}
-
 export default CreateCertificate;

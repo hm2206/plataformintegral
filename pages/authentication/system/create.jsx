@@ -1,6 +1,6 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { Body, BtnBack, InputFile } from '../../../components/Utils';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Form, Button, Select } from 'semantic-ui-react'
 import { authentication, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
@@ -11,7 +11,14 @@ import ContentControl from '../../../components/contentControl';
 import { Confirm } from '../../../services/utils';
 
 
-const CreateSystem = ({ pathname, query }) => {
+const CreateSystem = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+    }, []);
+
 
     // estados
     const [form, setForm] = useState({});
@@ -253,14 +260,6 @@ const CreateSystem = ({ pathname, query }) => {
             </ContentControl>
         </Fragment>
     )
-}
-
-// server
-CreateSystem.getInitialProps = async (ctx) => {
-    AUTHENTICATE(ctx);
-    let { pathname, query } = ctx;
-    // render
-    return { pathname, query }
 }
 
 // exportar
