@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Select } from 'semantic-ui-react';
-import uid from 'uid';
+import uid from '../../utils/uid';
 import Skeleton from 'react-loading-skeleton';
 
 /**

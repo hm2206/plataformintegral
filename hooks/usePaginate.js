@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import urlJoin from 'url-join'
-import uid from 'uid'
+import uid from '../utils/uid'
 
 const usePaginate = ({ api = {}, url = "", queryString = "", config = {}, execute = true }, callback = null) => {
 

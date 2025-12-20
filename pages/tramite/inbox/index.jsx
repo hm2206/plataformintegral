@@ -31,10 +31,11 @@ const reducer = (state, { type, payload }) => {
     }
 };
 
-const InboxContent = ({ pathname, query }) => {
+const InboxContent = () => {
 
     // router
     const router = useRouter();
+    const { pathname, query } = router;
 
     // auth
     const { auth } = useContext(AuthContext);
@@ -194,13 +195,17 @@ const InboxContent = ({ pathname, query }) => {
 }
 
 
-const InboxIndex = ({ pathname, query, success, role, boss }) => {
+const InboxIndex = ({ success, role, boss }) => {
+
+    // router
+    const router = useRouter();
+    const { pathname, query } = router;
 
     // entity
     const entity_context = useContext(EntityContext);
 
     // props
-    const isRole = Object.keys(role).length;
+    const isRole = role ? Object.keys(role).length : 0;
 
     // roles
     const getRole = () => {
@@ -232,9 +237,9 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
     // render
     return (
         <TramiteSocketProvider>
-            <TramiteProvider 
-                dependencia_id={query.dependencia_id || ""}
-                role={role} 
+            <TramiteProvider
+                dependencia_id={query?.dependencia_id || ""}
+                role={role}
                 boss={boss}
             >
                 <div className="col-12">
@@ -250,10 +255,7 @@ const InboxIndex = ({ pathname, query, success, role, boss }) => {
                         }
                         info={['Bandeja de entrada del trámite documentario']}
                     >
-                        <InboxContent 
-                            pathname={pathname}
-                            query={query}
-                        />
+                        <InboxContent />
                     </BoardSimple>
                 </div>
             </TramiteProvider>

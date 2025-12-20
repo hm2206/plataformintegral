@@ -1,25 +1,132 @@
 import React from 'react';
 import AppIconCube from './appIconCube';
 
+const VerificarAuthentication = ({ my_app = {} }) => {
 
-const VerificarAuthentication = () => {
+    const styles = {
+        container: {
+            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+            minHeight: '100vh',
+            width: '100%',
+            zIndex: 6000,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontFamily: "'Roboto', sans-serif",
+        },
+        content: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            padding: '40px',
+            maxWidth: '400px',
+        },
+        title: {
+            fontSize: '24px',
+            fontWeight: '600',
+            color: '#1a202c',
+            margin: '32px 0 12px 0',
+            animation: 'fadeIn 0.6s ease-out',
+        },
+        subtitle: {
+            fontSize: '15px',
+            color: '#718096',
+            lineHeight: '1.6',
+            margin: 0,
+            animation: 'fadeIn 0.6s ease-out 0.2s backwards',
+        },
+        progressContainer: {
+            marginTop: '32px',
+            width: '200px',
+            animation: 'fadeIn 0.6s ease-out 0.4s backwards',
+        },
+        progressBar: {
+            width: '100%',
+            height: '4px',
+            background: '#e2e8f0',
+            borderRadius: '4px',
+            overflow: 'hidden',
+        },
+        progressFill: {
+            width: '30%',
+            height: '100%',
+            background: 'linear-gradient(90deg, #346cb0 0%, #5a8fd8 100%)',
+            borderRadius: '4px',
+            animation: 'progress 1.5s ease-in-out infinite',
+        },
+        appName: {
+            marginTop: '24px',
+            fontSize: '13px',
+            color: '#a0aec0',
+            fontWeight: '500',
+            letterSpacing: '0.5px',
+            animation: 'fadeIn 0.6s ease-out 0.6s backwards',
+        },
+    };
+
+    const keyframes = `
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes progress {
+            0% {
+                width: 0%;
+                margin-left: 0%;
+            }
+            50% {
+                width: 60%;
+                margin-left: 20%;
+            }
+            100% {
+                width: 0%;
+                margin-left: 100%;
+            }
+        }
+    `;
+
     return (
-        <div style={{ background: '#f5f7fa', minHeight: '100vh', width: "100%", zIndex: "6000", fontFamily: 'ProximaNova, sans-serif', position: 'fixed', top: '0px', left: '0px' }} className="text-center">
-            <div style={{ display: 'flex', width: '100%', height: '100vh', justifyContent: 'center', alignItems: 'center', alignContent: 'center', flexDirection: 'column' }}>
-                
-                <AppIconCube/>
-                
-                <h1 style={{ fontWeight: '400', fontSize: '2.3rem', width: "100%" }} className="mt-2">Verificando Autenticación</h1>
-                
-                <div style={{ maxWidth: '700px', marginBottom: '20px', marginTop: '20px', color: '#545454', fontSize: '1.7em', fontFamily: 'ProximaNova, sans-serif', lineHeight: '1.3125' }}>
-                    Espere porfavor mientras verificamos la autenticación
-                    <div className="row justify-content-center mt-3">
-                        <div className="ccff_preloader"></div>
+        <>
+            <style>{keyframes}</style>
+            <div style={styles.container}>
+                <div style={styles.content}>
+                    <AppIconCube size={90} animated={true} />
+
+                    <h1 style={styles.title}>
+                        Verificando Acceso
+                    </h1>
+
+                    <p style={styles.subtitle}>
+                        Estamos validando tus credenciales.
+                        <br />
+                        Esto solo tomara un momento.
+                    </p>
+
+                    <div style={styles.progressContainer}>
+                        <div style={styles.progressBar}>
+                            <div style={styles.progressFill}></div>
+                        </div>
                     </div>
+
+                    {my_app?.name && (
+                        <p style={styles.appName}>
+                            {my_app.name}
+                        </p>
+                    )}
                 </div>
             </div>
-        </div>
-    )
+        </>
+    );
 }
 
 export default VerificarAuthentication;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
-import uid from 'uid';
+import uid from '../../utils/uid';
 
 /**
  * setting format for select

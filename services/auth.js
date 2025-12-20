@@ -13,7 +13,7 @@ export const AUTHENTICATE = () => {
     if (typeof window === 'undefined') return false;
     const token = AUTH();
     if (token) return true;
-    Router.replace("/login");
+    location.href = "/login";
     return false;
 };
 
@@ -22,7 +22,7 @@ export const GUEST = () => {
     if (typeof window === 'undefined') return false;
     const token = AUTH();
     if (!token) return true;
-    Router.replace("/");
+    location.href = "/";
     return false;
 };
 
@@ -41,11 +41,11 @@ export const LOGOUT = () => {
 // Verificar permisos - solo cliente
 export const VERIFY = async (systemSlug, name = "", type = "MODULE") => {
     if (typeof window === 'undefined') return false;
-    const pathname = name || Router.pathname;
+    const pathname = name || location.pathname;
     let { allow } = await authentication.get(`auth/permission/${systemSlug}/${type}?name=${pathname}`)
         .then(res => res.data)
         .catch(err => ({ success: false, status: err.status || 501, allow: false }));
     if (allow) return true;
-    Router.replace(`/401`);
+    location.href = '/401';
     return false;
 }

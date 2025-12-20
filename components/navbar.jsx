@@ -167,11 +167,9 @@ const Navbar = () => {
 									Perfil
 								</a>{" "}
 
-								<Link href="/docs">
-									<a className="dropdown-item">
-										<span className="fas fa-info-circle"></span>{" "}
-										Ayuda
-									</a>
+								<Link href="/docs" className="dropdown-item">
+									<span className="fas fa-info-circle"></span>{" "}
+									Ayuda
 								</Link>
 
 									<a href="#logout"

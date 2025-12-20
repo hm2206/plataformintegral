@@ -195,8 +195,8 @@ const RecoveryPassword = ({ pathname, query }) => {
                 </Show>
                 <br/>
                 <div class="d-block d-md-inline-block">
-                    <Link href="/login">
-                        <a class="btn btn-block btn-light">Regresar a iniciar sesión</a>
+                    <Link href="/login" className="btn btn-block btn-light">
+                        Regresar a iniciar sesión
                     </Link>
                 </div>
             </div>

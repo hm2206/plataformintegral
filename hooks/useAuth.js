@@ -39,7 +39,7 @@ const useAuth = () => {
             .catch(err => ({ success: false, message: "No se pudó cerrar sesión" }));
         if (success) {
             removeToken();
-            Router.push(redirect);
+            location.href = redirect;
         }
         return { success, message };
     }

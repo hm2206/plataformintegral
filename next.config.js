@@ -1,4 +1,3 @@
-const withSass = require('@zeit/next-sass');
-const withCSS = require('@zeit/next-css');
-
-module.exports = withCSS(withSass());
+module.exports = {
+  // Next.js 9.3+ tiene soporte nativo para CSS y Sass
+};

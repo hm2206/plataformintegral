@@ -13,7 +13,7 @@ import { onProgress } from '../../services/apis';
 import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import { EntityContext } from '../../contexts/EntityContext';
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
-import uid from 'uid';
+import uid from '../../utils/uid';
 import { useMemo } from 'react';
 
 

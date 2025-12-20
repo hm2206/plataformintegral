@@ -1,4 +1,4 @@
-import uid from 'uid';
+import uid from '../../utils/uid';
 
 // tipo de action
 export const groupTypes = {

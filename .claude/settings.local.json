@@ -3,7 +3,23 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(grep:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(for file in \"D:/frontend/tramite-client/components/\"*.jsx)",
+      "Bash(do mv \"$file\" \"$file%.jsx.tsx\")",
+      "Bash(done)",
+      "Bash(for file in \"D:/frontend/tramite-client/components/selects/\"*.jsx)",
+      "Bash(for file in \"D:/frontend/tramite-client/pages/\"*.jsx)",
+      "Bash(npm run build:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout 10 node:*)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(ls:*)",
+      "Bash(npm ls:*)",
+      "Bash(timeout 8 node:*)",
+      "Bash(timeout 15 npm run dev:*)"
     ]
   }
 }

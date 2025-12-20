@@ -16,7 +16,7 @@ import ListDiscount from '../../components/escalafon/discount/listDiscount'
 import ConfigDiscountProvider from '../../providers/escalafon/ConfigDiscountProvider';
 import CreateConfigDiscount from '../../components/escalafon/config_discounts/createConfigDiscount'
 import moment from 'moment';
-import uid from 'uid';
+import uid from '../../utils/uid';
 
 const configDiscountProvider = new ConfigDiscountProvider
 

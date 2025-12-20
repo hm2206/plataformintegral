@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic';
 import { ScreenProvider } from '../contexts/ScreenContext';
 import { AuthProvider } from '../contexts/AuthContext';
 import Router, { useRouter } from 'next/router';
@@ -19,30 +20,32 @@ import { AppProvider } from '../contexts';
 import Cookies from 'js-cookie';
 
 
-// config router
-Router.onRouteChangeStart = () => {
-	let loadingBrand = document.getElementById('loading-brand');
-	if (loadingBrand) loadingBrand.style.display = 'block';
+// config router - solo en cliente
+if (typeof window !== 'undefined') {
+	Router.events.on('routeChangeStart', () => {
+		let loadingBrand = document.getElementById('loading-brand');
+		if (loadingBrand) loadingBrand.style.display = 'block';
+	});
+
+	Router.events.on('routeChangeComplete', () => {
+		let loadingBrand = document.getElementById('loading-brand');
+		if (loadingBrand) loadingBrand.style.display = 'none';
+	});
+
+	Router.events.on('routeChangeError', () => {
+		let loadingBrand = document.getElementById('loading-brand');
+		if (loadingBrand) loadingBrand.style.display = 'none';
+	});
 }
 
-// state pages
-Router.onRouteChangeComplete = () => {
-	let loadingBrand = document.getElementById('loading-brand');
-	if (loadingBrand) loadingBrand.style.display = 'none';
-}
 
-Router.onRouteChangeError = () => {
-	let loadingBrand = document.getElementById('loading-brand');
-	if (loadingBrand) loadingBrand.style.display = 'none';
-}
-
-
-// app main
+// app main - solo cliente
 const IntegrationApp = ({ Component, pageProps }) => {
 	const router = useRouter();
 	const { pathname, query } = router;
 
-	// estados
+	// estado para saber si estamos en el cliente
+	const [isClient, setIsClient] = useState(false);
 	const [app, setApp] = useState({});
 	const [success, setSuccess] = useState(false);
 	const [loading, setLoading] = useState(true);
@@ -57,7 +60,7 @@ const IntegrationApp = ({ Component, pageProps }) => {
 		let stored_token = localStorage.getItem('auth_token');
 		if (!is_auth_token && stored_token) {
 			Cookies.set('auth_token', stored_token);
-			Router.push('/');
+			location.href = '/';
 		}
 	}
 
@@ -80,19 +83,77 @@ const IntegrationApp = ({ Component, pageProps }) => {
 		setLoading(false);
 	}
 
-	// obtener token y app al montar
+	// detectar cliente y cargar datos
 	useEffect(() => {
+		setIsClient(true);
 		recoveryToken();
 		fetchApp();
 	}, []);
 
-	// loading
-	if (loading) {
-		return (
-			<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-				<div>Cargando...</div>
+	// Loader component reutilizable
+	const AppLoader = () => (
+		<>
+			<style>{`
+				@keyframes appSpin {
+					to { transform: rotate(360deg); }
+				}
+				@keyframes appFade {
+					0%, 100% { opacity: 0.4; }
+					50% { opacity: 1; }
+				}
+			`}</style>
+			<div style={{
+				display: 'flex',
+				flexDirection: 'column',
+				justifyContent: 'center',
+				alignItems: 'center',
+				height: '100vh',
+				background: 'linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%)',
+				fontFamily: "'Roboto', sans-serif",
+			}}>
+				<div style={{
+					position: 'relative',
+					width: '56px',
+					height: '56px',
+					marginBottom: '24px'
+				}}>
+					<div style={{
+						position: 'absolute',
+						width: '100%',
+						height: '100%',
+						border: '3px solid #e2e8f0',
+						borderTopColor: '#346cb0',
+						borderRadius: '50%',
+						animation: 'appSpin 0.8s linear infinite'
+					}} />
+					<div style={{
+						position: 'absolute',
+						width: '65%',
+						height: '65%',
+						top: '17.5%',
+						left: '17.5%',
+						border: '3px solid #e2e8f0',
+						borderBottomColor: '#5a8fd8',
+						borderRadius: '50%',
+						animation: 'appSpin 1.2s linear infinite reverse'
+					}} />
+				</div>
+				<p style={{
+					margin: 0,
+					fontSize: '15px',
+					color: '#64748b',
+					fontWeight: '500',
+					animation: 'appFade 1.5s ease-in-out infinite'
+				}}>
+					Cargando...
+				</p>
 			</div>
-		);
+		</>
+	);
+
+	// Mostrar loader mientras no esté en cliente o esté cargando
+	if (!isClient || loading) {
+		return <AppLoader />;
 	}
 
 	// render

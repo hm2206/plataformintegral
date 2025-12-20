@@ -1,12 +1,15 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import uid from 'uid';
+import dynamic from 'next/dynamic';
+import uid from '../utils/uid';
 import Show from '../components/show';
-import NotCurrent from '../components/notCurrent';
-import AppHeader from '../components/appHeader';
-import NotInternet from '../components/notInternet';
-import Maintenance from '../components/maintenance';
-import LoadingGlobal from '../components/loadingGlobal';
 import { ScreenContext } from './ScreenContext';
+
+// Dynamic imports para evitar dependencia circular
+const NotCurrent = dynamic(() => import('../components/notCurrent'), { ssr: false });
+const AppHeader = dynamic(() => import('../components/appHeader'), { ssr: false });
+const NotInternet = dynamic(() => import('../components/notInternet'), { ssr: false });
+const Maintenance = dynamic(() => import('../components/maintenance'), { ssr: false });
+const LoadingGlobal = dynamic(() => import('../components/loadingGlobal'), { ssr: false });
 
 // definiendo context
 export const AppContext = createContext();
@@ -91,10 +94,7 @@ export const AppProvider = ({ children, success, app, pathname, query }) => {
             <Show condicion={success}
                 predeterminado={<Maintenance/>}
             >
-                <Show condicion={current_loading}>
-                    <LoadingGlobal/>
-                </Show>
-                {/* loading de la ruta*/}
+                {/* loading de cambio de ruta */}
                 <LoadingGlobal display="none" id="loading-brand"/>
                 {/* components */}
                 <Show condicion={current_app}
