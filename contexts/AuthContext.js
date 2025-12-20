@@ -20,6 +20,41 @@ const defaultAuthValue = {
 
 export const AuthContext = createContext(defaultAuthValue);
 
+// Loader de pantalla completa - definido fuera del componente
+const AuthLoader = () => (
+    <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        flexDirection: 'column',
+        gap: '20px',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%)'
+    }}>
+        <style>{`
+            @keyframes authSpin {
+                to { transform: rotate(360deg); }
+            }
+        `}</style>
+        <div style={{
+            width: '50px',
+            height: '50px',
+            border: '3px solid #e2e8f0',
+            borderTopColor: '#346cb0',
+            borderRadius: '50%',
+            animation: 'authSpin 0.8s linear infinite'
+        }} />
+        <p style={{
+            margin: 0,
+            fontSize: '14px',
+            color: '#718096',
+            fontWeight: '500',
+        }}>
+            Verificando sesión...
+        </p>
+    </div>
+);
+
 
 export const AuthProvider = ({ children }) => {
 
@@ -54,60 +89,9 @@ export const AuthProvider = ({ children }) => {
         }
     }, [is_logged]);
 
-    // Loader de pantalla completa mientras verifica auth
-    const FullScreenLoader = () => (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '100vh',
-            flexDirection: 'column',
-            gap: '20px',
-            background: 'linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%)'
-        }}>
-            <style>{`
-                @keyframes authSpin {
-                    to { transform: rotate(360deg); }
-                }
-                @keyframes authPulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                }
-            `}</style>
-            <div style={{
-                position: 'relative',
-                width: '50px',
-                height: '50px',
-            }}>
-                <div style={{
-                    position: 'absolute',
-                    width: '100%',
-                    height: '100%',
-                    border: '3px solid #e2e8f0',
-                    borderTopColor: '#346cb0',
-                    borderRadius: '50%',
-                    animation: 'authSpin 0.8s linear infinite'
-                }} />
-            </div>
-            <p style={{
-                margin: 0,
-                fontSize: '14px',
-                color: '#718096',
-                fontWeight: '500',
-                animation: 'authPulse 1.5s ease-in-out infinite'
-            }}>
-                Verificando sesión...
-            </p>
-        </div>
-    );
-
     // Si está cargando o no está logueado, mostrar loader
-    if (loading || !is_logged) {
-        return (
-            <AuthContext.Provider value={{ logout, is_logged, auth, setAuth, loading, token }}>
-                <FullScreenLoader />
-            </AuthContext.Provider>
-        );
+    if (loading || is_logged !== true) {
+        return <AuthLoader />;
     }
 
     // response - solo se muestra cuando está autenticado
