@@ -6,7 +6,7 @@ import Router from 'next/router';
 const useAuth = () => {
 
     // estados
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [is_logged, setIsLogged] = useState(undefined);
 
     // remover tokens

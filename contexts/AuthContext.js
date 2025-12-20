@@ -3,7 +3,6 @@ import useAuth from '../hooks/useAuth';
 import Navbar from '../components/navbar';
 import Sidebar from '../components/sidebar';
 import { Content } from '../components/Utils';
-import Show from '../components/show';
 import { EntityProvider } from '../contexts/EntityContext';
 import { SocketProvider } from '../contexts/SocketContext';
 import { NotificationProvider } from '../contexts/notification/NotificationContext';
@@ -55,30 +54,30 @@ export const AuthProvider = ({ children }) => {
         }
     }, [is_logged]);
 
-    // Loading del dashboard - elegante
-    const DashboardLoader = () => (
-        <div className="col-12" style={{
+    // Loader de pantalla completa mientras verifica auth
+    const FullScreenLoader = () => (
+        <div style={{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            minHeight: 'calc(100vh - 200px)',
+            minHeight: '100vh',
             flexDirection: 'column',
             gap: '20px',
-            background: 'transparent'
+            background: 'linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%)'
         }}>
             <style>{`
-                @keyframes dashSpin {
+                @keyframes authSpin {
                     to { transform: rotate(360deg); }
                 }
-                @keyframes dashPulse {
-                    0%, 100% { opacity: 1; transform: scale(1); }
-                    50% { opacity: 0.7; transform: scale(0.95); }
+                @keyframes authPulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.5; }
                 }
             `}</style>
             <div style={{
                 position: 'relative',
-                width: '60px',
-                height: '60px',
+                width: '50px',
+                height: '50px',
             }}>
                 <div style={{
                     position: 'absolute',
@@ -87,18 +86,7 @@ export const AuthProvider = ({ children }) => {
                     border: '3px solid #e2e8f0',
                     borderTopColor: '#346cb0',
                     borderRadius: '50%',
-                    animation: 'dashSpin 0.8s linear infinite'
-                }} />
-                <div style={{
-                    position: 'absolute',
-                    width: '70%',
-                    height: '70%',
-                    top: '15%',
-                    left: '15%',
-                    border: '3px solid #e2e8f0',
-                    borderBottomColor: '#5a8fd8',
-                    borderRadius: '50%',
-                    animation: 'dashSpin 1.2s linear infinite reverse'
+                    animation: 'authSpin 0.8s linear infinite'
                 }} />
             </div>
             <p style={{
@@ -106,14 +94,23 @@ export const AuthProvider = ({ children }) => {
                 fontSize: '14px',
                 color: '#718096',
                 fontWeight: '500',
-                animation: 'dashPulse 1.5s ease-in-out infinite'
+                animation: 'authPulse 1.5s ease-in-out infinite'
             }}>
-                Cargando...
+                Verificando sesión...
             </p>
         </div>
     );
 
-    // response
+    // Si está cargando o no está logueado, mostrar loader
+    if (loading || !is_logged) {
+        return (
+            <AuthContext.Provider value={{ logout, is_logged, auth, setAuth, loading, token }}>
+                <FullScreenLoader />
+            </AuthContext.Provider>
+        );
+    }
+
+    // response - solo se muestra cuando está autenticado
     return (
         <AuthContext.Provider value={{ logout, is_logged, auth, setAuth, loading, token }}>
             <EntityProvider>
@@ -127,11 +124,7 @@ export const AuthProvider = ({ children }) => {
                                 <Sidebar/>
                                 {/* pages auth */}
                                 <Content>
-                                    <Show condicion={!loading && is_logged}
-                                        predeterminado={<DashboardLoader />}
-                                    >
-                                        {children}
-                                    </Show>
+                                    {children}
                                 </Content>
                             </div>
                         </div>
