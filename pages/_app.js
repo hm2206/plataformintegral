@@ -8,8 +8,6 @@ import { authentication } from '../services/apis';
 import moment from 'moment';
 moment.locale('es');
 
-// component utils
-import Show from '../components/show';
 
 // css
 import '../styles/tailwind.css';
@@ -168,16 +166,14 @@ const IntegrationApp = ({ Component, pageProps }) => {
 	return (
 		<ScreenProvider>
 			<AppProvider {...appProps}>
-				{/* auth */}
-				<Show condicion={auth_token}>
+				{/* auth - solo renderizar AuthProvider si hay token */}
+				{auth_token ? (
 					<AuthProvider>
 						<Component {...pageProps}/>
 					</AuthProvider>
-				</Show>
-				{/* Guest */}
-				<Show condicion={!auth_token}>
+				) : (
 					<Component {...pageProps}/>
-				</Show>
+				)}
 			</AppProvider>
 		</ScreenProvider>
 	)

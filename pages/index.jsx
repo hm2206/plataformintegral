@@ -1,14 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { AUTHENTICATE } from '../services/auth';
 import { Body } from '../components/Utils';
 import CardProfile from '../components/cardProfile';
 import CardChangePassword from '../components/cardChangePassword';
+import { AuthContext } from '../contexts/AuthContext';
 
 const Index = () => {
+    const { is_logged, loading } = useContext(AuthContext);
 
     useEffect(() => {
         AUTHENTICATE();
     }, []);
+
+    // No mostrar nada mientras carga o no está autenticado
+    if (loading || !is_logged) {
+        return null;
+    }
 
     return (
         <div className="col-md-12">
