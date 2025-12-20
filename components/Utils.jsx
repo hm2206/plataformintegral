@@ -187,7 +187,7 @@ const DropZone = ({
 
 
 const Content = ({ children }) => {
-  
+
   // screen
   const { fullscreen } = useContext(ScreenContext)
 
@@ -196,7 +196,7 @@ const Content = ({ children }) => {
     <Fragment>
       <div className={fullscreen ? 'app-main-extend' : 'app-main'}>
         <div className="wrapper">
-          <div className="page mb-5">
+          <div className="page">
             <div className={`page-inner- row`}>{children}</div>
           </div>
         </div>
@@ -208,7 +208,7 @@ const Content = ({ children }) => {
 const Body = props => (
   <Fragment>
     {/* <div className="page-header page-header-light"></div> */}
-    <div className="content mt-4 ml-3 mr-3">{props.children}</div>
+    <div className="content mt-3 ml-3 mr-3">{props.children}</div>
   </Fragment>
 );
 

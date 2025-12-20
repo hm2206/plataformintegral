@@ -1,13 +1,14 @@
 import React, { useContext, useMemo } from 'react';
 import { TramiteContext } from '../../contexts/tramite/TramiteContext';
 import Show from '../show';
-import { Button } from 'semantic-ui-react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { tramiteTypes } from '../../contexts/tramite/TramiteReducer';
 import { Confirm } from '../../services/utils';
 import { tramite } from '../../services/apis';
 import Swal from 'sweetalert2';
 import { AppContext } from '../../contexts';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null, onBackRecibido = null }) => {
 
@@ -24,17 +25,17 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null, on
     const isTramite = Object.keys(current_tramite).length;
 
     const options = {
-        headers: { 
+        headers: {
             DependenciaId: current_tracking.dependencia_id
         }
-    }
+    };
 
     // next action
     const handleNext = (act) => {
         setOption(["NEXT"]);
         if (typeof onAction == 'function') onAction(act);
-    }
-    
+    };
+
     const handleAnularProcess = async () => {
         let answer = await Confirm('warning', '¿Estas seguro en anular el proceso del trámite?', 'Anular Proceso');
         if (!answer) return;
@@ -49,7 +50,7 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null, on
             app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'error', text: 'No se pudó anular el proceso del trámite' });
         });
-    }
+    };
 
     const handleBackRecibido = async () => {
         let answer = await Confirm('warning', '¿Estas seguro en regresar el trámite a recibido?', 'Regresar');
@@ -65,10 +66,10 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null, on
             app_context.setCurrentLoading(false);
             Swal.fire({ icon: 'error', text: 'No se pudó regresar el trámite' });
         });
-    }
+    };
 
     const canEdit = useMemo(() => {
-        let allower = current_tracking.current 
+        let allower = current_tracking.current
             && !current_tracking.revisado
             && current_tracking.dependencia_id == current_tramite.dependencia_origen_id;
         if (current_tracking.modo == 'YO' && allower) return current_tramite.person_id == current_tracking.person_id;
@@ -82,130 +83,154 @@ const ShowAction = ({ onAction = null, onAnularProcess = null, onEdit = null, on
 
     // render
     return (
-        <div className="col-md-12">
-            {/* configuración de los archivos del tracking */}
+        <div className="tw-space-y-4">
+            {/* Acciones principales */}
             <Show condicion={current_tracking.current}>
-                <div className="col-md-12 mt-4">
+                <div className="tw-flex tw-flex-wrap tw-gap-3">
+                    {/* Anular */}
                     <Show condicion={
-                        !current_tracking.revisado && 
-                        auth.id == current_tracking.user_verify_id && 
+                        !current_tracking.revisado &&
+                        auth.id == current_tracking.user_verify_id &&
                         current_tracking.status == 'REGISTRADO'
                     }>
-                        <Button color="red" 
-                            basic
-                            size="mini"
+                        <Button
+                            variant="outline"
                             onClick={() => handleNext('ANULADO')}
+                            className="tw-border-red-300 tw-text-red-600 hover:tw-bg-red-50 tw-gap-2"
                         >
-                            Anular <i className="fas fa-times"></i>
+                            <i className="fas fa-times"></i>
+                            Anular
                         </Button>
                     </Show>
-                                                    
-                    <Show condicion={!current_tracking.next}
-                        predeterminado={
-                            <Button color="teal" 
-                                basic 
-                                size="mini"
-                                disabled={!current_tracking.revisado}
-                                onClick={() => handleNext(current_tracking.next)}
-                            >
-                                Continuar trámite <i className="fas fa-paper-plane"></i>
-                            </Button>
-                        }
-                    >
-                        <Show condicion={!current_tracking.alert 
-                            && current_tracking.status == 'PENDIENTE' 
+
+                    {/* Continuar trámite */}
+                    <Show condicion={current_tracking.next}>
+                        <Button
+                            onClick={() => handleNext(current_tracking.next)}
+                            disabled={!current_tracking.revisado}
+                            className="tw-bg-teal-500 hover:tw-bg-teal-600 tw-gap-2"
+                        >
+                            <i className="fas fa-paper-plane"></i>
+                            Continuar trámite
+                        </Button>
+                    </Show>
+
+                    <Show condicion={!current_tracking.next}>
+                        {/* Responder */}
+                        <Show condicion={!current_tracking.alert
+                            && current_tracking.status == 'PENDIENTE'
                             && isDependenciaResponse
                         }>
-                            <Button color="orange" 
-                                basic 
-                                size="mini"
-                                disabled={!current_tracking.revisado}
+                            <Button
                                 onClick={() => {
                                     setNext("RESPONDIDO");
                                     dispatch({ type: tramiteTypes.CHANGE_TRAMITE, payload: current_tramite });
                                     setOption(['CREATE']);
                                 }}
+                                disabled={!current_tracking.revisado}
+                                className="tw-bg-amber-500 hover:tw-bg-amber-600 tw-gap-2"
                             >
-                                Responder <i className="fas fa-reply"></i>
+                                <i className="fas fa-reply"></i>
+                                Responder
                             </Button>
                         </Show>
 
+                        {/* Enviar */}
                         <Show condicion={current_tracking.status == 'REGISTRADO' || current_tracking.status == 'SUBTRAMITE'}>
-                            <Button color="teal" 
-                                basic 
-                                size="mini"
-                                disabled={!current_tracking.revisado}
+                            <Button
                                 onClick={() => handleNext('ENVIADO')}
+                                disabled={!current_tracking.revisado}
+                                className="tw-bg-teal-500 hover:tw-bg-teal-600 tw-gap-2"
                             >
-                                Enviar <i className="fas fa-paper-plane"></i>
+                                <i className="fas fa-paper-plane"></i>
+                                Enviar
                             </Button>
                         </Show>
 
+                        {/* Derivar */}
                         <Show condicion={current_tracking.status == 'PENDIENTE' && current_tracking.is_action}>
-                            <Button color="purple" 
-                                basic 
-                                size="mini"
-                                disabled={!current_tracking.revisado}
+                            <Button
                                 onClick={() => handleNext('DERIVADO')}
+                                disabled={!current_tracking.revisado}
+                                className="tw-bg-purple-500 hover:tw-bg-purple-600 tw-gap-2"
                             >
-                                Derivar <i className="fas fa-paper-plane"></i>
+                                <i className="fas fa-share"></i>
+                                Derivar
                             </Button>
                         </Show>
 
+                        {/* Rechazar */}
                         <Show condicion={current_tracking.status == 'RECIBIDO'}>
-                            <Button color="red" 
-                                basic 
-                                size="mini"
-                                disabled={!current_tracking.revisado}
+                            <Button
+                                variant="outline"
                                 onClick={() => handleNext('RECHAZADO')}
+                                disabled={!current_tracking.revisado}
+                                className="tw-border-red-300 tw-text-red-600 hover:tw-bg-red-50 tw-gap-2"
                             >
-                                Rechazar <i className="fas fa-times"></i>
+                                <i className="fas fa-times"></i>
+                                Rechazar
                             </Button>
                         </Show>
 
+                        {/* Aceptar */}
                         <Show condicion={current_tracking.status == 'RECIBIDO'}>
-                            <Button color="green" 
-                                basic 
-                                size="mini"
-                                disabled={!current_tracking.revisado}
+                            <Button
                                 onClick={() => handleNext('ACEPTADO')}
+                                disabled={!current_tracking.revisado}
+                                className="tw-bg-emerald-500 hover:tw-bg-emerald-600 tw-gap-2"
                             >
-                                Aceptar <i className="fas fa-check"></i>
+                                <i className="fas fa-check"></i>
+                                Aceptar
                             </Button>
                         </Show>
 
+                        {/* Finalizar */}
                         <Show condicion={!current_tracking.alert && current_tracking.status == 'PENDIENTE'}>
-                            <Button color="teal" 
-                                size="mini"
-                                disabled={!current_tracking.revisado}
+                            <Button
                                 onClick={() => handleNext('FINALIZADO')}
+                                disabled={!current_tracking.revisado}
+                                className="tw-bg-teal-600 hover:tw-bg-teal-700 tw-gap-2"
                             >
-                                Finalizar <i className="fas fa-check"></i>
+                                <i className="fas fa-flag-checkered"></i>
+                                Finalizar
                             </Button>
                         </Show>
                     </Show>
                 </div>
             </Show>
-            {/* editar  tramite*/}
-            <div className="col-md-12 text-right">
-                <Show condicion={canEdit}>
-                    <span className="close cursor-pointer" 
-                        title="Editar Trámite"
-                        onClick={() => typeof onEdit == 'function' ? onEdit() : null}>
-                        <i className="fas fa-pencil-alt text-dark"></i>
-                    </span>
-                </Show>
-                
-                <Show condicion={canBackRecibido}>
-                    <span className="close cursor-pointer mr-4" 
-                        title="Regresar a recibido"
-                        onClick={handleBackRecibido}>
-                        <i className="fas fa-history text-danger"></i>
-                    </span>
-                </Show>
-            </div>
+
+            {/* Acciones secundarias */}
+            <Show condicion={canEdit || canBackRecibido}>
+                <div className="tw-flex tw-items-center tw-justify-end tw-gap-3 tw-pt-4 tw-border-t tw-border-gray-100">
+                    <Show condicion={canBackRecibido}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleBackRecibido}
+                            className="tw-text-amber-600 hover:tw-bg-amber-50 tw-gap-2"
+                            title="Regresar a recibido"
+                        >
+                            <i className="fas fa-history"></i>
+                            Regresar
+                        </Button>
+                    </Show>
+
+                    <Show condicion={canEdit}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => typeof onEdit == 'function' ? onEdit() : null}
+                            className="tw-text-gray-600 hover:tw-bg-gray-100 tw-gap-2"
+                            title="Editar Trámite"
+                        >
+                            <i className="fas fa-pencil-alt"></i>
+                            Editar
+                        </Button>
+                    </Show>
+                </div>
+            </Show>
         </div>
-    )
-}
+    );
+};
 
 export default ShowAction;

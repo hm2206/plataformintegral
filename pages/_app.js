@@ -12,6 +12,7 @@ moment.locale('es');
 import Show from '../components/show';
 
 // css
+import '../styles/tailwind.css';
 import '../styles/main.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -22,17 +23,24 @@ import Cookies from 'js-cookie';
 
 // config router - solo en cliente
 if (typeof window !== 'undefined') {
+	let loadingTimeout = null;
+
 	Router.events.on('routeChangeStart', () => {
-		let loadingBrand = document.getElementById('loading-brand');
-		if (loadingBrand) loadingBrand.style.display = 'block';
+		// Solo mostrar loader si la navegación toma más de 300ms
+		loadingTimeout = setTimeout(() => {
+			let loadingBrand = document.getElementById('loading-brand');
+			if (loadingBrand) loadingBrand.style.display = 'block';
+		}, 300);
 	});
 
 	Router.events.on('routeChangeComplete', () => {
+		clearTimeout(loadingTimeout);
 		let loadingBrand = document.getElementById('loading-brand');
 		if (loadingBrand) loadingBrand.style.display = 'none';
 	});
 
 	Router.events.on('routeChangeError', () => {
+		clearTimeout(loadingTimeout);
 		let loadingBrand = document.getElementById('loading-brand');
 		if (loadingBrand) loadingBrand.style.display = 'none';
 	});

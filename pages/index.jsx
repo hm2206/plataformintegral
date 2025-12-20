@@ -13,14 +13,11 @@ const Index = () => {
     return (
         <div className="col-md-12">
             <Body>
-                <div className="row">
-                    <div className="col-md-7">
-                        <div className="card">
-                            <CardProfile/>
-                        </div>
+                <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-12 tw-gap-5">
+                    <div className="lg:tw-col-span-7">
+                        <CardProfile/>
                     </div>
-
-                    <div className="col-md-5">
+                    <div className="lg:tw-col-span-5">
                         <CardChangePassword/>
                     </div>
                 </div>
