@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { BtnFloat } from '../../../components/Utils';
 import Router, { useRouter } from 'next/router';
 import { AUTHENTICATE, VERIFY } from '../../../services/auth';
-import { Button, Form, Pagination } from 'semantic-ui-react'
+import { Form } from 'semantic-ui-react'
+import { Button } from '@/components/ui/button'
+import { Pagination } from '@/components/ui/pagination'
 import { authentication } from '../../../services/apis';
 import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
@@ -11,18 +13,36 @@ import { system_store } from '../../../services/verify.json';
 import CreatePerson from '../../../components/authentication/person/createPerson'
 import Show from '../../../components/show'
 
-const IndexPerson = ({ people }) => {
+const IndexPerson = () => {
     const router = useRouter();
     const { pathname, query } = router;
 
-    useEffect(() => {
-        if (!AUTHENTICATE()) return;
-    }, []);
-
-
+    const [people, setPeople] = useState({ data: [], lastPage: 1, total: 0, page: 1 });
+    const [loading, setLoading] = useState(true);
     const [query_search, setQuerySearch] = useState(query.query_search || "");
     const [option, setOption] = useState()
     const [is_refresh, setIsRefresh] = useState(false)
+
+    // cargar datos
+    const fetchPeople = async () => {
+        setLoading(true);
+        const page = query.page || 1;
+        const search = query.query_search || '';
+        await authentication.get(`person?page=${page}&query_search=${search}`)
+            .then(res => {
+                setPeople(res.data.people || { data: [], lastPage: 1, total: 0, page: 1 });
+            })
+            .catch(err => {
+                console.error(err);
+                setPeople({ data: [], lastPage: 1, total: 0, page: 1 });
+            });
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchPeople();
+    }, [query.page, query.query_search]);
     
     // next page
     const handlePage = async (e, { activePage }) => {
@@ -108,8 +128,8 @@ const IndexPerson = ({ people }) => {
                                     </div>
 
                                     <div className="col-xs col-2">
-                                        <Button color="blue"
-                                            fluid
+                                        <Button
+                                            className="tw-w-full"
                                             onClick={() => setIsRefresh(true)}
                                         >
                                             <i className="fas fa-search"></i>
@@ -125,8 +145,9 @@ const IndexPerson = ({ people }) => {
                         
                         <div className="text-center">
                             <hr/>
-                            <Pagination activePage={query.page} 
-                                totalPages={people.lastPage || 1}
+                            <Pagination
+                                activePage={query.page || 1}
+                                totalPages={people?.lastPage || 1}
                                 onPageChange={handlePage}
                             />
                         </div>

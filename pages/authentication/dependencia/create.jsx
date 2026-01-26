@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import Router, { useRouter } from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
+import { Form } from 'semantic-ui-react'
+import ReactSelect from 'react-select';
+import { Button } from '@/components/ui/button';
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -119,17 +121,22 @@ const EditDependencia = () => {
                                     <div className="col-md-6 mb-3">
                                         <Form.Field  error={errors && errors.type && errors.type[0] ? true : false}>
                                             <label htmlFor="">Tipo <b className="text-red">*</b></label>
-                                            <Select
+                                            <ReactSelect
                                                 placeholder="Selec. Tipo de Dependencia"
                                                 name="type"
-                                                value={form.type || ""}
+                                                value={[
+                                                    { value: 'OTRO', label: 'Otro' },
+                                                    { value: 'ESCUELA', label: 'Escuela' },
+                                                    { value: 'FACULTAD', label: 'Facultad' },
+                                                    { value: 'OFICINA', label: 'Oficina' }
+                                                ].find(opt => opt.value === form.type) || null}
                                                 options={[
-                                                    { key: 'OTRO', value: 'OTRO', text: 'Otro' },
-                                                    { key: 'ESCUELA', value: 'ESCUELA', text: 'Escuela' },
-                                                    { key: 'FACULTAD', value: 'FACULTAD', text: 'Facultad' },
-                                                    { key: 'OFICINA', value: 'OFICINA', text: 'Oficina' }
+                                                    { value: 'OTRO', label: 'Otro' },
+                                                    { value: 'ESCUELA', label: 'Escuela' },
+                                                    { value: 'FACULTAD', label: 'Facultad' },
+                                                    { value: 'OFICINA', label: 'Oficina' }
                                                 ]}
-                                                onChange={(e, obj) => handleInput(obj)}
+                                                onChange={(selected) => handleInput({ name: 'type', value: selected?.value || '' })}
                                             />
                                             <label>{errors && errors.type && errors.type[0]}</label>
                                         </Form.Field>
@@ -144,12 +151,16 @@ const EditDependencia = () => {
             {/* panel de control */}
             <ContentControl>
                 <div className="col-lg-2 col-6">
-                    <Button fluid 
-                        color="teal"
+                    <Button
+                        className="tw-w-full"
                         disabled={current_loading}
                         onClick={save}
                     >
-                        <i className="fas fa-save"></i> Guardar
+                        {current_loading ? (
+                            <><i className="fas fa-spinner fa-spin mr-1"></i> Guardando...</>
+                        ) : (
+                            <><i className="fas fa-save mr-1"></i> Guardar</>
+                        )}
                     </Button>
                 </div>
             </ContentControl>

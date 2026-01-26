@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Form, Select } from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
+import ReactSelect from 'react-select';
 import { authentication, handleErrorRequest, onProgress } from '../services/apis';
 import Show from '../components/show';
 import Swal from "sweetalert2";
@@ -14,6 +15,40 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
+
+// Estilos para react-select
+const selectStyles = (hasError = false) => ({
+    control: (base, state) => ({
+        ...base,
+        minHeight: '38px',
+        fontSize: '14px',
+        borderColor: hasError ? '#e0b4b4' : state.isFocused ? '#85b7d9' : '#dededf',
+        backgroundColor: hasError ? '#fff6f6' : '#fff',
+        boxShadow: state.isFocused ? '0 0 0 1px #85b7d9' : 'none',
+        '&:hover': { borderColor: state.isFocused ? '#85b7d9' : '#dededf' }
+    }),
+    option: (base, state) => ({
+        ...base,
+        fontSize: '14px',
+        backgroundColor: state.isSelected ? '#2185d0' : state.isFocused ? '#f0f0f0' : '#fff',
+        color: state.isSelected ? '#fff' : '#333',
+    }),
+    menu: (base) => ({ ...base, zIndex: 1000 })
+});
+
+// Opciones estáticas
+const maritalStatusOptions = [
+    { value: "S", label: "Soltero(a)" },
+    { value: "C", label: "Casado(a)" },
+    { value: "D", label: "Divorciado(a)" },
+    { value: "V", label: "Viudo(a)" }
+];
+
+const genderOptions = [
+    { value: "M", label: "Masculino" },
+    { value: "F", label: "Femenino" },
+    { value: "I", label: "No Binario" }
+];
 
 const CardProfile = () => {
 
@@ -268,50 +303,45 @@ const CardProfile = () => {
                                     )}
                                 </div>
 
-                                <Form.Field error={errors.marital_status?.[0] ? true : false}>
-                                    <Label className="tw-text-gray-600 tw-text-sm tw-block tw-mb-1.5">
+                                <div className="tw-space-y-1.5">
+                                    <Label className="tw-text-gray-600 tw-text-sm tw-block">
                                         Estado Civil <span className="tw-text-red-500">*</span>
                                     </Label>
-                                    <Select
-                                        fluid
-                                        options={[
-                                            { key: "SOL", value: "S", text: "Soltero(a)" },
-                                            { key: "CAS", value: "C", text: "Casado(a)" },
-                                            { key: "DIV", value: "D", text: "Divorciado(a)" },
-                                            { key: "VIU", value: "V", text: "Viudo(a)" }
-                                        ]}
+                                    <ReactSelect
+                                        styles={selectStyles(errors.marital_status?.[0])}
+                                        options={maritalStatusOptions}
                                         placeholder="Seleccionar"
                                         name="marital_status"
-                                        value={current_person.marital_status || ""}
-                                        onChange={(e, obj) => handleInputPerson(obj)}
-                                        disabled={current_loading}
+                                        value={maritalStatusOptions.find(opt => opt.value === current_person.marital_status) || null}
+                                        onChange={(selected) => handleInputPerson({ name: 'marital_status', value: selected?.value || '' })}
+                                        isDisabled={current_loading}
+                                        isClearable={false}
+                                        isSearchable={false}
                                     />
                                     {errors.marital_status?.[0] && (
                                         <p className="tw-text-xs tw-text-red-500 tw-mt-1">{errors.marital_status[0]}</p>
                                     )}
-                                </Form.Field>
+                                </div>
 
-                                <Form.Field error={errors.gender?.[0] ? true : false}>
-                                    <Label className="tw-text-gray-600 tw-text-sm tw-block tw-mb-1.5">
+                                <div className="tw-space-y-1.5">
+                                    <Label className="tw-text-gray-600 tw-text-sm tw-block">
                                         Género <span className="tw-text-red-500">*</span>
                                     </Label>
-                                    <Select
-                                        fluid
-                                        options={[
-                                            { key: "GEN-M", value: "M", text: "Masculino" },
-                                            { key: "GEN-F", value: "F", text: "Femenino" },
-                                            { key: "GEN-I", value: "I", text: "No Binario" }
-                                        ]}
+                                    <ReactSelect
+                                        styles={selectStyles(errors.gender?.[0])}
+                                        options={genderOptions}
                                         placeholder="Seleccionar"
                                         name="gender"
-                                        value={current_person.gender || ""}
-                                        onChange={(e, obj) => handleInputPerson(obj)}
-                                        disabled={current_loading}
+                                        value={genderOptions.find(opt => opt.value === current_person.gender) || null}
+                                        onChange={(selected) => handleInputPerson({ name: 'gender', value: selected?.value || '' })}
+                                        isDisabled={current_loading}
+                                        isClearable={false}
+                                        isSearchable={false}
                                     />
                                     {errors.gender?.[0] && (
                                         <p className="tw-text-xs tw-text-red-500 tw-mt-1">{errors.gender[0]}</p>
                                     )}
-                                </Form.Field>
+                                </div>
                             </div>
                         </div>
 

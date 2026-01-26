@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Body, BtnBack } from '../../../components/Utils';
 import { backUrl } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
+import { Form } from 'semantic-ui-react'
 import { authentication } from '../../../services/apis';
 import {  AUTHENTICATE } from '../../../services/auth';
 

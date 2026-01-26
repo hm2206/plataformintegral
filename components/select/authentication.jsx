@@ -1,7 +1,6 @@
 import React from 'react';
-import { SelectBase } from './utils';
+import { SelectBase, SelectDisabled } from './utils';
 import { authentication } from '../../services/apis';
-import { Select } from 'semantic-ui-react';
 
 const SelectDocumentType = ({ id = "id", name, value, onChange, refresh, disabled = false }) => {
     return <SelectBase 
@@ -200,7 +199,7 @@ const SelectEntityDependenciaNotUser = ({ id = "id", user_id, entity_id, name, v
                 placeholder="Seleccionar Dependencia"
                 refresh={refresh}
             />
-        :   <Select placeholder="Seleccionar Dependencia" disabled fluid value="" options={[]}/>
+        :   <SelectDisabled placeholder="Seleccionar Dependencia" />
 }
 
 
@@ -241,7 +240,7 @@ const SelectDependenciaPerfilLaboral = ({ dependencia_id, id = "id", name, value
                 execute={execute}
                 disabled={disabled}
             />
-        :   <Select placeholder="Seleccionar  Laboral" disabled fluid value="" options={[]}/>
+        :   <SelectDisabled placeholder="Seleccionar Perfil Laboral" />
 }
 
 

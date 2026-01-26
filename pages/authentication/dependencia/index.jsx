@@ -3,7 +3,10 @@ import Datatable from '../../../components/datatable';
 import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { AUTHENTICATE } from '../../../services/auth';
-import { Form, Button, Select, Pagination } from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
+import ReactSelect from 'react-select';
+import { Button } from '@/components/ui/button';
+import { Pagination } from '@/components/ui/pagination';
 import { BtnFloat } from '../../../components/Utils';
 import Show from '../../../components/show';
 import { authentication } from '../../../services/apis';
@@ -23,11 +26,14 @@ const DependenciaIndex = () => {
     useEffect(() => {
         if (!AUTHENTICATE()) return;
         fetchInitialData();
-    }, []);
+    }, [query.page, query.query_search, query.type]);
 
     const fetchInitialData = async () => {
         setLoading(true);
-        await authentication.get(`dependencia?${query_string}`)
+        const page = query.page || 1;
+        const query_search = query.query_search || '';
+        const type = query.type || '';
+        await authentication.get(`dependencia?page=${page}&query_search=${query_search}&type=${type}`)
             .then(res => {
                 setSuccess(res.data.success);
                 setDependencia(res.data.dependencia);
@@ -182,28 +188,31 @@ const DependenciaIndex = () => {
                                 </Form.Field>
                             </div>
                             <div className="col-md-4 mb-1 col-6 col-sm-6 col-xl-2">
-                                <Form.Field>
-                                    <Select
-                                        fluid
-                                        placeholder="TODOS"
-                                        name="type"
-                                        value={form.type}
-                                        onChange={(e, obj) => handleInput(obj)}
-                                        options={[
-                                            { key: 'ALL', value: "", text: 'TODOS'},
-                                            { key: 'OTRO', value: 'OTRO', text: 'OTRO'},
-                                            { key: 'ESCUELA', value: 'ESCUELA', text: 'ESCUELA'},
-                                            { key: 'FACULTAD', value: 'FACULTAD', text: 'FACULTAD'},
-                                            { key: 'OFICINA', value: 'OFICINA', text: 'OFICINA'},
-                                        ]}
-                                    />
-                                </Form.Field>
+                                <ReactSelect
+                                    placeholder="TODOS"
+                                    name="type"
+                                    value={[
+                                        { value: "", label: 'TODOS'},
+                                        { value: 'OTRO', label: 'OTRO'},
+                                        { value: 'ESCUELA', label: 'ESCUELA'},
+                                        { value: 'FACULTAD', label: 'FACULTAD'},
+                                        { value: 'OFICINA', label: 'OFICINA'},
+                                    ].find(opt => opt.value === form.type) || null}
+                                    onChange={(selected) => handleInput({ name: 'type', value: selected?.value || '' })}
+                                    options={[
+                                        { value: "", label: 'TODOS'},
+                                        { value: 'OTRO', label: 'OTRO'},
+                                        { value: 'ESCUELA', label: 'ESCUELA'},
+                                        { value: 'FACULTAD', label: 'FACULTAD'},
+                                        { value: 'OFICINA', label: 'OFICINA'},
+                                    ]}
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-3 col-6 col-sm-12 col-xl-2 mb-1">
-                                <Button 
-                                    fluid
+                                <Button
+                                    className="tw-w-full"
                                     onClick={searchAction}
-                                    color="blue"
                                 >
                                     <i className="fas fa-search mr-1"></i>
                                     <span>Buscar</span>
@@ -216,8 +225,9 @@ const DependenciaIndex = () => {
                 {/* paginacion */}
                 <div className="text-center">
                     <hr/>
-                    <Pagination activePage={dependencia && dependencia.page || 1} 
-                        totalPages={dependencia && dependencia.lastPage || 1}
+                    <Pagination
+                        activePage={dependencia?.page || 1}
+                        totalPages={dependencia?.lastPage || 1}
                         onPageChange={handlePage}
                     />
                 </div>

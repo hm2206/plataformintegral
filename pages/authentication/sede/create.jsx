@@ -1,128 +1,124 @@
-import React, { Component } from 'react';
-import { Body, BtnBack, InputFile } from '../../../components/Utils';
-import { backUrl, parseOptions } from '../../../services/utils';
-import Router from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
+import React, { useState, useEffect } from 'react';
+import { Body, BtnBack } from '../../../components/Utils';
+import { backUrl } from '../../../services/utils';
+import Router, { useRouter } from 'next/router';
+import { Form } from 'semantic-ui-react'
+import { Button } from '@/components/ui/button';
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
-import Show from '../../../components/show';
 import { AUTHENTICATE } from '../../../services/auth';
+import { Confirm } from '../../../services/utils';
+import BoardSimple from '../../../components/boardSimple';
+import ContentControl from '../../../components/contentControl';
 
 
-export default class CreateSede extends Component
-{
-state = {
-        loading: false,
-        form: {},
-        errors: {},
-        files: {}
-    }
+const CreateSede = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
 
-    componentDidMount = () => {
+    const [loading, setLoading] = useState(false);
+    const [form, setForm] = useState({});
+    const [errors, setErrors] = useState({});
+
+    useEffect(() => {
         if (!AUTHENTICATE()) return;
+    }, []);
+
+    const handleInput = ({ name, value }) => {
+        let newForm = Object.assign({}, form);
+        newForm[name] = value;
+        setForm(newForm);
+        let newErrors = Object.assign({}, errors);
+        newErrors[name] = [];
+        setErrors(newErrors);
     }
 
-
-
-    handleInput = ({ name, value }, obj = 'form') => {
-        this.setState((state, props) => {
-            let newObj = Object.assign({}, state[obj]);
-            newObj[name] = value;
-            state.errors[name] = "";
-            return { [obj]: newObj, errors: state.errors };
-        });
-    }
-
-    save = async () => {
-        this.props.fireLoading(true);
-        let { form } = this.state;
-        // crear sistema
+    const save = async () => {
+        let answer = await Confirm('warning', '¿Estas seguro en guardar los datos?', 'Estoy seguro');
+        if (!answer) return false;
+        setLoading(true);
         await authentication.post('sede', form)
         .then(async res => {
-            this.props.fireLoading(false);
             let { success, message } = res.data;
             if (!success) throw new Error(message);
             await Swal.fire({ icon: 'success', text: message });
-            this.setState({ form: {}, errors: {}, files: {} })
+            setForm({});
+            setErrors({});
         })
         .catch(err => {
             try {
-                this.props.fireLoading(false);
                 let response = JSON.parse(err.message);
                 Swal.fire({ icon: 'warning', text: response.message });
-                this.setState({ errors: response.errors });
+                setErrors(response.errors || {});
             } catch (error) {
                 Swal.fire({ icon: 'error', text: err.message });
             }
-        })
+        });
+        setLoading(false);
     }
 
-    validate = () => {
-        let { module_id } = this.state.form;
-        return module_id;
-    }
+    return (
+        <div className="col-md-12">
+            <BoardSimple
+                title="Sede"
+                info={["Crear Sede"]}
+                prefix={<BtnBack/>}
+                bg="light"
+                options={[]}
+            >
+                <div className="card-body">
+                    <Form className="row justify-content-center">
+                        <div className="col-md-9">
+                            <div className="row justify-content-end">
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field error={errors?.descripcion?.[0] ? true : false}>
+                                        <label htmlFor="">Descripción <b className="text-red">*</b></label>
+                                        <input type="text"
+                                            name="descripcion"
+                                            placeholder="Ingrese la descripción de la Sede"
+                                            onChange={(e) => handleInput(e.target)}
+                                            value={form.descripcion || ""}
+                                        />
+                                        <label>{errors?.descripcion?.[0]}</label>
+                                    </Form.Field>
+                                </div>
 
-    render() {
-
-        let { pathname, query } = this.props;
-        let { form, errors } = this.state;
-
-        return (
-            <div className="col-md-12">
-                <Body>
-                    <div className="card-header">
-                        <BtnBack onClick={(e) => Router.push(backUrl(pathname))}/> Crear Sede
-                    </div>
-                    <div className="card-body">
-                        <Form className="row justify-content-center">
-                            <div className="col-md-9">
-                                <div className="row justify-content-end">
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.descripcion && errors.descripcion[0] || false}>
-                                            <label htmlFor="">Descripción <b className="text-red">*</b></label>
-                                            <input type="text"
-                                                name="descripcion"
-                                                placeholder="Ingrese la descripción de la Sede"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                value={form.descripcion || ""}
-                                            />
-                                            <label>{errors && errors.descripcion && errors.descripcion[0]}</label>
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-6 mb-3">
-                                        <Form.Field error={errors && errors.direccion && errors.direccion[0] || false}>
-                                            <label htmlFor="">Dirección <b className="text-red">*</b></label>
-                                            <textarea type="text"
-                                                name="direccion"
-                                                placeholder="Ingrese la dirección"
-                                                onChange={(e) => this.handleInput(e.target)}
-                                                value={form.direccion || ""}
-                                            />
-                                            <label>{errors && errors.direccion && errors.direccion[0]}</label>
-                                        </Form.Field>
-                                    </div>
-
-                                    <div className="col-md-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div className="col-md-2">
-                                        <Button color="teal" fluid
-                                            disabled={this.state.loading}
-                                            onClick={this.save}
-                                            loading={this.state.loading}
-                                        >
-                                            <i className="fas fa-save"></i> Guardar
-                                        </Button>
-                                    </div>
+                                <div className="col-md-6 mb-3">
+                                    <Form.Field error={errors?.direccion?.[0] ? true : false}>
+                                        <label htmlFor="">Dirección <b className="text-red">*</b></label>
+                                        <textarea
+                                            name="direccion"
+                                            placeholder="Ingrese la dirección"
+                                            onChange={(e) => handleInput(e.target)}
+                                            value={form.direccion || ""}
+                                        />
+                                        <label>{errors?.direccion?.[0]}</label>
+                                    </Form.Field>
                                 </div>
                             </div>
-                        </Form>
-                    </div>
-                </Body>
-            </div>
-        )
-    }
-    
+                        </div>
+                    </Form>
+                </div>
+            </BoardSimple>
+
+            {/* panel de control */}
+            <ContentControl>
+                <div className="col-lg-2 col-6">
+                    <Button
+                        className="tw-w-full"
+                        disabled={loading}
+                        onClick={save}
+                    >
+                        {loading ? (
+                            <><i className="fas fa-spinner fa-spin mr-1"></i> Guardando...</>
+                        ) : (
+                            <><i className="fas fa-save mr-1"></i> Guardar</>
+                        )}
+                    </Button>
+                </div>
+            </ContentControl>
+        </div>
+    )
 }
+
+export default CreateSede;

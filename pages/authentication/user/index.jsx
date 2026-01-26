@@ -1,5 +1,8 @@
 import React, { Component, Fragment, useContext, useState, useEffect } from 'react';
-import { Button, Form, Pagination, Select } from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
+import ReactSelect from 'react-select';
+import { Button } from '@/components/ui/button';
+import { Pagination } from '@/components/ui/pagination';
 import Datatable from '../../../components/datatable';
 import { authentication, handleErrorRequest } from '../../../services/apis';
 import Router, { useRouter } from 'next/router';
@@ -13,7 +16,7 @@ import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts/AppContext';
 import { system_store } from '../../../services/verify.json';
 
-const UserIndex = ({ users }) => {
+const UserIndex = () => {
     const router = useRouter();
     const { pathname, query } = router;
 
@@ -21,13 +24,37 @@ const UserIndex = ({ users }) => {
         if (!AUTHENTICATE()) return;
     }, []);
 
-
     // app
     const app_context = useContext(AppContext);
 
     // estados
+    const [users, setUsers] = useState({ data: [], lastPage: 1 });
+    const [loading, setLoading] = useState(true);
     const [estado, setEstado] = useState(query.estado || 1);
     const [query_search, setQuerySearch] = useState(query.query_search || "");
+
+    // obtener usuarios
+    const fetchUsers = async () => {
+        setLoading(true);
+        const page = query.page || 1;
+        const currentEstado = query.estado || estado;
+        const currentSearch = query.query_search || "";
+
+        await authentication.get(`user?page=${page}&state=${currentEstado}&query_search=${currentSearch}`)
+            .then(res => {
+                setUsers(res.data.users || { data: [], lastPage: 1 });
+            })
+            .catch(err => {
+                console.error(err);
+                setUsers({ data: [], lastPage: 1 });
+            });
+        setLoading(false);
+    };
+
+    // cargar datos cuando cambie la query
+    useEffect(() => {
+        fetchUsers();
+    }, [query.page, query.estado, query.query_search]);
 
     // obtener opciones
     const getOption = async (obj, key, index) => {
@@ -102,6 +129,7 @@ const UserIndex = ({ users }) => {
             >
                 <Datatable
                     isFilter={false}
+                    loading={loading}
                     headers={["#ID", "Apellidos y Nombres", "Email", "F. Creación", "Estado"]}
                     index={[
                         {
@@ -177,22 +205,25 @@ const UserIndex = ({ users }) => {
                             </div>
 
                             <div className="col-md-4 mb-1">
-                                <Select fluid
+                                <ReactSelect
                                     placeholder="Seleccionar estado"
                                     name="estado"
-                                    value={`${estado}`}
+                                    value={[
+                                        { value: "1", label: "Usuarios Activos" },
+                                        { value: "0", label: "Usuarios Inactivos" }
+                                    ].find(opt => opt.value === `${estado}`)}
                                     options={[
-                                        { key: "ACTIVOS", value: "1", text: "Usuarios Activos" },
-                                        { key: "INACTIVOS", value: "0", text: "Usuarios Inactivos" }
+                                        { value: "1", label: "Usuarios Activos" },
+                                        { value: "0", label: "Usuarios Inactivos" }
                                     ]}
-                                    onChange={(e, obj) => setEstado(obj.value)}
+                                    onChange={(selected) => setEstado(selected?.value)}
+                                    isClearable={false}
+                                    isSearchable={false}
                                 />
                             </div>
 
                             <div className="col-md-2">
-                                <Button color="blue"
-                                    onClick={handleSearch}
-                                >
+                                <Button onClick={handleSearch}>
                                     <i className="fas fa-search mr-1"></i>
                                     <span>Buscar</span>
                                 </Button>
@@ -203,8 +234,9 @@ const UserIndex = ({ users }) => {
                 {/* paginación */}
                 <div className="text-center">
                     <hr/>
-                    <Pagination activePage={query.page} 
-                        totalPages={users.lastPage || 1}
+                    <Pagination
+                        activePage={query.page || 1}
+                        totalPages={users?.lastPage || 1}
                         onPageChange={handlePage}
                     />
                 </div>

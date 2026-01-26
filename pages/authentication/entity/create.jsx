@@ -2,7 +2,8 @@ import React, { useState, Fragment, useEffect } from 'react';
 import { BtnBack, InputFile } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import Router, { useRouter } from 'next/router';
-import { Form, Button, Progress } from 'semantic-ui-react'
+import { Form, Progress } from 'semantic-ui-react'
+import { Button } from '@/components/ui/button';
 import { authentication, handleErrorRequest, onProgress } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
@@ -193,13 +194,16 @@ const CreateEntity = () => {
                     }
                 >
                     <div className="col-lg-2 col-6">
-                        <Button fluid 
-                            color="teal"
+                        <Button
+                            className="tw-w-full"
                             disabled={current_loading}
                             onClick={save}
-                            loading={current_loading}
                         >
-                            <i className="fas fa-save"></i> Guardar
+                            {current_loading ? (
+                                <><i className="fas fa-spinner fa-spin mr-1"></i> Guardando...</>
+                            ) : (
+                                <><i className="fas fa-save mr-1"></i> Guardar</>
+                            )}
                         </Button>
                     </div>
                 </Show>

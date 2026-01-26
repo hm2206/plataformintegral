@@ -108,14 +108,10 @@ export const AuthProvider = ({ children }) => {
           <NotificationProvider>
             {/* navbar */}
             <Navbar />
-            <div className="gx-layout-content ant-layout-content">
-              <div className="gx-main-content-wrapper">
-                {/* sidebar */}
-                <Sidebar />
-                {/* pages auth */}
-                <Content>{children}</Content>
-              </div>
-            </div>
+            {/* sidebar */}
+            <Sidebar />
+            {/* pages auth */}
+            <Content>{children}</Content>
           </NotificationProvider>
         </SocketProvider>
       </EntityProvider>

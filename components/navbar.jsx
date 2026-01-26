@@ -101,69 +101,63 @@ const Navbar = () => {
 
 				{/* Entity selector */}
 				<Show condicion={!auth_context.loading && render}>
-					<div className="tw-flex-none tw-ml-3 navbar-entity-selector">
+					<div className="tw-flex-none tw-ml-3 tw-min-w-[200px] tw-max-w-[280px] navbar-entity-selector">
 						<style>{`
-							.navbar-entity-selector .ui.selection.dropdown {
-								min-width: 200px;
-								max-width: 260px;
+							.navbar-entity-selector [class*="-control"] {
 								min-height: 34px !important;
-								padding: 8px 32px 8px 12px !important;
 								border: none !important;
 								border-radius: 8px !important;
 								background: rgba(255,255,255,0.15) !important;
 								font-size: 13px !important;
 								backdrop-filter: blur(4px);
+								box-shadow: none !important;
+								cursor: pointer !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown:hover {
+							.navbar-entity-selector [class*="-control"]:hover {
 								background: rgba(255,255,255,0.25) !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown > .text {
+							.navbar-entity-selector [class*="-singleValue"] {
 								color: white !important;
-								white-space: nowrap !important;
-								overflow: hidden !important;
-								text-overflow: ellipsis !important;
-								display: block !important;
-								max-width: 100% !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown > .default.text {
+							.navbar-entity-selector [class*="-placeholder"] {
 								color: rgba(255,255,255,0.7) !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown > .dropdown.icon {
-								color: rgba(255,255,255,0.7) !important;
-								top: 50% !important;
-								transform: translateY(-50%) !important;
-								margin-top: 0 !important;
-								right: 10px !important;
+							.navbar-entity-selector [class*="-indicatorSeparator"] {
+								display: none !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown .menu {
+							.navbar-entity-selector [class*="-indicatorContainer"] svg {
+								fill: rgba(255,255,255,0.7) !important;
+								color: rgba(255,255,255,0.7) !important;
+							}
+							.navbar-entity-selector [class*="-menu"] {
 								border-radius: 8px !important;
 								margin-top: 4px !important;
 								border: 1px solid #e5e7eb !important;
 								box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
 								background: white !important;
-								max-width: 320px !important;
+								z-index: 9999 !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown .menu > .item {
+							.navbar-entity-selector [class*="-option"] {
 								font-size: 13px !important;
 								padding: 10px 12px !important;
 								color: #374151 !important;
 								background: white !important;
+								cursor: pointer !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown .menu > .item:hover {
+							.navbar-entity-selector [class*="-option"]:hover {
 								background: #f3f4f6 !important;
 								color: #346cb0 !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown .menu > .item.selected {
+							.navbar-entity-selector [class*="-option"][class*="--is-selected"] {
 								background: #eff6ff !important;
 								color: #346cb0 !important;
 								font-weight: 500 !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown .menu > .item .text {
-								color: #374151 !important;
+							.navbar-entity-selector [class*="-input-container"] {
+								color: white !important;
 							}
-							.navbar-entity-selector .ui.selection.dropdown .menu > .item:hover .text,
-							.navbar-entity-selector .ui.selection.dropdown .menu > .item.selected .text {
-								color: #346cb0 !important;
+							.navbar-entity-selector [class*="-input"] {
+								color: white !important;
 							}
 						`}</style>
 						<SelectEntityUser

@@ -2,7 +2,8 @@ import React, { useState, Fragment, useEffect } from 'react';
 import { BtnBack, InputFile } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import Router, { useRouter } from 'next/router';
-import { Form, Button, Progress } from 'semantic-ui-react'
+import { Form, Progress } from 'semantic-ui-react'
+import { Button } from '@/components/ui/button';
 import { authentication, handleErrorRequest, onProgress } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
@@ -19,21 +20,28 @@ const EditEntity = () => {
     const [success, setSuccess] = useState(false);
     const [entity, setEntity] = useState({});
 
-    useEffect(() => {
-        if (!AUTHENTICATE()) return;
-        fetchInitialData();
-    }, []);
-
     const fetchInitialData = async () => {
+        if (!query.id) return;
         setLoading(true);
+        const id = atob(query.id);
         await authentication.get(`entity/${id}`)
             .then(res => {
                 setSuccess(res.data.success);
-                setEntity(res.data.entity);
+                const ent = res.data.entity || {};
+                setEntity(ent);
+                setForm(JSON.parse(JSON.stringify(ent)));
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                setEntity({});
+            });
         setLoading(false);
     };
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, [query.id]);
 
 
     // estados
@@ -43,6 +51,24 @@ const EditEntity = () => {
     const [current_loading, setCurrentLoading] = useState(false);
     const [percent, setPercent] = useState(0);
     const [edit, setEdit] = useState(false);
+
+    // cancelar edicion
+    useEffect(() => {
+        if (!edit && Object.keys(entity).length > 0) {
+            setForm(JSON.parse(JSON.stringify(entity)));
+            setFiles({});
+        }
+    }, [edit, entity]);
+
+    // loading state
+    if (loading) {
+        return (
+            <div className="col-md-12 text-center py-5">
+                <i className="fas fa-spinner fa-spin fa-2x"></i>
+                <p className="mt-2">Cargando...</p>
+            </div>
+        );
+    }
 
     // manejador de form
     const handleInput = ({ name, value }) => {
@@ -100,14 +126,6 @@ const EditEntity = () => {
             setPercent(0);
         }));
     }
-
-    // cancelar edicion
-    useEffect(() => {
-        if (!edit) {
-            setForm(JSON.parse(JSON.stringify(entity || {})));
-            setFiles({});
-        }
-    }, [edit]);
 
     // renderizar
     return (
@@ -231,23 +249,27 @@ const EditEntity = () => {
                         }
                     >
                         <div className="col-lg-2 col-6">
-                            <Button fluid 
-                                color="red"
+                            <Button
+                                variant="destructive"
+                                className="tw-w-full"
                                 disabled={current_loading}
-                                onClick={(e) => setEdit(false)}
+                                onClick={() => setEdit(false)}
                             >
-                                <i className="fas fa-times"></i> cancelar
+                                <i className="fas fa-times mr-1"></i> Cancelar
                             </Button>
                         </div>
 
                         <div className="col-lg-2 col-6">
-                            <Button fluid 
-                                color="blue"
+                            <Button
+                                className="tw-w-full"
                                 disabled={current_loading}
                                 onClick={save}
-                                loading={current_loading}
                             >
-                                <i className="fas fa-sync"></i> Actualizar
+                                {current_loading ? (
+                                    <><i className="fas fa-spinner fa-spin mr-1"></i> Actualizando...</>
+                                ) : (
+                                    <><i className="fas fa-sync mr-1"></i> Actualizar</>
+                                )}
                             </Button>
                         </div>
                     </Show>

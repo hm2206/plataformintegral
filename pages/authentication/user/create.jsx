@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import Router, { useRouter } from 'next/router';
-import { Form, Button } from 'semantic-ui-react'
+import { Form } from 'semantic-ui-react'
+import { Button } from '@/components/ui/button';
 import { authentication, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import Show from '../../../components/show';
@@ -114,9 +115,9 @@ const CreateUser = () => {
                                             <div className="col-md-4">
                                                 <Button
                                                     disabled={current_loading}
-                                                    onClick={(e) => setOption("ASSIGN")}
+                                                    onClick={() => setOption("ASSIGN")}
                                                 >
-                                                    <i className="fas fa-plus"></i> Asignar
+                                                    <i className="fas fa-plus mr-1"></i> Asignar
                                                 </Button>
                                             </div>
                                         </Show>
@@ -152,10 +153,11 @@ const CreateUser = () => {
 
                                             <div className="col-md-4">
                                                 <Button
-                                                    onClick={(e) => setOption("ASSIGN")}
+                                                    variant="secondary"
+                                                    onClick={() => setOption("ASSIGN")}
                                                     disabled={current_loading}
                                                 >
-                                                    <i className="fas fa-sync"></i> Cambiar
+                                                    <i className="fas fa-sync mr-1"></i> Cambiar
                                                 </Button>
                                             </div>
                                         </Show>
@@ -232,12 +234,16 @@ const CreateUser = () => {
             {/* panel de control */}
             <ContentControl>
                 <div className="col-lg-2 col-6">
-                    <Button color="teal" fluid
+                    <Button
+                        className="tw-w-full"
                         disabled={current_loading || !validate() || !isPerson}
                         onClick={save}
-                        loading={current_loading}
                     >
-                        <i className="fas fa-save"></i> Guardar
+                        {current_loading ? (
+                            <><i className="fas fa-spinner fa-spin mr-1"></i> Guardando...</>
+                        ) : (
+                            <><i className="fas fa-save mr-1"></i> Guardar</>
+                        )}
                     </Button>
                 </div>
             </ContentControl>

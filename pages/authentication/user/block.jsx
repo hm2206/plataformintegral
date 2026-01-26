@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import { Confirm } from '../../../services/utils';
 import Router from 'next/router';
-import { Form, Button, Select, Checkbox, List, Image } from 'semantic-ui-react'
+import { Form, Checkbox, List } from 'semantic-ui-react'
+import { Button } from '@/components/ui/button';
 import { authentication, handleErrorRequest } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -43,26 +44,25 @@ const ItemMethod = ({ user, block, disabled, method, onAction = null }) => {
         <List.Item>
             <List.Content floated='right'>
                 <Show condicion={block}>
-                    <Button color={'green'}
-                        className="mt-1"
+                    <Button
+                        className="tw-mt-1 tw-bg-green-600 hover:tw-bg-green-700"
                         title={'Permitir'}
                         disabled={disabled || loading}
-                        loading={loading}
-                        onClick={(e) => handleAction(true)}
+                        onClick={() => handleAction(true)}
                     >
-                        <i className="fas fa-check"></i>
+                        {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-check"></i>}
                     </Button>
                 </Show>
 
                 <Show condicion={!block}>
-                    <Button color={'red'}
-                        className="mt-1"
+                    <Button
+                        variant="destructive"
+                        className="tw-mt-1"
                         title={'Bloquear'}
                         disabled={disabled || loading}
-                        loading={loading}
-                        onClick={(e) => handleAction(false)}
+                        onClick={() => handleAction(false)}
                     >
-                        <i className="fas fa-ban"></i>
+                        {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-ban"></i>}
                     </Button>
                 </Show>
             </List.Content>
@@ -208,9 +208,10 @@ const BlockUser = ({ pathname, query, success, user }) => {
                                         </div>
 
                                         <div className="col-md-2 col-2">
-                                            <Button fluid
+                                            <Button
+                                                className="tw-w-full"
                                                 disabled={current_loading}
-                                                onClick={(e) => {
+                                                onClick={() => {
                                                     setCurrentPage(1);
                                                     setIsSearch(true)
                                                 }}
@@ -247,11 +248,13 @@ const BlockUser = ({ pathname, query, success, user }) => {
 
                                         <div className="col-md-12 mt-4">
                                             <hr/>
-                                            <Button fluid
+                                            <Button
+                                                variant="outline"
+                                                className="tw-w-full"
                                                 disabled={current_loading || !(current_last_page >= (current_page + 1))}
-                                                onClick={(e) => setCurrentPage(current_page + 1)}
+                                                onClick={() => setCurrentPage(current_page + 1)}
                                             >
-                                                <i className="fas fa-arrow-down"></i> Obtener más registros
+                                                <i className="fas fa-arrow-down mr-1"></i> Obtener más registros
                                             </Button>
                                         </div>
                                     </div>

@@ -12,8 +12,8 @@ import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
-import router from 'next/router';
-import { Button, Checkbox } from 'semantic-ui-react';
+import { useRouter } from 'next/router';
+import { Button } from '@/components/ui/button';
 import NotFoundData from '../../../components/notFoundData'
 
 const actions = {
@@ -22,26 +22,60 @@ const actions = {
     ADD_PERMISOS: "ADD_PERMISOS",
 };
 
- const ConfigUser = ({ user }) => {
+const ConfigUser = () => {
     const router = useRouter();
     const { pathname, query } = router;
-
-    useEffect(() => {
-        if (!AUTHENTICATE()) return;
-    }, []);
-
-
-    if (!success) return <NotFoundData/>
 
     // app
     const app_context = useContext(AppContext);
 
     // estados
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [option, setOption] = useState();
     const [form, setForm] = useState({});
     const [edit, setEdit] = useState(false);
     const [errors, setErrors] = useState({});
     const [reset_password, setResetPassword] = useState();
+
+    // obtener usuario
+    const fetchUser = async () => {
+        if (!query.id) return;
+        setLoading(true);
+        try {
+            const id = atob(query.id);
+            const res = await authentication.get(`user/${id}`);
+            setUser(res.data.user || null);
+            setForm(res.data.user || {});
+        } catch (err) {
+            console.error(err);
+            setUser(null);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchUser();
+    }, [query.id]);
+
+    // reset form cuando se cancela edición
+    useEffect(() => {
+        if (!edit && user) setForm(Object.assign({}, user));
+    }, [edit, user]);
+
+    // loading state
+    if (loading) {
+        return (
+            <div className="col-md-12 text-center py-5">
+                <i className="fas fa-spinner fa-spin fa-2x"></i>
+                <p className="mt-2">Cargando...</p>
+            </div>
+        );
+    }
+
+    // not found
+    if (!user) return <NotFoundData/>
 
     const handleInput = ({ name, value }) => {
         let newForm = Object.assign({}, form);
@@ -81,14 +115,6 @@ const actions = {
             setEdit(false);
         }).catch(err => handleErrorRequest(err, setErrors, () => app_context.setCurrentLoading(false)))
     }
-
-    useEffect(() => {
-        setForm(Object.assign({}, user || {}));
-    }, []);
-
-    useEffect(() => {
-        if (!edit) setForm(Object.assign({}, user || {}));
-    }, [edit]);
 
     // render
     return (
@@ -172,39 +198,45 @@ const actions = {
 
                                     <Show condicion={edit}
                                         predeterminado={
-                                            <Form.Field className="col-md-6 text-right">
-                                                <Button onClick={autoResetPassword}>
-                                                    <i className="fas fa-key"></i> Reset Password
+                                            <div className="col-md-6 text-right">
+                                                <Button variant="secondary" onClick={autoResetPassword}>
+                                                    <i className="fas fa-key mr-1"></i> Reset Password
                                                 </Button>
-                                            </Form.Field>
+                                            </div>
                                         }
                                     >
                                         <div className="col-md-6 mb-3 text-right">
                                             <Form.Field>
                                                 <label htmlFor="">
-                                                    Sincronizar email con el 
+                                                    Sincronizar email con el
                                                     <span className="ml-1 badge badge-light">email de contacto</span>
                                                 </label>
-                                                <Checkbox toggle
-                                                    name="sync"
-                                                    checked={form.sync ? true : false}
-                                                    onChange={(e, obj) => handleInput({ name: obj.name, value: obj.checked ? 1 : 0 })}
-                                                />
+                                                <div className="mt-2">
+                                                    <label className="tw-relative tw-inline-flex tw-items-center tw-cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            name="sync"
+                                                            checked={form.sync ? true : false}
+                                                            onChange={(e) => handleInput({ name: 'sync', value: e.target.checked ? 1 : 0 })}
+                                                            className="tw-sr-only tw-peer"
+                                                        />
+                                                        <div className="tw-w-11 tw-h-6 tw-bg-gray-200 tw-rounded-full tw-peer peer-checked:tw-bg-primary-500 peer-checked:after:tw-translate-x-full after:tw-content-[''] after:tw-absolute after:tw-top-0.5 after:tw-left-[2px] after:tw-bg-white after:tw-rounded-full after:tw-h-5 after:tw-w-5 after:tw-transition-all"></div>
+                                                    </label>
+                                                </div>
                                             </Form.Field>
                                         </div>
 
-                                        <div className="col-12 text-right">
-                                            <Button color="red"
-                                                basic
+                                        <div className="col-12 text-right tw-space-x-2">
+                                            <Button
+                                                variant="outline"
+                                                className="tw-text-red-500 tw-border-red-300 hover:tw-bg-red-50"
                                                 onClick={() => setEdit(false)}
                                             >
-                                                <i className="fas fa-times"></i> Cancelar
+                                                <i className="fas fa-times mr-1"></i> Cancelar
                                             </Button>
 
-                                            <Button color="blue"
-                                                onClick={handleUpdate}
-                                            >
-                                                <i className="fas fa-sync"></i> Guardar cambios
+                                            <Button onClick={handleUpdate}>
+                                                <i className="fas fa-sync mr-1"></i> Guardar cambios
                                             </Button>
                                         </div>
                                     </Show>

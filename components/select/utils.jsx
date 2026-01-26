@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Select } from 'semantic-ui-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import ReactSelect from 'react-select';
 import uid from '../../utils/uid';
 import Skeleton from 'react-loading-skeleton';
 
 /**
  * setting format for select
- * @param {*} param0 
+ * @param {*} param0
  */
 const settingSelect = async ({ is_new = true, data = [], index = { key: "", value: "", text: "" }, displayText = null, placeholder = "Seleccionar" }) => {
     let newData = [];
@@ -28,9 +28,9 @@ const settingSelect = async ({ is_new = true, data = [], index = { key: "", valu
                 return value;
             }
         }
-        // response 
+        // response
         return response;
-    } 
+    }
     // add datos
     await data.filter(async (d, indexD) => {
         let text = `${getObj(d, index.text)}`.toUpperCase()
@@ -46,6 +46,42 @@ const settingSelect = async ({ is_new = true, data = [], index = { key: "", valu
     // response data
     return newData;
 }
+
+// Estilos personalizados para react-select (similar a Semantic UI)
+const customStyles = (error = false, active = false) => ({
+    control: (base, state) => ({
+        ...base,
+        minHeight: '38px',
+        fontSize: '14px',
+        borderColor: error ? '#e0b4b4' : state.isFocused ? '#85b7d9' : '#dededf',
+        backgroundColor: error ? '#fff6f6' : active ? '#e8f4ff' : '#fff',
+        boxShadow: state.isFocused ? '0 0 0 1px #85b7d9' : 'none',
+        '&:hover': {
+            borderColor: state.isFocused ? '#85b7d9' : '#dededf'
+        }
+    }),
+    option: (base, state) => ({
+        ...base,
+        fontSize: '14px',
+        backgroundColor: state.isSelected ? '#2185d0' : state.isFocused ? '#f0f0f0' : '#fff',
+        color: state.isSelected ? '#fff' : '#333',
+        '&:active': {
+            backgroundColor: '#2185d0'
+        }
+    }),
+    placeholder: (base) => ({
+        ...base,
+        color: '#999'
+    }),
+    singleValue: (base) => ({
+        ...base,
+        color: '#333'
+    }),
+    menu: (base) => ({
+        ...base,
+        zIndex: 1000
+    })
+});
 
 
 const ButtonRefresh = ({ message, onClick = null }) => {
@@ -163,30 +199,76 @@ const SelectBase = ({
         if (datos.length) typeof onData == 'function' ? onData(datos) : null;
     }, [datos]);
 
+    // Convertir opciones al formato de react-select
+    const options = useMemo(() => {
+        const sourceData = defaultDatos.length ? defaultDatos : datos;
+        return sourceData.map(item => ({
+            value: item.value,
+            label: item.text,
+            key: item.key,
+            obj: item.obj
+        }));
+    }, [defaultDatos, datos]);
+
+    // Encontrar el valor seleccionado actual
+    const selectedValue = useMemo(() => {
+        const currentValue = `${valueChange || ""}`;
+        return options.find(opt => opt.value === currentValue) || null;
+    }, [options, valueChange]);
+
+    // Manejar el cambio manteniendo compatibilidad con el formato anterior
+    const handleChange = (selected) => {
+        if (typeof onChange === 'function') {
+            const syntheticEvent = { target: { name, value: selected?.value || "" } };
+            const objData = {
+                name,
+                value: selected?.value || "",
+                text: selected?.label || "",
+                obj: selected?.obj || null
+            };
+            onChange(syntheticEvent, objData);
+        }
+    };
+
     // render
-    return is_error 
+    return is_error
         ?   <div>
-                <ButtonRefresh 
+                <ButtonRefresh
                     onClick={async (e) => await getDatos()}
                     message="Volver a obtener los datos"
-                /> 
+                />
             </div>
-        :   loading 
+        :   loading
             ?   <Skeleton height="37px"/>
-            : <Select fluid
-                className={active ? 'input-active' : ''}
-                wrapSelection={false}
-                search
-                disabled={loading || disabled}
-                placeholder={loading ? 'Cargando...' : placeholder}
-                options={defaultDatos.length ? defaultDatos : datos}
-                name={name}
-                onChange={(e, obj) => typeof onChange == 'function' ? onChange(e, obj) : null}
-                value={`${valueChange || ""}`}
-                compact
-                error={error}
-            />
+            :   <ReactSelect
+                    styles={customStyles(error, active)}
+                    isDisabled={loading || disabled}
+                    isSearchable={true}
+                    isClearable={false}
+                    placeholder={loading ? 'Cargando...' : placeholder}
+                    options={options}
+                    name={name}
+                    onChange={handleChange}
+                    value={selectedValue}
+                    noOptionsMessage={() => "Sin opciones"}
+                    loadingMessage={() => "Cargando..."}
+                    menuPlacement="auto"
+                />
 }
 
 
-export { SelectBase };
+// Componente Select deshabilitado (reemplazo de Semantic UI Select disabled)
+const SelectDisabled = ({ placeholder = 'Seleccionar' }) => {
+    return (
+        <ReactSelect
+            styles={customStyles(false, false)}
+            isDisabled={true}
+            placeholder={placeholder}
+            options={[]}
+            value={null}
+        />
+    );
+};
+
+
+export { SelectBase, SelectDisabled };

@@ -1,5 +1,7 @@
 import React, { useState, Fragment, useContext, useEffect } from 'react';
-import { Button, Form, Pagination } from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
+import { Button } from '@/components/ui/button';
+import { Pagination } from '@/components/ui/pagination';
 import Datatable from '../../../components/datatable';
 import { authentication, handleErrorRequest } from '../../../services/apis';
 import Router, { useRouter } from 'next/router';
@@ -12,21 +14,39 @@ import Swal from 'sweetalert2';
 import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts/AppContext';
 
-const SystemIndex = ({ systems }) => {
+const SystemIndex = () => {
     const router = useRouter();
     const { pathname, query } = router;
-
-    useEffect(() => {
-        if (!AUTHENTICATE()) return;
-    }, []);
-
 
     // app
     const app_context = useContext(AppContext)
 
     // estados
+    const [systems, setSystems] = useState({ data: [], lastPage: 1, page: 1 });
+    const [loading, setLoading] = useState(true);
     const [current_loading, setCurrentLoading] = useState(false);
     const [query_search, setQuerySearch] = useState(query.query_search || "");
+
+    // cargar datos
+    const fetchSystems = async () => {
+        setLoading(true);
+        const page = query.page || 1;
+        const search = query.query_search || '';
+        await authentication.get(`system?page=${page}&query_search=${search}`)
+            .then(res => {
+                setSystems(res.data.systems || { data: [], lastPage: 1, page: 1 });
+            })
+            .catch(err => {
+                console.error(err);
+                setSystems({ data: [], lastPage: 1, page: 1 });
+            });
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchSystems();
+    }, [query.page, query.query_search]);
 
     // manejador de opciones
     const getOption = (obj, key, index) => {
@@ -168,9 +188,9 @@ const SystemIndex = ({ systems }) => {
                             </div>
 
                             <div className="col-md-2">
-                                <Button onClick={handleSearch}
+                                <Button
+                                    onClick={handleSearch}
                                     disabled={current_loading}
-                                    color="blue"
                                 >
                                     <i className="fas fa-search mr-1"></i>
                                     <span>Buscar</span>
@@ -181,8 +201,9 @@ const SystemIndex = ({ systems }) => {
                 </Datatable>
                 <div className="text-center">
                     <hr/>
-                    <Pagination activePage={systems && systems.page || 1} 
-                        totalPages={systems && systems.lastPage || 1}
+                    <Pagination
+                        activePage={systems?.page || 1}
+                        totalPages={systems?.lastPage || 1}
                         onPageChange={handlePage}
                     />
                 </div>

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {Button, Form, Pagination} from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
+import { Button } from '@/components/ui/button';
+import { Pagination } from '@/components/ui/pagination';
 import Datatable from '../../../components/datatable';
 import {authentication} from '../../../services/apis';
 import Router, { useRouter } from 'next/router';
@@ -13,24 +15,27 @@ const EntityIndex = () => {
     const router = useRouter();
     const { pathname, query } = router;
     const [loading, setLoading] = useState(true);
-    const [success, setSuccess] = useState(false);
-    const [entities, setEntities] = useState({});
+    const [entities, setEntities] = useState({ data: [], lastPage: 1 });
+
+    const fetchInitialData = async () => {
+        setLoading(true);
+        const page = query.page || 1;
+        const search = query.query_search || '';
+        await authentication.get(`entity?page=${page}&query_search=${search}`)
+            .then(res => {
+                setEntities(res.data.entities || { data: [], lastPage: 1 });
+            })
+            .catch(err => {
+                console.error(err);
+                setEntities({ data: [], lastPage: 1 });
+            });
+        setLoading(false);
+    };
 
     useEffect(() => {
         if (!AUTHENTICATE()) return;
         fetchInitialData();
-    }, []);
-
-    const fetchInitialData = async () => {
-        setLoading(true);
-        await authentication.get(`entity?page=${query.page}&query_search=${query.query_search}`)
-            .then(res => {
-                setSuccess(res.data.success);
-                setEntities(res.data.entities);
-            })
-            .catch(err => console.error(err));
-        setLoading(false);
-    };
+    }, [query.page, query.query_search]);
 
 
     // estados
@@ -156,9 +161,7 @@ const EntityIndex = () => {
                             </div>
 
                             <div className="col-md-2">
-                                <Button onClick={handleSearch}
-                                    color="blue"
-                                >
+                                <Button onClick={handleSearch}>
                                     <i className="fas fa-search mr-1"></i>
                                     <span>Buscar</span>
                                 </Button>
@@ -169,8 +172,9 @@ const EntityIndex = () => {
                 
                 <div className="text-center">
                     <hr/>
-                    <Pagination activePage={query.page || 1} 
-                        totalPages={entities.lastPage || 1}
+                    <Pagination
+                        activePage={query.page || 1}
+                        totalPages={entities?.lastPage || 1}
                         onPageChange={handlePage}
                     />
                 </div>

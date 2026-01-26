@@ -1,31 +1,50 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Button, Form , Pagination } from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
+import { Button } from '@/components/ui/button';
+import { Pagination } from '@/components/ui/pagination';
 import Datatable from '../../../components/datatable';
-import {authentication} from '../../../services/apis';
+import { authentication } from '../../../services/apis';
 import Router, { useRouter } from 'next/router';
 import btoa from 'btoa';
 import { BtnFloat } from '../../../components/Utils';
-import { AUTHENTICATE, VERIFY } from '../../../services/auth';
+import { AUTHENTICATE } from '../../../services/auth';
 import { Confirm } from '../../../services/utils';
-import { system_store } from '../../../services/verify.json'; 
 import Swal from 'sweetalert2';
 import BoardSimple from '../../../components/boardSimple';
 import { AppContext } from '../../../contexts/AppContext';
 
-const AppIndex = ({ apps }) => {
+const AppIndex = () => {
     const router = useRouter();
     const { pathname, query } = router;
-
-    useEffect(() => {
-        if (!AUTHENTICATE()) return;
-    }, []);
-
 
     // app
     const app_context = useContext(AppContext)
 
     // estados
-    const [form, setForm] = useState(JSON.parse(JSON.stringify(query)));
+    const [apps, setApps] = useState({ data: [], lastPage: 1, page: 1 });
+    const [loading, setLoading] = useState(true);
+    const [form, setForm] = useState({ query_search: query.query_search || '' });
+
+    // cargar datos
+    const fetchApps = async () => {
+        setLoading(true);
+        const page = query.page || 1;
+        const search = query.query_search || '';
+        await authentication.get(`app?page=${page}&query_search=${search}`)
+            .then(res => {
+                setApps(res.data.apps || { data: [], lastPage: 1, page: 1 });
+            })
+            .catch(err => {
+                console.error(err);
+                setApps({ data: [], lastPage: 1, page: 1 });
+            });
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchApps();
+    }, [query.page, query.query_search]);
 
     // cambiar filtros
     const handleInput = ({ name, value }) => {
@@ -195,9 +214,7 @@ const AppIndex = ({ apps }) => {
                             </div>
 
                             <div className="col-md-2">
-                                <Button onClick={handleSearch}
-                                    color="blue"
-                                >
+                                <Button onClick={handleSearch}>
                                     <i className="fas fa-search mr-1"></i>
                                     <span>Buscar</span>
                                 </Button>

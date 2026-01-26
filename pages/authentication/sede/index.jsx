@@ -1,128 +1,132 @@
-import React, { Component, Fragment } from 'react'
-import { BtnFloat } from '../../../components/Utils';
-import Router from 'next/router';
+import React, { useState, useEffect } from 'react'
+import { BtnFloat, Body } from '../../../components/Utils';
+import Router, { useRouter } from 'next/router';
 import { AUTHENTICATE } from '../../../services/auth';
-import { Button, Form, Pagination } from 'semantic-ui-react'
-import { authentication} from '../../../services/apis';
+import { Form } from 'semantic-ui-react'
+import { Button } from '@/components/ui/button'
+import { Pagination } from '@/components/ui/pagination'
+import { authentication } from '../../../services/apis';
 import DataTable from '../../../components/datatable';
 import btoa from 'btoa';
-import { responsive } from '../../../services/storage.json';
-import { Body } from '../../../components/Utils';
-import Show from '../../../components/show';
-import { getSede } from '../../../services/requests/sede';
 
-export default class Index extends Component
-{
-state = {
-        loading: false,
-        query_search: ""
-    }
+const SedeIndex = () => {
+    const router = useRouter();
+    const { pathname, query } = router;
 
-    componentDidMount = () => {
+    const [sede, setSede] = useState({ data: [], lastPage: 1, total: 0 });
+    const [loading, setLoading] = useState(true);
+    const [query_search, setQuerySearch] = useState(query.query_search || "");
+
+    // cargar datos
+    const fetchSedes = async () => {
+        setLoading(true);
+        const page = query.page || 1;
+        const search = query.query_search || '';
+        await authentication.get(`sede?page=${page}&query_search=${search}`)
+            .then(res => {
+                setSede(res.data.sede || { data: [], lastPage: 1, total: 0 });
+            })
+            .catch(err => {
+                console.error(err);
+                setSede({ data: [], lastPage: 1, total: 0 });
+            });
+        setLoading(false);
+    };
+
+    useEffect(() => {
         if (!AUTHENTICATE()) return;
-        this.fetchInitialData();
-    }
+        fetchSedes();
+    }, [query.page, query.query_search]);
 
-    fetchInitialData = async () => {
-        const { query } = this.props;
-        // TODO: Implement fetch logic from AUTHENTICATE
-    }
-
-
-    setting = (props) => {
-        this.setState({ query_search: props.query.query_search || "" });
-    }
-
-    handleInput = ({ name, value }, url = false) => {
-        this.setState({ [name]: value });
-    }
-
-    
-    handlePage = async (e, { activePage }) => {
-        let { pathname, query, push } = Router;
+    const handlePage = async (e, { activePage }) => {
+        let { push } = Router;
         query.page = activePage;
         await push({ pathname, query });
     }
 
-    handleOption = async (obj, key, index) => {
-        this.setState({ loading: true });
-        let { query, pathname, push } = Router;
-        let id = await btoa(obj.id);
+    const handleOption = async (obj, key, index) => {
+        let { push } = Router;
+        let id = btoa(obj.id);
         query.id = id;
         if (key == 'info') push({ pathname: `${pathname}/edit`, query });
     }
 
-    render() {
-
-        let { query, sede } = this.props;
-
-        return (
-            <div className="col-md-12">
-                <Body>
-                    <Form loading={this.state.loading}>
-                        <div className="col-md-12">
-                            <DataTable titulo={<span>Lista de Sedes</span>}
-                                headers={["#ID", "Descripción", "Dirección"]}
-                                data={sede && sede.data}
-                                index={[
-                                    { key: "id", type: "text" },
-                                    { key: "descripcion", type: "text", className: "uppercase" },
-                                    { key: "direccion", type: "icon" }
-                                ]}
-                                options={[
-                                    { key: "info", icon: "fas fa-info" }
-                                ]}
-                                getOption={this.handleOption}
-                            >
-                                <div className="col-md-12 mt-2">
-                                    <div className="row">
-                                        <div className="col-md-7 mb-1 col-10">
-                                            <Form.Field>
-                                                <input type="text" 
-                                                    placeholder="Buscar trabajador por: Descripció o Dirección"
-                                                    name="query_search"
-                                                    value={this.state.query_search}
-                                                    onChange={(e) => this.handleInput(e.target)}
-                                                />
-                                            </Form.Field>
-                                        </div>
-
-                                        <div className="col-xs col-2">
-                                            <Button color="blue"
-                                                fluid
-                                                onClick={ async (e) => Router.push({ pathname: Router.pathname, query: { query_search: this.state.query_search } })}
-                                            >
-                                                <i className="fas fa-search"></i> {responsive.md < this.props.screenX ? 'Buscar' : ''}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="card-body mt-4">
-                                    <h4>Resultados: {sede && sede.total || 0}</h4>
-                                </div>
-
-                            </DataTable>
-                            <div className="text-center">
-                                <hr/>
-                                <Pagination defaultActivePage={query.page || 1} 
-                                    totalPages={sede && sede.lastPage || 1}
-                                    enabled={this.state.loading}
-                                    onPageChange={this.handlePage}
-                                />
-                            </div>
-                        </div>
-
-                        <BtnFloat
-                            disabled={this.state.loading}
-                            onClick={(e) => Router.push({ pathname: `${Router.pathname}/create` })}
-                        >
-                            <i className="fas fa-plus"></i>
-                        </BtnFloat>
-                    </Form>
-                </Body>
-            </div>
-        )
+    const handleSearch = async () => {
+        let { push } = Router;
+        query.page = 1;
+        query.query_search = query_search;
+        await push({ pathname, query });
     }
 
+    return (
+        <div className="col-md-12">
+            <Body>
+                <Form>
+                    <div className="col-md-12">
+                        <DataTable
+                            titulo={<span>Lista de Sedes</span>}
+                            loading={loading}
+                            headers={["#ID", "Descripción", "Dirección"]}
+                            data={sede?.data || []}
+                            index={[
+                                { key: "id", type: "text" },
+                                { key: "descripcion", type: "text", className: "uppercase" },
+                                { key: "direccion", type: "icon" }
+                            ]}
+                            options={[
+                                { key: "info", icon: "fas fa-info" }
+                            ]}
+                            getOption={handleOption}
+                        >
+                            <div className="col-md-12 mt-2">
+                                <div className="row">
+                                    <div className="col-md-7 mb-1 col-10">
+                                        <Form.Field>
+                                            <input
+                                                type="text"
+                                                placeholder="Buscar por: Descripción o Dirección"
+                                                name="query_search"
+                                                value={query_search}
+                                                onChange={(e) => setQuerySearch(e.target.value)}
+                                            />
+                                        </Form.Field>
+                                    </div>
+
+                                    <div className="col-xs col-2">
+                                        <Button
+                                            className="tw-w-full"
+                                            onClick={handleSearch}
+                                        >
+                                            <i className="fas fa-search"></i>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="card-body mt-4">
+                                <h4>Resultados: {sede?.total || 0}</h4>
+                            </div>
+                        </DataTable>
+
+                        <div className="text-center">
+                            <hr/>
+                            <Pagination
+                                activePage={query.page || 1}
+                                totalPages={sede?.lastPage || 1}
+                                onPageChange={handlePage}
+                            />
+                        </div>
+                    </div>
+
+                    <BtnFloat
+                        onClick={() => Router.push({ pathname: `${pathname}/create` })}
+                    >
+                        <i className="fas fa-plus"></i>
+                    </BtnFloat>
+                </Form>
+            </Body>
+        </div>
+    )
 }
+
+export default SedeIndex;

@@ -1,11 +1,13 @@
 import React, { Fragment, useEffect, useState } from 'react'
-import { Form, Image, Select, Button, Progress } from 'semantic-ui-react';
+import { Form, Image, Progress } from 'semantic-ui-react';
+import ReactSelect from 'react-select';
 import Router, { useRouter } from 'next/router';
 import { authentication, handleErrorRequest, onProgress } from '../../../services/apis';
 import { Confirm } from '../../../services/utils';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
 import { BtnBack } from '../../../components/Utils';
+import { Button } from '@/components/ui/button';
 import BoardSimple from '../../../components/boardSimple';
 import { SelectDocumentType, SelectDepartamento, SelectProvincia, SelectDistrito } from '../../../components/select/authentication';
 import ContentControl from '../../../components/contentControl'
@@ -19,31 +21,44 @@ const EditPerson = () => {
     const [success, setSuccess] = useState(false);
     const [person, setPerson] = useState({});
 
-    useEffect(() => {
-        if (!AUTHENTICATE()) return;
-        fetchInitialData();
-    }, []);
-
     const fetchInitialData = async () => {
+        if (!query.id) return;
         setLoading(true);
+        const id = atob(query.id);
         await authentication.get(`person/${id}`)
             .then(res => {
                 setSuccess(res.data.success);
-                setPerson(res.data.person);
+                setPerson(res.data.person || {});
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                setPerson({});
+            });
         setLoading(false);
     };
+
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, [query.id]);
 
 
     // estados
     const [form, setForm] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
-    const [image_render, setImageRender] = useState(person.image || "/img/base.png");
+    const [image_render, setImageRender] = useState("/img/base.png");
     const [image, setImage] = useState("");
     const [errors, setErrors] = useState({});
     const [percent, setPercent] = useState(0);
     const [edit, setEdit] = useState(false);
+
+    // inicializar form cuando se carga la persona
+    useEffect(() => {
+        if (Object.keys(person).length > 0) {
+            setForm(JSON.parse(JSON.stringify(person)));
+            setImageRender(person.image || "/img/base.png");
+        }
+    }, [person]);
 
     // obtener y imagen y renderizar
     const handleImage = ({ name, value, files }) => {
@@ -118,14 +133,24 @@ const EditPerson = () => {
         }, 400);
     }
 
+    // loading state
+    if (loading) {
+        return (
+            <div className="col-md-12 text-center py-5">
+                <i className="fas fa-spinner fa-spin fa-2x"></i>
+                <p className="mt-2">Cargando...</p>
+            </div>
+        );
+    }
+
     // renderizar
     return (
         <Fragment>
             <div className="col-md-12">
                 <BoardSimple
                     prefix={<BtnBack/>}
-                    title={<span>Persona <b className="capitalize"></b></span>}
-                    info={["Crear persona"]}
+                    title={<span>Persona: <b className="capitalize">{person.fullname || ''}</b></span>}
+                    info={["Editar persona"]}
                     bg="light"
                     options={[]}
                 >
@@ -228,16 +253,19 @@ const EditPerson = () => {
                                     <div className="col-md-4">
                                         <Form.Field error={errors.gender && errors.gender[0] ? true : false}>
                                             <label htmlFor="">Genero <b className="text-red">*</b></label>
-                                            <Select
+                                            <ReactSelect
                                                 placeholder="Select. Genero"
                                                 name="gender"
-                                                value={form.gender || ""}
-                                                disabled={!edit}
+                                                value={[
+                                                    { value: "M", label: "Masculino" },
+                                                    { value: "F", label: "Femenino" }
+                                                ].find(opt => opt.value === form.gender) || null}
+                                                isDisabled={!edit}
                                                 options={[
-                                                    { key: "M", value: "M", text: "Masculino" },
-                                                    { key: "F", value: "F", text: "Femenino" }
+                                                    { value: "M", label: "Masculino" },
+                                                    { value: "F", label: "Femenino" }
                                                 ]}
-                                                onChange={(e, obj) => handleInput(obj)}
+                                                onChange={(selected) => handleInput({ name: 'gender', value: selected?.value || '' })}
                                             />
                                             <label>{errors.gender && errors.gender[0]}</label>
                                         </Form.Field>
@@ -259,18 +287,24 @@ const EditPerson = () => {
                                     <div className="col-md-4">
                                         <Form.Field error={errors.marital_status && errors.marital_status[0] ? true : false}>
                                             <label htmlFor="">Estado Cívil <b className="text-red">*</b></label>
-                                            <Select
+                                            <ReactSelect
                                                 placeholder="Seleccionar estado civil"
                                                 name="marital_status"
-                                                value={form.marital_status || ''}
-                                                onChange={(e, obj) => handleInput(obj)}
-                                                disabled={!edit}
+                                                value={[
+                                                    { value: "S", label: "Soltero(a)" },
+                                                    { value: "C", label: "Casado(a)" },
+                                                    { value: "D", label: "Divorsiado(a)" },
+                                                    { value: "V", label: "Viudo(a)" },
+                                                    { value: "O", label: "Conviviente(a)" }
+                                                ].find(opt => opt.value === form.marital_status) || null}
+                                                onChange={(selected) => handleInput({ name: 'marital_status', value: selected?.value || '' })}
+                                                isDisabled={!edit}
                                                 options={[
-                                                    { key: "S", value: "S", text: "Soltero(a)" },
-                                                    { key: "C", value: "C", text: "Casado(a)" },
-                                                    { key: "D", value: "D", text: "Divorsiado(a)" },
-                                                    { key: "V", value: "V", text: "Viudo(a)" },
-                                                    { key: "O", value: "O", text: "Conviviente(a)" }
+                                                    { value: "S", label: "Soltero(a)" },
+                                                    { value: "C", label: "Casado(a)" },
+                                                    { value: "D", label: "Divorsiado(a)" },
+                                                    { value: "V", label: "Viudo(a)" },
+                                                    { value: "O", label: "Conviviente(a)" }
                                                 ]}
                                             />
                                             <label>{errors.marital_status && errors.marital_status[0]}</label>
@@ -408,30 +442,31 @@ const EditPerson = () => {
                     <Show condicion={edit}
                         predeterminado={
                             <div className="col-lg-2 col-6">
-                                <Button fluid 
-                                    color="orange"
-                                    onClick={(e) => setEdit(true)}
+                                <Button
+                                    className="tw-w-full tw-bg-orange-500 hover:tw-bg-orange-600"
+                                    onClick={() => setEdit(true)}
                                 >
-                                    <i className="fas fa-pencil-alt"></i> Editar
+                                    <i className="fas fa-pencil-alt mr-1"></i> Editar
                                 </Button>
                             </div>
                         }
                     >
                         <div className="col-lg-2 col-6">
-                            <Button fluid 
-                                color="blue"
+                            <Button
+                                className="tw-w-full"
                                 onClick={save}
                             >
-                                <i className="fas fa-sync"></i> Actualizar
+                                <i className="fas fa-sync mr-1"></i> Actualizar
                             </Button>
                         </div>
 
                         <div className="col-lg-2 col-6">
-                            <Button fluid 
-                                color="red"
-                                onClick={(e) => setEdit(false)}
+                            <Button
+                                variant="destructive"
+                                className="tw-w-full"
+                                onClick={() => setEdit(false)}
                             >
-                                <i className="fas fa-times"></i> Cancelar
+                                <i className="fas fa-times mr-1"></i> Cancelar
                             </Button>
                         </div>
                     </Show>

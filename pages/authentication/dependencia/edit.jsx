@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BtnBack } from '../../../components/Utils';
 import Router, { useRouter } from 'next/router';
-import { Form, Button, Select } from 'semantic-ui-react'
+import { Form } from 'semantic-ui-react'
+import ReactSelect from 'react-select';
+import { Button } from '@/components/ui/button';
 import { authentication } from '../../../services/apis';
 import Swal from 'sweetalert2';
 import { AUTHENTICATE } from '../../../services/auth';
@@ -20,25 +22,32 @@ const EditDependencia = () => {
     const [success, setSuccess] = useState(false);
     const [dependencia, setDependencia] = useState({});
 
-    useEffect(() => {
-        if (!AUTHENTICATE()) return;
-        fetchInitialData();
-    }, []);
-
     const fetchInitialData = async () => {
+        if (!query.id) return;
         setLoading(true);
+        const id = atob(query.id);
         await authentication.get(`dependencia/${id}`)
             .then(res => {
                 setSuccess(res.data.success);
-                setDependencia(res.data.dependencia);
+                const dep = res.data.dependencia || {};
+                setDependencia(dep);
+                setForm(JSON.parse(JSON.stringify(dep)));
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                setDependencia({});
+            });
         setLoading(false);
     };
 
+    useEffect(() => {
+        if (!AUTHENTICATE()) return;
+        fetchInitialData();
+    }, [query.id]);
+
 
     // estados
-    const [form, setForm] = useState(JSON.parse(JSON.stringify(dependencia || {})));
+    const [form, setForm] = useState({});
     const [errors, setErrors] = useState({});
     const [current_loading, setCurrentLoading] = useState(false);
     const [edit, setEdit] = useState(false);
@@ -86,12 +95,22 @@ const EditDependencia = () => {
         setForm(JSON.parse(JSON.stringify(dependencia || {})));
     }
 
+    // loading state
+    if (loading) {
+        return (
+            <div className="col-md-12 text-center py-5">
+                <i className="fas fa-spinner fa-spin fa-2x"></i>
+                <p className="mt-2">Cargando...</p>
+            </div>
+        );
+    }
+
     // renderizar
     return (
         <Fragment>
             <div className="col-md-12">
                 <BoardSimple
-                    title={<span className="capitalize">Dependencia: {dependencia && dependencia.nombre || ""}</span>}
+                    title={<span className="capitalize">Dependencia: {dependencia?.nombre || ""}</span>}
                     info={[`Editar dependencia`]}
                     bg="light"
                     prefix={<BtnBack/>}
@@ -143,17 +162,22 @@ const EditDependencia = () => {
                                     <div className="col-md-6 mb-3">
                                         <Form.Field  error={errors && errors.type && errors.type[0] ? true : false}>
                                             <label htmlFor="">Tipo <b className="text-red">*</b></label>
-                                            <Select
+                                            <ReactSelect
                                                 placeholder="Selec. Tipo de Dependencia"
                                                 name="type"
-                                                value={form.type || ""}
+                                                value={[
+                                                    { value: 'OTRO', label: 'Otro' },
+                                                    { value: 'ESCUELA', label: 'Escuela' },
+                                                    { value: 'FACULTAD', label: 'Facultad' },
+                                                    { value: 'OFICINA', label: 'Oficina' }
+                                                ].find(opt => opt.value === form.type) || null}
                                                 options={[
-                                                    { key: 'OTRO', value: 'OTRO', text: 'Otro' },
-                                                    { key: 'ESCUELA', value: 'ESCUELA', text: 'Escuela' },
-                                                    { key: 'FACULTAD', value: 'FACULTAD', text: 'Facultad' },
-                                                    { key: 'OFICINA', value: 'OFICINA', text: 'Oficina' }
+                                                    { value: 'OTRO', label: 'Otro' },
+                                                    { value: 'ESCUELA', label: 'Escuela' },
+                                                    { value: 'FACULTAD', label: 'Facultad' },
+                                                    { value: 'OFICINA', label: 'Oficina' }
                                                 ]}
-                                                onChange={(e, obj) => handleInput(obj)}
+                                                onChange={(selected) => handleInput({ name: 'type', value: selected?.value || '' })}
                                             />
                                             <label>{errors && errors.type && errors.type[0]}</label>
                                         </Form.Field>
@@ -169,22 +193,27 @@ const EditDependencia = () => {
             <Show condicion={edit}>
                 <ContentControl>
                     <div className="col-lg-2 col-6">
-                        <Button fluid 
-                            color="red"
+                        <Button
+                            variant="destructive"
+                            className="tw-w-full"
                             onClick={handleCancel}
                             disabled={current_loading}
                         >
-                            <i className="fas fa-times"></i> Cancelar
+                            <i className="fas fa-times mr-1"></i> Cancelar
                         </Button>
                     </div>
 
                     <div className="col-lg-2 col-6">
-                        <Button fluid 
-                            color="blue"
+                        <Button
+                            className="tw-w-full"
                             disabled={current_loading}
                             onClick={save}
                         >
-                            <i className="fas fa-sync"></i> Actualizar
+                            {current_loading ? (
+                                <><i className="fas fa-spinner fa-spin mr-1"></i> Actualizando...</>
+                            ) : (
+                                <><i className="fas fa-sync mr-1"></i> Actualizar</>
+                            )}
                         </Button>
                     </div>
                 </ContentControl>
